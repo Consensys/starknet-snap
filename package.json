@@ -1,0 +1,24 @@
+{
+  "name": "starknet-snap",
+  "version": "0.1.0",
+  "main": "index.js",
+  "private": true,
+  "license": "(Apache-2.0 OR MIT)",
+  "repository": "https://github.com/ConsenSys/starknet-snap.git",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "setup": "yarn workspaces run setup",
+    "build": "yarn workspaces run build",
+    "test": "yarn workspace @consensys/starknet-snap run test",
+    "lint": "yarn workspaces run lint",
+    "clean": "yarn workspaces run clean",
+    "prepare": "husky install"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^17.0.3",
+    "@commitlint/config-conventional": "^17.0.3",
+    "husky": "^8.0.0"
+  }
+}

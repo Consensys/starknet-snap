@@ -1,0 +1,15 @@
+.toast-success {
+  background-color: #292a6c;
+}
+
+#toast-container > .toast-success {
+  background-image: url('../../../../assets/images/check.png') !important ;
+}
+
+.toast-error {
+  background-color: #292a6c;
+}
+
+#toast-container > .toast-error {
+  background-image: url('../../../../assets/images/error.png') !important ;
+}

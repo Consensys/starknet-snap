@@ -1,0 +1,19 @@
+{
+  "packages": {
+    "packages/starknet-snap": {
+      "extra-files": [
+        {
+          "type": "json",
+          "path": "openrpc/starknet_snap_api_openrpc.json",
+          "jsonpath": "$.info.version"
+        },
+        {
+          "type": "json",
+          "path": "snap.manifest.json",
+          "jsonpath": "$.version"
+        }
+      ]
+    },
+    "packages/wallet-ui": {}
+  }
+}

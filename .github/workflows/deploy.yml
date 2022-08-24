@@ -1,0 +1,67 @@
+name: Deployments
+
+on:
+  push:
+    branches:
+      - staging
+      - production
+jobs:
+  deploy:
+    name: Deploy Snap and UI
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-central-1
+
+      - name: Use Node.js 16.x
+        uses: actions/setup-node@v2
+        with:
+          node-version: 16.x
+          registry-url: 'https://registry.npmjs.org'
+      - name: Get Yarn cache directory
+        run: echo "::set-output name=YARN_CACHE_DIR::$(yarn cache dir)"
+        id: yarn-cache-dir
+      - name: Get Yarn version
+        run: echo "::set-output name=YARN_VERSION::$(yarn --version)"
+        id: yarn-version
+      - name: Cache yarn dependencies
+        uses: actions/cache@v2
+        with:
+          path: ${{ steps.yarn-cache-dir.outputs.YARN_CACHE_DIR }}
+          key: yarn-cache-${{ runner.os }}-${{ steps.yarn-version.outputs.YARN_VERSION }}-${{ hashFiles('yarn.lock') }}
+      - run: yarn setup
+      - run: yarn clean
+
+      - name: Staging Deployment
+        run: |
+          VERSION=$(node -p "require('./packages/starknet-snap/package.json').version")
+          REACT_APP_SNAP_VERSION=${VERSION}-staging yarn workspace wallet-ui build
+          
+          yarn workspace @consensys/starknet-snap version --new-version ${VERSION}-staging --no-git-tag-version
+          yarn workspace @consensys/starknet-snap build
+          
+          yarn workspace @consensys/starknet-snap publish --tag staging --access public
+          aws s3 sync ./packages/wallet-ui/build s3://app-staging.starknet-snap.consensys-solutions.net
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        if: github.ref_name == 'staging'
+
+      - name: Production Deployment
+        run: |
+          VERSION=$(node -p "require('./packages/starknet-snap/package.json').version")
+          REACT_APP_SNAP_VERSION=${VERSION} yarn workspace wallet-ui build
+
+          yarn workspace @consensys/starknet-snap version --new-version ${VERSION} --no-git-tag-version
+          yarn workspace @consensys/starknet-snap build
+          
+          yarn workspace @consensys/starknet-snap publish --tag latest --access public
+          aws s3 sync ./packages/wallet-ui/build s3://app.starknet-snap.consensys-solutions.net
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        if: github.ref_name == 'production'

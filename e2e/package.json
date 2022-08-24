@@ -1,0 +1,32 @@
+{
+  "name": "e2e",
+  "version": "1.0.1",
+  "description": "end-to-end tests project",
+  "scripts": {
+    "test": "npx playwright test --config=./playwright.config.ts",
+    "build": "playwright install --with-deps chromium",
+    "clean": "echo [INFO] No action",
+    "lint": "echo [INFO] No action"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.24.0",
+    "@types/jest": "^27.5.0",
+    "jest": "^28.1",
+    "jest-playwright-preset": "^1.7.0",
+    "playwright": "^1.21",
+    "ts-jest": "^28.0.2",
+    "typescript": "^4.6.3"
+  },
+  "dependencies": {},
+  "jest": {
+    "transform": {
+      "^.+\\.ts$": "ts-jest"
+    },
+    "moduleFileExtensions": [
+      "ts",
+      "js",
+      "json"
+    ],
+    "testTimeout": 120000
+  }
+}

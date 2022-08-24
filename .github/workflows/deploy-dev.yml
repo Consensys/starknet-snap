@@ -1,0 +1,57 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "packages/**"  
+jobs:
+  deploy-wallet-ui:
+    name: Deploy Wallet UI (Dev)
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-central-1
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 16.x
+
+      - name: Get Yarn cache directory
+        run: echo "::set-output name=YARN_CACHE_DIR::$(yarn cache dir)"
+        id: yarn-cache-dir
+
+      - name: Get Yarn version
+        run: echo "::set-output name=YARN_VERSION::$(yarn --version)"
+        id: yarn-version
+
+      - name: Cache yarn dependencies
+        uses: actions/cache@v2
+        with:
+          path: ${{ steps.yarn-cache-dir.outputs.YARN_CACHE_DIR }}
+          key: yarn-cache-${{ runner.os }}-${{ steps.yarn-version.outputs.YARN_VERSION }}-${{ hashFiles('yarn.lock') }}
+
+      - name: Cache froxe lockfile
+        run: yarn setup
+
+      - name: Clean yarn cache
+        run: yarn clean
+
+      - name: Build wallet-ui workspace
+        run: |
+          VERSION=$(node -p "require('./packages/starknet-snap/package.json').version")
+          HASH=$(git rev-parse --short HEAD)
+          DATE=$(date +%Y%m%d)
+          REACT_APP_SNAP_VERSION=${VERSION}-dev-${HASH}-${DATE} yarn workspace wallet-ui build 
+
+      - name: Deploy to Dev
+        run: aws s3 sync ./packages/wallet-ui/build s3://app-dev.starknet-snap.consensys-solutions.net

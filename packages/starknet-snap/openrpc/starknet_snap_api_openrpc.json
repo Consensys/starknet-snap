@@ -1,0 +1,1124 @@
+{
+  "openrpc": "1.0.0-rc1",
+  "info": {
+    "version": "0.5.1",
+    "title": "StarkNet MetaMask Snap API",
+    "license": {}
+  },
+  "servers": [],
+  "methods": [
+    {
+      "name": "starkNet_extractPrivateKey",
+      "summary": "Extract private key from deployed StarkNet account and display in MetaMask",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "userAddress",
+          "summary": "Address of the account contract",
+          "description": "Address of the account contract",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/ADDRESS"
+          }
+        },
+        {
+          "name": "chainId",
+          "summary": "Id of the target StarkNet network",
+          "description": "Id of the target StarkNet network (default to StarkNet Goerli Testnet)",
+          "required": false,
+          "schema": {
+            "$ref": "#/components/schemas/CHAIN_ID"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "summary": "Always be null for security reason",
+        "description": "Always be null for security reason, the private key will only be shown on the pop-up",
+        "schema": {
+          "type": "null",
+          "description": "This always is null"
+        }
+      },
+      "errors": []
+    },
+    {
+      "name": "starkNet_extractPublicKey",
+      "summary": "Extract public key from an StarkNet account address",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "userAddress",
+          "summary": "Address of the account contract",
+          "description": "Address of the account contract",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/ADDRESS"
+          }
+        },
+        {
+          "name": "chainId",
+          "summary": "Id of the target StarkNet network",
+          "description": "Id of the target StarkNet network (default to StarkNet Goerli Testnet)",
+          "required": false,
+          "schema": {
+            "$ref": "#/components/schemas/CHAIN_ID"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "summary": "Public key of the given account address",
+        "description": "Public key of the given account address (can be different from the actual signer)",
+        "schema": {
+          "$ref": "#/components/schemas/FELT"
+        }
+      },
+      "errors": []
+    },
+    {
+      "name": "starkNet_createAccount",
+      "summary": "Deploys an account contract",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "chainId",
+          "summary": "Id of the target StarkNet network",
+          "description": "Id of the target StarkNet network (default to StarkNet Goerli Testnet)",
+          "required": false,
+          "schema": {
+            "$ref": "#/components/schemas/CHAIN_ID"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "summary": "Response from StarkNet’s \"gateway/add_transaction\" endpoint",
+        "description": "Response from StarkNet’s \"gateway/add_transaction\" endpoint",
+        "schema": {
+          "$ref": "#/components/schemas/CREATE_ACCOUNT_RESULT"
+        }
+      },
+      "errors": []
+    },
+    {
+      "name": "starkNet_recoverAccounts",
+      "summary": "Recovers deployed user accounts from the seed phrase of MetaMask based on BIP-44",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "startScanIndex",
+          "summary": "Starting address index of the derived key in BIP-44",
+          "description": "Starting address index of the derived key in BIP-44 (default to 0)",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        {
+          "name": "maxScanned",
+          "summary": "Maximum number of addresses to scan during the recovery process",
+          "description": "Maximum number of addresses to scan during the recovery process (default to 1)",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        {
+          "name": "maxMissed",
+          "summary": "Maximum number of unitialized addresses hit during the recovery process",
+          "description": "Maximum number of unitialized addresses (i.e. account with no signer) hit during the recovery process (default to 1)",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        {
+          "name": "chainId",
+          "summary": "Id of the target StarkNet network",
+          "description": "Id of the target StarkNet network (default to StarkNet Goerli Testnet)",
+          "required": false,
+          "schema": {
+            "$ref": "#/components/schemas/CHAIN_ID"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "summary": "List of the scanned user accounts during the recovery process",
+        "description": "List of the scanned user accounts during the recovery process",
+        "schema": {
+          "$ref": "#/components/schemas/RECOVER_ACCOUNTS_RESULT"
+        }
+      },
+      "errors": []
+    },
+    {
+      "name": "starkNet_getStoredUserAccounts",
+      "summary": "Gets a list of stored user accounts",
+      "description": "Gets a list of stored user accounts that are either initialized or initializing",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "chainId",
+          "summary": "Id of the target StarkNet network",
+          "description": "Id of the target StarkNet network (default to StarkNet Goerli Testnet)",
+          "required": false,
+          "schema": {
+            "$ref": "#/components/schemas/CHAIN_ID"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "summary": "List of the stored user accounts",
+        "description": "List of the stored user accounts",
+        "schema": {
+          "$ref": "#/components/schemas/RECOVER_ACCOUNTS_RESULT"
+        }
+      },
+      "errors": []
+    },
+    {
+      "name": "starkNet_estimateFee",
+      "summary": "Gets the estimated gas fee for calling a method on any contract",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "contractAddress",
+          "summary": "Address of the target contract",
+          "description": "Address of the target contract",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/ADDRESS"
+          }
+        },
+        {
+          "name": "contractFuncName",
+          "summary": "Target function name of the contract",
+          "description": "Target function name of the contract",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "contractCallData",
+          "summary": "Call data for the target function with \",\" as separator",
+          "description": "Call data for the target function with \",\" as separator",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "senderAddress",
+          "summary": "Address of the sender",
+          "description": "Address of the sender",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/ADDRESS"
+          }
+        },
+        {
+          "name": "chainId",
+          "summary": "Id of the target StarkNet network",
+          "description": "Id of the target StarkNet network (default to StarkNet Goerli Testnet)",
+          "required": false,
+          "schema": {
+            "$ref": "#/components/schemas/CHAIN_ID"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "summary": "Response from StarkNet’s \"feeder_gateway/estimate_fee\" endpoint",
+        "description": "Response from StarkNet’s \"feeder_gateway/estimate_fee\" endpoint",
+        "schema": {
+          "$ref": "#/components/schemas/ESTIMATE_FEE_RESULT"
+        }
+      },
+      "errors": []
+    },
+    {
+      "name": "starkNet_sendTransaction",
+      "summary": "Sign and send a transaction",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "contractAddress",
+          "summary": "Address of the target contract",
+          "description": "Address of the target contract",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/ADDRESS"
+          }
+        },
+        {
+          "name": "contractFuncName",
+          "summary": "Target function name of the contract",
+          "description": "Target function name of the contract",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "contractCallData",
+          "summary": "Call data for the target function with \",\" as separator",
+          "description": "Call data for the target function with \",\" as separator",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "senderAddress",
+          "summary": "Address of the sender",
+          "description": "Address of the sender",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/ADDRESS"
+          }
+        },
+        {
+          "name": "maxFee",
+          "summary": "Maximum gas fee allowed from the sender",
+          "description": "Maximum gas fee allowed from the sender (if not given, the max fee will be automatically calculated)",
+          "required": false,
+          "schema": {
+            "$ref": "#/components/schemas/NUM_AS_HEX"
+          }
+        },
+        {
+          "name": "chainId",
+          "summary": "Id of the target StarkNet network",
+          "description": "Id of the target StarkNet network (default to StarkNet Goerli Testnet)",
+          "required": false,
+          "schema": {
+            "$ref": "#/components/schemas/CHAIN_ID"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "summary": "Response from StarkNet’s \"gateway/add_transaction\" endpoint",
+        "description": "Response from StarkNet’s \"gateway/add_transaction\" endpoint",
+        "schema": {
+          "$ref": "#/components/schemas/SEND_TRANSACTION_RESULT"
+        }
+      },
+      "errors": []
+    },
+    {
+      "name": "starkNet_getTransactionStatus",
+      "summary": "Gets the status of a transaction",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "transactionHash",
+          "summary": "Hash of the target transaction",
+          "description": "Hash of the target transaction",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/TXN_HASH"
+          }
+        },
+        {
+          "name": "chainId",
+          "summary": "Id of the target StarkNet network",
+          "description": "Id of the target StarkNet network (default to StarkNet Goerli Testnet)",
+          "required": false,
+          "schema": {
+            "$ref": "#/components/schemas/CHAIN_ID"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "summary": "Status of the transaction",
+        "description": "Status of the transaction",
+        "schema": {
+          "$ref": "#/components/schemas/TXN_STATUS"
+        }
+      },
+      "errors": []
+    },
+    {
+      "name": "starkNet_getTransactions",
+      "summary": "Gets the transaction records from a sender address",
+      "description": "Gets the transaction records from a sender address",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "senderAddress",
+          "summary": "Address of the sender",
+          "description": "Address of the sender",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/ADDRESS"
+          }
+        },
+        {
+          "name": "contractAddress",
+          "summary": "Address of the called contract",
+          "description": "Address of the called contract",
+          "required": false,
+          "schema": {
+            "$ref": "#/components/schemas/ADDRESS"
+          }
+        },
+        {
+          "name": "pageSize",
+          "summary": "Page size when calling the Voyager get \"api/txns\" endpoint",
+          "description": "Page size when calling the Voyager get \"api/txns\" endpoint (default to 10, and only 10, 25, 50 is effective)",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        {
+          "name": "txnsInLastNumOfDays",
+          "summary": "Number of past days of transaction records to be fetched from Voyager",
+          "description": "Number of past days of transaction records to be fetched from Voyager (default to 5)",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        {
+          "name": "withDeployTxn",
+          "summary": "Indicate whether to include the deploy transaction of the sender’s account contract",
+          "description": "Indicate whether to include the deploy transaction of the sender’s account contract (default to false)",
+          "required": false,
+          "schema": {
+            "type": "boolean"
+          }
+        },
+        {
+          "name": "onlyFromState",
+          "summary": "Indicate whether to only retrieve transaction records that are stored in snap state",
+          "description": "Indicate whether to only retrieve transaction records that are stored in snap state, i.e. those in \"RECEIVED\", \"PENDING\", \"ACCEPTED_ON_L2\", and \"REJECTED\" state (default to false)",
+          "required": false,
+          "schema": {
+            "type": "boolean"
+          }
+        },
+        {
+          "name": "chainId",
+          "summary": "Id of the target StarkNet network",
+          "description": "Id of the target StarkNet network (default to StarkNet Goerli Testnet)",
+          "required": false,
+          "schema": {
+            "$ref": "#/components/schemas/CHAIN_ID"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "summary": "List of the transaction records",
+        "description": "List of the transaction records",
+        "schema": {
+          "$ref": "#/components/schemas/GET_TRANSACTIONS_RESULT"
+        }
+      },
+      "errors": []
+    },
+    {
+      "name": "starkNet_getValue",
+      "summary": "Calls a VIEW method on any Contract",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "contractAddress",
+          "summary": "Address of the target contract",
+          "description": "Address of the target contract",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/ADDRESS"
+          }
+        },
+        {
+          "name": "contractFuncName",
+          "summary": "Target function name of the contract",
+          "description": "Target function name of the contract",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "contractCallData",
+          "summary": "Call data for the target function with \",\" as separator",
+          "description": "Call data for the target function with \",\" as separator",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "chainId",
+          "summary": "Id of the target StarkNet network",
+          "description": "Id of the target StarkNet network (default to StarkNet Goerli Testnet)",
+          "required": false,
+          "schema": {
+            "$ref": "#/components/schemas/CHAIN_ID"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "summary": "Response from StarkNet’s \"feeder_gateway/call_contract\" endpoint",
+        "description": "Response from StarkNet’s \"feeder_gateway/call_contract\" endpoint",
+        "schema": {
+          "$ref": "#/components/schemas/GET_VALUE_RESULT"
+        }
+      },
+      "errors": []
+    },
+    {
+      "name": "starkNet_getErc20TokenBalance",
+      "summary": "Gets the user's current balance of an ERC-20 Token",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "tokenAddress",
+          "summary": "Address of the ERC-20 token contract",
+          "description": "Address of the ERC-20 token contract",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/ADDRESS"
+          }
+        },
+        {
+          "name": "userAddress",
+          "summary": "Address of the user account",
+          "description": "Address of the user account",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/ADDRESS"
+          }
+        },
+        {
+          "name": "chainId",
+          "summary": "Id of the target StarkNet network",
+          "description": "Id of the target StarkNet network (default to StarkNet Goerli Testnet)",
+          "required": false,
+          "schema": {
+            "$ref": "#/components/schemas/CHAIN_ID"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "summary": "The token balance in Hex",
+        "description": "The token balance in Hex",
+        "schema": {
+          "$ref": "#/components/schemas/NUM_AS_HEX"
+        }
+      },
+      "errors": []
+    },
+    {
+      "name": "starkNet_signMessage",
+      "summary": "Signs a typed data message",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "typedDataMessage",
+          "summary": "JSON representation of the typed data to be signed",
+          "description": "JSON representation of the typed data to be signed",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "signerAddress",
+          "summary": "Address of the signer",
+          "description": "Address of the signer",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/ADDRESS"
+          }
+        },
+        {
+          "name": "chainId",
+          "summary": "Id of the target StarkNet network",
+          "description": "Id of the target StarkNet network (default to StarkNet Goerli Testnet)",
+          "required": false,
+          "schema": {
+            "$ref": "#/components/schemas/CHAIN_ID"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "summary": "Signed hash of typed data",
+        "description": "Signed hash of typed data",
+        "schema": {
+          "$ref": "#/components/schemas/TYPED_DATA_SIGNATURE"
+        }
+      },
+      "errors": []
+    },
+    {
+      "name": "starkNet_verifyMessage",
+      "summary": "Verifies a signed typed data message",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "typedDataMessage",
+          "summary": "JSON representation of the original typed data message to be verified",
+          "description": "JSON representation of the original typed data message to be verified",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "signerAddress",
+          "summary": "Address of the signer",
+          "description": "Address of the signer",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/ADDRESS"
+          }
+        },
+        {
+          "name": "signature",
+          "summary": "Signature of the typed data message",
+          "description": "Signature of the typed data message",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/TYPED_DATA_SIGNATURE"
+          }
+        },
+        {
+          "name": "chainId",
+          "summary": "Id of the target StarkNet network",
+          "description": "Id of the target StarkNet network (default to StarkNet Goerli Testnet)",
+          "required": false,
+          "schema": {
+            "$ref": "#/components/schemas/CHAIN_ID"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "summary": "Boolean value indicates whether the signature is verified",
+        "description": "Boolean value indicates whether the signature is verified",
+        "schema": {
+          "type": "boolean"
+        }
+      },
+      "errors": []
+    },
+    {
+      "name": "starkNet_addErc20Token",
+      "summary": "Adds an ERC-20 Token to the token list in snap’s state",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "tokenAddress",
+          "summary": "Address of the ERC-20 token contract",
+          "description": "Address of the ERC-20 token contract",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/ADDRESS"
+          }
+        },
+        {
+          "name": "tokenName",
+          "summary": "Name of the ERC-20 token",
+          "description": "Name of the ERC-20 token (no longer than 64 ASCII characters and can't be all spaces)",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "tokenSymbol",
+          "summary": "Symbol of the ERC-20 token (no longer than 16 ASCII characters and can't be all spaces)",
+          "description": "Symbol of the ERC-20 token",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "tokenDecimals",
+          "summary": "Number of decimals for the ERC-20 token unit",
+          "description": "Number of decimals for the ERC-20 token unit (default to 18)",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        {
+          "name": "chainId",
+          "summary": "Id of the target StarkNet network",
+          "description": "Id of the target StarkNet network (default to StarkNet Goerli Testnet)",
+          "required": false,
+          "schema": {
+            "$ref": "#/components/schemas/CHAIN_ID"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "summary": "Object of the added ERC-20 token",
+        "description": "Object of the added ERC-20 token",
+        "schema": {
+          "$ref": "#/components/schemas/ADD_ERC_20_TOKEN_RESULT"
+        }
+      },
+      "errors": []
+    },
+    {
+      "name": "starkNet_getStoredErc20Tokens",
+      "summary": "Gets a list of stored Erc20 Tokens",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "chainId",
+          "summary": "Id of the target StarkNet network",
+          "description": "Id of the target StarkNet network (default to StarkNet Goerli Testnet)",
+          "required": false,
+          "schema": {
+            "$ref": "#/components/schemas/CHAIN_ID"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "summary": "List of the stored ERC-20 tokens",
+        "description": "List of the stored ERC-20 tokens",
+        "schema": {
+          "$ref": "#/components/schemas/GET_STORED_ERC_20_TOKENS_RESULT"
+        }
+      },
+      "errors": []
+    },
+    {
+      "name": "starkNet_addNetwork",
+      "summary": "Adds a StarkNet network to the network list in snap’s state",
+      "description": "Currently disabled (by always returning error)",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "networkName",
+          "summary": "Name of the StarkNet network",
+          "description": "Name of the StarkNet network (no longer than 64 ASCII characters and can't be all spaces)",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "networkChainId",
+          "summary": "Id of the StarkNet network",
+          "description": "Id of the StarkNet network",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/CHAIN_ID"
+          }
+        },
+        {
+          "name": "networkBaseUrl",
+          "summary": "Base URL of the \"feeder\" and \"feeder_gateway\" API endpoints",
+          "description": "Base URL of the \"feeder\" and \"feeder_gateway\" API endpoints",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "networkNodeUrl",
+          "summary": "Node URL of the JSON-RPC node API endpoints",
+          "description": "Node URL of the JSON-RPC node API endpoints",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "networkVoyagerUrl",
+          "summary": "Base URL of the Voyager API endpoints for retrieving transaction records",
+          "description": "Base URL of the Voyager API endpoints for retrieving transaction records",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "accountClassHash",
+          "summary": "Class hash for deploying user accounts in the network",
+          "description": "Class hash for deploying user accounts in the network",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/FELT"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "summary": "Object of the added StarkNet network",
+        "description": "Object of the added StarkNet network",
+        "schema": {
+          "$ref": "#/components/schemas/ADD_NETWORK_RESULT"
+        }
+      },
+      "errors": []
+    },
+    {
+      "name": "starkNet_getStoredNetworks",
+      "summary": "Gets a list of stored StarkNet networks",
+      "description": "Gets a list of stored StarkNet networks",
+      "paramStructure": "by-name",
+      "params": [],
+      "result": {
+        "name": "result",
+        "summary": "List of the stored StarkNet networks",
+        "description": "List of the stored StarkNet networks",
+        "schema": {
+          "$ref": "#/components/schemas/GET_STORED_NETWORKS_RESULT"
+        }
+      },
+      "errors": []
+    }
+  ],
+  "components": {
+    "contentDescriptors": {},
+    "schemas": {
+      "NUM_AS_HEX": {
+        "title": "An integer number in hex format (0x...)",
+        "type": "string",
+        "pattern": "^0x[a-fA-F0-9]+$"
+      },
+      "PROTOCOL_VERSION": {
+        "title": "protocolVersion",
+        "description": "StarkNet protocol version, given in hex representation.",
+        "type": "string",
+        "pattern": "^0x[a-fA-F0-9]+$"
+      },
+      "CHAIN_ID": {
+        "title": "chainId",
+        "description": "StarkNet chain id, given in hex representation.",
+        "type": "string",
+        "pattern": "^0x[a-fA-F0-9]+$"
+      },
+      "ADDRESS": {
+        "$ref": "#/components/schemas/FELT"
+      },
+      "ETH_ADDRESS": {
+        "type": "string",
+        "$comment": "An ethereum address",
+        "description": "an ethereum address represented as 40 hex digits",
+        "pattern": "^0x[a-fA-F0-9]{40}$"
+      },
+      "TXN_HASH": {
+        "$ref": "#/components/schemas/FELT",
+        "description": "The transaction hash, as assigned in StarkNet",
+        "title": "A transaction's hash"
+      },
+      "FELT": {
+        "type": "string",
+        "title": "Field element",
+        "$comment": "A field element, represented as a string of hex digits",
+        "description": "A field element. Represented as up to 63 hex digits and leading 4 bits zeroed.",
+        "pattern": "^0x0[a-fA-F0-9]{1,63}$"
+      },
+      "BLOCK_NUMBER": {
+        "description": "The block's number (its height)",
+        "type": "integer",
+        "minimum": 0
+      },
+      "BLOCK_HASH": {
+        "$ref": "#/components/schemas/FELT"
+      },
+      "TXN_STATUS": {
+        "type": "string",
+        "enum": [
+          "UNKNOWN",
+          "RECEIVED",
+          "PENDING",
+          "ACCEPTED_ON_L2",
+          "ACCEPTED_ON_L1",
+          "REJECTED"
+        ],
+        "description": "The status of the transaction. May be unknown in case node is not aware of it"
+      },
+      "VOYAGER_TXN_TYPE": {
+        "type": "string",
+        "enum": [
+          "invoke",
+          "deploy"
+        ],
+        "description": "The txn type of the transaction from Voyager. May not be a full list here and subject to change"
+      },
+      "VOYAGER_TXN_STATUS": {
+        "type": "string",
+        "enum": [
+          "Accepted on L2",
+          "Accepted on L1"
+        ],
+        "description": "The status of the transaction. May be unknown in case node is not aware of it"
+      },
+      "TYPED_DATA_SIGNATURE": {
+        "description": "Signature of a typed data",
+        "type": "string",
+        "pattern": "^[1-9][0-9]+,[1-9][0-9]+$"
+      },
+      "ERC_20_TOKEN": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "$ref": "#/components/schemas/ADDRESS",
+            "description": "Address of the ERC-20 token contract"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the ERC-20 token"
+          },
+          "symbol": {
+            "type": "string",
+            "description": "Symbol of the ERC-20 token"
+          },
+          "image": {
+            "type": "string",
+            "description": "Image URL of the ERC-20 token"
+          },
+          "decimals": {
+            "type": "integer",
+            "description": "Number of decimals for the ERC-20 token unit"
+          },
+          "chainId": {
+            "$ref": "#/components/schemas/CHAIN_ID",
+            "description": "Id of the StarkNet network where the token resides"
+          }
+        }
+      },
+      "USER_ACCOUNT": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "$ref": "#/components/schemas/ADDRESS",
+            "description": "Address of the user account"
+          },
+          "addressIndex": {
+            "type": "integer",
+            "description": "Address index of BIP-44 of the user account"
+          },
+          "publicKey": {
+            "$ref": "#/components/schemas/FELT",
+            "description": "Public key of the user account (empty if the account has no signer)"
+          },
+          "addressSalt": {
+            "$ref": "#/components/schemas/FELT",
+            "description": "Address salt used when creating the user account"
+          },
+          "deployTxnHash": {
+            "$ref": "#/components/schemas/TXN_HASH",
+            "description": "Hash of the deploy transaction of the user account"
+          },
+          "derivationPath": {
+            "type": "string",
+            "description": "BIP-44 derivation path used wjem creating the user account"
+          },
+          "chainId": {
+            "$ref": "#/components/schemas/CHAIN_ID",
+            "description": "Id of the StarkNet network where the token resides"
+          }
+        }
+      },
+      "STARKNET_NETWORK": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the StarkNet network"
+          },
+          "baseUrl": {
+            "type": "string",
+            "description": "Base URL of the \"feeder\" and \"feeder_gateway\" API endpoints"
+          },
+          "nodeUrl": {
+            "type": "string",
+            "description": "Node URL of the JSON-RPC node API endpoints"
+          },
+          "voyagerUrl": {
+            "type": "string",
+            "description": "Base URL of the Voyager API endpoints for retrieving transaction records"
+          },
+          "accountClassHash": {
+            "$ref": "#/components/schemas/FELT",
+            "description": "Class hash for deploying user accounts in the network"
+          },
+          "chainId": {
+            "$ref": "#/components/schemas/CHAIN_ID",
+            "description": "Id of the StarkNet network"
+          }
+        }
+      },
+      "TRANSACTION_RECORD": {
+        "type": "object",
+        "properties": {
+          "txnHash": {
+            "$ref": "#/components/schemas/TXN_HASH",
+            "description": "Hash of the transaction"
+          },
+          "txnType": {
+            "$ref": "#/components/schemas/VOYAGER_TXN_TYPE",
+            "description": "Type of the transaction"
+          },
+          "senderAddress": {
+            "$ref": "#/components/schemas/ADDRESS",
+            "description": "Address of the sender"
+          },
+          "contractAddress": {
+            "$ref": "#/components/schemas/ADDRESS",
+            "description": "Address of the called contract"
+          },
+          "contractFuncName": {
+            "type": "string",
+            "description": "Function of the called contract"
+          },
+          "contractCallData": {
+            "type": "array",
+            "description": "Call data for the called contract function"
+          },
+          "status": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/TXN_STATUS"
+              },
+              {
+                "$ref": "#/components/schemas/VOYAGER_TXN_STATUS"
+              }
+            ],
+            "description": "Status of the transaction"
+          },
+          "failureReason": {
+            "type": "string",
+            "description": "Failed reason if the txn was rejected"
+          },
+          "eventIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of ID of events emitted as part of this transaction"
+          },
+          "timestamp": {
+            "type": "integer",
+            "description": "Timestamp of the transaction"
+          },
+          "chainId": {
+            "$ref": "#/components/schemas/CHAIN_ID",
+            "description": "Id of the StarkNet network where the txn submitted to"
+          }
+        }
+      },
+      "CREATE_ACCOUNT_RESULT": {
+        "type": "object",
+        "properties": {
+          "transaction_hash": {
+            "$ref": "#/components/schemas/TXN_HASH",
+            "description": "The hash identifying the transaction"
+          },
+          "address": {
+            "$ref": "#/components/schemas/ADDRESS",
+            "description": "The address of the deploying account"
+          },
+          "code": {
+            "description": "Response code of the deploy txn"
+          }
+        }
+      },
+      "SEND_TRANSACTION_RESULT": {
+        "type": "object",
+        "properties": {
+          "transaction_hash": {
+            "$ref": "#/components/schemas/TXN_HASH",
+            "description": "The hash identifying the transaction"
+          },
+          "code": {
+            "type": "string",
+            "description": "Response code of the sent txn"
+          }
+        }
+      },
+      "GET_VALUE_RESULT": {
+        "type": "object",
+        "properties": {
+          "result": {
+            "type": "array"
+          }
+        }
+      },
+      "ESTIMATE_FEE_RESULT": {
+        "type": "object",
+        "properties": {
+          "suggestedMaxFee": {
+            "type": "string",
+            "description": "Estimated gas fee with overhead added in decimal string"
+          },
+          "overallFee": {
+            "type": "string",
+            "description": "Overall gas fee in in decimal string"
+          },
+          "gasConsumed": {
+            "type": "string",
+            "description": "Total amount of consumed gas in decimal string"
+          },
+          "gasPrice": {
+            "type": "string",
+            "description": "Price for each gas unit in decimal string"
+          },
+          "unit": {
+            "type": "string",
+            "description": "Gas fee unit (e.g. \"wei\")"
+          }
+        }
+      },
+      "ADD_ERC_20_TOKEN_RESULT": {
+        "$ref": "#/components/schemas/ERC_20_TOKEN"
+      },
+      "ADD_NETWORK_RESULT": {
+        "$ref": "#/components/schemas/STARKNET_NETWORK"
+      },
+      "GET_STORED_ERC_20_TOKENS_RESULT": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/ERC_20_TOKEN"
+        }
+      },
+      "RECOVER_ACCOUNTS_RESULT": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/USER_ACCOUNT"
+        }
+      },
+      "GET_STORED_NETWORKS_RESULT": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/STARKNET_NETWORK"
+        }
+      },
+      "GET_TRANSACTIONS_RESULT": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/TRANSACTION_RECORD"
+        }
+      }
+    },
+    "errors": {}
+  }
+}

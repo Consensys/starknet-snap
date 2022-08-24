@@ -1,0 +1,35 @@
+name: Playwright End to End Tests
+
+on:
+  pull_request:
+    branches:
+      - staging
+    paths:
+      - "e2e/**"
+
+jobs:
+  playwright:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 16.x
+     
+      - name: Install dependencies
+        run: cd e2e && yarn install --frozen-lockfile
+      - name: Install dependencies for Chromium
+        run: npx playwright install-deps chromium
+      - name: Unzip Metamask Flask Extension
+        #run:  unzip -d "./e2e/extension-source" "./e2e/extension.crx"
+        run:  ditto -x -k "./e2e/extension.zip" "./e2e/extension-source"
+      - name: Run Playwright End to End Tests
+        run: cd e2e && yarn test tests/*.test.ts
+
+      # This is to upload artifacts, and report to Github
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: playwright-report
+          path: playwright-report

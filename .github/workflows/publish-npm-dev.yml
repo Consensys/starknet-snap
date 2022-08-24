@@ -1,0 +1,31 @@
+name: Publish Dev to NPM
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "packages/**"
+permissions:
+  contents: write
+defaults:
+  run:
+    working-directory: ./packages/starknet-snap
+jobs:
+  publish-dev-to-npm:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: |
+          yarn setup
+          VERSION=$(node -p "require('../starknet-snap/package.json').version")
+          HASH=$(git rev-parse --short HEAD)
+          DATE=$(date +%Y%m%d)
+          yarn version --new-version ${VERSION}-dev-${HASH}-${DATE} --no-git-tag-version
+      - run: yarn build
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '16.x'
+          registry-url: 'https://registry.npmjs.org'
+      - run: yarn publish --tag dev --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

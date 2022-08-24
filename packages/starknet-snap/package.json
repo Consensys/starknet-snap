@@ -1,0 +1,74 @@
+{
+  "name": "@consensys/starknet-snap",
+  "version": "0.5.1",
+  "license": "(Apache-2.0 OR MIT)",
+  "main": "src/index.ts",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ConsenSys/starknet-snap.git"
+  },
+  "scripts": {
+    "setup": "yarn install --frozen-lockfile && yarn allow-scripts",
+    "build:clean": "yarn clean && yarn build",
+    "build": "mm-snap build",
+    "serve": "mm-snap serve",
+    "clean": "rimraf js/* && rimraf dist/*",
+    "watch": "yarn build && concurrently --kill-others --names SNAP,SERVE -c bgMagenta.bold,bgGreen.bold \"yarn run watch:snap\" \"yarn run serve\"",
+    "watch:snap": "mm-snap watch",
+    "prettier": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
+    "lint": "eslint . --max-warnings 0 -f json -o eslint-report.json",
+    "test": "yarn run test:unit && yarn run cover:report",
+    "test:unit": "nyc --check-coverage --statements 80 --branches 80 --functions 80 --lines 80 mocha --colors -r ts-node/register \"test/**/*.test.ts\"",
+    "cover:report": "nyc report --reporter=lcov --reporter=text"
+  },
+  "keywords": [],
+  "author": "",
+  "devDependencies": {
+    "@lavamoat/allow-scripts": "^2.0.3",
+    "@lavamoat/preinstall-always-fail": "^1.0.0",
+    "@metamask/key-tree": "^4.0.0",
+    "@metamask/snap-types": "^0.16.0",
+    "@metamask/snaps-cli": "^0.16.0",
+    "@types/chai": "^4.3.1",
+    "@types/sinon": "^10.0.11",
+    "@types/sinon-chai": "^3.2.8",
+    "@typescript-eslint/eslint-plugin": "^5.20.0",
+    "@typescript-eslint/parser": "^5.20.0",
+    "concurrently": "^7.1.0",
+    "eslint": "^8.13.0",
+    "mocha": "^9.2.2",
+    "nyc": "^15.1.0",
+    "prettier": "^2.6.2",
+    "rimraf": "^3.0.2",
+    "standard-version": "^9.5.0",
+    "ts-node": "^10.8.1",
+    "typescript": "^4.6.3"
+  },
+  "dependencies": {
+    "@starkware-industries/starkware-crypto-utils": "^0.0.2",
+    "async-mutex": "^0.3.2",
+    "chai": "^4.3.6",
+    "ethereum-unit-converter": "^0.0.17",
+    "sinon": "^13.0.2",
+    "sinon-chai": "^3.7.0",
+    "starknet": "^4.3.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "lavamoat": {
+    "allowScripts": {
+      "@lavamoat/preinstall-always-fail": false,
+      "@metamask/snap-types>@metamask/controllers>babel-runtime>core-js": true,
+      "@starkware-industries/starkware-crypto-utils>ethereumjs-wallet>ethereum-cryptography>keccak": true,
+      "@starkware-industries/starkware-crypto-utils>ethereumjs-wallet>ethereum-cryptography>secp256k1": true
+    }
+  },
+  "nyc": {
+    "exclude": [
+      "**/addNetwork.ts",
+      "**/*.test.ts"
+    ]
+  }
+}
