@@ -13,13 +13,13 @@ export const theme: DefaultTheme = {
     primary: {
       light: '#D4D4E2',
       main: '#292A6C',
-      dark: '#linear-gradient(0deg, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)), #292A6C',
+      dark: '#212256',
       contrastText: '#FFFFFF',
     },
     secondary: {
-      light: 'linear-gradient(0deg, rgba(255, 255, 255, 0.88), rgba(255, 255, 255, 0.88)), #FB4C43',
+      light: '#FFEAE8',
       main: '#FB4C43',
-      dark: 'linear-gradient(0deg, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)), #FB4C43',
+      dark: '#C93D36',
       contrastText: '#FFFFFF',
     },
     error: {
