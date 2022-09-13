@@ -15,7 +15,8 @@ export const STARKNET_MAINNET_NETWORK: Network = {
   name: 'StarkNet Mainnet',
   chainId: constants.StarknetChainId.MAINNET,
   baseUrl: 'https://alpha-mainnet.starknet.io',
-  nodeUrl: 'https://starknet-mainnet.infura.io/v3/60c7253fb48147658095fe0460ac9ee9',
+  //nodeUrl: 'https://starknet-mainnet.infura.io/v3/60c7253fb48147658095fe0460ac9ee9',
+  nodeUrl: '',
   voyagerUrl: 'https://voyager.online',
   accountClassHash: '0x3e327de1c40540b98d05cbcb13552008e36f0ec8d61d46956d2f9752c294328', // from argent-x repo
 };
