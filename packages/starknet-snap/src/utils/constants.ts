@@ -15,8 +15,7 @@ export const STARKNET_MAINNET_NETWORK: Network = {
   name: 'StarkNet Mainnet',
   chainId: constants.StarknetChainId.MAINNET,
   baseUrl: 'https://alpha-mainnet.starknet.io',
-  //nodeUrl: 'https://starknet-mainnet.infura.io/v3/16f7a66f09414870baa2b483d67475c6',
-  nodeUrl: '',
+  nodeUrl: 'https://starknet-mainnet.infura.io/v3/60c7253fb48147658095fe0460ac9ee9',
   voyagerUrl: 'https://voyager.online',
   accountClassHash: '0x3e327de1c40540b98d05cbcb13552008e36f0ec8d61d46956d2f9752c294328', // from argent-x repo
 };
@@ -25,8 +24,7 @@ export const STARKNET_TESTNET_NETWORK: Network = {
   name: 'Goerli Testnet',
   chainId: constants.StarknetChainId.TESTNET,
   baseUrl: 'https://alpha4.starknet.io',
-  //nodeUrl: 'https://starknet-goerli.infura.io/v3/60c7253fb48147658095fe0460ac9ee9',
-  nodeUrl: '',
+  nodeUrl: 'https://starknet-goerli.infura.io/v3/60c7253fb48147658095fe0460ac9ee9',
   voyagerUrl: 'https://goerli.voyager.online',
   accountClassHash: '0x3e327de1c40540b98d05cbcb13552008e36f0ec8d61d46956d2f9752c294328', // from argent-x repo
 };
