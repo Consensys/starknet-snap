@@ -90,7 +90,7 @@ export async function getTransactions(params: ApiParams) {
     await Promise.allSettled(
       storedUnsettledTxns.map(async (txn) => {
         const txnStatus = await utils.getTransactionStatus(txn.txnHash, network);
-        txn.status = txnStatus;
+        txn.status = txnStatus ?? txn.status;
         txn.failureReason = '';
       }),
     );

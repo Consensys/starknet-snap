@@ -22,6 +22,7 @@ chai.use(sinonChai);
 const sandbox = sinon.createSandbox();
 
 describe('Test function: createAccount', function () {
+  this.timeout(5000);
   const walletStub = new WalletMock();
   const state: SnapState = {
     accContracts: [],
