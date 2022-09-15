@@ -1036,9 +1036,6 @@
           "address": {
             "$ref": "#/components/schemas/ADDRESS",
             "description": "The address of the deploying account"
-          },
-          "code": {
-            "description": "Response code of the deploy txn"
           }
         }
       },
