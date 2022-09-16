@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.6.0](https://github.com/ConsenSys/starknet-snap/compare/starknet-snap-v0.5.1...starknet-snap-v0.6.0) (2022-09-16)
+
+
+### Features
+
+* set Infura RPC node as the default provider for mainnet ([5d969d0](https://github.com/ConsenSys/starknet-snap/commit/5d969d085e1b4b2b670071757da9240c900c3478))
+* updated snap shasum ([43f9cbc](https://github.com/ConsenSys/starknet-snap/commit/43f9cbcde509725cfe73a28fd18c10793221377c))
+* updated yarn.lock and temporarily set Sequencer as the default provider for mainnet ([db01340](https://github.com/ConsenSys/starknet-snap/commit/db01340843e24a9f2915334ced77f8e40b13385d))
+* upgraded to starknet.js v4.5.0 and set Infura RPC node as the default provider ([d666ac7](https://github.com/ConsenSys/starknet-snap/commit/d666ac76ff02a12e935a24f1ef6a7df83fe10bca))
+
+
+### Bug Fixes
+
+* createAccount response fields and updated test cases and the ope… ([#4](https://github.com/ConsenSys/starknet-snap/issues/4)) ([6c03853](https://github.com/ConsenSys/starknet-snap/commit/6c0385393658b1d047a29212b6691b3c819451ec))
+
 ## [0.5.1](https://github.com/ConsenSys/starknet-snap/compare/starknet-snap-v0.5.0...starknet-snap-v0.5.1) (2022-08-22)
 
 
