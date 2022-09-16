@@ -56,7 +56,10 @@ export async function createAccount(params: ApiParams) {
 
     console.log(`createAccount:\ndeployResp: ${JSON.stringify(deployResp)}`);
 
-    return deployResp;
+    return {
+      address: deployResp.contract_address,
+      transaction_hash: deployResp.transaction_hash,
+    };
   } catch (err) {
     console.error(`Problem found: ${err}`);
     throw err;

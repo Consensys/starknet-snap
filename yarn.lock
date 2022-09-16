@@ -1377,7 +1377,7 @@
     ethereum-unit-converter "^0.0.17"
     sinon "^13.0.2"
     sinon-chai "^3.7.0"
-    starknet "^4.5.0"
+    starknet "^4.6.0"
 
 "@cspotcode/source-map-support@^0.8.0":
   version "0.8.1"
@@ -17109,10 +17109,10 @@ standard-version@^9.5.0:
     stringify-package "^1.0.1"
     yargs "^16.0.0"
 
-starknet@^4.5.0:
-  version "4.5.0"
-  resolved "https://registry.yarnpkg.com/starknet/-/starknet-4.5.0.tgz#703544d1b7996f5b3a6bcbe824ada19bf1d90d4f"
-  integrity sha512-cOmgltghf1lkmurlsYY6a3WrpMZPQjywqLTk3/43TUCplZ8WtxsnImbdhKT0wDBlpDLXk0hK0NKsKnu7TT8D9A==
+starknet@^4.6.0:
+  version "4.6.0"
+  resolved "https://registry.yarnpkg.com/starknet/-/starknet-4.6.0.tgz#85e9f4c4749541f94d35f29e766643cd699599bd"
+  integrity sha512-a7UgPKUTo3S5u9yAGm+FW1XTV7yhFFbtAm6mZmNv0hTZVxEE70JkunaM8S3eQzzrlbFnjED+OntDnE1FOO8xBw==
   dependencies:
     "@ethersproject/bytes" "^5.6.1"
     bn.js "^5.2.1"

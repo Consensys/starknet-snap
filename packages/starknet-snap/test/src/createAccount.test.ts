@@ -65,7 +65,8 @@ describe('Test function: createAccount', function () {
       createAccountProxyMainnetResp.contract_address,
     );
     expect(walletStub.rpcStubs.snap_manageState).to.have.been.callCount(4);
-    expect(result).to.be.eql(createAccountProxyMainnetResp);
+    expect(result.address).to.be.eq(createAccountProxyMainnetResp.contract_address);
+    expect(result.transaction_hash).to.be.eq(createAccountProxyMainnetResp.transaction_hash);
     expect(state.accContracts.length).to.be.eq(1);
     expect(state.accContracts[0].address).to.be.eq(createAccountProxyMainnetResp.contract_address);
     expect(state.accContracts[0].deployTxnHash).to.be.eq(createAccountProxyMainnetResp.transaction_hash);
@@ -88,7 +89,8 @@ describe('Test function: createAccount', function () {
       createAccountProxyResp.contract_address,
     );
     expect(walletStub.rpcStubs.snap_manageState).to.have.been.callCount(4);
-    expect(result).to.be.eql(createAccountProxyResp);
+    expect(result.address).to.be.eq(createAccountProxyResp.contract_address);
+    expect(result.transaction_hash).to.be.eq(createAccountProxyResp.transaction_hash);
     expect(state.accContracts.length).to.be.eq(2);
     expect(state.accContracts[1].address).to.be.eq(createAccountProxyResp.contract_address);
     expect(state.accContracts[1].deployTxnHash).to.be.eq(createAccountProxyResp.transaction_hash);
@@ -105,7 +107,8 @@ describe('Test function: createAccount', function () {
     apiParams.requestParams = requestObject;
     const result = await createAccount(apiParams);
     expect(walletStub.rpcStubs.snap_manageState).to.have.been.callCount(0);
-    expect(result).to.be.eql(createAccountFailedProxyResp);
+    expect(result.address).to.be.eq(createAccountFailedProxyResp.contract_address);
+    expect(result.transaction_hash).to.be.eq(createAccountFailedProxyResp.transaction_hash);
     expect(state.accContracts.length).to.be.eq(2);
     expect(state.transactions.length).to.be.eq(2);
   });
