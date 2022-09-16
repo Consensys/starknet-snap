@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.12.0](https://github.com/ConsenSys/starknet-snap/compare/wallet-ui-v0.11.0...wallet-ui-v0.12.0) (2022-09-16)
+
+
+### Features
+
+* upgraded to starknet.js v4.5.0 and set Infura RPC node as the default provider ([d666ac7](https://github.com/ConsenSys/starknet-snap/commit/d666ac76ff02a12e935a24f1ef6a7df83fe10bca))
+
+
+### Bug Fixes
+
+* createAccount response fields and updated test cases and the ope… ([#4](https://github.com/ConsenSys/starknet-snap/issues/4)) ([6c03853](https://github.com/ConsenSys/starknet-snap/commit/6c0385393658b1d047a29212b6691b3c819451ec))
+* moved react-scripts to devDependencies and updated yarn.lock ([ee320ce](https://github.com/ConsenSys/starknet-snap/commit/ee320ce3e0284b6ba2f1c567b832ba9e49710ff9))
+* Theme colors ([aef0dfc](https://github.com/ConsenSys/starknet-snap/commit/aef0dfc91a4fdae4154abf4b9ea39e5107ae9bd4))
+* Updated theme colors ([679dbcf](https://github.com/ConsenSys/starknet-snap/commit/679dbcf02f904b34ee38e9cb4404320729d1dcc9))
+
 ## [0.11.0](https://github.com/ConsenSys/starknet-snap/compare/wallet-ui-v0.10.0...wallet-ui-v0.11.0) (2022-08-22)
 
 
