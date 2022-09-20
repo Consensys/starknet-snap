@@ -207,6 +207,8 @@
   <form id="deployUserAccContract">
     <fieldset>
       <legend>Deploy User Account Contract</legend>
+      <label for="addressIndex">Specific Address Index (optional)</label>
+      <input type="text" id="addressIndex" name="addressIndex"><br>
       <input type="submit" id="deployUserAccContract" value="Deploy User Account SC">
     </fieldset>
   </form>
@@ -496,6 +498,7 @@
   async function deployUserAccContract(e) {
     e.preventDefault() // to prevent default form behavior
 
+    const addressIndex = document.getElementById('addressIndex').value
     const chainId = document.getElementById('targetChainId').value;
     const isDev = document.getElementById('isDev').checked;
     
@@ -505,6 +508,7 @@
         params: [snapId, {
           method: 'starkNet_createAccount',
           params: {
+            addressIndex,
             chainId,
             isDev,
           },

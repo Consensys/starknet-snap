@@ -101,7 +101,12 @@ export const bip44Entropy: JsonBIP44CoinTypeNode = {
 
 export const createAccountProxyMainnetResp = {
   transaction_hash: '0x3b690b4c9dd639881a46f6a344ee90254562175ed7a7f5a028f69b8c32ccb47',
-  contract_address: '0x464a46982528b8b038b4a81af5be9a72b05e3bb42c449adbb222c4d8a168645',
+  contract_address: '0x57c2c9609934e5e2a23ecc5027c65731065d255fd8ce4a7234626b9b35e8e70',
+};
+
+export const createAccountProxyMainnetResp2 = {
+  transaction_hash: '0x60d85f7411349c0b4bc94cf1a6659dccb945f82865592ae7aaa494fa62b6965',
+  contract_address: '0x7aca804cc7541b6e57f2d7d22284f41ef7b445f4560526a2c6a48398e55cf86',
 };
 
 export const createAccountProxyResp = {
