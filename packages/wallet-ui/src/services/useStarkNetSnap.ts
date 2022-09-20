@@ -152,6 +152,7 @@ export const useStarkNetSnap = () => {
         {
           method: 'starkNet_createAccount',
           params: {
+            addressIndex: 0,
             chainId,
           },
         },

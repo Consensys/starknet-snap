@@ -1,5 +1,5 @@
 import { getKeysFromAddressIndex, getAccContractAddressAndCallData, deployContract } from './utils/starknetUtils';
-import { getNetworkFromChainId, upsertAccount, upsertTransaction } from './utils/snapUtils';
+import { getNetworkFromChainId, getValidNumber, upsertAccount, upsertTransaction } from './utils/snapUtils';
 import { AccContract, VoyagerTransactionType, Transaction, TransactionStatus } from './types/snapState';
 import { ApiParams, CreateAccountRequestParams } from './types/snapApi';
 import { PROXY_CONTRACT_STR } from './utils/constants';
@@ -9,18 +9,21 @@ export async function createAccount(params: ApiParams) {
     const { state, wallet, saveMutex, keyDeriver, requestParams } = params;
     const requestParamsObj = requestParams as CreateAccountRequestParams;
 
+    const addressIndex = getValidNumber(requestParamsObj.addressIndex, -1, 0);
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
 
-    const { publicKey, addressIndex, derivationPath } = await getKeysFromAddressIndex(
-      keyDeriver,
-      network.chainId,
-      state,
-    );
+    const {
+      publicKey,
+      addressIndex: addressIndexInUsed,
+      derivationPath,
+    } = await getKeysFromAddressIndex(keyDeriver, network.chainId, state, addressIndex);
     const { address: contractAddress, callData: contractCallData } = getAccContractAddressAndCallData(
       network.accountClassHash,
       publicKey,
     );
-    console.log(`createAccount:\ncontractAddress = ${contractAddress}\npublicKey = ${publicKey}`);
+    console.log(
+      `createAccount:\ncontractAddress = ${contractAddress}\npublicKey = ${publicKey}\naddressIndex = ${addressIndexInUsed}`,
+    );
 
     const deployResp = await deployContract(network, PROXY_CONTRACT_STR, contractCallData, publicKey);
 
@@ -29,7 +32,7 @@ export async function createAccount(params: ApiParams) {
         addressSalt: publicKey,
         publicKey,
         address: deployResp.contract_address,
-        addressIndex,
+        addressIndex: addressIndexInUsed,
         derivationPath,
         deployTxnHash: deployResp.transaction_hash,
         chainId: network.chainId,

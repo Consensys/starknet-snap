@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.0](https://github.com/ConsenSys/starknet-snap/compare/starknet-snap-v0.6.0...starknet-snap-v0.7.0) (2022-09-20)
+
+
+### Features
+
+* added specific address index in starkNet_createAccount and fixed Dapp to always use 0 ([#7](https://github.com/ConsenSys/starknet-snap/issues/7)) ([0607626](https://github.com/ConsenSys/starknet-snap/commit/0607626a2614ef01b964212ab08cdc225fc226a8))
+
 ## [0.6.0](https://github.com/ConsenSys/starknet-snap/compare/starknet-snap-v0.5.1...starknet-snap-v0.6.0) (2022-09-16)
 
 

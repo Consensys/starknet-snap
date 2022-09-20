@@ -1,7 +1,7 @@
 {
   "openrpc": "1.0.0-rc1",
   "info": {
-    "version": "0.6.0",
+    "version": "0.7.0",
     "title": "StarkNet MetaMask Snap API",
     "license": {}
   },
@@ -81,6 +81,16 @@
       "summary": "Deploys an account contract",
       "paramStructure": "by-name",
       "params": [
+        {
+          "name": "addressIndex",
+          "summary": "Specific address index of the derived key in BIP-44",
+          "description": "Specific address index of the derived key in BIP-44",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
         {
           "name": "chainId",
           "summary": "Id of the target StarkNet network",

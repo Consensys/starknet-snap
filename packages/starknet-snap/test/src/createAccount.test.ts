@@ -13,6 +13,7 @@ import {
   createAccountProxyResp,
   createAccountProxyMainnetResp,
   createAccountFailedProxyResp,
+  createAccountProxyMainnetResp2,
 } from '../constants.test';
 import { getAddressKeyDeriver } from '../../src/utils/keyPair';
 import { Mutex } from 'async-mutex';
@@ -75,6 +76,33 @@ describe('Test function: createAccount', function () {
     expect(state.transactions.length).to.be.eq(1);
   });
 
+  it('should create and store an user account of specific address index with proxy in state correctly in mainnet', async function () {
+    sandbox.stub(utils, 'deployContract').callsFake(async () => {
+      return createAccountProxyMainnetResp2;
+    });
+    const requestObject: CreateAccountRequestParams = {
+      chainId: STARKNET_MAINNET_NETWORK.chainId,
+      addressIndex: 1,
+    };
+    apiParams.requestParams = requestObject;
+    const result = await createAccount(apiParams);
+    const { publicKey: expectedPublicKey } = await utils.getKeysFromAddress(
+      apiParams.keyDeriver,
+      STARKNET_MAINNET_NETWORK.chainId,
+      state,
+      createAccountProxyMainnetResp2.contract_address,
+    );
+    expect(walletStub.rpcStubs.snap_manageState).to.have.been.callCount(4);
+    expect(result.address).to.be.eq(createAccountProxyMainnetResp2.contract_address);
+    expect(result.transaction_hash).to.be.eq(createAccountProxyMainnetResp2.transaction_hash);
+    expect(state.accContracts.length).to.be.eq(2);
+    expect(state.accContracts[1].address).to.be.eq(createAccountProxyMainnetResp2.contract_address);
+    expect(state.accContracts[1].deployTxnHash).to.be.eq(createAccountProxyMainnetResp2.transaction_hash);
+    expect(state.accContracts[1].publicKey).to.be.eq(expectedPublicKey);
+    expect(state.accContracts[1].addressSalt).to.be.eq(expectedPublicKey);
+    expect(state.transactions.length).to.be.eq(2);
+  });
+
   it('should create and store an user account with proxy in state correctly in testnet', async function () {
     sandbox.stub(utils, 'deployContract').callsFake(async () => {
       return createAccountProxyResp;
@@ -91,12 +119,12 @@ describe('Test function: createAccount', function () {
     expect(walletStub.rpcStubs.snap_manageState).to.have.been.callCount(4);
     expect(result.address).to.be.eq(createAccountProxyResp.contract_address);
     expect(result.transaction_hash).to.be.eq(createAccountProxyResp.transaction_hash);
-    expect(state.accContracts.length).to.be.eq(2);
-    expect(state.accContracts[1].address).to.be.eq(createAccountProxyResp.contract_address);
-    expect(state.accContracts[1].deployTxnHash).to.be.eq(createAccountProxyResp.transaction_hash);
-    expect(state.accContracts[1].publicKey).to.be.eq(expectedPublicKey);
-    expect(state.accContracts[1].addressSalt).to.be.eq(expectedPublicKey);
-    expect(state.transactions.length).to.be.eq(2);
+    expect(state.accContracts.length).to.be.eq(3);
+    expect(state.accContracts[2].address).to.be.eq(createAccountProxyResp.contract_address);
+    expect(state.accContracts[2].deployTxnHash).to.be.eq(createAccountProxyResp.transaction_hash);
+    expect(state.accContracts[2].publicKey).to.be.eq(expectedPublicKey);
+    expect(state.accContracts[2].addressSalt).to.be.eq(expectedPublicKey);
+    expect(state.transactions.length).to.be.eq(3);
   });
 
   it('should skip upsert account and transaction if deployTxn response code has no transaction_hash in testnet', async function () {
@@ -109,8 +137,8 @@ describe('Test function: createAccount', function () {
     expect(walletStub.rpcStubs.snap_manageState).to.have.been.callCount(0);
     expect(result.address).to.be.eq(createAccountFailedProxyResp.contract_address);
     expect(result.transaction_hash).to.be.eq(createAccountFailedProxyResp.transaction_hash);
-    expect(state.accContracts.length).to.be.eq(2);
-    expect(state.transactions.length).to.be.eq(2);
+    expect(state.accContracts.length).to.be.eq(3);
+    expect(state.transactions.length).to.be.eq(3);
   });
 
   it('should throw error if upsertAccount failed', async function () {
