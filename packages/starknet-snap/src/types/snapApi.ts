@@ -35,7 +35,9 @@ export interface BaseRequestParams {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface CreateAccountRequestParams extends BaseRequestParams {}
+export interface CreateAccountRequestParams extends BaseRequestParams {
+  addressIndex?: string | number;
+}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface GetStoredUserAccountsRequestParams extends BaseRequestParams {}
