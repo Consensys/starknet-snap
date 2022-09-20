@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.13.0](https://github.com/ConsenSys/starknet-snap/compare/wallet-ui-v0.12.0...wallet-ui-v0.13.0) (2022-09-20)
+
+
+### Features
+
+* added specific address index in starkNet_createAccount and fixed Dapp to always use 0 ([#7](https://github.com/ConsenSys/starknet-snap/issues/7)) ([0607626](https://github.com/ConsenSys/starknet-snap/commit/0607626a2614ef01b964212ab08cdc225fc226a8))
+
 ## [0.12.0](https://github.com/ConsenSys/starknet-snap/compare/wallet-ui-v0.11.0...wallet-ui-v0.12.0) (2022-09-16)
 
 
