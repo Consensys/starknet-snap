@@ -63,11 +63,14 @@ export const callContract = async (
   contractCallData: RawCalldata = [],
 ): Promise<CallContractResponse> => {
   const provider = getProvider(network);
-  return provider.callContract({
-    contractAddress,
-    entrypoint: contractFuncName,
-    calldata: contractCallData,
-  });
+  return provider.callContract(
+    {
+      contractAddress,
+      entrypoint: contractFuncName,
+      calldata: contractCallData,
+    },
+    'latest',
+  );
 };
 
 export const estimateFee = async (
