@@ -71,6 +71,16 @@ export async function getTransactions(params: ApiParams) {
       console.log(`getTransactions\nstoredUnsettledDeployTxns:\n${JSON.stringify(storedUnsettledDeployTxns)}`);
       storedUnsettledTxns = [...storedUnsettledTxns, ...storedUnsettledDeployTxns];
     }
+
+    // For each "unsettled" txn, update the status and timestamp from the same txn found in massagedTxns
+    storedUnsettledTxns.forEach((txn) => {
+      const foundMassagedTxn = massagedTxns.find((massagedTxn) =>
+        number.toBN(massagedTxn.txnHash).eq(number.toBN(txn.txnHash)),
+      );
+      txn.status = foundMassagedTxn?.status ?? txn.status;
+      txn.timestamp = foundMassagedTxn?.timestamp ?? txn.timestamp;
+    });
+
     console.log(`getTransactions\nstoredUnsettledTxns:\n${JSON.stringify(storedUnsettledTxns)}`);
 
     // Retrieve the REJECTED txns from snap state
@@ -85,8 +95,7 @@ export async function getTransactions(params: ApiParams) {
     );
     console.log(`getTransactions\nstoredRejectedTxns:\n${JSON.stringify(storedRejectedTxns)}`);
 
-    // For each "unsettled" txn, call get_transacton_status endpoint from feeder_gateway to
-    // get the latest status
+    // For each "unsettled" txn, get the latest status from the provider (RPC or sequencer)
     await Promise.allSettled(
       storedUnsettledTxns.map(async (txn) => {
         const txnStatus = await utils.getTransactionStatus(txn.txnHash, network);
