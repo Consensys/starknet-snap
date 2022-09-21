@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.0](https://github.com/ConsenSys/starknet-snap/compare/starknet-snap-v0.7.0...starknet-snap-v0.8.0) (2022-09-21)
+
+
+### Features
+
+* ensure txns in snap state have the same status and timestamp as… ([#10](https://github.com/ConsenSys/starknet-snap/issues/10)) ([7c6de7c](https://github.com/ConsenSys/starknet-snap/commit/7c6de7c17d67ca9813a7193d4ff17375cb0c1ceb))
+
 ## [0.7.0](https://github.com/ConsenSys/starknet-snap/compare/starknet-snap-v0.6.0...starknet-snap-v0.7.0) (2022-09-20)
 
 
