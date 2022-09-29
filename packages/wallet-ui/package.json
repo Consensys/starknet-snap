@@ -3,6 +3,7 @@
   "version": "0.13.0",
   "private": true,
   "license": "(Apache-2.0 OR MIT)",
+  "homepage": "/starknet",
   "dependencies": {
     "@consensys/starknet-snap": "file:../starknet-snap",
     "@emotion/react": "^11.9.0",
