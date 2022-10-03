@@ -16,7 +16,7 @@ interface Props {
 }
 
 export const AddTokenModalView = ({ closeModal }: Props) => {
-  const { addErc20Token } = useStarkNetSnap();
+  const { setErc20TokenBalance, addErc20Token } = useStarkNetSnap();
   const [enabled, setEnabled] = useState(false);
   const networks = useAppSelector((state) => state.networks);
   const { accounts } = useAppSelector((state) => state.wallet);
@@ -77,7 +77,7 @@ export const AddTokenModalView = ({ closeModal }: Props) => {
           enabled={enabled}
           onClick={async () => {
             try {
-              await addErc20Token(
+              const newToken = await addErc20Token(
                 fields.address,
                 fields.name,
                 fields.symbol,
@@ -85,6 +85,7 @@ export const AddTokenModalView = ({ closeModal }: Props) => {
                 chain,
                 accounts[0] as unknown as string,
               );
+              setErc20TokenBalance(newToken);
               toastr.success('Token added successfully');
               closeModal();
             } catch (err) {

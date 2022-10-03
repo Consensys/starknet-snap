@@ -426,6 +426,7 @@ export const useStarkNetSnap = () => {
     const tokenWithBalance: Erc20TokenBalance = addMissingPropertiesToToken(token, tokenBalance, usdPrice);
     dispatch(upsertErc20TokenBalance(tokenWithBalance));
     dispatch(disableLoading());
+    return tokenWithBalance;
   };
 
   const updateTokenBalance = async (tokenAddress: string, accountAddress: string, chainId: string) => {
