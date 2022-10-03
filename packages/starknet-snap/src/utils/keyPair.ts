@@ -4,16 +4,15 @@ import { number } from 'starknet';
 
 export async function getAddressKeyDeriver(wallet) {
   const bip44Node = await wallet.request({
-    method: `snap_getBip44Entropy_9004`,
-    params: [],
+    method: 'snap_getBip44Entropy',
+    params: {
+      coinType: 9004,
+    },
   });
 
   //`m / purpose' / coin_type' / account' / change / address_index`
   //`m / 44' / 9004' / 0' / 0 / {index}`
-  return getBIP44AddressKeyDeriver(bip44Node, {
-    account: 0,
-    change: 0,
-  });
+  return getBIP44AddressKeyDeriver(bip44Node);
 }
 
 export async function getAddressKey(keyDeriver, addressIndex = 0) {

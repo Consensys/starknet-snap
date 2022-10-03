@@ -9,8 +9,8 @@ import { sendTransaction } from '../../src/sendTransaction';
 import { STARKNET_TESTNET_NETWORK } from '../../src/utils/constants';
 import {
   account1,
-  bip44Entropy,
   estimateFeeResp,
+  getBip44EntropyStub,
   sendTransactionFailedResp,
   sendTransactionResp,
   token2,
@@ -42,7 +42,7 @@ describe('Test function: sendTransaction', function () {
   let executeTxnResp;
 
   beforeEach(async function () {
-    walletStub.rpcStubs.snap_getBip44Entropy_9004.resolves(bip44Entropy);
+    walletStub.rpcStubs.snap_getBip44Entropy.callsFake(getBip44EntropyStub);
     apiParams.keyDeriver = await getAddressKeyDeriver(walletStub);
     sandbox.stub(utils, 'estimateFee').callsFake(async () => {
       return estimateFeeResp;

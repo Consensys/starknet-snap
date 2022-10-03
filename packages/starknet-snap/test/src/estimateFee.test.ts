@@ -7,7 +7,7 @@ import { estimateFee } from '../../src/estimateFee';
 import { SnapState } from '../../src/types/snapState';
 import { STARKNET_TESTNET_NETWORK } from '../../src/utils/constants';
 import { getAddressKeyDeriver } from '../../src/utils/keyPair';
-import { account2, bip44Entropy, estimateFeeResp, estimateFeeResp2 } from '../constants.test';
+import { account2, estimateFeeResp, estimateFeeResp2, getBip44EntropyStub } from '../constants.test';
 import { Mutex } from 'async-mutex';
 import { ApiParams, EstimateFeeRequestParams } from '../../src/types/snapApi';
 
@@ -37,7 +37,7 @@ describe('Test function: estimateFee', function () {
   };
 
   beforeEach(async function () {
-    walletStub.rpcStubs.snap_getBip44Entropy_9004.resolves(bip44Entropy);
+    walletStub.rpcStubs.snap_getBip44Entropy.callsFake(getBip44EntropyStub);
     apiParams.keyDeriver = await getAddressKeyDeriver(walletStub);
   });
 

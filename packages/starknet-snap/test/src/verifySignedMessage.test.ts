@@ -6,7 +6,7 @@ import { SnapState } from '../../src/types/snapState';
 import typedDataExample from '../../src/typedData/typedDataExample.json';
 import { verifySignedMessage } from '../../src/verifySignedMessage';
 import { STARKNET_TESTNET_NETWORK } from '../../src/utils/constants';
-import { account1, bip44Entropy, signature1, signature2, unfoundUserAddress } from '../constants.test';
+import { account1, getBip44EntropyStub, signature1, signature2, unfoundUserAddress } from '../constants.test';
 import { getAddressKeyDeriver } from '../../src/utils/keyPair';
 import * as utils from '../../src/utils/starknetUtils';
 import { Mutex } from 'async-mutex';
@@ -32,7 +32,7 @@ describe('Test function: verifySignedMessage', function () {
   };
 
   beforeEach(async function () {
-    walletStub.rpcStubs.snap_getBip44Entropy_9004.resolves(bip44Entropy);
+    walletStub.rpcStubs.snap_getBip44Entropy.callsFake(getBip44EntropyStub);
     apiParams.keyDeriver = await getAddressKeyDeriver(walletStub);
   });
 

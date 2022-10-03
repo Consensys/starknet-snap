@@ -99,6 +99,14 @@ export const bip44Entropy: JsonBIP44CoinTypeNode = {
   path: "m / bip32:44' / bip32:9004'",
 };
 
+export const getBip44EntropyStub = async (...args: unknown[]) => {
+  if (args?.[0]?.['coinType'] === 9004) {
+    return bip44Entropy;
+  } else {
+    return null;
+  }
+};
+
 export const createAccountProxyMainnetResp = {
   transaction_hash: '0x3b690b4c9dd639881a46f6a344ee90254562175ed7a7f5a028f69b8c32ccb47',
   contract_address: '0x57c2c9609934e5e2a23ecc5027c65731065d255fd8ce4a7234626b9b35e8e70',
