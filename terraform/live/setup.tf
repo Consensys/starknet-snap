@@ -2,13 +2,19 @@
 ## Backend
 #############
 
+#terraform {
+#  backend "s3" {
+#    bucket         = "starknet-snap-tfstate-euc1"
+#    dynamodb_table = "starknet-snap-tfstate-euc1"
+#    region         = "eu-central-1"
+#    key            = "live/terraform.tfstate"
+#    encrypt        = true
+#  }
+#}
+
 terraform {
-  backend "s3" {
-    bucket         = "starknet-snap-tfstate-euc1"
-    dynamodb_table = "starknet-snap-tfstate-euc1"
-    region         = "eu-central-1"
-    key            = "live/terraform.tfstate"
-    encrypt        = true
+  backend "local" {
+    path = "state.json"
   }
 }
 
