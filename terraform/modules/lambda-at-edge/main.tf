@@ -4,12 +4,12 @@ resource "aws_s3_bucket" "bucket" {
   force_destroy = true
 }
 
-resource "aws_s3_bucket_acl" "example" {
+resource "aws_s3_bucket_acl" "main" {
   bucket = aws_s3_bucket.bucket.id
   acl    = "private"
 }
 
-resource "aws_s3_bucket_versioning" "versioning_example" {
+resource "aws_s3_bucket_versioning" "main_versioning" {
   bucket = aws_s3_bucket.bucket.id
   versioning_configuration {
     status = "Enabled"

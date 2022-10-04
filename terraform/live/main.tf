@@ -8,12 +8,11 @@ locals {
   dev_domain_name     = "app-dev.${local.hosted_zone_name}"
   staging_domain_name = "app-staging.${local.hosted_zone_name}"
   prod_domain_name    = "app.${local.hosted_zone_name}"
+
   # snaps 
   snaps_hosted_zone_name = "snaps.consensys.net"
   snaps_hosted_zone_id   = aws_route53_zone.snaps.zone_id
   dev_snaps_domain_name  = "dev.${local.snaps_hosted_zone_name}"
-  # lambdas
-
 }
 
 resource "aws_route53_zone" "main" {
