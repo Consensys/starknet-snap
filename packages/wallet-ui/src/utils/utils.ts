@@ -1,6 +1,11 @@
 import { KeyboardEvent } from 'react';
 import { ethers } from 'ethers';
-import { NUMBER_DISPLAY_MAX_LENGTH, STARKNET_MAINNET_EXPLORER, STARKNET_TESTNET_EXPLORER } from './constants';
+import {
+  DECIMALS_DISPLAYED_MAX_LENGTH,
+  STARKNET_MAINNET_EXPLORER,
+  STARKNET_TESTNET_EXPLORER,
+  TIMEOUT_DURATION,
+} from './constants';
 import { Erc20Token, Erc20TokenBalance } from 'types';
 import { constants } from 'starknet';
 
@@ -37,7 +42,11 @@ export const addMissingPropertiesToToken = (
 };
 
 export const getHumanReadableAmount = (asset: Erc20TokenBalance) => {
-  return ethers.utils.formatUnits(asset.amount, asset.decimals).substring(0, NUMBER_DISPLAY_MAX_LENGTH);
+  const amountStr = ethers.utils.formatUnits(asset.amount, asset.decimals);
+  const indexDecimal = amountStr.indexOf('.');
+  return ethers.utils
+    .formatUnits(asset.amount, asset.decimals)
+    .substring(0, indexDecimal + DECIMALS_DISPLAYED_MAX_LENGTH);
 };
 
 export const getAmountPrice = (asset: Erc20TokenBalance, assetAmount: number, usdMode: boolean) => {
@@ -69,4 +78,15 @@ export const isSpecialInputKey = (event: KeyboardEvent<HTMLInputElement>) => {
     event.key === 'ArrowLeft' ||
     event.metaKey
   );
+};
+
+export const fetchWithTimeout = async (resource: string, options = { timeout: TIMEOUT_DURATION }) => {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), options.timeout);
+  const response = await fetch(resource, {
+    ...options,
+    signal: controller.signal,
+  });
+  clearTimeout(id);
+  return response;
 };
