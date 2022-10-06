@@ -1369,7 +1369,7 @@
     chalk "^4.1.0"
 
 "@consensys/starknet-snap@file:packages/starknet-snap":
-  version "0.5.1"
+  version "0.8.0"
   dependencies:
     "@starkware-industries/starkware-crypto-utils" "^0.0.2"
     async-mutex "^0.3.2"
@@ -1377,7 +1377,7 @@
     ethereum-unit-converter "^0.0.17"
     sinon "^13.0.2"
     sinon-chai "^3.7.0"
-    starknet "^4.6.0"
+    starknet "~4.6.0"
 
 "@cspotcode/source-map-support@^0.8.0":
   version "0.8.1"
@@ -17109,7 +17109,7 @@ standard-version@^9.5.0:
     stringify-package "^1.0.1"
     yargs "^16.0.0"
 
-starknet@^4.6.0:
+starknet@~4.6.0:
   version "4.6.0"
   resolved "https://registry.yarnpkg.com/starknet/-/starknet-4.6.0.tgz#85e9f4c4749541f94d35f29e766643cd699599bd"
   integrity sha512-a7UgPKUTo3S5u9yAGm+FW1XTV7yhFFbtAm6mZmNv0hTZVxEE70JkunaM8S3eQzzrlbFnjED+OntDnE1FOO8xBw==
