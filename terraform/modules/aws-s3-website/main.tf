@@ -103,7 +103,7 @@ resource "aws_cloudfront_distribution" "dist" {
     dynamic "lambda_function_association" {
       for_each = try(var.lambda_function_arn, null)
       content {
-        event_type   = "viewer-request"
+        event_type   = "origin-request"
         lambda_arn   = lambda_function_association.value
         include_body = false
       }
