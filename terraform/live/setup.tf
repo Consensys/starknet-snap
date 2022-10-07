@@ -39,11 +39,3 @@ module "tags" {
   project     = var.project_name
   region      = var.region
 }
-
-module "tags-us-east-1" {
-  source      = "../modules/generic-tags"
-  environment = var.env_type
-  repository  = var.repository
-  project     = var.project_name
-  region      = "us-east-1"
-}

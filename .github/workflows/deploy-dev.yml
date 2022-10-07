@@ -54,4 +54,6 @@ jobs:
           REACT_APP_SNAP_VERSION=${VERSION}-dev-${HASH}-${DATE} yarn workspace wallet-ui build 
 
       - name: Deploy to Dev
-        run: aws s3 sync ./packages/wallet-ui/build s3://app-dev.starknet-snap.consensys-solutions.net/starknet
+        run: | 
+          aws s3 sync ./packages/wallet-ui/build s3://app-dev.starknet-snap.consensys-solutions.net/starknet
+          aws s3 sync ./packages/wallet-ui/build s3://dev.snaps.consensys.net/starknet

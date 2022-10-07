@@ -110,10 +110,11 @@ resource "aws_cloudfront_distribution" "dist" {
     }
 
     dynamic "function_association" {
-      for_each = try(var.cloudfront_function_arn, null)
+      for_each = try(var.cloudfront_functions, null)
+      iterator = function_association
       content {
-        event_type   = "viewer-request"
-        function_arn = function_association.value
+        event_type   = function_association.value.event_type
+        function_arn = function_association.value.arn
       }
     }
   }
