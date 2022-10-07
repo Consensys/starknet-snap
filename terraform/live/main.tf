@@ -74,7 +74,7 @@ resource "aws_cloudfront_function" "starknet_redirect" {
 module "security_header_lambda" {
   source = "../modules/lambda-at-edge"
 
-  bucket_name            = local.dev_domain_name
+  bucket_name            = "security_headers_starknet_lambda"
   lambda_name            = "security_headers"
   lambda_description     = "lambda adding security headers"
   lambda_code_source_dir = "${path.root}/lambdas"
@@ -99,12 +99,12 @@ module "s3_dev" {
 module "s3_snaps_page_dev" {
   source = "../modules/aws-s3-website"
 
-  bucket_name     = local.dev_snaps_domain_name
-  domain_name     = local.dev_snaps_domain_name
-  certificate_arn = module.snaps_cert.acm_certificate_arn
-  hosted_zone_id  = local.hosted_zone_id
-  function_arn    = [aws_cloudfront_function.starknet_redirect.arn]
-  tags            = module.tags.common
+  bucket_name             = local.dev_snaps_domain_name
+  domain_name             = local.dev_snaps_domain_name
+  certificate_arn         = module.snaps_cert.acm_certificate_arn
+  hosted_zone_id          = local.hosted_zone_id
+  cloudfront_function_arn = [aws_cloudfront_function.starknet_redirect.arn]
+  tags                    = module.tags.common
 }
 
 #############

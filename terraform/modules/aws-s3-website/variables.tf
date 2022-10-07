@@ -37,7 +37,7 @@ variable "certificate_arn" {
   default     = ""
 }
 
-variable "function_arn" {
+variable "cloudfront_function_arn" {
   description = "Function arn"
   type        = list(string)
   default     = []
