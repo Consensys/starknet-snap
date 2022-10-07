@@ -99,6 +99,23 @@ resource "aws_cloudfront_distribution" "dist" {
         forward = "none"
       }
     }
+
+    dynamic "lambda_function_association" {
+      for_each = try(var.lambda_function_arn, null)
+      content {
+        event_type   = "viewer-request"
+        lambda_arn   = lambda_function_association.value["function_arn"]
+        include_body = false
+      }
+    }
+
+    dynamic "function_association" {
+      for_each = try(var.function_arn, null)
+      content {
+        event_type   = "viewer-request"
+        function_arn = function_association.value["function_arn"]
+      }
+    }
   }
 
   restrictions {
@@ -112,6 +129,7 @@ resource "aws_cloudfront_distribution" "dist" {
     ssl_support_method       = "sni-only"
     minimum_protocol_version = "TLSv1.2_2021"
   }
+
 }
 
 resource "aws_route53_record" "dist" {

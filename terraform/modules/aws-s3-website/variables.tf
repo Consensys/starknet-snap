@@ -36,3 +36,15 @@ variable "certificate_arn" {
   type        = string
   default     = ""
 }
+
+variable "function_arn" {
+  description = "Function arn"
+  type        = list(string)
+  default     = []
+}
+
+variable "lambda_function_arn" {
+  description = "Lambda function arn"
+  type        = list(string)
+  default     = []
+}
