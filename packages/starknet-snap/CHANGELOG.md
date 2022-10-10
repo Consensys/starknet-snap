@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.0](https://github.com/ConsenSys/starknet-snap/compare/starknet-snap-v0.8.0...starknet-snap-v0.9.0) (2022-10-10)
+
+
+### Features
+
+* fixed the starknet.js version to be v4.6.x ([#22](https://github.com/ConsenSys/starknet-snap/issues/22)) ([e71a87c](https://github.com/ConsenSys/starknet-snap/commit/e71a87c3aa4f5945214079e073cabef4e7c2dd0a))
+
 ## [0.8.0](https://github.com/ConsenSys/starknet-snap/compare/starknet-snap-v0.7.0...starknet-snap-v0.8.0) (2022-09-21)
 
 
