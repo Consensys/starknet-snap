@@ -47,7 +47,8 @@ jobs:
           yarn workspace @consensys/starknet-snap build
           
           yarn workspace @consensys/starknet-snap publish --tag staging --access public
-          aws s3 sync ./packages/wallet-ui/build s3://app-staging.starknet-snap.consensys-solutions.net
+          aws s3 sync ./packages/wallet-ui/build s3://app-staging.starknet-snap.consensys-solutions.net/starknet
+          aws s3 sync ./packages/wallet-ui/build s3://staging.snaps.consensys.net/starknet
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         if: github.ref_name == 'staging'
@@ -62,6 +63,7 @@ jobs:
           
           yarn workspace @consensys/starknet-snap publish --tag latest --access public
           aws s3 sync ./packages/wallet-ui/build s3://app.starknet-snap.consensys-solutions.net
+          aws s3 sync ./packages/wallet-ui/build s3://snaps.consensys.net/starknet
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         if: github.ref_name == 'production'

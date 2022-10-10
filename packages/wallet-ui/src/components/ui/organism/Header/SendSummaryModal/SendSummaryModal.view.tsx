@@ -24,7 +24,7 @@ import { useEffect, useState } from 'react';
 import { useStarkNetSnap } from 'services';
 import { ethers } from 'ethers';
 import Toastr from 'toastr2';
-import { NUMBER_DISPLAY_MAX_LENGTH } from 'utils/constants';
+import { DECIMALS_DISPLAYED_MAX_LENGTH } from 'utils/constants';
 
 interface Props {
   address: string;
@@ -88,7 +88,7 @@ export const SendSummaryModalView = ({ address, amount, chainId, closeModal }: P
       const ethToken = wallet.erc20TokenBalances[0];
       const gasFeesBN = ethers.utils.parseUnits(gasFees.suggestedMaxFee, gasFees.unit);
       const gasFeesFloat = parseFloat(ethers.utils.formatUnits(gasFeesBN, ethToken.decimals));
-      setGasFeesAmount(gasFeesFloat.toFixed(NUMBER_DISPLAY_MAX_LENGTH).toString());
+      setGasFeesAmount(gasFeesFloat.toFixed(DECIMALS_DISPLAYED_MAX_LENGTH).toString());
       if (ethToken.usdPrice) {
         setGasFeesAmountUSD(getAmountPrice(ethToken, gasFeesFloat, false));
       }
@@ -98,7 +98,7 @@ export const SendSummaryModalView = ({ address, amount, chainId, closeModal }: P
         const totalAmountBN = gasFeesBN.add(amountBN);
         const totalAmount = ethers.utils.formatUnits(totalAmountBN, ethToken.decimals);
         const totalAmountFloat = parseFloat(totalAmount);
-        setTotalAmount(totalAmountFloat.toFixed(NUMBER_DISPLAY_MAX_LENGTH).toString());
+        setTotalAmount(totalAmountFloat.toFixed(DECIMALS_DISPLAYED_MAX_LENGTH).toString());
         if (ethToken.usdPrice) {
           setTotalAmountUSD(getAmountPrice(ethToken, totalAmountFloat, false));
         }
