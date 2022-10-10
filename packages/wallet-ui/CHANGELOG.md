@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.14.0](https://github.com/ConsenSys/starknet-snap/compare/wallet-ui-v0.13.0...wallet-ui-v0.14.0) (2022-10-10)
+
+
+### Features
+
+* auto select the newly added token from the asset list ([#16](https://github.com/ConsenSys/starknet-snap/issues/16)) ([b9f0282](https://github.com/ConsenSys/starknet-snap/commit/b9f0282e261f2fd1f3b791b8620249faee166525))
+* fixed the starknet.js version to be v4.6.x ([#22](https://github.com/ConsenSys/starknet-snap/issues/22)) ([e71a87c](https://github.com/ConsenSys/starknet-snap/commit/e71a87c3aa4f5945214079e073cabef4e7c2dd0a))
+
+
+### Bug Fixes
+
+* number of decimals displayed for the token amount ([#19](https://github.com/ConsenSys/starknet-snap/issues/19)) ([78f3809](https://github.com/ConsenSys/starknet-snap/commit/78f3809551209de51186de7a0ae8c8ba052157be))
+
 ## [0.13.0](https://github.com/ConsenSys/starknet-snap/compare/wallet-ui-v0.12.0...wallet-ui-v0.13.0) (2022-09-20)
 
 
