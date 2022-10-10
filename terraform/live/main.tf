@@ -14,7 +14,7 @@ locals {
   snaps_hosted_zone_id      = aws_route53_zone.snaps.zone_id
   dev_snaps_domain_name     = "dev.${local.snaps_hosted_zone_name}"
   staging_snaps_domain_name = "staging.${local.snaps_hosted_zone_name}"
-  prod_snaps_domain_name    = "${local.snaps_hosted_zone_name}"
+  prod_snaps_domain_name    = local.snaps_hosted_zone_name
 
   #cloudfront functions
   cloudfront_functions = {
