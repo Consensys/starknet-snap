@@ -4,7 +4,7 @@ import { Variant } from 'theme/types';
 
 interface Idiv {
   variant: Variant;
-  isMultiline:boolean;
+  isMultiline: boolean;
 }
 
 export const Wrapper = styled.div<Idiv>`
@@ -62,4 +62,5 @@ export const Parag = styled.p`
   line-height: 140%;
   margin-top: 0;
   margin-bottom: 0;
+  text-align: left;
 `;
