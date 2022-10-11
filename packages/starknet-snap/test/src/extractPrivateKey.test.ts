@@ -5,7 +5,7 @@ import { WalletMock } from '../wallet.mock.test';
 import { SnapState } from '../../src/types/snapState';
 import { extractPrivateKey } from '../../src/extractPrivateKey';
 import { STARKNET_TESTNET_NETWORK } from '../../src/utils/constants';
-import { account1, bip44Entropy, unfoundUserAddress } from '../constants.test';
+import { account1, getBip44EntropyStub, unfoundUserAddress } from '../constants.test';
 import { getAddressKeyDeriver } from '../../src/utils/keyPair';
 import * as utils from '../../src/utils/starknetUtils';
 import { Mutex } from 'async-mutex';
@@ -30,7 +30,7 @@ describe('Test function: extractPrivateKey', function () {
   };
 
   beforeEach(async function () {
-    walletStub.rpcStubs.snap_getBip44Entropy_9004.resolves(bip44Entropy);
+    walletStub.rpcStubs.snap_getBip44Entropy.callsFake(getBip44EntropyStub);
     apiParams.keyDeriver = await getAddressKeyDeriver(walletStub);
   });
 

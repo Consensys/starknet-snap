@@ -8,12 +8,12 @@ import { createAccount } from '../../src/createAccount';
 import { SnapState } from '../../src/types/snapState';
 import { STARKNET_MAINNET_NETWORK, STARKNET_TESTNET_NETWORK } from '../../src/utils/constants';
 import {
-  bip44Entropy,
   createAccountProxyTxn,
   createAccountProxyResp,
   createAccountProxyMainnetResp,
   createAccountFailedProxyResp,
   createAccountProxyMainnetResp2,
+  getBip44EntropyStub,
 } from '../constants.test';
 import { getAddressKeyDeriver } from '../../src/utils/keyPair';
 import { Mutex } from 'async-mutex';
@@ -39,7 +39,7 @@ describe('Test function: createAccount', function () {
   };
 
   beforeEach(async function () {
-    walletStub.rpcStubs.snap_getBip44Entropy_9004.resolves(bip44Entropy);
+    walletStub.rpcStubs.snap_getBip44Entropy.callsFake(getBip44EntropyStub);
     apiParams.keyDeriver = await getAddressKeyDeriver(walletStub);
     sandbox.useFakeTimers(createAccountProxyTxn.timestamp);
     walletStub.rpcStubs.snap_manageState.resolves(state);

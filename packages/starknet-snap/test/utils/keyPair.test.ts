@@ -15,7 +15,7 @@ describe('Test function: getAddressKey', function () {
   let keyDeriver;
 
   beforeEach(async function () {
-    walletStub.rpcStubs.snap_getBip44Entropy_9004.resolves(bip44Entropy);
+    walletStub.rpcStubs.snap_getBip44Entropy.resolves(bip44Entropy);
     keyDeriver = await getAddressKeyDeriver(walletStub);
   });
 
@@ -42,7 +42,7 @@ describe('Test function: getAddressKey', function () {
     const addressKey = `0x${privateKey}${chainCode}`;
     const expectedResult = keyDerivation.grindKey(addressKey, ec.n);
     const result = await getAddressKey(keyDeriver);
-    expect(walletStub.rpcStubs.snap_getBip44Entropy_9004).to.have.been.calledOnce;
+    expect(walletStub.rpcStubs.snap_getBip44Entropy).to.have.been.calledOnce;
     expect(result.addressKey).to.be.eql(`0x${expectedResult}`);
   });
 
@@ -54,7 +54,7 @@ describe('Test function: getAddressKey', function () {
     const addressKey = `0x${privateKey}${chainCode}`;
     const expectedResult = keyDerivation.grindKey(addressKey, ec.n);
     const result = await getAddressKey(keyDeriver, addressIndex);
-    expect(walletStub.rpcStubs.snap_getBip44Entropy_9004).to.have.been.calledOnce;
+    expect(walletStub.rpcStubs.snap_getBip44Entropy).to.have.been.calledOnce;
     expect(result.addressKey).to.be.eql(`0x${expectedResult}`);
   });
 });
