@@ -8,7 +8,8 @@ export const NoFlaskModalView = () => {
       <Title>You don't have the MetaMask Flask extension</Title>
       <DescriptionCentered>
         You need to install MetaMask Flask extension in order to use the StarkNet Snap.
-        <br /><br />
+        <br />
+        <br />
         <AlertView
           text="Please make sure that the regular MetaMask extension is disabled or use a different browser profile"
           variant="warning"

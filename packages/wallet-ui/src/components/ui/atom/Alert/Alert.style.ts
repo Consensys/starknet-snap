@@ -4,7 +4,7 @@ import { Variant } from 'theme/types';
 
 interface Idiv {
   variant: Variant;
-  isMultiline:boolean;
+  isMultiline: boolean;
 }
 
 export const Wrapper = styled.div<Idiv>`
