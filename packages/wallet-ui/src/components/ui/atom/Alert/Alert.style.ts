@@ -62,4 +62,5 @@ export const Parag = styled.p`
   line-height: 140%;
   margin-top: 0;
   margin-bottom: 0;
+  text-align: left;
 `;
