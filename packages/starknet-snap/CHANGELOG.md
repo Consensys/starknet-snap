@@ -1,6 +1,13 @@
 # Changelog
 
 
+## [0.11.0](https://github.com/ConsenSys/starknet-snap/compare/starknet-snap-v0.10.0...starknet-snap-v0.11.0) (2022-10-25)
+
+
+### Features
+
+* added changes to accommodate Voyager txn API responses changes ([#34](https://github.com/ConsenSys/starknet-snap/issues/34)) ([7990de0](https://github.com/ConsenSys/starknet-snap/commit/7990de0cbeadb100fd3d4b85bc3dfa6c7c607b30))
+
 ## [0.10.0](https://github.com/ConsenSys/starknet-snap/compare/starknet-snap-v0.9.0...starknet-snap-v0.10.0) (2022-10-11)
 
 

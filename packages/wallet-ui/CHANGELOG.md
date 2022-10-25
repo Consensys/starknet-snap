@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
 
+## [0.15.0](https://github.com/ConsenSys/starknet-snap/compare/wallet-ui-v0.14.1...wallet-ui-v0.15.0) (2022-10-25)
+
+
+### Features
+
+* added changes to accommodate Voyager txn API responses changes ([#34](https://github.com/ConsenSys/starknet-snap/issues/34)) ([7990de0](https://github.com/ConsenSys/starknet-snap/commit/7990de0cbeadb100fd3d4b85bc3dfa6c7c607b30))
+
 ## [0.14.1](https://github.com/ConsenSys/starknet-snap/compare/wallet-ui-v0.14.0...wallet-ui-v0.14.1) (2022-10-11)
 
 
