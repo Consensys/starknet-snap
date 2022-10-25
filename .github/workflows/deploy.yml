@@ -49,7 +49,7 @@ jobs:
           yarn workspace @consensys/starknet-snap version --new-version ${VERSION}-staging --no-git-tag-version
           yarn workspace @consensys/starknet-snap build
           
-          yarn workspace @consensys/starknet-snap publish --tag staging --access public
+          yarn workspace @consensys/starknet-snap publish --tag staging --access public 2>&1 > /dev/null || :
           aws s3 sync ./packages/wallet-ui/build s3://app-staging.starknet-snap.consensys-solutions.net/starknet
           aws s3 sync ./packages/wallet-ui/build s3://staging.snaps.consensys.net/starknet
         env:
@@ -64,7 +64,7 @@ jobs:
           yarn workspace @consensys/starknet-snap version --new-version ${VERSION} --no-git-tag-version
           yarn workspace @consensys/starknet-snap build
           
-          yarn workspace @consensys/starknet-snap publish --tag latest --access public
+          yarn workspace @consensys/starknet-snap publish --tag latest --access public 2>&1 > /dev/null || :
           aws s3 sync ./packages/wallet-ui/build s3://app.starknet-snap.consensys-solutions.net
           aws s3 sync ./packages/wallet-ui/build s3://snaps.consensys.net/starknet
         env:
