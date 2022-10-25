@@ -1,13 +1,12 @@
 # Changelog
 
+
 ## [0.10.0](https://github.com/ConsenSys/starknet-snap/compare/starknet-snap-v0.9.0...starknet-snap-v0.10.0) (2022-10-11)
 
 
 ### Features
 
 * update to use snap_getBip44Entropy ([#21](https://github.com/ConsenSys/starknet-snap/issues/21)) ([a619c66](https://github.com/ConsenSys/starknet-snap/commit/a619c66c3f2f97b53da4608f6133efd08ce26e34))
-
-## [0.9.0](https://github.com/ConsenSys/starknet-snap/compare/starknet-snap-v0.8.0...starknet-snap-v0.9.0) (2022-10-10)
 
 
 ### Features
