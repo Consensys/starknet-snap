@@ -20,7 +20,7 @@ import {
   ProviderOptions,
 } from 'starknet';
 import { Network, SnapState, Transaction, TransactionType } from '../types/snapState';
-import { CONTRACT_ADDRESS_PREFIX, PROXY_CONTRACT_HASH } from './constants';
+import { CONTRACT_ADDRESS_PREFIX, PROXY_CONTRACT_HASH, TRANSFER_SELECTOR_HEX } from './constants';
 import { getAddressKey } from './keyPair';
 import {
   getAccount,
@@ -227,15 +227,12 @@ export const getMassagedTransactions = async (
 
       const massagedTxn: Transaction = {
         txnHash: txnResp?.header?.hash || txn.hash,
-        txnType: txnResp?.header?.type || txn.type,
+        txnType: (txnResp?.header?.type || txn.type)?.toLowerCase(),
         chainId: network.chainId,
         senderAddress: txnResp?.header?.to || txn.to,
-        contractAddress: txnResp?.argentxMetadata?.calldata?.[0]?.value || txnResp?.header?.to || txn.to,
-        contractFuncName: txnResp?.argentxMetadata?.functionNames?.[0] || '',
-        contractCallData:
-          txnResp?.argentxMetadata?.calldata
-            ?.slice(2, txnResp.argentxMetadata.calldata?.length - 1)
-            .map((data) => data.value) || [],
+        contractAddress: txnResp?.calldata?.[1] || txnResp?.header?.to || txn.to,
+        contractFuncName: number.toBN(txnResp?.calldata?.[2]).eq(number.toBN(TRANSFER_SELECTOR_HEX)) ? 'transfer' : '',
+        contractCallData: txnResp?.calldata?.slice(6, txnResp.calldata?.length - 1) || [],
         timestamp: txnResp?.header?.timestamp || txn.timestamp,
         status: txnResp?.header?.status || txn.status,
         eventIds: txnResp?.receipt?.events?.map((event) => event.id) || [],

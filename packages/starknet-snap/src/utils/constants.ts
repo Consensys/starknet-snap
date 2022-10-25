@@ -11,6 +11,8 @@ export const MAXIMUM_NETWORK_NAME_LENGTH = 64;
 export const MAXIMUM_TOKEN_NAME_LENGTH = 64;
 export const MAXIMUM_TOKEN_SYMBOL_LENGTH = 16;
 
+export const TRANSFER_SELECTOR_HEX = '0x83afd3f4caedc6eebf44246fe54e38c95e3179a5ec9ea81740eca5b482d12e';
+
 export const STARKNET_MAINNET_NETWORK: Network = {
   name: 'StarkNet Mainnet',
   chainId: constants.StarknetChainId.MAINNET,
