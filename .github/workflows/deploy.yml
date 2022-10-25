@@ -1,12 +1,15 @@
 name: Deployments
 
 on:
-  push:
-    branches:
-      - staging
-      - production
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy'
+        type: environment
+        required: true
 jobs:
   deploy:
+    environment: ${{ inputs.environment }}
     name: Deploy Snap and UI
     runs-on: ubuntu-20.04
     steps:
@@ -51,7 +54,7 @@ jobs:
           aws s3 sync ./packages/wallet-ui/build s3://staging.snaps.consensys.net/starknet
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        if: github.ref_name == 'staging'
+        if: inputs.environment == 'staging'
 
       - name: Production Deployment
         run: |
@@ -66,4 +69,4 @@ jobs:
           aws s3 sync ./packages/wallet-ui/build s3://snaps.consensys.net/starknet
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        if: github.ref_name == 'production'
+        if: inputs.environment == 'production'
