@@ -380,7 +380,7 @@ export const useStarkNetSnap = () => {
       }
 
       //Set the deploy transaction
-      const deployTransaction = storedTxns.find((txn: Transaction) => txn.txnType === 'deploy');
+      const deployTransaction = storedTxns.find((txn: Transaction) => txn.txnType.toLowerCase() === 'deploy');
       dispatch(setTransactionDeploy(deployTransaction));
 
       dispatch(setTransactions(storedTxns));

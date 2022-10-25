@@ -17,11 +17,11 @@ export const getIcon = (transactionName: string): IconProp => {
 };
 
 export const getTxnName = (transaction: Transaction): string => {
-  if (transaction.txnType === VoyagerTransactionType.INVOKE) {
-    if (transaction.contractFuncName === 'transfer') {
+  if (transaction.txnType.toLowerCase() === VoyagerTransactionType.INVOKE) {
+    if (transaction.contractFuncName.toLowerCase() === 'transfer') {
       return 'Send';
     }
-  } else if (transaction.txnType === VoyagerTransactionType.DEPLOY) {
+  } else if (transaction.txnType.toLowerCase() === VoyagerTransactionType.DEPLOY) {
     return 'Deploy';
   }
   return 'Unknown';

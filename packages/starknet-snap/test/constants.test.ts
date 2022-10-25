@@ -486,7 +486,7 @@ export const expectedMassagedTxns: Transaction[] = [
     senderAddress: '0x05a98ec74a40383cf99896bfea2ec5e6aad16c7eed50025a5f569d585ebb13a2',
     contractAddress: '0x7394cbe418daa16e42b87ba67372d4ab4a5df0b05c6e554d158458ce245bc10',
     contractFuncName: 'transfer',
-    contractCallData: ['0x14361d05e560796ad3152e083b609f5205f3bd76039327326746ba7f769a666', '0x0de0b6b3a7640000'],
+    contractCallData: ['0x14361d05e560796ad3152e083b609f5205f3bd76039327326746ba7f769a666', '0xde0b6b3a7640000', '0x0'],
     timestamp: 1655109666,
     failureReason: '',
     status: 'Accepted on L1',
