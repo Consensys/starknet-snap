@@ -7,7 +7,7 @@
 
 The StarkNet snap allows developers to **deploy StarkNet accounts, make transactions on StarkNet, and interact with StarkNet smart contracts.** It can be connected with any dapp to access StarkNet and developers can experiment integrating their dapp with this snap today. 
 
-[StarkNet dapp](https://app.starknet-snap.consensys-solutions.net/)
+[StarkNet dapp](https://snaps.consensys.net/starknet)
 
 [Blog post](https://consensys.net/blog/metamask/metamask-integrates-starkware-into-first-of-its-kind-zk-rollup-snap/)
 
