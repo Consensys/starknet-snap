@@ -1,4 +1,4 @@
 export enum URL {
-    DEV = 'https://app-dev.starknet-snap.consensys-solutions.net/',
-    PROD = 'https://app.starknet-snap.consensys-solutions.net/',
+    DEV = 'https://dev.snaps.consensys.net/starknet',
+    PROD = 'https://snaps.consensys.net/starknet',
 }
