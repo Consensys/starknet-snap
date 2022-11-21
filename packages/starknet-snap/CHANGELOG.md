@@ -1,6 +1,13 @@
 # Changelog
 
 
+## [0.12.0](https://github.com/ConsenSys/starknet-snap/compare/starknet-snap-v0.11.0...starknet-snap-v0.12.0) (2022-11-21)
+
+
+### Features
+
+* temporarily reverted back to use StarkNet feeder gateway APIs as default provider ([#39](https://github.com/ConsenSys/starknet-snap/issues/39)) ([ed05913](https://github.com/ConsenSys/starknet-snap/commit/ed059130c6b4cddd28965302eb3824529d1328ac))
+
 ## [0.11.0](https://github.com/ConsenSys/starknet-snap/compare/starknet-snap-v0.10.0...starknet-snap-v0.11.0) (2022-10-25)
 
 
