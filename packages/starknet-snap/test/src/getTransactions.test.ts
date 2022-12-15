@@ -10,8 +10,8 @@ import {
   createAccountProxyTxn,
   expectedMassagedTxn4,
   expectedMassagedTxns,
-  getTxnFromVoyagerResp1,
-  getTxnFromVoyagerResp2,
+  getTxnFromSequencerResp1,
+  getTxnFromSequencerResp2,
   getTxnsFromVoyagerResp,
   initAccountTxn,
   txn1,
@@ -46,11 +46,11 @@ describe('Test function: getTransactions', function () {
     sandbox.stub(utils, 'getTransactionsFromVoyager').callsFake(async () => {
       return getTxnsFromVoyagerResp;
     });
-    sandbox.stub(utils, 'getTransactionFromVoyager').callsFake(async (...args) => {
+    sandbox.stub(utils, 'getTransactionFromSequencer').callsFake(async (...args) => {
       if (args?.[0] === getTxnsFromVoyagerResp.items[0].hash) {
-        return getTxnFromVoyagerResp1;
+        return getTxnFromSequencerResp1;
       } else if (args?.[0] === getTxnsFromVoyagerResp.items[1].hash) {
-        return getTxnFromVoyagerResp2;
+        return getTxnFromSequencerResp2;
       } else {
         return null;
       }

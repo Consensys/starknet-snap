@@ -12,13 +12,13 @@
             "webRoot": "${workspaceFolder}"
         },
         {
-            "command": "yarn workspace starknet-snap test",
+            "command": "yarn workspace @consensys/starknet-snap test",
             "name": "Run starknet-snap test",
             "request": "launch",
             "type": "node-terminal"
         },
         {
-            "command": "yarn workspace starknet-snap serve",
+            "command": "yarn workspace @consensys/starknet-snap serve",
             "name": "Run starknet-snap serve",
             "request": "launch",
             "type": "node-terminal"

@@ -2,7 +2,7 @@ import * as Types from '@consensys/starknet-snap/src/types/snapState';
 import { BigNumber } from 'ethers';
 
 export type Account = Pick<Types.AccContract, 'address' | 'publicKey'>;
-export type Network = Pick<Types.Network, 'name' | 'chainId' | 'baseUrl' | 'nodeUrl'>;
+export type Network = Pick<Types.Network, 'name' | 'chainId' | 'baseUrl' | 'nodeUrl' | 'useOldAccounts'>;
 
 export interface Erc20TokenBalance extends Types.Erc20Token {
   amount: BigNumber;
@@ -18,6 +18,7 @@ export type TransactionStatusOptions =
 
 export enum VoyagerTransactionType { // for retrieving txns from Voyager
   DEPLOY = 'deploy',
+  DEPLOY_ACCOUNT = 'deploy_account',
   INVOKE = 'invoke',
 }
 

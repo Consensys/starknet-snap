@@ -7,6 +7,7 @@ export async function extractPrivateKey(params: ApiParams) {
   try {
     const { state, wallet, keyDeriver, requestParams } = params;
     const requestParamsObj = requestParams as ExtractPrivateKeyRequestParams;
+    const useOldAccounts = !!requestParamsObj.useOldAccounts;
 
     if (!requestParamsObj.userAddress) {
       throw new Error(
@@ -31,8 +32,8 @@ export async function extractPrivateKey(params: ApiParams) {
 
     if (response === true) {
       const userAddress = requestParamsObj.userAddress;
-      const network = getNetworkFromChainId(state, requestParamsObj.chainId);
-      const { privateKey: userPrivateKey } = await getKeysFromAddress(keyDeriver, network.chainId, state, userAddress);
+      const network = getNetworkFromChainId(state, requestParamsObj.chainId, useOldAccounts);
+      const { privateKey: userPrivateKey } = await getKeysFromAddress(keyDeriver, network, state, userAddress);
 
       await wallet.request({
         method: 'snap_confirm',

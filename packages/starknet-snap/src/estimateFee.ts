@@ -6,12 +6,14 @@ import {
   getKeysFromAddress,
   getCallDataArray,
   estimateFee as estimateFeeUtil,
+  estimateFee_v4_6_0 as estimateFeeUtil_v4_6_0,
 } from './utils/starknetUtils';
 
 export async function estimateFee(params: ApiParams) {
   try {
     const { state, keyDeriver, requestParams } = params;
     const requestParamsObj = requestParams as EstimateFeeRequestParams;
+    const useOldAccounts = !!requestParamsObj.useOldAccounts;
 
     if (!requestParamsObj.contractAddress || !requestParamsObj.senderAddress || !requestParamsObj.contractFuncName) {
       throw new Error(
@@ -36,13 +38,8 @@ export async function estimateFee(params: ApiParams) {
     const contractFuncName = requestParamsObj.contractFuncName;
     const contractCallData = getCallDataArray(requestParamsObj.contractCallData);
     const senderAddress = requestParamsObj.senderAddress;
-    const network = getNetworkFromChainId(state, requestParamsObj.chainId);
-    const { privateKey: senderPrivateKey } = await getKeysFromAddress(
-      keyDeriver,
-      network.chainId,
-      state,
-      senderAddress,
-    );
+    const network = getNetworkFromChainId(state, requestParamsObj.chainId, useOldAccounts);
+    const { privateKey: senderPrivateKey } = await getKeysFromAddress(keyDeriver, network, state, senderAddress);
     const senderKeyPair = getKeyPairFromPrivateKey(senderPrivateKey);
 
     const txnInvocation = {
@@ -53,7 +50,9 @@ export async function estimateFee(params: ApiParams) {
 
     console.log(`estimateFee:\ntxnInvocation: ${JSON.stringify(txnInvocation)}`);
 
-    const estimateFeeResp = await estimateFeeUtil(network, senderAddress, senderKeyPair, txnInvocation);
+    const estimateFeeResp = useOldAccounts
+      ? await estimateFeeUtil_v4_6_0(network, senderAddress, senderKeyPair, txnInvocation)
+      : await estimateFeeUtil(network, senderAddress, senderKeyPair, txnInvocation);
 
     console.log(`estimateFee:\nestimateFeeResp: ${JSON.stringify(estimateFeeResp)}`);
 

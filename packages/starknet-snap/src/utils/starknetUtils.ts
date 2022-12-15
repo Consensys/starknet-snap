@@ -16,19 +16,14 @@ import {
   EstimateFee,
   RawCalldata,
   CallContractResponse,
-  CompiledContract,
   ProviderOptions,
+  GetTransactionResponse,
 } from 'starknet';
+import * as starknet_v4_6_0 from 'starknet_v4.6.0';
 import { Network, SnapState, Transaction, TransactionType } from '../types/snapState';
-import { CONTRACT_ADDRESS_PREFIX, PROXY_CONTRACT_HASH, TRANSFER_SELECTOR_HEX } from './constants';
+import { PROXY_CONTRACT_HASH, TRANSFER_SELECTOR_HEX } from './constants';
 import { getAddressKey } from './keyPair';
-import {
-  getAccount,
-  getAccounts,
-  getNetwork,
-  getTransactionFromVoyagerUrl,
-  getTransactionsFromVoyagerUrl,
-} from './snapUtils';
+import { getAccount, getAccounts, getTransactionFromVoyagerUrl, getTransactionsFromVoyagerUrl } from './snapUtils';
 
 export const getCallDataArray = (callDataStr: string): string[] => {
   return (callDataStr ?? '')
@@ -54,6 +49,25 @@ export const getProvider = (network: Network): Provider => {
     };
   }
   return new Provider(providerParam);
+};
+
+export const getProvider_v4_6_0 = (network: Network): starknet_v4_6_0.Provider => {
+  let providerParam: starknet_v4_6_0.ProviderOptions = {};
+  // same precedence as defined in starknet.js Provider class constructor
+  if (network.nodeUrl) {
+    providerParam = {
+      rpc: {
+        nodeUrl: network.nodeUrl,
+      },
+    };
+  } else if (network.baseUrl) {
+    providerParam = {
+      sequencer: {
+        baseUrl: network.baseUrl,
+      },
+    };
+  }
+  return new starknet_v4_6_0.Provider(providerParam);
 };
 
 export const callContract = async (
@@ -84,6 +98,17 @@ export const estimateFee = async (
   return account.estimateFee(txnInvocation, { blockIdentifier: 'latest' });
 };
 
+export const estimateFee_v4_6_0 = async (
+  network: Network,
+  senderAddress: string,
+  senderKeyPair: KeyPair,
+  txnInvocation: Call | Call[],
+): Promise<starknet_v4_6_0.EstimateFee> => {
+  const provider = getProvider_v4_6_0(network);
+  const account = new starknet_v4_6_0.Account(provider, senderAddress, senderKeyPair);
+  return account.estimateFee(txnInvocation, { blockIdentifier: 'latest' });
+};
+
 export const executeTxn = async (
   network: Network,
   senderAddress: string,
@@ -98,33 +123,70 @@ export const executeTxn = async (
   });
 };
 
-export const deployContract = async (
+export const executeTxn_v4_6_0 = async (
   network: Network,
-  contract: CompiledContract | string,
-  constructorCalldata: RawCalldata,
-  addressSalt: number.BigNumberish,
-): Promise<DeployContractResponse> => {
-  const provider = getProvider(network);
-  return provider.deployContract({
-    contract,
-    constructorCalldata,
-    addressSalt,
+  senderAddress: string,
+  senderKeyPair: KeyPair,
+  txnInvocation: Call | Call[],
+  maxFee: number.BigNumberish,
+): Promise<starknet_v4_6_0.InvokeFunctionResponse> => {
+  const provider = getProvider_v4_6_0(network);
+  const account = new starknet_v4_6_0.Account(provider, senderAddress, senderKeyPair);
+  return account.execute(txnInvocation, undefined, {
+    maxFee,
   });
 };
 
-export const getNonce = async (userAccAddress: string, network: Network): Promise<string> => {
-  const resp = await callContract(network, userAccAddress, 'get_nonce');
-  return resp.result[0];
+export const deployAccount = async (
+  network: Network,
+  contractAddress: string,
+  contractCallData: RawCalldata,
+  addressSalt: number.BigNumberish,
+  keyPair: KeyPair,
+  maxFee: number.BigNumberish,
+): Promise<DeployContractResponse> => {
+  const provider = getProvider(network);
+  const account = new Account(provider, contractAddress, keyPair);
+  const deployAccountPayload = {
+    classHash: PROXY_CONTRACT_HASH,
+    contractAddress: contractAddress,
+    constructorCalldata: contractCallData,
+    addressSalt,
+  };
+  return account.deployAccount(deployAccountPayload, { maxFee });
+};
+
+export const estimateAccountDeployFee = async (
+  network: Network,
+  contractAddress: string,
+  contractCallData: RawCalldata,
+  addressSalt: number.BigNumberish,
+  keyPair: KeyPair,
+): Promise<EstimateFee> => {
+  const provider = getProvider(network);
+  const account = new Account(provider, contractAddress, keyPair);
+  const deployAccountPayload = {
+    classHash: PROXY_CONTRACT_HASH,
+    contractAddress: contractAddress,
+    constructorCalldata: contractCallData,
+    addressSalt,
+  };
+  return account.estimateAccountDeployFee(deployAccountPayload);
 };
 
 export const getSigner = async (userAccAddress: string, network: Network): Promise<string> => {
-  const resp = await callContract(network, userAccAddress, 'get_signer');
+  const resp = await callContract(network, userAccAddress, network.useOldAccounts ? 'get_signer' : 'getSigner');
   return resp.result[0];
 };
 
 export const getTransactionStatus = async (transactionHash: number.BigNumberish, network: Network) => {
   const provider = getProvider(network);
   return (await provider.getTransactionReceipt(transactionHash)).status;
+};
+
+export const getTransactionFromSequencer = async (transactionHash: number.BigNumberish, network: Network) => {
+  const provider = getProvider(network);
+  return provider.getTransaction(transactionHash);
 };
 
 export const getTransactionsFromVoyager = async (
@@ -177,7 +239,11 @@ const getTransactionsFromVoyagerHelper = async (
       // means lastPage not fetched
       try {
         const { items: lastPageTxns } = await getTransactionsFromVoyager(toAddress, pageSize, maxPage, network);
-        deployTxns = lastPageTxns.filter((txn) => txn.type.toLowerCase() === TransactionType.DEPLOY.toLowerCase());
+        deployTxns = lastPageTxns.filter(
+          (txn) =>
+            txn.type.toLowerCase() === TransactionType.DEPLOY.toLowerCase() ||
+            txn.type.toLowerCase() === TransactionType.DEPLOY_ACCOUNT.toLowerCase(),
+        );
         txns = [...txns, ...deployTxns];
       } catch (err) {
         console.error(
@@ -185,7 +251,11 @@ const getTransactionsFromVoyagerHelper = async (
         );
       }
     } else {
-      deployTxns = txns.filter((txn) => txn.type.toLowerCase() === TransactionType.DEPLOY.toLowerCase());
+      deployTxns = txns.filter(
+        (txn) =>
+          txn.type.toLowerCase() === TransactionType.DEPLOY.toLowerCase() ||
+          txn.type.toLowerCase() === TransactionType.DEPLOY_ACCOUNT.toLowerCase(),
+      );
     }
   }
 
@@ -218,24 +288,25 @@ export const getMassagedTransactions = async (
 
   let massagedTxns = await Promise.all(
     txns.map(async (txn) => {
-      let txnResp;
+      let txnResp: GetTransactionResponse;
       try {
-        txnResp = await getTransactionFromVoyager(txn.hash, network);
+        txnResp = await getTransactionFromSequencer(txn.hash, network);
+        console.log(`getMassagedTransactions: txnResp:\n${JSON.stringify(txnResp)}`);
       } catch (err) {
         console.error(`getMassagedTransactions: error received from getTransactionFromVoyager: ${err}`);
       }
 
       const massagedTxn: Transaction = {
-        txnHash: txnResp?.header?.hash || txn.hash,
-        txnType: (txnResp?.header?.type || txn.type)?.toLowerCase(),
+        txnHash: txnResp.transaction_hash || txn.hash,
+        txnType: txn.type?.toLowerCase(),
         chainId: network.chainId,
-        senderAddress: txnResp?.header?.to || txn.to,
-        contractAddress: txnResp?.calldata?.[1] || txnResp?.header?.to || txn.to,
-        contractFuncName: number.toBN(txnResp?.calldata?.[2]).eq(number.toBN(TRANSFER_SELECTOR_HEX)) ? 'transfer' : '',
-        contractCallData: txnResp?.calldata?.slice(6, txnResp.calldata?.length - 1) || [],
-        timestamp: txnResp?.header?.timestamp || txn.timestamp,
-        status: txnResp?.header?.status || txn.status,
-        eventIds: txnResp?.receipt?.events?.map((event) => event.id) || [],
+        senderAddress: txnResp.sender_address || txn.to,
+        contractAddress: txnResp.calldata?.[1] || txnResp.contract_address || txn.to,
+        contractFuncName: number.toBN(txnResp.calldata?.[2]).eq(number.toBN(TRANSFER_SELECTOR_HEX)) ? 'transfer' : '',
+        contractCallData: txnResp.calldata?.slice(6, txnResp.calldata?.length - 1) || [],
+        timestamp: txn.timestamp,
+        status: txnResp['status'] || txn.status,
+        eventIds: [],
         failureReason: '',
       };
 
@@ -244,6 +315,7 @@ export const getMassagedTransactions = async (
   );
 
   console.log(`getMassagedTransactions: massagedTxns total = ${massagedTxns.length}`);
+  console.log(`getMassagedTransactions: massagedTxns:\n${JSON.stringify(massagedTxns)}`);
 
   if (contractAddress) {
     massagedTxns = massagedTxns.filter(
@@ -305,22 +377,6 @@ export const verifyTypedDataMessageSignature = (
   return ec.verify(signerKeyPair, msgHash, signature);
 };
 
-export const calculateContractAddress = (
-  salt: number.BigNumberish,
-  contractHash: number.BigNumberish,
-  constructorCalldata: number.BigNumberish[],
-  callerAddress: number.BigNumberish = 0,
-): string => {
-  const constructorCalldataHash = hash.computeHashOnElements(constructorCalldata);
-  return hash.computeHashOnElements([
-    CONTRACT_ADDRESS_PREFIX,
-    callerAddress,
-    salt,
-    contractHash,
-    constructorCalldataHash,
-  ]);
-};
-
 export const getNextAddressIndex = (chainId: string, state: SnapState, derivationPath: string) => {
   const accounts = getAccounts(state, chainId).filter(
     (acc) => acc.derivationPath === derivationPath && acc.addressIndex >= 0,
@@ -338,8 +394,7 @@ export const getAccContractAddressAndCallData = (accountClassHash: string, publi
     selector: hash.getSelectorFromName('initialize'),
     calldata: stark.compileCalldata({ signer: publicKey, guardian: '0' }),
   });
-  const address = calculateContractAddress(publicKey, PROXY_CONTRACT_HASH, callData);
-
+  const address = hash.calculateContractAddressFromHash(publicKey, PROXY_CONTRACT_HASH, callData, 0);
   return {
     address,
     callData,
@@ -348,20 +403,25 @@ export const getAccContractAddressAndCallData = (accountClassHash: string, publi
 
 export const getKeysFromAddress = async (
   keyDeriver,
-  chainId: string,
+  network: Network,
   state: SnapState,
   address: string,
   maxScan = 20,
 ) => {
   let addressIndex;
-  const network = getNetwork(state, chainId);
-  const acc = getAccount(state, address, chainId);
+  const acc = getAccount(state, address, network.chainId);
   if (acc) {
     addressIndex = acc.addressIndex;
     console.log(`getNextAddressIndex:\nFound address in state: ${addressIndex} ${address}`);
   } else {
     for (let i = 0; i < maxScan; i++) {
-      const { publicKey } = await getKeysFromAddressIndex(keyDeriver, chainId, state, i);
+      const { publicKey } = await getKeysFromAddressIndex(
+        keyDeriver,
+        network.chainId,
+        state,
+        i,
+        network.useOldAccounts,
+      );
       const { address: calculatedAddress } = getAccContractAddressAndCallData(network.accountClassHash, publicKey);
       if (number.toBN(calculatedAddress).eq(number.toBN(address))) {
         addressIndex = i;
@@ -372,7 +432,7 @@ export const getKeysFromAddress = async (
   }
 
   if (!isNaN(addressIndex)) {
-    return getKeysFromAddressIndex(keyDeriver, chainId, state, addressIndex);
+    return getKeysFromAddressIndex(keyDeriver, network.chainId, state, addressIndex, network.useOldAccounts);
   }
   return null;
 };
@@ -382,6 +442,7 @@ export const getKeysFromAddressIndex = async (
   chainId: string,
   state: SnapState,
   index: number = undefined,
+  useOldAccounts = false,
 ) => {
   let addressIndex = index;
   if (isNaN(addressIndex) || addressIndex < 0) {
@@ -389,7 +450,7 @@ export const getKeysFromAddressIndex = async (
     console.log(`getKeysFromAddressIndex: addressIndex found: ${addressIndex}`);
   }
 
-  const { addressKey, derivationPath } = await getAddressKey(keyDeriver, addressIndex);
+  const { addressKey, derivationPath } = await getAddressKey(keyDeriver, addressIndex, useOldAccounts);
   const starkKeyPair = ec.getKeyPair(addressKey);
   const starkKeyPub = ec.getStarkKey(starkKeyPair);
   const starkKeyPrivate = number.toHex(starkKeyPair.getPrivate());
@@ -398,5 +459,6 @@ export const getKeysFromAddressIndex = async (
     publicKey: starkKeyPub,
     addressIndex,
     derivationPath,
+    keyPair: starkKeyPair,
   };
 };

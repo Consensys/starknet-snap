@@ -1,10 +1,9 @@
 import { getBIP44AddressKeyDeriver } from '@metamask/key-tree';
 import chai, { expect } from 'chai';
 import sinonChai from 'sinon-chai';
-import { getAddressKey, getAddressKeyDeriver } from '../../src/utils/keyPair';
+import { getAddressKey, getAddressKeyDeriver, grindKey } from '../../src/utils/keyPair';
 import { bip44Entropy } from '../constants.test';
 import { WalletMock } from '../wallet.mock.test';
-import { keyDerivation, ec } from '@starkware-industries/starkware-crypto-utils';
 // import { getAccContractAddressAndCallData, getKeysFromAddressIndex } from '../../src/utils/starknetUtils';
 // import { STARKNET_TESTNET_NETWORK } from '../../src/utils/constants';
 
@@ -31,30 +30,26 @@ describe('Test function: getAddressKey', function () {
   //       STARKNET_TESTNET_NETWORK.accountClassHash,
   //       result.publicKey,
   //     );
-  //     console.log(`result ${i}:\nderivedKeys: ${JSON.stringify(result)}\naddress: ${address}`);
+  //     console.log(`result ${i}:\npublicKey: ${result.publicKey}\nprivateKey: ${result.privateKey}\naddress: ${address}`);
   //   }
   // });
 
   it('should get the ground address key from the BIP-44 entropy correctly', async function () {
     const deriveStarkNetAddress = await getBIP44AddressKeyDeriver(bip44Entropy);
     const privateKey = (await deriveStarkNetAddress(0)).privateKey;
-    const chainCode = (await deriveStarkNetAddress(0)).chainCode;
-    const addressKey = `0x${privateKey}${chainCode}`;
-    const expectedResult = keyDerivation.grindKey(addressKey, ec.n);
+    const expectedResult = grindKey(privateKey);
     const result = await getAddressKey(keyDeriver);
     expect(walletStub.rpcStubs.snap_getBip44Entropy).to.have.been.calledOnce;
-    expect(result.addressKey).to.be.eql(`0x${expectedResult}`);
+    expect(result.addressKey).to.be.eql(expectedResult);
   });
 
   it('should get the ground address key of a specific address index from the BIP-44 entropy correctly', async function () {
     const addressIndex = 10;
     const deriveStarkNetAddress = await getBIP44AddressKeyDeriver(bip44Entropy);
     const privateKey = (await deriveStarkNetAddress(addressIndex)).privateKey;
-    const chainCode = (await deriveStarkNetAddress(addressIndex)).chainCode;
-    const addressKey = `0x${privateKey}${chainCode}`;
-    const expectedResult = keyDerivation.grindKey(addressKey, ec.n);
+    const expectedResult = grindKey(privateKey);
     const result = await getAddressKey(keyDeriver, addressIndex);
     expect(walletStub.rpcStubs.snap_getBip44Entropy).to.have.been.calledOnce;
-    expect(result.addressKey).to.be.eql(`0x${expectedResult}`);
+    expect(result.addressKey).to.be.eql(expectedResult);
   });
 });

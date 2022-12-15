@@ -2,7 +2,13 @@ import { number, constants, validateAndParseAddress } from 'starknet';
 import { estimateFee } from './estimateFee';
 import { Transaction, TransactionStatus, VoyagerTransactionType } from './types/snapState';
 import { getNetworkFromChainId, getSigningTxnText, upsertTransaction } from './utils/snapUtils';
-import { getKeyPairFromPrivateKey, getKeysFromAddress, getCallDataArray, executeTxn } from './utils/starknetUtils';
+import {
+  getKeyPairFromPrivateKey,
+  getKeysFromAddress,
+  getCallDataArray,
+  executeTxn,
+  executeTxn_v4_6_0,
+} from './utils/starknetUtils';
 import { ApiParams, SendTransactionRequestParams } from './types/snapApi';
 
 export async function sendTransaction(params: ApiParams) {
@@ -33,13 +39,9 @@ export async function sendTransaction(params: ApiParams) {
     const contractFuncName = requestParamsObj.contractFuncName;
     const contractCallData = getCallDataArray(requestParamsObj.contractCallData);
     const senderAddress = requestParamsObj.senderAddress;
-    const network = getNetworkFromChainId(state, requestParamsObj.chainId);
-    const { privateKey: senderPrivateKey } = await getKeysFromAddress(
-      keyDeriver,
-      network.chainId,
-      state,
-      senderAddress,
-    );
+    const useOldAccounts = !!requestParamsObj.useOldAccounts;
+    const network = getNetworkFromChainId(state, requestParamsObj.chainId, useOldAccounts);
+    const { privateKey: senderPrivateKey } = await getKeysFromAddress(keyDeriver, network, state, senderAddress);
     const senderKeyPair = getKeyPairFromPrivateKey(senderPrivateKey);
     let maxFee = requestParamsObj.maxFee ? number.toBN(requestParamsObj.maxFee) : constants.ZERO;
     if (maxFee.eq(constants.ZERO)) {
@@ -78,7 +80,9 @@ export async function sendTransaction(params: ApiParams) {
       `sendTransaction:\ntxnInvocation: ${JSON.stringify(txnInvocation)}\nmaxFee: ${JSON.stringify(maxFee)}}`,
     );
 
-    const txnResp = await executeTxn(network, senderAddress, senderKeyPair, txnInvocation, maxFee);
+    const txnResp = useOldAccounts
+      ? await executeTxn_v4_6_0(network, senderAddress, senderKeyPair, txnInvocation, maxFee)
+      : await executeTxn(network, senderAddress, senderKeyPair, txnInvocation, maxFee);
 
     console.log(`sendTransaction:\ntxnResp: ${JSON.stringify(txnResp)}`);
 

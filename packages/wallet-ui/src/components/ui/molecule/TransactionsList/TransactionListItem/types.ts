@@ -1,5 +1,5 @@
 import { IconProp } from '@fortawesome/fontawesome-svg-core';
-import { Transaction, VoyagerTransactionType } from 'types';
+import { Transaction, TransactionStatus, VoyagerTransactionType } from 'types';
 import { shortenAddress } from 'utils/utils';
 import { ethers } from 'ethers';
 
@@ -10,6 +10,7 @@ export const getIcon = (transactionName: string): IconProp => {
     case 'Receive':
       return ['fas', 'long-arrow-alt-down'];
     case 'Deploy':
+    case 'Deploy Account':
       return ['fas', 'long-arrow-alt-up'];
     default:
       return ['fas', 'arrow-right-arrow-left'];
@@ -23,6 +24,8 @@ export const getTxnName = (transaction: Transaction): string => {
     }
   } else if (transaction.txnType.toLowerCase() === VoyagerTransactionType.DEPLOY) {
     return 'Deploy';
+  } else if (transaction.txnType.toLowerCase() === VoyagerTransactionType.DEPLOY_ACCOUNT) {
+    return 'Deploy Account';
   }
   return 'Unknown';
 };
@@ -53,6 +56,10 @@ export const getTxnToFromLabel = (transaction: Transaction): string => {
     default:
       return '';
   }
+};
+
+export const getTxnFailureReason = (transaction: Transaction): string => {
+  return transaction.status.toLowerCase() === TransactionStatus.REJECTED.toLowerCase() && transaction?.failureReason ? ` (${transaction.failureReason})` : '';
 };
 
 export const getTxnValues = (transaction: Transaction, decimals: number = 18, toUsdRate: number = 0) => {

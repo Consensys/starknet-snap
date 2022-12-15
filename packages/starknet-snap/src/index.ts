@@ -20,6 +20,8 @@ import {
   STARKNET_MAINNET_NETWORK,
   STARKNET_TESTNET_NETWORK,
   STARKNET_TESTNET2_NETWORK,
+  STARKNET_TESTNET_NETWORK_DEPRECATED,
+  STARKNET_MAINNET_NETWORK_DEPRECATED,
 } from './utils/constants';
 import { upsertErc20Token, upsertNetwork } from './utils/snapUtils';
 import { getStoredNetworks } from './getStoredNetworks';
@@ -36,7 +38,6 @@ const saveMutex = new Mutex();
 export const onRpcRequest: OnRpcRequestHandler = async ({ origin, request }) => {
   const requestParams = request?.params as unknown as ApiRequestParams;
   const isDev = !!requestParams?.isDev;
-  const isGoerli2 = !!requestParams?.isGoerli2;
 
   // Switch statement for methods not requiring state to speed things up a bit
   console.log(origin, request);
@@ -69,11 +70,12 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ origin, request }) => 
   if (isDev) {
     await upsertNetwork(STARKNET_INTEGRATION_NETWORK, wallet, saveMutex, state);
   } else {
-    if (isGoerli2) {
-      await upsertNetwork(STARKNET_TESTNET2_NETWORK, wallet, saveMutex, state);
-    } else {
-      await upsertNetwork(STARKNET_TESTNET_NETWORK, wallet, saveMutex, state);
-    }
+    await upsertNetwork(STARKNET_TESTNET_NETWORK, wallet, saveMutex, state);
+  }
+  await upsertNetwork(STARKNET_TESTNET2_NETWORK, wallet, saveMutex, state);
+  await upsertNetwork(STARKNET_MAINNET_NETWORK_DEPRECATED, wallet, saveMutex, state);
+  if (!isDev) {
+    await upsertNetwork(STARKNET_TESTNET_NETWORK_DEPRECATED, wallet, saveMutex, state);
   }
   for (const token of PRELOADED_TOKENS) {
     await upsertErc20Token(token, wallet, saveMutex, state);

@@ -105,7 +105,7 @@ export const useStarkNetSnap = () => {
     return tokens;
   };
 
-  const recoverAccounts = async (chainId: string) => {
+  const recoverAccounts = async (chainId: string, useOldAccounts = false) => {
     const START_SCAN_INDEX = 0;
     const MAX_SCANNED = 1;
     const MAX_MISSED = 1;
@@ -120,6 +120,7 @@ export const useStarkNetSnap = () => {
             maxScanned: MAX_SCANNED,
             maxMissed: MAX_MISSED,
             chainId,
+            useOldAccounts,
           },
         },
       ],
@@ -143,7 +144,7 @@ export const useStarkNetSnap = () => {
     return data;
   };
 
-  const addAccount = async (chainId: string) => {
+  const addAccount = async (chainId: string, useOldAccounts = false) => {
     dispatch(enableLoadingWithMessage('Deploying account...'));
     const data = (await ethereum.request({
       method: 'wallet_invokeSnap',
@@ -154,6 +155,7 @@ export const useStarkNetSnap = () => {
           params: {
             addressIndex: 0,
             chainId,
+            useOldAccounts,
           },
         },
       ],
@@ -184,7 +186,8 @@ export const useStarkNetSnap = () => {
         return;
       }
       const chainId = nets[activeNetwork].chainId;
-      await getWalletData(chainId, nets);
+      const useOldAccounts = !!nets[activeNetwork].useOldAccounts;
+      await getWalletData(chainId, useOldAccounts, nets);
     } catch (err: any) {
       if (err.code && err.code === 4100) {
         const toastr = new Toastr();
@@ -198,15 +201,19 @@ export const useStarkNetSnap = () => {
     }
   };
 
-  const getWalletData = async (chainId: string, networks?: Network[]) => {
+  const getWalletData = async (chainId: string, useOldAccounts = false, networks?: Network[]) => {
     if (!loader.isLoading && !networks) {
       dispatch(enableLoadingWithMessage('Getting network data ...'));
     }
     const tokens = await getTokens(chainId);
-    let acc: Account[] | Account = await recoverAccounts(chainId);
+    let acc: Account[] | Account = await recoverAccounts(chainId, useOldAccounts);
     if (!acc || acc.length === 0 || !acc[0].publicKey) {
-      dispatch(enableLoadingWithMessage('Deploying account ...'));
-      acc = await addAccount(chainId);
+      if (useOldAccounts) {
+        dispatch(enableLoadingWithMessage('Skipped deploying old version account ...'));
+      } else {
+        dispatch(enableLoadingWithMessage('Deploying account ...'));
+        acc = await addAccount(chainId, useOldAccounts);
+      }
     }
     const tokenBalances = await Promise.all(
       tokens.map(async (token) => {
@@ -242,7 +249,7 @@ export const useStarkNetSnap = () => {
     dispatch(setErc20TokenBalanceSelected(erc20TokenBalance));
   };
 
-  async function getPrivateKeyFromAddress(address: string, chainId: string) {
+  async function getPrivateKeyFromAddress(address: string, chainId: string, useOldAccounts = false) {
     try {
       await ethereum.request({
         method: 'wallet_invokeSnap',
@@ -253,6 +260,7 @@ export const useStarkNetSnap = () => {
             params: {
               userAddress: address,
               chainId,
+              useOldAccounts,
             },
           },
         ],
@@ -269,6 +277,7 @@ export const useStarkNetSnap = () => {
     contractCallData: string,
     senderAddress: string,
     chainId: string,
+    useOldAccounts = false,
   ) {
     try {
       const response = await ethereum.request({
@@ -283,6 +292,7 @@ export const useStarkNetSnap = () => {
               contractCallData,
               senderAddress,
               chainId,
+              useOldAccounts,
             },
           },
         ],
@@ -301,6 +311,7 @@ export const useStarkNetSnap = () => {
     senderAddress: string,
     maxFee: string,
     chainId: string,
+    useOldAccounts = false,
   ) {
     dispatch(enableLoadingWithMessage('Sending transaction...'));
     try {
@@ -317,6 +328,7 @@ export const useStarkNetSnap = () => {
               senderAddress,
               maxFee,
               chainId,
+              useOldAccounts,
             },
           },
         ],
@@ -381,7 +393,9 @@ export const useStarkNetSnap = () => {
 
       //Set the deploy transaction
       const deployTransaction = storedTxns.find(
-        (txn: Transaction) => txn.txnType.toLowerCase() === VoyagerTransactionType.DEPLOY,
+        (txn: Transaction) =>
+          txn.txnType.toLowerCase() === VoyagerTransactionType.DEPLOY ||
+          txn.txnType.toLowerCase() === VoyagerTransactionType.DEPLOY_ACCOUNT,
       );
       dispatch(setTransactionDeploy(deployTransaction));
 

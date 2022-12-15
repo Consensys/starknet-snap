@@ -18,15 +18,6 @@ describe('Test function: callContract', function () {
     sandbox.restore();
   });
 
-  it('should get the nonce of an user account correctly', async function () {
-    sandbox.stub(utils, 'callContract').callsFake(async () => {
-      return { result: ['0xc'] };
-    });
-
-    const result = await utils.getNonce(userAddress, STARKNET_TESTNET_NETWORK);
-    expect(result).to.be.eq('0xc');
-  });
-
   it('should get the signer of an user account correctly', async function () {
     sandbox.stub(utils, 'callContract').callsFake(async () => {
       return { result: ['0x795d62a9896b221af17bedd8cceb8d963ac6864857d7476e2f8c03ba0c5df9'] };

@@ -39,7 +39,7 @@ export const TransactionsListView = ({ transactions }: Props) => {
       getTransactions(address, wallet.erc20TokenBalanceSelected.address, 10, 10, chain);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [wallet.erc20TokenBalanceSelected.address, wallet.erc20TokenBalanceSelected.chainId]);
+  }, [wallet.erc20TokenBalanceSelected.address, wallet.erc20TokenBalanceSelected.chainId, wallet.accounts?.[0]]);
 
   return (
     <Wrapper<FC<IListProps<Transaction>>>

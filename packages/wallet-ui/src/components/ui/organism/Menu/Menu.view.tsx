@@ -79,7 +79,7 @@ export const MenuView = ({ connected, ...otherProps }: IProps) => {
             </MenuSection>
             <MenuSection>
               {networks.items.map((network, index) => (
-                <Menu.Item key={network.chainId}>
+                <Menu.Item key={network.chainId + '_' + index}>
                   <NetworkMenuItem onClick={() => changeNetwork(index)}>
                     <Radio
                       checked={Number(networks.activeNetwork) === index}

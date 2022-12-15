@@ -51,9 +51,6 @@ describe('Test function: sendTransaction', function () {
     sandbox.stub(utils, 'executeTxn').callsFake(async () => {
       return executeTxnResp;
     });
-    sandbox.stub(utils, 'getNonce').callsFake(async () => {
-      return '0xc';
-    });
     walletStub.rpcStubs.snap_confirm.resolves(true);
     walletStub.rpcStubs.snap_manageState.resolves(state);
   });

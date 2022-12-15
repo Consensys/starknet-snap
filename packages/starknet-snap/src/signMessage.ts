@@ -33,19 +33,15 @@ export async function signMessage(params: ApiParams) {
     }
 
     const signerAddress = requestParamsObj.signerAddress;
+    const useOldAccounts = !!requestParamsObj.useOldAccounts;
     const typedDataMessage = requestParamsObj.typedDataMessage
       ? JSON.parse(requestParamsObj.typedDataMessage)
       : typedDataExample;
-    const network = getNetworkFromChainId(state, requestParamsObj.chainId);
+    const network = getNetworkFromChainId(state, requestParamsObj.chainId, useOldAccounts);
 
     console.log(`signMessage:\nsignerAddress: ${signerAddress}\ntypedDataMessage: ${JSON.stringify(typedDataMessage)}`);
 
-    const { privateKey: signerPrivateKey } = await getKeysFromAddress(
-      keyDeriver,
-      network.chainId,
-      state,
-      signerAddress,
-    );
+    const { privateKey: signerPrivateKey } = await getKeysFromAddress(keyDeriver, network, state, signerAddress);
     const signerKeyPair = getKeyPairFromPrivateKey(signerPrivateKey);
     const typedDataSignature = getTypedDataMessageSignature(signerKeyPair, typedDataMessage, signerAddress);
 

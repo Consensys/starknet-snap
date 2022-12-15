@@ -21,12 +21,13 @@ export async function verifySignedMessage(params: ApiParams) {
       throw new Error(`The given signer address is invalid: ${requestParamsObj.signerAddress}`);
     }
 
+    const useOldAccounts = !!requestParamsObj.useOldAccounts;
     const verifySignerAddress = requestParamsObj.signerAddress;
     const verifySignature = requestParamsObj.signature.split(',').map((x) => x.trim());
     const verifyTypedDataMessage = requestParamsObj.typedDataMessage
       ? JSON.parse(requestParamsObj.typedDataMessage)
       : typedDataExample;
-    const network = getNetworkFromChainId(state, requestParamsObj.chainId);
+    const network = getNetworkFromChainId(state, requestParamsObj.chainId, useOldAccounts);
 
     console.log(
       `verifySignedMessage:\nverifySignerAddress: ${verifySignerAddress}\nverifySignature: ${verifySignature}\nverifyTypedDataMessage: ${JSON.stringify(
@@ -34,12 +35,7 @@ export async function verifySignedMessage(params: ApiParams) {
       )}`,
     );
 
-    const { privateKey: signerPrivateKey } = await getKeysFromAddress(
-      keyDeriver,
-      network.chainId,
-      state,
-      verifySignerAddress,
-    );
+    const { privateKey: signerPrivateKey } = await getKeysFromAddress(keyDeriver, network, state, verifySignerAddress);
 
     const verifySignerKeyPair = getKeyPairFromPrivateKey(signerPrivateKey);
     const isVerified = verifyTypedDataMessageSignature(

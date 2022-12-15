@@ -32,11 +32,10 @@
   <br>
   <label for="targetChainId">Target Chain Id in Hex (optional, default Goerli testnet)</label>
   <input type="text" id="targetChainId" name="targetChainId"><br>
-  <select id="goerliTestnetType" name="goerliTestnetType">
-    <option value="testnet1">Use StarkNet Testnet 1 for Goerli testnet</option>
-    <option value="testnet2">Use StarkNet Testnet 2 for Goerli testnet</option>
-    <option value="integration">Use StarkNet Integration network for Goerli testnet</option>
-  </select>
+  <label for="isDev">Use StarkNet Integration network for Goerli testnet</label>
+  <input type="checkbox" id="isDev" name="isDev"><br>
+  <label for="useOldAccounts">Use Old Account Contracts</label>
+  <input type="checkbox" id="useOldAccounts" name="useOldAccounts"><br>
   <form id="recoverUserAccounts">
     <fieldset>
       <legend>Recover User Accounts</legend>
@@ -305,17 +304,11 @@
   getTransactionsForm.addEventListener('submit', getTransactions)
   recoverUserAccountsForm.addEventListener('submit', recoverUserAccounts)
 
-  function getReqFlagsForTestnetType(testType) {
-    const rv = {
-      isDev: false,
-      isGoerli2: false,
+  function getReqFlagsFromCheckbox() {
+    return {
+      isDev: document.getElementById('isDev').checked,
+      useOldAccounts: document.getElementById('useOldAccounts').checked,
     }
-    if (testType === "testnet2") {
-      rv.isGoerli2 = true
-    } else if (testType === 'integration') {
-      rv.isDev = true
-    }
-    return rv
   }
 
   // here we get permissions to interact with and install the snap
@@ -366,7 +359,6 @@
     const tokenAddress = document.getElementById('tokenAddress').value
     const userAddress = document.getElementById('userAccAddress').value
     const chainId = document.getElementById('targetChainId').value
-    const goerliTestnetType = document.getElementById('goerliTestnetType').value
 
     try {
       const response = await ethereum.request({
@@ -377,7 +369,7 @@
             tokenAddress,
             userAddress,
             chainId,
-            ...getReqFlagsForTestnetType(goerliTestnetType),
+            ...getReqFlagsFromCheckbox(),
           },
         }]
       })
@@ -398,7 +390,6 @@
     const contractCallData = document.getElementById('contractCallData').value
     const senderAddress = document.getElementById('feeSenderAddress').value
     const chainId = document.getElementById('targetChainId').value
-    const goerliTestnetType = document.getElementById('goerliTestnetType').value
 
     try {
       const response = await ethereum.request({
@@ -411,7 +402,7 @@
             contractCallData,
             senderAddress,
             chainId,
-            ...getReqFlagsForTestnetType(goerliTestnetType),
+            ...getReqFlagsFromCheckbox(),
           }
         }]
       })
@@ -433,7 +424,6 @@
     const senderAddress = document.getElementById('senderAddress').value
     const maxFee = document.getElementById('transferMaxFee').value
     const chainId = document.getElementById('targetChainId').value
-    const goerliTestnetType = document.getElementById('goerliTestnetType').value
 
     try {
       const response = await ethereum.request({
@@ -447,7 +437,7 @@
             senderAddress,
             maxFee,
             chainId,
-            ...getReqFlagsForTestnetType(goerliTestnetType),
+            ...getReqFlagsFromCheckbox(),
           },
         }]
       })
@@ -464,7 +454,6 @@
     e.preventDefault() // to prevent default form behavior 
 
     const chainId = document.getElementById('targetChainId').value
-    const goerliTestnetType = document.getElementById('goerliTestnetType').value
 
     try {
       const response = await ethereum.request({
@@ -473,7 +462,7 @@
           method: 'starkNet_getStoredUserAccounts',
           params: {
             chainId,
-            ...getReqFlagsForTestnetType(goerliTestnetType)
+            ...getReqFlagsFromCheckbox()
           },
         }]
       })
@@ -490,7 +479,6 @@
 
     const transactionHash = document.getElementById('transactionHash').value
     const chainId = document.getElementById('targetChainId').value
-    const goerliTestnetType = document.getElementById('goerliTestnetType').value
 
     try {
       const response = await ethereum.request({
@@ -500,7 +488,7 @@
           params: {
             transactionHash,
             chainId,
-            ...getReqFlagsForTestnetType(goerliTestnetType), 
+            ...getReqFlagsFromCheckbox(), 
           },
         }]
       })
@@ -516,7 +504,6 @@
 
     const addressIndex = document.getElementById('addressIndex').value
     const chainId = document.getElementById('targetChainId').value
-    const goerliTestnetType = document.getElementById('goerliTestnetType').value
 
     try {
       const response = await ethereum.request({
@@ -526,7 +513,7 @@
           params: {
             addressIndex,
             chainId,
-            ...getReqFlagsForTestnetType(goerliTestnetType),
+            ...getReqFlagsFromCheckbox(),
           },
         }]
       })
@@ -542,7 +529,6 @@
 
     const userAddress = document.getElementById('userAddress').value
     const chainId = document.getElementById('targetChainId').value
-    const goerliTestnetType = document.getElementById('goerliTestnetType').value
 
     try {
       const response = await ethereum.request({
@@ -552,7 +538,7 @@
           params: {
             userAddress,
             chainId,
-            ...getReqFlagsForTestnetType(goerliTestnetType),
+            ...getReqFlagsFromCheckbox(),
           },
         }]
       })
@@ -568,7 +554,6 @@
 
     const userAddress = document.getElementById('pkUserAddress').value
     const chainId = document.getElementById('targetChainId').value
-    const goerliTestnetType = document.getElementById('goerliTestnetType').value
 
     try {
       const response = await ethereum.request({
@@ -578,7 +563,7 @@
           params: {
             userAddress,
             chainId,
-            ...getReqFlagsForTestnetType(goerliTestnetType),
+            ...getReqFlagsFromCheckbox(),
           },
         }]
       })
@@ -595,7 +580,6 @@
     const typedDataMessage = document.getElementById('typedDataMessage').value
     const signerAddress = document.getElementById('signerUserAddress').value
     const chainId = document.getElementById('targetChainId').value
-    const goerliTestnetType = document.getElementById('goerliTestnetType').value
 
     try {
       const response = await ethereum.request({
@@ -606,7 +590,7 @@
             typedDataMessage,
             signerAddress,
             chainId,
-            ...getReqFlagsForTestnetType(goerliTestnetType),
+            ...getReqFlagsFromCheckbox(),
           },
         }]
       })
@@ -624,7 +608,6 @@
     const signerAddress = document.getElementById('verifySignerUserAddress').value
     const signature = document.getElementById('verifySignature').value
     const chainId = document.getElementById('targetChainId').value
-    const goerliTestnetType = document.getElementById('goerliTestnetType').value
 
     try {
       const response = await ethereum.request({
@@ -636,7 +619,7 @@
             signerAddress,
             signature,
             chainId,
-            ...getReqFlagsForTestnetType(goerliTestnetType),
+            ...getReqFlagsFromCheckbox(),
           },
         }]
       })
@@ -655,7 +638,6 @@
     const tokenSymbol = document.getElementById('addTokenSymbol').value
     const tokenDecimals = document.getElementById('addTokenDecimals').value
     const chainId = document.getElementById('targetChainId').value
-    const goerliTestnetType = document.getElementById('goerliTestnetType').value
 
     try {
       const response = await ethereum.request({
@@ -668,7 +650,7 @@
             tokenSymbol,
             tokenDecimals,
             chainId,
-            ...getReqFlagsForTestnetType(goerliTestnetType),
+            ...getReqFlagsFromCheckbox(),
           },
         }]
       })
@@ -683,7 +665,6 @@
     e.preventDefault() // to prevent default form behavior
 
     const chainId = document.getElementById('targetChainId').value
-    const goerliTestnetType = document.getElementById('goerliTestnetType').value
 
     try {
       const response = await ethereum.request({
@@ -692,7 +673,7 @@
           method: 'starkNet_getStoredErc20Tokens',
           params: {
             chainId,
-            ...getReqFlagsForTestnetType(goerliTestnetType),
+            ...getReqFlagsFromCheckbox(),
           },
         }]
       })
@@ -712,7 +693,6 @@
     const senderAddress = document.getElementById('txnSenderAddress').value
     const maxFee = document.getElementById('txnMaxFee').value
     const chainId = document.getElementById('targetChainId').value
-    const goerliTestnetType = document.getElementById('goerliTestnetType').value
 
     try {
       const response = await ethereum.request({
@@ -726,7 +706,7 @@
             senderAddress,
             maxFee,
             chainId,
-            ...getReqFlagsForTestnetType(goerliTestnetType),
+            ...getReqFlagsFromCheckbox(),
           },
         }]
       })
@@ -746,7 +726,6 @@
     const contractFuncName = document.getElementById('callContractFuncName').value
     const contractCallData = document.getElementById('callContractCallData').value
     const chainId = document.getElementById('targetChainId').value
-    const goerliTestnetType = document.getElementById('goerliTestnetType').value
 
     try {
       const response = await ethereum.request({
@@ -758,7 +737,7 @@
             contractFuncName,
             contractCallData,
             chainId,
-            ...getReqFlagsForTestnetType(goerliTestnetType),
+            ...getReqFlagsFromCheckbox(),
           },
         }]
       })
@@ -780,7 +759,6 @@
     const networkNodeUrl = document.getElementById('addNetworkNodeUrl').value
     const networkVoyagerUrl = document.getElementById('addNetworkVoyagerUrl').value
     const accountClassHash = document.getElementById('addNetworkAccClassHash').value
-    const goerliTestnetType = document.getElementById('goerliTestnetType').value
 
     try {
       const response = await ethereum.request({
@@ -794,7 +772,7 @@
             networkNodeUrl,
             networkVoyagerUrl,
             accountClassHash,
-            ...getReqFlagsForTestnetType(goerliTestnetType),
+            ...getReqFlagsFromCheckbox(),
           },
         }]
       })
@@ -832,7 +810,6 @@
     const txnType = document.getElementById('txnType').value
     const txnsInLastNumOfDays = document.getElementById('txnInLastNumOfDays').value
     const chainId = document.getElementById('targetChainId').value
-    const goerliTestnetType = document.getElementById('goerliTestnetType').value
 
     try {
       const response = await ethereum.request({
@@ -845,7 +822,7 @@
             txnType,
             txnsInLastNumOfDays,
             chainId,
-            ...getReqFlagsForTestnetType(goerliTestnetType),
+            ...getReqFlagsFromCheckbox(),
           },
         }]
       })
@@ -866,7 +843,6 @@
     const chainId = document.getElementById('targetChainId').value
     const onlyFromState = document.getElementById('getTxnsOnlyFromState').checked
     const withDeployTxn = document.getElementById('getTxnsWithDeployTxn').checked
-    const goerliTestnetType = document.getElementById('goerliTestnetType').value
 
     try {
       const response = await ethereum.request({
@@ -881,7 +857,7 @@
             onlyFromState,
             withDeployTxn,
             chainId,
-            ...getReqFlagsForTestnetType(goerliTestnetType),
+            ...getReqFlagsFromCheckbox(),
           },
         }]
       })
@@ -899,7 +875,6 @@
     const maxScanned = document.getElementById('maxScanned').value
     const maxMissed = document.getElementById('maxMissed').value
     const chainId = document.getElementById('targetChainId').value
-    const goerliTestnetType = document.getElementById('goerliTestnetType').value
 
     try {
       const response = await ethereum.request({
@@ -911,7 +886,7 @@
             maxScanned,
             maxMissed,
             chainId,
-            ...getReqFlagsForTestnetType(goerliTestnetType),
+            ...getReqFlagsFromCheckbox(),
           },
         }]
       })

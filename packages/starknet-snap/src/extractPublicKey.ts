@@ -9,7 +9,8 @@ export async function extractPublicKey(params: ApiParams) {
     const requestParamsObj = requestParams as ExtractPublicKeyRequestParams;
 
     const userAddress = requestParamsObj.userAddress;
-    const network = getNetworkFromChainId(state, requestParamsObj.chainId);
+    const useOldAccounts = !!requestParamsObj.useOldAccounts;
+    const network = getNetworkFromChainId(state, requestParamsObj.chainId, useOldAccounts);
 
     if (!requestParamsObj.userAddress) {
       throw new Error(
@@ -27,7 +28,7 @@ export async function extractPublicKey(params: ApiParams) {
     const accContract = getAccount(state, userAddress, network.chainId);
     if (!accContract?.publicKey || number.toBN(accContract.publicKey).eq(number.toBN(constants.ZERO))) {
       console.log(`extractPublicKey: User address cannot be found or the signer public key is 0x0: ${userAddress}`);
-      const { publicKey } = await getKeysFromAddress(keyDeriver, network.chainId, state, userAddress);
+      const { publicKey } = await getKeysFromAddress(keyDeriver, network, state, userAddress);
       userPublicKey = publicKey;
     } else {
       userPublicKey = accContract.publicKey;
