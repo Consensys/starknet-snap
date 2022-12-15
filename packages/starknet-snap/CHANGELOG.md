@@ -1,6 +1,17 @@
 # Changelog
 
 
+## [1.0.0](https://github.com/ConsenSys/starknet-snap/compare/starknet-snap-v0.12.0...starknet-snap-v1.0.0) (2022-12-15)
+
+
+### ⚠ BREAKING CHANGES
+
+* starknet.js to v4.17.1 for new account deployment ([#42](https://github.com/ConsenSys/starknet-snap/issues/42))
+
+### Features
+
+* starknet.js to v4.17.1 for new account deployment ([#42](https://github.com/ConsenSys/starknet-snap/issues/42)) ([f0df619](https://github.com/ConsenSys/starknet-snap/commit/f0df6194d149d04c21d9116aa5a3faaa64fa5cca))
+
 ## [0.12.0](https://github.com/ConsenSys/starknet-snap/compare/starknet-snap-v0.11.0...starknet-snap-v0.12.0) (2022-11-21)
 
 
