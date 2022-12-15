@@ -13,22 +13,22 @@ export const invalidNetwork: Network = {
 };
 
 export const account1: AccContract = {
-  address: '0x57c2c9609934e5e2a23ecc5027c65731065d255fd8ce4a7234626b9b35e8e70',
-  addressSalt: '0x05d29e4b51193b25475380872f5809db82727557c64910235d63ae26b26a2461',
+  address: '0x4882a372da3dfe1c53170ad75893832469bf87b62b13e84662565c4a88f25cd',
+  addressSalt: '0x0154c7b20442ee954f50831702ca844ec185ad484c21719575d351583deec90b',
   addressIndex: 0,
   derivationPath: "m / bip32:44' / bip32:9004' / bip32:0' / bip32:0",
   deployTxnHash: '0x5da2d94a324bc56f80cf1fb985c22c85769db434ed403ae71774a07103d229b',
-  publicKey: '0x05d29e4b51193b25475380872f5809db82727557c64910235d63ae26b26a2461',
+  publicKey: '0x0154c7b20442ee954f50831702ca844ec185ad484c21719575d351583deec90b',
   chainId: constants.StarknetChainId.TESTNET,
 };
 
 export const account2: AccContract = {
-  address: '0x7aca804cc7541b6e57f2d7d22284f41ef7b445f4560526a2c6a48398e55cf86',
-  addressSalt: '0x06be07eaf385c24bfd6dbc6450b362f6ad3ca83d310ccb3b1896aae92cc355a2',
+  address: '0x353c982282cb6dea5afc3db185910d6967c1dac6b813bcc6981e6438ea290dd',
+  addressSalt: '0x019e59f349e1aa813ab4556c5836d0472e5e1ae82d1e5c3b3e8aabfeb290befd',
   addressIndex: 1,
   derivationPath: "m / bip32:44' / bip32:9004' / bip32:0' / bip32:0",
   deployTxnHash: '0x5bc00132b8f2fc0f673dc232594b26727e712b204a2716f9dc28a8c5f607b5e',
-  publicKey: '0x06be07eaf385c24bfd6dbc6450b362f6ad3ca83d310ccb3b1896aae92cc355a2',
+  publicKey: '0x019e59f349e1aa813ab4556c5836d0472e5e1ae82d1e5c3b3e8aabfeb290befd',
   chainId: constants.StarknetChainId.TESTNET,
 };
 
@@ -77,13 +77,13 @@ export const token3: Erc20Token = {
 };
 
 export const signature1 = [
-  '2121320640460590640541012102648975038969582979202416014111718766642353818340',
-  '786244468223897203145061704883349714415393691543700276171926335884401345499',
+  '516020642975010862953753694938162828355589290469166577916863056232343408026',
+  '2251696516606127908683557735430451943938460227398850312125458443328304619271',
 ];
 
 export const signature2 = [
-  '509210968929191264109539398328327304776456858314483751496677017554224942535',
-  '2490562014257449737955709015513146789604950972547136148574384459590409894467',
+  '2097333561319225847382651606677826358290601470682325253385662728360261876313',
+  '3446162480918390061797019824053459944083183558758902007996159588638509129622',
 ];
 
 // Derived from seed phrase: "dog simple gown ankle release anger local pulp rose river approve miracle"
@@ -109,17 +109,17 @@ export const getBip44EntropyStub = async (...args: unknown[]) => {
 
 export const createAccountProxyMainnetResp = {
   transaction_hash: '0x3b690b4c9dd639881a46f6a344ee90254562175ed7a7f5a028f69b8c32ccb47',
-  contract_address: '0x57c2c9609934e5e2a23ecc5027c65731065d255fd8ce4a7234626b9b35e8e70',
+  contract_address: '0x4882a372da3dfe1c53170ad75893832469bf87b62b13e84662565c4a88f25cd',
 };
 
 export const createAccountProxyMainnetResp2 = {
   transaction_hash: '0x60d85f7411349c0b4bc94cf1a6659dccb945f82865592ae7aaa494fa62b6965',
-  contract_address: '0x7aca804cc7541b6e57f2d7d22284f41ef7b445f4560526a2c6a48398e55cf86',
+  contract_address: '0x353c982282cb6dea5afc3db185910d6967c1dac6b813bcc6981e6438ea290dd',
 };
 
 export const createAccountProxyResp = {
   transaction_hash: '0x3b690b4c9dd639881a46f6a344ee90254562175ed7a7f5a028f69b8c32ccb47',
-  contract_address: '0x0388ef19a9f403d9dbc593487f9b8e64548b25091cef6ce68f8132cc433c7654',
+  contract_address: '0x4b36a2b0a1e9d2af3416914798de776e37d9e0ab9a50d2dec30485dca64bb8',
 };
 
 export const createAccountFailedProxyResp = {
@@ -225,6 +225,24 @@ export const txn4: Transaction = {
   eventIds: [],
 };
 
+export const getBalanceResp = {
+  result: ['0x0', '0x0'],
+};
+
+export const estimateDeployFeeResp = {
+  overall_fee: number.toBN('0x0'),
+  gas_consumed: number.toBN('0x0'),
+  suggestedMaxFee: number.toBN('0x0'),
+  gas_price: number.toBN('0x0'),
+};
+
+export const estimateDeployFeeResp2 = {
+  overall_fee: number.toBN('0xaff3f0a7'),
+  gas_consumed: number.toBN('0x18e1'),
+  suggestedMaxFee: number.toBN('0x071287'),
+  gas_price: number.toBN('0x0107ede8fa'),
+};
+
 export const estimateFeeResp = {
   overall_fee: number.toBN('0x0dc3e44d89e6'),
   gas_consumed: number.toBN('0x276a'),
@@ -237,65 +255,61 @@ export const estimateFeeResp2 = {
   suggestedMaxFee: number.toBN('0x14a5d6744ed9'),
 };
 
-export const getNonceResp = {
-  result: ['0x2'],
-};
-
-export const unfoundUserAddress = '0x1018488ad767b06c16f309f419c68356b863bac53ad5cd5ea19f15f33cec0d6';
+export const unfoundUserAddress = '0x18dfa1955a0154524203f81c5668d6a78c708375ee8908dcb55a49c6ec87190';
 export const unfoundUserPrivateKey = '0x610d87a5c02459f8643f9ad6a9bc70597d1a8a0ab4d645346b7eadc5266ad4d';
-export const unfoundUserPublicKey = '0x0388ef19a9f403d9dbc593487f9b8e64548b25091cef6ce68f8132cc433c7654';
+export const unfoundUserPublicKey = '0x4b36a2b0a1e9d2af3416914798de776e37d9e0ab9a50d2dec30485dca64bb8';
 export const foundUserPrivateKey = '0x3cddbb7f3694ce84bd9598820834015d979d78e63474a5b00e59b41b0563f4e';
 
 export const testnetPublicKeys = [
-  '0x05d29e4b51193b25475380872f5809db82727557c64910235d63ae26b26a2461',
-  '0x06be07eaf385c24bfd6dbc6450b362f6ad3ca83d310ccb3b1896aae92cc355a2',
-  '0x0388ef19a9f403d9dbc593487f9b8e64548b25091cef6ce68f8132cc433c7654',
-  '0x04e72db9bc95260c9f544d73f6dc1a318c643df6c9b3dc77460d3dc1a4c3cd9b',
-  '0x0728fd84a471029506a0d8ef5213bd08aed06552fabcf4a8858d569dcf2ab3e7',
-  '0x069d15c92678d75664d83031bd150d5707a51d8c0ee418f88a8d4d92a7c87860',
-  '0x0702e6bca52dc5be2aea11c36780b8b8358ea3faf89256ad01980f895868f21a',
-  '0x06ff5015cacef06a17bd087694297938cfae1ed3ee256a855ca7a84981bafb8d',
-  '0x079066626ce1cb433b12ec1755157e294df6fe4e418aa672365f85f11bb5b5f0',
-  '0x0d38c0f976c0e83dbfa8de595d8239623e75da5cfacca7a086c42b2a739e98',
+  '0x0154c7b20442ee954f50831702ca844ec185ad484c21719575d351583deec90b',
+  '0x019e59f349e1aa813ab4556c5836d0472e5e1ae82d1e5c3b3e8aabfeb290befd',
+  '0x4b36a2b0a1e9d2af3416914798de776e37d9e0ab9a50d2dec30485dca64bb8',
+  '0x06de8036537a36bcdfaf0954f71fd7bb11f3f1a9e5778ac5e988e5f8f56aade4',
+  '0x024cf3571b72b7cc235bff8d0e973faccde2c7162e5a3e978d91a529657d718f',
+  '0x04863e0b7d7df4a53c5b0b99aef944245856f09cef8f04380ae41dc56ff4ae75',
+  '0x0282427b86ee5228538ed7d0e0081553cd37a377cd06983c24c0d34acfd35b1a',
+  '0x03c23c5416c73af04f89ecb1e19a7074519bb7ef0c6c52a785a2200ff899a916',
+  '0x020bc19e11620253377cc18a8b6b633bb964a6488f5941a8d5ad7e97e0b8a6c4',
+  '0x04cc995ff1e5a4b145f07912cf9fd5b0a178b23563d4cbf1a4547c43351fc426',
 ];
 
 export const testnetAccAddresses = [
-  '0x57c2c9609934e5e2a23ecc5027c65731065d255fd8ce4a7234626b9b35e8e70',
-  '0x7aca804cc7541b6e57f2d7d22284f41ef7b445f4560526a2c6a48398e55cf86',
-  '0x1018488ad767b06c16f309f419c68356b863bac53ad5cd5ea19f15f33cec0d6',
-  '0x24809bc377447f3dd83cdac92d61c3f9a784f9d3350cf0e5881ed33740fb920',
-  '0x109f5733b7f456e3f2ed786136053c9c400f0bd3aa156576aebd2b45f8d430f',
-  '0x70f21c66c45d7fcc64c42268b0b067eadc1dc085cdde9e59707e25b5db39423',
-  '0x71a2490633a1c3dd6aa0eab5f7c7b89531cbe85a8a7767823be2b103f376de6',
-  '0x3ddc18fcb20737f7a228f016367d67ecf480640d50abddbbf2dba6f6694f648',
-  '0x1e1c0f162c5e148e2cced1f2a4e3f4b37e898f5be5df53ec7a4149a0f1f67d2',
-  '0x287f3bf9dbe2a98039d9cafdd3d82f255f77a990d4662405fce1a9df8f0a898',
+  '0x4882a372da3dfe1c53170ad75893832469bf87b62b13e84662565c4a88f25cd',
+  '0x353c982282cb6dea5afc3db185910d6967c1dac6b813bcc6981e6438ea290dd',
+  '0x18dfa1955a0154524203f81c5668d6a78c708375ee8908dcb55a49c6ec87190',
+  '0x12f772099692e75ed792aaa4a61cd5cf3dfe9833931aa67296d208bb609312e',
+  '0x541299104160a88ce08b8f1d5d3f8fe565214c5d2651034842e0b596f730a46',
+  '0x2d8cdaf0d5de527fb48fa64e8c4a29b7bc1131d30a6e4350fcd960d376a65c0',
+  '0x419eebcde2675d0716faf85992a815f64bb05a3b02a5c3805fa9908ad032434',
+  '0x1320d99ed97884f476cfa0899d24892eb829f0f69ae1972df3c9516fd7795ec',
+  '0x78318094673e259a53912054837b15993f16a04a50bd5af5683cca69196a704',
+  '0x75ba974e17b0d1736a7fb81655082e9960c6975edcc1b573d37386cbaf2c0b8',
 ];
 
 export const mainnetPublicKeys = [
-  '0x05d29e4b51193b25475380872f5809db82727557c64910235d63ae26b26a2461',
-  '0x06be07eaf385c24bfd6dbc6450b362f6ad3ca83d310ccb3b1896aae92cc355a2',
-  '0x0388ef19a9f403d9dbc593487f9b8e64548b25091cef6ce68f8132cc433c7654',
-  '0x04e72db9bc95260c9f544d73f6dc1a318c643df6c9b3dc77460d3dc1a4c3cd9b',
-  '0x0728fd84a471029506a0d8ef5213bd08aed06552fabcf4a8858d569dcf2ab3e7',
-  '0x069d15c92678d75664d83031bd150d5707a51d8c0ee418f88a8d4d92a7c87860',
-  '0x0702e6bca52dc5be2aea11c36780b8b8358ea3faf89256ad01980f895868f21a',
-  '0x06ff5015cacef06a17bd087694297938cfae1ed3ee256a855ca7a84981bafb8d',
-  '0x079066626ce1cb433b12ec1755157e294df6fe4e418aa672365f85f11bb5b5f0',
-  '0x0d38c0f976c0e83dbfa8de595d8239623e75da5cfacca7a086c42b2a739e98',
+  '0x0154c7b20442ee954f50831702ca844ec185ad484c21719575d351583deec90b',
+  '0x019e59f349e1aa813ab4556c5836d0472e5e1ae82d1e5c3b3e8aabfeb290befd',
+  '0x4b36a2b0a1e9d2af3416914798de776e37d9e0ab9a50d2dec30485dca64bb8',
+  '0x06de8036537a36bcdfaf0954f71fd7bb11f3f1a9e5778ac5e988e5f8f56aade4',
+  '0x024cf3571b72b7cc235bff8d0e973faccde2c7162e5a3e978d91a529657d718f',
+  '0x04863e0b7d7df4a53c5b0b99aef944245856f09cef8f04380ae41dc56ff4ae75',
+  '0x0282427b86ee5228538ed7d0e0081553cd37a377cd06983c24c0d34acfd35b1a',
+  '0x03c23c5416c73af04f89ecb1e19a7074519bb7ef0c6c52a785a2200ff899a916',
+  '0x020bc19e11620253377cc18a8b6b633bb964a6488f5941a8d5ad7e97e0b8a6c4',
+  '0x04cc995ff1e5a4b145f07912cf9fd5b0a178b23563d4cbf1a4547c43351fc426',
 ];
 
 export const mainnetAccAddresses = [
-  '0x57c2c9609934e5e2a23ecc5027c65731065d255fd8ce4a7234626b9b35e8e70',
-  '0x7aca804cc7541b6e57f2d7d22284f41ef7b445f4560526a2c6a48398e55cf86',
-  '0x1018488ad767b06c16f309f419c68356b863bac53ad5cd5ea19f15f33cec0d6',
-  '0x24809bc377447f3dd83cdac92d61c3f9a784f9d3350cf0e5881ed33740fb920',
-  '0x109f5733b7f456e3f2ed786136053c9c400f0bd3aa156576aebd2b45f8d430f',
-  '0x70f21c66c45d7fcc64c42268b0b067eadc1dc085cdde9e59707e25b5db39423',
-  '0x71a2490633a1c3dd6aa0eab5f7c7b89531cbe85a8a7767823be2b103f376de6',
-  '0x3ddc18fcb20737f7a228f016367d67ecf480640d50abddbbf2dba6f6694f648',
-  '0x1e1c0f162c5e148e2cced1f2a4e3f4b37e898f5be5df53ec7a4149a0f1f67d2',
-  '0x287f3bf9dbe2a98039d9cafdd3d82f255f77a990d4662405fce1a9df8f0a898',
+  '0x4882a372da3dfe1c53170ad75893832469bf87b62b13e84662565c4a88f25cd',
+  '0x353c982282cb6dea5afc3db185910d6967c1dac6b813bcc6981e6438ea290dd',
+  '0x18dfa1955a0154524203f81c5668d6a78c708375ee8908dcb55a49c6ec87190',
+  '0x12f772099692e75ed792aaa4a61cd5cf3dfe9833931aa67296d208bb609312e',
+  '0x541299104160a88ce08b8f1d5d3f8fe565214c5d2651034842e0b596f730a46',
+  '0x2d8cdaf0d5de527fb48fa64e8c4a29b7bc1131d30a6e4350fcd960d376a65c0',
+  '0x419eebcde2675d0716faf85992a815f64bb05a3b02a5c3805fa9908ad032434',
+  '0x1320d99ed97884f476cfa0899d24892eb829f0f69ae1972df3c9516fd7795ec',
+  '0x78318094673e259a53912054837b15993f16a04a50bd5af5683cca69196a704',
+  '0x75ba974e17b0d1736a7fb81655082e9960c6975edcc1b573d37386cbaf2c0b8',
 ];
 
 export const getTxnsFromVoyagerResp = {
@@ -464,6 +478,84 @@ export const getTxnFromVoyagerResp2 = {
   },
 };
 
+export const getTxnFromSequencerResp1 = {
+  status: 'ACCEPTED_ON_L1',
+  block_hash: '0x2c6b3d318f93b500b44dcf565f65dda066f22cae6f4d76e3ec479193d77a511',
+  block_number: 238254,
+  transaction_index: 13,
+  transaction: {
+    transaction_hash: '0x1366c2f9f46b1a86ba0c28b5a08fa0aa3750c4d1cbe06e97e72bd46ae2ac1f9',
+    version: '0x0',
+    max_fee: '0x14c51dc08cad',
+    signature: [
+      '0xc592f24ab0e90ea4dac92a1e18aabec8033ebd3ce3a517cdc72972ade3e121',
+      '0x1bca4a8c65bf5aa28fcf0deb63307389e6d0f4f3295561f90a79b5313d08fc6',
+    ],
+    contract_address: '0x5a98ec74a40383cf99896bfea2ec5e6aad16c7eed50025a5f569d585ebb13a2',
+    entry_point_selector: '0x15d40a3d6ca2ac30f4031e42be28da9b056fef9bb7357ac5e85627ee876e5ad',
+    calldata: [
+      '0x1',
+      '0x7394cbe418daa16e42b87ba67372d4ab4a5df0b05c6e554d158458ce245bc10',
+      '0x83afd3f4caedc6eebf44246fe54e38c95e3179a5ec9ea81740eca5b482d12e',
+      '0x0',
+      '0x3',
+      '0x3',
+      '0x14361d05e560796ad3152e083b609f5205f3bd76039327326746ba7f769a666',
+      '0xde0b6b3a7640000',
+      '0x0',
+      '0x1',
+    ],
+    type: 'INVOKE_FUNCTION',
+  },
+  calldata: [
+    '0x1',
+    '0x7394cbe418daa16e42b87ba67372d4ab4a5df0b05c6e554d158458ce245bc10',
+    '0x83afd3f4caedc6eebf44246fe54e38c95e3179a5ec9ea81740eca5b482d12e',
+    '0x0',
+    '0x3',
+    '0x3',
+    '0x14361d05e560796ad3152e083b609f5205f3bd76039327326746ba7f769a666',
+    '0xde0b6b3a7640000',
+    '0x0',
+    '0x1',
+  ],
+  contract_address: '0x5a98ec74a40383cf99896bfea2ec5e6aad16c7eed50025a5f569d585ebb13a2',
+  entry_point_selector: '0x15d40a3d6ca2ac30f4031e42be28da9b056fef9bb7357ac5e85627ee876e5ad',
+  max_fee: '0x14c51dc08cad',
+  signature: [
+    '0xc592f24ab0e90ea4dac92a1e18aabec8033ebd3ce3a517cdc72972ade3e121',
+    '0x1bca4a8c65bf5aa28fcf0deb63307389e6d0f4f3295561f90a79b5313d08fc6',
+  ],
+  transaction_hash: '0x1366c2f9f46b1a86ba0c28b5a08fa0aa3750c4d1cbe06e97e72bd46ae2ac1f9',
+  version: '0x0',
+};
+
+export const getTxnFromSequencerResp2 = {
+  status: 'ACCEPTED_ON_L1',
+  block_hash: '0x78ba7300924ababbe80d05b9f36e9f0a3f40b6889d16662513aa7001aa7d2e5',
+  block_number: 235032,
+  transaction_index: 6,
+  transaction: {
+    transaction_hash: '0x6beceb86579dc78749bdaaf441501edc21e218e020236e2ebea1b6a96d0bac7',
+    version: '0x0',
+    contract_address: '0x5a98ec74a40383cf99896bfea2ec5e6aad16c7eed50025a5f569d585ebb13a2',
+    contract_address_salt: '0x110e50179b0ef539fd1558571698a98cfe90d6829ff8203bfe577fdda6fc44e',
+    class_hash: '0x25ec026985a3bf9d0cc1fe17326b245dfdc3ff89b8fde106542a3ea56c5a918',
+    constructor_calldata: [
+      '0x3e327de1c40540b98d05cbcb13552008e36f0ec8d61d46956d2f9752c294328',
+      '0x79dc0da7c54b95f10aa182ad0a46400db63156920adb65eca2654c0945a463',
+      '0x2',
+      '0x110e50179b0ef539fd1558571698a98cfe90d6829ff8203bfe577fdda6fc44e',
+      '0x0',
+    ],
+    type: 'DEPLOY',
+  },
+  calldata: [],
+  contract_address: '0x5a98ec74a40383cf99896bfea2ec5e6aad16c7eed50025a5f569d585ebb13a2',
+  transaction_hash: '0x6beceb86579dc78749bdaaf441501edc21e218e020236e2ebea1b6a96d0bac7',
+  version: '0x0',
+};
+
 export const expectedMassagedTxn4: Transaction = {
   chainId: '0x534e5f474f45524c49',
   contractAddress: '0x07394cbe418daa16e42b87ba67372d4ab4a5df0b05c6e554d158458ce245bc10',
@@ -488,22 +580,22 @@ export const expectedMassagedTxns: Transaction[] = [
     contractFuncName: 'transfer',
     contractCallData: ['0x14361d05e560796ad3152e083b609f5205f3bd76039327326746ba7f769a666', '0xde0b6b3a7640000', '0x0'],
     timestamp: 1655109666,
+    status: 'ACCEPTED_ON_L1',
+    eventIds: [],
     failureReason: '',
-    status: 'Accepted on L1',
-    eventIds: ['238254_13_0'],
   },
   {
     txnHash: '0x6beceb86579dc78749bdaaf441501edc21e218e020236e2ebea1b6a96d0bac7',
     txnType: 'deploy',
     chainId: '0x534e5f474f45524c49',
     senderAddress: '0x05a98ec74a40383cf99896bfea2ec5e6aad16c7eed50025a5f569d585ebb13a2',
-    contractAddress: '0x05a98ec74a40383cf99896bfea2ec5e6aad16c7eed50025a5f569d585ebb13a2',
+    contractAddress: '0x5a98ec74a40383cf99896bfea2ec5e6aad16c7eed50025a5f569d585ebb13a2',
     contractFuncName: '',
     contractCallData: [],
     timestamp: 1654834401,
+    status: 'ACCEPTED_ON_L1',
+    eventIds: [],
     failureReason: '',
-    status: 'Accepted on L1',
-    eventIds: ['235032_6_0'],
   },
   expectedMassagedTxn4,
 ];

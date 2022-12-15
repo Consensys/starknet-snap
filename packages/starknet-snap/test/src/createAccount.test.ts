@@ -14,6 +14,10 @@ import {
   createAccountFailedProxyResp,
   createAccountProxyMainnetResp2,
   getBip44EntropyStub,
+  estimateDeployFeeResp,
+  getBalanceResp,
+  account1,
+  estimateDeployFeeResp2,
 } from '../constants.test';
 import { getAddressKeyDeriver } from '../../src/utils/keyPair';
 import { Mutex } from 'async-mutex';
@@ -23,7 +27,7 @@ chai.use(sinonChai);
 const sandbox = sinon.createSandbox();
 
 describe('Test function: createAccount', function () {
-  this.timeout(5000);
+  this.timeout(10000);
   const walletStub = new WalletMock();
   const state: SnapState = {
     accContracts: [],
@@ -51,8 +55,15 @@ describe('Test function: createAccount', function () {
   });
 
   it('should create and store an user account with proxy in state correctly in mainnet', async function () {
-    sandbox.stub(utils, 'deployContract').callsFake(async () => {
+    sandbox.stub(utils, 'deployAccount').callsFake(async () => {
       return createAccountProxyMainnetResp;
+    });
+    sandbox.stub(utils, 'getSigner').throws(new Error());
+    sandbox.stub(utils, 'callContract').callsFake(async () => {
+      return getBalanceResp;
+    });
+    sandbox.stub(utils, 'estimateAccountDeployFee').callsFake(async () => {
+      return estimateDeployFeeResp;
     });
     const requestObject: CreateAccountRequestParams = {
       chainId: STARKNET_MAINNET_NETWORK.chainId,
@@ -61,7 +72,7 @@ describe('Test function: createAccount', function () {
     const result = await createAccount(apiParams);
     const { publicKey: expectedPublicKey } = await utils.getKeysFromAddress(
       apiParams.keyDeriver,
-      STARKNET_MAINNET_NETWORK.chainId,
+      STARKNET_MAINNET_NETWORK,
       state,
       createAccountProxyMainnetResp.contract_address,
     );
@@ -77,8 +88,15 @@ describe('Test function: createAccount', function () {
   });
 
   it('should create and store an user account of specific address index with proxy in state correctly in mainnet', async function () {
-    sandbox.stub(utils, 'deployContract').callsFake(async () => {
+    sandbox.stub(utils, 'deployAccount').callsFake(async () => {
       return createAccountProxyMainnetResp2;
+    });
+    sandbox.stub(utils, 'getSigner').throws(new Error());
+    sandbox.stub(utils, 'callContract').callsFake(async () => {
+      return getBalanceResp;
+    });
+    sandbox.stub(utils, 'estimateAccountDeployFee').callsFake(async () => {
+      return estimateDeployFeeResp;
     });
     const requestObject: CreateAccountRequestParams = {
       chainId: STARKNET_MAINNET_NETWORK.chainId,
@@ -88,7 +106,7 @@ describe('Test function: createAccount', function () {
     const result = await createAccount(apiParams);
     const { publicKey: expectedPublicKey } = await utils.getKeysFromAddress(
       apiParams.keyDeriver,
-      STARKNET_MAINNET_NETWORK.chainId,
+      STARKNET_MAINNET_NETWORK,
       state,
       createAccountProxyMainnetResp2.contract_address,
     );
@@ -104,15 +122,22 @@ describe('Test function: createAccount', function () {
   });
 
   it('should create and store an user account with proxy in state correctly in testnet', async function () {
-    sandbox.stub(utils, 'deployContract').callsFake(async () => {
+    sandbox.stub(utils, 'deployAccount').callsFake(async () => {
       return createAccountProxyResp;
+    });
+    sandbox.stub(utils, 'getSigner').throws(new Error());
+    sandbox.stub(utils, 'callContract').callsFake(async () => {
+      return getBalanceResp;
+    });
+    sandbox.stub(utils, 'estimateAccountDeployFee').callsFake(async () => {
+      return estimateDeployFeeResp;
     });
     const requestObject: CreateAccountRequestParams = {};
     apiParams.requestParams = requestObject;
     const result = await createAccount(apiParams);
     const { publicKey: expectedPublicKey } = await utils.getKeysFromAddress(
       apiParams.keyDeriver,
-      STARKNET_TESTNET_NETWORK.chainId,
+      STARKNET_TESTNET_NETWORK,
       state,
       createAccountProxyResp.contract_address,
     );
@@ -127,9 +152,76 @@ describe('Test function: createAccount', function () {
     expect(state.transactions.length).to.be.eq(3);
   });
 
+  it('should not create any user account with proxy in state in testnet if account already initialized with a signer', async function () {
+    sandbox.stub(utils, 'deployAccount').callsFake(async () => {
+      return createAccountProxyResp;
+    });
+    sandbox.stub(utils, 'getSigner').callsFake(async () => {
+      return account1.publicKey;
+    });
+    sandbox.stub(utils, 'callContract').callsFake(async () => {
+      return getBalanceResp;
+    });
+    sandbox.stub(utils, 'estimateAccountDeployFee').callsFake(async () => {
+      return estimateDeployFeeResp;
+    });
+    const requestObject: CreateAccountRequestParams = {};
+    apiParams.requestParams = requestObject;
+    const result = await createAccount(apiParams);
+    expect(walletStub.rpcStubs.snap_manageState).to.have.been.callCount(4);
+    expect(result.address).to.be.eq(createAccountProxyResp.contract_address);
+    expect(result.transaction_hash).to.be.eq(createAccountProxyResp.transaction_hash);
+    expect(state.accContracts.length).to.be.eq(3);
+    expect(state.transactions.length).to.be.eq(3);
+  });
+
+  it('should not create any user account with proxy in state in testnet if account does not have enough ETH balance', async function () {
+    sandbox.stub(utils, 'deployAccount').callsFake(async () => {
+      return createAccountProxyResp;
+    });
+    sandbox.stub(utils, 'getSigner').throws(new Error());
+    sandbox.stub(utils, 'callContract').callsFake(async () => {
+      return getBalanceResp;
+    });
+    sandbox.stub(utils, 'estimateAccountDeployFee').callsFake(async () => {
+      return estimateDeployFeeResp2;
+    });
+    const requestObject: CreateAccountRequestParams = {};
+    apiParams.requestParams = requestObject;
+    const result = await createAccount(apiParams);
+    expect(walletStub.rpcStubs.snap_manageState).to.have.been.callCount(3);
+    expect(result.address).to.be.eq(createAccountProxyResp.contract_address);
+    expect(result.transaction_hash).to.be.eq(createAccountProxyResp.transaction_hash);
+    expect(state.accContracts.length).to.be.eq(3);
+    expect(state.transactions.length).to.be.eq(3);
+  });
+
+  it('should not create any user account with proxy in state in testnet if get account ETH balance throws error', async function () {
+    sandbox.stub(utils, 'deployAccount').callsFake(async () => {
+      return createAccountProxyResp;
+    });
+    sandbox.stub(utils, 'getSigner').throws(new Error());
+    sandbox.stub(utils, 'callContract').throws(new Error());
+    sandbox.stub(utils, 'estimateAccountDeployFee').callsFake(async () => {
+      return estimateDeployFeeResp2;
+    });
+    const requestObject: CreateAccountRequestParams = {};
+    apiParams.requestParams = requestObject;
+    const result = await createAccount(apiParams);
+    expect(walletStub.rpcStubs.snap_manageState).to.have.been.callCount(3);
+    expect(result.address).to.be.eq(createAccountProxyResp.contract_address);
+    expect(result.transaction_hash).to.be.eq(createAccountProxyResp.transaction_hash);
+    expect(state.accContracts.length).to.be.eq(3);
+    expect(state.transactions.length).to.be.eq(3);
+  });
+
   it('should skip upsert account and transaction if deployTxn response code has no transaction_hash in testnet', async function () {
-    sandbox.stub(utils, 'deployContract').callsFake(async () => {
+    sandbox.stub(utils, 'deployAccount').callsFake(async () => {
       return createAccountFailedProxyResp;
+    });
+    sandbox.stub(utils, 'getSigner').throws(new Error());
+    sandbox.stub(utils, 'estimateAccountDeployFee').callsFake(async () => {
+      return estimateDeployFeeResp;
     });
     const requestObject: CreateAccountRequestParams = {};
     apiParams.requestParams = requestObject;
@@ -143,8 +235,12 @@ describe('Test function: createAccount', function () {
 
   it('should throw error if upsertAccount failed', async function () {
     sandbox.stub(snapUtils, 'upsertAccount').throws(new Error());
-    sandbox.stub(utils, 'postData').callsFake(async () => {
+    sandbox.stub(utils, 'deployAccount').callsFake(async () => {
       return createAccountProxyResp;
+    });
+    sandbox.stub(utils, 'getSigner').throws(new Error());
+    sandbox.stub(utils, 'estimateAccountDeployFee').callsFake(async () => {
+      return estimateDeployFeeResp;
     });
     const requestObject: CreateAccountRequestParams = {};
     apiParams.requestParams = requestObject;

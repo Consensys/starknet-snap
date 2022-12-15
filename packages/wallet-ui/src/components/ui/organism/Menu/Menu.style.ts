@@ -92,7 +92,7 @@ export const MenuItems = styled(Menu.Items)`
   flex-direction: column;
   padding: 8px 0px;
   gap: 8px;
-  width: 242px;
+  width: 260px;
 `;
 
 export const MenuDivider = styled(Menu.Items)`

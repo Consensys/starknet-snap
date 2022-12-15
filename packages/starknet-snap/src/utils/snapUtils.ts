@@ -242,8 +242,10 @@ export async function upsertAccount(userAccount: AccContract, wallet, mutex: Mut
   });
 }
 
-export function getNetwork(state: SnapState, chainId: string) {
-  return state.networks?.find((network) => Number(network.chainId) === Number(chainId));
+export function getNetwork(state: SnapState, chainId: string, useOldAccounts = false) {
+  return state.networks?.find(
+    (network) => Number(network.chainId) === Number(chainId) && !!network?.useOldAccounts === useOldAccounts,
+  );
 }
 
 export function getNetworks(state: SnapState) {
@@ -259,7 +261,7 @@ export async function upsertNetwork(network: Network, wallet, mutex: Mutex, stat
       });
     }
 
-    const storedNetwork = getNetwork(state, network.chainId);
+    const storedNetwork = getNetwork(state, network.chainId, network.useOldAccounts);
     if (!storedNetwork) {
       if (!state.networks) {
         state.networks = [];
@@ -277,6 +279,7 @@ export async function upsertNetwork(network: Network, wallet, mutex: Mutex, stat
       storedNetwork.nodeUrl = network.nodeUrl;
       storedNetwork.voyagerUrl = network.voyagerUrl;
       storedNetwork.accountClassHash = network.accountClassHash;
+      storedNetwork.useOldAccounts = !!network.useOldAccounts;
     }
 
     await wallet.request({
@@ -294,6 +297,10 @@ export function getErc20Token(state: SnapState, tokenAddress: string, chainId: s
 
 export function getErc20Tokens(state: SnapState, chainId: string) {
   return state.erc20Tokens?.filter((token) => Number(token.chainId) === Number(chainId));
+}
+
+export function getEtherErc20Token(state: SnapState, chainId: string) {
+  return state.erc20Tokens?.find((token) => Number(token.chainId) === Number(chainId) && token.symbol === 'ETH');
 }
 
 export async function upsertErc20Token(erc20Token: Erc20Token, wallet, mutex: Mutex, state: SnapState = undefined) {
@@ -332,9 +339,9 @@ export async function upsertErc20Token(erc20Token: Erc20Token, wallet, mutex: Mu
   });
 }
 
-export function getNetworkFromChainId(state: SnapState, targerChainId: string | undefined) {
+export function getNetworkFromChainId(state: SnapState, targerChainId: string | undefined, useOldAccounts = false) {
   const chainId = targerChainId || STARKNET_TESTNET_NETWORK.chainId;
-  const network = getNetwork(state, chainId);
+  const network = getNetwork(state, chainId, useOldAccounts);
   if (!network) {
     throw new Error(`can't find the network in snap state with chainId: ${chainId}`);
   }
@@ -365,7 +372,7 @@ export function getTransactions(
   chainId: string,
   senderAddress: string | undefined,
   contractAddress: string | undefined,
-  txnType: VoyagerTransactionType | string | undefined,
+  txnType: VoyagerTransactionType | string | string[] | undefined,
   status: string | string[] | undefined,
   minTimestamp: number | undefined, // in ms
 ): Transaction[] {
@@ -383,7 +390,11 @@ export function getTransactions(
       filteredTxns = filteredTxns.filter((txn) => number.toBN(txn.contractAddress).eq(number.toBN(contractAddress)));
     }
     if (txnType) {
-      filteredTxns = filteredTxns.filter((txn) => txn.txnType === txnType);
+      if (Array.isArray(txnType)) {
+        filteredTxns = filteredTxns.filter((txn) => txnType.includes(txn.txnType));
+      } else {
+        filteredTxns = filteredTxns.filter((txn) => txn.txnType === txnType);
+      }
     }
     if (status) {
       if (Array.isArray(status)) {

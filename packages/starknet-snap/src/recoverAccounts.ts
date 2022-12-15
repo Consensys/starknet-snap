@@ -12,9 +12,12 @@ export async function recoverAccounts(params: ApiParams) {
     const startIndex = getValidNumber(requestParamsObj.startScanIndex, 0, 0);
     const maxScanned = getValidNumber(requestParamsObj.maxScanned, 1, 1);
     const maxMissed = getValidNumber(requestParamsObj.maxMissed, 1, 1);
-    const network = getNetworkFromChainId(state, requestParamsObj.chainId);
+    const useOldAccounts = !!requestParamsObj.useOldAccounts;
+    const network = getNetworkFromChainId(state, requestParamsObj.chainId, useOldAccounts);
 
-    console.log(`recoverAccounts:\nstartIndex: ${startIndex}, maxScanned: ${maxScanned}, maxMissed: ${maxMissed}`);
+    console.log(
+      `recoverAccounts:\nstartIndex: ${startIndex}, maxScanned: ${maxScanned}, maxMissed: ${maxMissed}, useOldAccounts: ${useOldAccounts}`,
+    );
 
     if (!network.accountClassHash) {
       await wallet.request({
@@ -39,6 +42,7 @@ export async function recoverAccounts(params: ApiParams) {
         network.chainId,
         state,
         i,
+        useOldAccounts,
       );
       const { address: contractAddress } = getAccContractAddressAndCallData(network.accountClassHash, publicKey);
       console.log(`recoverAccounts: index ${i}:\ncontractAddress = ${contractAddress}\npublicKey = ${publicKey}`);

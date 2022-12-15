@@ -64,7 +64,7 @@ export async function getTransactions(params: ApiParams) {
         network.chainId,
         senderAddress,
         undefined, // contractAddress: senderAddress,
-        VoyagerTransactionType.DEPLOY,
+        [VoyagerTransactionType.DEPLOY, VoyagerTransactionType.DEPLOY_ACCOUNT],
         [TransactionStatus.RECEIVED, TransactionStatus.PENDING, TransactionStatus.ACCEPTED_ON_L2],
         undefined,
       );
@@ -100,7 +100,7 @@ export async function getTransactions(params: ApiParams) {
       storedUnsettledTxns.map(async (txn) => {
         const txnStatus = await utils.getTransactionStatus(txn.txnHash, network);
         txn.status = txnStatus ?? txn.status;
-        txn.failureReason = '';
+        txn.failureReason = txn.failureReason || '';
       }),
     );
     console.log(`getTransactions\nstoredUnsettledTxns after updated status:\n${JSON.stringify(storedUnsettledTxns)}`);
@@ -117,7 +117,7 @@ export async function getTransactions(params: ApiParams) {
     // Clean up all ACCEPTED_ON_L1 and ACCEPTED_ON_L2 txns that has timestamp less than minTimeStamp as they will be retrievable from the Voyager "api/txns" endpoint
     await snapUtils.removeAcceptedTransaction(minTimeStamp, wallet, saveMutex);
 
-    // sort in timestamp descending order
+    // Sort in timestamp descending order
     massagedTxns = [...massagedTxns, ...storedUnsettledTxns, ...storedRejectedTxns].sort(
       (a: Transaction, b: Transaction) => b.timestamp - a.timestamp,
     );

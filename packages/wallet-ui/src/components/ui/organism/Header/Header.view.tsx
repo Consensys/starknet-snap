@@ -21,6 +21,7 @@ interface Props {
 export const HeaderView = ({ address }: Props) => {
   const [receiveOpen, setReceiveOpen] = useState(false);
   const [sendOpen, setSendOpen] = useState(false);
+  const [needMoreETH, setNeedMoreETH] = useState(false);
   const networks = useAppSelector((state) => state.networks);
   const wallet = useAppSelector((state) => state.wallet);
   const { updateTokenBalance } = useStarkNetSnap();
@@ -53,8 +54,14 @@ export const HeaderView = ({ address }: Props) => {
       wallet.transactionDeploy?.status === 'Accepted on L2' ||
       wallet.transactionDeploy?.status === TransactionStatus.ACCEPTED_ON_L1 ||
       wallet.transactionDeploy?.status === TransactionStatus.ACCEPTED_ON_L2
-    )
+    ) {
       setSendOpen(true);
+    } else if (
+      wallet.transactionDeploy?.status === 'Rejected' ||
+      wallet.transactionDeploy?.status === TransactionStatus.REJECTED
+    ) {
+      setNeedMoreETH(true);
+    }
   };
 
   return (
@@ -70,7 +77,12 @@ export const HeaderView = ({ address }: Props) => {
         <HeaderButton onClick={() => setReceiveOpen(true)}>Receive</HeaderButton>
         <PopperTooltip
           content={
-            !sendOpen && (
+            !sendOpen && needMoreETH ? (
+              <div>
+                Your account needs to hold enough ETH before being deployed,<br></br> Please send enough ETH to this
+                account address and try again by refreshing the page
+              </div>
+            ) : (
               <div>
                 Please try again in a few minutes. Your account is still being deployed on StarkNet,<br></br> you’ll be
                 able to send after the transaction is accepted by the network

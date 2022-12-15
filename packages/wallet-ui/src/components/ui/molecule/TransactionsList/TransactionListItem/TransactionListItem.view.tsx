@@ -15,7 +15,15 @@ import {
   Status,
   Wrapper,
 } from './TransactionListItem.style';
-import { getIcon, getTxnDate, getTxnName, getTxnStatus, getTxnToFromLabel, getTxnValues } from './types';
+import {
+  getIcon,
+  getTxnDate,
+  getTxnFailureReason,
+  getTxnName,
+  getTxnStatus,
+  getTxnToFromLabel,
+  getTxnValues,
+} from './types';
 import { openExplorerTab } from 'utils/utils';
 
 interface Props {
@@ -48,6 +56,7 @@ export const TransactionListItemView = ({ transaction }: Props) => {
   const txnDate = getTxnDate(transaction);
   const txnStatus = getTxnStatus(transaction);
   const txnToFromLabel = getTxnToFromLabel(transaction);
+  const txnFailureReason = getTxnFailureReason(transaction);
 
   return (
     <Wrapper onClick={() => openExplorerTab(transaction.txnHash, 'tx', transaction.chainId)}>
@@ -59,13 +68,17 @@ export const TransactionListItemView = ({ transaction }: Props) => {
           <Label>{txnName}</Label>
           <Description>
             {txnDate}
-            <Status status={txnStatus}> . {txnStatus}</Status>
+            <Status status={txnStatus}>
+              {' '}
+              . {txnStatus}
+              {txnFailureReason}
+            </Status>
           </Description>
         </Column>
       </Left>
       <Middle>{txnToFromLabel} </Middle>
       <Right>
-        {txnName !== 'Deploy' && (
+        {txnName === 'Send' && (
           <AssetQuantity currency={currencySymbol} currencyValue={txnValue} USDValue={txnUsdValue} />
         )}
       </Right>

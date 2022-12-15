@@ -26,9 +26,9 @@
   "devDependencies": {
     "@lavamoat/allow-scripts": "^2.0.3",
     "@lavamoat/preinstall-always-fail": "^1.0.0",
-    "@metamask/key-tree": "^4.0.0",
-    "@metamask/snap-types": "^0.16.0",
-    "@metamask/snaps-cli": "^0.16.0",
+    "@metamask/key-tree": "^6.0.0",
+    "@metamask/snap-types": "^0.23.0",
+    "@metamask/snaps-cli": "^0.23.0",
     "@types/chai": "^4.3.1",
     "@types/sinon": "^10.0.11",
     "@types/sinon-chai": "^3.2.8",
@@ -45,13 +45,14 @@
     "typescript": "^4.6.3"
   },
   "dependencies": {
-    "@starkware-industries/starkware-crypto-utils": "^0.0.2",
     "async-mutex": "^0.3.2",
     "chai": "^4.3.6",
     "ethereum-unit-converter": "^0.0.17",
     "sinon": "^13.0.2",
     "sinon-chai": "^3.7.0",
-    "starknet": "~4.6.0"
+    "ethers": "^5.5.1",
+    "starknet": "npm:starknet@^4.17.1",
+    "starknet_v4.6.0": "npm:starknet@4.6.0"
   },
   "publishConfig": {
     "access": "public",

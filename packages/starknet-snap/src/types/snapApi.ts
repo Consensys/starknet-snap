@@ -32,7 +32,7 @@ export type ApiRequestParams =
 export interface BaseRequestParams {
   chainId?: string;
   isDev?: boolean;
-  isGoerli2?: boolean;
+  useOldAccounts?: boolean;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

@@ -30,15 +30,18 @@ export interface Network {
   nodeUrl: string;
   voyagerUrl: string;
   accountClassHash: string; // in hex
+  useOldAccounts?: boolean;
 }
 
 export enum TransactionType { // for sending txns via StarkNet gateway
   DEPLOY = 'DEPLOY',
+  DEPLOY_ACCOUNT = 'DEPLOY_ACCOUNT',
   INVOKE_FUNCTION = 'INVOKE_FUNCTION',
 }
 
 export enum VoyagerTransactionType { // for retrieving txns from Voyager
   DEPLOY = 'deploy',
+  DEPLOY_ACCOUNT = 'deploy_account',
   INVOKE = 'invoke',
 }
 
