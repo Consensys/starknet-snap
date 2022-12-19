@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
 
+## [1.1.0](https://github.com/ConsenSys/starknet-snap/compare/wallet-ui-v1.0.0...wallet-ui-v1.1.0) (2022-12-19)
+
+
+### Features
+
+* update the min snap version to v1.0.0 ([#44](https://github.com/ConsenSys/starknet-snap/issues/44)) ([0deb190](https://github.com/ConsenSys/starknet-snap/commit/0deb190c4ce6048e34c61b31e6c8e527f2787628))
+
 ## [1.0.0](https://github.com/ConsenSys/starknet-snap/compare/wallet-ui-v0.15.1...wallet-ui-v1.0.0) (2022-12-15)
 
 
