@@ -21,6 +21,7 @@ import { Transaction } from 'types';
 import { ethers } from 'ethers';
 import { getAssetPriceUSD } from './coinGecko';
 import semver from 'semver/preload';
+import { ConstructionOutlined } from '@mui/icons-material';
 
 export const useStarkNetSnap = () => {
   const dispatch = useAppDispatch();
@@ -166,6 +167,10 @@ export const useStarkNetSnap = () => {
   const oldVersionDetected = async () => {
     const snaps = await ethereum.request({ method: 'wallet_getSnaps' });
     if (typeof snaps[snapId]?.version !== 'undefined') {
+      console.log(`snaps[snapId][version]: ${snaps[snapId]?.version}`);
+      console.log(`snaps[snapId][version].split('_')[0]: ${snaps[snapId]?.version?.split('-')?.[0]}`);
+      console.log(`minSnapVersion: ${minSnapVersion}`);
+      console.log(`semver.lt: ${semver.lt(snaps[snapId]?.version?.split('-')?.[0], minSnapVersion)}`);
       return semver.lt(snaps[snapId]?.version?.split('-')?.[0], minSnapVersion);
     }
     return false;
