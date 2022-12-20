@@ -21,7 +21,6 @@ import { Transaction } from 'types';
 import { ethers } from 'ethers';
 import { getAssetPriceUSD } from './coinGecko';
 import semver from 'semver/preload';
-import { ConstructionOutlined } from '@mui/icons-material';
 
 export const useStarkNetSnap = () => {
   const dispatch = useAppDispatch();
