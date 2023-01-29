@@ -211,7 +211,9 @@ export async function upsertAccount(userAccount: AccContract, wallet, mutex: Mut
     if (!state) {
       state = await wallet.request({
         method: 'snap_manageState',
-        params: ['get'],
+        params: {
+          operation: 'get',
+        },
       });
     }
 
@@ -237,7 +239,10 @@ export async function upsertAccount(userAccount: AccContract, wallet, mutex: Mut
 
     await wallet.request({
       method: 'snap_manageState',
-      params: ['update', state],
+      params: {
+        operation: 'update',
+        newState: state,
+      },
     });
   });
 }
@@ -257,7 +262,9 @@ export async function upsertNetwork(network: Network, wallet, mutex: Mutex, stat
     if (!state) {
       state = await wallet.request({
         method: 'snap_manageState',
-        params: ['get'],
+        params: {
+          operation: 'get',
+        },
       });
     }
 
@@ -284,7 +291,10 @@ export async function upsertNetwork(network: Network, wallet, mutex: Mutex, stat
 
     await wallet.request({
       method: 'snap_manageState',
-      params: ['update', state],
+      params: {
+        operation: 'update',
+        newState: state,
+      },
     });
   });
 }
@@ -308,7 +318,9 @@ export async function upsertErc20Token(erc20Token: Erc20Token, wallet, mutex: Mu
     if (!state) {
       state = await wallet.request({
         method: 'snap_manageState',
-        params: ['get'],
+        params: {
+          operation: 'get',
+        },
       });
     }
 
@@ -334,7 +346,10 @@ export async function upsertErc20Token(erc20Token: Erc20Token, wallet, mutex: Mu
 
     await wallet.request({
       method: 'snap_manageState',
-      params: ['update', state],
+      params: {
+        operation: 'update',
+        newState: state,
+      },
     });
   });
 }
@@ -415,7 +430,9 @@ export async function upsertTransaction(txn: Transaction, wallet, mutex: Mutex, 
     if (!state) {
       state = await wallet.request({
         method: 'snap_manageState',
-        params: ['get'],
+        params: {
+          operation: 'get',
+        },
       });
     }
 
@@ -439,7 +456,10 @@ export async function upsertTransaction(txn: Transaction, wallet, mutex: Mutex, 
 
     await wallet.request({
       method: 'snap_manageState',
-      params: ['update', state],
+      params: {
+        operation: 'update',
+        newState: state,
+      },
     });
   });
 }
@@ -449,7 +469,9 @@ export async function upsertTransactions(txns: Transaction[], wallet, mutex: Mut
     if (!state) {
       state = await wallet.request({
         method: 'snap_manageState',
-        params: ['get'],
+        params: {
+          operation: 'get',
+        },
       });
     }
 
@@ -469,7 +491,10 @@ export async function upsertTransactions(txns: Transaction[], wallet, mutex: Mut
 
     await wallet.request({
       method: 'snap_manageState',
-      params: ['update', state],
+      params: {
+        operation: 'update',
+        newState: state,
+      },
     });
   });
 }
@@ -484,7 +509,9 @@ export async function removeAcceptedTransaction(
     if (!state) {
       state = await wallet.request({
         method: 'snap_manageState',
-        params: ['get'],
+        params: {
+          operation: 'get',
+        },
       });
     }
 
@@ -495,7 +522,10 @@ export async function removeAcceptedTransaction(
     );
     await wallet.request({
       method: 'snap_manageState',
-      params: ['update', state],
+      params: {
+        operation: 'update',
+        newState: state,
+      },
     });
   });
 }

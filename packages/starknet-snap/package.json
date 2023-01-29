@@ -28,7 +28,7 @@
     "@lavamoat/preinstall-always-fail": "^1.0.0",
     "@metamask/key-tree": "^6.0.0",
     "@metamask/snap-types": "^0.23.0",
-    "@metamask/snaps-cli": "^0.23.0",
+    "@metamask/snaps-cli": "^0.27.1",
     "@types/chai": "^4.3.1",
     "@types/sinon": "^10.0.11",
     "@types/sinon-chai": "^3.2.8",
@@ -60,10 +60,7 @@
   },
   "lavamoat": {
     "allowScripts": {
-      "@lavamoat/preinstall-always-fail": false,
-      "@metamask/snap-types>@metamask/controllers>babel-runtime>core-js": true,
-      "@starkware-industries/starkware-crypto-utils>ethereumjs-wallet>ethereum-cryptography>keccak": true,
-      "@starkware-industries/starkware-crypto-utils>ethereumjs-wallet>ethereum-cryptography>secp256k1": true
+      "@lavamoat/preinstall-always-fail": false
     }
   },
   "nyc": {

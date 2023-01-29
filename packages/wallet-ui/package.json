@@ -106,8 +106,6 @@
   },
   "lavamoat": {
     "allowScripts": {
-      "@consensys/starknet-snap>@starkware-industries/starkware-crypto-utils>ethereumjs-wallet>ethereum-cryptography>keccak": true,
-      "@consensys/starknet-snap>@starkware-industries/starkware-crypto-utils>ethereumjs-wallet>ethereum-cryptography>secp256k1": true,
       "@fortawesome/fontawesome-svg-core": true,
       "@fortawesome/free-regular-svg-icons": true,
       "@fortawesome/free-solid-svg-icons": true,

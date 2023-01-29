@@ -36,12 +36,10 @@ export const useStarkNetSnap = () => {
     dispatch(enableLoadingWithMessage('Connecting...'));
     ethereum
       .request({
-        method: 'wallet_enable',
-        params: [
-          {
-            wallet_snap: { [snapId]: { version: snapVersion } },
-          },
-        ],
+        method: 'wallet_requestSnaps',
+        params: {
+          [snapId]: { version: snapVersion },
+        },
       })
       .then(() => {
         dispatch(setWalletConnection(true));
@@ -58,12 +56,12 @@ export const useStarkNetSnap = () => {
     ethereum
       .request({
         method: 'wallet_invokeSnap',
-        params: [
+        params: {
           snapId,
-          {
+          request: {
             method: 'ping',
           },
-        ],
+        },
       })
       .then(() => {
         dispatch(setWalletConnection(true));
@@ -79,12 +77,12 @@ export const useStarkNetSnap = () => {
   const getNetworks = async () => {
     const data = (await ethereum.request({
       method: 'wallet_invokeSnap',
-      params: [
+      params: {
         snapId,
-        {
+        request: {
           method: 'starkNet_getStoredNetworks',
         },
-      ],
+      },
     })) as Network[];
     return data;
   };
@@ -92,15 +90,15 @@ export const useStarkNetSnap = () => {
   const getTokens = async (chainId: string) => {
     const tokens = (await ethereum.request({
       method: 'wallet_invokeSnap',
-      params: [
+      params: {
         snapId,
-        {
+        request: {
           method: 'starkNet_getStoredErc20Tokens',
           params: {
             chainId,
           },
         },
-      ],
+      },
     })) as Erc20Token[];
     return tokens;
   };
@@ -111,9 +109,9 @@ export const useStarkNetSnap = () => {
     const MAX_MISSED = 1;
     const scannedAccounts = (await ethereum.request({
       method: 'wallet_invokeSnap',
-      params: [
+      params: {
         snapId,
-        {
+        request: {
           method: 'starkNet_recoverAccounts',
           params: {
             startScanIndex: START_SCAN_INDEX,
@@ -123,7 +121,7 @@ export const useStarkNetSnap = () => {
             useOldAccounts,
           },
         },
-      ],
+      },
     })) as Account[];
     return scannedAccounts;
   };
@@ -131,15 +129,15 @@ export const useStarkNetSnap = () => {
   const getAccounts = async (chainId: string) => {
     const data = (await ethereum.request({
       method: 'wallet_invokeSnap',
-      params: [
+      params: {
         snapId,
-        {
+        request: {
           method: 'starkNet_getStoredUserAccounts',
           params: {
             chainId,
           },
         },
-      ],
+      },
     })) as Account[];
     return data;
   };
@@ -147,9 +145,9 @@ export const useStarkNetSnap = () => {
   const addAccount = async (chainId: string, useOldAccounts = false) => {
     const data = (await ethereum.request({
       method: 'wallet_invokeSnap',
-      params: [
+      params: {
         snapId,
-        {
+        request: {
           method: 'starkNet_createAccount',
           params: {
             addressIndex: 0,
@@ -158,7 +156,7 @@ export const useStarkNetSnap = () => {
             deploy: false,
           },
         },
-      ],
+      },
     })) as Account;
     return data;
   };
@@ -256,9 +254,9 @@ export const useStarkNetSnap = () => {
     try {
       await ethereum.request({
         method: 'wallet_invokeSnap',
-        params: [
+        params: {
           snapId,
-          {
+          request: {
             method: 'starkNet_extractPrivateKey',
             params: {
               userAddress: address,
@@ -266,7 +264,7 @@ export const useStarkNetSnap = () => {
               useOldAccounts,
             },
           },
-        ],
+        },
       });
     } catch (err) {
       //eslint-disable-next-line no-console
@@ -285,9 +283,9 @@ export const useStarkNetSnap = () => {
     try {
       const response = await ethereum.request({
         method: 'wallet_invokeSnap',
-        params: [
+        params: {
           snapId,
-          {
+          request: {
             method: 'starkNet_estimateFee',
             params: {
               contractAddress,
@@ -298,7 +296,7 @@ export const useStarkNetSnap = () => {
               useOldAccounts,
             },
           },
-        ],
+        },
       });
       return response;
     } catch (err) {
@@ -320,9 +318,9 @@ export const useStarkNetSnap = () => {
     try {
       const response = await ethereum.request({
         method: 'wallet_invokeSnap',
-        params: [
+        params: {
           snapId,
-          {
+          request: {
             method: 'starkNet_sendTransaction',
             params: {
               contractAddress,
@@ -334,7 +332,7 @@ export const useStarkNetSnap = () => {
               useOldAccounts,
             },
           },
-        ],
+        },
       });
       dispatch(disableLoading());
       return response;
@@ -362,9 +360,9 @@ export const useStarkNetSnap = () => {
     try {
       const data = await ethereum.request({
         method: 'wallet_invokeSnap',
-        params: [
+        params: {
           snapId,
-          {
+          request: {
             method: 'starkNet_getTransactions',
             params: {
               senderAddress,
@@ -376,7 +374,7 @@ export const useStarkNetSnap = () => {
               chainId,
             },
           },
-        ],
+        },
       });
 
       let storedTxns = data;
@@ -426,9 +424,9 @@ export const useStarkNetSnap = () => {
     dispatch(enableLoadingWithMessage('Adding Token...'));
     const token = await ethereum.request({
       method: 'wallet_invokeSnap',
-      params: [
+      params: {
         snapId,
-        {
+        request: {
           method: 'starkNet_addErc20Token',
           params: {
             tokenAddress,
@@ -438,7 +436,7 @@ export const useStarkNetSnap = () => {
             chainId,
           },
         },
-      ],
+      },
     });
     const tokenBalance = await getTokenBalance(tokenAddress, accountAddress, chainId);
     const usdPrice = await getAssetPriceUSD(token);
@@ -470,9 +468,9 @@ export const useStarkNetSnap = () => {
     try {
       const response = await ethereum.request({
         method: 'wallet_invokeSnap',
-        params: [
+        params: {
           snapId,
-          {
+          request: {
             method: 'starkNet_getErc20TokenBalance',
             params: {
               tokenAddress,
@@ -480,7 +478,7 @@ export const useStarkNetSnap = () => {
               chainId,
             },
           },
-        ],
+        },
       });
       return response;
     } catch (err) {

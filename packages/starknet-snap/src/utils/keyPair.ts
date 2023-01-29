@@ -1,4 +1,4 @@
-import { getBIP44AddressKeyDeriver } from '@metamask/key-tree';
+import { BIP44AddressKeyDeriver, getBIP44AddressKeyDeriver } from '@metamask/key-tree';
 import { number, encode, ec } from 'starknet';
 import { utils } from 'ethers';
 
@@ -43,7 +43,7 @@ function hashKeyWithIndex(key: string, index: number) {
   return number.toBN(hash);
 }
 
-export async function getAddressKey(keyDeriver, addressIndex = 0, useOldAccounts = false) {
+export async function getAddressKey(keyDeriver: BIP44AddressKeyDeriver, addressIndex = 0, useOldAccounts = false) {
   const privateKey = (await keyDeriver(addressIndex)).privateKey;
   const chainCode = (await keyDeriver(addressIndex)).chainCode;
   const addressKey = useOldAccounts

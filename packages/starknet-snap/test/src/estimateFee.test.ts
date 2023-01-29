@@ -5,7 +5,7 @@ import { WalletMock } from '../wallet.mock.test';
 import * as utils from '../../src/utils/starknetUtils';
 import { estimateFee } from '../../src/estimateFee';
 import { SnapState } from '../../src/types/snapState';
-import { STARKNET_TESTNET_NETWORK } from '../../src/utils/constants';
+import { STARKNET_TESTNET_NETWORK, STARKNET_TESTNET_NETWORK_DEPRECATED } from '../../src/utils/constants';
 import { getAddressKeyDeriver } from '../../src/utils/keyPair';
 import { account2, estimateFeeResp, estimateFeeResp2, getBip44EntropyStub } from '../constants.test';
 import { Mutex } from 'async-mutex';
@@ -20,7 +20,7 @@ describe('Test function: estimateFee', function () {
   const state: SnapState = {
     accContracts: [account2],
     erc20Tokens: [],
-    networks: [STARKNET_TESTNET_NETWORK],
+    networks: [STARKNET_TESTNET_NETWORK, STARKNET_TESTNET_NETWORK_DEPRECATED],
     transactions: [],
   };
   const requestObject: EstimateFeeRequestParams = {
@@ -61,6 +61,18 @@ describe('Test function: estimateFee', function () {
     sandbox.stub(utils, 'estimateFeeBulk').callsFake(async () => {
       return [estimateFeeResp2];
     });
+    const result = await estimateFee(apiParams);
+    expect(result.suggestedMaxFee).to.be.eq(estimateFeeResp.suggestedMaxFee.toString(10));
+  });
+
+  it('should estimate the fee correctly for an old account', async function () {
+    sandbox.stub(utils, 'estimateFee_v4_6_0').callsFake(async () => {
+      return estimateFeeResp;
+    });
+    apiParams.requestParams = {
+      ...requestObject,
+      useOldAccounts: true,
+    };
     const result = await estimateFee(apiParams);
     expect(result.suggestedMaxFee).to.be.eq(estimateFeeResp.suggestedMaxFee.toString(10));
   });

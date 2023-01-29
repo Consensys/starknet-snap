@@ -1,3 +1,5 @@
+import { RawCalldata } from 'starknet';
+
 export interface SnapState {
   accContracts: AccContract[];
   erc20Tokens: Erc20Token[];
@@ -61,7 +63,7 @@ export interface Transaction {
   senderAddress: string; // in hex
   contractAddress: string; // in hex
   contractFuncName: string;
-  contractCallData: string[];
+  contractCallData: RawCalldata;
   status: TransactionStatus | string;
   failureReason: string;
   eventIds: string[];
