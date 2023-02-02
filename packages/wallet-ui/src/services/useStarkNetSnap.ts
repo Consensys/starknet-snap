@@ -166,10 +166,10 @@ export const useStarkNetSnap = () => {
   const oldVersionDetected = async () => {
     const snaps = await ethereum.request({ method: 'wallet_getSnaps' });
     if (typeof snaps[snapId]?.version !== 'undefined') {
-      console.log(`snaps[snapId][version]: ${snaps[snapId]?.version}`);
-      console.log(`snaps[snapId][version].split('_')[0]: ${snaps[snapId]?.version?.split('-')?.[0]}`);
-      console.log(`minSnapVersion: ${minSnapVersion}`);
-      console.log(`semver.lt: ${semver.lt(snaps[snapId]?.version?.split('-')?.[0], minSnapVersion)}`);
+      // console.log(`snaps[snapId][version]: ${snaps[snapId]?.version}`);
+      // console.log(`snaps[snapId][version].split('_')[0]: ${snaps[snapId]?.version?.split('-')?.[0]}`);
+      // console.log(`minSnapVersion: ${minSnapVersion}`);
+      // console.log(`semver.lt: ${semver.lt(snaps[snapId]?.version?.split('-')?.[0], minSnapVersion)}`);
       return semver.lt(snaps[snapId]?.version?.split('-')?.[0], minSnapVersion);
     }
     return false;

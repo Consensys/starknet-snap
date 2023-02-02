@@ -15,8 +15,7 @@ export async function getAddressKeyDeriver(wallet) {
   return getBIP44AddressKeyDeriver(bip44Node);
 }
 
-export function grindKey(keySeed: string): string {
-  const keyValueLimit = ec.ec.n;
+export function grindKey(keySeed: string, keyValueLimit = ec.ec.n): string {
   if (!keyValueLimit) {
     return keySeed;
   }
