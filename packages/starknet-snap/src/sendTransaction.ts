@@ -87,7 +87,8 @@ export async function sendTransaction(params: ApiParams) {
       `sendTransaction:\ntxnInvocation: ${JSON.stringify(txnInvocation)}\nmaxFee: ${JSON.stringify(maxFee)}}`,
     );
 
-    const accountDeployed = isAccountDeployed(network, publicKey);
+    const accountDeployed = await isAccountDeployed(network, publicKey);
+    console.log('accountDeployed', accountDeployed);
     if (!accountDeployed) {
       //Deploy account before sending the transaction
       console.log('sendTransaction:\nFirst transaction : send deploy transaction');
@@ -96,7 +97,7 @@ export async function sendTransaction(params: ApiParams) {
         wallet: params.wallet,
         saveMutex: params.saveMutex,
         keyDeriver,
-        requestParams: { addressIndex: 0 },
+        requestParams: { addressIndex: 0, deploy: true },
       };
       await createAccount(createAccountApiParams);
     }
