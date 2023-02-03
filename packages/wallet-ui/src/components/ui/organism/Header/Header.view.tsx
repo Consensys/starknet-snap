@@ -50,17 +50,12 @@ export const HeaderView = ({ address }: Props) => {
 
   const handleSendClick = () => {
     if (
-      wallet.transactionDeploy?.status === 'Accepted on L1' ||
-      wallet.transactionDeploy?.status === 'Accepted on L2' ||
-      wallet.transactionDeploy?.status === TransactionStatus.ACCEPTED_ON_L1 ||
-      wallet.transactionDeploy?.status === TransactionStatus.ACCEPTED_ON_L2
-    ) {
-      setSendOpen(true);
-    } else if (
       wallet.transactionDeploy?.status === 'Rejected' ||
       wallet.transactionDeploy?.status === TransactionStatus.REJECTED
     ) {
       setNeedMoreETH(true);
+    } else {
+      setSendOpen(true);
     }
   };
 

@@ -1,7 +1,7 @@
 import { number, constants, validateAndParseAddress } from 'starknet';
 import { estimateFee } from './estimateFee';
 import { Transaction, TransactionStatus, VoyagerTransactionType } from './types/snapState';
-import { getNetworkFromChainId, getSigningTxnText, upsertTransaction } from './utils/snapUtils';
+import { getAccounts, getNetworkFromChainId, getSigningTxnText, upsertTransaction } from './utils/snapUtils';
 import {
   getKeyPairFromPrivateKey,
   getKeysFromAddress,
@@ -10,6 +10,7 @@ import {
   executeTxn_v4_6_0,
 } from './utils/starknetUtils';
 import { ApiParams, SendTransactionRequestParams } from './types/snapApi';
+import { createAccount } from './createAccount';
 
 export async function sendTransaction(params: ApiParams) {
   try {
@@ -69,6 +70,19 @@ export async function sendTransaction(params: ApiParams) {
       ],
     });
     if (!response) return false;
+
+    //First deploy the account if it has not been deployed yet
+    const userAccounts = getAccounts(state, network.chainId).filter(
+      (acc) => (acc.publicKey !== '' || acc.deployTxnHash !== '') && acc.address === senderAddress,
+    );
+    console.log('Accounts found', userAccounts);
+    if (userAccounts.length === 0) {
+      //Deploy account before sending the transaction
+      console.log('Start deployment');
+      const createAccountApiParams = { state, wallet, saveMutex, keyDeriver, requestParams: { addressIndex: 0 } };
+      await createAccount(createAccountApiParams);
+      console.log('Finished deployment');
+    }
 
     const txnInvocation = {
       contractAddress,

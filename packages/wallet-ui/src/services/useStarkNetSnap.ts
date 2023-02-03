@@ -215,8 +215,8 @@ export const useStarkNetSnap = () => {
       if (useOldAccounts) {
         dispatch(enableLoadingWithMessage('Skipped deploying old version account ...'));
       } else {
-        dispatch(enableLoadingWithMessage('Deploying account ...'));
-        acc = await addAccount(chainId, useOldAccounts);
+        // dispatch(enableLoadingWithMessage('Deploying account ...'));
+        // acc = await addAccount(chainId, useOldAccounts);
       }
     }
     const tokenBalances = await Promise.all(
