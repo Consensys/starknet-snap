@@ -51,7 +51,8 @@ export const HeaderView = ({ address }: Props) => {
   const handleSendClick = () => {
     if (
       wallet.transactionDeploy?.status === 'Rejected' ||
-      wallet.transactionDeploy?.status === TransactionStatus.REJECTED
+      wallet.transactionDeploy?.status === TransactionStatus.REJECTED ||
+      wallet.transactionDeploy?.status === undefined
     ) {
       setNeedMoreETH(true);
     } else {

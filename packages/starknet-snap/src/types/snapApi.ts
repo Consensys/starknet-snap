@@ -34,6 +34,7 @@ export interface BaseRequestParams {
   chainId?: string;
   isDev?: boolean;
   useOldAccounts?: boolean;
+  deploy?: boolean;
 }
 
 export interface CreateAccountRequestParams extends BaseRequestParams {

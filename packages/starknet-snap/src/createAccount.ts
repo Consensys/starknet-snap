@@ -53,7 +53,8 @@ export async function createAccount(params: ApiParams) {
     }
     if (signerAssigned) {
       failureReason = 'The account address had already been deployed';
-    } else {
+    }
+    if (requestParamsObj.deploy) {
       try {
         const getBalanceResp = await callContract(
           network,
@@ -80,52 +81,55 @@ export async function createAccount(params: ApiParams) {
         failureReason = 'The account address ETH balance cannot be read';
         console.error(`createAccount: failed to read the ETH balance of ${contractAddress}: ${err}`);
       }
-    }
 
-    const deployResp = await deployAccount(
-      network,
-      contractAddress,
-      contractCallData,
-      publicKey,
-      keyPair,
-      estimateDeployFee?.suggestedMaxFee,
-    );
-
-    if (deployResp.contract_address && deployResp.transaction_hash) {
-      const userAccount: AccContract = {
-        addressSalt: publicKey,
+      const deployResp = await deployAccount(
+        network,
+        contractAddress,
+        contractCallData,
         publicKey,
+        keyPair,
+        estimateDeployFee?.suggestedMaxFee,
+      );
+
+      if (deployResp.contract_address && deployResp.transaction_hash) {
+        const userAccount: AccContract = {
+          addressSalt: publicKey,
+          publicKey,
+          address: deployResp.contract_address,
+          addressIndex: addressIndexInUsed,
+          derivationPath,
+          deployTxnHash: deployResp.transaction_hash,
+          chainId: network.chainId,
+        };
+
+        await upsertAccount(userAccount, wallet, saveMutex);
+
+        const txn: Transaction = {
+          txnHash: deployResp.transaction_hash,
+          txnType: VoyagerTransactionType.DEPLOY_ACCOUNT,
+          chainId: network.chainId,
+          senderAddress: deployResp.contract_address,
+          contractAddress: deployResp.contract_address,
+          contractFuncName: '',
+          contractCallData: [],
+          status: TransactionStatus.RECEIVED,
+          failureReason,
+          eventIds: [],
+          timestamp: Math.floor(Date.now() / 1000),
+        };
+
+        await upsertTransaction(txn, wallet, saveMutex);
+      }
+
+      console.log(`createAccount:\ndeployResp: ${JSON.stringify(deployResp)}`);
+
+      return {
         address: deployResp.contract_address,
-        addressIndex: addressIndexInUsed,
-        derivationPath,
-        deployTxnHash: deployResp.transaction_hash,
-        chainId: network.chainId,
+        transaction_hash: deployResp.transaction_hash,
       };
-
-      await upsertAccount(userAccount, wallet, saveMutex);
-
-      const txn: Transaction = {
-        txnHash: deployResp.transaction_hash,
-        txnType: VoyagerTransactionType.DEPLOY_ACCOUNT,
-        chainId: network.chainId,
-        senderAddress: deployResp.contract_address,
-        contractAddress: deployResp.contract_address,
-        contractFuncName: '',
-        contractCallData: [],
-        status: TransactionStatus.RECEIVED,
-        failureReason,
-        eventIds: [],
-        timestamp: Math.floor(Date.now() / 1000),
-      };
-
-      await upsertTransaction(txn, wallet, saveMutex);
     }
-
-    console.log(`createAccount:\ndeployResp: ${JSON.stringify(deployResp)}`);
-
     return {
-      address: deployResp.contract_address,
-      transaction_hash: deployResp.transaction_hash,
+      address: contractAddress,
     };
   } catch (err) {
     console.error(`Problem found: ${err}`);
