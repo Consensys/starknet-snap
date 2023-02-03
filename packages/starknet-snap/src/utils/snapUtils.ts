@@ -75,7 +75,7 @@ function isPreloadedTokenAddress(tokenAddress: string, chainId: string) {
 }
 
 function isPreloadedNetworkChainId(networkChainId: string) {
-  return !!PRELOADED_NETWORKS.find((network) => Number(network.chainId) === Number(networkChainId));
+  return !!PRELOADED_NETWORKS.find((network) => number.toBN(network.chainId).eq(number.toBN(networkChainId)));
 }
 
 function isPreloadedNetworkName(networkName: string) {
@@ -231,7 +231,7 @@ export async function upsertAccount(userAccount: AccContract, wallet, mutex: Mut
       storedAccount.addressSalt = userAccount.addressSalt;
       storedAccount.addressIndex = userAccount.addressIndex;
       storedAccount.derivationPath = userAccount.derivationPath;
-      storedAccount.publicKey = userAccount.publicKey || storedAccount.publicKey;
+      storedAccount.publicKey = userAccount.publicKey;
       storedAccount.deployTxnHash = userAccount.deployTxnHash || storedAccount.deployTxnHash;
     }
 
