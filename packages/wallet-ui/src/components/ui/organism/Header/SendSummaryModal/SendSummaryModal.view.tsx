@@ -18,6 +18,7 @@ import {
   Wrapper,
   EstimatedFeesTooltip,
   LoadingWrapper,
+  IncludeDeploy,
 } from './SendSummaryModal.style';
 import { useAppSelector } from 'hooks/redux';
 import { useEffect, useState } from 'react';
@@ -37,7 +38,7 @@ export const SendSummaryModalView = ({ address, amount, chainId, closeModal }: P
   const wallet = useAppSelector((state) => state.wallet);
   const networks = useAppSelector((state) => state.networks);
   const [estimatingGas, setEstimatingGas] = useState(true);
-  const [gasFees, setGasFees] = useState({ suggestedMaxFee: '0', unit: 'wei' });
+  const [gasFees, setGasFees] = useState({ suggestedMaxFee: '0', unit: 'wei', includeDeploy: false });
   const [gasFeesError, setGasFeesError] = useState(false);
   const [gasFeesAmount, setGasFeesAmount] = useState('');
   const [gasFeesAmountUSD, setGasFeesAmountUSD] = useState('');
@@ -212,6 +213,7 @@ export const SendSummaryModalView = ({ address, amount, chainId, closeModal }: P
           </RightSummary>
         </Summary>
         {!estimatingGas && <TotalAmount>Maximum fees: {gasFeesAmount} ETH</TotalAmount>}
+        {gasFees.includeDeploy && <IncludeDeploy>*Fees include a one time deployment fee</IncludeDeploy>}
         <Summary>
           <LeftSummary>
             <PopperTooltip placement="right" closeTrigger="hover" content="Amount + Fee">

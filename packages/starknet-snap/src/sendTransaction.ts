@@ -1,13 +1,14 @@
 import { number, constants, validateAndParseAddress } from 'starknet';
 import { estimateFee } from './estimateFee';
 import { Transaction, TransactionStatus, VoyagerTransactionType } from './types/snapState';
-import { getAccounts, getNetworkFromChainId, getSigningTxnText, upsertTransaction } from './utils/snapUtils';
+import { getNetworkFromChainId, getSigningTxnText, upsertTransaction } from './utils/snapUtils';
 import {
   getKeyPairFromPrivateKey,
   getKeysFromAddress,
   getCallDataArray,
   executeTxn,
   executeTxn_v4_6_0,
+  isAccountDeployed,
 } from './utils/starknetUtils';
 import { ApiParams, SendTransactionRequestParams } from './types/snapApi';
 import { createAccount } from './createAccount';
@@ -42,7 +43,12 @@ export async function sendTransaction(params: ApiParams) {
     const senderAddress = requestParamsObj.senderAddress;
     const useOldAccounts = !!requestParamsObj.useOldAccounts;
     const network = getNetworkFromChainId(state, requestParamsObj.chainId, useOldAccounts);
-    const { privateKey: senderPrivateKey } = await getKeysFromAddress(keyDeriver, network, state, senderAddress);
+    const { privateKey: senderPrivateKey, publicKey } = await getKeysFromAddress(
+      keyDeriver,
+      network,
+      state,
+      senderAddress,
+    );
     const senderKeyPair = getKeyPairFromPrivateKey(senderPrivateKey);
     let maxFee = requestParamsObj.maxFee ? number.toBN(requestParamsObj.maxFee) : constants.ZERO;
     if (maxFee.eq(constants.ZERO)) {
@@ -71,19 +77,6 @@ export async function sendTransaction(params: ApiParams) {
     });
     if (!response) return false;
 
-    //First deploy the account if it has not been deployed yet
-    const userAccounts = getAccounts(state, network.chainId).filter(
-      (acc) => (acc.publicKey !== '' || acc.deployTxnHash !== '') && acc.address === senderAddress,
-    );
-    console.log('Accounts found', userAccounts);
-    if (userAccounts.length === 0) {
-      //Deploy account before sending the transaction
-      console.log('Start deployment');
-      const createAccountApiParams = { state, wallet, saveMutex, keyDeriver, requestParams: { addressIndex: 0 } };
-      await createAccount(createAccountApiParams);
-      console.log('Finished deployment');
-    }
-
     const txnInvocation = {
       contractAddress,
       entrypoint: contractFuncName,
@@ -94,9 +87,25 @@ export async function sendTransaction(params: ApiParams) {
       `sendTransaction:\ntxnInvocation: ${JSON.stringify(txnInvocation)}\nmaxFee: ${JSON.stringify(maxFee)}}`,
     );
 
+    const accountDeployed = isAccountDeployed(network, publicKey);
+    if (!accountDeployed) {
+      //Deploy account before sending the transaction
+      console.log('sendTransaction:\nFirst transaction : send deploy transaction');
+      const createAccountApiParams = {
+        state,
+        wallet: params.wallet,
+        saveMutex: params.saveMutex,
+        keyDeriver,
+        requestParams: { addressIndex: 0 },
+      };
+      await createAccount(createAccountApiParams);
+    }
+
+    //In case this is the first transaction we assign a nonce of 1 to make sure it does after the deploy transaction
+    const nonceSendTransaction = accountDeployed ? undefined : 1;
     const txnResp = useOldAccounts
-      ? await executeTxn_v4_6_0(network, senderAddress, senderKeyPair, txnInvocation, maxFee)
-      : await executeTxn(network, senderAddress, senderKeyPair, txnInvocation, maxFee);
+      ? await executeTxn_v4_6_0(network, senderAddress, senderKeyPair, txnInvocation, maxFee, nonceSendTransaction)
+      : await executeTxn(network, senderAddress, senderKeyPair, txnInvocation, maxFee, nonceSendTransaction);
 
     console.log(`sendTransaction:\ntxnResp: ${JSON.stringify(txnResp)}`);
 

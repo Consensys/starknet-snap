@@ -82,6 +82,13 @@ export const TotalAmount = styled.div`
   align-self: flex-end;
 `;
 
+export const IncludeDeploy = styled.div`
+  margin-top: ${(props) => props.theme.spacing.tiny2};
+  font-size: ${(props) => props.theme.typography.c1.fontSize};
+  color: ${(props) => props.theme.palette.grey.grey1};
+  align-self: flex-end;
+`;
+
 export const Buttons = styled.div`
   display: flex;
   flex-direction: row;
