@@ -33,6 +33,7 @@ export interface BaseRequestParams {
   chainId?: string;
   isDev?: boolean;
   useOldAccounts?: boolean;
+  deploy?: boolean;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
