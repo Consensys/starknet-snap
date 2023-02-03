@@ -88,7 +88,6 @@ export async function sendTransaction(params: ApiParams) {
     );
 
     const accountDeployed = await isAccountDeployed(network, publicKey);
-    console.log('accountDeployed', accountDeployed);
     if (!accountDeployed) {
       //Deploy account before sending the transaction
       console.log('sendTransaction:\nFirst transaction : send deploy transaction');
