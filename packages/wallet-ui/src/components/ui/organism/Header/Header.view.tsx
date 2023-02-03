@@ -70,15 +70,10 @@ export const HeaderView = ({ address }: Props) => {
         <HeaderButton onClick={() => setReceiveOpen(true)}>Receive</HeaderButton>
         <PopperTooltip
           content={
-            !sendOpen && needMoreETH ? (
+            needMoreETH && (
               <div>
                 Your account needs to hold enough ETH before being deployed,<br></br> Please send enough ETH to this
                 account address and try again by refreshing the page
-              </div>
-            ) : (
-              <div>
-                Please try again in a few minutes. Your account is still being deployed on StarkNet,<br></br> you’ll be
-                able to send after the transaction is accepted by the network
               </div>
             )
           }
