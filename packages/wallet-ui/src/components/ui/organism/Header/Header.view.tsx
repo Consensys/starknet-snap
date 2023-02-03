@@ -49,14 +49,11 @@ export const HeaderView = ({ address }: Props) => {
   }, [wallet.erc20TokenBalanceSelected]);
 
   const handleSendClick = () => {
-    if (
-      wallet.transactionDeploy?.status === 'Rejected' ||
-      wallet.transactionDeploy?.status === TransactionStatus.REJECTED ||
-      wallet.transactionDeploy?.status === undefined
-    ) {
-      setNeedMoreETH(true);
-    } else {
+    if (Number(wallet.erc20TokenBalanceSelected.amount) > 0) {
       setSendOpen(true);
+      setNeedMoreETH(false);
+    } else {
+      setNeedMoreETH(true);
     }
   };
 
