@@ -254,6 +254,41 @@
       "errors": []
     },
     {
+      "name": "starkNet_estimateAccountDeployFee",
+      "summary": "Gets the estimated gas fee for deploying an account contract",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "addressIndex",
+          "summary": "Specific address index of the derived key in BIP-44",
+          "description": "Specific address index of the derived key in BIP-44",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        {
+          "name": "chainId",
+          "summary": "Id of the target StarkNet network",
+          "description": "Id of the target StarkNet network (default to StarkNet Goerli Testnet)",
+          "required": false,
+          "schema": {
+            "$ref": "#/components/schemas/CHAIN_ID"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "summary": "Response from StarkNet’s \"feeder_gateway/estimate_fee\" endpoint",
+        "description": "Response from StarkNet’s \"feeder_gateway/estimate_fee\" endpoint",
+        "schema": {
+          "$ref": "#/components/schemas/ESTIMATE_FEE_RESULT"
+        }
+      },
+      "errors": []
+    },
+    {
       "name": "starkNet_sendTransaction",
       "summary": "Sign and send a transaction",
       "paramStructure": "by-name",

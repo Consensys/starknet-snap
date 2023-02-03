@@ -162,6 +162,14 @@
       <input type="submit" id="getEstimateFee" value="Get Estimate Fee">
     </fieldset>
   </form>
+  <form id="getEstimateAccountDeployFee">
+    <fieldset>
+      <legend>Get Estimate Account Deploy Fee</legend>
+      <label for="addressIndex">Specific Address Index (optional)</label>
+      <input type="text" id="estimateDeployFeeAddressIndex" name="estimateDeployFeeAddressIndex"><br>
+      <input type="submit" id="getEstimateAccountDeployFee" value="Get Estimate Account Deploy Fee">
+    </fieldset>
+  </form>
   <form id="callContract">
     <fieldset>
       <legend>Call Contract (READ-ONLY)</legend>
@@ -263,6 +271,7 @@
   const sendPingButton = document.querySelector('button.sendPing')
   const getErc20BalanceForm = document.getElementById('getErc20Balance')
   const getEstimateFeeForm = document.getElementById('getEstimateFee')
+  const getEstimateAccountDeployFeeForm = document.getElementById('getEstimateAccountDeployFee')
   const getDeployedAccContractsForm = document.getElementById('getDeployedAccContracts')
   const transferErc20Form = document.getElementById('transferErc20')
   const getTransactionStatusForm = document.getElementById('getTransactionStatus')
@@ -287,6 +296,7 @@
   getDeployedAccContractsForm.addEventListener('submit', getDeployedAccContracts)
   getErc20BalanceForm.addEventListener('submit', getErc20Balance)
   getEstimateFeeForm.addEventListener('submit', getEstimateFee)
+  getEstimateAccountDeployFeeForm.addEventListener('submit', getEstimateAccountDeployFee)
   transferErc20Form.addEventListener('submit', transferErc20)
   getTransactionStatusForm.addEventListener('submit', getTransactionStatus)
   deployUserAccContractForm.addEventListener('submit', deployUserAccContract)
@@ -408,6 +418,31 @@
       })
 
       console.log(`response: ${response}`);
+    } catch (err) {
+      console.error(err)
+      alert('Problem happened: ' + err.message || err)
+    }
+  }
+
+  // here we call the snap's "starkNet_estimateAccountDeployFee" method
+  async function getEstimateAccountDeployFee(e) {
+    e.preventDefault() // to prevent default form behavior
+
+    const addressIndex = document.getElementById('estimateDeployFeeAddressIndex').value
+    const chainId = document.getElementById('targetChainId').value
+
+    try {
+      const response = await ethereum.request({
+        method: 'wallet_invokeSnap',
+        params: [snapId, {
+          method: 'starkNet_estimateAccountDeployFee',
+          params: {
+            addressIndex,
+            chainId,
+            ...getReqFlagsFromCheckbox(),
+          }
+        }]
+      })
     } catch (err) {
       console.error(err)
       alert('Problem happened: ' + err.message || err)

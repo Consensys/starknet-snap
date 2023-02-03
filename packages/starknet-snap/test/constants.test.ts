@@ -239,8 +239,20 @@ export const estimateDeployFeeResp = {
 export const estimateDeployFeeResp2 = {
   overall_fee: number.toBN('0xaff3f0a7'),
   gas_consumed: number.toBN('0x18e1'),
-  suggestedMaxFee: number.toBN('0x071287'),
-  gas_price: number.toBN('0x0107ede8fa'),
+  suggestedMaxFee: number.toBN('0x0107ede8fa'),
+  gas_price: number.toBN('0x071287'),
+};
+
+export const estimateDeployFeeResp3 = {
+  overall_fee: number.toBN('0x1160f77b2edd'),
+  gas_consumed: number.toBN('0x18e1'),
+  suggestedMaxFee: number.toBN('0x1a117338c64b'),
+  gas_price: number.toBN('0xb2d3297d'),
+};
+
+export const estimateDeployFeeResp4 = {
+  overall_fee: number.toBN('0x1160f77b2edd'),
+  suggestedMaxFee: number.toBN('0x1a117338c64b'),
 };
 
 export const estimateFeeResp = {

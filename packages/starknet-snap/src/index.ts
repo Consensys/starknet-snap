@@ -31,6 +31,7 @@ import { recoverAccounts } from './recoverAccounts';
 import { Mutex } from 'async-mutex';
 import { OnRpcRequestHandler } from '@metamask/snap-types';
 import { ApiParams, ApiRequestParams } from './types/snapApi';
+import { estimateAccDeployFee } from './estimateAccountDeployFee';
 
 declare const wallet;
 const saveMutex = new Mutex();
@@ -143,6 +144,10 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ origin, request }) => 
     case 'starkNet_estimateFee':
       apiParams.keyDeriver = await getAddressKeyDeriver(wallet);
       return estimateFee(apiParams);
+
+    case 'starkNet_estimateAccountDeployFee':
+      apiParams.keyDeriver = await getAddressKeyDeriver(wallet);
+      return estimateAccDeployFee(apiParams);
 
     case 'starkNet_addErc20Token':
       return addErc20Token(apiParams);
