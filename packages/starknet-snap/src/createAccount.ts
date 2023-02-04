@@ -25,6 +25,7 @@ export async function createAccount(params: ApiParams) {
 
     const addressIndex = getValidNumber(requestParamsObj.addressIndex, -1, 0);
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
+    const deploy = !!requestParamsObj.deploy;
 
     const {
       publicKey,
@@ -54,7 +55,7 @@ export async function createAccount(params: ApiParams) {
     if (signerAssigned) {
       failureReason = 'The account address had already been deployed';
     }
-    if (requestParamsObj.deploy) {
+    if (deploy) {
       try {
         const getBalanceResp = await callContract(
           network,

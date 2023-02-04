@@ -34,11 +34,11 @@ export interface BaseRequestParams {
   chainId?: string;
   isDev?: boolean;
   useOldAccounts?: boolean;
-  deploy?: boolean;
 }
 
 export interface CreateAccountRequestParams extends BaseRequestParams {
   addressIndex?: string | number;
+  deploy?: boolean;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
