@@ -92,6 +92,15 @@
           }
         },
         {
+          "name": "deploy",
+          "summary": "Indicate whether to send the deploy transaction for the account contract",
+          "description": "Indicate whether to include send the deploy transaction for the account contract (default to false)",
+          "required": false,
+          "schema": {
+            "type": "boolean"
+          }
+        },
+        {
           "name": "chainId",
           "summary": "Id of the target StarkNet network",
           "description": "Id of the target StarkNet network (default to StarkNet Goerli Testnet)",
@@ -1127,6 +1136,10 @@
           "unit": {
             "type": "string",
             "description": "Gas fee unit (e.g. \"wei\")"
+          },
+          "includeDeploy": {
+            "type": "boolean",
+            "description": "Indicate whether deploy txn is included (for first send txn)"
           }
         }
       },
