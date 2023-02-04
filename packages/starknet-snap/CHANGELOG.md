@@ -1,6 +1,13 @@
 # Changelog
 
 
+## [1.2.0](https://github.com/ConsenSys/starknet-snap/compare/starknet-snap-v1.1.0...starknet-snap-v1.2.0) (2023-02-04)
+
+
+### Features
+
+* Sf 479 account deployment with first transaction ([#55](https://github.com/ConsenSys/starknet-snap/issues/55)) ([dedcbba](https://github.com/ConsenSys/starknet-snap/commit/dedcbba7291431c6912002e96e5ece595f8474fa))
+
 ## [1.1.0](https://github.com/ConsenSys/starknet-snap/compare/starknet-snap-v1.0.0...starknet-snap-v1.1.0) (2023-02-02)
 
 

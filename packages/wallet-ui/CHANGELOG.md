@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
 
+## [1.6.0](https://github.com/ConsenSys/starknet-snap/compare/wallet-ui-v1.5.0...wallet-ui-v1.6.0) (2023-02-04)
+
+
+### Features
+
+* Sf 479 account deployment with first transaction ([#55](https://github.com/ConsenSys/starknet-snap/issues/55)) ([dedcbba](https://github.com/ConsenSys/starknet-snap/commit/dedcbba7291431c6912002e96e5ece595f8474fa))
+
 ## [1.5.0](https://github.com/ConsenSys/starknet-snap/compare/wallet-ui-v1.4.0...wallet-ui-v1.5.0) (2023-02-02)
 
 
