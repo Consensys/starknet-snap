@@ -43,12 +43,11 @@ export async function sendTransaction(params: ApiParams) {
     const senderAddress = requestParamsObj.senderAddress;
     const useOldAccounts = !!requestParamsObj.useOldAccounts;
     const network = getNetworkFromChainId(state, requestParamsObj.chainId, useOldAccounts);
-    const { privateKey: senderPrivateKey, publicKey } = await getKeysFromAddress(
-      keyDeriver,
-      network,
-      state,
-      senderAddress,
-    );
+    const {
+      privateKey: senderPrivateKey,
+      publicKey,
+      addressIndex,
+    } = await getKeysFromAddress(keyDeriver, network, state, senderAddress);
     const senderKeyPair = getKeyPairFromPrivateKey(senderPrivateKey);
     let maxFee = requestParamsObj.maxFee ? number.toBN(requestParamsObj.maxFee) : constants.ZERO;
     if (maxFee.eq(constants.ZERO)) {
@@ -96,7 +95,11 @@ export async function sendTransaction(params: ApiParams) {
         wallet: params.wallet,
         saveMutex: params.saveMutex,
         keyDeriver,
-        requestParams: { addressIndex: 0, deploy: true },
+        requestParams: {
+          addressIndex,
+          deploy: true,
+          chainId: requestParamsObj.chainId,
+        },
       };
       await createAccount(createAccountApiParams);
     }

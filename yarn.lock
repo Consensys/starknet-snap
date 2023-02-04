@@ -1490,7 +1490,7 @@
     ethers "^5.5.1"
     sinon "^13.0.2"
     sinon-chai "^3.7.0"
-    starknet "npm:starknet@^4.17.1"
+    starknet "4.19.3"
     starknet_v4.6.0 "npm:starknet@4.6.0"
 
 "@cspotcode/source-map-support@^0.8.0":
@@ -16247,7 +16247,7 @@ starknet@4.19.3:
     ts-custom-error "^3.3.1"
     url-join "^4.0.1"
 
-starknet@^4.17.1, "starknet@npm:starknet@^4.17.1":
+starknet@^4.17.1:
   version "4.17.1"
   resolved "https://registry.yarnpkg.com/starknet/-/starknet-4.17.1.tgz#2aa429a9b07afd10d2b9a059dfc8cadd4982f6e3"
   integrity sha512-xihdf+pWUCdKK30r+fNLfg+5RHHpTNw20gvrucbcPPDnsDr2bjwtFu3UjXOtHnbys6qF8fW3ttMkctRoQ5J6Xg==
