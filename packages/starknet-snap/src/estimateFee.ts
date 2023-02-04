@@ -6,10 +6,10 @@ import {
   getKeysFromAddress,
   getCallDataArray,
   estimateFee_v4_6_0 as estimateFeeUtil_v4_6_0,
-  getSigner,
   getAccContractAddressAndCallData,
   estimateFeeBulk,
   addFeesFromAllTransactions,
+  isAccountDeployed,
 } from './utils/starknetUtils';
 
 import { PROXY_CONTRACT_HASH } from './utils/constants';
@@ -61,19 +61,7 @@ export async function estimateFee(params: ApiParams) {
     console.log(`estimateFee:\ntxnInvocation: ${JSON.stringify(txnInvocation)}`);
 
     //Estimate deploy account fee if the signer has not been deployed yet
-    let accountDeployed = true;
-    const { address: signerContractAddress, callData } = getAccContractAddressAndCallData(
-      network.accountClassHash,
-      publicKey,
-    );
-    try {
-      await getSigner(signerContractAddress, network);
-      console.log(`estimateFee:\ngetSigner: contractAddress = ${signerContractAddress}`);
-    } catch (err) {
-      accountDeployed = false;
-      console.log(`estimateFee:\ngetSigner: err in get signer: ${JSON.stringify(err)}`);
-    }
-
+    const accountDeployed = await isAccountDeployed(network, publicKey);
     let bulkTransactions: TransactionBulk = [
       {
         type: 'INVOKE_FUNCTION',
@@ -81,6 +69,7 @@ export async function estimateFee(params: ApiParams) {
       },
     ];
     if (!accountDeployed) {
+      const { callData } = getAccContractAddressAndCallData(network.accountClassHash, publicKey);
       const deployAccountpayload = {
         classHash: PROXY_CONTRACT_HASH,
         contractAddress: senderAddress,

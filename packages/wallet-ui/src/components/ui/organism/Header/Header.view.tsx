@@ -11,7 +11,6 @@ import { ReceiveModal } from './ReceiveModal';
 import { SendModal } from './SendModal';
 import { useStarkNetSnap } from 'services';
 import { PopperTooltip } from 'components/ui/molecule/PopperTooltip';
-import { TransactionStatus } from 'types';
 import { TOKEN_BALANCE_REFRESH_FREQUENCY } from 'utils/constants';
 
 interface Props {
