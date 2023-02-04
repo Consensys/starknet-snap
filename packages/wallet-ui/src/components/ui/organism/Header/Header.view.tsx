@@ -48,7 +48,10 @@ export const HeaderView = ({ address }: Props) => {
   }, [wallet.erc20TokenBalanceSelected]);
 
   const handleSendClick = () => {
-    if (Number(wallet.erc20TokenBalanceSelected.amount) > 0) {
+    if (
+      Number(wallet.erc20TokenBalanceSelected.amount) > 0 ||
+      wallet.erc20TokenBalanceSelected.address !== wallet.erc20TokenBalances[0].address
+    ) {
       setSendOpen(true);
       setNeedMoreETH(false);
     } else {
@@ -71,8 +74,9 @@ export const HeaderView = ({ address }: Props) => {
           content={
             needMoreETH && (
               <div>
-                Your account needs to hold enough ETH before being deployed,<br></br> Please send enough ETH to this
-                account address and try again by refreshing the page
+                Your account needs to hold enough ETH before being deployed,
+                <br></br> Please send enough ETH to this account address and try
+                again by refreshing the page
               </div>
             )
           }
