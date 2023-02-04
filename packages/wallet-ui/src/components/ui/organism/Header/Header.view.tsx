@@ -75,8 +75,7 @@ export const HeaderView = ({ address }: Props) => {
             needMoreETH && (
               <div>
                 Your account needs to hold enough ETH before being deployed,
-                <br></br> Please send enough ETH to this account address and try
-                again by refreshing the page
+                <br></br> Please send enough ETH to this account address and try again by refreshing the page
               </div>
             )
           }
