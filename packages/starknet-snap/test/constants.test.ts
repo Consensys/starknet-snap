@@ -257,9 +257,7 @@ export const estimateDeployFeeResp4 = {
 
 export const estimateFeeResp = {
   overall_fee: number.toBN('0x0dc3e44d89e6'),
-  gas_consumed: number.toBN('0x276a'),
   suggestedMaxFee: number.toBN('0x14a5d6744ed9'),
-  gas_price: number.toBN('0x59682f07'),
 };
 
 export const estimateFeeResp2 = {

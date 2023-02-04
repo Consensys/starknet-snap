@@ -486,26 +486,16 @@ export const isAccountDeployed = async (network: Network, publicKey: string) => 
 };
 
 export const addFeesFromAllTransactions = (fees: EstimateFee[]): EstimateFee => {
-  let gas_consumed_bn = number.toBN(0);
-  let gas_price_bn = number.toBN(0);
   let overall_fee_bn = number.toBN(0);
   let suggestedMaxFee_bn = number.toBN(0);
-  for (let i = 0; i < fees.length; i++) {
-    const fee = fees[i];
-    const gas_consumed = fee.gas_consumed;
-    gas_consumed_bn = gas_consumed.add(gas_consumed_bn);
-    const gas_price = fee.gas_price;
-    gas_price_bn = gas_price.add(gas_price_bn);
-    const overall_fee = fee.overall_fee;
-    overall_fee_bn = overall_fee.add(overall_fee_bn);
-    const suggestedMaxFee = fee.suggestedMaxFee;
-    suggestedMaxFee_bn = suggestedMaxFee.add(suggestedMaxFee_bn);
-  }
+
+  fees.forEach((fee) => {
+    overall_fee_bn = overall_fee_bn.add(fee.overall_fee);
+    suggestedMaxFee_bn = suggestedMaxFee_bn.add(fee.suggestedMaxFee);
+  });
 
   return {
     overall_fee: overall_fee_bn,
-    gas_price: gas_price_bn,
-    gas_consumed: gas_consumed_bn,
     suggestedMaxFee: suggestedMaxFee_bn,
   };
 };
