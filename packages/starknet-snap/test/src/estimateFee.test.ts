@@ -38,6 +38,9 @@ describe('Test function: estimateFee', function () {
 
   beforeEach(async function () {
     walletStub.rpcStubs.snap_getBip44Entropy.callsFake(getBip44EntropyStub);
+    sandbox.stub(utils, 'getSigner').callsFake(async () => {
+      return account2.publicKey;
+    });
     apiParams.keyDeriver = await getAddressKeyDeriver(walletStub);
   });
 
@@ -47,23 +50,23 @@ describe('Test function: estimateFee', function () {
   });
 
   it('should estimate the fee correctly', async function () {
-    sandbox.stub(utils, 'estimateFee').callsFake(async () => {
-      return estimateFeeResp;
+    sandbox.stub(utils, 'estimateFeeBulk').callsFake(async () => {
+      return [estimateFeeResp];
     });
     const result = await estimateFee(apiParams);
     expect(result.suggestedMaxFee).to.be.eq(estimateFeeResp.suggestedMaxFee.toString(10));
   });
 
   it('should estimate the fee without gas consumed and gas price correctly', async function () {
-    sandbox.stub(utils, 'estimateFee').callsFake(async () => {
-      return estimateFeeResp2;
+    sandbox.stub(utils, 'estimateFeeBulk').callsFake(async () => {
+      return [estimateFeeResp2];
     });
     const result = await estimateFee(apiParams);
     expect(result.suggestedMaxFee).to.be.eq(estimateFeeResp.suggestedMaxFee.toString(10));
   });
 
   it('should throw error if estimateFee failed', async function () {
-    sandbox.stub(utils, 'estimateFee').throws(new Error());
+    sandbox.stub(utils, 'estimateFeeBulk').throws(new Error());
     apiParams.requestParams = requestObject;
 
     let result;

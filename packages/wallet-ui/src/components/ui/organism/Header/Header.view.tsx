@@ -11,7 +11,6 @@ import { ReceiveModal } from './ReceiveModal';
 import { SendModal } from './SendModal';
 import { useStarkNetSnap } from 'services';
 import { PopperTooltip } from 'components/ui/molecule/PopperTooltip';
-import { TransactionStatus } from 'types';
 import { TOKEN_BALANCE_REFRESH_FREQUENCY } from 'utils/constants';
 
 interface Props {
@@ -49,17 +48,10 @@ export const HeaderView = ({ address }: Props) => {
   }, [wallet.erc20TokenBalanceSelected]);
 
   const handleSendClick = () => {
-    if (
-      wallet.transactionDeploy?.status === 'Accepted on L1' ||
-      wallet.transactionDeploy?.status === 'Accepted on L2' ||
-      wallet.transactionDeploy?.status === TransactionStatus.ACCEPTED_ON_L1 ||
-      wallet.transactionDeploy?.status === TransactionStatus.ACCEPTED_ON_L2
-    ) {
+    if (Number(wallet.erc20TokenBalanceSelected.amount) > 0) {
       setSendOpen(true);
-    } else if (
-      wallet.transactionDeploy?.status === 'Rejected' ||
-      wallet.transactionDeploy?.status === TransactionStatus.REJECTED
-    ) {
+      setNeedMoreETH(false);
+    } else {
       setNeedMoreETH(true);
     }
   };
@@ -77,15 +69,10 @@ export const HeaderView = ({ address }: Props) => {
         <HeaderButton onClick={() => setReceiveOpen(true)}>Receive</HeaderButton>
         <PopperTooltip
           content={
-            !sendOpen && needMoreETH ? (
+            needMoreETH && (
               <div>
                 Your account needs to hold enough ETH before being deployed,<br></br> Please send enough ETH to this
                 account address and try again by refreshing the page
-              </div>
-            ) : (
-              <div>
-                Please try again in a few minutes. Your account is still being deployed on StarkNet,<br></br> you’ll be
-                able to send after the transaction is accepted by the network
               </div>
             )
           }

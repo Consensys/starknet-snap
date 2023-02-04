@@ -92,6 +92,15 @@
           }
         },
         {
+          "name": "deploy",
+          "summary": "Indicate whether to send the deploy transaction for the account contract",
+          "description": "Indicate whether to include send the deploy transaction for the account contract (default to false)",
+          "required": false,
+          "schema": {
+            "type": "boolean"
+          }
+        },
+        {
           "name": "chainId",
           "summary": "Id of the target StarkNet network",
           "description": "Id of the target StarkNet network (default to StarkNet Goerli Testnet)",
@@ -231,6 +240,41 @@
           "required": true,
           "schema": {
             "$ref": "#/components/schemas/ADDRESS"
+          }
+        },
+        {
+          "name": "chainId",
+          "summary": "Id of the target StarkNet network",
+          "description": "Id of the target StarkNet network (default to StarkNet Goerli Testnet)",
+          "required": false,
+          "schema": {
+            "$ref": "#/components/schemas/CHAIN_ID"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "summary": "Response from StarkNet’s \"feeder_gateway/estimate_fee\" endpoint",
+        "description": "Response from StarkNet’s \"feeder_gateway/estimate_fee\" endpoint",
+        "schema": {
+          "$ref": "#/components/schemas/ESTIMATE_FEE_RESULT"
+        }
+      },
+      "errors": []
+    },
+    {
+      "name": "starkNet_estimateAccountDeployFee",
+      "summary": "Gets the estimated gas fee for deploying an account contract",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "addressIndex",
+          "summary": "Specific address index of the derived key in BIP-44",
+          "description": "Specific address index of the derived key in BIP-44",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "minimum": 0
           }
         },
         {
@@ -1092,6 +1136,10 @@
           "unit": {
             "type": "string",
             "description": "Gas fee unit (e.g. \"wei\")"
+          },
+          "includeDeploy": {
+            "type": "boolean",
+            "description": "Indicate whether deploy txn is included (for first send txn)"
           }
         }
       },

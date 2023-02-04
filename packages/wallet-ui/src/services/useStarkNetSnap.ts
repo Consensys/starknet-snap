@@ -145,7 +145,6 @@ export const useStarkNetSnap = () => {
   };
 
   const addAccount = async (chainId: string, useOldAccounts = false) => {
-    dispatch(enableLoadingWithMessage('Deploying account...'));
     const data = (await ethereum.request({
       method: 'wallet_invokeSnap',
       params: [
@@ -156,6 +155,7 @@ export const useStarkNetSnap = () => {
             addressIndex: 0,
             chainId,
             useOldAccounts,
+            deploy: false,
           },
         },
       ],
@@ -215,7 +215,6 @@ export const useStarkNetSnap = () => {
       if (useOldAccounts) {
         dispatch(enableLoadingWithMessage('Skipped deploying old version account ...'));
       } else {
-        dispatch(enableLoadingWithMessage('Deploying account ...'));
         acc = await addAccount(chainId, useOldAccounts);
       }
     }

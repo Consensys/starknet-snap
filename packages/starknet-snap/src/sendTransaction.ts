@@ -8,8 +8,10 @@ import {
   getCallDataArray,
   executeTxn,
   executeTxn_v4_6_0,
+  isAccountDeployed,
 } from './utils/starknetUtils';
 import { ApiParams, SendTransactionRequestParams } from './types/snapApi';
+import { createAccount } from './createAccount';
 
 export async function sendTransaction(params: ApiParams) {
   try {
@@ -41,7 +43,11 @@ export async function sendTransaction(params: ApiParams) {
     const senderAddress = requestParamsObj.senderAddress;
     const useOldAccounts = !!requestParamsObj.useOldAccounts;
     const network = getNetworkFromChainId(state, requestParamsObj.chainId, useOldAccounts);
-    const { privateKey: senderPrivateKey } = await getKeysFromAddress(keyDeriver, network, state, senderAddress);
+    const {
+      privateKey: senderPrivateKey,
+      publicKey,
+      addressIndex,
+    } = await getKeysFromAddress(keyDeriver, network, state, senderAddress);
     const senderKeyPair = getKeyPairFromPrivateKey(senderPrivateKey);
     let maxFee = requestParamsObj.maxFee ? number.toBN(requestParamsObj.maxFee) : constants.ZERO;
     if (maxFee.eq(constants.ZERO)) {
@@ -80,9 +86,29 @@ export async function sendTransaction(params: ApiParams) {
       `sendTransaction:\ntxnInvocation: ${JSON.stringify(txnInvocation)}\nmaxFee: ${JSON.stringify(maxFee)}}`,
     );
 
+    const accountDeployed = await isAccountDeployed(network, publicKey);
+    if (!accountDeployed) {
+      //Deploy account before sending the transaction
+      console.log('sendTransaction:\nFirst transaction : send deploy transaction');
+      const createAccountApiParams = {
+        state,
+        wallet: params.wallet,
+        saveMutex: params.saveMutex,
+        keyDeriver,
+        requestParams: {
+          addressIndex,
+          deploy: true,
+          chainId: requestParamsObj.chainId,
+        },
+      };
+      await createAccount(createAccountApiParams);
+    }
+
+    //In case this is the first transaction we assign a nonce of 1 to make sure it does after the deploy transaction
+    const nonceSendTransaction = accountDeployed ? undefined : 1;
     const txnResp = useOldAccounts
-      ? await executeTxn_v4_6_0(network, senderAddress, senderKeyPair, txnInvocation, maxFee)
-      : await executeTxn(network, senderAddress, senderKeyPair, txnInvocation, maxFee);
+      ? await executeTxn_v4_6_0(network, senderAddress, senderKeyPair, txnInvocation, maxFee, nonceSendTransaction)
+      : await executeTxn(network, senderAddress, senderKeyPair, txnInvocation, maxFee, nonceSendTransaction);
 
     console.log(`sendTransaction:\ntxnResp: ${JSON.stringify(txnResp)}`);
 

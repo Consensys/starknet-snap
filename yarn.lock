@@ -1482,7 +1482,7 @@
     chalk "^4.1.0"
 
 "@consensys/starknet-snap@file:packages/starknet-snap":
-  version "0.12.0"
+  version "1.1.0"
   dependencies:
     async-mutex "^0.3.2"
     chai "^4.3.6"
@@ -1490,7 +1490,7 @@
     ethers "^5.5.1"
     sinon "^13.0.2"
     sinon-chai "^3.7.0"
-    starknet "npm:starknet@^4.17.1"
+    starknet "4.19.3"
     starknet_v4.6.0 "npm:starknet@4.6.0"
 
 "@cspotcode/source-map-support@^0.8.0":
@@ -16230,7 +16230,24 @@ standard-version@^9.5.0:
     stringify-package "^1.0.1"
     yargs "^16.0.0"
 
-starknet@^4.17.1, "starknet@npm:starknet@^4.17.1":
+starknet@4.19.3:
+  version "4.19.3"
+  resolved "https://registry.yarnpkg.com/starknet/-/starknet-4.19.3.tgz#63c928fd4bbd5877acf8cb7851164ce8999abe63"
+  integrity sha512-iInVOWabKwp1UDDhwzYhTOLJntUaFeOxcpBp4rmOBegTJCl9lZSyogw1ElS0ot6D53Vltr1eIHsBrlv0RwQE+Q==
+  dependencies:
+    "@ethersproject/bytes" "^5.6.1"
+    bn.js "^5.2.1"
+    elliptic "^6.5.4"
+    ethereum-cryptography "^1.0.3"
+    hash.js "^1.1.7"
+    isomorphic-fetch "^3.0.0"
+    json-bigint "^1.0.0"
+    minimalistic-assert "^1.0.1"
+    pako "^2.0.4"
+    ts-custom-error "^3.3.1"
+    url-join "^4.0.1"
+
+starknet@^4.17.1:
   version "4.17.1"
   resolved "https://registry.yarnpkg.com/starknet/-/starknet-4.17.1.tgz#2aa429a9b07afd10d2b9a059dfc8cadd4982f6e3"
   integrity sha512-xihdf+pWUCdKK30r+fNLfg+5RHHpTNw20gvrucbcPPDnsDr2bjwtFu3UjXOtHnbys6qF8fW3ttMkctRoQ5J6Xg==

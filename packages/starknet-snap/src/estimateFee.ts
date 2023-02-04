@@ -1,13 +1,18 @@
-import { validateAndParseAddress } from 'starknet';
+import { TransactionBulk, validateAndParseAddress } from 'starknet';
 import { ApiParams, EstimateFeeRequestParams } from './types/snapApi';
 import { getNetworkFromChainId } from './utils/snapUtils';
 import {
   getKeyPairFromPrivateKey,
   getKeysFromAddress,
   getCallDataArray,
-  estimateFee as estimateFeeUtil,
   estimateFee_v4_6_0 as estimateFeeUtil_v4_6_0,
+  getAccContractAddressAndCallData,
+  estimateFeeBulk,
+  addFeesFromAllTransactions,
+  isAccountDeployed,
 } from './utils/starknetUtils';
+
+import { PROXY_CONTRACT_HASH } from './utils/constants';
 
 export async function estimateFee(params: ApiParams) {
   try {
@@ -39,7 +44,12 @@ export async function estimateFee(params: ApiParams) {
     const contractCallData = getCallDataArray(requestParamsObj.contractCallData);
     const senderAddress = requestParamsObj.senderAddress;
     const network = getNetworkFromChainId(state, requestParamsObj.chainId, useOldAccounts);
-    const { privateKey: senderPrivateKey } = await getKeysFromAddress(keyDeriver, network, state, senderAddress);
+    const { privateKey: senderPrivateKey, publicKey } = await getKeysFromAddress(
+      keyDeriver,
+      network,
+      state,
+      senderAddress,
+    );
     const senderKeyPair = getKeyPairFromPrivateKey(senderPrivateKey);
 
     const txnInvocation = {
@@ -50,9 +60,42 @@ export async function estimateFee(params: ApiParams) {
 
     console.log(`estimateFee:\ntxnInvocation: ${JSON.stringify(txnInvocation)}`);
 
-    const estimateFeeResp = useOldAccounts
-      ? await estimateFeeUtil_v4_6_0(network, senderAddress, senderKeyPair, txnInvocation)
-      : await estimateFeeUtil(network, senderAddress, senderKeyPair, txnInvocation);
+    //Estimate deploy account fee if the signer has not been deployed yet
+    const accountDeployed = await isAccountDeployed(network, publicKey);
+    let bulkTransactions: TransactionBulk = [
+      {
+        type: 'INVOKE_FUNCTION',
+        payload: txnInvocation,
+      },
+    ];
+    if (!accountDeployed) {
+      const { callData } = getAccContractAddressAndCallData(network.accountClassHash, publicKey);
+      const deployAccountpayload = {
+        classHash: PROXY_CONTRACT_HASH,
+        contractAddress: senderAddress,
+        constructorCalldata: callData,
+        addressSalt: publicKey,
+      };
+
+      bulkTransactions = [
+        {
+          type: 'DEPLOY_ACCOUNT',
+          payload: deployAccountpayload,
+        },
+        {
+          type: 'INVOKE_FUNCTION',
+          payload: txnInvocation,
+        },
+      ];
+    }
+
+    let estimateFeeResp;
+    if (useOldAccounts) {
+      estimateFeeResp = await estimateFeeUtil_v4_6_0(network, senderAddress, senderKeyPair, txnInvocation);
+    } else {
+      const estimateBulkFeeResp = await estimateFeeBulk(network, senderAddress, senderKeyPair, bulkTransactions);
+      estimateFeeResp = addFeesFromAllTransactions(estimateBulkFeeResp);
+    }
 
     console.log(`estimateFee:\nestimateFeeResp: ${JSON.stringify(estimateFeeResp)}`);
 
@@ -62,6 +105,7 @@ export async function estimateFee(params: ApiParams) {
       gasConsumed: estimateFeeResp.gas_consumed?.toString(10) ?? '0',
       gasPrice: estimateFeeResp.gas_price?.toString(10) ?? '0',
       unit: 'wei',
+      includeDeploy: !accountDeployed,
     };
     console.log(`estimateFee:\nresp: ${JSON.stringify(resp)}`);
 

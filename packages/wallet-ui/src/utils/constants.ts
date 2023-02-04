@@ -30,7 +30,7 @@ export const TOKENS: any = {
   },
 };
 
-export const DECIMALS_DISPLAYED_MAX_LENGTH = 6;
+export const DECIMALS_DISPLAYED_MAX_LENGTH = 11;
 
 export const COINGECKO_API = 'https://api.coingecko.com/api/v3/';
 

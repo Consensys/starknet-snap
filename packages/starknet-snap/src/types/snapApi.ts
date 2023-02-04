@@ -21,6 +21,7 @@ export type ApiRequestParams =
   | SendTransactionRequestParams
   | GetValueRequestParams
   | EstimateFeeRequestParams
+  | EstimateAccountDeployFeeRequestParams
   | AddErc20TokenRequestParams
   | GetStoredErc20TokensRequestParams
   | AddNetworkRequestParams
@@ -35,9 +36,9 @@ export interface BaseRequestParams {
   useOldAccounts?: boolean;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface CreateAccountRequestParams extends BaseRequestParams {
   addressIndex?: string | number;
+  deploy?: boolean;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -96,6 +97,10 @@ export interface EstimateFeeRequestParams extends BaseRequestParams {
   contractFuncName: string;
   contractCallData?: string;
   senderAddress: string;
+}
+
+export interface EstimateAccountDeployFeeRequestParams extends BaseRequestParams {
+  addressIndex?: string | number;
 }
 
 export interface AddErc20TokenRequestParams extends BaseRequestParams {

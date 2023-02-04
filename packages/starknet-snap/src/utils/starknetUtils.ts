@@ -18,6 +18,7 @@ import {
   CallContractResponse,
   ProviderOptions,
   GetTransactionResponse,
+  TransactionBulk,
 } from 'starknet';
 import * as starknet_v4_6_0 from 'starknet_v4.6.0';
 import { Network, SnapState, Transaction, TransactionType } from '../types/snapState';
@@ -95,7 +96,18 @@ export const estimateFee = async (
 ): Promise<EstimateFee> => {
   const provider = getProvider(network);
   const account = new Account(provider, senderAddress, senderKeyPair);
-  return account.estimateFee(txnInvocation, { blockIdentifier: 'latest' });
+  return account.estimateInvokeFee(txnInvocation, { blockIdentifier: 'latest' });
+};
+
+export const estimateFeeBulk = async (
+  network: Network,
+  senderAddress: string,
+  senderKeyPair: KeyPair,
+  txnInvocation: TransactionBulk,
+): Promise<EstimateFee[]> => {
+  const provider = getProvider(network);
+  const account = new Account(provider, senderAddress, senderKeyPair);
+  return account.estimateFeeBulk(txnInvocation, { blockIdentifier: 'latest' });
 };
 
 export const estimateFee_v4_6_0 = async (
@@ -115,12 +127,11 @@ export const executeTxn = async (
   senderKeyPair: KeyPair,
   txnInvocation: Call | Call[],
   maxFee: number.BigNumberish,
+  nonce?: number,
 ): Promise<InvokeFunctionResponse> => {
   const provider = getProvider(network);
   const account = new Account(provider, senderAddress, senderKeyPair);
-  return account.execute(txnInvocation, undefined, {
-    maxFee,
-  });
+  return account.execute(txnInvocation, undefined, { nonce, maxFee });
 };
 
 export const executeTxn_v4_6_0 = async (
@@ -129,12 +140,11 @@ export const executeTxn_v4_6_0 = async (
   senderKeyPair: KeyPair,
   txnInvocation: Call | Call[],
   maxFee: number.BigNumberish,
+  nonce?: number,
 ): Promise<starknet_v4_6_0.InvokeFunctionResponse> => {
   const provider = getProvider_v4_6_0(network);
   const account = new starknet_v4_6_0.Account(provider, senderAddress, senderKeyPair);
-  return account.execute(txnInvocation, undefined, {
-    maxFee,
-  });
+  return account.execute(txnInvocation, undefined, { nonce, maxFee });
 };
 
 export const deployAccount = async (
@@ -460,5 +470,32 @@ export const getKeysFromAddressIndex = async (
     addressIndex,
     derivationPath,
     keyPair: starkKeyPair,
+  };
+};
+
+export const isAccountDeployed = async (network: Network, publicKey: string) => {
+  let accountDeployed = true;
+  try {
+    const { address: signerContractAddress } = getAccContractAddressAndCallData(network.accountClassHash, publicKey);
+    await getSigner(signerContractAddress, network);
+  } catch (err) {
+    accountDeployed = false;
+  }
+
+  return accountDeployed;
+};
+
+export const addFeesFromAllTransactions = (fees: EstimateFee[]): EstimateFee => {
+  let overall_fee_bn = number.toBN(0);
+  let suggestedMaxFee_bn = number.toBN(0);
+
+  fees.forEach((fee) => {
+    overall_fee_bn = overall_fee_bn.add(fee.overall_fee);
+    suggestedMaxFee_bn = suggestedMaxFee_bn.add(fee.suggestedMaxFee);
+  });
+
+  return {
+    overall_fee: overall_fee_bn,
+    suggestedMaxFee: suggestedMaxFee_bn,
   };
 };

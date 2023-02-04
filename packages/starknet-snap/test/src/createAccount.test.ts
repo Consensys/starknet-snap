@@ -54,6 +54,29 @@ describe('Test function: createAccount', function () {
     sandbox.restore();
   });
 
+  it('should only return derived address without sending deploy txn correctly in mainnet if deploy is false', async function () {
+    sandbox.stub(utils, 'getSigner').throws(new Error());
+    const requestObject: CreateAccountRequestParams = {
+      chainId: STARKNET_MAINNET_NETWORK.chainId,
+    };
+    apiParams.requestParams = requestObject;
+    const result = await createAccount(apiParams);
+    const { publicKey } = await utils.getKeysFromAddressIndex(
+      apiParams.keyDeriver,
+      STARKNET_MAINNET_NETWORK.chainId,
+      state,
+      -1,
+    );
+    const { address: contractAddress } = utils.getAccContractAddressAndCallData(
+      STARKNET_MAINNET_NETWORK.accountClassHash,
+      publicKey,
+    );
+    expect(walletStub.rpcStubs.snap_manageState).to.have.been.callCount(0);
+    expect(result.address).to.be.eq(contractAddress);
+    expect(state.accContracts.length).to.be.eq(0);
+    expect(state.transactions.length).to.be.eq(0);
+  });
+
   it('should create and store an user account with proxy in state correctly in mainnet', async function () {
     sandbox.stub(utils, 'deployAccount').callsFake(async () => {
       return createAccountProxyMainnetResp;
@@ -67,6 +90,7 @@ describe('Test function: createAccount', function () {
     });
     const requestObject: CreateAccountRequestParams = {
       chainId: STARKNET_MAINNET_NETWORK.chainId,
+      deploy: true,
     };
     apiParams.requestParams = requestObject;
     const result = await createAccount(apiParams);
@@ -101,6 +125,7 @@ describe('Test function: createAccount', function () {
     const requestObject: CreateAccountRequestParams = {
       chainId: STARKNET_MAINNET_NETWORK.chainId,
       addressIndex: 1,
+      deploy: true,
     };
     apiParams.requestParams = requestObject;
     const result = await createAccount(apiParams);
@@ -132,7 +157,7 @@ describe('Test function: createAccount', function () {
     sandbox.stub(utils, 'estimateAccountDeployFee').callsFake(async () => {
       return estimateDeployFeeResp;
     });
-    const requestObject: CreateAccountRequestParams = {};
+    const requestObject: CreateAccountRequestParams = { deploy: true };
     apiParams.requestParams = requestObject;
     const result = await createAccount(apiParams);
     const { publicKey: expectedPublicKey } = await utils.getKeysFromAddress(
@@ -165,7 +190,7 @@ describe('Test function: createAccount', function () {
     sandbox.stub(utils, 'estimateAccountDeployFee').callsFake(async () => {
       return estimateDeployFeeResp;
     });
-    const requestObject: CreateAccountRequestParams = {};
+    const requestObject: CreateAccountRequestParams = { deploy: true };
     apiParams.requestParams = requestObject;
     const result = await createAccount(apiParams);
     expect(walletStub.rpcStubs.snap_manageState).to.have.been.callCount(4);
@@ -186,7 +211,7 @@ describe('Test function: createAccount', function () {
     sandbox.stub(utils, 'estimateAccountDeployFee').callsFake(async () => {
       return estimateDeployFeeResp2;
     });
-    const requestObject: CreateAccountRequestParams = {};
+    const requestObject: CreateAccountRequestParams = { deploy: true };
     apiParams.requestParams = requestObject;
     const result = await createAccount(apiParams);
     expect(walletStub.rpcStubs.snap_manageState).to.have.been.callCount(3);
@@ -205,7 +230,7 @@ describe('Test function: createAccount', function () {
     sandbox.stub(utils, 'estimateAccountDeployFee').callsFake(async () => {
       return estimateDeployFeeResp2;
     });
-    const requestObject: CreateAccountRequestParams = {};
+    const requestObject: CreateAccountRequestParams = { deploy: true };
     apiParams.requestParams = requestObject;
     const result = await createAccount(apiParams);
     expect(walletStub.rpcStubs.snap_manageState).to.have.been.callCount(3);
@@ -223,7 +248,7 @@ describe('Test function: createAccount', function () {
     sandbox.stub(utils, 'estimateAccountDeployFee').callsFake(async () => {
       return estimateDeployFeeResp;
     });
-    const requestObject: CreateAccountRequestParams = {};
+    const requestObject: CreateAccountRequestParams = { deploy: true };
     apiParams.requestParams = requestObject;
     const result = await createAccount(apiParams);
     expect(walletStub.rpcStubs.snap_manageState).to.have.been.callCount(0);
@@ -242,7 +267,7 @@ describe('Test function: createAccount', function () {
     sandbox.stub(utils, 'estimateAccountDeployFee').callsFake(async () => {
       return estimateDeployFeeResp;
     });
-    const requestObject: CreateAccountRequestParams = {};
+    const requestObject: CreateAccountRequestParams = { deploy: true };
     apiParams.requestParams = requestObject;
 
     let result;
