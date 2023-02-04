@@ -74,8 +74,8 @@ export const HeaderView = ({ address }: Props) => {
           content={
             needMoreETH && (
               <div>
-                Your account needs to hold enough {wallet.erc20TokenBalanceSelected.symbol} before being deployed,
-                <br></br> Please send enough {wallet.erc20TokenBalanceSelected.symbol} to this account address and try
+                Your account needs to hold enough ETH before being deployed,
+                <br></br> Please send enough ETH to this account address and try
                 again by refreshing the page
               </div>
             )
