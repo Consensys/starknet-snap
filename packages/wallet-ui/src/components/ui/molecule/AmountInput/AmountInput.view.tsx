@@ -48,15 +48,9 @@ export const AmountInputView = ({
     //If we are in USD mode we sent the eth amount as the value
     let valueToSend = value;
     if (onChangeCustom) {
-      let valueToSendBN = ethers.utils.parseUnits(inputRef.current?.value || '0', asset.decimals);
       if (usdMode && asset.usdPrice && inputRef.current?.value && inputRef.current?.value !== '.') {
         const inputFloat = parseFloat(inputRef.current.value);
         valueToSend = getAmountPrice(asset, inputFloat, usdMode);
-      }
-
-      //In case the input amount is bigger than the user's balance we send the user balancer instead as the value
-      if (valueToSendBN.gt(asset.amount)) {
-        valueToSend = ethers.utils.formatUnits(asset.amount, asset.decimals);
       }
       onChangeCustom(valueToSend);
     }
