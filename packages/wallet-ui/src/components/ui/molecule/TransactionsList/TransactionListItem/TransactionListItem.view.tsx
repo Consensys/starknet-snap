@@ -24,7 +24,7 @@ import {
   getTxnToFromLabel,
   getTxnValues,
 } from './types';
-import { openExplorerTab } from 'utils/utils';
+import { getHumanReadableAmount, openExplorerTab } from 'utils/utils';
 
 interface Props {
   transaction: Transaction;
@@ -43,7 +43,7 @@ export const TransactionListItemView = ({ transaction }: Props) => {
       );
       if (foundToken) {
         const txnValues = getTxnValues(transaction, foundToken.decimals, foundToken.usdPrice);
-        setTxnValue(txnValues.txnValue);
+        setTxnValue(getHumanReadableAmount(foundToken, txnValues.txnValue));
         setTxnUsdValue(txnValues.txnUsdValue);
         setCurrencySymbol(foundToken.symbol);
       }

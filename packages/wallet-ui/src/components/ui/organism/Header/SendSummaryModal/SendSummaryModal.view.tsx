@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { getAmountPrice, shortenAddress } from 'utils/utils';
+import { getAmountPrice, getHumanReadableAmount, getMaxDecimalsReadable, shortenAddress } from 'utils/utils';
 import { AssetQuantity } from 'components/ui/molecule/AssetQuantity';
 import { PopperTooltip } from 'components/ui/molecule/PopperTooltip';
 import {
@@ -25,7 +25,6 @@ import { useEffect, useState } from 'react';
 import { useStarkNetSnap } from 'services';
 import { ethers } from 'ethers';
 import Toastr from 'toastr2';
-import { DECIMALS_DISPLAYED_MAX_LENGTH } from 'utils/constants';
 
 interface Props {
   address: string;
@@ -91,8 +90,9 @@ export const SendSummaryModalView = ({ address, amount, chainId, closeModal }: P
       //We assume the first token for the user will always be ETH
       const ethToken = wallet.erc20TokenBalances[0];
       const gasFeesBN = ethers.utils.parseUnits(gasFees.suggestedMaxFee, gasFees.unit);
-      const gasFeesFloat = parseFloat(ethers.utils.formatUnits(gasFeesBN, ethToken.decimals));
-      setGasFeesAmount(gasFeesFloat.toFixed(DECIMALS_DISPLAYED_MAX_LENGTH).toString());
+      const gasFeesStr = ethers.utils.formatUnits(gasFeesBN, ethToken.decimals);
+      const gasFeesFloat = parseFloat(gasFeesStr);
+      setGasFeesAmount(getMaxDecimalsReadable(ethToken, gasFeesStr));
       if (ethToken.usdPrice) {
         setGasFeesAmountUSD(getAmountPrice(ethToken, gasFeesFloat, false));
       }
@@ -101,8 +101,8 @@ export const SendSummaryModalView = ({ address, amount, chainId, closeModal }: P
         //We add the fees with the amount if the current token is ETH
         const totalAmountBN = gasFeesBN.add(amountBN);
         const totalAmount = ethers.utils.formatUnits(totalAmountBN, ethToken.decimals);
+        setTotalAmount(getMaxDecimalsReadable(ethToken, totalAmount));
         const totalAmountFloat = parseFloat(totalAmount);
-        setTotalAmount(totalAmountFloat.toFixed(DECIMALS_DISPLAYED_MAX_LENGTH).toString());
         if (ethToken.usdPrice) {
           setTotalAmountUSD(getAmountPrice(ethToken, totalAmountFloat, false));
         }
@@ -165,7 +165,14 @@ export const SendSummaryModalView = ({ address, amount, chainId, closeModal }: P
         //ETH selected
         return totalAmount + ' ETH';
       } else {
-        return amount + ' ' + wallet.erc20TokenBalanceSelected.symbol + ' + ' + gasFeesAmount + ' ETH';
+        return (
+          getHumanReadableAmount(wallet.erc20TokenBalanceSelected, amount) +
+          ' ' +
+          wallet.erc20TokenBalanceSelected.symbol +
+          ' + ' +
+          gasFeesAmount +
+          ' ETH'
+        );
       }
     }
   };
@@ -180,7 +187,7 @@ export const SendSummaryModalView = ({ address, amount, chainId, closeModal }: P
         <AddressDiv>{shortenAddress(address)}</AddressDiv>
         <AssetQuantity
           currency={wallet.erc20TokenBalanceSelected.symbol}
-          currencyValue={amount}
+          currencyValue={getMaxDecimalsReadable(wallet.erc20TokenBalanceSelected, amount)}
           USDValue={amountUsdPrice}
           size="medium"
           centered
@@ -225,7 +232,7 @@ export const SendSummaryModalView = ({ address, amount, chainId, closeModal }: P
             <USDAmount>{totalAmountUSD} USD</USDAmount>
           </RightSummary>
         </Summary>
-        <TotalAmount>Maximum amount: {totalAmount} ETH</TotalAmount>
+        {totalAmount && <TotalAmount>Maximum amount: {totalAmount} ETH</TotalAmount>}
       </Wrapper>
       <Buttons>
         <ButtonStyled onClick={closeModal} backgroundTransparent borderVisible>

@@ -68,6 +68,7 @@ export const LoadingWrapper = styled(LoadingSmall)`
 
 export const CurrencyAmount = styled.div`
   font-size: ${(props) => props.theme.typography.p1.fontSize};
+  text-align: end;
 `;
 
 export const USDAmount = styled.div`

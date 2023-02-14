@@ -51,12 +51,36 @@ export const addMissingPropertiesToToken = (
   };
 };
 
-export const getHumanReadableAmount = (asset: Erc20TokenBalance) => {
-  const amountStr = ethers.utils.formatUnits(asset.amount, asset.decimals);
+export const getHumanReadableAmount = (asset: Erc20TokenBalance, assetAmount?: string) => {
+  const amountStr = assetAmount ? assetAmount : ethers.utils.formatUnits(asset.amount, asset.decimals);
   const indexDecimal = amountStr.indexOf('.');
-  return ethers.utils
-    .formatUnits(asset.amount, asset.decimals)
-    .substring(0, indexDecimal + DECIMALS_DISPLAYED_MAX_LENGTH);
+  const integerPart = amountStr.substring(0, indexDecimal);
+  let decimalPart = amountStr.substring(indexDecimal + 1, indexDecimal + 5 - integerPart.length);
+  if (integerPart === '0') {
+    decimalPart = amountStr.substring(indexDecimal + 1);
+  }
+  const decimalPartArray = decimalPart.split('');
+  const firstNonZeroIndex = decimalPartArray.findIndex((char) => char !== '0');
+  if (firstNonZeroIndex === -1) {
+    return integerPart;
+  }
+
+  return amountStr.substring(0, indexDecimal + firstNonZeroIndex + 3);
+};
+
+export const getMaxDecimalsReadable = (asset: Erc20TokenBalance, assetAmount?: string) => {
+  const amountStr = assetAmount ? assetAmount : ethers.utils.formatUnits(asset.amount, asset.decimals);
+  const indexDecimal = amountStr.indexOf('.');
+  const decimalPart = amountStr.substring(indexDecimal + 1).split('');
+  const firstNonZeroIndexReverse = decimalPart.reverse().findIndex((char) => char !== '0');
+  if (firstNonZeroIndexReverse !== -1) {
+    let lastNonZeroIndex = amountStr.length - firstNonZeroIndexReverse;
+    if (lastNonZeroIndex - indexDecimal > DECIMALS_DISPLAYED_MAX_LENGTH) {
+      lastNonZeroIndex = indexDecimal + 1 + DECIMALS_DISPLAYED_MAX_LENGTH;
+    }
+    return amountStr.substring(0, lastNonZeroIndex);
+  }
+  return amountStr.substring(0, indexDecimal);
 };
 
 export const getAmountPrice = (asset: Erc20TokenBalance, assetAmount: number, usdMode: boolean) => {

@@ -52,7 +52,6 @@ export const AmountInputView = ({
         const inputFloat = parseFloat(inputRef.current.value);
         valueToSend = getAmountPrice(asset, inputFloat, usdMode);
       }
-
       onChangeCustom(valueToSend);
     }
   };
@@ -98,8 +97,9 @@ export const AmountInputView = ({
 
   const handleMaxClick = () => {
     if (inputRef.current && asset.usdPrice) {
-      const amountFloat = parseFloat(ethers.utils.formatUnits(asset.amount, asset.decimals).toString());
-      inputRef.current.value = usdMode ? getAmountPrice(asset, amountFloat, false) : amountFloat.toString();
+      const amountStr = ethers.utils.formatUnits(asset.amount, asset.decimals).toString();
+      const amountFloat = parseFloat(amountStr);
+      inputRef.current.value = usdMode ? getAmountPrice(asset, amountFloat, false) : amountStr;
       fetchTotalPrice(inputRef.current.value);
       resizeInput();
       triggerOnChange(inputRef.current.value);
