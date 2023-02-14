@@ -249,7 +249,7 @@ export const SendSummaryModalView = ({ address, amount, chainId, closeModal }: P
         <ButtonStyled onClick={closeModal} backgroundTransparent borderVisible>
           REJECT
         </ButtonStyled>
-        <ButtonStyled enabled={!estimatingGas && !gasFeesError} onClick={handleConfirmClick}>
+        <ButtonStyled enabled={!estimatingGas && !gasFeesError && !totalExceedsBalance} onClick={handleConfirmClick}>
           CONFIRM
         </ButtonStyled>
       </Buttons>
