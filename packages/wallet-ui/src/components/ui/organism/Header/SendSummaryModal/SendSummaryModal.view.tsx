@@ -19,6 +19,7 @@ import {
   EstimatedFeesTooltip,
   LoadingWrapper,
   IncludeDeploy,
+  AlertTotalExceedsAmount,
 } from './SendSummaryModal.style';
 import { useAppSelector } from 'hooks/redux';
 import { useEffect, useState } from 'react';
@@ -242,6 +243,7 @@ export const SendSummaryModalView = ({ address, amount, chainId, closeModal }: P
           </RightSummary>
         </Summary>
         {totalAmount && <TotalAmount>Maximum amount: {totalAmount} ETH</TotalAmount>}
+        {totalExceedsBalance && <AlertTotalExceedsAmount text="Insufficient funds for fees" variant="warning" />}
       </Wrapper>
       <Buttons>
         <ButtonStyled onClick={closeModal} backgroundTransparent borderVisible>

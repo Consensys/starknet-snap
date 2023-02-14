@@ -9,7 +9,7 @@ interface Props {
   variant: Variant;
 }
 
-export function AlertView({ text, variant }: Props) {
+export function AlertView({ text, variant, ...otherProps }: Props) {
   const paragraph = useRef<HTMLParagraphElement | null>(null);
   const [isMultiline, setIsMultiline] = useState(false);
   useEffect(() => {
@@ -19,7 +19,7 @@ export function AlertView({ text, variant }: Props) {
     }
   }, []);
   return (
-    <Wrapper isMultiline={isMultiline} variant={variant}>
+    <Wrapper isMultiline={isMultiline} variant={variant} {...otherProps}>
       <>
         {variant === VariantOptions.SUCCESS && <LeftIcon icon={['fas', 'check-circle']} />}
         {variant === VariantOptions.INFO && <LeftIcon icon={['fas', 'info-circle']} color={theme.palette.info.dark} />}

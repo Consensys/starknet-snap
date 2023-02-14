@@ -1,6 +1,7 @@
 import styled from 'styled-components';
 import { Button } from 'components/ui/atom/Button';
 import { LoadingSmall } from 'components/ui/atom/LoadingSmall';
+import { Alert } from 'components/ui/atom/Alert';
 
 export const Wrapper = styled.div`
   display: flex;
@@ -109,4 +110,8 @@ export const ButtonStyled = styled(Button)`
 export const EstimatedFeesTooltip = styled.div`
   width: 240px;
   text-align: left;
+`;
+
+export const AlertTotalExceedsAmount = styled(Alert)`
+  margin-top: ${(props) => props.theme.spacing.base};
 `;
