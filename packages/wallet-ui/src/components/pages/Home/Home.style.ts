@@ -18,3 +18,9 @@ export const RightPart = styled.div`
   width: 100%;
   background-color: ${(props) => props.theme.palette.grey.white};
 `;
+
+export const NoTransactions = styled.p`
+  ${props=>props.theme.typography.p1};
+  text-align:center;
+  color:${props=>props.theme.palette.grey.grey1};
+`;
