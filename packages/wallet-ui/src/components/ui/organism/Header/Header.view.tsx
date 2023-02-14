@@ -10,7 +10,6 @@ import { Buttons, HeaderButton, Wrapper } from './Header.style';
 import { ReceiveModal } from './ReceiveModal';
 import { SendModal } from './SendModal';
 import { useStarkNetSnap } from 'services';
-import { PopperTooltip } from 'components/ui/molecule/PopperTooltip';
 import { TOKEN_BALANCE_REFRESH_FREQUENCY } from 'utils/constants';
 
 interface Props {
@@ -20,7 +19,6 @@ interface Props {
 export const HeaderView = ({ address }: Props) => {
   const [receiveOpen, setReceiveOpen] = useState(false);
   const [sendOpen, setSendOpen] = useState(false);
-  const [needMoreETH, setNeedMoreETH] = useState(false);
   const networks = useAppSelector((state) => state.networks);
   const wallet = useAppSelector((state) => state.wallet);
   const { updateTokenBalance } = useStarkNetSnap();
@@ -48,15 +46,7 @@ export const HeaderView = ({ address }: Props) => {
   }, [wallet.erc20TokenBalanceSelected]);
 
   const handleSendClick = () => {
-    if (
-      Number(wallet.erc20TokenBalanceSelected.amount) > 0 ||
-      wallet.erc20TokenBalanceSelected.address !== wallet.erc20TokenBalances[0].address
-    ) {
-      setSendOpen(true);
-      setNeedMoreETH(false);
-    } else {
-      setNeedMoreETH(true);
-    }
+    setSendOpen(true);
   };
 
   return (
@@ -70,22 +60,9 @@ export const HeaderView = ({ address }: Props) => {
       />
       <Buttons>
         <HeaderButton onClick={() => setReceiveOpen(true)}>Receive</HeaderButton>
-        <PopperTooltip
-          content={
-            needMoreETH && (
-              <div>
-                Your account needs to hold enough ETH before being deployed,
-                <br></br> Please send enough ETH to this account address and try again by refreshing the page
-              </div>
-            )
-          }
-          placement="left"
-          closeTrigger="click"
-        >
-          <Button onClick={() => handleSendClick()} backgroundTransparent borderVisible>
-            Send
-          </Button>
-        </PopperTooltip>
+        <Button onClick={() => handleSendClick()} backgroundTransparent borderVisible>
+          Send
+        </Button>
       </Buttons>
       <PopIn isOpen={receiveOpen} setIsOpen={setReceiveOpen}>
         <ReceiveModal address={address} />
