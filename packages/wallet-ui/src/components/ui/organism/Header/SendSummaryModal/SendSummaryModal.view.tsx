@@ -19,6 +19,7 @@ import {
   EstimatedFeesTooltip,
   LoadingWrapper,
   IncludeDeploy,
+  AlertTotalExceedsAmount,
 } from './SendSummaryModal.style';
 import { useAppSelector } from 'hooks/redux';
 import { useEffect, useState } from 'react';
@@ -44,6 +45,7 @@ export const SendSummaryModalView = ({ address, amount, chainId, closeModal }: P
   const [amountUsdPrice, setAmountUsdPrice] = useState('');
   const [totalAmount, setTotalAmount] = useState('');
   const [totalAmountUSD, setTotalAmountUSD] = useState('');
+  const [totalExceedsBalance, setTotalExceedsBalance] = useState(false);
   const { estimateFees, sendTransaction, getTransactions } = useStarkNetSnap();
 
   const toastr = new Toastr({
@@ -90,6 +92,7 @@ export const SendSummaryModalView = ({ address, amount, chainId, closeModal }: P
       //We assume the first token for the user will always be ETH
       const ethToken = wallet.erc20TokenBalances[0];
       const gasFeesBN = ethers.utils.parseUnits(gasFees.suggestedMaxFee, gasFees.unit);
+      let totalToCheck = gasFeesBN;
       const gasFeesStr = ethers.utils.formatUnits(gasFeesBN, ethToken.decimals);
       const gasFeesFloat = parseFloat(gasFeesStr);
       setGasFeesAmount(getMaxDecimalsReadable(ethToken, gasFeesStr));
@@ -100,6 +103,7 @@ export const SendSummaryModalView = ({ address, amount, chainId, closeModal }: P
       if (wallet.erc20TokenBalanceSelected.address === ethToken.address) {
         //We add the fees with the amount if the current token is ETH
         const totalAmountBN = gasFeesBN.add(amountBN);
+        totalToCheck = totalAmountBN;
         const totalAmount = ethers.utils.formatUnits(totalAmountBN, ethToken.decimals);
         setTotalAmount(getMaxDecimalsReadable(ethToken, totalAmount));
         const totalAmountFloat = parseFloat(totalAmount);
@@ -111,6 +115,12 @@ export const SendSummaryModalView = ({ address, amount, chainId, closeModal }: P
         const amountUSDFloat = parseFloat(amountUsdPrice);
         const totalUSDAmount = amountUSDFloat + amountGasFeeUSDFloat;
         setTotalAmountUSD(totalUSDAmount.toFixed(2));
+      }
+      //Check if total amount exceeds or gasFees exceeds ETH balance
+      if (totalToCheck > ethToken.amount) {
+        setTotalExceedsBalance(true);
+      } else {
+        setTotalExceedsBalance(false);
       }
     }
   }, [gasFees]);
@@ -233,12 +243,13 @@ export const SendSummaryModalView = ({ address, amount, chainId, closeModal }: P
           </RightSummary>
         </Summary>
         {totalAmount && <TotalAmount>Maximum amount: {totalAmount} ETH</TotalAmount>}
+        {totalExceedsBalance && <AlertTotalExceedsAmount text="Insufficient funds for fees" variant="warning" />}
       </Wrapper>
       <Buttons>
         <ButtonStyled onClick={closeModal} backgroundTransparent borderVisible>
           REJECT
         </ButtonStyled>
-        <ButtonStyled enabled={!estimatingGas && !gasFeesError} onClick={handleConfirmClick}>
+        <ButtonStyled enabled={!estimatingGas && !gasFeesError && !totalExceedsBalance} onClick={handleConfirmClick}>
           CONFIRM
         </ButtonStyled>
       </Buttons>
