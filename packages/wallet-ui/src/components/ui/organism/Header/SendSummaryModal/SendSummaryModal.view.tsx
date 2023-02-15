@@ -117,7 +117,7 @@ export const SendSummaryModalView = ({ address, amount, chainId, closeModal }: P
         setTotalAmountUSD(totalUSDAmount.toFixed(2));
       }
       //Check if total amount exceeds or gasFees exceeds ETH balance
-      if (totalToCheck > ethToken.amount) {
+      if (totalToCheck.gt(ethToken.amount)) {
         setTotalExceedsBalance(true);
       } else {
         setTotalExceedsBalance(false);
