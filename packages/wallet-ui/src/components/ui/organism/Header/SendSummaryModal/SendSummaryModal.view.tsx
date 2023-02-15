@@ -155,6 +155,8 @@ export const SendSummaryModalView = ({ address, amount, chainId, closeModal }: P
               10,
               10,
               chainId,
+              false,
+              true,
             ).catch((err) => {
               console.error(`handleConfirmClick: error from getTransactions: ${err}`);
             });
