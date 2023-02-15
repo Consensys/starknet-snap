@@ -3,6 +3,23 @@
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
 
+## [1.7.0](https://github.com/ConsenSys/starknet-snap/compare/wallet-ui-v1.6.0...wallet-ui-v1.7.0) (2023-02-15)
+
+
+### Features
+
+* bump min snap version to v1.2 ([2a937db](https://github.com/ConsenSys/starknet-snap/commit/2a937db3b6ecd47ce00b93cbcd379b800384d6f3))
+* improved decimals display + fix max function in the send modal ([#59](https://github.com/ConsenSys/starknet-snap/issues/59)) ([63ae882](https://github.com/ConsenSys/starknet-snap/commit/63ae882fa69641e3f89a04252e5a4e2cec8fcf9f))
+* show you have no transactions if account is not deployed yet ([#62](https://github.com/ConsenSys/starknet-snap/issues/62)) ([da47b1e](https://github.com/ConsenSys/starknet-snap/commit/da47b1efb661f335ba5e45a1e56e7effa295a51a))
+* warn fees exceeds balance ([#60](https://github.com/ConsenSys/starknet-snap/issues/60)) ([3e9a66c](https://github.com/ConsenSys/starknet-snap/commit/3e9a66c61411b74e2fd45059d450d400b97be21a))
+
+
+### Bug Fixes
+
+* fix lint ([686c96c](https://github.com/ConsenSys/starknet-snap/commit/686c96c1b23e425e7b67ecd35db23abe2845aa24))
+* fix token symbol in not enough tokens message ([#58](https://github.com/ConsenSys/starknet-snap/issues/58)) ([eb4b18e](https://github.com/ConsenSys/starknet-snap/commit/eb4b18e783396c6760b6ca24d668bfd7fc29fc45))
+* switch to change from ETH to USD mode ([#61](https://github.com/ConsenSys/starknet-snap/issues/61)) ([7e9106c](https://github.com/ConsenSys/starknet-snap/commit/7e9106cd1c21ca8a85fd101c55b4043b5e617ed9))
+
 ## [1.6.0](https://github.com/ConsenSys/starknet-snap/compare/wallet-ui-v1.5.0...wallet-ui-v1.6.0) (2023-02-04)
 
 
