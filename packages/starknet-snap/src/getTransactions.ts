@@ -54,7 +54,12 @@ export async function getTransactions(params: ApiParams) {
       senderAddress,
       contractAddress,
       undefined,
-      [TransactionStatus.RECEIVED, TransactionStatus.PENDING, TransactionStatus.ACCEPTED_ON_L2],
+      [
+        TransactionStatus.RECEIVED,
+        TransactionStatus.NOT_RECEIVED,
+        TransactionStatus.PENDING,
+        TransactionStatus.ACCEPTED_ON_L2,
+      ],
       minTimeStamp,
     );
 
@@ -65,7 +70,12 @@ export async function getTransactions(params: ApiParams) {
         senderAddress,
         undefined, // contractAddress: senderAddress,
         [VoyagerTransactionType.DEPLOY, VoyagerTransactionType.DEPLOY_ACCOUNT],
-        [TransactionStatus.RECEIVED, TransactionStatus.PENDING, TransactionStatus.ACCEPTED_ON_L2],
+        [
+          TransactionStatus.RECEIVED,
+          TransactionStatus.NOT_RECEIVED,
+          TransactionStatus.PENDING,
+          TransactionStatus.ACCEPTED_ON_L2,
+        ],
         undefined,
       );
       console.log(`getTransactions\nstoredUnsettledDeployTxns:\n${JSON.stringify(storedUnsettledDeployTxns)}`);
