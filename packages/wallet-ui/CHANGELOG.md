@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
 
+## [1.7.1](https://github.com/ConsenSys/starknet-snap/compare/wallet-ui-v1.7.0...wallet-ui-v1.7.1) (2023-02-15)
+
+
+### Bug Fixes
+
+* change filter in the snap so that it gets the not received transactions when refreshing ([#63](https://github.com/ConsenSys/starknet-snap/issues/63)) ([74a612f](https://github.com/ConsenSys/starknet-snap/commit/74a612fce6278526b3ee9db1cf83e452c2fdd3f2))
+
 ## [1.7.0](https://github.com/ConsenSys/starknet-snap/compare/wallet-ui-v1.6.0...wallet-ui-v1.7.0) (2023-02-15)
 
 

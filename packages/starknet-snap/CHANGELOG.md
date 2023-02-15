@@ -1,6 +1,13 @@
 # Changelog
 
 
+## [1.2.1](https://github.com/ConsenSys/starknet-snap/compare/starknet-snap-v1.2.0...starknet-snap-v1.2.1) (2023-02-15)
+
+
+### Bug Fixes
+
+* change filter in the snap so that it gets the not received transactions when refreshing ([#63](https://github.com/ConsenSys/starknet-snap/issues/63)) ([74a612f](https://github.com/ConsenSys/starknet-snap/commit/74a612fce6278526b3ee9db1cf83e452c2fdd3f2))
+
 ## [1.2.0](https://github.com/ConsenSys/starknet-snap/compare/starknet-snap-v1.1.0...starknet-snap-v1.2.0) (2023-02-04)
 
 
