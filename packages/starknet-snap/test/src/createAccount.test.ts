@@ -233,7 +233,7 @@ describe('Test function: createAccount', function () {
     sandbox.stub(utils, 'estimateAccountDeployFee').callsFake(async () => {
       return estimateDeployFeeResp3;
     });
-    const requestObject: CreateAccountRequestParams = {};
+    const requestObject: CreateAccountRequestParams = { deploy: true };
     apiParams.requestParams = requestObject;
     const result = await createAccount(apiParams);
     expect(walletStub.rpcStubs.snap_manageState).to.have.been.callCount(3);

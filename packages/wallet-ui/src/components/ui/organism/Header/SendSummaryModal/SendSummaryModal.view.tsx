@@ -232,7 +232,7 @@ export const SendSummaryModalView = ({ address, amount, chainId, closeModal }: P
           </RightSummary>
         </Summary>
         {!estimatingGas && <TotalAmount>Maximum fees: {gasFeesAmount} ETH</TotalAmount>}
-        {gasFees.includeDeploy && <IncludeDeploy>*Fees include a one-time deployment fee</IncludeDeploy>}
+        {gasFees.includeDeploy && <IncludeDeploy>*Fees include an one-time deployment fee</IncludeDeploy>}
         <Summary>
           <LeftSummary>
             <PopperTooltip placement="right" closeTrigger="hover" content="Amount + Fee">
