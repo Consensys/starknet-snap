@@ -1,6 +1,13 @@
 # Changelog
 
 
+## [1.3.0](https://github.com/ConsenSys/starknet-snap/compare/starknet-snap-v1.2.1...starknet-snap-v1.3.0) (2023-02-17)
+
+
+### Features
+
+* added support for MM flask v10.24.1 and added starkNet_estimate… ([#50](https://github.com/ConsenSys/starknet-snap/issues/50)) ([88acb2f](https://github.com/ConsenSys/starknet-snap/commit/88acb2fbf7c4884a0bd142a70bc87a0366432fbe))
+
 ## [1.2.1](https://github.com/ConsenSys/starknet-snap/compare/starknet-snap-v1.2.0...starknet-snap-v1.2.1) (2023-02-15)
 
 
