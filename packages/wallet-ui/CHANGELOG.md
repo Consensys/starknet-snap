@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
 
+## [1.8.0](https://github.com/ConsenSys/starknet-snap/compare/wallet-ui-v1.7.2...wallet-ui-v1.8.0) (2023-02-17)
+
+
+### Features
+
+* added support for MM flask v10.24.1 and added starkNet_estimate… ([#50](https://github.com/ConsenSys/starknet-snap/issues/50)) ([88acb2f](https://github.com/ConsenSys/starknet-snap/commit/88acb2fbf7c4884a0bd142a70bc87a0366432fbe))
+
 ## [1.7.2](https://github.com/ConsenSys/starknet-snap/compare/wallet-ui-v1.7.1...wallet-ui-v1.7.2) (2023-02-16)
 
 
