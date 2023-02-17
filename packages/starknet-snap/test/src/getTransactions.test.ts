@@ -9,6 +9,7 @@ import { STARKNET_TESTNET_NETWORK, STARKNET_MAINNET_NETWORK } from '../../src/ut
 import {
   createAccountProxyTxn,
   expectedMassagedTxn4,
+  expectedMassagedTxn5,
   expectedMassagedTxns,
   getTxnFromSequencerResp1,
   getTxnFromSequencerResp2,
@@ -18,6 +19,7 @@ import {
   txn2,
   txn3,
   txn4,
+  txn5,
 } from '../constants.test';
 import { getTransactions } from '../../src/getTransactions';
 import { Mutex } from 'async-mutex';
@@ -32,7 +34,7 @@ describe('Test function: getTransactions', function () {
     accContracts: [],
     erc20Tokens: [],
     networks: [STARKNET_TESTNET_NETWORK, STARKNET_MAINNET_NETWORK],
-    transactions: [txn1, txn2, txn3, txn4, createAccountProxyTxn, initAccountTxn],
+    transactions: [txn1, txn2, txn3, txn4, txn5, createAccountProxyTxn, initAccountTxn],
   };
   const apiParams: ApiParams = {
     state,
@@ -55,7 +57,10 @@ describe('Test function: getTransactions', function () {
         return null;
       }
     });
-    sandbox.stub(utils, 'getTransactionStatus').callsFake(async () => {
+    sandbox.stub(utils, 'getTransactionStatus').callsFake(async (...args) => {
+      if (args?.[0] === expectedMassagedTxn5.txnHash) {
+        return undefined;
+      }
       return 'ACCEPTED_ON_L2';
     });
     walletStub.rpcStubs.snap_manageState.resolves(state);
@@ -74,7 +79,7 @@ describe('Test function: getTransactions', function () {
     apiParams.requestParams = requestObject;
     const result = await getTransactions(apiParams);
     expect(walletStub.rpcStubs.snap_manageState).to.have.been.called;
-    expect(result.length).to.be.eq(3);
+    expect(result.length).to.be.eq(4);
     expect(result).to.be.eql(expectedMassagedTxns);
   });
 
@@ -87,8 +92,8 @@ describe('Test function: getTransactions', function () {
     apiParams.requestParams = requestObject;
     const result = await getTransactions(apiParams);
     expect(walletStub.rpcStubs.snap_manageState).to.have.been.called;
-    expect(result.length).to.be.eq(1);
-    expect(result).to.be.eql([expectedMassagedTxn4]);
+    expect(result.length).to.be.eq(2);
+    expect(result).to.be.eql([expectedMassagedTxn5, expectedMassagedTxn4]);
   });
 
   it('should get the transactions with deploy txn from Voyager of testnet correctly', async function () {
@@ -100,7 +105,7 @@ describe('Test function: getTransactions', function () {
     apiParams.requestParams = requestObject;
     const result = await getTransactions(apiParams);
     expect(walletStub.rpcStubs.snap_manageState).to.have.been.called;
-    expect(result.length).to.be.eq(3);
+    expect(result.length).to.be.eq(4);
     expect(result).to.be.eql(expectedMassagedTxns);
   });
 

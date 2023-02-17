@@ -1,3 +1,4 @@
+import { BIP44AddressKeyDeriver } from '@metamask/key-tree';
 import Mutex from 'async-mutex/lib/Mutex';
 import { SnapState, VoyagerTransactionType } from './snapState';
 
@@ -6,7 +7,7 @@ export interface ApiParams {
   requestParams: ApiRequestParams;
   saveMutex: Mutex;
   wallet;
-  keyDeriver?;
+  keyDeriver?: BIP44AddressKeyDeriver;
 }
 
 export type ApiRequestParams =

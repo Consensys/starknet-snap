@@ -33,7 +33,7 @@ import { OnRpcRequestHandler } from '@metamask/snap-types';
 import { ApiParams, ApiRequestParams } from './types/snapApi';
 import { estimateAccDeployFee } from './estimateAccountDeployFee';
 
-declare const wallet;
+declare const snap;
 const saveMutex = new Mutex();
 
 export const onRpcRequest: OnRpcRequestHandler = async ({ origin, request }) => {
@@ -47,9 +47,11 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ origin, request }) => 
     return 'pong';
   }
 
-  let state: SnapState = await wallet.request({
+  let state: SnapState = await snap.request({
     method: 'snap_manageState',
-    params: ['get'],
+    params: {
+      operation: 'get',
+    },
   });
 
   if (!state) {
@@ -60,26 +62,29 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ origin, request }) => 
       transactions: [],
     };
     // initialize state if empty and set default data
-    await wallet.request({
+    await snap.request({
       method: 'snap_manageState',
-      params: ['update', state],
+      params: {
+        operation: 'update',
+        newState: state,
+      },
     });
   }
 
   // pre-inserted the default networks and tokens
-  await upsertNetwork(STARKNET_MAINNET_NETWORK, wallet, saveMutex, state);
+  await upsertNetwork(STARKNET_MAINNET_NETWORK, snap, saveMutex, state);
   if (isDev) {
-    await upsertNetwork(STARKNET_INTEGRATION_NETWORK, wallet, saveMutex, state);
+    await upsertNetwork(STARKNET_INTEGRATION_NETWORK, snap, saveMutex, state);
   } else {
-    await upsertNetwork(STARKNET_TESTNET_NETWORK, wallet, saveMutex, state);
+    await upsertNetwork(STARKNET_TESTNET_NETWORK, snap, saveMutex, state);
   }
-  await upsertNetwork(STARKNET_TESTNET2_NETWORK, wallet, saveMutex, state);
-  await upsertNetwork(STARKNET_MAINNET_NETWORK_DEPRECATED, wallet, saveMutex, state);
+  await upsertNetwork(STARKNET_TESTNET2_NETWORK, snap, saveMutex, state);
+  await upsertNetwork(STARKNET_MAINNET_NETWORK_DEPRECATED, snap, saveMutex, state);
   if (!isDev) {
-    await upsertNetwork(STARKNET_TESTNET_NETWORK_DEPRECATED, wallet, saveMutex, state);
+    await upsertNetwork(STARKNET_TESTNET_NETWORK_DEPRECATED, snap, saveMutex, state);
   }
   for (const token of PRELOADED_TOKENS) {
-    await upsertErc20Token(token, wallet, saveMutex, state);
+    await upsertErc20Token(token, snap, saveMutex, state);
   }
 
   console.log(`${request.method}:\nrequestParams: ${JSON.stringify(requestParams)}`);
@@ -87,14 +92,14 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ origin, request }) => 
   const apiParams: ApiParams = {
     state,
     requestParams,
-    wallet,
+    wallet: snap,
     saveMutex,
   };
 
   switch (request.method) {
     case 'hello':
       console.log(`Snap State:\n${JSON.stringify(state, null, 2)}`);
-      return wallet.request({
+      return snap.request({
         method: 'snap_confirm',
         params: [
           {
@@ -106,26 +111,26 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ origin, request }) => 
       });
 
     case 'starkNet_createAccount':
-      apiParams.keyDeriver = await getAddressKeyDeriver(wallet);
+      apiParams.keyDeriver = await getAddressKeyDeriver(snap);
       return createAccount(apiParams);
 
     case 'starkNet_getStoredUserAccounts':
       return getStoredUserAccounts(apiParams);
 
     case 'starkNet_extractPrivateKey':
-      apiParams.keyDeriver = await getAddressKeyDeriver(wallet);
+      apiParams.keyDeriver = await getAddressKeyDeriver(snap);
       return extractPrivateKey(apiParams);
 
     case 'starkNet_extractPublicKey':
-      apiParams.keyDeriver = await getAddressKeyDeriver(wallet);
+      apiParams.keyDeriver = await getAddressKeyDeriver(snap);
       return extractPublicKey(apiParams);
 
     case 'starkNet_signMessage':
-      apiParams.keyDeriver = await getAddressKeyDeriver(wallet);
+      apiParams.keyDeriver = await getAddressKeyDeriver(snap);
       return signMessage(apiParams);
 
     case 'starkNet_verifySignedMessage':
-      apiParams.keyDeriver = await getAddressKeyDeriver(wallet);
+      apiParams.keyDeriver = await getAddressKeyDeriver(snap);
       return verifySignedMessage(apiParams);
 
     case 'starkNet_getErc20TokenBalance':
@@ -135,18 +140,18 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ origin, request }) => 
       return getTransactionStatus(apiParams);
 
     case 'starkNet_sendTransaction':
-      apiParams.keyDeriver = await getAddressKeyDeriver(wallet);
+      apiParams.keyDeriver = await getAddressKeyDeriver(snap);
       return sendTransaction(apiParams);
 
     case 'starkNet_getValue':
       return getValue(apiParams);
 
     case 'starkNet_estimateFee':
-      apiParams.keyDeriver = await getAddressKeyDeriver(wallet);
+      apiParams.keyDeriver = await getAddressKeyDeriver(snap);
       return estimateFee(apiParams);
 
     case 'starkNet_estimateAccountDeployFee':
-      apiParams.keyDeriver = await getAddressKeyDeriver(wallet);
+      apiParams.keyDeriver = await getAddressKeyDeriver(snap);
       return estimateAccDeployFee(apiParams);
 
     case 'starkNet_addErc20Token':
@@ -168,7 +173,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ origin, request }) => 
       return getTransactions(apiParams);
 
     case 'starkNet_recoverAccounts':
-      apiParams.keyDeriver = await getAddressKeyDeriver(wallet);
+      apiParams.keyDeriver = await getAddressKeyDeriver(snap);
       return recoverAccounts(apiParams);
 
     default:

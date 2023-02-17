@@ -18,6 +18,7 @@ import {
   getBalanceResp,
   account1,
   estimateDeployFeeResp2,
+  estimateDeployFeeResp3,
 } from '../constants.test';
 import { getAddressKeyDeriver } from '../../src/utils/keyPair';
 import { Mutex } from 'async-mutex';
@@ -210,6 +211,27 @@ describe('Test function: createAccount', function () {
     });
     sandbox.stub(utils, 'estimateAccountDeployFee').callsFake(async () => {
       return estimateDeployFeeResp2;
+    });
+    const requestObject: CreateAccountRequestParams = { deploy: true };
+    apiParams.requestParams = requestObject;
+    const result = await createAccount(apiParams);
+    expect(walletStub.rpcStubs.snap_manageState).to.have.been.callCount(3);
+    expect(result.address).to.be.eq(createAccountProxyResp.contract_address);
+    expect(result.transaction_hash).to.be.eq(createAccountProxyResp.transaction_hash);
+    expect(state.accContracts.length).to.be.eq(3);
+    expect(state.transactions.length).to.be.eq(3);
+  });
+
+  it('should not create any user account with proxy in state in testnet if account does not have enough ETH balance for suggestedMaxFee > 0.000001 ETH', async function () {
+    sandbox.stub(utils, 'deployAccount').callsFake(async () => {
+      return createAccountProxyResp;
+    });
+    sandbox.stub(utils, 'getSigner').throws(new Error());
+    sandbox.stub(utils, 'callContract').callsFake(async () => {
+      return getBalanceResp;
+    });
+    sandbox.stub(utils, 'estimateAccountDeployFee').callsFake(async () => {
+      return estimateDeployFeeResp3;
     });
     const requestObject: CreateAccountRequestParams = { deploy: true };
     apiParams.requestParams = requestObject;

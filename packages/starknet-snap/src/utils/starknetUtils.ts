@@ -1,3 +1,4 @@
+import { BIP44AddressKeyDeriver } from '@metamask/key-tree';
 import {
   ec,
   json,
@@ -391,11 +392,13 @@ export const getNextAddressIndex = (chainId: string, state: SnapState, derivatio
   const accounts = getAccounts(state, chainId).filter(
     (acc) => acc.derivationPath === derivationPath && acc.addressIndex >= 0,
   );
-  const uninitializedAccounts = accounts.find(
+  const uninitializedAccount = accounts.find(
     (acc) => !acc.publicKey || number.toBN(acc.publicKey).eq(number.toBN(constants.ZERO)),
   );
-  console.log(`getNextAddressIndex:\nAccount found from state:\n${JSON.stringify(uninitializedAccounts)}`);
-  return uninitializedAccounts?.addressIndex ?? accounts.length;
+  console.log(
+    `getNextAddressIndex:\nUninitialized account found from state:\n${JSON.stringify(uninitializedAccount ?? 'None')}`,
+  );
+  return uninitializedAccount?.addressIndex ?? accounts.length;
 };
 
 export const getAccContractAddressAndCallData = (accountClassHash: string, publicKey) => {
@@ -448,7 +451,7 @@ export const getKeysFromAddress = async (
 };
 
 export const getKeysFromAddressIndex = async (
-  keyDeriver,
+  keyDeriver: BIP44AddressKeyDeriver,
   chainId: string,
   state: SnapState,
   index: number = undefined,
