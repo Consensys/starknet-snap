@@ -196,6 +196,12 @@ export const useStarkNetSnap = () => {
         toastr.error('Snap is unaccessible or unauthorized');
         dispatch(setWalletConnection(false));
       }
+      if (err.code && err.code === -32603) {
+        //We have to make the user reinstall the snap after the flask update to 10.25.0
+        //following the breaking change : snap_manageState now uses SIP-6 algorithm for encryption
+        //This change breaks the old snap state, hence the reinstallation
+        dispatch(setMinVersionModalVisible(true));
+      }
       //eslint-disable-next-line no-console
       console.error('Error while Initializing wallet', err);
     } finally {
