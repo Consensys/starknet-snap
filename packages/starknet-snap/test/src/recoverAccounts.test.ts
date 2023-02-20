@@ -197,7 +197,7 @@ describe('Test function: recoverAccounts', function () {
     };
     apiParams.requestParams = requestObject;
     const result = await recoverAccounts(apiParams);
-    expect(walletStub.rpcStubs.snap_confirm).to.have.been.calledOnce;
+    expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledOnce;
     expect(result).eql(null);
   });
 });

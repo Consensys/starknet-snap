@@ -3,6 +3,8 @@ import { getSigner, getKeysFromAddressIndex, getAccContractAddressAndCallData } 
 import { getNetworkFromChainId, getValidNumber, upsertAccount } from './utils/snapUtils';
 import { AccContract } from './types/snapState';
 import { ApiParams, RecoverAccountsRequestParams } from './types/snapApi';
+import { DialogType } from '@metamask/rpc-methods';
+import { heading, panel, text } from '@metamask/snaps-ui';
 
 export async function recoverAccounts(params: ApiParams) {
   try {
@@ -21,13 +23,14 @@ export async function recoverAccounts(params: ApiParams) {
 
     if (!network.accountClassHash) {
       await wallet.request({
-        method: 'snap_confirm',
-        params: [
-          {
-            prompt: 'Failed to recover accounts',
-            textAreaContent: `Recover Accounts not supported in network without class hash`,
-          },
-        ],
+        method: 'snap_dialog',
+        params: {
+          type: DialogType.Alert,
+          content: panel([
+            heading('Failed to recover accounts'),
+            text('Recover Accounts not supported in network without class hash'),
+          ]),
+        },
       });
       return null;
     }

@@ -12,6 +12,8 @@ import {
 } from './utils/starknetUtils';
 import { ApiParams, SendTransactionRequestParams } from './types/snapApi';
 import { createAccount } from './createAccount';
+import { DialogType } from '@metamask/rpc-methods';
+import { heading, panel, text } from '@metamask/snaps-ui';
 
 export async function sendTransaction(params: ApiParams) {
   try {
@@ -64,15 +66,17 @@ export async function sendTransaction(params: ApiParams) {
       maxFee,
       network,
     );
+
     const response = await wallet.request({
-      method: 'snap_confirm',
-      params: [
-        {
-          prompt: `Do you want to sign this transaction ?`,
-          description: `It will be signed with address: ${senderAddress}`,
-          textAreaContent: signingTxnText,
-        },
-      ],
+      method: 'snap_dialog',
+      params: {
+        type: DialogType.Confirmation,
+        content: panel([
+          heading('Do you want to sign this transaction ?'),
+          text(`It will be signed with address: ${senderAddress}`),
+          text(signingTxnText),
+        ]),
+      },
     });
     if (!response) return false;
 

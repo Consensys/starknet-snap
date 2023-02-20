@@ -7,7 +7,13 @@ import { estimateFee } from '../../src/estimateFee';
 import { SnapState } from '../../src/types/snapState';
 import { STARKNET_TESTNET_NETWORK, STARKNET_TESTNET_NETWORK_DEPRECATED } from '../../src/utils/constants';
 import { getAddressKeyDeriver } from '../../src/utils/keyPair';
-import { account2, estimateFeeResp, estimateFeeResp2, getBip44EntropyStub } from '../constants.test';
+import {
+  account2,
+  estimateDeployFeeResp4,
+  estimateFeeResp,
+  estimateFeeResp2,
+  getBip44EntropyStub,
+} from '../constants.test';
 import { Mutex } from 'async-mutex';
 import { ApiParams, EstimateFeeRequestParams } from '../../src/types/snapApi';
 
@@ -38,9 +44,6 @@ describe('Test function: estimateFee', function () {
 
   beforeEach(async function () {
     walletStub.rpcStubs.snap_getBip44Entropy.callsFake(getBip44EntropyStub);
-    sandbox.stub(utils, 'getSigner').callsFake(async () => {
-      return account2.publicKey;
-    });
     apiParams.keyDeriver = await getAddressKeyDeriver(walletStub);
   });
 
@@ -50,6 +53,9 @@ describe('Test function: estimateFee', function () {
   });
 
   it('should estimate the fee correctly', async function () {
+    sandbox.stub(utils, 'getSigner').callsFake(async () => {
+      return account2.publicKey;
+    });
     sandbox.stub(utils, 'estimateFeeBulk').callsFake(async () => {
       return [estimateFeeResp];
     });
@@ -57,7 +63,20 @@ describe('Test function: estimateFee', function () {
     expect(result.suggestedMaxFee).to.be.eq(estimateFeeResp.suggestedMaxFee.toString(10));
   });
 
+  it('should estimate the fee including deploy txn correctly', async function () {
+    sandbox.stub(utils, 'getSigner').throws(new Error());
+    sandbox.stub(utils, 'estimateFeeBulk').callsFake(async () => {
+      return [estimateDeployFeeResp4, estimateFeeResp];
+    });
+    const expectedSuggestedMaxFee = estimateDeployFeeResp4.suggestedMaxFee.add(estimateFeeResp.suggestedMaxFee);
+    const result = await estimateFee(apiParams);
+    expect(result.suggestedMaxFee).to.be.eq(expectedSuggestedMaxFee.toString(10));
+  });
+
   it('should estimate the fee without gas consumed and gas price correctly', async function () {
+    sandbox.stub(utils, 'getSigner').callsFake(async () => {
+      return account2.publicKey;
+    });
     sandbox.stub(utils, 'estimateFeeBulk').callsFake(async () => {
       return [estimateFeeResp2];
     });
@@ -66,6 +85,9 @@ describe('Test function: estimateFee', function () {
   });
 
   it('should estimate the fee correctly for an old account', async function () {
+    sandbox.stub(utils, 'getSigner').callsFake(async () => {
+      return account2.publicKey;
+    });
     sandbox.stub(utils, 'estimateFee_v4_6_0').callsFake(async () => {
       return estimateFeeResp;
     });
@@ -78,6 +100,9 @@ describe('Test function: estimateFee', function () {
   });
 
   it('should throw error if estimateFee failed', async function () {
+    sandbox.stub(utils, 'getSigner').callsFake(async () => {
+      return account2.publicKey;
+    });
     sandbox.stub(utils, 'estimateFeeBulk').throws(new Error());
     apiParams.requestParams = requestObject;
 
@@ -92,6 +117,9 @@ describe('Test function: estimateFee', function () {
   });
 
   it('should throw an error if the function name is undefined', async function () {
+    sandbox.stub(utils, 'getSigner').callsFake(async () => {
+      return account2.publicKey;
+    });
     apiParams.requestParams = {
       contractAddress: '0x07394cbe418daa16e42b87ba67372d4ab4a5df0b05c6e554d158458ce245bc10',
       contractFuncName: undefined,
@@ -109,6 +137,9 @@ describe('Test function: estimateFee', function () {
   });
 
   it('should throw an error if the contract address is invalid', async function () {
+    sandbox.stub(utils, 'getSigner').callsFake(async () => {
+      return account2.publicKey;
+    });
     apiParams.requestParams = {
       contractAddress: 'wrongAddress',
       contractFuncName: 'balanceOf',
@@ -126,6 +157,9 @@ describe('Test function: estimateFee', function () {
   });
 
   it('should throw an error if the sender address is invalid', async function () {
+    sandbox.stub(utils, 'getSigner').callsFake(async () => {
+      return account2.publicKey;
+    });
     apiParams.requestParams = {
       contractAddress: '0x07394cbe418daa16e42b87ba67372d4ab4a5df0b05c6e554d158458ce245bc10',
       contractFuncName: 'balanceOf',

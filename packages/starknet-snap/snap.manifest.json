@@ -7,7 +7,7 @@
     "url": "https://github.com/ConsenSys/starknet-snap.git"
   },
   "source": {
-    "shasum": "vf8exbds3XBbqdf5ifRpkVYDejg/hkxq3M48Nl0ECbQ=",
+    "shasum": "49yXFM3b+toXkjP1LJJ2uOmjHL/1Ut3pfAuVxGJ44Xo=",
     "location": {
       "npm": {
         "filePath": "dist/bundle.js",
@@ -17,7 +17,7 @@
     }
   },
   "initialPermissions": {
-    "snap_confirm": {},
+    "snap_dialog": {},
     "endowment:network-access": {},
     "snap_getBip44Entropy": [
       {

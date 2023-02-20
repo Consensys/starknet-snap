@@ -29,9 +29,11 @@ import { getStoredTransactions } from './getStoredTransactions';
 import { getTransactions } from './getTransactions';
 import { recoverAccounts } from './recoverAccounts';
 import { Mutex } from 'async-mutex';
-import { OnRpcRequestHandler } from '@metamask/snap-types';
+import { OnRpcRequestHandler } from '@metamask/snaps-types';
 import { ApiParams, ApiRequestParams } from './types/snapApi';
 import { estimateAccDeployFee } from './estimateAccountDeployFee';
+import { DialogType } from '@metamask/rpc-methods';
+import { copyable, heading, panel } from '@metamask/snaps-ui';
 
 declare const snap;
 const saveMutex = new Mutex();
@@ -100,14 +102,16 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ origin, request }) => 
     case 'hello':
       console.log(`Snap State:\n${JSON.stringify(state, null, 2)}`);
       return snap.request({
-        method: 'snap_confirm',
-        params: [
-          {
-            prompt: `${origin}!`,
-            description: 'Hello',
-            textAreaContent: `# of accounts: ${state.accContracts.length}\n# of txns: ${state.transactions.length}\n# of netwoks: ${state.networks.length}\n# of erc20Tokens: ${state.erc20Tokens.length}`,
-          },
-        ],
+        method: 'snap_dialog',
+        params: {
+          type: DialogType.Alert,
+          content: panel([
+            heading(`${origin}, Hello!`),
+            copyable(
+              `# of accounts: ${state.accContracts.length}\n\n# of netwoks: ${state.networks.length}\n\n# of erc20Tokens: ${state.erc20Tokens.length}\n\n# of txns: ${state.transactions.length}`,
+            ),
+          ]),
+        },
       });
 
     case 'starkNet_createAccount':

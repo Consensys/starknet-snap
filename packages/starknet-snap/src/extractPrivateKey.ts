@@ -2,6 +2,8 @@ import { validateAndParseAddress } from 'starknet';
 import { ApiParams, ExtractPrivateKeyRequestParams } from './types/snapApi';
 import { getNetworkFromChainId } from './utils/snapUtils';
 import { getKeysFromAddress } from './utils/starknetUtils';
+import { DialogType } from '@metamask/rpc-methods';
+import { copyable, panel, text } from '@metamask/snaps-ui';
 
 export async function extractPrivateKey(params: ApiParams) {
   try {
@@ -22,12 +24,11 @@ export async function extractPrivateKey(params: ApiParams) {
     }
 
     const response = await wallet.request({
-      method: 'snap_confirm',
-      params: [
-        {
-          prompt: `Do you want to export your private Key ?`,
-        },
-      ],
+      method: 'snap_dialog',
+      params: {
+        type: DialogType.Confirmation,
+        content: panel([text('Do you want to export your private Key ?')]),
+      },
     });
 
     if (response === true) {
@@ -36,13 +37,11 @@ export async function extractPrivateKey(params: ApiParams) {
       const { privateKey: userPrivateKey } = await getKeysFromAddress(keyDeriver, network, state, userAddress);
 
       await wallet.request({
-        method: 'snap_confirm',
-        params: [
-          {
-            prompt: 'StarkNet Account Private Key',
-            textAreaContent: `${userPrivateKey}`,
-          },
-        ],
+        method: 'snap_dialog',
+        params: {
+          type: DialogType.Alert,
+          content: panel([text('StarkNet Account Private Key'), copyable(userPrivateKey)]),
+        },
       });
     }
 
