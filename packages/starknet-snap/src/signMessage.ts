@@ -3,22 +3,13 @@ import { getTypedDataMessageSignature, getKeyPairFromPrivateKey, getKeysFromAddr
 import { getNetworkFromChainId } from './utils/snapUtils';
 import { ApiParams, SignMessageRequestParams } from './types/snapApi';
 import { validateAndParseAddress } from 'starknet';
+import { DialogType } from '@metamask/rpc-methods';
+import { heading, panel, text } from '@metamask/snaps-ui';
 
 export async function signMessage(params: ApiParams) {
   try {
     const { state, wallet, keyDeriver, requestParams } = params;
     const requestParamsObj = requestParams as SignMessageRequestParams;
-
-    const response = await wallet.request({
-      method: 'snap_confirm',
-      params: [
-        {
-          prompt: `Do you want to sign this message ?`,
-          textAreaContent: `${JSON.stringify(requestParamsObj.typedDataMessage)}`,
-        },
-      ],
-    });
-    if (!response) return false;
 
     if (!requestParamsObj.signerAddress) {
       throw new Error(
@@ -40,6 +31,15 @@ export async function signMessage(params: ApiParams) {
     const network = getNetworkFromChainId(state, requestParamsObj.chainId, useOldAccounts);
 
     console.log(`signMessage:\nsignerAddress: ${signerAddress}\ntypedDataMessage: ${JSON.stringify(typedDataMessage)}`);
+
+    const response = await wallet.request({
+      method: 'snap_dialog',
+      params: {
+        type: DialogType.Confirmation,
+        content: panel([heading('Do you want to sign this message ?'), text(JSON.stringify(typedDataMessage))]),
+      },
+    });
+    if (!response) return false;
 
     const { privateKey: signerPrivateKey } = await getKeysFromAddress(keyDeriver, network, state, signerAddress);
     const signerKeyPair = getKeyPairFromPrivateKey(signerPrivateKey);

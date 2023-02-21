@@ -9,7 +9,10 @@ import { sendTransaction } from '../../src/sendTransaction';
 import { STARKNET_TESTNET_NETWORK, STARKNET_TESTNET_NETWORK_DEPRECATED } from '../../src/utils/constants';
 import {
   account1,
+  createAccountProxyResp,
+  estimateDeployFeeResp,
   estimateFeeResp,
+  getBalanceResp,
   getBip44EntropyStub,
   sendTransactionFailedResp,
   sendTransactionResp,
@@ -44,9 +47,6 @@ describe('Test function: sendTransaction', function () {
   beforeEach(async function () {
     walletStub.rpcStubs.snap_getBip44Entropy.callsFake(getBip44EntropyStub);
     apiParams.keyDeriver = await getAddressKeyDeriver(walletStub);
-    sandbox.stub(utils, 'getSigner').callsFake(async () => {
-      return account1.publicKey;
-    });
     sandbox.stub(utils, 'estimateFeeBulk').callsFake(async () => {
       return [estimateFeeResp];
     });
@@ -60,7 +60,7 @@ describe('Test function: sendTransaction', function () {
     sandbox.stub(utils, 'executeTxn_v4_6_0').callsFake(async () => {
       return executeTxnResp;
     });
-    walletStub.rpcStubs.snap_confirm.resolves(true);
+    walletStub.rpcStubs.snap_dialog.resolves(true);
     walletStub.rpcStubs.snap_manageState.resolves(state);
   });
 
@@ -70,6 +70,9 @@ describe('Test function: sendTransaction', function () {
   });
 
   it('should send a transaction for transferring 10 tokens correctly', async function () {
+    sandbox.stub(utils, 'getSigner').callsFake(async () => {
+      return account1.publicKey;
+    });
     const requestObject: SendTransactionRequestParams = {
       contractAddress: '0x07394cbe418daa16e42b87ba67372d4ab4a5df0b05c6e554d158458ce245bc10',
       contractFuncName: 'transfer',
@@ -78,12 +81,39 @@ describe('Test function: sendTransaction', function () {
     };
     apiParams.requestParams = requestObject;
     const result = await sendTransaction(apiParams);
-    expect(walletStub.rpcStubs.snap_confirm).to.have.been.calledOnce;
+    expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledOnce;
+    expect(walletStub.rpcStubs.snap_manageState).to.have.been.called;
+    expect(result).to.be.eql(sendTransactionResp);
+  });
+
+  it('should trigger a deploy txn and send a transaction for transferring 10 tokens correctly', async function () {
+    sandbox.stub(utils, 'getSigner').throws(new Error());
+    sandbox.stub(utils, 'deployAccount').callsFake(async () => {
+      return createAccountProxyResp;
+    });
+    sandbox.stub(utils, 'callContract').callsFake(async () => {
+      return getBalanceResp;
+    });
+    sandbox.stub(utils, 'estimateAccountDeployFee').callsFake(async () => {
+      return estimateDeployFeeResp;
+    });
+    const requestObject: SendTransactionRequestParams = {
+      contractAddress: '0x07394cbe418daa16e42b87ba67372d4ab4a5df0b05c6e554d158458ce245bc10',
+      contractFuncName: 'transfer',
+      contractCallData: '0x0256d8f49882cc9366037415f48fa9fd2b5b7344ded7573ebfcef7c90e3e6b75,100000000000000000000,0',
+      senderAddress: account1.address,
+    };
+    apiParams.requestParams = requestObject;
+    const result = await sendTransaction(apiParams);
+    expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledOnce;
     expect(walletStub.rpcStubs.snap_manageState).to.have.been.called;
     expect(result).to.be.eql(sendTransactionResp);
   });
 
   it('should send a transaction for transferring 10 tokens correctly for an old account', async function () {
+    sandbox.stub(utils, 'getSigner').callsFake(async () => {
+      return account1.publicKey;
+    });
     const requestObject: SendTransactionRequestParams = {
       contractAddress: '0x07394cbe418daa16e42b87ba67372d4ab4a5df0b05c6e554d158458ce245bc10',
       contractFuncName: 'transfer',
@@ -93,13 +123,16 @@ describe('Test function: sendTransaction', function () {
     };
     apiParams.requestParams = requestObject;
     const result = await sendTransaction(apiParams);
-    expect(walletStub.rpcStubs.snap_confirm).to.have.been.calledOnce;
+    expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledOnce;
     expect(walletStub.rpcStubs.snap_manageState).to.have.been.called;
     expect(result).to.be.eql(sendTransactionResp);
   });
 
   it('should return false if user rejected to sign the transaction', async function () {
-    walletStub.rpcStubs.snap_confirm.resolves(false);
+    sandbox.stub(utils, 'getSigner').callsFake(async () => {
+      return account1.publicKey;
+    });
+    walletStub.rpcStubs.snap_dialog.resolves(false);
     const requestObject: SendTransactionRequestParams = {
       contractAddress: '0x07394cbe418daa16e42b87ba67372d4ab4a5df0b05c6e554d158458ce245bc10',
       contractFuncName: 'transfer',
@@ -108,12 +141,15 @@ describe('Test function: sendTransaction', function () {
     };
     apiParams.requestParams = requestObject;
     const result = await sendTransaction(apiParams);
-    expect(walletStub.rpcStubs.snap_confirm).to.have.been.calledOnce;
+    expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledOnce;
     expect(walletStub.rpcStubs.snap_manageState).not.to.have.been.called;
     expect(result).to.be.eql(false);
   });
 
   it('should send a transaction for transferring 10 tokens but not update snap state if transaction_hash is missing from response', async function () {
+    sandbox.stub(utils, 'getSigner').callsFake(async () => {
+      return account1.publicKey;
+    });
     executeTxnResp = sendTransactionFailedResp;
     const requestObject: SendTransactionRequestParams = {
       contractAddress: '0x07394cbe418daa16e42b87ba67372d4ab4a5df0b05c6e554d158458ce245bc10',
@@ -123,12 +159,15 @@ describe('Test function: sendTransaction', function () {
     };
     apiParams.requestParams = requestObject;
     const result = await sendTransaction(apiParams);
-    expect(walletStub.rpcStubs.snap_confirm).to.have.been.calledOnce;
+    expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledOnce;
     expect(walletStub.rpcStubs.snap_manageState).not.to.have.been.called;
     expect(result).to.be.eql(sendTransactionFailedResp);
   });
 
   it('should send a transaction with given max fee for transferring 10 tokens correctly', async function () {
+    sandbox.stub(utils, 'getSigner').callsFake(async () => {
+      return account1.publicKey;
+    });
     const requestObject: SendTransactionRequestParams = {
       contractAddress: '0x07394cbe418daa16e42b87ba67372d4ab4a5df0b05c6e554d158458ce245bc10',
       contractFuncName: 'transfer',
@@ -138,12 +177,15 @@ describe('Test function: sendTransaction', function () {
     };
     apiParams.requestParams = requestObject;
     const result = await sendTransaction(apiParams);
-    expect(walletStub.rpcStubs.snap_confirm).to.have.been.calledOnce;
+    expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledOnce;
     expect(walletStub.rpcStubs.snap_manageState).to.have.been.called;
     expect(result).to.be.eql(sendTransactionResp);
   });
 
   it('should send a transfer transaction for empty call data', async function () {
+    sandbox.stub(utils, 'getSigner').callsFake(async () => {
+      return account1.publicKey;
+    });
     const requestObject: SendTransactionRequestParams = {
       contractAddress: '0x07394cbe418daa16e42b87ba67372d4ab4a5df0b05c6e554d158458ce245bc10',
       contractFuncName: 'transfer',
@@ -152,12 +194,15 @@ describe('Test function: sendTransaction', function () {
     };
     apiParams.requestParams = requestObject;
     const result = await sendTransaction(apiParams);
-    expect(walletStub.rpcStubs.snap_confirm).to.have.been.calledOnce;
+    expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledOnce;
     expect(walletStub.rpcStubs.snap_manageState).to.have.been.called;
     expect(result).to.be.eql(sendTransactionResp);
   });
 
   it('should send a transaction for empty call data', async function () {
+    sandbox.stub(utils, 'getSigner').callsFake(async () => {
+      return account1.publicKey;
+    });
     const requestObject: SendTransactionRequestParams = {
       contractAddress: account1.address,
       contractFuncName: 'get_signer',
@@ -166,12 +211,15 @@ describe('Test function: sendTransaction', function () {
     };
     apiParams.requestParams = requestObject;
     const result = await sendTransaction(apiParams);
-    expect(walletStub.rpcStubs.snap_confirm).to.have.been.calledOnce;
+    expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledOnce;
     expect(walletStub.rpcStubs.snap_manageState).to.have.been.called;
     expect(result).to.be.eql(sendTransactionResp);
   });
 
   it('should send a transaction for transferring 10 tokens from an unfound user correctly', async function () {
+    sandbox.stub(utils, 'getSigner').callsFake(async () => {
+      return account1.publicKey;
+    });
     const requestObject: SendTransactionRequestParams = {
       contractAddress: '0x07394cbe418daa16e42b87ba67372d4ab4a5df0b05c6e554d158458ce245bc10',
       contractFuncName: 'transfer',
@@ -180,12 +228,15 @@ describe('Test function: sendTransaction', function () {
     };
     apiParams.requestParams = requestObject;
     const result = await sendTransaction(apiParams);
-    expect(walletStub.rpcStubs.snap_confirm).to.have.been.calledOnce;
+    expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledOnce;
     expect(walletStub.rpcStubs.snap_manageState).to.have.been.called;
     expect(result).to.be.eql(sendTransactionResp);
   });
 
   it('should send a transaction for transferring 10 tokens (token of 10 decimal places) from an unfound user correctly', async function () {
+    sandbox.stub(utils, 'getSigner').callsFake(async () => {
+      return account1.publicKey;
+    });
     const requestObject: SendTransactionRequestParams = {
       contractAddress: '0x06a09ccb1caaecf3d9683efe335a667b2169a409d19c589ba1eb771cd210af75',
       contractFuncName: 'transfer',
@@ -194,12 +245,15 @@ describe('Test function: sendTransaction', function () {
     };
     apiParams.requestParams = requestObject;
     const result = await sendTransaction(apiParams);
-    expect(walletStub.rpcStubs.snap_confirm).to.have.been.calledOnce;
+    expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledOnce;
     expect(walletStub.rpcStubs.snap_manageState).to.have.been.called;
     expect(result).to.be.eql(sendTransactionResp);
   });
 
   it('should throw error if upsertTransaction failed', async function () {
+    sandbox.stub(utils, 'getSigner').callsFake(async () => {
+      return account1.publicKey;
+    });
     sandbox.stub(snapUtils, 'upsertTransaction').throws(new Error());
     const requestObject: SendTransactionRequestParams = {
       contractAddress: '0x07394cbe418daa16e42b87ba67372d4ab4a5df0b05c6e554d158458ce245bc10',
@@ -220,6 +274,9 @@ describe('Test function: sendTransaction', function () {
   });
 
   it('should throw an error if contract address is undefined', async function () {
+    sandbox.stub(utils, 'getSigner').callsFake(async () => {
+      return account1.publicKey;
+    });
     const requestObject: SendTransactionRequestParams = {
       contractAddress: undefined,
       contractFuncName: 'transfer',
@@ -238,6 +295,9 @@ describe('Test function: sendTransaction', function () {
   });
 
   it('should throw an error if function name is undefined', async function () {
+    sandbox.stub(utils, 'getSigner').callsFake(async () => {
+      return account1.publicKey;
+    });
     const requestObject: SendTransactionRequestParams = {
       contractAddress: '0x07394cbe418daa16e42b87ba67372d4ab4a5df0b05c6e554d158458ce245bc10',
       contractFuncName: undefined,
@@ -256,6 +316,9 @@ describe('Test function: sendTransaction', function () {
   });
 
   it('should throw an error if sender address is undefined', async function () {
+    sandbox.stub(utils, 'getSigner').callsFake(async () => {
+      return account1.publicKey;
+    });
     const requestObject: SendTransactionRequestParams = {
       contractAddress: '0x07394cbe418daa16e42b87ba67372d4ab4a5df0b05c6e554d158458ce245bc10',
       contractFuncName: 'transfer',
@@ -274,6 +337,9 @@ describe('Test function: sendTransaction', function () {
   });
 
   it('should throw an error if contract address is invalid', async function () {
+    sandbox.stub(utils, 'getSigner').callsFake(async () => {
+      return account1.publicKey;
+    });
     const requestObject: SendTransactionRequestParams = {
       contractAddress: 'wrongAddress',
       contractFuncName: 'transfer',
@@ -292,6 +358,9 @@ describe('Test function: sendTransaction', function () {
   });
 
   it('should throw an error if sender address is invalid', async function () {
+    sandbox.stub(utils, 'getSigner').callsFake(async () => {
+      return account1.publicKey;
+    });
     const requestObject: SendTransactionRequestParams = {
       contractAddress: '0x07394cbe418daa16e42b87ba67372d4ab4a5df0b05c6e554d158458ce245bc10',
       contractFuncName: 'transfer',

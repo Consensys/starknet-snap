@@ -48,7 +48,7 @@ export const getTxnToFromLabel = (transaction: Transaction): string => {
   const txnName = getTxnName(transaction);
   switch(txnName) {
     case 'Send':
-      return 'To ' + shortenAddress(transaction.contractCallData[0]);
+      return 'To ' + shortenAddress(transaction.contractCallData[0].toString());
     case 'Receive':
       return 'From ' + shortenAddress(transaction.senderAddress);
     case 'Deploy':
@@ -70,7 +70,7 @@ export const getTxnValues = (transaction: Transaction, decimals: number = 18, to
   switch(txnName) {
     case 'Send':
     case 'Receive':
-      txnValue = ethers.utils.formatUnits(transaction.contractCallData[1], decimals);
+      txnValue = ethers.utils.formatUnits(transaction.contractCallData[1].toString(), decimals);
       txnUsdValue = (parseFloat(txnValue) * toUsdRate).toFixed(2);
       break;
     default:

@@ -180,17 +180,17 @@ export function getSigningTxnText(
       } else {
         amount = (Number(contractCallData[1]) * Math.pow(10, -1 * token.decimals)).toFixed(token.decimals);
       }
-      tokenTransferStr = `\nSender Address: ${senderAddress}\nRecipient Address: ${contractCallData[0]}\nAmount(${token.symbol}): ${amount}\n`;
+      tokenTransferStr = `\n\nSender Address: ${senderAddress}\n\nRecipient Address: ${contractCallData[0]}\n\nAmount(${token.symbol}): ${amount}`;
     } catch (err) {
       console.error(`getSigningTxnText: error found in amount conversion: ${err}`);
     }
   }
   return (
-    `Contract: ${contractAddress}\nCall Data: [${contractCallData.join(', ')}]\nEstimated Gas Fee(ETH): ${convert(
+    `Contract: ${contractAddress}\n\nCall Data: [${contractCallData.join(', ')}]\n\nEstimated Gas Fee(ETH): ${convert(
       maxFee,
       'wei',
       'ether',
-    )}\nNetwork: ${network.name}` + tokenTransferStr
+    )}\n\nNetwork: ${network.name}` + tokenTransferStr
   );
 }
 

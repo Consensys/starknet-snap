@@ -34,7 +34,7 @@ describe('Test function: signMessage', function () {
   beforeEach(async function () {
     walletStub.rpcStubs.snap_getBip44Entropy.callsFake(getBip44EntropyStub);
     apiParams.keyDeriver = await getAddressKeyDeriver(walletStub);
-    walletStub.rpcStubs.snap_confirm.resolves(true);
+    walletStub.rpcStubs.snap_dialog.resolves(true);
   });
 
   afterEach(function () {
@@ -49,7 +49,7 @@ describe('Test function: signMessage', function () {
     };
     apiParams.requestParams = requestObject;
     const result = await signMessage(apiParams);
-    expect(walletStub.rpcStubs.snap_confirm).to.have.been.calledOnce;
+    expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledOnce;
     expect(walletStub.rpcStubs.snap_manageState).not.to.have.been.called;
     expect(result).to.be.eql(signature1);
   });
@@ -61,7 +61,7 @@ describe('Test function: signMessage', function () {
     };
     apiParams.requestParams = requestObject;
     const result = await signMessage(apiParams);
-    expect(walletStub.rpcStubs.snap_confirm).to.have.been.calledOnce;
+    expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledOnce;
     expect(walletStub.rpcStubs.snap_manageState).not.to.have.been.called;
     expect(result).to.be.eql(signature2);
   });
@@ -82,19 +82,19 @@ describe('Test function: signMessage', function () {
     } finally {
       expect(result).to.be.an('Error');
     }
-    expect(walletStub.rpcStubs.snap_confirm).to.have.been.calledOnce;
+    expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledOnce;
     expect(walletStub.rpcStubs.snap_manageState).not.to.have.been.called;
   });
 
   it('should return false if the user not confirmed', async function () {
-    walletStub.rpcStubs.snap_confirm.resolves(false);
+    walletStub.rpcStubs.snap_dialog.resolves(false);
     const requestObject: SignMessageRequestParams = {
       signerAddress: account1.address,
       typedDataMessage: undefined, // will use typedDataExample.json
     };
     apiParams.requestParams = requestObject;
     const result = await signMessage(apiParams);
-    expect(walletStub.rpcStubs.snap_confirm).to.have.been.calledOnce;
+    expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledOnce;
     expect(walletStub.rpcStubs.snap_manageState).not.to.have.been.called;
     expect(result).to.be.eql(false);
   });

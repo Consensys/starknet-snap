@@ -94,6 +94,7 @@ export async function estimateFee(params: ApiParams) {
       estimateFeeResp = await estimateFeeUtil_v4_6_0(network, senderAddress, senderKeyPair, txnInvocation);
     } else {
       const estimateBulkFeeResp = await estimateFeeBulk(network, senderAddress, senderKeyPair, bulkTransactions);
+      console.log(`estimateFee:\nestimateBulkFeeResp: ${JSON.stringify(estimateBulkFeeResp)}`);
       estimateFeeResp = addFeesFromAllTransactions(estimateBulkFeeResp);
     }
 

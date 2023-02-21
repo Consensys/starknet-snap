@@ -11,7 +11,7 @@ export class WalletMock implements Wallet {
 
   public readonly rpcStubs = {
     snap_getBip44Entropy: sinon.stub(),
-    snap_confirm: sinon.stub(),
+    snap_dialog: sinon.stub(),
     snap_manageState: sinon.stub(),
   };
 
