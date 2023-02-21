@@ -181,18 +181,6 @@ describe('Test function: createAccount', function () {
   });
 
   it('should not create any user account with proxy in state in testnet if not in silentMode and user rejected', async function () {
-    // sandbox.stub(utils, 'deployAccount').callsFake(async () => {
-    //   return createAccountProxyResp;
-    // });
-    // sandbox.stub(utils, 'getSigner').callsFake(async () => {
-    //   return account1.publicKey;
-    // });
-    // sandbox.stub(utils, 'callContract').callsFake(async () => {
-    //   return getBalanceResp;
-    // });
-    // sandbox.stub(utils, 'estimateAccountDeployFee').callsFake(async () => {
-    //   return estimateDeployFeeResp;
-    // });
     walletStub.rpcStubs.snap_dialog.resolves(false);
     const requestObject: CreateAccountRequestParams = { deploy: true };
     apiParams.requestParams = requestObject;

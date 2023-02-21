@@ -58,7 +58,7 @@ export async function createAccount(params: ApiParams, silentMode = false) {
               heading('Do you want to sign this deploy account transaction ?'),
               text(`It will be signed with address: ${contractAddress}`),
               text(
-                `Account Info:\n\nAddress: ${contractAddress}\n\nPublic key: ${publicKey}\n\nAddress Index: ${addressIndex}`,
+                `Account Info:\n\nAddress: ${contractAddress}\n\nPublic Key: ${publicKey}\n\nAddress Index: ${addressIndex}`,
               ),
             ]),
           },
