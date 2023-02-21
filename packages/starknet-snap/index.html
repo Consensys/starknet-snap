@@ -219,6 +219,8 @@
       <legend>Deploy User Account Contract</legend>
       <label for="addressIndex">Specific Address Index (optional)</label>
       <input type="text" id="addressIndex" name="addressIndex"><br>
+      <label for="sendDeployTxn">Send Deploy Txn</label>
+      <input type="checkbox" id="sendDeployTxn" name="sendDeployTxn"><br>
       <input type="submit" id="deployUserAccContract" value="Deploy User Account SC">
     </fieldset>
   </form>
@@ -563,6 +565,7 @@
 
     const addressIndex = document.getElementById('addressIndex').value
     const chainId = document.getElementById('targetChainId').value
+    const deploy = document.getElementById('sendDeployTxn').checked
 
     try {
       const response = await ethereum.request({
@@ -573,6 +576,7 @@
             method: 'starkNet_createAccount',
             params: {
               addressIndex,
+              deploy,
               chainId,
               ...getReqFlagsFromCheckbox()
             }

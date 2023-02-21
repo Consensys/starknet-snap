@@ -17,6 +17,7 @@ import {
   estimateDeployFeeResp,
   getBalanceResp,
   account1,
+  account2,
   estimateDeployFeeResp2,
   estimateDeployFeeResp3,
 } from '../constants.test';
@@ -47,6 +48,7 @@ describe('Test function: createAccount', function () {
     walletStub.rpcStubs.snap_getBip44Entropy.callsFake(getBip44EntropyStub);
     apiParams.keyDeriver = await getAddressKeyDeriver(walletStub);
     sandbox.useFakeTimers(createAccountProxyTxn.timestamp);
+    walletStub.rpcStubs.snap_dialog.resolves(true);
     walletStub.rpcStubs.snap_manageState.resolves(state);
   });
 
@@ -147,7 +149,7 @@ describe('Test function: createAccount', function () {
     expect(state.transactions.length).to.be.eq(2);
   });
 
-  it('should create and store an user account with proxy in state correctly in testnet', async function () {
+  it('should create and store an user account with proxy in state correctly in testnet in silent mode', async function () {
     sandbox.stub(utils, 'deployAccount').callsFake(async () => {
       return createAccountProxyResp;
     });
@@ -160,7 +162,7 @@ describe('Test function: createAccount', function () {
     });
     const requestObject: CreateAccountRequestParams = { deploy: true };
     apiParams.requestParams = requestObject;
-    const result = await createAccount(apiParams);
+    const result = await createAccount(apiParams, true);
     const { publicKey: expectedPublicKey } = await utils.getKeysFromAddress(
       apiParams.keyDeriver,
       STARKNET_TESTNET_NETWORK,
@@ -175,6 +177,29 @@ describe('Test function: createAccount', function () {
     expect(state.accContracts[2].deployTxnHash).to.be.eq(createAccountProxyResp.transaction_hash);
     expect(state.accContracts[2].publicKey).to.be.eq(expectedPublicKey);
     expect(state.accContracts[2].addressSalt).to.be.eq(expectedPublicKey);
+    expect(state.transactions.length).to.be.eq(3);
+  });
+
+  it('should not create any user account with proxy in state in testnet if not in silentMode and user rejected', async function () {
+    // sandbox.stub(utils, 'deployAccount').callsFake(async () => {
+    //   return createAccountProxyResp;
+    // });
+    // sandbox.stub(utils, 'getSigner').callsFake(async () => {
+    //   return account1.publicKey;
+    // });
+    // sandbox.stub(utils, 'callContract').callsFake(async () => {
+    //   return getBalanceResp;
+    // });
+    // sandbox.stub(utils, 'estimateAccountDeployFee').callsFake(async () => {
+    //   return estimateDeployFeeResp;
+    // });
+    walletStub.rpcStubs.snap_dialog.resolves(false);
+    const requestObject: CreateAccountRequestParams = { deploy: true };
+    apiParams.requestParams = requestObject;
+    const result = await createAccount(apiParams);
+    expect(walletStub.rpcStubs.snap_manageState).to.have.been.callCount(0);
+    expect(result.address).to.be.eq(account2.address);
+    expect(state.accContracts.length).to.be.eq(3);
     expect(state.transactions.length).to.be.eq(3);
   });
 

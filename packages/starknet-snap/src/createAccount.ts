@@ -17,8 +17,10 @@ import { AccContract, VoyagerTransactionType, Transaction, TransactionStatus } f
 import { ApiParams, CreateAccountRequestParams } from './types/snapApi';
 import { EstimateFee, number } from 'starknet';
 import { ethers } from 'ethers';
+import { DialogType } from '@metamask/rpc-methods';
+import { heading, panel, text } from '@metamask/snaps-ui';
 
-export async function createAccount(params: ApiParams) {
+export async function createAccount(params: ApiParams, silentMode = false) {
   try {
     const { state, wallet, saveMutex, keyDeriver, requestParams } = params;
     const requestParamsObj = requestParams as CreateAccountRequestParams;
@@ -47,6 +49,26 @@ export async function createAccount(params: ApiParams) {
     let signer = '';
 
     if (deploy) {
+      if (!silentMode) {
+        const response = await wallet.request({
+          method: 'snap_dialog',
+          params: {
+            type: DialogType.Confirmation,
+            content: panel([
+              heading('Do you want to sign this deploy account transaction ?'),
+              text(`It will be signed with address: ${contractAddress}`),
+              text(
+                `Account Info:\n\nAddress: ${contractAddress}\n\nPublic key: ${publicKey}\n\nAddress Index: ${addressIndex}`,
+              ),
+            ]),
+          },
+        });
+        if (!response)
+          return {
+            address: contractAddress,
+          };
+      }
+
       try {
         signer = await getSigner(contractAddress, network);
         console.log(`createAccount:\ngetSigner: contractAddress = ${contractAddress}, signerPublicKey= ${signer}`);
