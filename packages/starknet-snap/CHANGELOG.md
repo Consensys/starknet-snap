@@ -1,6 +1,13 @@
 # Changelog
 
 
+## [1.4.0](https://github.com/ConsenSys/starknet-snap/compare/starknet-snap-v1.3.0...starknet-snap-v1.4.0) (2023-02-21)
+
+
+### Features
+
+* switch from snap confirm to snap dialog ([#71](https://github.com/ConsenSys/starknet-snap/issues/71)) ([9350517](https://github.com/ConsenSys/starknet-snap/commit/9350517931421902aac456c3b4862ec2a1bcd5da))
+
 ## [1.3.0](https://github.com/ConsenSys/starknet-snap/compare/starknet-snap-v1.2.1...starknet-snap-v1.3.0) (2023-02-17)
 
 
