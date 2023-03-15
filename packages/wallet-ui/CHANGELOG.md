@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
 
+## [1.13.0](https://github.com/ConsenSys/starknet-snap/compare/wallet-ui-v1.12.0...wallet-ui-v1.13.0) (2023-03-15)
+
+
+### Features
+
+* upgrade starknet.js to v4.22 and fix the dependabot alerts by u… ([#74](https://github.com/ConsenSys/starknet-snap/issues/74)) ([a3827ee](https://github.com/ConsenSys/starknet-snap/commit/a3827ee837160bfc767c199aef206dc474231997))
+
 ## [1.12.0](https://github.com/ConsenSys/starknet-snap/compare/wallet-ui-v1.11.0...wallet-ui-v1.12.0) (2023-02-21)
 
 
