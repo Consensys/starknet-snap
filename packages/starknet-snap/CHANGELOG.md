@@ -1,6 +1,13 @@
 # Changelog
 
 
+## [1.5.0](https://github.com/ConsenSys/starknet-snap/compare/starknet-snap-v1.4.0...starknet-snap-v1.5.0) (2023-03-15)
+
+
+### Features
+
+* upgrade starknet.js to v4.22 and fix the dependabot alerts by u… ([#74](https://github.com/ConsenSys/starknet-snap/issues/74)) ([a3827ee](https://github.com/ConsenSys/starknet-snap/commit/a3827ee837160bfc767c199aef206dc474231997))
+
 ## [1.4.0](https://github.com/ConsenSys/starknet-snap/compare/starknet-snap-v1.3.0...starknet-snap-v1.4.0) (2023-02-21)
 
 
