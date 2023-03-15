@@ -110,6 +110,7 @@
       "@fortawesome/free-regular-svg-icons": true,
       "@fortawesome/free-solid-svg-icons": true,
       "@fortawesome/free-solid-svg-icons>@fortawesome/fontawesome-common-types": true,
+      "@fortawesome/fontawesome-svg-core>@fortawesome/fontawesome-common-types": true,
       "@lavamoat/preinstall-always-fail": false,
       "@storybook/react>@storybook/core-common>webpack>watchpack>watchpack-chokidar2>chokidar>fsevents": true,
       "@storybook/react>core-js": true,
