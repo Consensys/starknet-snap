@@ -28,7 +28,7 @@
     "react-redux": "^8.0.1",
     "redux-persist": "^6.0.0",
     "semver": "^7.3.7",
-    "starknet": "^4.17.1",
+    "starknet": "^4.22.0",
     "styled-components": "^5.3.5",
     "toastr2": "^3.0.0-alpha.18",
     "web-vitals": "^2.1.4"
@@ -110,6 +110,7 @@
       "@fortawesome/free-regular-svg-icons": true,
       "@fortawesome/free-solid-svg-icons": true,
       "@fortawesome/free-solid-svg-icons>@fortawesome/fontawesome-common-types": true,
+      "@fortawesome/fontawesome-svg-core>@fortawesome/fontawesome-common-types": true,
       "@lavamoat/preinstall-always-fail": false,
       "@storybook/react>@storybook/core-common>webpack>watchpack>watchpack-chokidar2>chokidar>fsevents": true,
       "@storybook/react>core-js": true,
