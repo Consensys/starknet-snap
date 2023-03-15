@@ -484,7 +484,7 @@ export const isAccountDeployed = async (network: Network, publicKey: string) => 
   } catch (err) {
     accountDeployed = false;
   }
-
+  console.log(`isAccountDeployed: ${accountDeployed}`);
   return accountDeployed;
 };
 
