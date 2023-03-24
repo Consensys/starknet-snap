@@ -1389,7 +1389,7 @@
     chalk "^4.1.0"
 
 "@consensys/starknet-snap@file:packages/starknet-snap":
-  version "1.4.0"
+  version "1.5.0"
   dependencies:
     async-mutex "^0.3.2"
     chai "^4.3.6"
