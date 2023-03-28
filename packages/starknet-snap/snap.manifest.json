@@ -7,7 +7,7 @@
     "url": "https://github.com/ConsenSys/starknet-snap.git"
   },
   "source": {
-    "shasum": "E7NhoZ9RXHVqcFOJxau2FuQzZ0CfIi/kEFRijno/hzo=",
+    "shasum": "5Xb/c4pkUwR/rLYlebm/B34sC/dJ6IwU+OH6QG2izuE=",
     "location": {
       "npm": {
         "filePath": "dist/bundle.js",

@@ -6,6 +6,7 @@ import {
   getKeysFromAddress,
   getCallDataArray,
   estimateFee_v4_6_0 as estimateFeeUtil_v4_6_0,
+  estimateFee as estimateFeeUtil,
   getAccContractAddressAndCallData,
   estimateFeeBulk,
   addFeesFromAllTransactions,
@@ -92,10 +93,18 @@ export async function estimateFee(params: ApiParams) {
     let estimateFeeResp;
     if (useOldAccounts) {
       estimateFeeResp = await estimateFeeUtil_v4_6_0(network, senderAddress, senderKeyPair, txnInvocation);
+      console.log(`estimateFee:\nestimateFeeUtil_v4_6_0 estimateFeeResp: ${JSON.stringify(estimateFeeResp)}`);
     } else {
-      const estimateBulkFeeResp = await estimateFeeBulk(network, senderAddress, senderKeyPair, bulkTransactions);
-      console.log(`estimateFee:\nestimateBulkFeeResp: ${JSON.stringify(estimateBulkFeeResp)}`);
-      estimateFeeResp = addFeesFromAllTransactions(estimateBulkFeeResp);
+      if (accountDeployed) {
+        // This condition branch will be removed later when starknet.js
+        // supports estimateFeeBulk in rpc mode
+        estimateFeeResp = await estimateFeeUtil(network, senderAddress, senderKeyPair, txnInvocation);
+        console.log(`estimateFee:\nestimateFeeUtil estimateFeeResp: ${JSON.stringify(estimateFeeResp)}`);
+      } else {
+        const estimateBulkFeeResp = await estimateFeeBulk(network, senderAddress, senderKeyPair, bulkTransactions);
+        console.log(`estimateFee:\nestimateFeeBulk estimateBulkFeeResp: ${JSON.stringify(estimateBulkFeeResp)}`);
+        estimateFeeResp = addFeesFromAllTransactions(estimateBulkFeeResp);
+      }
     }
 
     console.log(`estimateFee:\nestimateFeeResp: ${JSON.stringify(estimateFeeResp)}`);

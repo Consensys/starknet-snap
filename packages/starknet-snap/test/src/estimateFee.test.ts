@@ -56,9 +56,14 @@ describe('Test function: estimateFee', function () {
     sandbox.stub(utils, 'getSigner').callsFake(async () => {
       return account2.publicKey;
     });
-    sandbox.stub(utils, 'estimateFeeBulk').callsFake(async () => {
-      return [estimateFeeResp];
+    sandbox.stub(utils, 'estimateFee').callsFake(async () => {
+      return estimateFeeResp;
     });
+    // The following will be commented out later when starknet.js
+    // supports estimateFeeBulk in rpc mode
+    // sandbox.stub(utils, 'estimateFeeBulk').callsFake(async () => {
+    //   return [estimateFeeResp];
+    // });
     const result = await estimateFee(apiParams);
     expect(result.suggestedMaxFee).to.be.eq(estimateFeeResp.suggestedMaxFee.toString(10));
   });
@@ -77,9 +82,14 @@ describe('Test function: estimateFee', function () {
     sandbox.stub(utils, 'getSigner').callsFake(async () => {
       return account2.publicKey;
     });
-    sandbox.stub(utils, 'estimateFeeBulk').callsFake(async () => {
-      return [estimateFeeResp2];
+    sandbox.stub(utils, 'estimateFee').callsFake(async () => {
+      return estimateFeeResp2;
     });
+    // The following will be commented out later when starknet.js
+    // supports estimateFeeBulk in rpc mode
+    // sandbox.stub(utils, 'estimateFeeBulk').callsFake(async () => {
+    //   return [estimateFeeResp2];
+    // });
     const result = await estimateFee(apiParams);
     expect(result.suggestedMaxFee).to.be.eq(estimateFeeResp.suggestedMaxFee.toString(10));
   });

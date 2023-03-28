@@ -34,10 +34,10 @@ export const getCallDataArray = (callDataStr: string): string[] => {
     .filter((x) => x.length > 0);
 };
 
-export const getProvider = (network: Network): Provider => {
+export const getProvider = (network: Network, forceSequencer = false): Provider => {
   let providerParam: ProviderOptions = {};
   // same precedence as defined in starknet.js Provider class constructor
-  if (network.nodeUrl) {
+  if (network.nodeUrl && !forceSequencer) {
     providerParam = {
       rpc: {
         nodeUrl: network.nodeUrl,
@@ -106,7 +106,9 @@ export const estimateFeeBulk = async (
   senderKeyPair: KeyPair,
   txnInvocation: TransactionBulk,
 ): Promise<EstimateFee[]> => {
-  const provider = getProvider(network);
+  // ensure always calling the sequencer endpoint since the rpc endpoint and
+  // starknet.js are not supported yet.
+  const provider = getProvider(network, true);
   const account = new Account(provider, senderAddress, senderKeyPair);
   return account.estimateFeeBulk(txnInvocation, { blockIdentifier: 'latest' });
 };
@@ -191,11 +193,13 @@ export const getSigner = async (userAccAddress: string, network: Network): Promi
 };
 
 export const getTransactionStatus = async (transactionHash: number.BigNumberish, network: Network) => {
-  const provider = getProvider(network);
+  // ensure always calling the sequencer endpoint since the rpc endpoint and
+  // does not support retrieving status of failed txn yet.
+  const provider = getProvider(network, true);
   return (await provider.getTransactionReceipt(transactionHash)).status;
 };
 
-export const getTransactionFromSequencer = async (transactionHash: number.BigNumberish, network: Network) => {
+export const getTransaction = async (transactionHash: number.BigNumberish, network: Network) => {
   const provider = getProvider(network);
   return provider.getTransaction(transactionHash);
 };
@@ -301,10 +305,10 @@ export const getMassagedTransactions = async (
     txns.map(async (txn) => {
       let txnResp: GetTransactionResponse;
       try {
-        txnResp = await getTransactionFromSequencer(txn.hash, network);
+        txnResp = await getTransaction(txn.hash, network);
         console.log(`getMassagedTransactions: txnResp:\n${JSON.stringify(txnResp)}`);
       } catch (err) {
-        console.error(`getMassagedTransactions: error received from getTransactionFromVoyager: ${err}`);
+        console.error(`getMassagedTransactions: error received from getTransaction: ${err}`);
       }
 
       const massagedTxn: Transaction = {

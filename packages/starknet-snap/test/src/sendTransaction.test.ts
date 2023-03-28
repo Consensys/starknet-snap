@@ -50,6 +50,9 @@ describe('Test function: sendTransaction', function () {
     sandbox.stub(utils, 'estimateFeeBulk').callsFake(async () => {
       return [estimateFeeResp];
     });
+    sandbox.stub(utils, 'estimateFee').callsFake(async () => {
+      return estimateFeeResp;
+    });
     sandbox.stub(utils, 'estimateFee_v4_6_0').callsFake(async () => {
       return estimateFeeResp;
     });
