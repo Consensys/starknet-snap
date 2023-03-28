@@ -1,6 +1,13 @@
 # Changelog
 
 
+## [1.6.0](https://github.com/ConsenSys/starknet-snap/compare/starknet-snap-v1.5.0...starknet-snap-v1.6.0) (2023-03-28)
+
+
+### Features
+
+* switched back to use Infura endpoints except for estimateFeeBulk ([#76](https://github.com/ConsenSys/starknet-snap/issues/76)) ([9df15df](https://github.com/ConsenSys/starknet-snap/commit/9df15df1aab5324f00529a1e0bb24d5f0d33ad07))
+
 ## [1.5.0](https://github.com/ConsenSys/starknet-snap/compare/starknet-snap-v1.4.0...starknet-snap-v1.5.0) (2023-03-15)
 
 
