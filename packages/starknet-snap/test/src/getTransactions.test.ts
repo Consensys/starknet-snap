@@ -48,7 +48,7 @@ describe('Test function: getTransactions', function () {
     sandbox.stub(utils, 'getTransactionsFromVoyager').callsFake(async () => {
       return getTxnsFromVoyagerResp;
     });
-    sandbox.stub(utils, 'getTransactionFromSequencer').callsFake(async (...args) => {
+    sandbox.stub(utils, 'getTransaction').callsFake(async (...args) => {
       if (args?.[0] === getTxnsFromVoyagerResp.items[0].hash) {
         return getTxnFromSequencerResp1;
       } else if (args?.[0] === getTxnsFromVoyagerResp.items[1].hash) {
