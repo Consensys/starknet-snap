@@ -35,7 +35,6 @@
   },
   "devDependencies": {
     "@lavamoat/allow-scripts": "^2.0.3",
-    "@lavamoat/preinstall-always-fail": "^1.0.0",
     "@storybook/addon-actions": "^6.5.3",
     "@storybook/addon-essentials": "^6.5.3",
     "@storybook/addon-interactions": "^6.5.3",
@@ -80,7 +79,7 @@
     "lint:misc": "prettier --check ./src/**/*.js ./src/**/*.ts ./src/**/*.tsx",
     "pretty": "prettier --write ./src/**/*.js  ./src/**/*.ts ./src/**/*.tsx",
     "lint": "yarn lint:react && yarn lint:misc",
-    "clean": "rimraf build/*",
+    "clean": "rimraf build",
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook",
     "type:check": "tsc --pretty --noEmit",
