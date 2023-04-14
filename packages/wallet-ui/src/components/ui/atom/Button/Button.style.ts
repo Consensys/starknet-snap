@@ -12,7 +12,7 @@ interface IButtonProps {
 interface ITextWrapper {
   fontSize?: string;
   upperCaseOnly?: boolean;
-  hasIcons:boolean;
+  hasIcons: boolean;
 }
 
 export const Wrapper = styled.button<IButtonProps>`
@@ -43,8 +43,10 @@ export const Wrapper = styled.button<IButtonProps>`
 
 export const TextWrapper = styled.span<ITextWrapper>`
   font-size: ${(props) => props.fontSize || props.theme.typography.p2.fontSize};
-  font-weight: ${(props) => props.hasIcons ? props.theme.typography.c1.fontWeight : props.theme.typography.bold.fontWeight};
-  font-family: ${(props) => props.hasIcons ? props.theme.typography.c1.fontFamily : props.theme.typography.bold.fontFamily};
+  font-weight: ${(props) =>
+    props.hasIcons ? props.theme.typography.c1.fontWeight : props.theme.typography.bold.fontWeight};
+  font-family: ${(props) =>
+    props.hasIcons ? props.theme.typography.c1.fontFamily : props.theme.typography.bold.fontFamily};
   text-transform: ${(props) => (props.upperCaseOnly ? 'uppercase' : 'initial')};
   margin-left: ${(props) => props.theme.spacing.tiny2};
   margin-right: ${(props) => props.theme.spacing.tiny2};

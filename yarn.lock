@@ -1921,7 +1921,7 @@ __metadata:
 
 "@consensys/starknet-snap@file:../starknet-snap::locator=wallet-ui%40workspace%3Apackages%2Fwallet-ui":
   version: 1.6.0
-  resolution: "@consensys/starknet-snap@file:../starknet-snap#../starknet-snap::hash=2494ad&locator=wallet-ui%40workspace%3Apackages%2Fwallet-ui"
+  resolution: "@consensys/starknet-snap@file:../starknet-snap#../starknet-snap::hash=f76065&locator=wallet-ui%40workspace%3Apackages%2Fwallet-ui"
   dependencies:
     async-mutex: ^0.3.2
     chai: ^4.3.6
@@ -1931,7 +1931,7 @@ __metadata:
     sinon-chai: ^3.7.0
     starknet: ^4.22.0
     starknet_v4.6.0: "npm:starknet@4.6.0"
-  checksum: 8a2125acb12d9537dc393d6ae4aef699b7540171ea8e18910172f911d992304ac3af90b2c14109ee9bd09cc09c525f80a2a7f255ba4738d3fcfa5ef2c3d25d03
+  checksum: b5b503020c3156e4ed31d812f397f3623310ac9c9b34c698ae7ec7b501c8be195f90c31e2b670ca1a8d2f3dba7eabad51d48a378eb4ea81065a218ed594cf713
   languageName: node
   linkType: hard
 
@@ -24383,6 +24383,7 @@ __metadata:
     react-redux: ^8.0.1
     react-scripts: 5.0.1
     redux-persist: ^6.0.0
+    rimraf: ^3.0.2
     semver: ^7.3.7
     starknet: ^4.22.0
     styled-components: ^5.3.5

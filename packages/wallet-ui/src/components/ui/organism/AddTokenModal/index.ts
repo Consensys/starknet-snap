@@ -1,1 +1,1 @@
-export { AddTokenModalView as AddTokenModal } from "./AddTokenModal.view";
+export { AddTokenModalView as AddTokenModal } from './AddTokenModal.view';

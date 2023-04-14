@@ -9,11 +9,11 @@
     "packages/*"
   ],
   "scripts": {
-    "setup": "yarn workspaces run setup",
-    "build": "yarn workspaces run build",
+    "setup": "yarn workspaces foreach run setup",
+    "build": "yarn workspaces foreach run build",
     "test": "yarn workspace @consensys/starknet-snap run test",
-    "lint": "yarn workspaces run lint",
-    "clean": "yarn workspaces run clean",
+    "lint": "yarn workspaces foreach run lint",
+    "clean": "yarn workspaces foreach run clean",
     "prepare": "husky install"
   },
   "devDependencies": {

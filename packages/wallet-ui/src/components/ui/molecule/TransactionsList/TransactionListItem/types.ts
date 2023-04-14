@@ -35,18 +35,22 @@ export const getTxnDate = (transaction: Transaction): string => {
 };
 
 export const getTxnStatus = (transaction: Transaction): string => {
-  return transaction.status.replaceAll('_', ' ').split(' ').map(word => {
-    word = word.toLowerCase();
-    if (word !== 'on') {
-      word = word.charAt(0).toUpperCase() + word.slice(1);
-    }
-    return word;
-  }).join(' ');
+  return transaction.status
+    .replaceAll('_', ' ')
+    .split(' ')
+    .map((word) => {
+      word = word.toLowerCase();
+      if (word !== 'on') {
+        word = word.charAt(0).toUpperCase() + word.slice(1);
+      }
+      return word;
+    })
+    .join(' ');
 };
 
 export const getTxnToFromLabel = (transaction: Transaction): string => {
   const txnName = getTxnName(transaction);
-  switch(txnName) {
+  switch (txnName) {
     case 'Send':
       return 'To ' + shortenAddress(transaction.contractCallData[0].toString());
     case 'Receive':
@@ -59,7 +63,9 @@ export const getTxnToFromLabel = (transaction: Transaction): string => {
 };
 
 export const getTxnFailureReason = (transaction: Transaction): string => {
-  return transaction.status.toLowerCase() === TransactionStatus.REJECTED.toLowerCase() && transaction?.failureReason ? ` (${transaction.failureReason})` : '';
+  return transaction.status.toLowerCase() === TransactionStatus.REJECTED.toLowerCase() && transaction?.failureReason
+    ? ` (${transaction.failureReason})`
+    : '';
 };
 
 export const getTxnValues = (transaction: Transaction, decimals: number = 18, toUsdRate: number = 0) => {
@@ -67,7 +73,7 @@ export const getTxnValues = (transaction: Transaction, decimals: number = 18, to
   let txnUsdValue = '0';
 
   const txnName = getTxnName(transaction);
-  switch(txnName) {
+  switch (txnName) {
     case 'Send':
     case 'Receive':
       txnValue = ethers.utils.formatUnits(transaction.contractCallData[1].toString(), decimals);
@@ -79,4 +85,3 @@ export const getTxnValues = (transaction: Transaction, decimals: number = 18, to
 
   return { txnValue, txnUsdValue };
 };
-

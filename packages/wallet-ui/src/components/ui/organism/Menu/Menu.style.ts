@@ -111,5 +111,5 @@ export const MenuItemText = styled.span`
 `;
 
 export const NetworkMenuItem = styled.div`
-  cursor:pointer;
-`
+  cursor: pointer;
+`;

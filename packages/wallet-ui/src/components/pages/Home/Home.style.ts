@@ -20,7 +20,7 @@ export const RightPart = styled.div`
 `;
 
 export const NoTransactions = styled.p`
-  ${props=>props.theme.typography.p1};
-  text-align:center;
-  color:${props=>props.theme.palette.grey.grey1};
+  ${(props) => props.theme.typography.p1};
+  text-align: center;
+  color: ${(props) => props.theme.palette.grey.grey1};
 `;
