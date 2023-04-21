@@ -1,6 +1,13 @@
 # Changelog
 
 
+## [1.7.0](https://github.com/ConsenSys/starknet-snap/compare/starknet-snap-v1.6.0...starknet-snap-v1.7.0) (2023-04-21)
+
+
+### Features
+
+* upgraded snap packages and patched luxon by upgrading yarn to v2 ([#79](https://github.com/ConsenSys/starknet-snap/issues/79)) ([94c2544](https://github.com/ConsenSys/starknet-snap/commit/94c25445b48a5d02ce4baba62621357c22e3bc89))
+
 ## [1.6.0](https://github.com/ConsenSys/starknet-snap/compare/starknet-snap-v1.5.0...starknet-snap-v1.6.0) (2023-03-28)
 
 
