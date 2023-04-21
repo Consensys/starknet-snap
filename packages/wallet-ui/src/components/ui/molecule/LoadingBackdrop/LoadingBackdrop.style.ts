@@ -13,7 +13,7 @@ export const Wrapper = styled.div`
   text-align: center;
   white-space: nowrap;
   h3 {
-    font-weight: ${props => props.theme.typography.regular.fontWeight};
-    font-family: ${props => props.theme.typography.regular.fontFamily};
+    font-weight: ${(props) => props.theme.typography.regular.fontWeight};
+    font-family: ${(props) => props.theme.typography.regular.fontFamily};
   }
 `;

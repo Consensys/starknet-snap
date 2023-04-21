@@ -40,10 +40,10 @@ export const InfoIcon = styled(RoundedIcon)`
 `;
 
 export const AddTokenButton = styled(Button).attrs((props) => ({
-  textStyle: { 
-    fontWeight: props.theme.typography.bold.fontWeight, 
-    fontSize: props.theme.typography.c1.fontSize ,
-    fontFamily: props.theme.typography.bold.fontFamily ,
+  textStyle: {
+    fontWeight: props.theme.typography.bold.fontWeight,
+    fontSize: props.theme.typography.c1.fontSize,
+    fontFamily: props.theme.typography.bold.fontFamily,
   },
 }))<IAddTokenButton>`
   height: 66px;
@@ -91,6 +91,6 @@ export const AccountDetailButton = styled(Button).attrs((props) => ({
 export const PopInStyled = styled(PopIn)`
   background-color: transparent;
   .modal-close-button {
-    transform:translateY(45px);
+    transform: translateY(45px);
   }
 `;
