@@ -16,6 +16,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - run: |
+          yarn install --no-immutable
           yarn setup
           VERSION=$(node -p "require('../starknet-snap/package.json').version")
           HASH=$(git rev-parse --short HEAD)
