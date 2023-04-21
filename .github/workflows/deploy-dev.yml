@@ -41,6 +41,7 @@ jobs:
           key: yarn-cache-${{ runner.os }}-${{ steps.yarn-version.outputs.YARN_VERSION }}-${{ hashFiles('yarn.lock') }}
 
       - name: Cache froxe lockfile
+        run: yarn install --no-immutable
         run: yarn setup
 
       - name: Clean yarn cache
