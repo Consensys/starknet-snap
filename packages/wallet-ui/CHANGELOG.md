@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
 
+## [1.14.0](https://github.com/ConsenSys/starknet-snap/compare/wallet-ui-v1.13.0...wallet-ui-v1.14.0) (2023-04-21)
+
+
+### Features
+
+* upgraded snap packages and patched luxon by upgrading yarn to v2 ([#79](https://github.com/ConsenSys/starknet-snap/issues/79)) ([94c2544](https://github.com/ConsenSys/starknet-snap/commit/94c25445b48a5d02ce4baba62621357c22e3bc89))
+
 ## [1.13.0](https://github.com/ConsenSys/starknet-snap/compare/wallet-ui-v1.12.0...wallet-ui-v1.13.0) (2023-03-15)
 
 
