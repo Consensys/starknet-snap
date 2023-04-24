@@ -46,14 +46,14 @@ jobs:
       - run: yarn lint
       - run: yarn test
       - name: SonarCloud Scan Starknet-Snap
-        uses: SonarSource/sonarcloud-github-action@v1.9
+        uses: SonarSource/sonarcloud-github-action@v1.8
         with:
           projectBaseDir: packages/starknet-snap/
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_STARKNET_SNAP }}
       - name: SonarCloud Scan Wallet-UI
-        uses: SonarSource/sonarcloud-github-action@v1.9
+        uses: SonarSource/sonarcloud-github-action@v1.8
         with:
           projectBaseDir: packages/wallet-ui/
         env:
