@@ -30,7 +30,7 @@ export const useStarkNetSnap = () => {
   const { ethereum } = window as any;
   const snapId = process.env.REACT_APP_SNAP_ID ? process.env.REACT_APP_SNAP_ID : 'local:http://localhost:8081/';
   const snapVersion = process.env.REACT_APP_SNAP_VERSION ? process.env.REACT_APP_SNAP_VERSION : '*';
-  const minSnapVersion = process.env.REACT_APP_MIN_SNAP_VERSION ? process.env.REACT_APP_MIN_SNAP_VERSION : '1.7.1';
+  const minSnapVersion = process.env.REACT_APP_MIN_SNAP_VERSION ? process.env.REACT_APP_MIN_SNAP_VERSION : '1.7.0';
 
   const connectToSnap = () => {
     dispatch(enableLoadingWithMessage('Connecting...'));

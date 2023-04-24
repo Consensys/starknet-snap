@@ -62,7 +62,7 @@ jobs:
           VERSION=$(node -p "require('./packages/starknet-snap/package.json').version")
           REACT_APP_SNAP_VERSION=${VERSION} yarn workspace wallet-ui build
 
-          npm --prefix ./packages/starknet-snap version --new-version ${VERSION} --no-git-tag-version
+          npm --prefix ./packages/starknet-snap version --new-version ${VERSION} --no-git-tag-version --allow-same-version
           yarn workspace @consensys/starknet-snap build
           
           npm publish ./packages/starknet-snap --tag latest --access public 2>&1 > /dev/null || :
