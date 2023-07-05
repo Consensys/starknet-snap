@@ -1,8 +1,7 @@
-import { TransactionBulk, validateAndParseAddress } from 'starknet';
+import { Invocations, validateAndParseAddress, TransactionType } from 'starknet';
 import { ApiParams, EstimateFeeRequestParams } from './types/snapApi';
 import { getNetworkFromChainId } from './utils/snapUtils';
 import {
-  getKeyPairFromPrivateKey,
   getKeysFromAddress,
   getCallDataArray,
   estimateFee_v4_6_0 as estimateFeeUtil_v4_6_0,
@@ -51,8 +50,7 @@ export async function estimateFee(params: ApiParams) {
       state,
       senderAddress,
     );
-    const senderKeyPair = getKeyPairFromPrivateKey(senderPrivateKey);
-
+    
     const txnInvocation = {
       contractAddress,
       entrypoint: contractFuncName,
@@ -63,9 +61,9 @@ export async function estimateFee(params: ApiParams) {
 
     //Estimate deploy account fee if the signer has not been deployed yet
     const accountDeployed = await isAccountDeployed(network, publicKey);
-    let bulkTransactions: TransactionBulk = [
+    let bulkTransactions: Invocations = [
       {
-        type: 'INVOKE_FUNCTION',
+        type: TransactionType.INVOKE,
         payload: txnInvocation,
       },
     ];
@@ -80,11 +78,11 @@ export async function estimateFee(params: ApiParams) {
 
       bulkTransactions = [
         {
-          type: 'DEPLOY_ACCOUNT',
+          type: TransactionType.DEPLOY_ACCOUNT,
           payload: deployAccountpayload,
         },
         {
-          type: 'INVOKE_FUNCTION',
+          type: TransactionType.INVOKE,
           payload: txnInvocation,
         },
       ];
@@ -92,16 +90,16 @@ export async function estimateFee(params: ApiParams) {
 
     let estimateFeeResp;
     if (useOldAccounts) {
-      estimateFeeResp = await estimateFeeUtil_v4_6_0(network, senderAddress, senderKeyPair, txnInvocation);
+      estimateFeeResp = await estimateFeeUtil(network, senderAddress, senderPrivateKey, txnInvocation);
       console.log(`estimateFee:\nestimateFeeUtil_v4_6_0 estimateFeeResp: ${JSON.stringify(estimateFeeResp)}`);
     } else {
       if (accountDeployed) {
         // This condition branch will be removed later when starknet.js
         // supports estimateFeeBulk in rpc mode
-        estimateFeeResp = await estimateFeeUtil(network, senderAddress, senderKeyPair, txnInvocation);
+        estimateFeeResp = await estimateFeeUtil(network, senderAddress, senderPrivateKey, txnInvocation);
         console.log(`estimateFee:\nestimateFeeUtil estimateFeeResp: ${JSON.stringify(estimateFeeResp)}`);
       } else {
-        const estimateBulkFeeResp = await estimateFeeBulk(network, senderAddress, senderKeyPair, bulkTransactions);
+        const estimateBulkFeeResp = await estimateFeeBulk(network, senderAddress, senderPrivateKey, bulkTransactions);
         console.log(`estimateFee:\nestimateFeeBulk estimateBulkFeeResp: ${JSON.stringify(estimateBulkFeeResp)}`);
         estimateFeeResp = addFeesFromAllTransactions(estimateBulkFeeResp);
       }

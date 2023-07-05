@@ -1,5 +1,5 @@
 import typedDataExample from './typedData/typedDataExample.json';
-import { verifyTypedDataMessageSignature, getKeyPairFromPrivateKey, getKeysFromAddress } from './utils/starknetUtils';
+import { verifyTypedDataMessageSignature,  getFullPublicKeyPairFromPrivateKey, getKeysFromAddress } from './utils/starknetUtils';
 import { getNetworkFromChainId } from './utils/snapUtils';
 import { ApiParams, VerifySignedMessageRequestParams } from './types/snapApi';
 import { validateAndParseAddress } from 'starknet';
@@ -36,10 +36,11 @@ export async function verifySignedMessage(params: ApiParams) {
     );
 
     const { privateKey: signerPrivateKey } = await getKeysFromAddress(keyDeriver, network, state, verifySignerAddress);
+    
+    const fullPublicKey = getFullPublicKeyPairFromPrivateKey(signerPrivateKey);
 
-    const verifySignerKeyPair = getKeyPairFromPrivateKey(signerPrivateKey);
     const isVerified = verifyTypedDataMessageSignature(
-      verifySignerKeyPair,
+      fullPublicKey,
       verifyTypedDataMessage,
       verifySignerAddress,
       verifySignature,

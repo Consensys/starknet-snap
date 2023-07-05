@@ -1,4 +1,4 @@
-import { number } from 'starknet';
+import { num } from 'starknet';
 import { getSigner, getKeysFromAddressIndex, getAccContractAddressAndCallData } from './utils/starknetUtils';
 import { getNetworkFromChainId, getValidNumber, upsertAccount } from './utils/snapUtils';
 import { AccContract } from './types/snapState';
@@ -61,7 +61,7 @@ export async function recoverAccounts(params: ApiParams) {
       }
 
       if (signerPublicKey) {
-        if (number.toBN(signerPublicKey).eq(number.toBN(publicKey))) {
+        if (num.toBigInt(signerPublicKey) == (num.toBigInt(publicKey))) {
           console.log(`recoverAccounts: index ${i} matched\npublicKey: ${publicKey}`);
         }
         j = 0;

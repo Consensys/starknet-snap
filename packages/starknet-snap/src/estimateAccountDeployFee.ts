@@ -18,7 +18,7 @@ export async function estimateAccDeployFee(params: ApiParams) {
     const {
       publicKey,
       addressIndex: addressIndexInUsed,
-      keyPair,
+      privateKey,
     } = await getKeysFromAddressIndex(keyDeriver, network.chainId, state, addressIndex);
     const { address: contractAddress, callData: contractCallData } = getAccContractAddressAndCallData(
       network.accountClassHash,
@@ -33,7 +33,7 @@ export async function estimateAccDeployFee(params: ApiParams) {
       contractAddress,
       contractCallData,
       publicKey,
-      keyPair,
+      privateKey,
     );
     console.log(`estimateAccountDeployFee:\nestimateDeployFee: ${JSON.stringify(estimateDeployFee)}`);
 

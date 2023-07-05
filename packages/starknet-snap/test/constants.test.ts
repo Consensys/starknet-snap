@@ -1,5 +1,5 @@
 import { JsonBIP44CoinTypeNode } from '@metamask/key-tree';
-import { constants, number, Status } from 'starknet';
+import { constants, num, TransactionStatus } from 'starknet';
 import { AccContract, Erc20Token, Network, Transaction, VoyagerTransactionType } from '../src/types/snapState';
 import { STARKNET_MAINNET_NETWORK, STARKNET_TESTNET_NETWORK } from '../src/utils/constants';
 
@@ -19,7 +19,7 @@ export const account1: AccContract = {
   derivationPath: "m / bip32:44' / bip32:9004' / bip32:0' / bip32:0",
   deployTxnHash: '0x5da2d94a324bc56f80cf1fb985c22c85769db434ed403ae71774a07103d229b',
   publicKey: '0x0154c7b20442ee954f50831702ca844ec185ad484c21719575d351583deec90b',
-  chainId: constants.StarknetChainId.TESTNET,
+  chainId: constants.StarknetChainId.SN_GOERLI,
 };
 
 export const account2: AccContract = {
@@ -29,7 +29,7 @@ export const account2: AccContract = {
   derivationPath: "m / bip32:44' / bip32:9004' / bip32:0' / bip32:0",
   deployTxnHash: '0x5bc00132b8f2fc0f673dc232594b26727e712b204a2716f9dc28a8c5f607b5e',
   publicKey: '0x019e59f349e1aa813ab4556c5836d0472e5e1ae82d1e5c3b3e8aabfeb290befd',
-  chainId: constants.StarknetChainId.TESTNET,
+  chainId: constants.StarknetChainId.SN_GOERLI,
 };
 
 export const account3: AccContract = {
@@ -39,7 +39,7 @@ export const account3: AccContract = {
   derivationPath: "m / bip32:44' / bip32:9004' / bip32:0' / bip32:0",
   deployTxnHash: '',
   publicKey: '0x0797efd8e3971dfca4f928485860896201320ce2997ca4789d9343204219599d',
-  chainId: constants.StarknetChainId.TESTNET,
+  chainId: constants.StarknetChainId.SN_GOERLI,
 };
 
 export const account4: AccContract = {
@@ -49,7 +49,7 @@ export const account4: AccContract = {
   derivationPath: "m / bip32:44' / bip32:9004' / bip32:0' / bip32:0",
   deployTxnHash: '0x3b690b4c9dd639881a46f6a344ee90254562175ed7a7f5a028f69b8c32ccb47',
   publicKey: '',
-  chainId: constants.StarknetChainId.TESTNET,
+  chainId: constants.StarknetChainId.SN_GOERLI,
 };
 
 export const token1: Erc20Token = {
@@ -57,7 +57,7 @@ export const token1: Erc20Token = {
   name: 'StarkNet ERC-20 sample',
   symbol: 'SNET',
   decimals: 18,
-  chainId: constants.StarknetChainId.TESTNET,
+  chainId: constants.StarknetChainId.SN_GOERLI,
 };
 
 export const token2: Erc20Token = {
@@ -65,7 +65,7 @@ export const token2: Erc20Token = {
   name: 'ArgentX Test Token',
   symbol: 'TT',
   decimals: 18,
-  chainId: constants.StarknetChainId.TESTNET,
+  chainId: constants.StarknetChainId.SN_GOERLI,
 };
 
 export const token3: Erc20Token = {
@@ -73,14 +73,13 @@ export const token3: Erc20Token = {
   name: 'Test Token with 10 decimal places',
   symbol: 'TT',
   decimals: 10,
-  chainId: constants.StarknetChainId.TESTNET,
+  chainId: constants.StarknetChainId.SN_GOERLI,
 };
 
 export const signature1 = [
   '516020642975010862953753694938162828355589290469166577916863056232343408026',
   '2251696516606127908683557735430451943938460227398850312125458443328304619271',
 ];
-
 export const signature2 = [
   '2097333561319225847382651606677826358290601470682325253385662728360261876313',
   '3446162480918390061797019824053459944083183558758902007996159588638509129622',
@@ -139,7 +138,7 @@ export const sendTransactionFailedResp = {
   transaction_hash: '',
 };
 
-export const getTxnStatusResp = 'ACCEPTED_ON_L1' as Status;
+export const getTxnStatusResp = TransactionStatus.ACCEPTED_ON_L1;
 
 export const createAccountProxyTxn: Transaction = {
   chainId: STARKNET_TESTNET_NETWORK.chainId,
@@ -158,7 +157,7 @@ export const createAccountProxyTxn: Transaction = {
 export const initAccountTxn: Transaction = {
   chainId: STARKNET_TESTNET_NETWORK.chainId,
   contractAddress: account1.address,
-  contractCallData: [], //[account1.publicKey, number.toHex(constants.ZERO)],
+  contractCallData: [], //[account1.publicKey, num.toHex(constants.ZERO)],
   contractFuncName: '', //'initialize',
   senderAddress: account1.address,
   timestamp: 1653559059,
@@ -244,39 +243,39 @@ export const getBalanceResp = {
 };
 
 export const estimateDeployFeeResp = {
-  overall_fee: number.toBN('0x0'),
-  gas_consumed: number.toBN('0x0'),
-  suggestedMaxFee: number.toBN('0x0'),
-  gas_price: number.toBN('0x0'),
+  overall_fee: num.toBigInt('0x0'),
+  gas_consumed: num.toBigInt('0x0'),
+  suggestedMaxFee: num.toBigInt('0x0'),
+  gas_price: num.toBigInt('0x0'),
 };
 
 export const estimateDeployFeeResp2 = {
-  overall_fee: number.toBN('0xaff3f0a7'),
-  gas_consumed: number.toBN('0x18e1'),
-  suggestedMaxFee: number.toBN('0x0107ede8fa'),
-  gas_price: number.toBN('0x071287'),
+  overall_fee: num.toBigInt('0xaff3f0a7'),
+  gas_consumed: num.toBigInt('0x18e1'),
+  suggestedMaxFee: num.toBigInt('0x0107ede8fa'),
+  gas_price: num.toBigInt('0x071287'),
 };
 
 export const estimateDeployFeeResp3 = {
-  overall_fee: number.toBN('0x1160f77b2edd'),
-  gas_consumed: number.toBN('0x18e1'),
-  suggestedMaxFee: number.toBN('0x1a117338c64b'),
-  gas_price: number.toBN('0xb2d3297d'),
+  overall_fee: num.toBigInt('0x1160f77b2edd'),
+  gas_consumed: num.toBigInt('0x18e1'),
+  suggestedMaxFee: num.toBigInt('0x1a117338c64b'),
+  gas_price: num.toBigInt('0xb2d3297d'),
 };
 
 export const estimateDeployFeeResp4 = {
-  overall_fee: number.toBN('0x1160f77b2edd'),
-  suggestedMaxFee: number.toBN('0x1a117338c64b'),
+  overall_fee: num.toBigInt('0x1160f77b2edd'),
+  suggestedMaxFee: num.toBigInt('0x1a117338c64b'),
 };
 
 export const estimateFeeResp = {
-  overall_fee: number.toBN('0x0dc3e44d89e6'),
-  suggestedMaxFee: number.toBN('0x14a5d6744ed9'),
+  overall_fee: num.toBigInt('0x0dc3e44d89e6'),
+  suggestedMaxFee: num.toBigInt('0x14a5d6744ed9'),
 };
 
 export const estimateFeeResp2 = {
-  overall_fee: number.toBN('0x0dc3e44d89e6'),
-  suggestedMaxFee: number.toBN('0x14a5d6744ed9'),
+  overall_fee: num.toBigInt('0x0dc3e44d89e6'),
+  suggestedMaxFee: num.toBigInt('0x14a5d6744ed9'),
 };
 
 export const unfoundUserAddress = '0x18dfa1955a0154524203f81c5668d6a78c708375ee8908dcb55a49c6ec87190';
@@ -285,16 +284,16 @@ export const unfoundUserPublicKey = '0x4b36a2b0a1e9d2af3416914798de776e37d9e0ab9
 export const foundUserPrivateKey = '0x3cddbb7f3694ce84bd9598820834015d979d78e63474a5b00e59b41b0563f4e';
 
 export const testnetPublicKeys = [
-  '0x0154c7b20442ee954f50831702ca844ec185ad484c21719575d351583deec90b',
-  '0x019e59f349e1aa813ab4556c5836d0472e5e1ae82d1e5c3b3e8aabfeb290befd',
+  '0x154c7b20442ee954f50831702ca844ec185ad484c21719575d351583deec90b',
+  '0x19e59f349e1aa813ab4556c5836d0472e5e1ae82d1e5c3b3e8aabfeb290befd',
   '0x4b36a2b0a1e9d2af3416914798de776e37d9e0ab9a50d2dec30485dca64bb8',
-  '0x06de8036537a36bcdfaf0954f71fd7bb11f3f1a9e5778ac5e988e5f8f56aade4',
-  '0x024cf3571b72b7cc235bff8d0e973faccde2c7162e5a3e978d91a529657d718f',
-  '0x04863e0b7d7df4a53c5b0b99aef944245856f09cef8f04380ae41dc56ff4ae75',
-  '0x0282427b86ee5228538ed7d0e0081553cd37a377cd06983c24c0d34acfd35b1a',
-  '0x03c23c5416c73af04f89ecb1e19a7074519bb7ef0c6c52a785a2200ff899a916',
-  '0x020bc19e11620253377cc18a8b6b633bb964a6488f5941a8d5ad7e97e0b8a6c4',
-  '0x04cc995ff1e5a4b145f07912cf9fd5b0a178b23563d4cbf1a4547c43351fc426',
+  '0x6de8036537a36bcdfaf0954f71fd7bb11f3f1a9e5778ac5e988e5f8f56aade4',
+  '0x24cf3571b72b7cc235bff8d0e973faccde2c7162e5a3e978d91a529657d718f',
+  '0x4863e0b7d7df4a53c5b0b99aef944245856f09cef8f04380ae41dc56ff4ae75',
+  '0x282427b86ee5228538ed7d0e0081553cd37a377cd06983c24c0d34acfd35b1a',
+  '0x3c23c5416c73af04f89ecb1e19a7074519bb7ef0c6c52a785a2200ff899a916',
+  '0x20bc19e11620253377cc18a8b6b633bb964a6488f5941a8d5ad7e97e0b8a6c4',
+  '0x4cc995ff1e5a4b145f07912cf9fd5b0a178b23563d4cbf1a4547c43351fc426',
 ];
 
 export const testnetAccAddresses = [
@@ -311,16 +310,16 @@ export const testnetAccAddresses = [
 ];
 
 export const mainnetPublicKeys = [
-  '0x0154c7b20442ee954f50831702ca844ec185ad484c21719575d351583deec90b',
-  '0x019e59f349e1aa813ab4556c5836d0472e5e1ae82d1e5c3b3e8aabfeb290befd',
+  '0x154c7b20442ee954f50831702ca844ec185ad484c21719575d351583deec90b',
+  '0x19e59f349e1aa813ab4556c5836d0472e5e1ae82d1e5c3b3e8aabfeb290befd',
   '0x4b36a2b0a1e9d2af3416914798de776e37d9e0ab9a50d2dec30485dca64bb8',
-  '0x06de8036537a36bcdfaf0954f71fd7bb11f3f1a9e5778ac5e988e5f8f56aade4',
-  '0x024cf3571b72b7cc235bff8d0e973faccde2c7162e5a3e978d91a529657d718f',
-  '0x04863e0b7d7df4a53c5b0b99aef944245856f09cef8f04380ae41dc56ff4ae75',
-  '0x0282427b86ee5228538ed7d0e0081553cd37a377cd06983c24c0d34acfd35b1a',
-  '0x03c23c5416c73af04f89ecb1e19a7074519bb7ef0c6c52a785a2200ff899a916',
-  '0x020bc19e11620253377cc18a8b6b633bb964a6488f5941a8d5ad7e97e0b8a6c4',
-  '0x04cc995ff1e5a4b145f07912cf9fd5b0a178b23563d4cbf1a4547c43351fc426',
+  '0x6de8036537a36bcdfaf0954f71fd7bb11f3f1a9e5778ac5e988e5f8f56aade4',
+  '0x24cf3571b72b7cc235bff8d0e973faccde2c7162e5a3e978d91a529657d718f',
+  '0x4863e0b7d7df4a53c5b0b99aef944245856f09cef8f04380ae41dc56ff4ae75',
+  '0x282427b86ee5228538ed7d0e0081553cd37a377cd06983c24c0d34acfd35b1a',
+  '0x3c23c5416c73af04f89ecb1e19a7074519bb7ef0c6c52a785a2200ff899a916',
+  '0x20bc19e11620253377cc18a8b6b633bb964a6488f5941a8d5ad7e97e0b8a6c4',
+  '0x4cc995ff1e5a4b145f07912cf9fd5b0a178b23563d4cbf1a4547c43351fc426',
 ];
 
 export const mainnetAccAddresses = [

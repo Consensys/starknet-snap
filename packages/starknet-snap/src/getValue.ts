@@ -1,4 +1,4 @@
-import { number, validateAndParseAddress } from 'starknet';
+import { num, validateAndParseAddress } from 'starknet';
 import { ApiParams, GetValueRequestParams } from './types/snapApi';
 import { getNetworkFromChainId } from './utils/snapUtils';
 import { getCallDataArray, callContract } from './utils/starknetUtils';
@@ -31,7 +31,7 @@ export async function getValue(params: ApiParams) {
       network,
       contractAddress,
       contractFuncName,
-      number.bigNumberishArrayToDecimalStringArray(contractCallData),
+      num.bigNumberishArrayToDecimalStringArray(contractCallData),
     );
 
     console.log(`getValue:\nresp: ${JSON.stringify(resp)}`);

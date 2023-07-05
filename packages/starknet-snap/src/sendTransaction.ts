@@ -1,9 +1,8 @@
-import { number, constants, validateAndParseAddress } from 'starknet';
+import { num, constants, validateAndParseAddress } from 'starknet';
 import { estimateFee } from './estimateFee';
 import { Transaction, TransactionStatus, VoyagerTransactionType } from './types/snapState';
 import { getNetworkFromChainId, getSigningTxnText, upsertTransaction } from './utils/snapUtils';
 import {
-  getKeyPairFromPrivateKey,
   getKeysFromAddress,
   getCallDataArray,
   executeTxn,
@@ -50,11 +49,10 @@ export async function sendTransaction(params: ApiParams) {
       publicKey,
       addressIndex,
     } = await getKeysFromAddress(keyDeriver, network, state, senderAddress);
-    const senderKeyPair = getKeyPairFromPrivateKey(senderPrivateKey);
-    let maxFee = requestParamsObj.maxFee ? number.toBN(requestParamsObj.maxFee) : constants.ZERO;
-    if (maxFee.eq(constants.ZERO)) {
+    let maxFee = requestParamsObj.maxFee ? num.toBigInt(requestParamsObj.maxFee) : constants.ZERO;
+    if (maxFee === constants.ZERO) {
       const { suggestedMaxFee } = await estimateFee(params);
-      maxFee = number.toBN(suggestedMaxFee);
+      maxFee = num.toBigInt(suggestedMaxFee);
     }
 
     const signingTxnText = getSigningTxnText(
@@ -111,8 +109,8 @@ export async function sendTransaction(params: ApiParams) {
     //In case this is the first transaction we assign a nonce of 1 to make sure it does after the deploy transaction
     const nonceSendTransaction = accountDeployed ? undefined : 1;
     const txnResp = useOldAccounts
-      ? await executeTxn_v4_6_0(network, senderAddress, senderKeyPair, txnInvocation, maxFee, nonceSendTransaction)
-      : await executeTxn(network, senderAddress, senderKeyPair, txnInvocation, maxFee, nonceSendTransaction);
+      ? await executeTxn_v4_6_0(network, senderAddress, senderPrivateKey, txnInvocation, maxFee, nonceSendTransaction)
+      : await executeTxn(network, senderAddress, senderPrivateKey, txnInvocation, maxFee, nonceSendTransaction);
 
     console.log(`sendTransaction:\ntxnResp: ${JSON.stringify(txnResp)}`);
 
@@ -124,7 +122,7 @@ export async function sendTransaction(params: ApiParams) {
         senderAddress,
         contractAddress,
         contractFuncName,
-        contractCallData: contractCallData.map((data: number.BigNumberish) => number.toHex(number.toBN(data))),
+        contractCallData: contractCallData.map((data: num.BigNumberish) => num.toHex(num.toBigInt(data))),
         status: TransactionStatus.RECEIVED,
         failureReason: '',
         eventIds: [],

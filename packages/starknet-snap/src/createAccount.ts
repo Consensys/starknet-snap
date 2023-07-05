@@ -15,7 +15,7 @@ import {
 } from './utils/snapUtils';
 import { AccContract, VoyagerTransactionType, Transaction, TransactionStatus } from './types/snapState';
 import { ApiParams, CreateAccountRequestParams } from './types/snapApi';
-import { EstimateFee, number } from 'starknet';
+import { EstimateFee, num } from 'starknet';
 import { ethers } from 'ethers';
 import { DialogType } from '@metamask/rpc-methods';
 import { heading, panel, text } from '@metamask/snaps-ui';
@@ -30,10 +30,10 @@ export async function createAccount(params: ApiParams, silentMode = false) {
     const deploy = !!requestParamsObj.deploy;
 
     const {
+      privateKey,
       publicKey,
       addressIndex: addressIndexInUsed,
       derivationPath,
-      keyPair,
     } = await getKeysFromAddressIndex(keyDeriver, network.chainId, state, addressIndex);
     const { address: contractAddress, callData: contractCallData } = getAccContractAddressAndCallData(
       network.accountClassHash,
@@ -84,7 +84,7 @@ export async function createAccount(params: ApiParams, silentMode = false) {
             network,
             getEtherErc20Token(state, network.chainId)?.address,
             'balanceOf',
-            [number.toBN(contractAddress).toString(10)],
+            [num.toBigInt(contractAddress).toString(10)],
           );
           console.log(`createAccount:\ngetBalanceResp: ${JSON.stringify(getBalanceResp)}`);
           estimateDeployFee = await estimateAccountDeployFee(
@@ -92,7 +92,7 @@ export async function createAccount(params: ApiParams, silentMode = false) {
             contractAddress,
             contractCallData,
             publicKey,
-            keyPair,
+            privateKey,
           );
           console.log(`createAccount:\nestimateDeployFee: ${JSON.stringify(estimateDeployFee)}`);
           if (Number(getBalanceResp.result[0]) < Number(estimateDeployFee.suggestedMaxFee)) {
@@ -112,7 +112,7 @@ export async function createAccount(params: ApiParams, silentMode = false) {
         contractAddress,
         contractCallData,
         publicKey,
-        keyPair,
+        privateKey,
         estimateDeployFee?.suggestedMaxFee,
       );
 

@@ -73,7 +73,7 @@ describe('Test function: estimateFee', function () {
     sandbox.stub(utils, 'estimateFeeBulk').callsFake(async () => {
       return [estimateDeployFeeResp4, estimateFeeResp];
     });
-    const expectedSuggestedMaxFee = estimateDeployFeeResp4.suggestedMaxFee.add(estimateFeeResp.suggestedMaxFee);
+    const expectedSuggestedMaxFee = estimateDeployFeeResp4.suggestedMaxFee + estimateFeeResp.suggestedMaxFee;
     const result = await estimateFee(apiParams);
     expect(result.suggestedMaxFee).to.be.eq(expectedSuggestedMaxFee.toString(10));
   });

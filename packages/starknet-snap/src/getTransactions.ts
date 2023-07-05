@@ -1,4 +1,4 @@
-import { number, validateAndParseAddress } from 'starknet';
+import { num, validateAndParseAddress } from 'starknet';
 import { ApiParams, GetTransactionsRequestParams } from './types/snapApi';
 import { Transaction, TransactionStatus, VoyagerTransactionType } from './types/snapState';
 import { DEFAULT_GET_TXNS_LAST_NUM_OF_DAYS, DEFAULT_GET_TXNS_PAGE_SIZE } from './utils/constants';
@@ -9,7 +9,9 @@ export async function getTransactions(params: ApiParams) {
   try {
     const { state, wallet, saveMutex, requestParams } = params;
     const requestParamsObj = requestParams as GetTransactionsRequestParams;
-
+    console.log({
+      add : requestParamsObj.senderAddress
+    })
     try {
       validateAndParseAddress(requestParamsObj.senderAddress);
     } catch (err) {
@@ -85,7 +87,7 @@ export async function getTransactions(params: ApiParams) {
     // For each "unsettled" txn, update the status and timestamp from the same txn found in massagedTxns
     storedUnsettledTxns.forEach((txn) => {
       const foundMassagedTxn = massagedTxns.find((massagedTxn) =>
-        number.toBN(massagedTxn.txnHash).eq(number.toBN(txn.txnHash)),
+        num.toBigInt(massagedTxn.txnHash) == (num.toBigInt(txn.txnHash)),
       );
       txn.status = foundMassagedTxn?.status ?? txn.status;
       txn.timestamp = foundMassagedTxn?.timestamp ?? txn.timestamp;
@@ -120,7 +122,7 @@ export async function getTransactions(params: ApiParams) {
 
     // Filter out massaged txns that are found in the updated stored txns
     massagedTxns = massagedTxns.filter((massagedTxn) => {
-      return !storedUnsettledTxns.find((txn) => number.toBN(txn.txnHash).eq(number.toBN(massagedTxn.txnHash)));
+      return !storedUnsettledTxns.find((txn) => num.toBigInt(txn.txnHash) == (num.toBigInt(massagedTxn.txnHash)));
     });
     console.log(`getTransactions\nmassagedTxns after filtered total:\n${massagedTxns.length}`);
 

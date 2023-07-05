@@ -1,5 +1,5 @@
 import { Mutex } from 'async-mutex';
-import { number, validateAndParseAddress } from 'starknet';
+import { num, validateAndParseAddress } from 'starknet';
 import {
   Network,
   Erc20Token,
@@ -69,13 +69,15 @@ function isPreloadedTokenSymbol(tokenSymbol: string, chainId: string) {
 }
 
 function isPreloadedTokenAddress(tokenAddress: string, chainId: string) {
+  const bigIntTokenAddress = num.toBigInt(tokenAddress);
   return !!PRELOADED_TOKENS.find(
-    (token) => number.toBN(token.address).eq(number.toBN(tokenAddress)) && Number(token.chainId) === Number(chainId),
+    (token) => num.toBigInt(token.address) === bigIntTokenAddress && Number(token.chainId) === Number(chainId),
   );
 }
 
 function isPreloadedNetworkChainId(networkChainId: string) {
-  return !!PRELOADED_NETWORKS.find((network) => number.toBN(network.chainId).eq(number.toBN(networkChainId)));
+  const bigIntNetworkChainId = num.toBigInt(networkChainId);
+  return !!PRELOADED_NETWORKS.find((network) => num.toBigInt(network.chainId) === bigIntNetworkChainId);
 }
 
 function isPreloadedNetworkName(networkName: string) {
@@ -166,7 +168,7 @@ export function getSigningTxnText(
   contractFuncName: string,
   contractCallData: string[],
   senderAddress: string,
-  maxFee: number.BigNumberish,
+  maxFee: num.BigNumberish,
   network: Network,
 ): string {
   // Retrieve the ERC-20 token from snap state for confirmation display purpose
@@ -195,8 +197,9 @@ export function getSigningTxnText(
 }
 
 export function getAccount(state: SnapState, accountAddress: string, chainId: string) {
+  const bigIntAccountAddress = num.toBigInt(accountAddress);
   return state.accContracts?.find(
-    (acc) => number.toBN(acc.address).eq(number.toBN(accountAddress)) && Number(acc.chainId) === Number(chainId),
+    (acc) => num.toBigInt(acc.address) === bigIntAccountAddress && Number(acc.chainId) === Number(chainId),
   );
 }
 
@@ -300,8 +303,9 @@ export async function upsertNetwork(network: Network, wallet, mutex: Mutex, stat
 }
 
 export function getErc20Token(state: SnapState, tokenAddress: string, chainId: string) {
+  const bigIntTokenAddress = num.toBigInt(tokenAddress);
   return state.erc20Tokens?.find(
-    (token) => number.toBN(token.address).eq(number.toBN(tokenAddress)) && Number(token.chainId) === Number(chainId),
+    (token) => num.toBigInt(token.address) === bigIntTokenAddress && Number(token.chainId) === Number(chainId),
   );
 }
 
@@ -377,8 +381,9 @@ export function getTransactionsFromVoyagerUrl(network: Network) {
 }
 
 export function getTransaction(state: SnapState, txnHash: string, chainId: string) {
+  const bigIntTxnHash = num.toBigInt(txnHash);
   return state.transactions?.find(
-    (txn) => number.toBN(txn.txnHash).eq(number.toBN(txnHash)) && Number(txn.chainId) === Number(chainId),
+    (txn) => num.toBigInt(txn.txnHash) === bigIntTxnHash && Number(txn.chainId) === Number(chainId),
   );
 }
 
@@ -399,10 +404,12 @@ export function getTransactions(
       filteredTxns = filteredTxns.filter((txn) => txn.timestamp * 1000 >= minTimestamp);
     }
     if (senderAddress) {
-      filteredTxns = filteredTxns.filter((txn) => number.toBN(txn.senderAddress).eq(number.toBN(senderAddress)));
+      const bigIntSenderAddress = num.toBigInt(senderAddress);
+      filteredTxns = filteredTxns.filter((txn) => num.toBigInt(txn.senderAddress) === bigIntSenderAddress);
     }
     if (contractAddress) {
-      filteredTxns = filteredTxns.filter((txn) => number.toBN(txn.contractAddress).eq(number.toBN(contractAddress)));
+      const bigIntContractAddress = num.toBigInt(contractAddress);
+      filteredTxns = filteredTxns.filter((txn) => num.toBigInt(txn.contractAddress) === bigIntContractAddress);
     }
     if (txnType) {
       if (Array.isArray(txnType)) {

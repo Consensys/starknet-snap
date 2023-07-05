@@ -11,6 +11,7 @@ import { getAddressKeyDeriver } from '../../src/utils/keyPair';
 import * as utils from '../../src/utils/starknetUtils';
 import { Mutex } from 'async-mutex';
 import { ApiParams, SignMessageRequestParams } from '../../src/types/snapApi';
+import { SignatureType } from '@noble/curves/abstract/weierstrass';
 
 chai.use(sinonChai);
 const sandbox = sinon.createSandbox();
@@ -48,10 +49,16 @@ describe('Test function: signMessage', function () {
       typedDataMessage: undefined, // will use typedDataExample.json
     };
     apiParams.requestParams = requestObject;
-    const result = await signMessage(apiParams);
+    const result : boolean | SignatureType = await signMessage(apiParams);
+    const expected = utils.getSignatureBySignatureString(signature1)
     expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledOnce;
     expect(walletStub.rpcStubs.snap_manageState).not.to.have.been.called;
-    expect(result).to.be.eql(signature1);
+    expect(result).not.to.be.eql(false);
+    if (result !== false) {
+      expect(result.r).to.be.eql(expected.r);
+      expect(result.s).to.be.eql(expected.s);
+    }
+    
   });
 
   it('should sign a message from an unfound user account correctly', async function () {
@@ -61,9 +68,14 @@ describe('Test function: signMessage', function () {
     };
     apiParams.requestParams = requestObject;
     const result = await signMessage(apiParams);
+    const expected = utils.getSignatureBySignatureString(signature2)
     expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledOnce;
     expect(walletStub.rpcStubs.snap_manageState).not.to.have.been.called;
-    expect(result).to.be.eql(signature2);
+    expect(result).not.to.be.eql(false);
+    if (result !== false) {
+      expect(result.r).to.be.eql(expected.r);
+      expect(result.s).to.be.eql(expected.s);
+    }
   });
 
   it('should throw error if getKeysFromAddress failed', async function () {

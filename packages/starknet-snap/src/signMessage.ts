@@ -1,5 +1,5 @@
 import typedDataExample from './typedData/typedDataExample.json';
-import { getTypedDataMessageSignature, getKeyPairFromPrivateKey, getKeysFromAddress } from './utils/starknetUtils';
+import { getTypedDataMessageSignature, getKeysFromAddress } from './utils/starknetUtils';
 import { getNetworkFromChainId } from './utils/snapUtils';
 import { ApiParams, SignMessageRequestParams } from './types/snapApi';
 import { validateAndParseAddress } from 'starknet';
@@ -42,9 +42,9 @@ export async function signMessage(params: ApiParams) {
     if (!response) return false;
 
     const { privateKey: signerPrivateKey } = await getKeysFromAddress(keyDeriver, network, state, signerAddress);
-    const signerKeyPair = getKeyPairFromPrivateKey(signerPrivateKey);
-    const typedDataSignature = getTypedDataMessageSignature(signerKeyPair, typedDataMessage, signerAddress);
 
+    const typedDataSignature = getTypedDataMessageSignature(signerPrivateKey, typedDataMessage, signerAddress);
+    
     console.log(`signMessage:\ntypedDataSignature: ${typedDataSignature}`);
     return typedDataSignature;
   } catch (err) {

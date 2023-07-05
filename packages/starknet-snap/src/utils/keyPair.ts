@@ -1,5 +1,5 @@
 import { BIP44AddressKeyDeriver, getBIP44AddressKeyDeriver } from '@metamask/key-tree';
-import { number, encode, ec } from 'starknet';
+import { number, encode, ec } from 'starknet_v4.22.0';
 import { utils } from 'ethers';
 
 export async function getAddressKeyDeriver(wallet) {
