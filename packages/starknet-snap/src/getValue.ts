@@ -1,3 +1,4 @@
+import { toJson } from './utils/serializer';
 import { num, validateAndParseAddress } from 'starknet';
 import { ApiParams, GetValueRequestParams } from './types/snapApi';
 import { getNetworkFromChainId } from './utils/snapUtils';
@@ -10,9 +11,7 @@ export async function getValue(params: ApiParams) {
 
     if (!requestParamsObj.contractAddress || !requestParamsObj.contractFuncName) {
       throw new Error(
-        `The given contract address and function name need to be non-empty string, got: ${JSON.stringify(
-          requestParamsObj,
-        )}`,
+        `The given contract address and function name need to be non-empty string, got: ${toJson(requestParamsObj)}`,
       );
     }
 
@@ -34,7 +33,7 @@ export async function getValue(params: ApiParams) {
       num.bigNumberishArrayToDecimalStringArray(contractCallData),
     );
 
-    console.log(`getValue:\nresp: ${JSON.stringify(resp)}`);
+    console.log(`getValue:\nresp: ${toJson(resp)}`);
 
     return resp.result;
   } catch (err) {

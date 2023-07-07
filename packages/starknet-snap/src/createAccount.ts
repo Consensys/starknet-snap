@@ -1,3 +1,4 @@
+import { toJson } from './utils/serializer';
 import {
   getKeysFromAddressIndex,
   getAccContractAddressAndCallData,
@@ -75,7 +76,7 @@ export async function createAccount(params: ApiParams, silentMode = false) {
         failureReason = 'The account address had already been deployed';
       } catch (err) {
         signerAssigned = false;
-        console.log(`createAccount:\ngetSigner: err in get signer: ${JSON.stringify(err)}`);
+        console.log(`createAccount:\ngetSigner: err in get signer: ${toJson(err)}`);
       }
 
       if (!signerAssigned) {
@@ -86,7 +87,7 @@ export async function createAccount(params: ApiParams, silentMode = false) {
             'balanceOf',
             [num.toBigInt(contractAddress).toString(10)],
           );
-          console.log(`createAccount:\ngetBalanceResp: ${JSON.stringify(getBalanceResp)}`);
+          console.log(`createAccount:\ngetBalanceResp: ${toJson(getBalanceResp)}`);
           estimateDeployFee = await estimateAccountDeployFee(
             network,
             contractAddress,
@@ -94,7 +95,7 @@ export async function createAccount(params: ApiParams, silentMode = false) {
             publicKey,
             privateKey,
           );
-          console.log(`createAccount:\nestimateDeployFee: ${JSON.stringify(estimateDeployFee)}`);
+          console.log(`createAccount:\nestimateDeployFee: ${toJson(estimateDeployFee)}`);
           if (Number(getBalanceResp.result[0]) < Number(estimateDeployFee.suggestedMaxFee)) {
             const gasFeeStr = ethers.utils.formatUnits(estimateDeployFee.suggestedMaxFee.toString(10), 18);
             const gasFeeFloat = parseFloat(gasFeeStr).toFixed(6); // 6 decimal places for ether
@@ -146,7 +147,7 @@ export async function createAccount(params: ApiParams, silentMode = false) {
         await upsertTransaction(txn, wallet, saveMutex);
       }
 
-      console.log(`createAccount:\ndeployResp: ${JSON.stringify(deployResp)}`);
+      console.log(`createAccount:\ndeployResp: ${toJson(deployResp)}`);
 
       return {
         address: deployResp.contract_address,

@@ -1,3 +1,4 @@
+import { toJson } from './serializer';
 import { Mutex } from 'async-mutex';
 import { num, validateAndParseAddress } from 'starknet';
 import {
@@ -227,10 +228,8 @@ export async function upsertAccount(userAccount: AccContract, wallet, mutex: Mut
       }
       state.accContracts.push(userAccount);
     } else {
-      if (JSON.stringify(storedAccount) === JSON.stringify(userAccount)) {
-        console.log(
-          `upsertAccount: same account and hence skip calling snap state update: ${JSON.stringify(storedAccount)}`,
-        );
+      if (toJson(storedAccount) === toJson(userAccount)) {
+        console.log(`upsertAccount: same account and hence skip calling snap state update: ${toJson(storedAccount)}`);
         return;
       }
       storedAccount.addressSalt = userAccount.addressSalt;
@@ -250,10 +249,8 @@ export async function upsertAccount(userAccount: AccContract, wallet, mutex: Mut
   });
 }
 
-export function getNetwork(state: SnapState, chainId: string, useOldAccounts = false) {
-  return state.networks?.find(
-    (network) => Number(network.chainId) === Number(chainId) && !!network?.useOldAccounts === useOldAccounts,
-  );
+export function getNetwork(state: SnapState, chainId: string) {
+  return state.networks?.find((network) => Number(network.chainId) === Number(chainId) && !!network?.useOldAccounts === false);
 }
 
 export function getNetworks(state: SnapState) {
@@ -271,17 +268,15 @@ export async function upsertNetwork(network: Network, wallet, mutex: Mutex, stat
       });
     }
 
-    const storedNetwork = getNetwork(state, network.chainId, network.useOldAccounts);
+    const storedNetwork = getNetwork(state, network.chainId);
     if (!storedNetwork) {
       if (!state.networks) {
         state.networks = [];
       }
       state.networks.push(network);
     } else {
-      if (JSON.stringify(storedNetwork) === JSON.stringify(network)) {
-        console.log(
-          `upsertNetwork: same network and hence skip calling snap state update: ${JSON.stringify(storedNetwork)}`,
-        );
+      if (toJson(storedNetwork) === toJson(network)) {
+        console.log(`upsertNetwork: same network and hence skip calling snap state update: ${toJson(storedNetwork)}`);
         return;
       }
       storedNetwork.name = network.name;
@@ -289,7 +284,6 @@ export async function upsertNetwork(network: Network, wallet, mutex: Mutex, stat
       storedNetwork.nodeUrl = network.nodeUrl;
       storedNetwork.voyagerUrl = network.voyagerUrl;
       storedNetwork.accountClassHash = network.accountClassHash;
-      storedNetwork.useOldAccounts = !!network.useOldAccounts;
     }
 
     await wallet.request({
@@ -335,11 +329,9 @@ export async function upsertErc20Token(erc20Token: Erc20Token, wallet, mutex: Mu
       }
       state.erc20Tokens.push(erc20Token);
     } else {
-      if (JSON.stringify(storedErc20Token) === JSON.stringify(erc20Token)) {
+      if (toJson(storedErc20Token) === toJson(erc20Token)) {
         console.log(
-          `upsertErc20Token: same Erc20 token and hence skip calling snap state update: ${JSON.stringify(
-            storedErc20Token,
-          )}`,
+          `upsertErc20Token: same Erc20 token and hence skip calling snap state update: ${toJson(storedErc20Token)}`,
         );
         return;
       }
@@ -358,13 +350,13 @@ export async function upsertErc20Token(erc20Token: Erc20Token, wallet, mutex: Mu
   });
 }
 
-export function getNetworkFromChainId(state: SnapState, targerChainId: string | undefined, useOldAccounts = false) {
+export function getNetworkFromChainId(state: SnapState, targerChainId: string | undefined) {
   const chainId = targerChainId || STARKNET_TESTNET_NETWORK.chainId;
-  const network = getNetwork(state, chainId, useOldAccounts);
+  const network = getNetwork(state, chainId);
   if (!network) {
     throw new Error(`can't find the network in snap state with chainId: ${chainId}`);
   }
-  console.log(`getNetworkFromChainId: From ${targerChainId}:\n${JSON.stringify(network)}`);
+  console.log(`getNetworkFromChainId: From ${targerChainId}:\n${toJson(network)}`);
   return network;
 }
 
@@ -450,9 +442,9 @@ export async function upsertTransaction(txn: Transaction, wallet, mutex: Mutex, 
       }
       state.transactions.push(txn);
     } else {
-      if (JSON.stringify(storedTxn) === JSON.stringify(txn)) {
+      if (toJson(storedTxn) === toJson(txn)) {
         console.log(
-          `upsertTransaction: same transaction and hence skip calling snap state update: ${JSON.stringify(storedTxn)}`,
+          `upsertTransaction: same transaction and hence skip calling snap state update: ${toJson(storedTxn)}`,
         );
         return;
       }

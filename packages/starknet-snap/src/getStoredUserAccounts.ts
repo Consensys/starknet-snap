@@ -1,3 +1,4 @@
+import { toJson } from './utils/serializer';
 import { ApiParams, GetStoredUserAccountsRequestParams } from './types/snapApi';
 import { getAccounts, getNetworkFromChainId } from './utils/snapUtils';
 
@@ -12,7 +13,7 @@ export async function getStoredUserAccounts(params: ApiParams) {
     const userAccounts = getAccounts(state, network.chainId).filter(
       (acc) => acc.publicKey !== '' || acc.deployTxnHash !== '',
     );
-    console.log(`getStoredUserAccounts: userAccounts:\n${JSON.stringify(userAccounts, null, 2)}`);
+    console.log(`getStoredUserAccounts: userAccounts:\n${toJson(userAccounts, 2)}`);
 
     return userAccounts;
   } catch (err) {

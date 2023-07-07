@@ -1,14 +1,9 @@
+import { toJson } from './utils/serializer';
 import { num, constants, validateAndParseAddress } from 'starknet';
 import { estimateFee } from './estimateFee';
 import { Transaction, TransactionStatus, VoyagerTransactionType } from './types/snapState';
 import { getNetworkFromChainId, getSigningTxnText, upsertTransaction } from './utils/snapUtils';
-import {
-  getKeysFromAddress,
-  getCallDataArray,
-  executeTxn,
-  executeTxn_v4_6_0,
-  isAccountDeployed,
-} from './utils/starknetUtils';
+import { getKeysFromAddress, getCallDataArray, executeTxn, isAccountDeployed } from './utils/starknetUtils';
 import { ApiParams, SendTransactionRequestParams } from './types/snapApi';
 import { createAccount } from './createAccount';
 import { DialogType } from '@metamask/rpc-methods';
@@ -21,7 +16,7 @@ export async function sendTransaction(params: ApiParams) {
 
     if (!requestParamsObj.contractAddress || !requestParamsObj.senderAddress || !requestParamsObj.contractFuncName) {
       throw new Error(
-        `The given contract address, sender address, and function name need to be non-empty string, got: ${JSON.stringify(
+        `The given contract address, sender address, and function name need to be non-empty string, got: ${toJson(
           requestParamsObj,
         )}`,
       );
@@ -42,8 +37,7 @@ export async function sendTransaction(params: ApiParams) {
     const contractFuncName = requestParamsObj.contractFuncName;
     const contractCallData = getCallDataArray(requestParamsObj.contractCallData);
     const senderAddress = requestParamsObj.senderAddress;
-    const useOldAccounts = !!requestParamsObj.useOldAccounts;
-    const network = getNetworkFromChainId(state, requestParamsObj.chainId, useOldAccounts);
+    const network = getNetworkFromChainId(state, requestParamsObj.chainId);
     const {
       privateKey: senderPrivateKey,
       publicKey,
@@ -84,9 +78,7 @@ export async function sendTransaction(params: ApiParams) {
       calldata: contractCallData,
     };
 
-    console.log(
-      `sendTransaction:\ntxnInvocation: ${JSON.stringify(txnInvocation)}\nmaxFee: ${JSON.stringify(maxFee)}}`,
-    );
+    console.log(`sendTransaction:\ntxnInvocation: ${toJson(txnInvocation)}\nmaxFee: ${toJson(maxFee)}}`);
 
     const accountDeployed = await isAccountDeployed(network, publicKey);
     if (!accountDeployed) {
@@ -108,11 +100,16 @@ export async function sendTransaction(params: ApiParams) {
 
     //In case this is the first transaction we assign a nonce of 1 to make sure it does after the deploy transaction
     const nonceSendTransaction = accountDeployed ? undefined : 1;
-    const txnResp = useOldAccounts
-      ? await executeTxn_v4_6_0(network, senderAddress, senderPrivateKey, txnInvocation, maxFee, nonceSendTransaction)
-      : await executeTxn(network, senderAddress, senderPrivateKey, txnInvocation, maxFee, nonceSendTransaction);
+    const txnResp = await executeTxn(
+      network,
+      senderAddress,
+      senderPrivateKey,
+      txnInvocation,
+      maxFee,
+      nonceSendTransaction,
+    );
 
-    console.log(`sendTransaction:\ntxnResp: ${JSON.stringify(txnResp)}`);
+    console.log(`sendTransaction:\ntxnResp: ${toJson(txnResp)}`);
 
     if (txnResp.transaction_hash) {
       const txn: Transaction = {

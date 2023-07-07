@@ -71,22 +71,24 @@ describe('Test function: getTransactions', function () {
     sandbox.restore();
   });
 
-  it('should get the transactions from Voyager of SN_GOERLI correctly', async function () {
+  it('should get the transactions from Voyager of testnet correctly', async function () {
     const requestObject: GetTransactionsRequestParams = {
-      senderAddress: '0x05a98ec74a40383cf99896bfea2ec5e6aad16c7eed50025a5f569d585ebb13a2',
+      senderAddress: txn4.senderAddress,
       pageSize: '10',
     };
     apiParams.requestParams = requestObject;
-    
+
     const result = await getTransactions(apiParams);
+
+    console.log({ result });
     expect(walletStub.rpcStubs.snap_manageState).to.have.been.called;
     expect(result.length).to.be.eq(4);
     expect(result).to.be.eql(expectedMassagedTxns);
   });
 
-  it('should get the transactions of SN_GOERLI stored in snap state correctly', async function () {
+  it('should get the transactions of testnet stored in snap state correctly', async function () {
     const requestObject: GetTransactionsRequestParams = {
-      senderAddress: '0x05a98ec74a40383cf99896bfea2ec5e6aad16c7eed50025a5f569d585ebb13a2',
+      senderAddress: txn4.senderAddress,
       pageSize: '10',
       onlyFromState: true,
     };
@@ -97,9 +99,9 @@ describe('Test function: getTransactions', function () {
     expect(result).to.be.eql([expectedMassagedTxn5, expectedMassagedTxn4]);
   });
 
-  it('should get the transactions with deploy txn from Voyager of SN_GOERLI correctly', async function () {
+  it('should get the transactions with deploy txn from Voyager of testnet correctly', async function () {
     const requestObject: GetTransactionsRequestParams = {
-      senderAddress: '0x05a98ec74a40383cf99896bfea2ec5e6aad16c7eed50025a5f569d585ebb13a2',
+      senderAddress: txn4.senderAddress,
       pageSize: '10',
       withDeployTxn: true,
     };
@@ -113,7 +115,7 @@ describe('Test function: getTransactions', function () {
   it('should throw error if upsertTransactions failed', async function () {
     sandbox.stub(snapUtils, 'upsertTransactions').throws(new Error());
     const requestObject: GetTransactionsRequestParams = {
-      senderAddress: '0x05a98ec74a40383cf99896bfea2ec5e6aad16c7eed50025a5f569d585ebb13a2',
+      senderAddress: txn4.senderAddress,
       pageSize: '10',
       withDeployTxn: true,
     };
@@ -148,7 +150,7 @@ describe('Test function: getTransactions', function () {
 
   it('should throw an error if the contract address is an invalid address', async function () {
     const requestObject: GetTransactionsRequestParams = {
-      senderAddress: '0x05a98ec74a40383cf99896bfea2ec5e6aad16c7eed50025a5f569d585ebb13a2',
+      senderAddress: txn4.senderAddress,
       pageSize: '10',
       withDeployTxn: true,
       contractAddress: 'wrongAddress',

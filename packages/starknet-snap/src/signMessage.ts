@@ -1,3 +1,4 @@
+import { toJson } from './utils/serializer';
 import typedDataExample from './typedData/typedDataExample.json';
 import { getTypedDataMessageSignature, getKeysFromAddress } from './utils/starknetUtils';
 import { getNetworkFromChainId } from './utils/snapUtils';
@@ -13,7 +14,7 @@ export async function signMessage(params: ApiParams) {
 
     if (!requestParamsObj.signerAddress) {
       throw new Error(
-        `The given signer address need to be non-empty string, got: ${JSON.stringify(requestParamsObj.signerAddress)}`,
+        `The given signer address need to be non-empty string, got: ${toJson(requestParamsObj.signerAddress)}`,
       );
     }
 
@@ -24,19 +25,18 @@ export async function signMessage(params: ApiParams) {
     }
 
     const signerAddress = requestParamsObj.signerAddress;
-    const useOldAccounts = !!requestParamsObj.useOldAccounts;
     const typedDataMessage = requestParamsObj.typedDataMessage
       ? JSON.parse(requestParamsObj.typedDataMessage)
       : typedDataExample;
-    const network = getNetworkFromChainId(state, requestParamsObj.chainId, useOldAccounts);
+    const network = getNetworkFromChainId(state, requestParamsObj.chainId);
 
-    console.log(`signMessage:\nsignerAddress: ${signerAddress}\ntypedDataMessage: ${JSON.stringify(typedDataMessage)}`);
+    console.log(`signMessage:\nsignerAddress: ${signerAddress}\ntypedDataMessage: ${toJson(typedDataMessage)}`);
 
     const response = await wallet.request({
       method: 'snap_dialog',
       params: {
         type: DialogType.Confirmation,
-        content: panel([heading('Do you want to sign this message ?'), text(JSON.stringify(typedDataMessage))]),
+        content: panel([heading('Do you want to sign this message ?'), text(toJson(typedDataMessage))]),
       },
     });
     if (!response) return false;
@@ -44,9 +44,9 @@ export async function signMessage(params: ApiParams) {
     const { privateKey: signerPrivateKey } = await getKeysFromAddress(keyDeriver, network, state, signerAddress);
 
     const typedDataSignature = getTypedDataMessageSignature(signerPrivateKey, typedDataMessage, signerAddress);
-    
-    console.log(`signMessage:\ntypedDataSignature: ${typedDataSignature}`);
-    return typedDataSignature;
+
+    console.log(`signMessage:\ntypedDataSignature: ${toJson(typedDataSignature)}`);
+    return typedDataSignature.toDERHex();
   } catch (err) {
     console.error(`Problem found: ${err}`);
     throw err;

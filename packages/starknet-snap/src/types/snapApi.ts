@@ -34,7 +34,6 @@ export type ApiRequestParams =
 export interface BaseRequestParams {
   chainId?: string;
   isDev?: boolean;
-  useOldAccounts?: boolean;
 }
 
 export interface CreateAccountRequestParams extends BaseRequestParams {

@@ -1,3 +1,4 @@
+import { toJson } from './serializer';
 import { BIP44AddressKeyDeriver } from '@metamask/key-tree';
 import {
   ec,
@@ -21,7 +22,6 @@ import {
   Invocations,
 } from 'starknet';
 import type { Hex } from '@noble/curves/abstract/utils';
-import * as starknet_v4_6_0 from 'starknet_v4.6.0';
 import { Network, SnapState, Transaction, TransactionType } from '../types/snapState';
 import { PROXY_CONTRACT_HASH, TRANSFER_SELECTOR_HEX } from './constants';
 import { getAddressKey } from './keyPair';
@@ -53,25 +53,6 @@ export const getProvider = (network: Network, forceSequencer = false): Provider 
   return new Provider(providerParam);
 };
 
-export const getProvider_v4_6_0 = (network: Network): starknet_v4_6_0.Provider => {
-  let providerParam: starknet_v4_6_0.ProviderOptions = {};
-  // same precedence as defined in starknet.js Provider class constructor
-  if (network.nodeUrl) {
-    providerParam = {
-      rpc: {
-        nodeUrl: network.nodeUrl,
-      },
-    };
-  } else if (network.baseUrl) {
-    providerParam = {
-      sequencer: {
-        baseUrl: network.baseUrl,
-      },
-    };
-  }
-  return new starknet_v4_6_0.Provider(providerParam);
-};
-
 export const callContract = async (
   network: Network,
   contractAddress: string,
@@ -92,7 +73,7 @@ export const callContract = async (
 export const estimateFee = async (
   network: Network,
   senderAddress: string,
-  privateKey: any,
+  privateKey: string | Uint8Array,
   txnInvocation: Call | Call[],
 ): Promise<EstimateFee> => {
   const provider = getProvider(network);
@@ -103,7 +84,7 @@ export const estimateFee = async (
 export const estimateFeeBulk = async (
   network: Network,
   senderAddress: string,
-  privateKey: any,
+  privateKey: string | Uint8Array,
   txnInvocation: Invocations,
 ): Promise<EstimateFee[]> => {
   // ensure always calling the sequencer endpoint since the rpc endpoint and
@@ -113,21 +94,10 @@ export const estimateFeeBulk = async (
   return account.estimateFeeBulk(txnInvocation, { blockIdentifier: 'latest' });
 };
 
-export const estimateFee_v4_6_0 = async (
-  network: Network,
-  senderAddress: string,
-  senderKeyPair: any,
-  txnInvocation: Call | Call[],
-): Promise<EstimateFee> => {
-  const provider = getProvider(network);
-  const account = new Account(provider, senderAddress, senderKeyPair);
-  return account.estimateFee(txnInvocation, { blockIdentifier: 'latest' });
-};
-
 export const executeTxn = async (
   network: Network,
   senderAddress: string,
-  privateKey: any,
+  privateKey: string | Uint8Array,
   txnInvocation: Call | Call[],
   maxFee: num.BigNumberish,
   nonce?: number,
@@ -137,25 +107,12 @@ export const executeTxn = async (
   return account.execute(txnInvocation, undefined, { nonce, maxFee });
 };
 
-export const executeTxn_v4_6_0 = async (
-  network: Network,
-  senderAddress: string,
-  senderKeyPair: any,
-  txnInvocation: Call | Call[],
-  maxFee: num.BigNumberish,
-  nonce?: number,
-): Promise<InvokeFunctionResponse> => {
-  const provider = getProvider(network);
-  const account = new Account(provider, senderAddress, senderKeyPair);
-  return account.execute(txnInvocation, undefined, { nonce, maxFee });
-};
-
 export const deployAccount = async (
   network: Network,
   contractAddress: string,
   contractCallData: RawCalldata,
   addressSalt: num.BigNumberish,
-  privateKey: any,
+  privateKey: string | Uint8Array,
   maxFee: num.BigNumberish,
 ): Promise<DeployContractResponse> => {
   const provider = getProvider(network);
@@ -174,7 +131,7 @@ export const estimateAccountDeployFee = async (
   contractAddress: string,
   contractCallData: RawCalldata,
   addressSalt: num.BigNumberish,
-  privateKey: any,
+  privateKey: string | Uint8Array,
 ): Promise<EstimateFee> => {
   const provider = getProvider(network);
   const account = new Account(provider, contractAddress, privateKey);
@@ -188,7 +145,7 @@ export const estimateAccountDeployFee = async (
 };
 
 export const getSigner = async (userAccAddress: string, network: Network): Promise<string> => {
-  const resp = await callContract(network, userAccAddress, network.useOldAccounts ? 'get_signer' : 'getSigner');
+  const resp = await callContract(network, userAccAddress, 'getSigner');
   return resp.result[0];
 };
 
@@ -300,13 +257,14 @@ export const getMassagedTransactions = async (
     withDeployTxn,
     network,
   );
-  const bigIntTransferSelectorHex = num.toBigInt(TRANSFER_SELECTOR_HEX)
+
+  const bigIntTransferSelectorHex = num.toBigInt(TRANSFER_SELECTOR_HEX);
   let massagedTxns = await Promise.all(
     txns.map(async (txn) => {
       let txnResp: GetTransactionResponse;
       try {
         txnResp = await getTransaction(txn.hash, network);
-        console.log(`getMassagedTransactions: txnResp:\n${JSON.stringify(txnResp)}`);
+        console.log(`getMassagedTransactions: txnResp:\n${toJson(txnResp)}`);
       } catch (err) {
         console.error(`getMassagedTransactions: error received from getTransaction: ${err}`);
       }
@@ -317,7 +275,7 @@ export const getMassagedTransactions = async (
         chainId: network.chainId,
         senderAddress: txnResp.sender_address || txnResp.contract_address || txn.contract_address || '',
         contractAddress: txnResp.calldata?.[1] || txnResp.contract_address || txn.contract_address || '',
-        contractFuncName: num.toBigInt(txnResp.calldata?.[2]) === bigIntTransferSelectorHex ? 'transfer' : '',
+        contractFuncName: num.toBigInt(txnResp.calldata?.[2] || '') === bigIntTransferSelectorHex ? 'transfer' : '',
         contractCallData: txnResp.calldata?.slice(6, txnResp.calldata?.length - 1) || [],
         timestamp: txn.timestamp,
         status: txnResp['status'] || txn.status || '',
@@ -330,10 +288,10 @@ export const getMassagedTransactions = async (
   );
 
   console.log(`getMassagedTransactions: massagedTxns total = ${massagedTxns.length}`);
-  console.log(`getMassagedTransactions: massagedTxns:\n${JSON.stringify(massagedTxns)}`);
+  console.log(`getMassagedTransactions: massagedTxns:\n${toJson(massagedTxns)}`);
 
   if (contractAddress) {
-    const bigIntContractAddress = num.toBigInt(contractAddress)
+    const bigIntContractAddress = num.toBigInt(contractAddress);
     massagedTxns = massagedTxns.filter(
       (massagedTxn) =>
         num.toBigInt(massagedTxn.contractAddress) === bigIntContractAddress ||
@@ -371,7 +329,7 @@ export const postData = async (url = '', data = {}) => {
 };
 
 export function getFullPublicKeyPairFromPrivateKey(privateKey: Hex) {
-  return encode.addHexPrefix( encode.buf2hex( ec.starkCurve.getPublicKey( privateKey, false)));
+  return encode.addHexPrefix(encode.buf2hex(ec.starkCurve.getPublicKey(privateKey, false)));
 }
 
 export const getTypedDataMessageSignature = (
@@ -383,20 +341,17 @@ export const getTypedDataMessageSignature = (
   return ec.starkCurve.sign(msgHash, privateKey);
 };
 
-export const getSignatureBySignatureString = (signatureStr:string[], recoveryId:number = 0) => {
-  if (signatureStr.length < 2){
-    throw new Error(`Invalid signature length: ${signatureStr.length}`)
-  }
-  return new ec.starkCurve.Signature(num.toBigInt(signatureStr[0]), num.toBigInt(signatureStr[1]))
-}
+export const getSignatureBySignatureString = (signatureStr: Hex) => {
+  return ec.starkCurve.Signature.fromDER(signatureStr);
+};
 
 export const verifyTypedDataMessageSignature = (
   fullPublicKey: Hex,
   typedDataMessage: typedData.TypedData,
   signerUserAddress: num.BigNumberish,
-  signatureStr: any,
+  signatureStr: Hex,
 ) => {
-  const signature = getSignatureBySignatureString(signatureStr)
+  const signature = getSignatureBySignatureString(signatureStr);
   const msgHash = typedData.getMessageHash(typedDataMessage, signerUserAddress);
   return ec.starkCurve.verify(signature, msgHash, fullPublicKey);
 };
@@ -405,11 +360,9 @@ export const getNextAddressIndex = (chainId: string, state: SnapState, derivatio
   const accounts = getAccounts(state, chainId).filter(
     (acc) => acc.derivationPath === derivationPath && acc.addressIndex >= 0,
   );
-  const uninitializedAccount = accounts.find(
-    (acc) => !acc.publicKey || num.toBigInt(acc.publicKey) === constants.ZERO,
-  );
+  const uninitializedAccount = accounts.find((acc) => !acc.publicKey || num.toBigInt(acc.publicKey) === constants.ZERO);
   console.log(
-    `getNextAddressIndex:\nUninitialized account found from state:\n${JSON.stringify(uninitializedAccount ?? 'None')}`,
+    `getNextAddressIndex:\nUninitialized account found from state:\n${toJson(uninitializedAccount ?? 'None')}`,
   );
   return uninitializedAccount?.addressIndex ?? accounts.length;
 };
@@ -440,15 +393,9 @@ export const getKeysFromAddress = async (
     addressIndex = acc.addressIndex;
     console.log(`getNextAddressIndex:\nFound address in state: ${addressIndex} ${address}`);
   } else {
-    const bigIntAddress = num.toBigInt(address)
+    const bigIntAddress = num.toBigInt(address);
     for (let i = 0; i < maxScan; i++) {
-      const { publicKey } = await getKeysFromAddressIndex(
-        keyDeriver,
-        network.chainId,
-        state,
-        i,
-        network.useOldAccounts,
-      );
+      const { publicKey } = await getKeysFromAddressIndex(keyDeriver, network.chainId, state, i);
       const { address: calculatedAddress } = getAccContractAddressAndCallData(network.accountClassHash, publicKey);
       if (num.toBigInt(calculatedAddress) === bigIntAddress) {
         addressIndex = i;
@@ -459,7 +406,7 @@ export const getKeysFromAddress = async (
   }
 
   if (!isNaN(addressIndex)) {
-    return getKeysFromAddressIndex(keyDeriver, network.chainId, state, addressIndex, network.useOldAccounts);
+    return getKeysFromAddressIndex(keyDeriver, network.chainId, state, addressIndex);
   }
   return null;
 };
@@ -469,7 +416,6 @@ export const getKeysFromAddressIndex = async (
   chainId: string,
   state: SnapState,
   index: number = undefined,
-  useOldAccounts = false,
 ) => {
   let addressIndex = index;
   if (isNaN(addressIndex) || addressIndex < 0) {
@@ -477,7 +423,7 @@ export const getKeysFromAddressIndex = async (
     console.log(`getKeysFromAddressIndex: addressIndex found: ${addressIndex}`);
   }
 
-  const { addressKey, derivationPath } = await getAddressKey(keyDeriver, addressIndex, useOldAccounts);
+  const { addressKey, derivationPath } = await getAddressKey(keyDeriver, addressIndex);
   const starkKeyPub = ec.starkCurve.getStarkKey(addressKey);
   const starkKeyPrivate = num.toHex(addressKey);
   return {

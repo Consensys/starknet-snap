@@ -1,3 +1,4 @@
+import { toJson } from './utils/serializer';
 import { EstimateFee } from 'starknet';
 import { ApiParams, EstimateAccountDeployFeeRequestParams } from './types/snapApi';
 import { getNetworkFromChainId, getValidNumber } from './utils/snapUtils';
@@ -35,7 +36,7 @@ export async function estimateAccDeployFee(params: ApiParams) {
       publicKey,
       privateKey,
     );
-    console.log(`estimateAccountDeployFee:\nestimateDeployFee: ${JSON.stringify(estimateDeployFee)}`);
+    console.log(`estimateAccountDeployFee:\nestimateDeployFee: ${toJson(estimateDeployFee)}`);
 
     const resp = {
       suggestedMaxFee: estimateDeployFee.suggestedMaxFee.toString(10),
@@ -44,7 +45,7 @@ export async function estimateAccDeployFee(params: ApiParams) {
       gasPrice: estimateDeployFee.gas_price?.toString(10) ?? '0',
       unit: 'wei',
     };
-    console.log(`estimateAccountDeployFee:\nresp: ${JSON.stringify(resp)}`);
+    console.log(`estimateAccountDeployFee:\nresp: ${toJson(resp)}`);
 
     return resp;
   } catch (err) {

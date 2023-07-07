@@ -1,3 +1,4 @@
+import { toJson } from './utils/serializer';
 import { num } from 'starknet';
 import { getSigner, getKeysFromAddressIndex, getAccContractAddressAndCallData } from './utils/starknetUtils';
 import { getNetworkFromChainId, getValidNumber, upsertAccount } from './utils/snapUtils';
@@ -14,12 +15,9 @@ export async function recoverAccounts(params: ApiParams) {
     const startIndex = getValidNumber(requestParamsObj.startScanIndex, 0, 0);
     const maxScanned = getValidNumber(requestParamsObj.maxScanned, 1, 1);
     const maxMissed = getValidNumber(requestParamsObj.maxMissed, 1, 1);
-    const useOldAccounts = !!requestParamsObj.useOldAccounts;
-    const network = getNetworkFromChainId(state, requestParamsObj.chainId, useOldAccounts);
+    const network = getNetworkFromChainId(state, requestParamsObj.chainId);
 
-    console.log(
-      `recoverAccounts:\nstartIndex: ${startIndex}, maxScanned: ${maxScanned}, maxMissed: ${maxMissed}, useOldAccounts: ${useOldAccounts}`,
-    );
+    console.log(`recoverAccounts:\nstartIndex: ${startIndex}, maxScanned: ${maxScanned}, maxMissed: ${maxMissed}`);
 
     if (!network.accountClassHash) {
       await wallet.request({
@@ -45,7 +43,6 @@ export async function recoverAccounts(params: ApiParams) {
         network.chainId,
         state,
         i,
-        useOldAccounts,
       );
       const { address: contractAddress } = getAccContractAddressAndCallData(network.accountClassHash, publicKey);
       console.log(`recoverAccounts: index ${i}:\ncontractAddress = ${contractAddress}\npublicKey = ${publicKey}`);
@@ -56,12 +53,12 @@ export async function recoverAccounts(params: ApiParams) {
         signerPublicKey = await getSigner(contractAddress, network);
         console.log(`recoverAccounts: index ${i}\nsignerPublicKey: ${signerPublicKey}`);
       } catch (err) {
-        console.log(`recoverAccounts: index ${i}\nerr in get signer: ${JSON.stringify(err)}`);
+        console.log(`recoverAccounts: index ${i}\nerr in get signer: ${toJson(err)}`);
         signerPublicKey = '';
       }
 
       if (signerPublicKey) {
-        if (num.toBigInt(signerPublicKey) == (num.toBigInt(publicKey))) {
+        if (num.toBigInt(signerPublicKey) === num.toBigInt(publicKey)) {
           console.log(`recoverAccounts: index ${i} matched\npublicKey: ${publicKey}`);
         }
         j = 0;
@@ -79,7 +76,7 @@ export async function recoverAccounts(params: ApiParams) {
         chainId: network.chainId,
       };
 
-      console.log(`recoverAccounts: index ${i}\nuserAccount: ${JSON.stringify(userAccount)}`);
+      console.log(`recoverAccounts: index ${i}\nuserAccount: ${toJson(userAccount)}`);
 
       await upsertAccount(userAccount, wallet, saveMutex);
 
@@ -87,7 +84,7 @@ export async function recoverAccounts(params: ApiParams) {
       i++;
     }
 
-    console.log(`recoverAccounts:\nscannedAccounts: ${JSON.stringify(scannedAccounts, null, 2)}`);
+    console.log(`recoverAccounts:\nscannedAccounts: ${toJson(scannedAccounts, 2)}`);
 
     return scannedAccounts;
   } catch (err) {

@@ -76,14 +76,10 @@ export const token3: Erc20Token = {
   chainId: constants.StarknetChainId.SN_GOERLI,
 };
 
-export const signature1 = [
-  '516020642975010862953753694938162828355589290469166577916863056232343408026',
-  '2251696516606127908683557735430451943938460227398850312125458443328304619271',
-];
-export const signature2 = [
-  '2097333561319225847382651606677826358290601470682325253385662728360261876313',
-  '3446162480918390061797019824053459944083183558758902007996159588638509129622',
-];
+export const signature1 =
+  '3044022001240ead6d946a3901a80771c249111dbdabd566a5ff8f5ef6404319bc740d9a022004fa6a41b05328cb8408dcd60db880c70a4884b5f19bc0b7ef56ed2746129f07';
+export const signature2 =
+  '3044022004a30c7974f65e03369c6f91a4a781528b77f329f5a8f459ed633e4566807a590220079e7576b474cba89ebd4aea0ab8ea36be179c286e752d2955d46cef79f65f96';
 
 // Derived from seed phrase: "dog simple gown ankle release anger local pulp rose river approve miracle"
 export const bip44Entropy: JsonBIP44CoinTypeNode = {
@@ -346,10 +342,7 @@ export const getTxnsFromVoyagerResp = {
       contract_address: '0x05a98ec74a40383cf99896bfea2ec5e6aad16c7eed50025a5f569d585ebb13a2',
       timestamp: 1655109666,
       entry_point_type: null,
-      signature: [
-        '0xc592f24ab0e90ea4dac92a1e18aabec8033ebd3ce3a517cdc72972ade3e121',
-        '0x1bca4a8c65bf5aa28fcf0deb63307389e6d0f4f3295561f90a79b5313d08fc6',
-      ],
+      signature: signature1,
       actual_fee: null,
       status: 'Accepted on L1',
       class_hash: null,
@@ -385,10 +378,7 @@ export const getTxnFromVoyagerResp1 = {
     contract_address: '0x05a98ec74a40383cf99896bfea2ec5e6aad16c7eed50025a5f569d585ebb13a2',
     timestamp: 1655109666,
     entry_point_type: null,
-    signature: [
-      '0xc592f24ab0e90ea4dac92a1e18aabec8033ebd3ce3a517cdc72972ade3e121',
-      '0x1bca4a8c65bf5aa28fcf0deb63307389e6d0f4f3295561f90a79b5313d08fc6',
-    ],
+    signature: signature1,
     status: 'Accepted on L1',
     sender_address: null,
     version: null,
@@ -510,10 +500,7 @@ export const getTxnFromSequencerResp1 = {
     transaction_hash: '0x1366c2f9f46b1a86ba0c28b5a08fa0aa3750c4d1cbe06e97e72bd46ae2ac1f9',
     version: '0x0',
     max_fee: '0x14c51dc08cad',
-    signature: [
-      '0xc592f24ab0e90ea4dac92a1e18aabec8033ebd3ce3a517cdc72972ade3e121',
-      '0x1bca4a8c65bf5aa28fcf0deb63307389e6d0f4f3295561f90a79b5313d08fc6',
-    ],
+    signature: signature1,
     contract_address: '0x5a98ec74a40383cf99896bfea2ec5e6aad16c7eed50025a5f569d585ebb13a2',
     entry_point_selector: '0x15d40a3d6ca2ac30f4031e42be28da9b056fef9bb7357ac5e85627ee876e5ad',
     calldata: [
@@ -545,10 +532,7 @@ export const getTxnFromSequencerResp1 = {
   contract_address: '0x5a98ec74a40383cf99896bfea2ec5e6aad16c7eed50025a5f569d585ebb13a2',
   entry_point_selector: '0x15d40a3d6ca2ac30f4031e42be28da9b056fef9bb7357ac5e85627ee876e5ad',
   max_fee: '0x14c51dc08cad',
-  signature: [
-    '0xc592f24ab0e90ea4dac92a1e18aabec8033ebd3ce3a517cdc72972ade3e121',
-    '0x1bca4a8c65bf5aa28fcf0deb63307389e6d0f4f3295561f90a79b5313d08fc6',
-  ],
+  signature: signature1,
   transaction_hash: '0x1366c2f9f46b1a86ba0c28b5a08fa0aa3750c4d1cbe06e97e72bd46ae2ac1f9',
   version: '0x0',
 };

@@ -1,3 +1,4 @@
+import { toJson } from './utils/serializer';
 import { constants, num, validateAndParseAddress } from 'starknet';
 import { ApiParams, ExtractPublicKeyRequestParams } from './types/snapApi';
 import { getAccount, getNetworkFromChainId } from './utils/snapUtils';
@@ -9,12 +10,11 @@ export async function extractPublicKey(params: ApiParams) {
     const requestParamsObj = requestParams as ExtractPublicKeyRequestParams;
 
     const userAddress = requestParamsObj.userAddress;
-    const useOldAccounts = !!requestParamsObj.useOldAccounts;
-    const network = getNetworkFromChainId(state, requestParamsObj.chainId, useOldAccounts);
+    const network = getNetworkFromChainId(state, requestParamsObj.chainId);
 
     if (!requestParamsObj.userAddress) {
       throw new Error(
-        `The given user address need to be non-empty string, got: ${JSON.stringify(requestParamsObj.userAddress)}`,
+        `The given user address need to be non-empty string, got: ${toJson(requestParamsObj.userAddress)}`,
       );
     }
 

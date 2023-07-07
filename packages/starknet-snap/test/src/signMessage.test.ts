@@ -1,3 +1,4 @@
+import { toJson } from '../../src/utils/serializer';
 import chai, { expect } from 'chai';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
@@ -11,7 +12,6 @@ import { getAddressKeyDeriver } from '../../src/utils/keyPair';
 import * as utils from '../../src/utils/starknetUtils';
 import { Mutex } from 'async-mutex';
 import { ApiParams, SignMessageRequestParams } from '../../src/types/snapApi';
-import { SignatureType } from '@noble/curves/abstract/weierstrass';
 
 chai.use(sinonChai);
 const sandbox = sinon.createSandbox();
@@ -49,33 +49,22 @@ describe('Test function: signMessage', function () {
       typedDataMessage: undefined, // will use typedDataExample.json
     };
     apiParams.requestParams = requestObject;
-    const result : boolean | SignatureType = await signMessage(apiParams);
-    const expected = utils.getSignatureBySignatureString(signature1)
+    const result: boolean | string = await signMessage(apiParams);
     expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledOnce;
     expect(walletStub.rpcStubs.snap_manageState).not.to.have.been.called;
-    expect(result).not.to.be.eql(false);
-    if (result !== false) {
-      expect(result.r).to.be.eql(expected.r);
-      expect(result.s).to.be.eql(expected.s);
-    }
-    
+    expect(result).to.be.eql(signature1);
   });
 
   it('should sign a message from an unfound user account correctly', async function () {
     const requestObject: SignMessageRequestParams = {
       signerAddress: unfoundUserAddress,
-      typedDataMessage: JSON.stringify(typedDataExample),
+      typedDataMessage: toJson(typedDataExample),
     };
     apiParams.requestParams = requestObject;
     const result = await signMessage(apiParams);
-    const expected = utils.getSignatureBySignatureString(signature2)
     expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledOnce;
     expect(walletStub.rpcStubs.snap_manageState).not.to.have.been.called;
-    expect(result).not.to.be.eql(false);
-    if (result !== false) {
-      expect(result.r).to.be.eql(expected.r);
-      expect(result.s).to.be.eql(expected.s);
-    }
+    expect(result).to.be.eql(signature2);
   });
 
   it('should throw error if getKeysFromAddress failed', async function () {
@@ -114,7 +103,7 @@ describe('Test function: signMessage', function () {
   it('should throw an error if the signerAddress is undefined', async function () {
     const requestObject: SignMessageRequestParams = {
       signerAddress: undefined,
-      typedDataMessage: JSON.stringify(typedDataExample),
+      typedDataMessage: toJson(typedDataExample),
     };
     apiParams.requestParams = requestObject;
     let result;
@@ -131,7 +120,7 @@ describe('Test function: signMessage', function () {
     const invalidAddress = 'wrongAddress';
     const requestObject: SignMessageRequestParams = {
       signerAddress: invalidAddress,
-      typedDataMessage: JSON.stringify(typedDataExample),
+      typedDataMessage: toJson(typedDataExample),
     };
     apiParams.requestParams = requestObject;
     let result;

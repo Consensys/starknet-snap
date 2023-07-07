@@ -1,3 +1,4 @@
+import { toJson } from './utils/serializer';
 import { num, validateAndParseAddress } from 'starknet';
 import { ApiParams, GetTransactionsRequestParams } from './types/snapApi';
 import { Transaction, TransactionStatus, VoyagerTransactionType } from './types/snapState';
@@ -9,16 +10,15 @@ export async function getTransactions(params: ApiParams) {
   try {
     const { state, wallet, saveMutex, requestParams } = params;
     const requestParamsObj = requestParams as GetTransactionsRequestParams;
-    console.log({
-      add : requestParamsObj.senderAddress
-    })
     try {
       validateAndParseAddress(requestParamsObj.senderAddress);
     } catch (err) {
       throw new Error(`The given sender address is invalid: ${requestParamsObj.senderAddress}`);
     }
     try {
-      validateAndParseAddress(requestParamsObj.contractAddress);
+      if (requestParamsObj.contractAddress) {
+        validateAndParseAddress(requestParamsObj.contractAddress);
+      }
     } catch (err) {
       throw new Error(`The given contract address is invalid: ${requestParamsObj.contractAddress}`);
     }
@@ -80,20 +80,20 @@ export async function getTransactions(params: ApiParams) {
         ],
         undefined,
       );
-      console.log(`getTransactions\nstoredUnsettledDeployTxns:\n${JSON.stringify(storedUnsettledDeployTxns)}`);
+      console.log(`getTransactions\nstoredUnsettledDeployTxns:\n${toJson(storedUnsettledDeployTxns)}`);
       storedUnsettledTxns = [...storedUnsettledTxns, ...storedUnsettledDeployTxns];
     }
 
     // For each "unsettled" txn, update the status and timestamp from the same txn found in massagedTxns
     storedUnsettledTxns.forEach((txn) => {
-      const foundMassagedTxn = massagedTxns.find((massagedTxn) =>
-        num.toBigInt(massagedTxn.txnHash) == (num.toBigInt(txn.txnHash)),
+      const foundMassagedTxn = massagedTxns.find(
+        (massagedTxn) => num.toBigInt(massagedTxn.txnHash) == num.toBigInt(txn.txnHash),
       );
       txn.status = foundMassagedTxn?.status ?? txn.status;
       txn.timestamp = foundMassagedTxn?.timestamp ?? txn.timestamp;
     });
 
-    console.log(`getTransactions\nstoredUnsettledTxns:\n${JSON.stringify(storedUnsettledTxns)}`);
+    console.log(`getTransactions\nstoredUnsettledTxns:\n${toJson(storedUnsettledTxns)}`);
 
     // Retrieve the REJECTED txns from snap state
     const storedRejectedTxns = snapUtils.getTransactions(
@@ -105,7 +105,7 @@ export async function getTransactions(params: ApiParams) {
       TransactionStatus.REJECTED,
       minTimeStamp,
     );
-    console.log(`getTransactions\nstoredRejectedTxns:\n${JSON.stringify(storedRejectedTxns)}`);
+    console.log(`getTransactions\nstoredRejectedTxns:\n${toJson(storedRejectedTxns)}`);
 
     // For each "unsettled" txn, get the latest status from the provider (RPC or sequencer)
     await Promise.allSettled(
@@ -115,14 +115,14 @@ export async function getTransactions(params: ApiParams) {
         txn.failureReason = txn.failureReason || '';
       }),
     );
-    console.log(`getTransactions\nstoredUnsettledTxns after updated status:\n${JSON.stringify(storedUnsettledTxns)}`);
+    console.log(`getTransactions\nstoredUnsettledTxns after updated status:\n${toJson(storedUnsettledTxns)}`);
 
     // Update the transactions in state in a single call
     await snapUtils.upsertTransactions(storedUnsettledTxns, wallet, saveMutex);
 
     // Filter out massaged txns that are found in the updated stored txns
     massagedTxns = massagedTxns.filter((massagedTxn) => {
-      return !storedUnsettledTxns.find((txn) => num.toBigInt(txn.txnHash) == (num.toBigInt(massagedTxn.txnHash)));
+      return !storedUnsettledTxns.find((txn) => num.toBigInt(txn.txnHash) === num.toBigInt(massagedTxn.txnHash));
     });
     console.log(`getTransactions\nmassagedTxns after filtered total:\n${massagedTxns.length}`);
 
@@ -133,7 +133,7 @@ export async function getTransactions(params: ApiParams) {
     massagedTxns = [...massagedTxns, ...storedUnsettledTxns, ...storedRejectedTxns].sort(
       (a: Transaction, b: Transaction) => b.timestamp - a.timestamp,
     );
-    console.log(`getTransactions\nmassagedTxns:\n${JSON.stringify(massagedTxns)}`);
+    console.log(`getTransactions\nmassagedTxns:\n${toJson(massagedTxns)}`);
 
     return massagedTxns;
   } catch (err) {
