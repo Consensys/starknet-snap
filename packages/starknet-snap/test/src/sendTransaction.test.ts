@@ -1,4 +1,5 @@
 import chai, { expect } from 'chai';
+import chaiAsPromised from 'chai-as-promised';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import { WalletMock } from '../wallet.mock.test';
@@ -26,6 +27,7 @@ import { Mutex } from 'async-mutex';
 import { ApiParams, SendTransactionRequestParams } from '../../src/types/snapApi';
 
 chai.use(sinonChai);
+chai.use(chaiAsPromised);
 const sandbox = sinon.createSandbox();
 
 describe('Test function: sendTransaction', function () {
@@ -196,6 +198,39 @@ describe('Test function: sendTransaction', function () {
     expect(result).to.be.eql(sendTransactionResp);
   });
 
+  it('should sanitize markdown from call data', async function () {
+    // transaction hash must be missing for this case to happen
+    // otherwise contract call data (with such value) will fail to validate upsert logic.
+    executeTxnResp = sendTransactionFailedResp;
+    sandbox.stub(utils, 'getSigner').callsFake(async () => {
+      return account1.publicKey;
+    });
+    const requestObject: SendTransactionRequestParams = {
+      contractAddress: account1.address,
+      contractFuncName: 'get_signer',
+      contractCallData: '**foo** [test](https://google.com)',
+      senderAddress: account1.address,
+    };
+    apiParams.requestParams = requestObject;
+    await sendTransaction(apiParams);
+    const expectedDialogParams = {
+      type: 'confirmation',
+      content: { type: 'panel', children: [
+        { type: 'heading', value: 'Do you want to sign this transaction ?' },
+        {
+          type: 'text',
+          value: 'It will be signed with address: 0x4882a372da3dfe1c53170ad75893832469bf87b62b13e84662565c4a88f25cd'
+        },
+        {
+          type: 'text',
+          value: `Contract: 0x4882a372da3dfe1c53170ad75893832469bf87b62b13e84662565c4a88f25cd\n\nCall Data: [foo test]\n\nEstimated Gas Fee(ETH): 0.000022702500105945\n\nNetwork: Goerli Testnet`
+        }
+      ]}
+    };
+    expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledOnce;
+    expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledWith(expectedDialogParams);
+  });
+
   it('should send a transaction for transferring 10 tokens from an unfound user correctly', async function () {
     sandbox.stub(utils, 'getSigner').callsFake(async () => {
       return account1.publicKey;
@@ -356,5 +391,19 @@ describe('Test function: sendTransaction', function () {
     } finally {
       expect(result).to.be.an('Error');
     }
+  });
+
+  it('should throw an error when call data entries can not be converted to a bigNumber', async function () {
+    sandbox.stub(utils, 'getSigner').callsFake(async () => {
+      return account1.publicKey;
+    });
+    const requestObject: SendTransactionRequestParams = {
+      contractAddress: account1.address,
+      contractFuncName: 'get_signer',
+      contractCallData: '**foo**',
+      senderAddress: account1.address,
+    };
+    apiParams.requestParams = requestObject;
+    await expect(sendTransaction(apiParams)).to.be.rejectedWith("contractCallData could not be converted, Invalid character");
   });
 });

@@ -1921,17 +1921,18 @@ __metadata:
 
 "@consensys/starknet-snap@file:../starknet-snap::locator=wallet-ui%40workspace%3Apackages%2Fwallet-ui":
   version: 1.7.0
-  resolution: "@consensys/starknet-snap@file:../starknet-snap#../starknet-snap::hash=377556&locator=wallet-ui%40workspace%3Apackages%2Fwallet-ui"
+  resolution: "@consensys/starknet-snap@file:../starknet-snap#../starknet-snap::hash=128314&locator=wallet-ui%40workspace%3Apackages%2Fwallet-ui"
   dependencies:
     async-mutex: ^0.3.2
     chai: ^4.3.6
     ethereum-unit-converter: ^0.0.17
     ethers: ^5.5.1
+    remove-markdown: ^0.5.0
     sinon: ^13.0.2
     sinon-chai: ^3.7.0
     starknet: ^5.14.0
     starknet_v4.22.0: "npm:starknet@4.22.0"
-  checksum: 67f8fd634272e0a840278837f414ba143ded72d49e34043d583b7b68f76a20c4a0793453c2c7947e2e1be21e8fd842a07b02492773ceebd32c8ca85d1f30b94a
+  checksum: 36dfcfe5ff1db189831af4829e26f6e5e7f93a824fb9cd4f55c5a5ca3f1bf11a9f76573ce242488087b5af8458ef0fcc24403af21049641827050343c264c6c9
   languageName: node
   linkType: hard
 
@@ -1946,12 +1947,15 @@ __metadata:
     "@metamask/snaps-types": ^0.32.2
     "@metamask/snaps-ui": ^0.32.2
     "@types/chai": ^4.3.1
+    "@types/chai-as-promised": ^7.1.5
+    "@types/remove-markdown": ^0.3.1
     "@types/sinon": ^10.0.11
     "@types/sinon-chai": ^3.2.8
     "@typescript-eslint/eslint-plugin": ^5.20.0
     "@typescript-eslint/parser": ^5.20.0
     async-mutex: ^0.3.2
     chai: ^4.3.6
+    chai-as-promised: ^7.1.1
     concurrently: ^7.1.0
     eslint: ^8.13.0
     ethereum-unit-converter: ^0.0.17
@@ -1959,6 +1963,7 @@ __metadata:
     mocha: ^9.2.2
     nyc: ^15.1.0
     prettier: ^2.6.2
+    remove-markdown: ^0.5.0
     rimraf: ^3.0.2
     sinon: ^13.0.2
     sinon-chai: ^3.7.0
@@ -5996,6 +6001,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/chai-as-promised@npm:^7.1.5":
+  version: 7.1.5
+  resolution: "@types/chai-as-promised@npm:7.1.5"
+  dependencies:
+    "@types/chai": "*"
+  checksum: 7c1345c6e32513d52d8e562ec173c23161648d6b792046525f18803a9932d7b3ad3dca8f0181e3c529ec42b106099f174e34edeb184d61dc93e32c98b5132fd4
+  languageName: node
+  linkType: hard
+
 "@types/chai@npm:*, @types/chai@npm:^4.3.1":
   version: 4.3.4
   resolution: "@types/chai@npm:4.3.4"
@@ -6454,6 +6468,13 @@ __metadata:
     "@types/scheduler": "*"
     csstype: ^3.0.2
   checksum: e752df961105e5127652460504785897ca6e77259e0da8f233f694f9e8f451cde7fa0709d4456ade0ff600c8ce909cfe29f9b08b9c247fa9b734e126ec53edd7
+  languageName: node
+  linkType: hard
+
+"@types/remove-markdown@npm:^0.3.1":
+  version: 0.3.1
+  resolution: "@types/remove-markdown@npm:0.3.1"
+  checksum: a673aafa3a3722d959b4ad1d4e95b33f04f037a8bb95a82e843d6005b12b51f9b1bfd5954cd5c8707fbbb2f1d8865f7e632f02f99389ab83d0dcfd2cb1920dbb
   languageName: node
   linkType: hard
 
@@ -9193,6 +9214,17 @@ __metadata:
   version: 1.1.0
   resolution: "ccount@npm:1.1.0"
   checksum: b335a79d0aa4308919cf7507babcfa04ac63d389ebed49dbf26990d4607c8a4713cde93cc83e707d84571ddfe1e7615dad248be9bc422ae4c188210f71b08b78
+  languageName: node
+  linkType: hard
+
+"chai-as-promised@npm:^7.1.1":
+  version: 7.1.1
+  resolution: "chai-as-promised@npm:7.1.1"
+  dependencies:
+    check-error: ^1.0.2
+  peerDependencies:
+    chai: ">= 2.1.2 < 5"
+  checksum: 7262868a5b51a12af4e432838ddf97a893109266a505808e1868ba63a12de7ee1166e9d43b5c501a190c377c1b11ecb9ff8e093c89f097ad96c397e8ec0f8d6a
   languageName: node
   linkType: hard
 
@@ -21061,6 +21093,13 @@ __metadata:
   dependencies:
     mdast-squeeze-paragraphs: ^4.0.0
   checksum: 2071eb74d0ecfefb152c4932690a9fd950c3f9f798a676f1378a16db051da68fb20bf288688cc153ba5019dded35408ff45a31dfe9686eaa7a9f1df9edbb6c81
+  languageName: node
+  linkType: hard
+
+"remove-markdown@npm:^0.5.0":
+  version: 0.5.0
+  resolution: "remove-markdown@npm:0.5.0"
+  checksum: c3c9051e7e7d7c5560e7d70a5093704d868fa57d244eb89533fe7bf960bce68e7901197616c6b296cb22f47af6c15a6bce693467f35709fe399379ea1125e536
   languageName: node
   linkType: hard
 

@@ -8,7 +8,7 @@ import { ApiParams, SendTransactionRequestParams } from './types/snapApi';
 import { createAccount } from './createAccount';
 import { DialogType } from '@metamask/rpc-methods';
 import { heading, panel, text } from '@metamask/snaps-ui';
-
+import RemoveMarkdown from 'remove-markdown';
 export async function sendTransaction(params: ApiParams) {
   try {
     const { state, wallet, saveMutex, keyDeriver, requestParams } = params;
@@ -49,16 +49,16 @@ export async function sendTransaction(params: ApiParams) {
       maxFee = num.toBigInt(suggestedMaxFee);
     }
 
+    const sanitizedContractCallData = contractCallData.map((data: num.BigNumberish) => RemoveMarkdown(data.toString()));
     const signingTxnText = getSigningTxnText(
       state,
       contractAddress,
       contractFuncName,
-      contractCallData,
+      sanitizedContractCallData,
       senderAddress,
       maxFee,
       network,
     );
-
     const response = await wallet.request({
       method: 'snap_dialog',
       params: {
@@ -75,7 +75,7 @@ export async function sendTransaction(params: ApiParams) {
     const txnInvocation = {
       contractAddress,
       entrypoint: contractFuncName,
-      calldata: contractCallData,
+      calldata: sanitizedContractCallData,
     };
 
     console.log(`sendTransaction:\ntxnInvocation: ${toJson(txnInvocation)}\nmaxFee: ${maxFee.toString()}}`);
@@ -119,7 +119,13 @@ export async function sendTransaction(params: ApiParams) {
         senderAddress,
         contractAddress,
         contractFuncName,
-        contractCallData: contractCallData.map((data: num.BigNumberish) => num.toHex(num.toBigInt(data))),
+        contractCallData: sanitizedContractCallData.map((data: num.BigNumberish) => {
+          try {
+            return num.toHex(num.toBigInt(data))
+          } catch(e) {
+            throw new Error(`contractCallData could not be converted, ${e.message || e}`)
+          }
+        }),
         status: TransactionStatus.RECEIVED,
         failureReason: '',
         eventIds: [],
