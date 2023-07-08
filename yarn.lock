@@ -1921,7 +1921,7 @@ __metadata:
 
 "@consensys/starknet-snap@file:../starknet-snap::locator=wallet-ui%40workspace%3Apackages%2Fwallet-ui":
   version: 1.7.0
-  resolution: "@consensys/starknet-snap@file:../starknet-snap#../starknet-snap::hash=0e68c3&locator=wallet-ui%40workspace%3Apackages%2Fwallet-ui"
+  resolution: "@consensys/starknet-snap@file:../starknet-snap#../starknet-snap::hash=844fe0&locator=wallet-ui%40workspace%3Apackages%2Fwallet-ui"
   dependencies:
     async-mutex: ^0.3.2
     chai: ^4.3.6
@@ -1931,8 +1931,7 @@ __metadata:
     sinon-chai: ^3.7.0
     starknet: ^5.14.0
     starknet_v4.22.0: "npm:starknet@4.22.0"
-    starknet_v4.6.0: "npm:starknet@4.6.0"
-  checksum: bb15df688ba050dc74f7ea46e983d5cf7d6bb721f462ae5713e5d40fdee4d01a4e0262a3793cb943987281e3bcc0ecea9f9317e1a23eaaceba38ae9578b78b15
+  checksum: 29d3920d065ca62d04a625f7a4896c866a042c095d9a6428293563bcf539e86cfc5f6dfbaca4f1a052444213b36499bf04403b4d11b22ddd89a19ea9cc7ee0fe
   languageName: node
   linkType: hard
 
@@ -1966,7 +1965,6 @@ __metadata:
     standard-version: ^9.5.0
     starknet: ^5.14.0
     starknet_v4.22.0: "npm:starknet@4.22.0"
-    starknet_v4.6.0: "npm:starknet@4.6.0"
     ts-node: ^10.8.1
     typescript: ^4.6.3
   languageName: unknown
@@ -22431,25 +22429,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"starknet_v4.6.0@npm:starknet@4.6.0":
-  version: 4.6.0
-  resolution: "starknet@npm:4.6.0"
-  dependencies:
-    "@ethersproject/bytes": ^5.6.1
-    bn.js: ^5.2.1
-    elliptic: ^6.5.4
-    ethereum-cryptography: ^1.0.3
-    hash.js: ^1.1.7
-    isomorphic-fetch: ^3.0.0
-    json-bigint: ^1.0.0
-    minimalistic-assert: ^1.0.1
-    pako: ^2.0.4
-    ts-custom-error: ^3.2.0
-    url-join: ^4.0.1
-  checksum: 13395bd31bc9a957b47168b5ec9b0128d323617b8c9bbbe8625af3313a78e773cea767d175b664cf49c36d1b2bf7e36b1fd24b1b615f3e9fbe56340f57ac385d
-  languageName: node
-  linkType: hard
-
 "state-toggle@npm:^1.0.0":
   version: 1.0.3
   resolution: "state-toggle@npm:1.0.3"
@@ -23522,7 +23501,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ts-custom-error@npm:^3.2.0, ts-custom-error@npm:^3.3.1":
+"ts-custom-error@npm:^3.3.1":
   version: 3.3.1
   resolution: "ts-custom-error@npm:3.3.1"
   checksum: 50a1e825fced68d70049bd8d282379a635e43aa023a370fa8e736b12a6edba7f18a2d731fa194ac35303a8b625be56e121bdb31d8a0318250d1a8b277059fce3

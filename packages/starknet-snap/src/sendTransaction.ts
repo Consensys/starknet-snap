@@ -78,7 +78,7 @@ export async function sendTransaction(params: ApiParams) {
       calldata: contractCallData,
     };
 
-    console.log(`sendTransaction:\ntxnInvocation: ${toJson(txnInvocation)}\nmaxFee: ${toJson(maxFee)}}`);
+    console.log(`sendTransaction:\ntxnInvocation: ${toJson(txnInvocation)}\nmaxFee: ${maxFee.toString()}}`);
 
     const accountDeployed = await isAccountDeployed(network, publicKey);
     if (!accountDeployed) {

@@ -36,7 +36,6 @@ interface Props {
 
 export const SendSummaryModalView = ({ address, amount, chainId, closeModal }: Props) => {
   const wallet = useAppSelector((state) => state.wallet);
-  const networks = useAppSelector((state) => state.networks);
   const [estimatingGas, setEstimatingGas] = useState(true);
   const [gasFees, setGasFees] = useState({ suggestedMaxFee: '0', unit: 'wei', includeDeploy: false });
   const [gasFeesError, setGasFeesError] = useState(false);
