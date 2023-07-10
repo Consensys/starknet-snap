@@ -29,7 +29,7 @@ export function AlertView({ text, variant, ...otherProps }: Props) {
         {variant === VariantOptions.WARNING && (
           <LeftIcon icon={['fas', 'exclamation-triangle']} color={theme.palette.warning.main} />
         )}
-        <Parag ref={paragraph} color={variant} dangerouslySetInnerHTML={{ __html: text }} />
+        <Parag ref={paragraph} color={variant}>{text}</Parag>
       </>
     </Wrapper>
   );
