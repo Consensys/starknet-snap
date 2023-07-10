@@ -1,5 +1,5 @@
 import { JsonBIP44CoinTypeNode } from '@metamask/key-tree';
-import { constants, num, TransactionStatus } from 'starknet';
+import { constants, num, TransactionStatus, ec } from 'starknet';
 import { AccContract, Erc20Token, Network, Transaction, VoyagerTransactionType } from '../src/types/snapState';
 import { STARKNET_MAINNET_NETWORK, STARKNET_TESTNET_NETWORK } from '../src/utils/constants';
 
@@ -342,7 +342,7 @@ export const getTxnsFromVoyagerResp = {
       contract_address: '0x05a98ec74a40383cf99896bfea2ec5e6aad16c7eed50025a5f569d585ebb13a2',
       timestamp: 1655109666,
       entry_point_type: null,
-      signature: signature1,
+      signature: ec.starkCurve.Signature.fromDER(signature1),
       actual_fee: null,
       status: 'Accepted on L1',
       class_hash: null,
@@ -378,7 +378,7 @@ export const getTxnFromVoyagerResp1 = {
     contract_address: '0x05a98ec74a40383cf99896bfea2ec5e6aad16c7eed50025a5f569d585ebb13a2',
     timestamp: 1655109666,
     entry_point_type: null,
-    signature: signature1,
+    signature: ec.starkCurve.Signature.fromDER(signature1),
     status: 'Accepted on L1',
     sender_address: null,
     version: null,
@@ -500,7 +500,7 @@ export const getTxnFromSequencerResp1 = {
     transaction_hash: '0x1366c2f9f46b1a86ba0c28b5a08fa0aa3750c4d1cbe06e97e72bd46ae2ac1f9',
     version: '0x0',
     max_fee: '0x14c51dc08cad',
-    signature: signature1,
+    signature: ec.starkCurve.Signature.fromDER(signature1),
     contract_address: '0x5a98ec74a40383cf99896bfea2ec5e6aad16c7eed50025a5f569d585ebb13a2',
     entry_point_selector: '0x15d40a3d6ca2ac30f4031e42be28da9b056fef9bb7357ac5e85627ee876e5ad',
     calldata: [
@@ -532,7 +532,7 @@ export const getTxnFromSequencerResp1 = {
   contract_address: '0x5a98ec74a40383cf99896bfea2ec5e6aad16c7eed50025a5f569d585ebb13a2',
   entry_point_selector: '0x15d40a3d6ca2ac30f4031e42be28da9b056fef9bb7357ac5e85627ee876e5ad',
   max_fee: '0x14c51dc08cad',
-  signature: signature1,
+  signature: ec.starkCurve.Signature.fromDER(signature1),
   transaction_hash: '0x1366c2f9f46b1a86ba0c28b5a08fa0aa3750c4d1cbe06e97e72bd46ae2ac1f9',
   version: '0x0',
 };
