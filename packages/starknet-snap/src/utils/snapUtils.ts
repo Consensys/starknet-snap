@@ -250,7 +250,9 @@ export async function upsertAccount(userAccount: AccContract, wallet, mutex: Mut
 }
 
 export function getNetwork(state: SnapState, chainId: string) {
-  return state.networks?.find((network) => Number(network.chainId) === Number(chainId) && !!network?.useOldAccounts === false);
+  return state.networks?.find(
+    (network) => Number(network.chainId) === Number(chainId) && !!network?.useOldAccounts === false,
+  );
 }
 
 export function getNetworks(state: SnapState) {

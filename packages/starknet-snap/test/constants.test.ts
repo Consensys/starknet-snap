@@ -1,5 +1,5 @@
 import { JsonBIP44CoinTypeNode } from '@metamask/key-tree';
-import { constants, num, TransactionStatus, ec } from 'starknet';
+import { constants, num, TransactionStatus } from 'starknet';
 import { AccContract, Erc20Token, Network, Transaction, VoyagerTransactionType } from '../src/types/snapState';
 import { STARKNET_MAINNET_NETWORK, STARKNET_TESTNET_NETWORK } from '../src/utils/constants';
 
