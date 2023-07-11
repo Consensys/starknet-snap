@@ -1,4 +1,5 @@
-import { number, validateAndParseAddress } from 'starknet';
+import { toJson } from './utils/serializer';
+import { num, validateAndParseAddress } from 'starknet';
 import { ApiParams, GetErc20TokenBalanceRequestParams } from './types/snapApi';
 import { getNetworkFromChainId } from './utils/snapUtils';
 import { callContract } from './utils/starknetUtils';
@@ -10,9 +11,7 @@ export async function getErc20TokenBalance(params: ApiParams) {
 
     if (!requestParamsObj.tokenAddress || !requestParamsObj.userAddress) {
       throw new Error(
-        `The given token address and user address need to be non-empty string, got: ${JSON.stringify(
-          requestParamsObj,
-        )}`,
+        `The given token address and user address need to be non-empty string, got: ${toJson(requestParamsObj)}`,
       );
     }
 
@@ -34,9 +33,9 @@ export async function getErc20TokenBalance(params: ApiParams) {
 
     console.log(`getErc20Balance:\nerc20Address: ${erc20Address}\nuserAddress: ${userAddress}`);
 
-    const resp = await callContract(network, erc20Address, 'balanceOf', [number.toBN(userAddress).toString(10)]);
+    const resp = await callContract(network, erc20Address, 'balanceOf', [num.toBigInt(userAddress).toString(10)]);
 
-    console.log(`getErc20Balance:\nresp: ${JSON.stringify(resp)}`);
+    console.log(`getErc20Balance:\nresp: ${toJson(resp)}`);
 
     return resp.result[0];
   } catch (err) {

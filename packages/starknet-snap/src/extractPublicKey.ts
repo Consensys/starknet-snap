@@ -1,4 +1,5 @@
-import { constants, number, validateAndParseAddress } from 'starknet';
+import { toJson } from './utils/serializer';
+import { constants, num, validateAndParseAddress } from 'starknet';
 import { ApiParams, ExtractPublicKeyRequestParams } from './types/snapApi';
 import { getAccount, getNetworkFromChainId } from './utils/snapUtils';
 import { getKeysFromAddress } from './utils/starknetUtils';
@@ -9,12 +10,11 @@ export async function extractPublicKey(params: ApiParams) {
     const requestParamsObj = requestParams as ExtractPublicKeyRequestParams;
 
     const userAddress = requestParamsObj.userAddress;
-    const useOldAccounts = !!requestParamsObj.useOldAccounts;
-    const network = getNetworkFromChainId(state, requestParamsObj.chainId, useOldAccounts);
+    const network = getNetworkFromChainId(state, requestParamsObj.chainId);
 
     if (!requestParamsObj.userAddress) {
       throw new Error(
-        `The given user address need to be non-empty string, got: ${JSON.stringify(requestParamsObj.userAddress)}`,
+        `The given user address need to be non-empty string, got: ${toJson(requestParamsObj.userAddress)}`,
       );
     }
 
@@ -26,7 +26,7 @@ export async function extractPublicKey(params: ApiParams) {
 
     let userPublicKey;
     const accContract = getAccount(state, userAddress, network.chainId);
-    if (!accContract?.publicKey || number.toBN(accContract.publicKey).eq(number.toBN(constants.ZERO))) {
+    if (!accContract?.publicKey || num.toBigInt(accContract.publicKey) === constants.ZERO) {
       console.log(`extractPublicKey: User address cannot be found or the signer public key is 0x0: ${userAddress}`);
       const { publicKey } = await getKeysFromAddress(keyDeriver, network, state, userAddress);
       userPublicKey = publicKey;

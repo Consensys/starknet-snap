@@ -1,3 +1,4 @@
+import { toJson } from './utils/serializer';
 import { AddErc20TokenRequestParams, ApiParams } from './types/snapApi';
 import { Erc20Token } from './types/snapState';
 import {
@@ -18,9 +19,7 @@ export async function addErc20Token(params: ApiParams) {
 
     if (!requestParamsObj.tokenAddress || !requestParamsObj.tokenName || !requestParamsObj.tokenSymbol) {
       throw new Error(
-        `The given token address, name, and symbol need to be non-empty string, got: ${JSON.stringify(
-          requestParamsObj,
-        )}`,
+        `The given token address, name, and symbol need to be non-empty string, got: ${toJson(requestParamsObj)}`,
       );
     }
 
@@ -52,7 +51,7 @@ export async function addErc20Token(params: ApiParams) {
 
     await upsertErc20Token(erc20Token, wallet, saveMutex);
 
-    console.log(`addErc20Token:\nerc20Token: ${JSON.stringify(erc20Token)}`);
+    console.log(`addErc20Token:\nerc20Token: ${toJson(erc20Token)}`);
     return erc20Token;
   } catch (err) {
     console.error(`Problem found: ${err}`);

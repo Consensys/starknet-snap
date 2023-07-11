@@ -103,7 +103,7 @@ export const useStarkNetSnap = () => {
     return tokens;
   };
 
-  const recoverAccounts = async (chainId: string, useOldAccounts = false) => {
+  const recoverAccounts = async (chainId: string) => {
     const START_SCAN_INDEX = 0;
     const MAX_SCANNED = 1;
     const MAX_MISSED = 1;
@@ -118,7 +118,6 @@ export const useStarkNetSnap = () => {
             maxScanned: MAX_SCANNED,
             maxMissed: MAX_MISSED,
             chainId,
-            useOldAccounts,
           },
         },
       },
@@ -142,7 +141,7 @@ export const useStarkNetSnap = () => {
     return data;
   };
 
-  const addAccount = async (chainId: string, useOldAccounts = false) => {
+  const addAccount = async (chainId: string) => {
     const data = (await ethereum.request({
       method: 'wallet_invokeSnap',
       params: {
@@ -152,7 +151,6 @@ export const useStarkNetSnap = () => {
           params: {
             addressIndex: 0,
             chainId,
-            useOldAccounts,
             deploy: false,
           },
         },
@@ -188,8 +186,7 @@ export const useStarkNetSnap = () => {
         return;
       }
       const chainId = nets[activeNetwork].chainId;
-      const useOldAccounts = !!nets[activeNetwork].useOldAccounts;
-      await getWalletData(chainId, useOldAccounts, nets);
+      await getWalletData(chainId, nets);
     } catch (err: any) {
       if (err.code && err.code === 4100) {
         const toastr = new Toastr();
@@ -209,18 +206,14 @@ export const useStarkNetSnap = () => {
     }
   };
 
-  const getWalletData = async (chainId: string, useOldAccounts = false, networks?: Network[]) => {
+  const getWalletData = async (chainId: string, networks?: Network[]) => {
     if (!loader.isLoading && !networks) {
       dispatch(enableLoadingWithMessage('Getting network data ...'));
     }
     const tokens = await getTokens(chainId);
-    let acc: Account[] | Account = await recoverAccounts(chainId, useOldAccounts);
+    let acc: Account[] | Account = await recoverAccounts(chainId);
     if (!acc || acc.length === 0 || !acc[0].publicKey) {
-      if (useOldAccounts) {
-        dispatch(enableLoadingWithMessage('Skipped deploying old version account ...'));
-      } else {
-        acc = await addAccount(chainId, useOldAccounts);
-      }
+      acc = await addAccount(chainId);
     }
     const tokenBalances = await Promise.all(
       tokens.map(async (token) => {
@@ -256,7 +249,7 @@ export const useStarkNetSnap = () => {
     dispatch(setErc20TokenBalanceSelected(erc20TokenBalance));
   };
 
-  async function getPrivateKeyFromAddress(address: string, chainId: string, useOldAccounts = false) {
+  async function getPrivateKeyFromAddress(address: string, chainId: string) {
     try {
       await ethereum.request({
         method: 'wallet_invokeSnap',
@@ -267,7 +260,6 @@ export const useStarkNetSnap = () => {
             params: {
               userAddress: address,
               chainId,
-              useOldAccounts,
             },
           },
         },
@@ -284,7 +276,6 @@ export const useStarkNetSnap = () => {
     contractCallData: string,
     senderAddress: string,
     chainId: string,
-    useOldAccounts = false,
   ) {
     try {
       const response = await ethereum.request({
@@ -299,7 +290,6 @@ export const useStarkNetSnap = () => {
               contractCallData,
               senderAddress,
               chainId,
-              useOldAccounts,
             },
           },
         },
@@ -318,7 +308,6 @@ export const useStarkNetSnap = () => {
     senderAddress: string,
     maxFee: string,
     chainId: string,
-    useOldAccounts = false,
   ) {
     dispatch(enableLoadingWithMessage('Sending transaction...'));
     try {
@@ -335,7 +324,6 @@ export const useStarkNetSnap = () => {
               senderAddress,
               maxFee,
               chainId,
-              useOldAccounts,
             },
           },
         },

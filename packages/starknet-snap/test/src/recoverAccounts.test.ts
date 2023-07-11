@@ -17,7 +17,7 @@ import {
 } from '../constants.test';
 import { getAddressKeyDeriver } from '../../src/utils/keyPair';
 import { recoverAccounts } from '../../src/recoverAccounts';
-import { constants, number } from 'starknet';
+import { constants, num } from 'starknet';
 import { Mutex } from 'async-mutex';
 import { ApiParams, RecoverAccountsRequestParams } from '../../src/types/snapApi';
 
@@ -61,8 +61,8 @@ describe('Test function: recoverAccounts', function () {
     for (let i = 0; i < validPublicKeys; i++) {
       getSignerStub.onCall(i).resolves(mainnetPublicKeys[i]);
     }
-    getSignerStub.onCall(validPublicKeys).resolves(number.toHex(constants.ZERO));
-    getSignerStub.resolves(number.toHex(constants.ZERO));
+    getSignerStub.onCall(validPublicKeys).resolves(num.toHex(constants.ZERO));
+    getSignerStub.resolves(num.toHex(constants.ZERO));
 
     const requestObject: RecoverAccountsRequestParams = {
       startScanIndex: 0,
@@ -80,13 +80,13 @@ describe('Test function: recoverAccounts', function () {
     expect(state.accContracts.map((acc) => acc.addressSalt)).to.be.eql(mainnetPublicKeys.slice(0, expectedCalledTimes));
     expect(
       state.accContracts
-        .filter((acc) => acc.publicKey && acc.publicKey !== number.toHex(constants.ZERO))
+        .filter((acc) => acc.publicKey && acc.publicKey !== num.toHex(constants.ZERO))
         .map((acc) => acc.publicKey),
     ).to.be.eql(mainnetPublicKeys.slice(0, validPublicKeys));
     expect(state.accContracts.length).to.be.eq(expectedCalledTimes);
   });
 
-  it('should recover accounts in testnet correctly', async function () {
+  it('should recover accounts in SN_GOERLI correctly', async function () {
     state.accContracts = [];
     const maxScanned = 5;
     const maxMissed = 3;
@@ -112,13 +112,13 @@ describe('Test function: recoverAccounts', function () {
     expect(state.accContracts.map((acc) => acc.addressSalt)).to.be.eql(testnetPublicKeys.slice(0, expectedCalledTimes));
     expect(
       state.accContracts
-        .filter((acc) => acc.publicKey && acc.publicKey !== number.toHex(constants.ZERO))
+        .filter((acc) => acc.publicKey && acc.publicKey !== num.toHex(constants.ZERO))
         .map((acc) => acc.publicKey),
     ).to.be.eql(testnetPublicKeys.slice(0, validPublicKeys));
     expect(state.accContracts.length).to.be.eq(expectedCalledTimes);
   });
 
-  it('should recover accounts in testnet with same parameters correctly', async function () {
+  it('should recover accounts in SN_GOERLI with same parameters correctly', async function () {
     const maxScanned = 5;
     const maxMissed = 3;
     const validPublicKeys = 2;
@@ -143,7 +143,7 @@ describe('Test function: recoverAccounts', function () {
     expect(state.accContracts.map((acc) => acc.addressSalt)).to.be.eql(testnetPublicKeys.slice(0, expectedCalledTimes));
     expect(
       state.accContracts
-        .filter((acc) => acc.publicKey && acc.publicKey !== number.toHex(constants.ZERO))
+        .filter((acc) => acc.publicKey && acc.publicKey !== num.toHex(constants.ZERO))
         .map((acc) => acc.publicKey),
     ).to.be.eql(testnetPublicKeys.slice(0, validPublicKeys));
     expect(state.accContracts.length).to.be.eq(expectedCalledTimes);
@@ -158,8 +158,8 @@ describe('Test function: recoverAccounts', function () {
     for (let i = 0; i < validPublicKeys; i++) {
       getSignerStub.onCall(i).resolves(mainnetPublicKeys[i]);
     }
-    getSignerStub.onCall(validPublicKeys).resolves(number.toHex(constants.ZERO));
-    getSignerStub.resolves(number.toHex(constants.ZERO));
+    getSignerStub.onCall(validPublicKeys).resolves(num.toHex(constants.ZERO));
+    getSignerStub.resolves(num.toHex(constants.ZERO));
 
     const requestObject: RecoverAccountsRequestParams = {
       startScanIndex: 0,
