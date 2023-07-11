@@ -87,7 +87,7 @@ export async function getTransactions(params: ApiParams) {
     // For each "unsettled" txn, update the status and timestamp from the same txn found in massagedTxns
     storedUnsettledTxns.forEach((txn) => {
       const foundMassagedTxn = massagedTxns.find(
-        (massagedTxn) => num.toBigInt(massagedTxn.txnHash) == num.toBigInt(txn.txnHash),
+        (massagedTxn) => num.toBigInt(massagedTxn.txnHash) === num.toBigInt(txn.txnHash),
       );
       txn.status = foundMassagedTxn?.status ?? txn.status;
       txn.timestamp = foundMassagedTxn?.timestamp ?? txn.timestamp;

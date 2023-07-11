@@ -26,7 +26,7 @@ export async function extractPublicKey(params: ApiParams) {
 
     let userPublicKey;
     const accContract = getAccount(state, userAddress, network.chainId);
-    if (!accContract?.publicKey || num.toBigInt(accContract.publicKey) == constants.ZERO) {
+    if (!accContract?.publicKey || num.toBigInt(accContract.publicKey) === constants.ZERO) {
       console.log(`extractPublicKey: User address cannot be found or the signer public key is 0x0: ${userAddress}`);
       const { publicKey } = await getKeysFromAddress(keyDeriver, network, state, userAddress);
       userPublicKey = publicKey;

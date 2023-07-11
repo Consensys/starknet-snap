@@ -45,10 +45,9 @@ function hashKeyWithIndex(key: string, index: number) {
 
 export async function getAddressKey(keyDeriver: BIP44AddressKeyDeriver, addressIndex = 0) {
   const privateKey = (await keyDeriver(addressIndex)).privateKey;
-  const addressKey = privateKey;
-  const groundAddressKey = grindKey(addressKey);
+  const addressKey = grindKey(privateKey);
   return {
-    addressKey: groundAddressKey,
+    addressKey,
     derivationPath: keyDeriver.path,
   };
 }
