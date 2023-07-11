@@ -1,3 +1,4 @@
+import { toJson } from './utils/serializer';
 import { getAddressKeyDeriver } from './utils/keyPair';
 import { createAccount } from './createAccount';
 import { signMessage } from './signMessage';
@@ -20,8 +21,6 @@ import {
   STARKNET_MAINNET_NETWORK,
   STARKNET_TESTNET_NETWORK,
   STARKNET_TESTNET2_NETWORK,
-  STARKNET_TESTNET_NETWORK_DEPRECATED,
-  STARKNET_MAINNET_NETWORK_DEPRECATED,
 } from './utils/constants';
 import { upsertErc20Token, upsertNetwork } from './utils/snapUtils';
 import { getStoredNetworks } from './getStoredNetworks';
@@ -81,15 +80,11 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ origin, request }) => 
     await upsertNetwork(STARKNET_TESTNET_NETWORK, snap, saveMutex, state);
   }
   await upsertNetwork(STARKNET_TESTNET2_NETWORK, snap, saveMutex, state);
-  await upsertNetwork(STARKNET_MAINNET_NETWORK_DEPRECATED, snap, saveMutex, state);
-  if (!isDev) {
-    await upsertNetwork(STARKNET_TESTNET_NETWORK_DEPRECATED, snap, saveMutex, state);
-  }
   for (const token of PRELOADED_TOKENS) {
     await upsertErc20Token(token, snap, saveMutex, state);
   }
 
-  console.log(`${request.method}:\nrequestParams: ${JSON.stringify(requestParams)}`);
+  console.log(`${request.method}:\nrequestParams: ${toJson(requestParams)}`);
 
   const apiParams: ApiParams = {
     state,
@@ -100,7 +95,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ origin, request }) => 
 
   switch (request.method) {
     case 'hello':
-      console.log(`Snap State:\n${JSON.stringify(state, null, 2)}`);
+      console.log(`Snap State:\n${toJson(state, 2)}`);
       return snap.request({
         method: 'snap_dialog',
         params: {

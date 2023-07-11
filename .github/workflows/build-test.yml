@@ -36,24 +36,17 @@ jobs:
       - run: yarn npm audit
       - run: yarn clean
       - run: yarn build
-      - name: Require clean working directory
-        shell: bash
-        run: |
-          if ! git diff --exit-code ':(exclude)yarn.lock'; then
-            echo "Working tree dirty at end of job"
-            exit 1
-          fi
       - run: yarn lint
       - run: yarn test
       - name: SonarCloud Scan Starknet-Snap
-        uses: SonarSource/sonarcloud-github-action@v1.8
+        uses: SonarSource/sonarcloud-github-action@v1.9.1
         with:
           projectBaseDir: packages/starknet-snap/
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_STARKNET_SNAP }}
       - name: SonarCloud Scan Wallet-UI
-        uses: SonarSource/sonarcloud-github-action@v1.8
+        uses: SonarSource/sonarcloud-github-action@v1.9.1
         with:
           projectBaseDir: packages/wallet-ui/
         env:

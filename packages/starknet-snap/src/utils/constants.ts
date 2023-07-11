@@ -15,45 +15,25 @@ export const TRANSFER_SELECTOR_HEX = '0x83afd3f4caedc6eebf44246fe54e38c95e3179a5
 
 export const STARKNET_MAINNET_NETWORK: Network = {
   name: 'StarkNet Mainnet',
-  chainId: constants.StarknetChainId.MAINNET,
+  chainId: constants.StarknetChainId.SN_MAIN,
   baseUrl: 'https://alpha-mainnet.starknet.io',
   nodeUrl: 'https://starknet-mainnet.infura.io/v3/60c7253fb48147658095fe0460ac9ee9',
   voyagerUrl: 'https://voyager.online',
   accountClassHash: '0x033434ad846cdd5f23eb73ff09fe6fddd568284a0fb7d1be20ee482f044dabe2', // from argent-x repo
-};
-
-export const STARKNET_MAINNET_NETWORK_DEPRECATED: Network = {
-  name: 'StarkNet Mainnet (deprecated acc)',
-  chainId: constants.StarknetChainId.MAINNET,
-  baseUrl: 'https://alpha-mainnet.starknet.io',
-  nodeUrl: 'https://starknet-mainnet.infura.io/v3/60c7253fb48147658095fe0460ac9ee9',
-  voyagerUrl: 'https://voyager.online',
-  accountClassHash: '0x3e327de1c40540b98d05cbcb13552008e36f0ec8d61d46956d2f9752c294328', // from argent-x repo
-  useOldAccounts: true,
 };
 
 export const STARKNET_TESTNET_NETWORK: Network = {
   name: 'Goerli Testnet',
-  chainId: constants.StarknetChainId.TESTNET,
+  chainId: constants.StarknetChainId.SN_GOERLI,
   baseUrl: 'https://alpha4.starknet.io',
   nodeUrl: 'https://starknet-goerli.infura.io/v3/60c7253fb48147658095fe0460ac9ee9',
   voyagerUrl: 'https://goerli.voyager.online',
   accountClassHash: '0x033434ad846cdd5f23eb73ff09fe6fddd568284a0fb7d1be20ee482f044dabe2', // from argent-x repo
 };
 
-export const STARKNET_TESTNET_NETWORK_DEPRECATED: Network = {
-  name: 'Goerli Testnet (deprecated acc)',
-  chainId: constants.StarknetChainId.TESTNET,
-  baseUrl: 'https://alpha4.starknet.io',
-  nodeUrl: 'https://starknet-goerli.infura.io/v3/60c7253fb48147658095fe0460ac9ee9',
-  voyagerUrl: 'https://goerli.voyager.online',
-  accountClassHash: '0x3e327de1c40540b98d05cbcb13552008e36f0ec8d61d46956d2f9752c294328', // from argent-x repo
-  useOldAccounts: true,
-};
-
 export const STARKNET_TESTNET2_NETWORK: Network = {
   name: 'Goerli Testnet 2',
-  chainId: constants.StarknetChainId.TESTNET2,
+  chainId: constants.StarknetChainId.SN_GOERLI2,
   baseUrl: 'https://alpha4-2.starknet.io',
   nodeUrl: 'https://starknet-goerli2.infura.io/v3/60c7253fb48147658095fe0460ac9ee9',
   voyagerUrl: 'https://goerli-2.voyager.online',
@@ -62,7 +42,7 @@ export const STARKNET_TESTNET2_NETWORK: Network = {
 
 export const STARKNET_INTEGRATION_NETWORK: Network = {
   name: 'Goerli Integration',
-  chainId: constants.StarknetChainId.TESTNET,
+  chainId: constants.StarknetChainId.SN_GOERLI,
   baseUrl: 'https://external.integration.starknet.io',
   nodeUrl: '',
   voyagerUrl: '',
@@ -152,9 +132,7 @@ export const TEST_TOKEN_TESTNET: Erc20Token = {
 export const PRELOADED_TOKENS = [ETHER_MAINNET, ETHER_TESTNET, ETHER_TESTNET2];
 export const PRELOADED_NETWORKS = [
   STARKNET_MAINNET_NETWORK,
-  STARKNET_MAINNET_NETWORK_DEPRECATED,
   STARKNET_TESTNET_NETWORK,
-  STARKNET_TESTNET_NETWORK_DEPRECATED,
   STARKNET_TESTNET2_NETWORK,
   STARKNET_INTEGRATION_NETWORK,
 ];

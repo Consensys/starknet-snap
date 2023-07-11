@@ -6,7 +6,8 @@ import * as utils from '../../src/utils/starknetUtils';
 import * as snapUtils from '../../src/utils/snapUtils';
 import { SnapState } from '../../src/types/snapState';
 import { sendTransaction } from '../../src/sendTransaction';
-import { STARKNET_TESTNET_NETWORK, STARKNET_TESTNET_NETWORK_DEPRECATED } from '../../src/utils/constants';
+
+import { STARKNET_TESTNET_NETWORK } from '../../src/utils/constants';
 import {
   account1,
   createAccountProxyResp,
@@ -33,7 +34,7 @@ describe('Test function: sendTransaction', function () {
   const state: SnapState = {
     accContracts: [account1],
     erc20Tokens: [token2, token3],
-    networks: [STARKNET_TESTNET_NETWORK, STARKNET_TESTNET_NETWORK_DEPRECATED],
+    networks: [STARKNET_TESTNET_NETWORK],
     transactions: [],
   };
   const apiParams: ApiParams = {
@@ -53,14 +54,8 @@ describe('Test function: sendTransaction', function () {
     sandbox.stub(utils, 'estimateFee').callsFake(async () => {
       return estimateFeeResp;
     });
-    sandbox.stub(utils, 'estimateFee_v4_6_0').callsFake(async () => {
-      return estimateFeeResp;
-    });
     executeTxnResp = sendTransactionResp;
     sandbox.stub(utils, 'executeTxn').callsFake(async () => {
-      return executeTxnResp;
-    });
-    sandbox.stub(utils, 'executeTxn_v4_6_0').callsFake(async () => {
       return executeTxnResp;
     });
     walletStub.rpcStubs.snap_dialog.resolves(true);
@@ -105,24 +100,6 @@ describe('Test function: sendTransaction', function () {
       contractFuncName: 'transfer',
       contractCallData: '0x0256d8f49882cc9366037415f48fa9fd2b5b7344ded7573ebfcef7c90e3e6b75,100000000000000000000,0',
       senderAddress: account1.address,
-    };
-    apiParams.requestParams = requestObject;
-    const result = await sendTransaction(apiParams);
-    expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledOnce;
-    expect(walletStub.rpcStubs.snap_manageState).to.have.been.called;
-    expect(result).to.be.eql(sendTransactionResp);
-  });
-
-  it('should send a transaction for transferring 10 tokens correctly for an old account', async function () {
-    sandbox.stub(utils, 'getSigner').callsFake(async () => {
-      return account1.publicKey;
-    });
-    const requestObject: SendTransactionRequestParams = {
-      contractAddress: '0x07394cbe418daa16e42b87ba67372d4ab4a5df0b05c6e554d158458ce245bc10',
-      contractFuncName: 'transfer',
-      contractCallData: '0x0256d8f49882cc9366037415f48fa9fd2b5b7344ded7573ebfcef7c90e3e6b75,100000000000000000000,0',
-      senderAddress: account1.address,
-      useOldAccounts: true,
     };
     apiParams.requestParams = requestObject;
     const result = await sendTransaction(apiParams);

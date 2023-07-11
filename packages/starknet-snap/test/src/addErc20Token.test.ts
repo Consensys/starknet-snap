@@ -36,7 +36,7 @@ describe('Test function: addErc20Token', function () {
     sandbox.restore();
   });
 
-  it('should add the ERC-20 token in testnet correctly', async function () {
+  it('should add the ERC-20 token in SN_GOERLI correctly', async function () {
     const requestObject: AddErc20TokenRequestParams = {
       tokenAddress: '0x244c20d51109adcf604fde1bbf878e5dcd549b3877ac87911ec6a158bd7aa62',
       tokenName: 'StarkNet ERC-20 sample',
@@ -50,7 +50,7 @@ describe('Test function: addErc20Token', function () {
     expect(state.erc20Tokens[0].symbol).to.be.eq(requestObject.tokenSymbol);
   });
 
-  it('should add the ERC-20 token (with undefined tokenDecimals) in testnet with default token decimal places correctly', async function () {
+  it('should add the ERC-20 token (with undefined tokenDecimals) in SN_GOERLI with default token decimal places correctly', async function () {
     const requestObject: AddErc20TokenRequestParams = {
       tokenAddress: '0x244c20d51109adcf604fde1bbf878e5dcd549b3877ac87911ec6a158bd7bb99',
       tokenName: 'StarkNet ERC-20 sample 2',
@@ -63,7 +63,7 @@ describe('Test function: addErc20Token', function () {
     expect(state.erc20Tokens[1].decimals).to.be.eq(DEFAULT_DECIMAL_PLACES);
   });
 
-  it('should add the ERC-20 token (with empty string tokenDecimals) in testnet with default token decimal places correctly', async function () {
+  it('should add the ERC-20 token (with empty string tokenDecimals) in SN_GOERLI with default token decimal places correctly', async function () {
     const requestObject: AddErc20TokenRequestParams = {
       tokenAddress: '0x244c20d51109adcf604fde1bbf878e5dcd549b3877ac87911ec6a158bd7cc99',
       tokenName: 'StarkNet ERC-20 sample 2',
@@ -77,7 +77,7 @@ describe('Test function: addErc20Token', function () {
     expect(state.erc20Tokens[1].decimals).to.be.eq(DEFAULT_DECIMAL_PLACES);
   });
 
-  it('should update the ERC-20 token in testnet correctly', async function () {
+  it('should update the ERC-20 token in SN_GOERLI correctly', async function () {
     const requestObject: AddErc20TokenRequestParams = {
       tokenAddress: '0x244c20d51109adcf604fde1bbf878e5dcd549b3877ac87911ec6a158bd7aa62',
       tokenName: 'StarkNet ERC-20 sample',
@@ -91,7 +91,7 @@ describe('Test function: addErc20Token', function () {
     expect(state.erc20Tokens[0].symbol).to.be.eq(requestObject.tokenSymbol);
   });
 
-  it('should not update snap state with the duplicated ERC-20 token in testnet', async function () {
+  it('should not update snap state with the duplicated ERC-20 token in SN_GOERLI', async function () {
     const requestObject: AddErc20TokenRequestParams = {
       tokenAddress: '0x244c20d51109adcf604fde1bbf878e5dcd549b3877ac87911ec6a158bd7aa62',
       tokenName: 'StarkNet ERC-20 sample',
