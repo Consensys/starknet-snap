@@ -1,7 +1,6 @@
 import chai, { expect } from 'chai';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
-import * as starknet from 'starknet';
 import { WalletMock } from '../wallet.mock.test';
 import * as utils from '../../src/utils/starknetUtils';
 import { STARKNET_TESTNET_NETWORK } from '../../src/utils/constants';
@@ -109,11 +108,13 @@ describe('Test function: getKeysFromAddress', function () {
 
 describe('Test function: validateAndParseAddress', function () {
 
-  it.skip('should call initial validateAndParseAddress when addresses have proper length', async function () {
-    const validateAndParseAddressSpy = sinon.spy(starknet, 'validateAndParseAddress');
+  it('should call initial validateAndParseAddress when addresses have proper length', async function () {
+    const validateAndParseAddressSpy = sinon.spy(utils, '_validateAndParseAddressFn');
     utils.validateAndParseAddress(account1.address);
     utils.validateAndParseAddress(account1.addressSalt);
-    expect(validateAndParseAddressSpy).to.have.been.called;
+    expect(validateAndParseAddressSpy).to.have.been.calledTwice;
+    expect(validateAndParseAddressSpy).to.have.been.calledWith(account1.address);
+    expect(validateAndParseAddressSpy).to.have.been.calledWith(account1.addressSalt);
   });
 
   it('should throw an error when addresses has invalid length', async function () {
