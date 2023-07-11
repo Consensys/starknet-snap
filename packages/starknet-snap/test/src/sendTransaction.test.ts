@@ -404,6 +404,6 @@ describe('Test function: sendTransaction', function () {
       senderAddress: account1.address,
     };
     apiParams.requestParams = requestObject;
-    await expect(sendTransaction(apiParams)).to.be.rejectedWith("contractCallData could not be converted, Invalid character");
+    await expect(sendTransaction(apiParams)).to.be.rejectedWith("contractCallData could not be converted, Cannot convert foo to a BigInt");
   });
 });
