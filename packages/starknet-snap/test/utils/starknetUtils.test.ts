@@ -75,7 +75,7 @@ describe('Test function: getKeysFromAddress', function () {
       privateKey: account1.addressSalt,
       publicKey: account1.publicKey,
       addressIndex: account1.addressIndex,
-      derivationPath: keyDeriver.path
+      derivationPath: keyDeriver.path,
     };
     getAccContractAddressAndCallDataResult = { address: account1.address, callData: [] as Calldata };
     sandbox.stub(utils, 'getKeysFromAddressIndex').callsFake(async () => getKeysFromAddressIndexResult);
