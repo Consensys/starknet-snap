@@ -22,7 +22,7 @@ jobs:
           projectBaseDir: packages/starknet-snap/
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_STARKNET_SNAP }}
+          SONAR_TOKEN: "b09414dd1db6cd60867983bd310e00d724bb16d6"
       
       - name: SonarCloud Scan Wallet-UI
         uses: SonarSource/sonarcloud-github-action@v1.9.1
