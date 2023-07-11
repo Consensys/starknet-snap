@@ -194,6 +194,16 @@ export function getSigningTxnText(
   );
 }
 
+export function getAddTokenText(
+  tokenAddress: string,
+  tokenName: string,
+  tokenSymbol: string,
+  tokenDecimals: number,
+  network: Network,
+) {
+  return `Token Address: ${tokenAddress}\n\nToken Name: ${tokenName}\n\nToken Symbol: ${tokenSymbol}\n\nToken Decimals: ${tokenDecimals}\n\nNetwork: ${network.name}`;
+}
+
 export function getAccount(state: SnapState, accountAddress: string, chainId: string) {
   return state.accContracts?.find(
     (acc) => number.toBN(acc.address).eq(number.toBN(accountAddress)) && Number(acc.chainId) === Number(chainId),

@@ -428,28 +428,38 @@ export const useStarkNetSnap = () => {
     accountAddress: string,
   ) => {
     dispatch(enableLoadingWithMessage('Adding Token...'));
-    const token = await ethereum.request({
-      method: 'wallet_invokeSnap',
-      params: {
-        snapId,
-        request: {
-          method: 'starkNet_addErc20Token',
-          params: {
-            tokenAddress,
-            tokenName,
-            tokenSymbol,
-            tokenDecimals,
-            chainId,
+    try {
+      const token = await ethereum.request({
+        method: 'wallet_invokeSnap',
+        params: {
+          snapId,
+          request: {
+            method: 'starkNet_addErc20Token',
+            params: {
+              tokenAddress,
+              tokenName,
+              tokenSymbol,
+              tokenDecimals,
+              chainId,
+            },
           },
         },
-      },
-    });
-    const tokenBalance = await getTokenBalance(tokenAddress, accountAddress, chainId);
-    const usdPrice = await getAssetPriceUSD(token);
-    const tokenWithBalance: Erc20TokenBalance = addMissingPropertiesToToken(token, tokenBalance, usdPrice);
-    dispatch(upsertErc20TokenBalance(tokenWithBalance));
-    dispatch(disableLoading());
-    return tokenWithBalance;
+      });
+      if (token) {
+        const tokenBalance = await getTokenBalance(tokenAddress, accountAddress, chainId);
+        const usdPrice = await getAssetPriceUSD(token);
+        const tokenWithBalance: Erc20TokenBalance = addMissingPropertiesToToken(token, tokenBalance, usdPrice);
+        dispatch(upsertErc20TokenBalance(tokenWithBalance));
+        dispatch(disableLoading());
+        return tokenWithBalance;
+      } else {
+        dispatch(disableLoading());
+        return null;
+      }
+    } catch (err) {
+      dispatch(disableLoading());
+      throw err;
+    }
   };
 
   const updateTokenBalance = async (tokenAddress: string, accountAddress: string, chainId: string) => {
