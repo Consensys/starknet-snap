@@ -36,7 +36,6 @@ interface Props {
 
 export const SendSummaryModalView = ({ address, amount, chainId, closeModal }: Props) => {
   const wallet = useAppSelector((state) => state.wallet);
-  const networks = useAppSelector((state) => state.networks);
   const [estimatingGas, setEstimatingGas] = useState(true);
   const [gasFees, setGasFees] = useState({ suggestedMaxFee: '0', unit: 'wei', includeDeploy: false });
   const [gasFeesError, setGasFeesError] = useState(false);
@@ -61,14 +60,12 @@ export const SendSummaryModalView = ({ address, amount, chainId, closeModal }: P
         setEstimatingGas(true);
         const amountBN = ethers.utils.parseUnits(amount, wallet.erc20TokenBalanceSelected.decimals);
         const callData = address + ',' + amountBN.toString() + ',0';
-        const useOldAccounts = !!networks?.items[networks.activeNetwork]?.useOldAccounts;
         estimateFees(
           wallet.erc20TokenBalanceSelected.address,
           'transfer',
           callData,
           wallet.accounts[0] as unknown as string,
           chainId,
-          useOldAccounts,
         )
           .then((response) => {
             if (response.message && response.message.includes('Error')) {
@@ -135,7 +132,6 @@ export const SendSummaryModalView = ({ address, amount, chainId, closeModal }: P
     if (wallet.accounts) {
       const amountBN = ethers.utils.parseUnits(amount, wallet.erc20TokenBalanceSelected.decimals);
       const callData = address + ',' + amountBN.toString() + ',0';
-      const useOldAccounts = !!networks?.items[networks.activeNetwork]?.useOldAccounts;
       sendTransaction(
         wallet.erc20TokenBalanceSelected.address,
         'transfer',
@@ -143,7 +139,6 @@ export const SendSummaryModalView = ({ address, amount, chainId, closeModal }: P
         wallet.accounts[0] as unknown as string,
         gasFees.suggestedMaxFee,
         chainId,
-        useOldAccounts,
       )
         .then((result) => {
           if (result) {

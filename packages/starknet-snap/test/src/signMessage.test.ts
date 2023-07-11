@@ -1,3 +1,4 @@
+import { toJson } from '../../src/utils/serializer';
 import chai, { expect } from 'chai';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
@@ -48,7 +49,7 @@ describe('Test function: signMessage', function () {
       typedDataMessage: undefined, // will use typedDataExample.json
     };
     apiParams.requestParams = requestObject;
-    const result = await signMessage(apiParams);
+    const result: boolean | string = await signMessage(apiParams);
     expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledOnce;
     expect(walletStub.rpcStubs.snap_manageState).not.to.have.been.called;
     expect(result).to.be.eql(signature1);
@@ -57,7 +58,7 @@ describe('Test function: signMessage', function () {
   it('should sign a message from an unfound user account correctly', async function () {
     const requestObject: SignMessageRequestParams = {
       signerAddress: unfoundUserAddress,
-      typedDataMessage: JSON.stringify(typedDataExample),
+      typedDataMessage: toJson(typedDataExample),
     };
     apiParams.requestParams = requestObject;
     const result = await signMessage(apiParams);
@@ -102,7 +103,7 @@ describe('Test function: signMessage', function () {
   it('should throw an error if the signerAddress is undefined', async function () {
     const requestObject: SignMessageRequestParams = {
       signerAddress: undefined,
-      typedDataMessage: JSON.stringify(typedDataExample),
+      typedDataMessage: toJson(typedDataExample),
     };
     apiParams.requestParams = requestObject;
     let result;
@@ -119,7 +120,7 @@ describe('Test function: signMessage', function () {
     const invalidAddress = 'wrongAddress';
     const requestObject: SignMessageRequestParams = {
       signerAddress: invalidAddress,
-      typedDataMessage: JSON.stringify(typedDataExample),
+      typedDataMessage: toJson(typedDataExample),
     };
     apiParams.requestParams = requestObject;
     let result;
