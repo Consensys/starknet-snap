@@ -45,8 +45,7 @@ function App() {
   useEffect(() => {
     if (networks.items.length > 0) {
       const chainId = networks.items[networks.activeNetwork].chainId;
-      const useOldAccounts = !!networks.items[networks.activeNetwork].useOldAccounts;
-      getWalletData(chainId, useOldAccounts);
+      getWalletData(chainId);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [networks.activeNetwork]);

@@ -1,3 +1,4 @@
+import { toJson } from '../../src/utils/serializer';
 import chai, { expect } from 'chai';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
@@ -45,7 +46,7 @@ describe('Test function: verifySignedMessage', function () {
     const requestObject: VerifySignedMessageRequestParams = {
       signerAddress: account1.address,
       typedDataMessage: undefined, // will use typedDataExample.json
-      signature: signature1.join(','),
+      signature: signature1,
     };
     apiParams.requestParams = requestObject;
     const result = await verifySignedMessage(apiParams);
@@ -56,8 +57,8 @@ describe('Test function: verifySignedMessage', function () {
   it('should verify a signed message from an unfound user account correctly', async function () {
     const requestObject: VerifySignedMessageRequestParams = {
       signerAddress: unfoundUserAddress,
-      typedDataMessage: JSON.stringify(typedDataExample),
-      signature: signature2.join(','),
+      typedDataMessage: toJson(typedDataExample),
+      signature: signature2,
     };
     apiParams.requestParams = requestObject;
     const result = await verifySignedMessage(apiParams);
@@ -70,7 +71,7 @@ describe('Test function: verifySignedMessage', function () {
     const requestObject: VerifySignedMessageRequestParams = {
       signerAddress: account1.address,
       typedDataMessage: undefined, // will use typedDataExample.json
-      signature: signature1.join(','),
+      signature: signature1,
     };
     apiParams.requestParams = requestObject;
 
@@ -89,7 +90,7 @@ describe('Test function: verifySignedMessage', function () {
     const requestObject: VerifySignedMessageRequestParams = {
       signerAddress: 'wrongAddress',
       typedDataMessage: undefined, // will use typedDataExample.json
-      signature: signature1.join(','),
+      signature: signature1,
     };
     apiParams.requestParams = requestObject;
     let result;

@@ -1,7 +1,6 @@
 import { getBIP44AddressKeyDeriver } from '@metamask/key-tree';
 import chai, { expect } from 'chai';
 import sinonChai from 'sinon-chai';
-import { encode } from 'starknet';
 import { getAddressKey, getAddressKeyDeriver, grindKey } from '../../src/utils/keyPair';
 import { bip44Entropy } from '../constants.test';
 import { WalletMock } from '../wallet.mock.test';
@@ -40,17 +39,6 @@ describe('Test function: getAddressKey', function () {
     const privateKey = (await deriveStarkNetAddress(0)).privateKey;
     const expectedResult = grindKey(privateKey);
     const result = await getAddressKey(keyDeriver);
-    expect(walletStub.rpcStubs.snap_getBip44Entropy).to.have.been.calledOnce;
-    expect(result.addressKey).to.be.eql(expectedResult);
-  });
-
-  it('should get the ground address key from the BIP-44 entropy correctly for old accounts', async function () {
-    const deriveStarkNetAddress = await getBIP44AddressKeyDeriver(bip44Entropy);
-    const privateKey = (await deriveStarkNetAddress(0)).privateKey;
-    const chainCode = (await keyDeriver(0)).chainCode;
-    const grindKeyInput = `0x${encode.removeHexPrefix(privateKey)}${encode.removeHexPrefix(chainCode)}`;
-    const expectedResult = grindKey(grindKeyInput);
-    const result = await getAddressKey(keyDeriver, 0, true);
     expect(walletStub.rpcStubs.snap_getBip44Entropy).to.have.been.calledOnce;
     expect(result.addressKey).to.be.eql(expectedResult);
   });

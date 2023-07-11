@@ -21,7 +21,6 @@ export const AccountDetailsModalView = ({ address }: Props) => {
   const networks = useAppSelector((state) => state.networks);
   const { getPrivateKeyFromAddress } = useStarkNetSnap();
   const chainId = networks?.items[networks.activeNetwork]?.chainId;
-  const useOldAccounts = !!networks?.items[networks.activeNetwork]?.useOldAccounts;
   return (
     <div>
       <AccountImageDiv>
@@ -39,11 +38,7 @@ export const AccountDetailsModalView = ({ address }: Props) => {
         <ButtonStyled backgroundTransparent borderVisible onClick={() => openExplorerTab(address, 'contract', chainId)}>
           VIEW ON EXPLORER
         </ButtonStyled>
-        <ButtonStyled
-          backgroundTransparent
-          borderVisible
-          onClick={() => getPrivateKeyFromAddress(address, chainId, useOldAccounts)}
-        >
+        <ButtonStyled backgroundTransparent borderVisible onClick={() => getPrivateKeyFromAddress(address, chainId)}>
           EXPORT PRIVATE KEY
         </ButtonStyled>
       </ButtonDiv>
