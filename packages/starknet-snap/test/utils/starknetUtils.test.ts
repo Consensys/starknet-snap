@@ -1,6 +1,7 @@
 import chai, { expect } from 'chai';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
+import * as starknet from 'starknet';
 import { WalletMock } from '../wallet.mock.test';
 import * as utils from '../../src/utils/starknetUtils';
 import { STARKNET_TESTNET_NETWORK } from '../../src/utils/constants';
@@ -14,6 +15,7 @@ import {
 } from '../constants.test';
 import { SnapState } from '../../src/types/snapState';
 import { Calldata } from 'starknet';
+
 chai.use(sinonChai);
 const sandbox = sinon.createSandbox();
 
@@ -102,5 +104,20 @@ describe('Test function: getKeysFromAddress', function () {
       expect(result).to.be.an('Error');
       expect(result?.message).to.be.eq(`Address not found: ${account2.address}`);
     }
+  });
+});
+
+describe('Test function: validateAndParseAddress', function () {
+
+  it.skip('should call initial validateAndParseAddress when addresses have proper length', async function () {
+    const validateAndParseAddressSpy = sinon.spy(starknet, 'validateAndParseAddress');
+    utils.validateAndParseAddress(account1.address);
+    utils.validateAndParseAddress(account1.addressSalt);
+    expect(validateAndParseAddressSpy).to.have.been.called;
+  });
+
+  it('should throw an error when addresses has invalid length', async function () {
+    const largeHex = "0x3f679957fd2a034d7c32aecb500b62e9d9b4708ebd1383edaa9534fb36b951a665019a";
+    expect(() => utils.validateAndParseAddress(largeHex)).to.throw("Address must be 63 character long");
   });
 });

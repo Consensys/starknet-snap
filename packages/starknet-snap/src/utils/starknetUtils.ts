@@ -20,6 +20,7 @@ import {
   ProviderOptions,
   GetTransactionResponse,
   Invocations,
+  validateAndParseAddress as _validateAndParseAddress
 } from 'starknet';
 import type { Hex } from '@noble/curves/abstract/utils';
 import { Network, SnapState, Transaction, TransactionType } from '../types/snapState';
@@ -461,3 +462,10 @@ export const addFeesFromAllTransactions = (fees: EstimateFee[]): EstimateFee => 
     suggestedMaxFee: suggestedMaxFee_bn,
   };
 };
+
+export const validateAndParseAddress = (address: number.BigNumberish, length = 63) => {
+  // getting rid of 0x and 0x0 prefixes
+  const trimmedAddress = address.toString().replace(/^0x0?/, '');
+  if (trimmedAddress.length !== length) throw new Error(`Address must be ${length} character long`);
+  return _validateAndParseAddress(address);
+}
