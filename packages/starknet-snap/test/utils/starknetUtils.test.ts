@@ -13,7 +13,7 @@ import {
   account2,
 } from '../constants.test';
 import { SnapState } from '../../src/types/snapState';
-import { Calldata, ec } from 'starknet';
+import { Calldata } from 'starknet';
 chai.use(sinonChai);
 const sandbox = sinon.createSandbox();
 
