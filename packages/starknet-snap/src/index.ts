@@ -33,6 +33,7 @@ import { ApiParams, ApiRequestParams } from './types/snapApi';
 import { estimateAccDeployFee } from './estimateAccountDeployFee';
 import { DialogType } from '@metamask/rpc-methods';
 import { copyable, heading, panel } from '@metamask/snaps-ui';
+import { logger } from './utils/logger';
 
 declare const snap;
 const saveMutex = new Mutex();
@@ -40,11 +41,14 @@ const saveMutex = new Mutex();
 export const onRpcRequest: OnRpcRequestHandler = async ({ origin, request }) => {
   const requestParams = request?.params as unknown as ApiRequestParams;
   const isDev = !!requestParams?.isDev;
+  const debugLevel = requestParams?.debugLevel;
 
+  logger.setLevel(debugLevel)
+  console.log(`debugLevel: ${logger.getLevel()}`);
   // Switch statement for methods not requiring state to speed things up a bit
-  console.log(origin, request);
+  logger.log(origin, request);
   if (request.method === 'ping') {
-    console.log('pong');
+    logger.log('pong');
     return 'pong';
   }
 
@@ -84,7 +88,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ origin, request }) => 
     await upsertErc20Token(token, snap, saveMutex, state);
   }
 
-  console.log(`${request.method}:\nrequestParams: ${toJson(requestParams)}`);
+  logger.log(`${request.method}:\nrequestParams: ${toJson(requestParams)}`);
 
   const apiParams: ApiParams = {
     state,
@@ -95,7 +99,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ origin, request }) => 
 
   switch (request.method) {
     case 'hello':
-      console.log(`Snap State:\n${toJson(state, 2)}`);
+      logger.log(`Snap State:\n${toJson(state, 2)}`);
       return snap.request({
         method: 'snap_dialog',
         params: {

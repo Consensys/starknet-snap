@@ -31,6 +31,11 @@ export const useStarkNetSnap = () => {
   const snapId = process.env.REACT_APP_SNAP_ID ? process.env.REACT_APP_SNAP_ID : 'local:http://localhost:8081/';
   const snapVersion = process.env.REACT_APP_SNAP_VERSION ? process.env.REACT_APP_SNAP_VERSION : '*';
   const minSnapVersion = process.env.REACT_APP_MIN_SNAP_VERSION ? process.env.REACT_APP_MIN_SNAP_VERSION : '1.7.0';
+  const debugLevel = process.env.REACT_APP_DEBUG_LEVEL ? process.env.REACT_APP_DEBUG_LEVEL : 'all';
+
+  const defaultParam = {
+    debugLevel
+  }
 
   const connectToSnap = () => {
     dispatch(enableLoadingWithMessage('Connecting...'));
@@ -60,6 +65,9 @@ export const useStarkNetSnap = () => {
           snapId,
           request: {
             method: 'ping',
+            params: {
+              ...defaultParam,
+            }
           },
         },
       })
@@ -81,6 +89,9 @@ export const useStarkNetSnap = () => {
         snapId,
         request: {
           method: 'starkNet_getStoredNetworks',
+          params: {
+            ...defaultParam,
+          },
         },
       },
     })) as Network[];
@@ -95,6 +106,7 @@ export const useStarkNetSnap = () => {
         request: {
           method: 'starkNet_getStoredErc20Tokens',
           params: {
+            ...defaultParam,
             chainId,
           },
         },
@@ -114,6 +126,7 @@ export const useStarkNetSnap = () => {
         request: {
           method: 'starkNet_recoverAccounts',
           params: {
+            ...defaultParam,
             startScanIndex: START_SCAN_INDEX,
             maxScanned: MAX_SCANNED,
             maxMissed: MAX_MISSED,
@@ -133,6 +146,7 @@ export const useStarkNetSnap = () => {
         request: {
           method: 'starkNet_getStoredUserAccounts',
           params: {
+            ...defaultParam,
             chainId,
           },
         },
@@ -149,6 +163,7 @@ export const useStarkNetSnap = () => {
         request: {
           method: 'starkNet_createAccount',
           params: {
+            ...defaultParam,
             addressIndex: 0,
             chainId,
             deploy: false,
@@ -258,6 +273,7 @@ export const useStarkNetSnap = () => {
           request: {
             method: 'starkNet_extractPrivateKey',
             params: {
+              ...defaultParam,
               userAddress: address,
               chainId,
             },
@@ -285,6 +301,7 @@ export const useStarkNetSnap = () => {
           request: {
             method: 'starkNet_estimateFee',
             params: {
+              ...defaultParam,
               contractAddress,
               contractFuncName,
               contractCallData,
@@ -318,6 +335,7 @@ export const useStarkNetSnap = () => {
           request: {
             method: 'starkNet_sendTransaction',
             params: {
+              ...defaultParam,
               contractAddress,
               contractFuncName,
               contractCallData,
@@ -359,6 +377,7 @@ export const useStarkNetSnap = () => {
           request: {
             method: 'starkNet_getTransactions',
             params: {
+              ...defaultParam,
               senderAddress,
               contractAddress,
               pageSize,
@@ -424,6 +443,7 @@ export const useStarkNetSnap = () => {
           request: {
             method: 'starkNet_addErc20Token',
             params: {
+              ...defaultParam,
               tokenAddress,
               tokenName,
               tokenSymbol,
@@ -477,6 +497,7 @@ export const useStarkNetSnap = () => {
           request: {
             method: 'starkNet_getErc20TokenBalance',
             params: {
+              ...defaultParam,
               tokenAddress,
               userAddress,
               chainId,

@@ -8,6 +8,7 @@ import {
 import { getNetworkFromChainId } from './utils/snapUtils';
 import { ApiParams, VerifySignedMessageRequestParams } from './types/snapApi';
 import { validateAndParseAddress } from 'starknet';
+import { logger } from './utils/logger';
 
 export async function verifySignedMessage(params: ApiParams) {
   try {
@@ -33,7 +34,7 @@ export async function verifySignedMessage(params: ApiParams) {
       : typedDataExample;
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
 
-    console.log(
+    logger.log(
       `verifySignedMessage:\nverifySignerAddress: ${verifySignerAddress}\nverifySignature: ${verifySignature}\nverifyTypedDataMessage: ${toJson(
         verifyTypedDataMessage,
       )}`,
@@ -50,10 +51,10 @@ export async function verifySignedMessage(params: ApiParams) {
       verifySignature,
     );
 
-    console.log(`verifySignedMessage:\nisVerified: ${isVerified}`);
+    logger.log(`verifySignedMessage:\nisVerified: ${isVerified}`);
     return isVerified;
   } catch (err) {
-    console.error(`Problem found: ${err}`);
+    logger.error(`Problem found: ${err}`);
     throw err;
   }
 }

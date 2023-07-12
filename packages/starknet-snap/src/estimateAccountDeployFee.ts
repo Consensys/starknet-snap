@@ -7,6 +7,7 @@ import {
   getKeysFromAddressIndex,
   getAccContractAddressAndCallData,
 } from './utils/starknetUtils';
+import { logger } from './utils/logger';
 
 export async function estimateAccDeployFee(params: ApiParams) {
   try {
@@ -25,7 +26,7 @@ export async function estimateAccDeployFee(params: ApiParams) {
       network.accountClassHash,
       publicKey,
     );
-    console.log(
+    logger.log(
       `estimateAccountDeployFee:\ncontractAddress = ${contractAddress}\npublicKey = ${publicKey}\naddressIndex = ${addressIndexInUsed}`,
     );
 
@@ -36,7 +37,7 @@ export async function estimateAccDeployFee(params: ApiParams) {
       publicKey,
       privateKey,
     );
-    console.log(`estimateAccountDeployFee:\nestimateDeployFee: ${toJson(estimateDeployFee)}`);
+    logger.log(`estimateAccountDeployFee:\nestimateDeployFee: ${toJson(estimateDeployFee)}`);
 
     const resp = {
       suggestedMaxFee: estimateDeployFee.suggestedMaxFee.toString(10),
@@ -45,11 +46,11 @@ export async function estimateAccDeployFee(params: ApiParams) {
       gasPrice: estimateDeployFee.gas_price?.toString(10) ?? '0',
       unit: 'wei',
     };
-    console.log(`estimateAccountDeployFee:\nresp: ${toJson(resp)}`);
+    logger.log(`estimateAccountDeployFee:\nresp: ${toJson(resp)}`);
 
     return resp;
   } catch (err) {
-    console.error(`Problem found: ${err}`);
+    logger.error(`Problem found: ${err}`);
     throw err;
   }
 }

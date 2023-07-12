@@ -26,6 +26,7 @@ import { Network, SnapState, Transaction, TransactionType } from '../types/snapS
 import { PROXY_CONTRACT_HASH, TRANSFER_SELECTOR_HEX } from './constants';
 import { getAddressKey } from './keyPair';
 import { getAccount, getAccounts, getTransactionFromVoyagerUrl, getTransactionsFromVoyagerUrl } from './snapUtils';
+import { logger } from './logger';
 
 export const getCallDataArray = (callDataStr: string): string[] => {
   return (callDataStr ?? '')
@@ -197,11 +198,11 @@ const getTransactionsFromVoyagerHelper = async (
       txns.push(...items);
       maxPage = lastPage;
     } catch (err) {
-      console.error(`getTransactionsFromVoyagerHelper: error received from getTransactionsFromVoyager: ${err}`);
+      logger.error(`getTransactionsFromVoyagerHelper: error received from getTransactionsFromVoyager: ${err}`);
     }
     i++;
   } while (i <= maxPage && txns[txns.length - 1]?.timestamp * 1000 >= minTimestamp);
-  console.log(
+  logger.log(
     `getTransactionsFromVoyagerHelper: minTimestamp = ${minTimestamp}, i = ${i}, maxPage = ${maxPage}, total = ${txns.length}`,
   );
 
@@ -218,7 +219,7 @@ const getTransactionsFromVoyagerHelper = async (
         );
         txns = [...txns, ...deployTxns];
       } catch (err) {
-        console.error(
+        logger.error(
           `getTransactionsFromVoyagerHelper: error received from getTransactionsFromVoyager at last page: ${err}`,
         );
       }
@@ -264,9 +265,9 @@ export const getMassagedTransactions = async (
       let txnResp: GetTransactionResponse;
       try {
         txnResp = await getTransaction(txn.hash, network);
-        console.log(`getMassagedTransactions: txnResp:\n${toJson(txnResp)}`);
+        logger.log(`getMassagedTransactions: txnResp:\n${toJson(txnResp)}`);
       } catch (err) {
-        console.error(`getMassagedTransactions: error received from getTransaction: ${err}`);
+        logger.error(`getMassagedTransactions: error received from getTransaction: ${err}`);
       }
 
       const massagedTxn: Transaction = {
@@ -287,8 +288,8 @@ export const getMassagedTransactions = async (
     }),
   );
 
-  console.log(`getMassagedTransactions: massagedTxns total = ${massagedTxns.length}`);
-  console.log(`getMassagedTransactions: massagedTxns:\n${toJson(massagedTxns)}`);
+  logger.log(`getMassagedTransactions: massagedTxns total = ${massagedTxns.length}`);
+  logger.log(`getMassagedTransactions: massagedTxns:\n${toJson(massagedTxns)}`);
 
   if (contractAddress) {
     const bigIntContractAddress = num.toBigInt(contractAddress);
@@ -361,7 +362,7 @@ export const getNextAddressIndex = (chainId: string, state: SnapState, derivatio
     (acc) => acc.derivationPath === derivationPath && acc.addressIndex >= 0,
   );
   const uninitializedAccount = accounts.find((acc) => !acc.publicKey || num.toBigInt(acc.publicKey) === constants.ZERO);
-  console.log(
+  logger.log(
     `getNextAddressIndex:\nUninitialized account found from state:\n${toJson(uninitializedAccount ?? 'None')}`,
   );
   return uninitializedAccount?.addressIndex ?? accounts.length;
@@ -391,7 +392,7 @@ export const getKeysFromAddress = async (
   const acc = getAccount(state, address, network.chainId);
   if (acc) {
     addressIndex = acc.addressIndex;
-    console.log(`getNextAddressIndex:\nFound address in state: ${addressIndex} ${address}`);
+    logger.log(`getNextAddressIndex:\nFound address in state: ${addressIndex} ${address}`);
   } else {
     const bigIntAddress = num.toBigInt(address);
     for (let i = 0; i < maxScan; i++) {
@@ -399,7 +400,7 @@ export const getKeysFromAddress = async (
       const { address: calculatedAddress } = getAccContractAddressAndCallData(network.accountClassHash, publicKey);
       if (num.toBigInt(calculatedAddress) === bigIntAddress) {
         addressIndex = i;
-        console.log(`getNextAddressIndex:\nFound address in scan: ${addressIndex} ${address}`);
+        logger.log(`getNextAddressIndex:\nFound address in scan: ${addressIndex} ${address}`);
         break;
       }
     }
@@ -421,7 +422,7 @@ export const getKeysFromAddressIndex = async (
   let addressIndex = index;
   if (isNaN(addressIndex) || addressIndex < 0) {
     addressIndex = getNextAddressIndex(chainId, state, keyDeriver.path);
-    console.log(`getKeysFromAddressIndex: addressIndex found: ${addressIndex}`);
+    logger.log(`getKeysFromAddressIndex: addressIndex found: ${addressIndex}`);
   }
 
   const { addressKey, derivationPath } = await getAddressKey(keyDeriver, addressIndex);
@@ -443,7 +444,7 @@ export const isAccountDeployed = async (network: Network, publicKey: string) => 
   } catch (err) {
     accountDeployed = false;
   }
-  console.log(`isAccountDeployed: ${accountDeployed}`);
+  logger.log(`isAccountDeployed: ${accountDeployed}`);
   return accountDeployed;
 };
 

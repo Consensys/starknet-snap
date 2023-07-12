@@ -6,6 +6,7 @@ import { ApiParams, SignMessageRequestParams } from './types/snapApi';
 import { validateAndParseAddress } from 'starknet';
 import { DialogType } from '@metamask/rpc-methods';
 import { heading, panel, text } from '@metamask/snaps-ui';
+import { logger } from './utils/logger';
 
 export async function signMessage(params: ApiParams) {
   try {
@@ -30,7 +31,7 @@ export async function signMessage(params: ApiParams) {
       : typedDataExample;
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
 
-    console.log(`signMessage:\nsignerAddress: ${signerAddress}\ntypedDataMessage: ${toJson(typedDataMessage)}`);
+    logger.log(`signMessage:\nsignerAddress: ${signerAddress}\ntypedDataMessage: ${toJson(typedDataMessage)}`);
 
     const response = await wallet.request({
       method: 'snap_dialog',
@@ -48,10 +49,10 @@ export async function signMessage(params: ApiParams) {
 
     const typedDataSignature = getTypedDataMessageSignature(signerPrivateKey, typedDataMessage, signerAddress);
 
-    console.log(`signMessage:\ntypedDataSignature: ${toJson(typedDataSignature)}`);
+    logger.log(`signMessage:\ntypedDataSignature: ${toJson(typedDataSignature)}`);
     return typedDataSignature.toDERHex();
   } catch (err) {
-    console.error(`Problem found: ${err}`);
+    logger.error(`Problem found: ${err}`);
     throw err;
   }
 }
