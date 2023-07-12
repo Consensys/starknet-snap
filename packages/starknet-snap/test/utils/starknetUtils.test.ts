@@ -119,6 +119,6 @@ describe('Test function: validateAndParseAddress', function () {
 
   it('should throw an error when addresses has invalid length', async function () {
     const largeHex = "0x3f679957fd2a034d7c32aecb500b62e9d9b4708ebd1383edaa9534fb36b951a665019a";
-    expect(() => utils.validateAndParseAddress(largeHex)).to.throw("Address must be 63 character long");
+    expect(() => utils.validateAndParseAddress(largeHex)).to.throw("Address 0x3f679957fd2a034d7c32aecb500b62e9d9b4708ebd1383edaa9534fb36b951a665019a has an invalid length");
   });
 });
