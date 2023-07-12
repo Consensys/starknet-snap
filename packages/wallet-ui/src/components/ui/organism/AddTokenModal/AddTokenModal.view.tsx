@@ -85,8 +85,10 @@ export const AddTokenModalView = ({ closeModal }: Props) => {
                 chain,
                 accounts[0] as unknown as string,
               );
-              setErc20TokenBalance(newToken);
-              toastr.success('Token added successfully');
+              if (newToken) {
+                setErc20TokenBalance(newToken);
+                toastr.success('Token added successfully');
+              }
               closeModal();
             } catch (err) {
               toastr.error('Error while adding token');
