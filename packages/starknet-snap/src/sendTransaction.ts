@@ -7,8 +7,7 @@ import { getKeysFromAddress, getCallDataArray, executeTxn, isAccountDeployed } f
 import { ApiParams, SendTransactionRequestParams } from './types/snapApi';
 import { createAccount } from './createAccount';
 import { DialogType } from '@metamask/rpc-methods';
-import { heading, panel, text } from '@metamask/snaps-ui';
-import RemoveMarkdown from 'remove-markdown';
+import { heading, panel, text, copyable } from '@metamask/snaps-ui';
 export async function sendTransaction(params: ApiParams) {
   try {
     const { state, wallet, saveMutex, keyDeriver, requestParams } = params;
@@ -49,12 +48,11 @@ export async function sendTransaction(params: ApiParams) {
       maxFee = num.toBigInt(suggestedMaxFee);
     }
 
-    const sanitizedContractCallData = contractCallData.map((data: num.BigNumberish) => RemoveMarkdown(data.toString()));
     const signingTxnText = getSigningTxnText(
       state,
       contractAddress,
       contractFuncName,
-      sanitizedContractCallData,
+      contractCallData,
       senderAddress,
       maxFee,
       network,
@@ -66,7 +64,7 @@ export async function sendTransaction(params: ApiParams) {
         content: panel([
           heading('Do you want to sign this transaction ?'),
           text(`It will be signed with address: ${senderAddress}`),
-          text(signingTxnText),
+          copyable(signingTxnText),
         ]),
       },
     });
@@ -75,7 +73,7 @@ export async function sendTransaction(params: ApiParams) {
     const txnInvocation = {
       contractAddress,
       entrypoint: contractFuncName,
-      calldata: sanitizedContractCallData,
+      calldata: contractCallData,
     };
 
     console.log(`sendTransaction:\ntxnInvocation: ${toJson(txnInvocation)}\nmaxFee: ${maxFee.toString()}}`);
@@ -119,7 +117,7 @@ export async function sendTransaction(params: ApiParams) {
         senderAddress,
         contractAddress,
         contractFuncName,
-        contractCallData: sanitizedContractCallData.map((data: num.BigNumberish) => {
+        contractCallData: contractCallData.map((data: num.BigNumberish) => {
           try {
             return num.toHex(num.toBigInt(data))
           } catch(e) {

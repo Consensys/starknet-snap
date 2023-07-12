@@ -1921,18 +1921,17 @@ __metadata:
 
 "@consensys/starknet-snap@file:../starknet-snap::locator=wallet-ui%40workspace%3Apackages%2Fwallet-ui":
   version: 1.7.0
-  resolution: "@consensys/starknet-snap@file:../starknet-snap#../starknet-snap::hash=128314&locator=wallet-ui%40workspace%3Apackages%2Fwallet-ui"
+  resolution: "@consensys/starknet-snap@file:../starknet-snap#../starknet-snap::hash=8af2ae&locator=wallet-ui%40workspace%3Apackages%2Fwallet-ui"
   dependencies:
     async-mutex: ^0.3.2
     chai: ^4.3.6
     ethereum-unit-converter: ^0.0.17
     ethers: ^5.5.1
-    remove-markdown: ^0.5.0
     sinon: ^13.0.2
     sinon-chai: ^3.7.0
     starknet: ^5.14.0
     starknet_v4.22.0: "npm:starknet@4.22.0"
-  checksum: 36dfcfe5ff1db189831af4829e26f6e5e7f93a824fb9cd4f55c5a5ca3f1bf11a9f76573ce242488087b5af8458ef0fcc24403af21049641827050343c264c6c9
+  checksum: 12dd7b50b00155a2ecbaaf4b5867b51cb4bbaced1fc32454e3a92350e67d3292f754caa603908cdca2294baaa998557b7655f7358e44c638658e45bad77dfafb
   languageName: node
   linkType: hard
 
@@ -1948,7 +1947,6 @@ __metadata:
     "@metamask/snaps-ui": ^0.32.2
     "@types/chai": ^4.3.1
     "@types/chai-as-promised": ^7.1.5
-    "@types/remove-markdown": ^0.3.1
     "@types/sinon": ^10.0.11
     "@types/sinon-chai": ^3.2.8
     "@typescript-eslint/eslint-plugin": ^5.20.0
@@ -1963,7 +1961,6 @@ __metadata:
     mocha: ^9.2.2
     nyc: ^15.1.0
     prettier: ^2.6.2
-    remove-markdown: ^0.5.0
     rimraf: ^3.0.2
     sinon: ^13.0.2
     sinon-chai: ^3.7.0
@@ -6468,13 +6465,6 @@ __metadata:
     "@types/scheduler": "*"
     csstype: ^3.0.2
   checksum: e752df961105e5127652460504785897ca6e77259e0da8f233f694f9e8f451cde7fa0709d4456ade0ff600c8ce909cfe29f9b08b9c247fa9b734e126ec53edd7
-  languageName: node
-  linkType: hard
-
-"@types/remove-markdown@npm:^0.3.1":
-  version: 0.3.1
-  resolution: "@types/remove-markdown@npm:0.3.1"
-  checksum: a673aafa3a3722d959b4ad1d4e95b33f04f037a8bb95a82e843d6005b12b51f9b1bfd5954cd5c8707fbbb2f1d8865f7e632f02f99389ab83d0dcfd2cb1920dbb
   languageName: node
   linkType: hard
 
@@ -21093,13 +21083,6 @@ __metadata:
   dependencies:
     mdast-squeeze-paragraphs: ^4.0.0
   checksum: 2071eb74d0ecfefb152c4932690a9fd950c3f9f798a676f1378a16db051da68fb20bf288688cc153ba5019dded35408ff45a31dfe9686eaa7a9f1df9edbb6c81
-  languageName: node
-  linkType: hard
-
-"remove-markdown@npm:^0.5.0":
-  version: 0.5.0
-  resolution: "remove-markdown@npm:0.5.0"
-  checksum: c3c9051e7e7d7c5560e7d70a5093704d868fa57d244eb89533fe7bf960bce68e7901197616c6b296cb22f47af6c15a6bce693467f35709fe399379ea1125e536
   languageName: node
   linkType: hard
 

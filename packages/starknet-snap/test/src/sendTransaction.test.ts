@@ -198,9 +198,7 @@ describe('Test function: sendTransaction', function () {
     expect(result).to.be.eql(sendTransactionResp);
   });
 
-  it('should sanitize markdown from call data', async function () {
-    // transaction hash must be missing for this case to happen
-    // otherwise contract call data (with such value) will fail to validate upsert logic.
+  it('should use heading, text and copyable component', async function () {
     executeTxnResp = sendTransactionFailedResp;
     sandbox.stub(utils, 'getSigner').callsFake(async () => {
       return account1.publicKey;
@@ -208,7 +206,7 @@ describe('Test function: sendTransaction', function () {
     const requestObject: SendTransactionRequestParams = {
       contractAddress: account1.address,
       contractFuncName: 'get_signer',
-      contractCallData: '**foo** [test](https://google.com)',
+      contractCallData: '**foo**',
       senderAddress: account1.address,
     };
     apiParams.requestParams = requestObject;
@@ -222,8 +220,8 @@ describe('Test function: sendTransaction', function () {
           value: 'It will be signed with address: 0x4882a372da3dfe1c53170ad75893832469bf87b62b13e84662565c4a88f25cd'
         },
         {
-          type: 'text',
-          value: `Contract: 0x4882a372da3dfe1c53170ad75893832469bf87b62b13e84662565c4a88f25cd\n\nCall Data: [foo test]\n\nEstimated Gas Fee(ETH): 0.000022702500105945\n\nNetwork: Goerli Testnet`
+          type: 'copyable',
+          value: `Contract: 0x4882a372da3dfe1c53170ad75893832469bf87b62b13e84662565c4a88f25cd\n\nCall Data: [**foo**]\n\nEstimated Gas Fee(ETH): 0.000022702500105945\n\nNetwork: Goerli Testnet`
         }
       ]}
     };
@@ -404,6 +402,6 @@ describe('Test function: sendTransaction', function () {
       senderAddress: account1.address,
     };
     apiParams.requestParams = requestObject;
-    await expect(sendTransaction(apiParams)).to.be.rejectedWith("contractCallData could not be converted, Cannot convert foo to a BigInt");
+    await expect(sendTransaction(apiParams)).to.be.rejectedWith("contractCallData could not be converted, Cannot convert **foo** to a BigInt");
   });
 });
