@@ -15,15 +15,14 @@ describe('Test function: logger', function () {
     debug: () => sinon.stub(console, 'debug'),
   };
   const spyempty = () => sinon.stub(logutils, 'emptyLog');
-  beforeEach(function () {});
-
+  
   afterEach(function () {
     sinon.restore();
     sinon.reset();
   });
 
   it('when log level set to all, should log every level correctly', function () {
-    let spy = {};
+    const spy = {};
     for (const key in logFnSpy) {
       spy[key] = logFnSpy[key]();
     }
@@ -37,7 +36,7 @@ describe('Test function: logger', function () {
   });
 
   it('when log level set to off, should not log', function () {
-    let spy = {};
+    const spy = {};
     for (const key in logFnSpy) {
       spy[key] = logFnSpy[key]();
     }
@@ -52,7 +51,7 @@ describe('Test function: logger', function () {
   });
 
   it('when log level set to info, should log correctly', function () {
-    let spy = {};
+    const spy = {};
     for (const key in logFnSpy) {
       spy[key] = logFnSpy[key]();
     }

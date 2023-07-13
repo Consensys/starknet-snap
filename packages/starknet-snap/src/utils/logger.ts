@@ -10,6 +10,7 @@ export enum LogLevel {
 }
 
 export interface loggingFn {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
   (message?: any, ...optionalParams: any[]): void;
 }
 
@@ -24,7 +25,8 @@ export interface ILogger {
   getLogLevel: () => LogLevel;
 }
 
-export const emptyLog: loggingFn = (message?: any, ...optionalParams: any[]) => {};
+// eslint-disable-next-line @typescript-eslint/no-empty-function, @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
+export const emptyLog: loggingFn = (message?: any, ...optionalParams: any[]) => {return};
 
 class Logger implements ILogger {
   readonly log: loggingFn;
