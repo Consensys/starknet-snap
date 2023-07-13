@@ -24,7 +24,7 @@ export interface ILogger {
   getLogLevel: () => LogLevel;
 }
 
-const emptyLog: loggingFn = (message?: any, ...optionalParams: any[]) => {};
+export const emptyLog: loggingFn = (message?: any, ...optionalParams: any[]) => {};
 
 class Logger implements ILogger {
   readonly log: loggingFn;
@@ -42,12 +42,14 @@ class Logger implements ILogger {
 
   private setLogLevel = function (level: string): void {
     if (level && Object.values(LogLevel).includes(level.toUpperCase())) {
-        this._logLevel = LogLevel[level.toUpperCase()];
+      this._logLevel = LogLevel[level.toUpperCase()];
+    } else {
+      this._logLevel = LogLevel.OFF;
     }
-  }
+  };
 
   public init = function (level: string): void {
-    this.setLogLevel(level)
+    this.setLogLevel(level);
     this.error = console.error.bind(console);
     this.warn = console.warn.bind(console);
     this.info = console.info.bind(console);
