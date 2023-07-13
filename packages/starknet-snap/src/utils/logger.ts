@@ -1,63 +1,83 @@
 // ERROR, WARN, INFO, DEBUG, TRACE, ALL, and OF
 export enum LogLevel {
-    ERROR = 1,
-    WARN = 2,
-    INFO = 3,
-    DEBUG = 4,
-    TRACE = 5,
-    ALL = 6,
-    OFF = 0
+  ERROR = 1,
+  WARN = 2,
+  INFO = 3,
+  DEBUG = 4,
+  TRACE = 5,
+  ALL = 6,
+  OFF = 0,
 }
 
-export const logger = class {
-    static level:number = 0;
-
-    static setLevel(level:string) {
-        if (level && Object.values(LogLevel).includes(level.toUpperCase())) {
-            logger.level = LogLevel[level.toUpperCase()];
-        }
-        else{
-            logger.level = LogLevel.OFF;
-        } 
-    } 
-    
-    static error(message?: any, ...optionalParams: any[]) {
-        if (logger.level >= LogLevel.ERROR) {
-            console.error(message, ...optionalParams)
-        }
-    }
-
-    static warn(message?: any, ...optionalParams: any[]) {
-        if (logger.level >= LogLevel.WARN) {
-            console.warn(message, ...optionalParams)
-        }
-    }
-
-    static info(message?: any, ...optionalParams: any[]) {
-        if (logger.level >= LogLevel.INFO) {
-            console.error(message, ...optionalParams)
-        }
-    }
-
-    static debug(message?: any, ...optionalParams: any[]) {
-        if (logger.level >= LogLevel.DEBUG) {
-            console.debug(message, ...optionalParams)
-        }
-    }
-
-    static trace(message?: any, ...optionalParams: any[]) {
-        if (logger.level >= LogLevel.TRACE) {
-            console.trace(message, ...optionalParams)
-        }
-    }
-
-    static log(message?: any, ...optionalParams: any[]) {
-        if (logger.level >= LogLevel.ALL) {
-            console.log(message, ...optionalParams)
-        }
-    }
-
-    static getLevel() {
-        return logger.level
-    } 
+export interface loggingFn {
+  (message?: any, ...optionalParams: any[]): void;
 }
+
+export interface ILogger {
+  log: loggingFn;
+  warn: loggingFn;
+  error: loggingFn;
+  debug: loggingFn;
+  info: loggingFn;
+  trace: loggingFn;
+  init: (level: string) => void;
+  getLogLevel: () => LogLevel;
+}
+
+const emptyLog: loggingFn = (message?: any, ...optionalParams: any[]) => {};
+
+class Logger implements ILogger {
+  readonly log: loggingFn;
+  readonly warn: loggingFn;
+  readonly error: loggingFn;
+  readonly debug: loggingFn;
+  readonly info: loggingFn;
+  readonly trace: loggingFn;
+
+  private _logLevel: LogLevel = LogLevel.OFF;
+
+  constructor() {
+    this.init(LogLevel.OFF.toString());
+  }
+
+  private setLogLevel = function (level: string): void {
+    if (level && Object.values(LogLevel).includes(level.toUpperCase())) {
+        this._logLevel = LogLevel[level.toUpperCase()];
+    }
+  }
+
+  public init = function (level: string): void {
+    this.setLogLevel(level)
+    this.error = console.error.bind(console);
+    this.warn = console.warn.bind(console);
+    this.info = console.info.bind(console);
+    this.debug = console.debug.bind(console);
+    this.trace = console.trace.bind(console);
+    this.log = console.log.bind(console);
+
+    if (this._logLevel < LogLevel.ERROR) {
+      this.error = emptyLog;
+    }
+    if (this._logLevel < LogLevel.WARN) {
+      this.warn = emptyLog;
+    }
+    if (this._logLevel < LogLevel.INFO) {
+      this.info = emptyLog;
+    }
+    if (this._logLevel < LogLevel.DEBUG) {
+      this.debug = emptyLog;
+    }
+    if (this._logLevel < LogLevel.TRACE) {
+      this.trace = emptyLog;
+    }
+    if (this._logLevel < LogLevel.ALL) {
+      this.log = emptyLog;
+    }
+  };
+
+  public getLogLevel = function (): LogLevel {
+    return this._logLevel;
+  };
+}
+
+export const logger = new Logger();
