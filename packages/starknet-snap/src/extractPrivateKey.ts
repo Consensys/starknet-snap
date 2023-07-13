@@ -1,5 +1,5 @@
 import { toJson } from './utils/serializer';
-import { validateAndParseAddress } from 'starknet';
+import { validateAndParseAddress } from '../src/utils/starknetUtils';
 import { ApiParams, ExtractPrivateKeyRequestParams } from './types/snapApi';
 import { getNetworkFromChainId } from './utils/snapUtils';
 import { getKeysFromAddress } from './utils/starknetUtils';

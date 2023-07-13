@@ -7,7 +7,7 @@ import {
 } from './utils/starknetUtils';
 import { getNetworkFromChainId } from './utils/snapUtils';
 import { ApiParams, VerifySignedMessageRequestParams } from './types/snapApi';
-import { validateAndParseAddress } from 'starknet';
+import { validateAndParseAddress } from '../src/utils/starknetUtils';
 
 export async function verifySignedMessage(params: ApiParams) {
   try {
