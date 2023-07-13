@@ -20,6 +20,7 @@ import {
   ProviderOptions,
   GetTransactionResponse,
   Invocations,
+  validateAndParseAddress as _validateAndParseAddress
 } from 'starknet';
 import type { Hex } from '@noble/curves/abstract/utils';
 import { Network, SnapState, Transaction, TransactionType } from '../types/snapState';
@@ -408,7 +409,8 @@ export const getKeysFromAddress = async (
   if (!isNaN(addressIndex)) {
     return getKeysFromAddressIndex(keyDeriver, network.chainId, state, addressIndex);
   }
-  return null;
+  console.log(`getNextAddressIndex:\nAddress not found: ${address}`);
+  throw new Error(`Address not found: ${address}`);
 };
 
 export const getKeysFromAddressIndex = async (
@@ -460,3 +462,13 @@ export const addFeesFromAllTransactions = (fees: EstimateFee[]): EstimateFee => 
     suggestedMaxFee: suggestedMaxFee_bn,
   };
 };
+
+export const _validateAndParseAddressFn = _validateAndParseAddress;
+export const validateAndParseAddress = (address: num.BigNumberish, length = 63) => {
+  // getting rid of 0x and 0x0 prefixes
+  const trimmedAddress = address.toString().replace(/^0x0?/, '');
+  if (trimmedAddress.length !== length) throw new Error(`Address ${address} has an invalid length`);
+  return _validateAndParseAddressFn(address);
+}
+
+

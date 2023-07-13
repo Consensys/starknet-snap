@@ -6,6 +6,7 @@ import {
   upsertErc20Token,
   getValidNumber,
   validateAddErc20TokenParams,
+  getAddTokenText,
 } from './utils/snapUtils';
 import { DEFAULT_DECIMAL_PLACES } from './utils/constants';
 import { DialogType } from '@metamask/rpc-methods';

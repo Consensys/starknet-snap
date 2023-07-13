@@ -1,6 +1,7 @@
 import { toJson } from './serializer';
 import { Mutex } from 'async-mutex';
-import { num, validateAndParseAddress } from 'starknet';
+import { num } from 'starknet';
+import { validateAndParseAddress } from './starknetUtils';
 import {
   Network,
   Erc20Token,
@@ -195,6 +196,16 @@ export function getSigningTxnText(
       'ether',
     )}\n\nNetwork: ${network.name}` + tokenTransferStr
   );
+}
+
+export function getAddTokenText(
+  tokenAddress: string,
+  tokenName: string,
+  tokenSymbol: string,
+  tokenDecimals: number,
+  network: Network,
+) {
+  return `Token Address: ${tokenAddress}\n\nToken Name: ${tokenName}\n\nToken Symbol: ${tokenSymbol}\n\nToken Decimals: ${tokenDecimals}\n\nNetwork: ${network.name}`;
 }
 
 export function getAccount(state: SnapState, accountAddress: string, chainId: string) {

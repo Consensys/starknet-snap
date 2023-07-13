@@ -3,7 +3,7 @@ import typedDataExample from './typedData/typedDataExample.json';
 import { getTypedDataMessageSignature, getKeysFromAddress } from './utils/starknetUtils';
 import { getNetworkFromChainId } from './utils/snapUtils';
 import { ApiParams, SignMessageRequestParams } from './types/snapApi';
-import { validateAndParseAddress } from 'starknet';
+import { validateAndParseAddress } from '../src/utils/starknetUtils';
 import { DialogType } from '@metamask/rpc-methods';
 import { heading, panel, text } from '@metamask/snaps-ui';
 
@@ -36,7 +36,10 @@ export async function signMessage(params: ApiParams) {
       method: 'snap_dialog',
       params: {
         type: DialogType.Confirmation,
-        content: panel([heading('Do you want to sign this message ?'), text(toJson(typedDataMessage))]),
+        content:
+          panel([heading('Do you want to sign this message ?'),
+          text(toJson(typedDataMessage)),
+          text(`Signer address: ${signerAddress}`)]),
       },
     });
     if (!response) return false;

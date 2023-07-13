@@ -1,5 +1,6 @@
 import { toJson } from './utils/serializer';
-import { num, constants, validateAndParseAddress } from 'starknet';
+import { num, constants } from 'starknet';
+import { validateAndParseAddress } from '../src/utils/starknetUtils';
 import { estimateFee } from './estimateFee';
 import { Transaction, TransactionStatus, VoyagerTransactionType } from './types/snapState';
 import { getNetworkFromChainId, getSigningTxnText, upsertTransaction } from './utils/snapUtils';
