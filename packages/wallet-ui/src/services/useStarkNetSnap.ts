@@ -34,8 +34,8 @@ export const useStarkNetSnap = () => {
   const debugLevel = process.env.REACT_APP_DEBUG_LEVEL ? process.env.REACT_APP_DEBUG_LEVEL : 'all';
 
   const defaultParam = {
-    debugLevel
-  }
+    debugLevel,
+  };
 
   const connectToSnap = () => {
     dispatch(enableLoadingWithMessage('Connecting...'));
@@ -67,7 +67,7 @@ export const useStarkNetSnap = () => {
             method: 'ping',
             params: {
               ...defaultParam,
-            }
+            },
           },
         },
       })
