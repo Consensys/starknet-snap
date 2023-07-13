@@ -20,7 +20,7 @@ import {
   ProviderOptions,
   GetTransactionResponse,
   Invocations,
-  validateAndParseAddress as _validateAndParseAddress
+  validateAndParseAddress as _validateAndParseAddress,
 } from 'starknet';
 import type { Hex } from '@noble/curves/abstract/utils';
 import { Network, SnapState, Transaction, TransactionType } from '../types/snapState';
@@ -470,6 +470,4 @@ export const validateAndParseAddress = (address: num.BigNumberish, length = 63) 
   const trimmedAddress = address.toString().replace(/^0x0?/, '');
   if (trimmedAddress.length !== length) throw new Error(`Address ${address} has an invalid length`);
   return _validateAndParseAddressFn(address);
-}
-
-
+};

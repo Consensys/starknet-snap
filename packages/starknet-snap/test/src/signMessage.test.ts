@@ -52,17 +52,29 @@ describe('Test function: signMessage', function () {
     const result: boolean | string = await signMessage(apiParams);
     const expectedDialogParams = {
       type: 'confirmation',
-      content: { type: 'panel', children: [
-        { type: 'heading', value: 'Do you want to sign this message ?' },
-        {
-          type: 'text',
-          value: '{"types":{"StarkNetDomain":[{"name":"name","type":"felt"},{"name":"version","type":"felt"},{"name":"chainId","type":"felt"}],"Person":[{"name":"name","type":"felt"},{"name":"wallet","type":"felt"}],"Mail":[{"name":"from","type":"Person"},{"name":"to","type":"Person"},{"name":"contents","type":"felt"}]},"primaryType":"Mail","domain":{"name":"StarkNet Mail","version":"1","chainId":1},"message":{"from":{"name":"Cow","wallet":"0xCD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826"},"to":{"name":"Bob","wallet":"0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB"},"contents":"Hello, Bob!"}}'
-        },
-        {
-          type: 'text',
-          value: `Signer address: ${account1.address}`
-        }
-      ]}
+      content: {
+        type: 'panel',
+        children: [
+          { type: 'heading', value: 'Do you want to sign this message ?' },
+
+          {
+            type: 'text',
+            value: `**Message:**`,
+          },
+          {
+            type: 'copyable',
+            value: toJson(typedDataExample),
+          },
+          {
+            type: 'text',
+            value: `**Signer address:**`,
+          },
+          {
+            type: 'copyable',
+            value: `${account1.address}`,
+          },
+        ],
+      },
     };
     expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledOnce;
     expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledWith(expectedDialogParams);
