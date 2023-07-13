@@ -3,7 +3,7 @@ import typedDataExample from './typedData/typedDataExample.json';
 import { getTypedDataMessageSignature, getKeysFromAddress } from './utils/starknetUtils';
 import { getNetworkFromChainId } from './utils/snapUtils';
 import { ApiParams, SignMessageRequestParams } from './types/snapApi';
-import { validateAndParseAddress } from 'starknet';
+import { validateAndParseAddress } from '../src/utils/starknetUtils';
 import { DialogType } from '@metamask/rpc-methods';
 import { heading, panel, text } from '@metamask/snaps-ui';
 import { logger } from './utils/logger';

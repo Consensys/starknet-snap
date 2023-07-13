@@ -1,5 +1,6 @@
 import { toJson } from './utils/serializer';
-import { Invocations, validateAndParseAddress, TransactionType } from 'starknet';
+import { Invocations, TransactionType } from 'starknet';
+import { validateAndParseAddress } from '../src/utils/starknetUtils';
 import { ApiParams, EstimateFeeRequestParams } from './types/snapApi';
 import { getNetworkFromChainId } from './utils/snapUtils';
 import {

@@ -1,6 +1,7 @@
 import { toJson } from './serializer';
 import { Mutex } from 'async-mutex';
-import { num, validateAndParseAddress } from 'starknet';
+import { num } from 'starknet';
+import { validateAndParseAddress } from './starknetUtils';
 import {
   Network,
   Erc20Token,

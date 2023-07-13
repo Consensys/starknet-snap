@@ -1,5 +1,6 @@
 import { toJson } from './utils/serializer';
-import { num, validateAndParseAddress } from 'starknet';
+import { num } from 'starknet';
+import { validateAndParseAddress } from '../src/utils/starknetUtils';
 import { ApiParams, GetTransactionsRequestParams } from './types/snapApi';
 import { Transaction, TransactionStatus, VoyagerTransactionType } from './types/snapState';
 import { DEFAULT_GET_TXNS_LAST_NUM_OF_DAYS, DEFAULT_GET_TXNS_PAGE_SIZE } from './utils/constants';
