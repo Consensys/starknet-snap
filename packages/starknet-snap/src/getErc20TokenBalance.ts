@@ -1,5 +1,6 @@
 import { toJson } from './utils/serializer';
-import { num, validateAndParseAddress } from 'starknet';
+import { num } from 'starknet';
+import { validateAndParseAddress } from '../src/utils/starknetUtils';
 import { ApiParams, GetErc20TokenBalanceRequestParams } from './types/snapApi';
 import { getNetworkFromChainId } from './utils/snapUtils';
 import { callContract } from './utils/starknetUtils';
