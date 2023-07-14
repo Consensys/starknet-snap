@@ -9,6 +9,7 @@ import { ApiParams, SendTransactionRequestParams } from './types/snapApi';
 import { createAccount } from './createAccount';
 import { DialogType } from '@metamask/rpc-methods';
 import { heading, panel, text } from '@metamask/snaps-ui';
+import { logger } from './utils/logger';
 
 export async function sendTransaction(params: ApiParams) {
   try {
@@ -79,12 +80,12 @@ export async function sendTransaction(params: ApiParams) {
       calldata: contractCallData,
     };
 
-    console.log(`sendTransaction:\ntxnInvocation: ${toJson(txnInvocation)}\nmaxFee: ${maxFee.toString()}}`);
+    logger.log(`sendTransaction:\ntxnInvocation: ${toJson(txnInvocation)}\nmaxFee: ${maxFee.toString()}}`);
 
     const accountDeployed = await isAccountDeployed(network, publicKey);
     if (!accountDeployed) {
       //Deploy account before sending the transaction
-      console.log('sendTransaction:\nFirst transaction : send deploy transaction');
+      logger.log('sendTransaction:\nFirst transaction : send deploy transaction');
       const createAccountApiParams = {
         state,
         wallet: params.wallet,
@@ -110,7 +111,7 @@ export async function sendTransaction(params: ApiParams) {
       nonceSendTransaction,
     );
 
-    console.log(`sendTransaction:\ntxnResp: ${toJson(txnResp)}`);
+    logger.log(`sendTransaction:\ntxnResp: ${toJson(txnResp)}`);
 
     if (txnResp.transaction_hash) {
       const txn: Transaction = {
@@ -132,7 +133,7 @@ export async function sendTransaction(params: ApiParams) {
 
     return txnResp;
   } catch (err) {
-    console.error(`Problem found: ${err}`);
+    logger.error(`Problem found: ${err}`);
     throw err;
   }
 }
