@@ -1,6 +1,7 @@
 import { toJson } from './utils/serializer';
 import { AddNetworkRequestParams, ApiParams } from './types/snapApi';
 import { validateAddNetworkParams } from './utils/snapUtils';
+import { logger } from './utils/logger';
 
 export async function addNetwork(params: ApiParams) {
   try {
@@ -23,7 +24,7 @@ export async function addNetwork(params: ApiParams) {
 
     throw new Error('addNetwork is currently disabled');
   } catch (err) {
-    console.error(`Problem found: ${err}`);
+    logger.error(`Problem found: ${err}`);
     throw err;
   }
 }

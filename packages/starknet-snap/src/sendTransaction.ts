@@ -1,5 +1,6 @@
 import { toJson } from './utils/serializer';
-import { num, constants, validateAndParseAddress } from 'starknet';
+import { num, constants } from 'starknet';
+import { validateAndParseAddress } from '../src/utils/starknetUtils';
 import { estimateFee } from './estimateFee';
 import { Transaction, TransactionStatus, VoyagerTransactionType } from './types/snapState';
 import { getNetworkFromChainId, getSigningTxnText, upsertTransaction } from './utils/snapUtils';
@@ -7,7 +8,8 @@ import { getKeysFromAddress, getCallDataArray, executeTxn, isAccountDeployed } f
 import { ApiParams, SendTransactionRequestParams } from './types/snapApi';
 import { createAccount } from './createAccount';
 import { DialogType } from '@metamask/rpc-methods';
-import { heading, panel, text } from '@metamask/snaps-ui';
+import { heading, panel } from '@metamask/snaps-ui';
+import { logger } from './utils/logger';
 
 export async function sendTransaction(params: ApiParams) {
   try {
@@ -49,7 +51,7 @@ export async function sendTransaction(params: ApiParams) {
       maxFee = num.toBigInt(suggestedMaxFee);
     }
 
-    const signingTxnText = getSigningTxnText(
+    const signingTxnComponents = getSigningTxnText(
       state,
       contractAddress,
       contractFuncName,
@@ -58,16 +60,11 @@ export async function sendTransaction(params: ApiParams) {
       maxFee,
       network,
     );
-
     const response = await wallet.request({
       method: 'snap_dialog',
       params: {
         type: DialogType.Confirmation,
-        content: panel([
-          heading('Do you want to sign this transaction ?'),
-          text(`It will be signed with address: ${senderAddress}`),
-          text(signingTxnText),
-        ]),
+        content: panel([heading('Do you want to sign this transaction ?'), ...signingTxnComponents]),
       },
     });
     if (!response) return false;
@@ -78,12 +75,12 @@ export async function sendTransaction(params: ApiParams) {
       calldata: contractCallData,
     };
 
-    console.log(`sendTransaction:\ntxnInvocation: ${toJson(txnInvocation)}\nmaxFee: ${maxFee.toString()}}`);
+    logger.log(`sendTransaction:\ntxnInvocation: ${toJson(txnInvocation)}\nmaxFee: ${maxFee.toString()}}`);
 
     const accountDeployed = await isAccountDeployed(network, publicKey);
     if (!accountDeployed) {
       //Deploy account before sending the transaction
-      console.log('sendTransaction:\nFirst transaction : send deploy transaction');
+      logger.log('sendTransaction:\nFirst transaction : send deploy transaction');
       const createAccountApiParams = {
         state,
         wallet: params.wallet,
@@ -109,7 +106,7 @@ export async function sendTransaction(params: ApiParams) {
       nonceSendTransaction,
     );
 
-    console.log(`sendTransaction:\ntxnResp: ${toJson(txnResp)}`);
+    logger.log(`sendTransaction:\ntxnResp: ${toJson(txnResp)}`);
 
     if (txnResp.transaction_hash) {
       const txn: Transaction = {
@@ -119,7 +116,13 @@ export async function sendTransaction(params: ApiParams) {
         senderAddress,
         contractAddress,
         contractFuncName,
-        contractCallData: contractCallData.map((data: num.BigNumberish) => num.toHex(num.toBigInt(data))),
+        contractCallData: contractCallData.map((data: num.BigNumberish) => {
+          try {
+            return num.toHex(num.toBigInt(data));
+          } catch (e) {
+            throw new Error(`contractCallData could not be converted, ${e.message || e}`);
+          }
+        }),
         status: TransactionStatus.RECEIVED,
         failureReason: '',
         eventIds: [],
@@ -131,7 +134,7 @@ export async function sendTransaction(params: ApiParams) {
 
     return txnResp;
   } catch (err) {
-    console.error(`Problem found: ${err}`);
+    logger.error(`Problem found: ${err}`);
     throw err;
   }
 }

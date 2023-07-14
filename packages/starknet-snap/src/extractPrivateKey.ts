@@ -1,10 +1,11 @@
 import { toJson } from './utils/serializer';
-import { validateAndParseAddress } from 'starknet';
+import { validateAndParseAddress } from '../src/utils/starknetUtils';
 import { ApiParams, ExtractPrivateKeyRequestParams } from './types/snapApi';
 import { getNetworkFromChainId } from './utils/snapUtils';
 import { getKeysFromAddress } from './utils/starknetUtils';
 import { DialogType } from '@metamask/rpc-methods';
 import { copyable, panel, text } from '@metamask/snaps-ui';
+import { logger } from './utils/logger';
 
 export async function extractPrivateKey(params: ApiParams) {
   try {
@@ -47,7 +48,7 @@ export async function extractPrivateKey(params: ApiParams) {
 
     return null;
   } catch (err) {
-    console.error(`Problem found: ${err}`);
+    logger.error(`Problem found: ${err}`);
     throw err;
   }
 }

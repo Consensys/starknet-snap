@@ -3,9 +3,10 @@ import typedDataExample from './typedData/typedDataExample.json';
 import { getTypedDataMessageSignature, getKeysFromAddress } from './utils/starknetUtils';
 import { getNetworkFromChainId } from './utils/snapUtils';
 import { ApiParams, SignMessageRequestParams } from './types/snapApi';
-import { validateAndParseAddress } from 'starknet';
+import { validateAndParseAddress } from '../src/utils/starknetUtils';
 import { DialogType } from '@metamask/rpc-methods';
-import { heading, panel, text } from '@metamask/snaps-ui';
+import { heading, panel, copyable, text } from '@metamask/snaps-ui';
+import { logger } from './utils/logger';
 
 export async function signMessage(params: ApiParams) {
   try {
@@ -30,16 +31,19 @@ export async function signMessage(params: ApiParams) {
       : typedDataExample;
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
 
-    console.log(`signMessage:\nsignerAddress: ${signerAddress}\ntypedDataMessage: ${toJson(typedDataMessage)}`);
+    logger.log(`signMessage:\nsignerAddress: ${signerAddress}\ntypedDataMessage: ${toJson(typedDataMessage)}`);
 
     const response = await wallet.request({
       method: 'snap_dialog',
       params: {
         type: DialogType.Confirmation,
-        content:
-          panel([heading('Do you want to sign this message ?'),
-          text(toJson(typedDataMessage)),
-          text(`Signer address: ${signerAddress}`)]),
+        content: panel([
+          heading('Do you want to sign this message ?'),
+          text(`**Message:**`),
+          copyable(toJson(typedDataMessage)),
+          text(`**Signer address:**`),
+          copyable(`${signerAddress}`),
+        ]),
       },
     });
     if (!response) return false;
@@ -48,10 +52,10 @@ export async function signMessage(params: ApiParams) {
 
     const typedDataSignature = getTypedDataMessageSignature(signerPrivateKey, typedDataMessage, signerAddress);
 
-    console.log(`signMessage:\ntypedDataSignature: ${toJson(typedDataSignature)}`);
+    logger.log(`signMessage:\ntypedDataSignature: ${toJson(typedDataSignature)}`);
     return typedDataSignature.toDERHex();
   } catch (err) {
-    console.error(`Problem found: ${err}`);
+    logger.error(`Problem found: ${err}`);
     throw err;
   }
 }

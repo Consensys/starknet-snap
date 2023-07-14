@@ -6,6 +6,7 @@ import { AccContract } from './types/snapState';
 import { ApiParams, RecoverAccountsRequestParams } from './types/snapApi';
 import { DialogType } from '@metamask/rpc-methods';
 import { heading, panel, text } from '@metamask/snaps-ui';
+import { logger } from './utils/logger';
 
 export async function recoverAccounts(params: ApiParams) {
   try {
@@ -17,7 +18,7 @@ export async function recoverAccounts(params: ApiParams) {
     const maxMissed = getValidNumber(requestParamsObj.maxMissed, 1, 1);
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
 
-    console.log(`recoverAccounts:\nstartIndex: ${startIndex}, maxScanned: ${maxScanned}, maxMissed: ${maxMissed}`);
+    logger.log(`recoverAccounts:\nstartIndex: ${startIndex}, maxScanned: ${maxScanned}, maxMissed: ${maxMissed}`);
 
     if (!network.accountClassHash) {
       await wallet.request({
@@ -45,21 +46,21 @@ export async function recoverAccounts(params: ApiParams) {
         i,
       );
       const { address: contractAddress } = getAccContractAddressAndCallData(network.accountClassHash, publicKey);
-      console.log(`recoverAccounts: index ${i}:\ncontractAddress = ${contractAddress}\npublicKey = ${publicKey}`);
+      logger.log(`recoverAccounts: index ${i}:\ncontractAddress = ${contractAddress}\npublicKey = ${publicKey}`);
 
       let signerPublicKey = '';
 
       try {
         signerPublicKey = await getSigner(contractAddress, network);
-        console.log(`recoverAccounts: index ${i}\nsignerPublicKey: ${signerPublicKey}`);
+        logger.log(`recoverAccounts: index ${i}\nsignerPublicKey: ${signerPublicKey}`);
       } catch (err) {
-        console.log(`recoverAccounts: index ${i}\nerr in get signer: ${toJson(err)}`);
+        logger.log(`recoverAccounts: index ${i}\nerr in get signer: ${toJson(err)}`);
         signerPublicKey = '';
       }
 
       if (signerPublicKey) {
         if (num.toBigInt(signerPublicKey) === num.toBigInt(publicKey)) {
-          console.log(`recoverAccounts: index ${i} matched\npublicKey: ${publicKey}`);
+          logger.log(`recoverAccounts: index ${i} matched\npublicKey: ${publicKey}`);
         }
         j = 0;
       } else {
@@ -76,7 +77,7 @@ export async function recoverAccounts(params: ApiParams) {
         chainId: network.chainId,
       };
 
-      console.log(`recoverAccounts: index ${i}\nuserAccount: ${toJson(userAccount)}`);
+      logger.log(`recoverAccounts: index ${i}\nuserAccount: ${toJson(userAccount)}`);
 
       await upsertAccount(userAccount, wallet, saveMutex);
 
@@ -84,11 +85,11 @@ export async function recoverAccounts(params: ApiParams) {
       i++;
     }
 
-    console.log(`recoverAccounts:\nscannedAccounts: ${toJson(scannedAccounts, 2)}`);
+    logger.log(`recoverAccounts:\nscannedAccounts: ${toJson(scannedAccounts, 2)}`);
 
     return scannedAccounts;
   } catch (err) {
-    console.error(`Problem found: ${err}`);
+    logger.error(`Problem found: ${err}`);
     throw err;
   }
 }

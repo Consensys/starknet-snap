@@ -1,5 +1,6 @@
 import { toJson } from './utils/serializer';
-import { Invocations, validateAndParseAddress, TransactionType } from 'starknet';
+import { Invocations, TransactionType } from 'starknet';
+import { validateAndParseAddress } from '../src/utils/starknetUtils';
 import { ApiParams, EstimateFeeRequestParams } from './types/snapApi';
 import { getNetworkFromChainId } from './utils/snapUtils';
 import {
@@ -13,6 +14,7 @@ import {
 } from './utils/starknetUtils';
 
 import { PROXY_CONTRACT_HASH } from './utils/constants';
+import { logger } from './utils/logger';
 
 export async function estimateFee(params: ApiParams) {
   try {
@@ -56,7 +58,7 @@ export async function estimateFee(params: ApiParams) {
       calldata: contractCallData,
     };
 
-    console.log(`estimateFee:\ntxnInvocation: ${toJson(txnInvocation)}`);
+    logger.log(`estimateFee:\ntxnInvocation: ${toJson(txnInvocation)}`);
 
     //Estimate deploy account fee if the signer has not been deployed yet
     const accountDeployed = await isAccountDeployed(network, publicKey);
@@ -93,14 +95,14 @@ export async function estimateFee(params: ApiParams) {
       // This condition branch will be removed later when starknet.js
       // supports estimateFeeBulk in rpc mode
       estimateFeeResp = await estimateFeeUtil(network, senderAddress, senderPrivateKey, txnInvocation);
-      console.log(`estimateFee:\nestimateFeeUtil estimateFeeResp: ${toJson(estimateFeeResp)}`);
+      logger.log(`estimateFee:\nestimateFeeUtil estimateFeeResp: ${toJson(estimateFeeResp)}`);
     } else {
       const estimateBulkFeeResp = await estimateFeeBulk(network, senderAddress, senderPrivateKey, bulkTransactions);
-      console.log(`estimateFee:\nestimateFeeBulk estimateBulkFeeResp: ${toJson(estimateBulkFeeResp)}`);
+      logger.log(`estimateFee:\nestimateFeeBulk estimateBulkFeeResp: ${toJson(estimateBulkFeeResp)}`);
       estimateFeeResp = addFeesFromAllTransactions(estimateBulkFeeResp);
     }
 
-    console.log(`estimateFee:\nestimateFeeResp: ${toJson(estimateFeeResp)}`);
+    logger.log(`estimateFee:\nestimateFeeResp: ${toJson(estimateFeeResp)}`);
 
     const resp = {
       suggestedMaxFee: estimateFeeResp.suggestedMaxFee.toString(10),
@@ -110,11 +112,11 @@ export async function estimateFee(params: ApiParams) {
       unit: 'wei',
       includeDeploy: !accountDeployed,
     };
-    console.log(`estimateFee:\nresp: ${toJson(resp)}`);
+    logger.log(`estimateFee:\nresp: ${toJson(resp)}`);
 
     return resp;
   } catch (err) {
-    console.error(`Problem found: ${err}`);
+    logger.error(`Problem found: ${err}`);
     throw err;
   }
 }

@@ -29,11 +29,26 @@ describe('Test function: addErc20Token', function () {
 
   beforeEach(function () {
     walletStub.rpcStubs.snap_manageState.resolves(state);
+    walletStub.rpcStubs.snap_dialog.resolves(true);
   });
 
   afterEach(function () {
     walletStub.reset();
     sandbox.restore();
+  });
+
+  it('should reject to add the ERC-20 token when deline in dialog', async function () {
+    walletStub.rpcStubs.snap_dialog.resolves(false);
+    const requestObject: AddErc20TokenRequestParams = {
+      tokenAddress: '0x244c20d51109adcf604fde1bbf878e5dcd549b3877ac87911ec6a158bd7aa62',
+      tokenName: 'StarkNet ERC-20 sample',
+      tokenSymbol: 'SNET',
+      tokenDecimals: 18,
+    };
+    apiParams.requestParams = requestObject;
+    await addErc20Token(apiParams);
+    expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledOnce;
+    expect(state.erc20Tokens.length).to.be.eq(0);
   });
 
   it('should add the ERC-20 token in SN_GOERLI correctly', async function () {
@@ -46,6 +61,7 @@ describe('Test function: addErc20Token', function () {
     apiParams.requestParams = requestObject;
     await addErc20Token(apiParams);
     expect(walletStub.rpcStubs.snap_manageState).to.have.been.calledTwice;
+    expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledOnce;
     expect(state.erc20Tokens.length).to.be.eq(1);
     expect(state.erc20Tokens[0].symbol).to.be.eq(requestObject.tokenSymbol);
   });
@@ -59,6 +75,7 @@ describe('Test function: addErc20Token', function () {
     apiParams.requestParams = requestObject;
     await addErc20Token(apiParams);
     expect(walletStub.rpcStubs.snap_manageState).to.have.been.calledTwice;
+    expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledOnce;
     expect(state.erc20Tokens.length).to.be.eq(2);
     expect(state.erc20Tokens[1].decimals).to.be.eq(DEFAULT_DECIMAL_PLACES);
   });
@@ -73,6 +90,7 @@ describe('Test function: addErc20Token', function () {
     apiParams.requestParams = requestObject;
     await addErc20Token(apiParams);
     expect(walletStub.rpcStubs.snap_manageState).to.have.been.calledTwice;
+    expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledOnce;
     expect(state.erc20Tokens.length).to.be.eq(3);
     expect(state.erc20Tokens[1].decimals).to.be.eq(DEFAULT_DECIMAL_PLACES);
   });
@@ -87,6 +105,7 @@ describe('Test function: addErc20Token', function () {
     apiParams.requestParams = requestObject;
     await addErc20Token(apiParams);
     expect(walletStub.rpcStubs.snap_manageState).to.have.been.calledTwice;
+    expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledOnce;
     expect(state.erc20Tokens.length).to.be.eq(3);
     expect(state.erc20Tokens[0].symbol).to.be.eq(requestObject.tokenSymbol);
   });
@@ -101,6 +120,7 @@ describe('Test function: addErc20Token', function () {
     apiParams.requestParams = requestObject;
     await addErc20Token(apiParams);
     expect(walletStub.rpcStubs.snap_manageState).to.have.been.calledOnce;
+    expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledOnce;
     expect(state.erc20Tokens.length).to.be.eq(3);
     expect(state.erc20Tokens[0].symbol).to.be.eq(requestObject.tokenSymbol);
   });

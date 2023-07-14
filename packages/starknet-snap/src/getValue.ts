@@ -1,8 +1,10 @@
 import { toJson } from './utils/serializer';
-import { num, validateAndParseAddress } from 'starknet';
+import { num } from 'starknet';
+import { validateAndParseAddress } from '../src/utils/starknetUtils';
 import { ApiParams, GetValueRequestParams } from './types/snapApi';
 import { getNetworkFromChainId } from './utils/snapUtils';
 import { getCallDataArray, callContract } from './utils/starknetUtils';
+import { logger } from './utils/logger';
 
 export async function getValue(params: ApiParams) {
   try {
@@ -33,11 +35,11 @@ export async function getValue(params: ApiParams) {
       num.bigNumberishArrayToDecimalStringArray(contractCallData),
     );
 
-    console.log(`getValue:\nresp: ${toJson(resp)}`);
+    logger.log(`getValue:\nresp: ${toJson(resp)}`);
 
     return resp.result;
   } catch (err) {
-    console.error(`Problem found: ${err}`);
+    logger.error(`Problem found: ${err}`);
     throw err;
   }
 }

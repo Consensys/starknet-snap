@@ -1,6 +1,8 @@
 import { toJson } from './serializer';
 import { Mutex } from 'async-mutex';
-import { num, validateAndParseAddress } from 'starknet';
+import { num } from 'starknet';
+import { validateAndParseAddress } from './starknetUtils';
+import { Component, text, copyable } from '@metamask/snaps-ui';
 import {
   Network,
   Erc20Token,
@@ -22,6 +24,7 @@ import {
 } from './constants';
 import convert from 'ethereum-unit-converter';
 import { AddErc20TokenRequestParams, AddNetworkRequestParams } from '../types/snapApi';
+import { logger } from './logger';
 
 function hasOnlyAsciiChars(str: string) {
   return /^[ -~]+$/.test(str);
@@ -171,10 +174,11 @@ export function getSigningTxnText(
   senderAddress: string,
   maxFee: num.BigNumberish,
   network: Network,
-): string {
+): Array<Component> {
   // Retrieve the ERC-20 token from snap state for confirmation display purpose
   const token = getErc20Token(state, contractAddress, network.chainId);
-  let tokenTransferStr = '';
+  const tokenTransferComponents1 = [];
+  const tokenTransferComponents2 = [];
   if (token && contractFuncName === 'transfer') {
     try {
       let amount = '';
@@ -183,18 +187,38 @@ export function getSigningTxnText(
       } else {
         amount = (Number(contractCallData[1]) * Math.pow(10, -1 * token.decimals)).toFixed(token.decimals);
       }
-      tokenTransferStr = `\n\nSender Address: ${senderAddress}\n\nRecipient Address: ${contractCallData[0]}\n\nAmount(${token.symbol}): ${amount}`;
+      tokenTransferComponents2.push(text('**Sender Address:**'));
+      tokenTransferComponents2.push(copyable(senderAddress));
+      tokenTransferComponents2.push(text('**Recipient Address:**'));
+      tokenTransferComponents2.push(copyable(contractCallData[0]));
+      tokenTransferComponents2.push(text(`**Amount(${token.symbol}):**`));
+      tokenTransferComponents2.push(copyable(amount));
     } catch (err) {
-      console.error(`getSigningTxnText: error found in amount conversion: ${err}`);
+      logger.error(`getSigningTxnText: error found in amount conversion: ${err}`);
     }
   }
-  return (
-    `Contract: ${contractAddress}\n\nCall Data: [${contractCallData.join(', ')}]\n\nEstimated Gas Fee(ETH): ${convert(
-      maxFee,
-      'wei',
-      'ether',
-    )}\n\nNetwork: ${network.name}` + tokenTransferStr
-  );
+  tokenTransferComponents1.push(text('**Signer Address:**'));
+  tokenTransferComponents1.push(copyable(senderAddress));
+  tokenTransferComponents1.push(text('**Contract:**'));
+  tokenTransferComponents1.push(copyable(contractAddress));
+  tokenTransferComponents1.push(text('**Call Data:**'));
+  tokenTransferComponents1.push(copyable(`[${contractCallData.join(', ')}]`));
+  tokenTransferComponents1.push(text('**Estimated Gas Fee(ETH):**'));
+  tokenTransferComponents1.push(copyable(convert(maxFee, 'wei', 'ether')));
+  tokenTransferComponents1.push(text('**Network:**'));
+  tokenTransferComponents1.push(copyable(network.name));
+
+  return tokenTransferComponents1.concat(tokenTransferComponents2);
+}
+
+export function getAddTokenText(
+  tokenAddress: string,
+  tokenName: string,
+  tokenSymbol: string,
+  tokenDecimals: number,
+  network: Network,
+) {
+  return `Token Address: ${tokenAddress}\n\nToken Name: ${tokenName}\n\nToken Symbol: ${tokenSymbol}\n\nToken Decimals: ${tokenDecimals}\n\nNetwork: ${network.name}`;
 }
 
 export function getAccount(state: SnapState, accountAddress: string, chainId: string) {
@@ -229,7 +253,7 @@ export async function upsertAccount(userAccount: AccContract, wallet, mutex: Mut
       state.accContracts.push(userAccount);
     } else {
       if (toJson(storedAccount) === toJson(userAccount)) {
-        console.log(`upsertAccount: same account and hence skip calling snap state update: ${toJson(storedAccount)}`);
+        logger.log(`upsertAccount: same account and hence skip calling snap state update: ${toJson(storedAccount)}`);
         return;
       }
       storedAccount.addressSalt = userAccount.addressSalt;
@@ -278,7 +302,7 @@ export async function upsertNetwork(network: Network, wallet, mutex: Mutex, stat
       state.networks.push(network);
     } else {
       if (toJson(storedNetwork) === toJson(network)) {
-        console.log(`upsertNetwork: same network and hence skip calling snap state update: ${toJson(storedNetwork)}`);
+        logger.log(`upsertNetwork: same network and hence skip calling snap state update: ${toJson(storedNetwork)}`);
         return;
       }
       storedNetwork.name = network.name;
@@ -332,7 +356,7 @@ export async function upsertErc20Token(erc20Token: Erc20Token, wallet, mutex: Mu
       state.erc20Tokens.push(erc20Token);
     } else {
       if (toJson(storedErc20Token) === toJson(erc20Token)) {
-        console.log(
+        logger.log(
           `upsertErc20Token: same Erc20 token and hence skip calling snap state update: ${toJson(storedErc20Token)}`,
         );
         return;
@@ -358,7 +382,7 @@ export function getNetworkFromChainId(state: SnapState, targerChainId: string | 
   if (!network) {
     throw new Error(`can't find the network in snap state with chainId: ${chainId}`);
   }
-  console.log(`getNetworkFromChainId: From ${targerChainId}:\n${toJson(network)}`);
+  logger.log(`getNetworkFromChainId: From ${targerChainId}:\n${toJson(network)}`);
   return network;
 }
 
@@ -445,7 +469,7 @@ export async function upsertTransaction(txn: Transaction, wallet, mutex: Mutex, 
       state.transactions.push(txn);
     } else {
       if (toJson(storedTxn) === toJson(txn)) {
-        console.log(
+        logger.log(
           `upsertTransaction: same transaction and hence skip calling snap state update: ${toJson(storedTxn)}`,
         );
         return;

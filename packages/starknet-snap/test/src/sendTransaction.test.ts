@@ -1,4 +1,5 @@
 import chai, { expect } from 'chai';
+import chaiAsPromised from 'chai-as-promised';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import { WalletMock } from '../wallet.mock.test';
@@ -26,6 +27,7 @@ import { Mutex } from 'async-mutex';
 import { ApiParams, SendTransactionRequestParams } from '../../src/types/snapApi';
 
 chai.use(sinonChai);
+chai.use(chaiAsPromised);
 const sandbox = sinon.createSandbox();
 
 describe('Test function: sendTransaction', function () {
@@ -196,6 +198,72 @@ describe('Test function: sendTransaction', function () {
     expect(result).to.be.eql(sendTransactionResp);
   });
 
+  it('should use heading, text and copyable component', async function () {
+    executeTxnResp = sendTransactionFailedResp;
+    sandbox.stub(utils, 'getSigner').callsFake(async () => {
+      return account1.publicKey;
+    });
+    const requestObject: SendTransactionRequestParams = {
+      contractAddress: account1.address,
+      contractFuncName: 'get_signer',
+      contractCallData: '**foo**',
+      senderAddress: account1.address,
+    };
+    apiParams.requestParams = requestObject;
+    await sendTransaction(apiParams);
+    const expectedDialogParams = {
+      type: 'confirmation',
+      content: {
+        type: 'panel',
+        children: [
+          { type: 'heading', value: 'Do you want to sign this transaction ?' },
+          {
+            type: 'text',
+            value: `**Signer Address:**`,
+          },
+          {
+            type: 'copyable',
+            value: '0x4882a372da3dfe1c53170ad75893832469bf87b62b13e84662565c4a88f25cd',
+          },
+          {
+            type: 'text',
+            value: `**Contract:**`,
+          },
+          {
+            type: 'copyable',
+            value: '0x4882a372da3dfe1c53170ad75893832469bf87b62b13e84662565c4a88f25cd',
+          },
+          {
+            type: 'text',
+            value: `**Call Data:**`,
+          },
+          {
+            type: 'copyable',
+            value: '[**foo**]',
+          },
+          {
+            type: 'text',
+            value: `**Estimated Gas Fee(ETH):**`,
+          },
+          {
+            type: 'copyable',
+            value: '0.000022702500105945',
+          },
+          {
+            type: 'text',
+            value: `**Network:**`,
+          },
+          {
+            type: 'copyable',
+            value: 'Goerli Testnet',
+          },
+        ],
+      },
+    };
+    expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledOnce;
+    expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledWith(expectedDialogParams);
+  });
+
   it('should send a transaction for transferring 10 tokens from an unfound user correctly', async function () {
     sandbox.stub(utils, 'getSigner').callsFake(async () => {
       return account1.publicKey;
@@ -356,5 +424,21 @@ describe('Test function: sendTransaction', function () {
     } finally {
       expect(result).to.be.an('Error');
     }
+  });
+
+  it('should throw an error when call data entries can not be converted to a bigNumber', async function () {
+    sandbox.stub(utils, 'getSigner').callsFake(async () => {
+      return account1.publicKey;
+    });
+    const requestObject: SendTransactionRequestParams = {
+      contractAddress: account1.address,
+      contractFuncName: 'get_signer',
+      contractCallData: '**foo**',
+      senderAddress: account1.address,
+    };
+    apiParams.requestParams = requestObject;
+    await expect(sendTransaction(apiParams)).to.be.rejectedWith(
+      'contractCallData could not be converted, Cannot convert **foo** to a BigInt',
+    );
   });
 });

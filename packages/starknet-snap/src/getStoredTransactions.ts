@@ -2,6 +2,7 @@ import { toJson } from './utils/serializer';
 import { ApiParams, GetStoredTransactionsRequestParams } from './types/snapApi';
 import { DEFAULT_GET_TXNS_LAST_NUM_OF_DAYS } from './utils/constants';
 import { getNetworkFromChainId, getTransactions, getValidNumber } from './utils/snapUtils';
+import { logger } from './utils/logger';
 
 export async function getStoredTransactions(params: ApiParams) {
   try {
@@ -26,10 +27,10 @@ export async function getStoredTransactions(params: ApiParams) {
       minTimeStamp,
     );
 
-    console.log(`getStoredTransactions: transactions:\n${toJson(transactions, 2)}`);
+    logger.log(`getStoredTransactions: transactions:\n${toJson(transactions, 2)}`);
     return transactions;
   } catch (err) {
-    console.error(`Problem found: ${err}`);
+    logger.error(`Problem found: ${err}`);
     throw err;
   }
 }
