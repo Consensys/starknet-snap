@@ -1,6 +1,7 @@
 import { toJson } from './serializer';
 import { Mutex } from 'async-mutex';
 import { num, validateAndParseAddress } from 'starknet';
+import { Component, text, copyable } from '@metamask/snaps-ui';
 import {
   Network,
   Erc20Token,
@@ -171,10 +172,11 @@ export function getSigningTxnText(
   senderAddress: string,
   maxFee: num.BigNumberish,
   network: Network,
-): string {
+): Array<Component> {
   // Retrieve the ERC-20 token from snap state for confirmation display purpose
   const token = getErc20Token(state, contractAddress, network.chainId);
-  let tokenTransferStr = '';
+  const tokenTransferComponents1 = [];
+  const tokenTransferComponents2 = [];
   if (token && contractFuncName === 'transfer') {
     try {
       let amount = '';
@@ -183,18 +185,28 @@ export function getSigningTxnText(
       } else {
         amount = (Number(contractCallData[1]) * Math.pow(10, -1 * token.decimals)).toFixed(token.decimals);
       }
-      tokenTransferStr = `\n\nSender Address: ${senderAddress}\n\nRecipient Address: ${contractCallData[0]}\n\nAmount(${token.symbol}): ${amount}`;
+      tokenTransferComponents2.push(text('**Sender Address:**'));
+      tokenTransferComponents2.push(copyable(senderAddress));
+      tokenTransferComponents2.push(text('**Recipient Address:**'));
+      tokenTransferComponents2.push(copyable(contractCallData[0]));
+      tokenTransferComponents2.push(text(`**Amount(${token.symbol}):**`));
+      tokenTransferComponents2.push(copyable(amount));
     } catch (err) {
       console.error(`getSigningTxnText: error found in amount conversion: ${err}`);
     }
   }
-  return (
-    `Contract: ${contractAddress}\n\nCall Data: [${contractCallData.join(', ')}]\n\nEstimated Gas Fee(ETH): ${convert(
-      maxFee,
-      'wei',
-      'ether',
-    )}\n\nNetwork: ${network.name}` + tokenTransferStr
-  );
+  tokenTransferComponents1.push(text('**Signer Address:**'));
+  tokenTransferComponents1.push(copyable(senderAddress));
+  tokenTransferComponents1.push(text('**Contract:**'));
+  tokenTransferComponents1.push(copyable(contractAddress));
+  tokenTransferComponents1.push(text('**Call Data:**'));
+  tokenTransferComponents1.push(copyable(`[${contractCallData.join(', ')}]`));
+  tokenTransferComponents1.push(text('**Estimated Gas Fee(ETH):**'));
+  tokenTransferComponents1.push(copyable(convert(maxFee, 'wei', 'ether')));
+  tokenTransferComponents1.push(text('**Network:**'));
+  tokenTransferComponents1.push(copyable(network.name));
+
+  return tokenTransferComponents1.concat(tokenTransferComponents2);
 }
 
 export function getAddTokenText(

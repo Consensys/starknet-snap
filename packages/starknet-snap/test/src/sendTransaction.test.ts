@@ -213,17 +213,52 @@ describe('Test function: sendTransaction', function () {
     await sendTransaction(apiParams);
     const expectedDialogParams = {
       type: 'confirmation',
-      content: { type: 'panel', children: [
-        { type: 'heading', value: 'Do you want to sign this transaction ?' },
-        {
-          type: 'text',
-          value: 'It will be signed with address: 0x4882a372da3dfe1c53170ad75893832469bf87b62b13e84662565c4a88f25cd'
-        },
-        {
-          type: 'copyable',
-          value: `Contract: 0x4882a372da3dfe1c53170ad75893832469bf87b62b13e84662565c4a88f25cd\n\nCall Data: [**foo**]\n\nEstimated Gas Fee(ETH): 0.000022702500105945\n\nNetwork: Goerli Testnet`
-        }
-      ]}
+      content: {
+        type: 'panel',
+        children: [
+          { type: 'heading', value: 'Do you want to sign this transaction ?' },
+          {
+            type: 'text',
+            value: `**Signer Address:**`,
+          },
+          {
+            type: 'copyable',
+            value: '0x4882a372da3dfe1c53170ad75893832469bf87b62b13e84662565c4a88f25cd',
+          },
+          {
+            type: 'text',
+            value: `**Contract:**`,
+          },
+          {
+            type: 'copyable',
+            value: '0x4882a372da3dfe1c53170ad75893832469bf87b62b13e84662565c4a88f25cd',
+          },
+          {
+            type: 'text',
+            value: `**Call Data:**`,
+          },
+          {
+            type: 'copyable',
+            value: '[**foo**]',
+          },
+          {
+            type: 'text',
+            value: `**Estimated Gas Fee(ETH):**`,
+          },
+          {
+            type: 'copyable',
+            value: '0.000022702500105945',
+          },
+          {
+            type: 'text',
+            value: `**Network:**`,
+          },
+          {
+            type: 'copyable',
+            value: 'Goerli Testnet',
+          },
+        ],
+      },
     };
     expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledOnce;
     expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledWith(expectedDialogParams);
@@ -402,6 +437,8 @@ describe('Test function: sendTransaction', function () {
       senderAddress: account1.address,
     };
     apiParams.requestParams = requestObject;
-    await expect(sendTransaction(apiParams)).to.be.rejectedWith("contractCallData could not be converted, Cannot convert **foo** to a BigInt");
+    await expect(sendTransaction(apiParams)).to.be.rejectedWith(
+      'contractCallData could not be converted, Cannot convert **foo** to a BigInt',
+    );
   });
 });

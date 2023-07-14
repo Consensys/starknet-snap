@@ -7,7 +7,7 @@ import { getKeysFromAddress, getCallDataArray, executeTxn, isAccountDeployed } f
 import { ApiParams, SendTransactionRequestParams } from './types/snapApi';
 import { createAccount } from './createAccount';
 import { DialogType } from '@metamask/rpc-methods';
-import { heading, panel, text, copyable } from '@metamask/snaps-ui';
+import { heading, panel } from '@metamask/snaps-ui';
 export async function sendTransaction(params: ApiParams) {
   try {
     const { state, wallet, saveMutex, keyDeriver, requestParams } = params;
@@ -48,7 +48,7 @@ export async function sendTransaction(params: ApiParams) {
       maxFee = num.toBigInt(suggestedMaxFee);
     }
 
-    const signingTxnText = getSigningTxnText(
+    const signingTxnComponents = getSigningTxnText(
       state,
       contractAddress,
       contractFuncName,
@@ -61,11 +61,7 @@ export async function sendTransaction(params: ApiParams) {
       method: 'snap_dialog',
       params: {
         type: DialogType.Confirmation,
-        content: panel([
-          heading('Do you want to sign this transaction ?'),
-          text(`It will be signed with address: ${senderAddress}`),
-          copyable(signingTxnText),
-        ]),
+        content: panel([heading('Do you want to sign this transaction ?'), ...signingTxnComponents]),
       },
     });
     if (!response) return false;
@@ -119,9 +115,9 @@ export async function sendTransaction(params: ApiParams) {
         contractFuncName,
         contractCallData: contractCallData.map((data: num.BigNumberish) => {
           try {
-            return num.toHex(num.toBigInt(data))
-          } catch(e) {
-            throw new Error(`contractCallData could not be converted, ${e.message || e}`)
+            return num.toHex(num.toBigInt(data));
+          } catch (e) {
+            throw new Error(`contractCallData could not be converted, ${e.message || e}`);
           }
         }),
         status: TransactionStatus.RECEIVED,
