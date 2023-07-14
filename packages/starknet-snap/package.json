@@ -36,6 +36,7 @@
     "@types/sinon-chai": "^3.2.8",
     "@typescript-eslint/eslint-plugin": "^5.20.0",
     "@typescript-eslint/parser": "^5.20.0",
+    "chai": "^4.3.6",
     "chai-as-promised": "^7.1.1",
     "concurrently": "^7.1.0",
     "eslint": "^8.13.0",
@@ -43,17 +44,16 @@
     "nyc": "^15.1.0",
     "prettier": "^2.6.2",
     "rimraf": "^3.0.2",
+    "sinon": "^13.0.2",
+    "sinon-chai": "^3.7.0",
     "standard-version": "^9.5.0",
     "ts-node": "^10.8.1",
     "typescript": "^4.6.3"
   },
   "dependencies": {
     "async-mutex": "^0.3.2",
-    "chai": "^4.3.6",
     "ethereum-unit-converter": "^0.0.17",
     "ethers": "^5.5.1",
-    "sinon": "^13.0.2",
-    "sinon-chai": "^3.7.0",
     "starknet": "^5.14.0",
     "starknet_v4.22.0": "npm:starknet@4.22.0"
   },
