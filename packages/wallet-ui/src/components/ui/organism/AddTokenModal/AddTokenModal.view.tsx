@@ -42,7 +42,7 @@ export const AddTokenModalView = ({ closeModal }: Props) => {
       <Wrapper>
         <Title>Add Token</Title>
         <Alert
-          text="Anyone can create a token, including creating fake versions of existing tokens. Learn more about <b>scams and security risks.</b>"
+          text="Anyone can create a token, including creating fake versions of existing tokens. Learn more about scams and security risks."
           variant="warning"
         />
         <Space />
