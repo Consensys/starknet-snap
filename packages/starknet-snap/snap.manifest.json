@@ -1,5 +1,5 @@
 {
-  "version": "1.8.0",
+  "version": "2.0.0",
   "description": "StarkNet Snap",
   "proposedName": "@consensys/starknet-snap",
   "repository": {
@@ -7,7 +7,7 @@
     "url": "https://github.com/ConsenSys/starknet-snap.git"
   },
   "source": {
-    "shasum": "kl4j88+kS5sNBb4HME/C3BcGXFwoZuTdQ1FjJ0dzv/0=",
+    "shasum": "8u2ENSdAAY3I536HfY4AM6kvYAkgneqpe6Os0h5UGvY=",
     "location": {
       "npm": {
         "filePath": "dist/bundle.js",
