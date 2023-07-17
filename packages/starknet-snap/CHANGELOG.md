@@ -1,6 +1,14 @@
 # Changelog
 
 
+## [1.7.1](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v1.7.0...starknet-snap-v1.7.1) (2023-07-17)
+
+
+### Bug Fixes
+
+* audit report ([#106](https://github.com/Consensys/starknet-snap/issues/106)) ([663720e](https://github.com/Consensys/starknet-snap/commit/663720ef2da91e7cb8f978f418be221ef8470e31))
+* deploy pipeline of production ([#89](https://github.com/Consensys/starknet-snap/issues/89)) ([8346bf1](https://github.com/Consensys/starknet-snap/commit/8346bf154874ba89580b393c9703bd7e216b3da0))
+
 ## [1.7.0](https://github.com/ConsenSys/starknet-snap/compare/starknet-snap-v1.6.0...starknet-snap-v1.7.0) (2023-04-21)
 
 
