@@ -33,7 +33,6 @@ export const useStarkNetSnap = () => {
   const minSnapVersion = process.env.REACT_APP_MIN_SNAP_VERSION ? process.env.REACT_APP_MIN_SNAP_VERSION : '2.0.1';
   const debugLevel = process.env.REACT_APP_DEBUG_LEVEL !== undefined ? process.env.REACT_APP_DEBUG_LEVEL : 'all';
 
-  
   const defaultParam = {
     debugLevel,
   };
