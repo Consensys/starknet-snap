@@ -60,7 +60,7 @@ jobs:
       - name: Production Deployment
         run: |
           VERSION=$(node -p "require('./packages/starknet-snap/package.json').version")
-          REACT_APP_SNAP_VERSION=${VERSION} yarn workspace wallet-ui build
+          REACT_APP_SNAP_VERSION=${VERSION} REACT_APP_DEBUG_LEVEL=off yarn workspace wallet-ui build
 
           npm --prefix ./packages/starknet-snap version --new-version ${VERSION} --no-git-tag-version --allow-same-version
           yarn workspace @consensys/starknet-snap build

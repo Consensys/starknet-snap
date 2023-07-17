@@ -37,7 +37,7 @@ describe('Test function: getStoredTransactions', function () {
     sandbox.restore();
   });
 
-  it('should get the stored transactions of testnet correctly', async function () {
+  it('should get the stored transactions of SN_GOERLI correctly', async function () {
     const requestObject: GetStoredTransactionsRequestParams = {};
     apiParams.requestParams = requestObject;
     const result = await getStoredTransactions(apiParams);
@@ -120,7 +120,7 @@ describe('Test function: getStoredTransactions', function () {
     expect(result).to.be.eql([txn1]);
   });
 
-  it('should not get any stored transactions of testnet of an unfound sender address correctly', async function () {
+  it('should not get any stored transactions of SN_GOERLI of an unfound sender address correctly', async function () {
     const requestObject: GetStoredTransactionsRequestParams = {
       chainId: STARKNET_TESTNET_NETWORK.chainId,
       contractAddress: '0x07394cbe418daa16e42b87ba67372d4ab4a5df0b05c6e554d158458ce245bc10',
@@ -133,7 +133,7 @@ describe('Test function: getStoredTransactions', function () {
     expect(result.length).to.be.eq(0);
   });
 
-  it('should get the stored DEPLOY transactions of testnet correctly', async function () {
+  it('should get the stored DEPLOY transactions of SN_GOERLI correctly', async function () {
     const requestObject: GetStoredTransactionsRequestParams = {
       chainId: STARKNET_TESTNET_NETWORK.chainId,
       txnType: VoyagerTransactionType.DEPLOY,
@@ -145,7 +145,7 @@ describe('Test function: getStoredTransactions', function () {
     expect(result).to.be.eql([createAccountProxyTxn]);
   });
 
-  it('should get the stored INVOKE transactions of testnet correctly', async function () {
+  it('should get the stored INVOKE transactions of SN_GOERLI correctly', async function () {
     const requestObject: GetStoredTransactionsRequestParams = {
       chainId: STARKNET_TESTNET_NETWORK.chainId,
       txnType: VoyagerTransactionType.INVOKE,

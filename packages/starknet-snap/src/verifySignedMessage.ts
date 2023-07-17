@@ -1,8 +1,14 @@
+import { toJson } from './utils/serializer';
 import typedDataExample from './typedData/typedDataExample.json';
-import { verifyTypedDataMessageSignature, getKeyPairFromPrivateKey, getKeysFromAddress } from './utils/starknetUtils';
+import {
+  verifyTypedDataMessageSignature,
+  getFullPublicKeyPairFromPrivateKey,
+  getKeysFromAddress,
+} from './utils/starknetUtils';
 import { getNetworkFromChainId } from './utils/snapUtils';
 import { ApiParams, VerifySignedMessageRequestParams } from './types/snapApi';
-import { validateAndParseAddress } from 'starknet';
+import { logger } from './utils/logger';
+import { validateAndParseAddress } from '../src/utils/starknetUtils';
 
 export async function verifySignedMessage(params: ApiParams) {
   try {
@@ -11,7 +17,7 @@ export async function verifySignedMessage(params: ApiParams) {
 
     if (!requestParamsObj.signerAddress || !requestParamsObj.signature) {
       throw new Error(
-        `The given signer address and signature need to be non-empty string, got: ${JSON.stringify(requestParamsObj)}`,
+        `The given signer address and signature need to be non-empty string, got: ${toJson(requestParamsObj)}`,
       );
     }
 
@@ -21,34 +27,34 @@ export async function verifySignedMessage(params: ApiParams) {
       throw new Error(`The given signer address is invalid: ${requestParamsObj.signerAddress}`);
     }
 
-    const useOldAccounts = !!requestParamsObj.useOldAccounts;
     const verifySignerAddress = requestParamsObj.signerAddress;
-    const verifySignature = requestParamsObj.signature.split(',').map((x) => x.trim());
+    const verifySignature = requestParamsObj.signature;
     const verifyTypedDataMessage = requestParamsObj.typedDataMessage
       ? JSON.parse(requestParamsObj.typedDataMessage)
       : typedDataExample;
-    const network = getNetworkFromChainId(state, requestParamsObj.chainId, useOldAccounts);
+    const network = getNetworkFromChainId(state, requestParamsObj.chainId);
 
-    console.log(
-      `verifySignedMessage:\nverifySignerAddress: ${verifySignerAddress}\nverifySignature: ${verifySignature}\nverifyTypedDataMessage: ${JSON.stringify(
+    logger.log(
+      `verifySignedMessage:\nverifySignerAddress: ${verifySignerAddress}\nverifySignature: ${verifySignature}\nverifyTypedDataMessage: ${toJson(
         verifyTypedDataMessage,
       )}`,
     );
 
     const { privateKey: signerPrivateKey } = await getKeysFromAddress(keyDeriver, network, state, verifySignerAddress);
 
-    const verifySignerKeyPair = getKeyPairFromPrivateKey(signerPrivateKey);
+    const fullPublicKey = getFullPublicKeyPairFromPrivateKey(signerPrivateKey);
+
     const isVerified = verifyTypedDataMessageSignature(
-      verifySignerKeyPair,
+      fullPublicKey,
       verifyTypedDataMessage,
       verifySignerAddress,
       verifySignature,
     );
 
-    console.log(`verifySignedMessage:\nisVerified: ${isVerified}`);
+    logger.log(`verifySignedMessage:\nisVerified: ${isVerified}`);
     return isVerified;
   } catch (err) {
-    console.error(`Problem found: ${err}`);
+    logger.error(`Problem found: ${err}`);
     throw err;
   }
 }

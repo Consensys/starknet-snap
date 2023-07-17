@@ -1,5 +1,8 @@
+import { toJson } from './serializer';
 import { Mutex } from 'async-mutex';
-import { number, validateAndParseAddress } from 'starknet';
+import { num } from 'starknet';
+import { validateAndParseAddress } from './starknetUtils';
+import { Component, text, copyable } from '@metamask/snaps-ui';
 import {
   Network,
   Erc20Token,
@@ -21,6 +24,7 @@ import {
 } from './constants';
 import convert from 'ethereum-unit-converter';
 import { AddErc20TokenRequestParams, AddNetworkRequestParams } from '../types/snapApi';
+import { logger } from './logger';
 
 function hasOnlyAsciiChars(str: string) {
   return /^[ -~]+$/.test(str);
@@ -69,13 +73,15 @@ function isPreloadedTokenSymbol(tokenSymbol: string, chainId: string) {
 }
 
 function isPreloadedTokenAddress(tokenAddress: string, chainId: string) {
+  const bigIntTokenAddress = num.toBigInt(tokenAddress);
   return !!PRELOADED_TOKENS.find(
-    (token) => number.toBN(token.address).eq(number.toBN(tokenAddress)) && Number(token.chainId) === Number(chainId),
+    (token) => num.toBigInt(token.address) === bigIntTokenAddress && Number(token.chainId) === Number(chainId),
   );
 }
 
 function isPreloadedNetworkChainId(networkChainId: string) {
-  return !!PRELOADED_NETWORKS.find((network) => number.toBN(network.chainId).eq(number.toBN(networkChainId)));
+  const bigIntNetworkChainId = num.toBigInt(networkChainId);
+  return !!PRELOADED_NETWORKS.find((network) => num.toBigInt(network.chainId) === bigIntNetworkChainId);
 }
 
 function isPreloadedNetworkName(networkName: string) {
@@ -166,12 +172,13 @@ export function getSigningTxnText(
   contractFuncName: string,
   contractCallData: string[],
   senderAddress: string,
-  maxFee: number.BigNumberish,
+  maxFee: num.BigNumberish,
   network: Network,
-): string {
+): Array<Component> {
   // Retrieve the ERC-20 token from snap state for confirmation display purpose
   const token = getErc20Token(state, contractAddress, network.chainId);
-  let tokenTransferStr = '';
+  const tokenTransferComponents1 = [];
+  const tokenTransferComponents2 = [];
   if (token && contractFuncName === 'transfer') {
     try {
       let amount = '';
@@ -180,23 +187,44 @@ export function getSigningTxnText(
       } else {
         amount = (Number(contractCallData[1]) * Math.pow(10, -1 * token.decimals)).toFixed(token.decimals);
       }
-      tokenTransferStr = `\n\nSender Address: ${senderAddress}\n\nRecipient Address: ${contractCallData[0]}\n\nAmount(${token.symbol}): ${amount}`;
+      tokenTransferComponents2.push(text('**Sender Address:**'));
+      tokenTransferComponents2.push(copyable(senderAddress));
+      tokenTransferComponents2.push(text('**Recipient Address:**'));
+      tokenTransferComponents2.push(copyable(contractCallData[0]));
+      tokenTransferComponents2.push(text(`**Amount(${token.symbol}):**`));
+      tokenTransferComponents2.push(copyable(amount));
     } catch (err) {
-      console.error(`getSigningTxnText: error found in amount conversion: ${err}`);
+      logger.error(`getSigningTxnText: error found in amount conversion: ${err}`);
     }
   }
-  return (
-    `Contract: ${contractAddress}\n\nCall Data: [${contractCallData.join(', ')}]\n\nEstimated Gas Fee(ETH): ${convert(
-      maxFee,
-      'wei',
-      'ether',
-    )}\n\nNetwork: ${network.name}` + tokenTransferStr
-  );
+  tokenTransferComponents1.push(text('**Signer Address:**'));
+  tokenTransferComponents1.push(copyable(senderAddress));
+  tokenTransferComponents1.push(text('**Contract:**'));
+  tokenTransferComponents1.push(copyable(contractAddress));
+  tokenTransferComponents1.push(text('**Call Data:**'));
+  tokenTransferComponents1.push(copyable(`[${contractCallData.join(', ')}]`));
+  tokenTransferComponents1.push(text('**Estimated Gas Fee(ETH):**'));
+  tokenTransferComponents1.push(copyable(convert(maxFee, 'wei', 'ether')));
+  tokenTransferComponents1.push(text('**Network:**'));
+  tokenTransferComponents1.push(copyable(network.name));
+
+  return tokenTransferComponents1.concat(tokenTransferComponents2);
+}
+
+export function getAddTokenText(
+  tokenAddress: string,
+  tokenName: string,
+  tokenSymbol: string,
+  tokenDecimals: number,
+  network: Network,
+) {
+  return `Token Address: ${tokenAddress}\n\nToken Name: ${tokenName}\n\nToken Symbol: ${tokenSymbol}\n\nToken Decimals: ${tokenDecimals}\n\nNetwork: ${network.name}`;
 }
 
 export function getAccount(state: SnapState, accountAddress: string, chainId: string) {
+  const bigIntAccountAddress = num.toBigInt(accountAddress);
   return state.accContracts?.find(
-    (acc) => number.toBN(acc.address).eq(number.toBN(accountAddress)) && Number(acc.chainId) === Number(chainId),
+    (acc) => num.toBigInt(acc.address) === bigIntAccountAddress && Number(acc.chainId) === Number(chainId),
   );
 }
 
@@ -224,10 +252,8 @@ export async function upsertAccount(userAccount: AccContract, wallet, mutex: Mut
       }
       state.accContracts.push(userAccount);
     } else {
-      if (JSON.stringify(storedAccount) === JSON.stringify(userAccount)) {
-        console.log(
-          `upsertAccount: same account and hence skip calling snap state update: ${JSON.stringify(storedAccount)}`,
-        );
+      if (toJson(storedAccount) === toJson(userAccount)) {
+        logger.log(`upsertAccount: same account and hence skip calling snap state update: ${toJson(storedAccount)}`);
         return;
       }
       storedAccount.addressSalt = userAccount.addressSalt;
@@ -247,9 +273,9 @@ export async function upsertAccount(userAccount: AccContract, wallet, mutex: Mut
   });
 }
 
-export function getNetwork(state: SnapState, chainId: string, useOldAccounts = false) {
+export function getNetwork(state: SnapState, chainId: string) {
   return state.networks?.find(
-    (network) => Number(network.chainId) === Number(chainId) && !!network?.useOldAccounts === useOldAccounts,
+    (network) => Number(network.chainId) === Number(chainId) && !Boolean(network?.useOldAccounts),
   );
 }
 
@@ -268,17 +294,15 @@ export async function upsertNetwork(network: Network, wallet, mutex: Mutex, stat
       });
     }
 
-    const storedNetwork = getNetwork(state, network.chainId, network.useOldAccounts);
+    const storedNetwork = getNetwork(state, network.chainId);
     if (!storedNetwork) {
       if (!state.networks) {
         state.networks = [];
       }
       state.networks.push(network);
     } else {
-      if (JSON.stringify(storedNetwork) === JSON.stringify(network)) {
-        console.log(
-          `upsertNetwork: same network and hence skip calling snap state update: ${JSON.stringify(storedNetwork)}`,
-        );
+      if (toJson(storedNetwork) === toJson(network)) {
+        logger.log(`upsertNetwork: same network and hence skip calling snap state update: ${toJson(storedNetwork)}`);
         return;
       }
       storedNetwork.name = network.name;
@@ -286,7 +310,6 @@ export async function upsertNetwork(network: Network, wallet, mutex: Mutex, stat
       storedNetwork.nodeUrl = network.nodeUrl;
       storedNetwork.voyagerUrl = network.voyagerUrl;
       storedNetwork.accountClassHash = network.accountClassHash;
-      storedNetwork.useOldAccounts = !!network.useOldAccounts;
     }
 
     await wallet.request({
@@ -300,8 +323,9 @@ export async function upsertNetwork(network: Network, wallet, mutex: Mutex, stat
 }
 
 export function getErc20Token(state: SnapState, tokenAddress: string, chainId: string) {
+  const bigIntTokenAddress = num.toBigInt(tokenAddress);
   return state.erc20Tokens?.find(
-    (token) => number.toBN(token.address).eq(number.toBN(tokenAddress)) && Number(token.chainId) === Number(chainId),
+    (token) => num.toBigInt(token.address) === bigIntTokenAddress && Number(token.chainId) === Number(chainId),
   );
 }
 
@@ -331,11 +355,9 @@ export async function upsertErc20Token(erc20Token: Erc20Token, wallet, mutex: Mu
       }
       state.erc20Tokens.push(erc20Token);
     } else {
-      if (JSON.stringify(storedErc20Token) === JSON.stringify(erc20Token)) {
-        console.log(
-          `upsertErc20Token: same Erc20 token and hence skip calling snap state update: ${JSON.stringify(
-            storedErc20Token,
-          )}`,
+      if (toJson(storedErc20Token) === toJson(erc20Token)) {
+        logger.log(
+          `upsertErc20Token: same Erc20 token and hence skip calling snap state update: ${toJson(storedErc20Token)}`,
         );
         return;
       }
@@ -354,13 +376,13 @@ export async function upsertErc20Token(erc20Token: Erc20Token, wallet, mutex: Mu
   });
 }
 
-export function getNetworkFromChainId(state: SnapState, targerChainId: string | undefined, useOldAccounts = false) {
+export function getNetworkFromChainId(state: SnapState, targerChainId: string | undefined) {
   const chainId = targerChainId || STARKNET_TESTNET_NETWORK.chainId;
-  const network = getNetwork(state, chainId, useOldAccounts);
+  const network = getNetwork(state, chainId);
   if (!network) {
     throw new Error(`can't find the network in snap state with chainId: ${chainId}`);
   }
-  console.log(`getNetworkFromChainId: From ${targerChainId}:\n${JSON.stringify(network)}`);
+  logger.log(`getNetworkFromChainId: From ${targerChainId}:\n${toJson(network)}`);
   return network;
 }
 
@@ -377,8 +399,9 @@ export function getTransactionsFromVoyagerUrl(network: Network) {
 }
 
 export function getTransaction(state: SnapState, txnHash: string, chainId: string) {
+  const bigIntTxnHash = num.toBigInt(txnHash);
   return state.transactions?.find(
-    (txn) => number.toBN(txn.txnHash).eq(number.toBN(txnHash)) && Number(txn.chainId) === Number(chainId),
+    (txn) => num.toBigInt(txn.txnHash) === bigIntTxnHash && Number(txn.chainId) === Number(chainId),
   );
 }
 
@@ -399,10 +422,12 @@ export function getTransactions(
       filteredTxns = filteredTxns.filter((txn) => txn.timestamp * 1000 >= minTimestamp);
     }
     if (senderAddress) {
-      filteredTxns = filteredTxns.filter((txn) => number.toBN(txn.senderAddress).eq(number.toBN(senderAddress)));
+      const bigIntSenderAddress = num.toBigInt(senderAddress);
+      filteredTxns = filteredTxns.filter((txn) => num.toBigInt(txn.senderAddress) === bigIntSenderAddress);
     }
     if (contractAddress) {
-      filteredTxns = filteredTxns.filter((txn) => number.toBN(txn.contractAddress).eq(number.toBN(contractAddress)));
+      const bigIntContractAddress = num.toBigInt(contractAddress);
+      filteredTxns = filteredTxns.filter((txn) => num.toBigInt(txn.contractAddress) === bigIntContractAddress);
     }
     if (txnType) {
       if (Array.isArray(txnType)) {
@@ -443,9 +468,9 @@ export async function upsertTransaction(txn: Transaction, wallet, mutex: Mutex, 
       }
       state.transactions.push(txn);
     } else {
-      if (JSON.stringify(storedTxn) === JSON.stringify(txn)) {
-        console.log(
-          `upsertTransaction: same transaction and hence skip calling snap state update: ${JSON.stringify(storedTxn)}`,
+      if (toJson(storedTxn) === toJson(txn)) {
+        logger.log(
+          `upsertTransaction: same transaction and hence skip calling snap state update: ${toJson(storedTxn)}`,
         );
         return;
       }

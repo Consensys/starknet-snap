@@ -1,19 +1,15 @@
-import { number, constants, validateAndParseAddress } from 'starknet';
+import { toJson } from './utils/serializer';
+import { num, constants } from 'starknet';
+import { validateAndParseAddress } from '../src/utils/starknetUtils';
 import { estimateFee } from './estimateFee';
 import { Transaction, TransactionStatus, VoyagerTransactionType } from './types/snapState';
 import { getNetworkFromChainId, getSigningTxnText, upsertTransaction } from './utils/snapUtils';
-import {
-  getKeyPairFromPrivateKey,
-  getKeysFromAddress,
-  getCallDataArray,
-  executeTxn,
-  executeTxn_v4_6_0,
-  isAccountDeployed,
-} from './utils/starknetUtils';
+import { getKeysFromAddress, getCallDataArray, executeTxn, isAccountDeployed } from './utils/starknetUtils';
 import { ApiParams, SendTransactionRequestParams } from './types/snapApi';
 import { createAccount } from './createAccount';
 import { DialogType } from '@metamask/rpc-methods';
-import { heading, panel, text } from '@metamask/snaps-ui';
+import { heading, panel } from '@metamask/snaps-ui';
+import { logger } from './utils/logger';
 
 export async function sendTransaction(params: ApiParams) {
   try {
@@ -22,7 +18,7 @@ export async function sendTransaction(params: ApiParams) {
 
     if (!requestParamsObj.contractAddress || !requestParamsObj.senderAddress || !requestParamsObj.contractFuncName) {
       throw new Error(
-        `The given contract address, sender address, and function name need to be non-empty string, got: ${JSON.stringify(
+        `The given contract address, sender address, and function name need to be non-empty string, got: ${toJson(
           requestParamsObj,
         )}`,
       );
@@ -43,21 +39,19 @@ export async function sendTransaction(params: ApiParams) {
     const contractFuncName = requestParamsObj.contractFuncName;
     const contractCallData = getCallDataArray(requestParamsObj.contractCallData);
     const senderAddress = requestParamsObj.senderAddress;
-    const useOldAccounts = !!requestParamsObj.useOldAccounts;
-    const network = getNetworkFromChainId(state, requestParamsObj.chainId, useOldAccounts);
+    const network = getNetworkFromChainId(state, requestParamsObj.chainId);
     const {
       privateKey: senderPrivateKey,
       publicKey,
       addressIndex,
     } = await getKeysFromAddress(keyDeriver, network, state, senderAddress);
-    const senderKeyPair = getKeyPairFromPrivateKey(senderPrivateKey);
-    let maxFee = requestParamsObj.maxFee ? number.toBN(requestParamsObj.maxFee) : constants.ZERO;
-    if (maxFee.eq(constants.ZERO)) {
+    let maxFee = requestParamsObj.maxFee ? num.toBigInt(requestParamsObj.maxFee) : constants.ZERO;
+    if (maxFee === constants.ZERO) {
       const { suggestedMaxFee } = await estimateFee(params);
-      maxFee = number.toBN(suggestedMaxFee);
+      maxFee = num.toBigInt(suggestedMaxFee);
     }
 
-    const signingTxnText = getSigningTxnText(
+    const signingTxnComponents = getSigningTxnText(
       state,
       contractAddress,
       contractFuncName,
@@ -66,16 +60,11 @@ export async function sendTransaction(params: ApiParams) {
       maxFee,
       network,
     );
-
     const response = await wallet.request({
       method: 'snap_dialog',
       params: {
         type: DialogType.Confirmation,
-        content: panel([
-          heading('Do you want to sign this transaction ?'),
-          text(`It will be signed with address: ${senderAddress}`),
-          text(signingTxnText),
-        ]),
+        content: panel([heading('Do you want to sign this transaction ?'), ...signingTxnComponents]),
       },
     });
     if (!response) return false;
@@ -86,14 +75,12 @@ export async function sendTransaction(params: ApiParams) {
       calldata: contractCallData,
     };
 
-    console.log(
-      `sendTransaction:\ntxnInvocation: ${JSON.stringify(txnInvocation)}\nmaxFee: ${JSON.stringify(maxFee)}}`,
-    );
+    logger.log(`sendTransaction:\ntxnInvocation: ${toJson(txnInvocation)}\nmaxFee: ${maxFee.toString()}}`);
 
     const accountDeployed = await isAccountDeployed(network, publicKey);
     if (!accountDeployed) {
       //Deploy account before sending the transaction
-      console.log('sendTransaction:\nFirst transaction : send deploy transaction');
+      logger.log('sendTransaction:\nFirst transaction : send deploy transaction');
       const createAccountApiParams = {
         state,
         wallet: params.wallet,
@@ -110,11 +97,16 @@ export async function sendTransaction(params: ApiParams) {
 
     //In case this is the first transaction we assign a nonce of 1 to make sure it does after the deploy transaction
     const nonceSendTransaction = accountDeployed ? undefined : 1;
-    const txnResp = useOldAccounts
-      ? await executeTxn_v4_6_0(network, senderAddress, senderKeyPair, txnInvocation, maxFee, nonceSendTransaction)
-      : await executeTxn(network, senderAddress, senderKeyPair, txnInvocation, maxFee, nonceSendTransaction);
+    const txnResp = await executeTxn(
+      network,
+      senderAddress,
+      senderPrivateKey,
+      txnInvocation,
+      maxFee,
+      nonceSendTransaction,
+    );
 
-    console.log(`sendTransaction:\ntxnResp: ${JSON.stringify(txnResp)}`);
+    logger.log(`sendTransaction:\ntxnResp: ${toJson(txnResp)}`);
 
     if (txnResp.transaction_hash) {
       const txn: Transaction = {
@@ -124,7 +116,13 @@ export async function sendTransaction(params: ApiParams) {
         senderAddress,
         contractAddress,
         contractFuncName,
-        contractCallData: contractCallData.map((data: number.BigNumberish) => number.toHex(number.toBN(data))),
+        contractCallData: contractCallData.map((data: num.BigNumberish) => {
+          try {
+            return num.toHex(num.toBigInt(data));
+          } catch (e) {
+            throw new Error(`contractCallData could not be converted, ${e.message || e}`);
+          }
+        }),
         status: TransactionStatus.RECEIVED,
         failureReason: '',
         eventIds: [],
@@ -136,7 +134,7 @@ export async function sendTransaction(params: ApiParams) {
 
     return txnResp;
   } catch (err) {
-    console.error(`Problem found: ${err}`);
+    logger.error(`Problem found: ${err}`);
     throw err;
   }
 }

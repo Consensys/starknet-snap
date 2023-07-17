@@ -1,8 +1,9 @@
-<!doctype html>
-<html>
-</head>
-<title>Hello, Snaps!</title>
-<link rel="icon" type="image/svg" href="./images/icon.svg" />
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Hello, Snaps!</title>
+    <link rel="icon" type="image/svg" href="./images/icon.svg" />
 </head>
 
 <body>
@@ -34,8 +35,13 @@
   <input type="text" id="targetChainId" name="targetChainId"><br>
   <label for="isDev">Use StarkNet Integration network for Goerli testnet</label>
   <input type="checkbox" id="isDev" name="isDev"><br>
-  <label for="useOldAccounts">Use Old Account Contracts</label>
-  <input type="checkbox" id="useOldAccounts" name="useOldAccounts"><br>
+  <label for="debugLevel">Log Level</label>
+  <select id="debugLevel">
+    <option value="6" selected="selected">All</option>
+    <option value="0">Off</option>
+    <option value="1">Error</option>
+  </select>
+  <br>
   <form id="recoverUserAccounts">
     <fieldset>
       <legend>Recover User Accounts</legend>
@@ -319,7 +325,7 @@
   function getReqFlagsFromCheckbox() {
     return {
       isDev: document.getElementById('isDev').checked,
-      useOldAccounts: document.getElementById('useOldAccounts').checked,
+      debugLevel: document.getElementById('debugLevel').value,
     }
   }
 

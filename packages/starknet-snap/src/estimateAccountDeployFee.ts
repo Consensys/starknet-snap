@@ -1,3 +1,4 @@
+import { toJson } from './utils/serializer';
 import { EstimateFee } from 'starknet';
 import { ApiParams, EstimateAccountDeployFeeRequestParams } from './types/snapApi';
 import { getNetworkFromChainId, getValidNumber } from './utils/snapUtils';
@@ -6,6 +7,7 @@ import {
   getKeysFromAddressIndex,
   getAccContractAddressAndCallData,
 } from './utils/starknetUtils';
+import { logger } from './utils/logger';
 
 export async function estimateAccDeployFee(params: ApiParams) {
   try {
@@ -18,13 +20,13 @@ export async function estimateAccDeployFee(params: ApiParams) {
     const {
       publicKey,
       addressIndex: addressIndexInUsed,
-      keyPair,
+      privateKey,
     } = await getKeysFromAddressIndex(keyDeriver, network.chainId, state, addressIndex);
     const { address: contractAddress, callData: contractCallData } = getAccContractAddressAndCallData(
       network.accountClassHash,
       publicKey,
     );
-    console.log(
+    logger.log(
       `estimateAccountDeployFee:\ncontractAddress = ${contractAddress}\npublicKey = ${publicKey}\naddressIndex = ${addressIndexInUsed}`,
     );
 
@@ -33,9 +35,9 @@ export async function estimateAccDeployFee(params: ApiParams) {
       contractAddress,
       contractCallData,
       publicKey,
-      keyPair,
+      privateKey,
     );
-    console.log(`estimateAccountDeployFee:\nestimateDeployFee: ${JSON.stringify(estimateDeployFee)}`);
+    logger.log(`estimateAccountDeployFee:\nestimateDeployFee: ${toJson(estimateDeployFee)}`);
 
     const resp = {
       suggestedMaxFee: estimateDeployFee.suggestedMaxFee.toString(10),
@@ -44,11 +46,11 @@ export async function estimateAccDeployFee(params: ApiParams) {
       gasPrice: estimateDeployFee.gas_price?.toString(10) ?? '0',
       unit: 'wei',
     };
-    console.log(`estimateAccountDeployFee:\nresp: ${JSON.stringify(resp)}`);
+    logger.log(`estimateAccountDeployFee:\nresp: ${toJson(resp)}`);
 
     return resp;
   } catch (err) {
-    console.error(`Problem found: ${err}`);
+    logger.error(`Problem found: ${err}`);
     throw err;
   }
 }

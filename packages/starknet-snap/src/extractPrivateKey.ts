@@ -1,19 +1,20 @@
-import { validateAndParseAddress } from 'starknet';
+import { toJson } from './utils/serializer';
+import { validateAndParseAddress } from '../src/utils/starknetUtils';
 import { ApiParams, ExtractPrivateKeyRequestParams } from './types/snapApi';
 import { getNetworkFromChainId } from './utils/snapUtils';
 import { getKeysFromAddress } from './utils/starknetUtils';
 import { DialogType } from '@metamask/rpc-methods';
 import { copyable, panel, text } from '@metamask/snaps-ui';
+import { logger } from './utils/logger';
 
 export async function extractPrivateKey(params: ApiParams) {
   try {
     const { state, wallet, keyDeriver, requestParams } = params;
     const requestParamsObj = requestParams as ExtractPrivateKeyRequestParams;
-    const useOldAccounts = !!requestParamsObj.useOldAccounts;
 
     if (!requestParamsObj.userAddress) {
       throw new Error(
-        `The given user address need to be non-empty string, got: ${JSON.stringify(requestParamsObj.userAddress)}`,
+        `The given user address need to be non-empty string, got: ${toJson(requestParamsObj.userAddress)}`,
       );
     }
 
@@ -33,7 +34,7 @@ export async function extractPrivateKey(params: ApiParams) {
 
     if (response === true) {
       const userAddress = requestParamsObj.userAddress;
-      const network = getNetworkFromChainId(state, requestParamsObj.chainId, useOldAccounts);
+      const network = getNetworkFromChainId(state, requestParamsObj.chainId);
       const { privateKey: userPrivateKey } = await getKeysFromAddress(keyDeriver, network, state, userAddress);
 
       await wallet.request({
@@ -47,7 +48,7 @@ export async function extractPrivateKey(params: ApiParams) {
 
     return null;
   } catch (err) {
-    console.error(`Problem found: ${err}`);
+    logger.error(`Problem found: ${err}`);
     throw err;
   }
 }

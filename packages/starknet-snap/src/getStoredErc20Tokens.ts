@@ -1,5 +1,7 @@
+import { toJson } from './utils/serializer';
 import { ApiParams, GetStoredErc20TokensRequestParams } from './types/snapApi';
 import { getErc20Tokens, getNetworkFromChainId } from './utils/snapUtils';
+import { logger } from './utils/logger';
 
 export async function getStoredErc20Tokens(params: ApiParams) {
   try {
@@ -8,11 +10,11 @@ export async function getStoredErc20Tokens(params: ApiParams) {
 
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
     const erc20Tokens = getErc20Tokens(state, network.chainId);
-    console.log(`getStoredErc20Tokens: erc20Tokens:\n${JSON.stringify(erc20Tokens, null, 2)}`);
+    logger.log(`getStoredErc20Tokens: erc20Tokens:\n${toJson(erc20Tokens, 2)}`);
 
     return erc20Tokens;
   } catch (err) {
-    console.error(`Problem found: ${err}`);
+    logger.error(`Problem found: ${err}`);
     throw err;
   }
 }

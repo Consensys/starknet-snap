@@ -149,7 +149,7 @@ describe('Test function: createAccount', function () {
     expect(state.transactions.length).to.be.eq(2);
   });
 
-  it('should create and store an user account with proxy in state correctly in testnet in silent mode', async function () {
+  it('should create and store an user account with proxy in state correctly in SN_GOERLI in silent mode', async function () {
     sandbox.stub(utils, 'deployAccount').callsFake(async () => {
       return createAccountProxyResp;
     });
@@ -180,7 +180,7 @@ describe('Test function: createAccount', function () {
     expect(state.transactions.length).to.be.eq(3);
   });
 
-  it('should not create any user account with proxy in state in testnet if not in silentMode and user rejected', async function () {
+  it('should not create any user account with proxy in state in SN_GOERLI if not in silentMode and user rejected', async function () {
     walletStub.rpcStubs.snap_dialog.resolves(false);
     const requestObject: CreateAccountRequestParams = { deploy: true };
     apiParams.requestParams = requestObject;
@@ -191,7 +191,7 @@ describe('Test function: createAccount', function () {
     expect(state.transactions.length).to.be.eq(3);
   });
 
-  it('should not create any user account with proxy in state in testnet if account already initialized with a signer', async function () {
+  it('should not create any user account with proxy in state in SN_GOERLI if account already initialized with a signer', async function () {
     sandbox.stub(utils, 'deployAccount').callsFake(async () => {
       return createAccountProxyResp;
     });
@@ -214,7 +214,7 @@ describe('Test function: createAccount', function () {
     expect(state.transactions.length).to.be.eq(3);
   });
 
-  it('should not create any user account with proxy in state in testnet if account does not have enough ETH balance', async function () {
+  it('should not create any user account with proxy in state in SN_GOERLI if account does not have enough ETH balance', async function () {
     sandbox.stub(utils, 'deployAccount').callsFake(async () => {
       return createAccountProxyResp;
     });
@@ -235,7 +235,7 @@ describe('Test function: createAccount', function () {
     expect(state.transactions.length).to.be.eq(3);
   });
 
-  it('should not create any user account with proxy in state in testnet if account does not have enough ETH balance for suggestedMaxFee > 0.000001 ETH', async function () {
+  it('should not create any user account with proxy in state in SN_GOERLI if account does not have enough ETH balance for suggestedMaxFee > 0.000001 ETH', async function () {
     sandbox.stub(utils, 'deployAccount').callsFake(async () => {
       return createAccountProxyResp;
     });
@@ -256,7 +256,7 @@ describe('Test function: createAccount', function () {
     expect(state.transactions.length).to.be.eq(3);
   });
 
-  it('should not create any user account with proxy in state in testnet if get account ETH balance throws error', async function () {
+  it('should not create any user account with proxy in state in SN_GOERLI if get account ETH balance throws error', async function () {
     sandbox.stub(utils, 'deployAccount').callsFake(async () => {
       return createAccountProxyResp;
     });
@@ -275,7 +275,7 @@ describe('Test function: createAccount', function () {
     expect(state.transactions.length).to.be.eq(3);
   });
 
-  it('should skip upsert account and transaction if deployTxn response code has no transaction_hash in testnet', async function () {
+  it('should skip upsert account and transaction if deployTxn response code has no transaction_hash in SN_GOERLI', async function () {
     sandbox.stub(utils, 'deployAccount').callsFake(async () => {
       return createAccountFailedProxyResp;
     });

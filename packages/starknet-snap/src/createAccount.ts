@@ -1,3 +1,4 @@
+import { toJson } from './utils/serializer';
 import {
   getKeysFromAddressIndex,
   getAccContractAddressAndCallData,
@@ -15,10 +16,11 @@ import {
 } from './utils/snapUtils';
 import { AccContract, VoyagerTransactionType, Transaction, TransactionStatus } from './types/snapState';
 import { ApiParams, CreateAccountRequestParams } from './types/snapApi';
-import { EstimateFee, number } from 'starknet';
+import { EstimateFee, num } from 'starknet';
 import { ethers } from 'ethers';
 import { DialogType } from '@metamask/rpc-methods';
 import { heading, panel, text } from '@metamask/snaps-ui';
+import { logger } from './utils/logger';
 
 export async function createAccount(params: ApiParams, silentMode = false) {
   try {
@@ -30,16 +32,16 @@ export async function createAccount(params: ApiParams, silentMode = false) {
     const deploy = !!requestParamsObj.deploy;
 
     const {
+      privateKey,
       publicKey,
       addressIndex: addressIndexInUsed,
       derivationPath,
-      keyPair,
     } = await getKeysFromAddressIndex(keyDeriver, network.chainId, state, addressIndex);
     const { address: contractAddress, callData: contractCallData } = getAccContractAddressAndCallData(
       network.accountClassHash,
       publicKey,
     );
-    console.log(
+    logger.log(
       `createAccount:\ncontractAddress = ${contractAddress}\npublicKey = ${publicKey}\naddressIndex = ${addressIndexInUsed}`,
     );
 
@@ -71,11 +73,11 @@ export async function createAccount(params: ApiParams, silentMode = false) {
 
       try {
         signer = await getSigner(contractAddress, network);
-        console.log(`createAccount:\ngetSigner: contractAddress = ${contractAddress}, signerPublicKey= ${signer}`);
+        logger.log(`createAccount:\ngetSigner: contractAddress = ${contractAddress}, signerPublicKey= ${signer}`);
         failureReason = 'The account address had already been deployed';
       } catch (err) {
         signerAssigned = false;
-        console.log(`createAccount:\ngetSigner: err in get signer: ${JSON.stringify(err)}`);
+        logger.log(`createAccount:\ngetSigner: err in get signer: ${toJson(err)}`);
       }
 
       if (!signerAssigned) {
@@ -84,17 +86,17 @@ export async function createAccount(params: ApiParams, silentMode = false) {
             network,
             getEtherErc20Token(state, network.chainId)?.address,
             'balanceOf',
-            [number.toBN(contractAddress).toString(10)],
+            [num.toBigInt(contractAddress).toString(10)],
           );
-          console.log(`createAccount:\ngetBalanceResp: ${JSON.stringify(getBalanceResp)}`);
+          logger.log(`createAccount:\ngetBalanceResp: ${toJson(getBalanceResp)}`);
           estimateDeployFee = await estimateAccountDeployFee(
             network,
             contractAddress,
             contractCallData,
             publicKey,
-            keyPair,
+            privateKey,
           );
-          console.log(`createAccount:\nestimateDeployFee: ${JSON.stringify(estimateDeployFee)}`);
+          logger.log(`createAccount:\nestimateDeployFee: ${toJson(estimateDeployFee)}`);
           if (Number(getBalanceResp.result[0]) < Number(estimateDeployFee.suggestedMaxFee)) {
             const gasFeeStr = ethers.utils.formatUnits(estimateDeployFee.suggestedMaxFee.toString(10), 18);
             const gasFeeFloat = parseFloat(gasFeeStr).toFixed(6); // 6 decimal places for ether
@@ -103,7 +105,7 @@ export async function createAccount(params: ApiParams, silentMode = false) {
           }
         } catch (err) {
           failureReason = 'The account address ETH balance cannot be read';
-          console.error(`createAccount: failed to read the ETH balance of ${contractAddress}: ${err}`);
+          logger.error(`createAccount: failed to read the ETH balance of ${contractAddress}: ${err}`);
         }
       }
 
@@ -112,7 +114,7 @@ export async function createAccount(params: ApiParams, silentMode = false) {
         contractAddress,
         contractCallData,
         publicKey,
-        keyPair,
+        privateKey,
         estimateDeployFee?.suggestedMaxFee,
       );
 
@@ -146,7 +148,7 @@ export async function createAccount(params: ApiParams, silentMode = false) {
         await upsertTransaction(txn, wallet, saveMutex);
       }
 
-      console.log(`createAccount:\ndeployResp: ${JSON.stringify(deployResp)}`);
+      logger.log(`createAccount:\ndeployResp: ${toJson(deployResp)}`);
 
       return {
         address: deployResp.contract_address,
@@ -157,7 +159,7 @@ export async function createAccount(params: ApiParams, silentMode = false) {
       address: contractAddress,
     };
   } catch (err) {
-    console.error(`Problem found: ${err}`);
+    logger.error(`Problem found: ${err}`);
     throw err;
   }
 }

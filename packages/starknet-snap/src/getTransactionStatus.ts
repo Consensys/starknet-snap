@@ -1,6 +1,8 @@
+import { toJson } from './utils/serializer';
 import { ApiParams, GetTransactionStatusRequestParams } from './types/snapApi';
 import { getNetworkFromChainId } from './utils/snapUtils';
 import * as utils from './utils/starknetUtils';
+import { logger } from './utils/logger';
 
 export async function getTransactionStatus(params: ApiParams) {
   try {
@@ -11,11 +13,11 @@ export async function getTransactionStatus(params: ApiParams) {
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
 
     const getTxnStatusResp = await utils.getTransactionStatus(transactionHash, network);
-    console.log(`getTransactionStatus:\ngetTxnStatusResp: ${JSON.stringify(getTxnStatusResp)}`);
+    logger.log(`getTransactionStatus:\ngetTxnStatusResp: ${toJson(getTxnStatusResp)}`);
 
     return getTxnStatusResp;
   } catch (err) {
-    console.error(`Problem found: ${err}`);
+    logger.error(`Problem found: ${err}`);
     throw err;
   }
 }
