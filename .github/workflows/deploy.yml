@@ -70,3 +70,13 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         if: inputs.environment == 'production'
+
+      - name: invalid aws cloudfront cache
+        env: 
+          AWS_CLOUDFRONT_DISTRIBUTIONS_ID: ${{ vars.AWS_CLOUDFRONT_DISTRIBUTIONS_ID }}
+        run: |
+          echo "Distribution ID : $AWS_CLOUDFRONT_DISTRIBUTIONS_ID"
+          id="$(aws cloudfront create-invalidation --distribution-id $AWS_CLOUDFRONT_DISTRIBUTIONS_ID --paths "/starknet/*" | grep Id | awk -F'"' '{ print $4}')"
+          echo "Waiting for invalidation $id"
+          aws cloudfront wait invalidation-completed --id $id --distribution-id $AWS_CLOUDFRONT_DISTRIBUTIONS_ID
+          echo "Invalidation $id completed"
