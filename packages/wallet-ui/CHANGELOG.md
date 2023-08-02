@@ -7,13 +7,7 @@ All notable changes to this project will be documented in this file. See [standa
 
 
 ### Bug Fixes
-
-* audit report ([#106](https://github.com/Consensys/starknet-snap/issues/106)) ([663720e](https://github.com/Consensys/starknet-snap/commit/663720ef2da91e7cb8f978f418be221ef8470e31))
-* audit report update version ([#108](https://github.com/Consensys/starknet-snap/issues/108)) ([32e5293](https://github.com/Consensys/starknet-snap/commit/32e5293653587ba53e806024876ccdb67d33cc0b))
-* audit report update version ([#112](https://github.com/Consensys/starknet-snap/issues/112)) ([5324859](https://github.com/Consensys/starknet-snap/commit/53248598d2e409e7a7f931c574a4485952ed1b1c))
-* deploy pipeline of production ([#89](https://github.com/Consensys/starknet-snap/issues/89)) ([8346bf1](https://github.com/Consensys/starknet-snap/commit/8346bf154874ba89580b393c9703bd7e216b3da0))
-* dummy commit for UI ([1468e72](https://github.com/Consensys/starknet-snap/commit/1468e7267a9d8a0befbf6fc25ead4a9a60629271))
-* **SF-494:** remove html tag from alert dialog ([#114](https://github.com/Consensys/starknet-snap/issues/114)) ([7231bb7](https://github.com/Consensys/starknet-snap/commit/7231bb7fa4671283b2e7b4cbf5a519d56a57697a))
+* remove html tag from alert dialog ([#114](https://github.com/Consensys/starknet-snap/issues/114)) ([7231bb7](https://github.com/Consensys/starknet-snap/commit/7231bb7fa4671283b2e7b4cbf5a519d56a57697a))
 
 ## [1.14.1](https://github.com/ConsenSys/starknet-snap/compare/wallet-ui-v1.14.0...wallet-ui-v1.14.1) (2023-04-24)
 

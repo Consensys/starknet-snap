@@ -1,44 +1,16 @@
 # Changelog
 
 
-## [3.0.0](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v2.0.0...starknet-snap-v3.0.0) (2023-07-17)
+## [2.0.1](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v2.0.0...starknet-snap-v2.0.1) (2023-07-17)
 
 
 ### ⚠ BREAKING CHANGES
-
-* starknet.js to v4.17.1 for new account deployment ([#42](https://github.com/Consensys/starknet-snap/issues/42))
+* starknet.js to 5.16.0
 
 ### Features
 
-* added changes to accommodate Voyager txn API responses changes ([#34](https://github.com/Consensys/starknet-snap/issues/34)) ([7990de0](https://github.com/Consensys/starknet-snap/commit/7990de0cbeadb100fd3d4b85bc3dfa6c7c607b30))
-* added specific address index in starkNet_createAccount and fixed Dapp to always use 0 ([#7](https://github.com/Consensys/starknet-snap/issues/7)) ([0607626](https://github.com/Consensys/starknet-snap/commit/0607626a2614ef01b964212ab08cdc225fc226a8))
-* added support for MM flask v10.24.1 and added starkNet_estimate… ([#50](https://github.com/Consensys/starknet-snap/issues/50)) ([88acb2f](https://github.com/Consensys/starknet-snap/commit/88acb2fbf7c4884a0bd142a70bc87a0366432fbe))
-* ensure txns in snap state have the same status and timestamp as… ([#10](https://github.com/Consensys/starknet-snap/issues/10)) ([7c6de7c](https://github.com/Consensys/starknet-snap/commit/7c6de7c17d67ca9813a7193d4ff17375cb0c1ceb))
-* fixed the starknet.js version to be v4.6.x ([#22](https://github.com/Consensys/starknet-snap/issues/22)) ([e71a87c](https://github.com/Consensys/starknet-snap/commit/e71a87c3aa4f5945214079e073cabef4e7c2dd0a))
-* set Infura RPC node as the default provider for mainnet ([5d969d0](https://github.com/Consensys/starknet-snap/commit/5d969d085e1b4b2b670071757da9240c900c3478))
-* Sf 479 account deployment with first transaction ([#55](https://github.com/Consensys/starknet-snap/issues/55)) ([dedcbba](https://github.com/Consensys/starknet-snap/commit/dedcbba7291431c6912002e96e5ece595f8474fa))
-* starknet.js to v4.17.1 for new account deployment ([#42](https://github.com/Consensys/starknet-snap/issues/42)) ([f0df619](https://github.com/Consensys/starknet-snap/commit/f0df6194d149d04c21d9116aa5a3faaa64fa5cca))
-* switch from snap confirm to snap dialog ([#71](https://github.com/Consensys/starknet-snap/issues/71)) ([9350517](https://github.com/Consensys/starknet-snap/commit/9350517931421902aac456c3b4862ec2a1bcd5da))
-* switched back to use Infura endpoints except for estimateFeeBulk ([#76](https://github.com/Consensys/starknet-snap/issues/76)) ([9df15df](https://github.com/Consensys/starknet-snap/commit/9df15df1aab5324f00529a1e0bb24d5f0d33ad07))
-* temporarily reverted back to use StarkNet feeder gateway APIs as default provider ([#39](https://github.com/Consensys/starknet-snap/issues/39)) ([ed05913](https://github.com/Consensys/starknet-snap/commit/ed059130c6b4cddd28965302eb3824529d1328ac))
-* update the response of stark net get transactions ([#51](https://github.com/Consensys/starknet-snap/issues/51)) ([56266a8](https://github.com/Consensys/starknet-snap/commit/56266a8fc5db80c0fb84fe50dae1dcf2c4ec9922))
-* update to use snap_getBip44Entropy ([#21](https://github.com/Consensys/starknet-snap/issues/21)) ([a619c66](https://github.com/Consensys/starknet-snap/commit/a619c66c3f2f97b53da4608f6133efd08ce26e34))
-* updated snap shasum ([43f9cbc](https://github.com/Consensys/starknet-snap/commit/43f9cbcde509725cfe73a28fd18c10793221377c))
-* updated yarn.lock and temporarily set Sequencer as the default provider for mainnet ([db01340](https://github.com/Consensys/starknet-snap/commit/db01340843e24a9f2915334ced77f8e40b13385d))
-* upgrade starknet.js to v4.22 and fix the dependabot alerts by u… ([#74](https://github.com/Consensys/starknet-snap/issues/74)) ([a3827ee](https://github.com/Consensys/starknet-snap/commit/a3827ee837160bfc767c199aef206dc474231997))
-* upgraded snap packages and patched luxon by upgrading yarn to v2 ([#79](https://github.com/Consensys/starknet-snap/issues/79)) ([94c2544](https://github.com/Consensys/starknet-snap/commit/94c25445b48a5d02ce4baba62621357c22e3bc89))
-* upgraded to starknet.js v4.5.0 and set Infura RPC node as the default provider ([d666ac7](https://github.com/Consensys/starknet-snap/commit/d666ac76ff02a12e935a24f1ef6a7df83fe10bca))
+* Upgrade starknet library from 4.22.0 to 5.16.0
 
-
-### Bug Fixes
-
-* audit report ([#106](https://github.com/Consensys/starknet-snap/issues/106)) ([663720e](https://github.com/Consensys/starknet-snap/commit/663720ef2da91e7cb8f978f418be221ef8470e31))
-* audit report update version ([#110](https://github.com/Consensys/starknet-snap/issues/110)) ([32a8388](https://github.com/Consensys/starknet-snap/commit/32a83880fb24002323161a0e5234ad8f8bb1ca0e))
-* audit report update version ([#111](https://github.com/Consensys/starknet-snap/issues/111)) ([0e39bad](https://github.com/Consensys/starknet-snap/commit/0e39baddfccb0bd0799b8b8f5b542e00fbd42821))
-* audit report update version ([#112](https://github.com/Consensys/starknet-snap/issues/112)) ([5324859](https://github.com/Consensys/starknet-snap/commit/53248598d2e409e7a7f931c574a4485952ed1b1c))
-* change filter in the snap so that it gets the not received transactions when refreshing ([#63](https://github.com/Consensys/starknet-snap/issues/63)) ([74a612f](https://github.com/Consensys/starknet-snap/commit/74a612fce6278526b3ee9db1cf83e452c2fdd3f2))
-* createAccount response fields and updated test cases and the ope… ([#4](https://github.com/Consensys/starknet-snap/issues/4)) ([6c03853](https://github.com/Consensys/starknet-snap/commit/6c0385393658b1d047a29212b6691b3c819451ec))
-* deploy pipeline of production ([#89](https://github.com/Consensys/starknet-snap/issues/89)) ([8346bf1](https://github.com/Consensys/starknet-snap/commit/8346bf154874ba89580b393c9703bd7e216b3da0))
 
 ## [1.7.0](https://github.com/ConsenSys/starknet-snap/compare/starknet-snap-v1.6.0...starknet-snap-v1.7.0) (2023-04-21)
 
