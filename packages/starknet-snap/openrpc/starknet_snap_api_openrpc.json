@@ -899,17 +899,30 @@
       },
       "TXN_STATUS": {
         "type": "string",
-        "enum": ["UNKNOWN", "RECEIVED", "PENDING", "ACCEPTED_ON_L2", "ACCEPTED_ON_L1", "REJECTED"],
+        "enum": [
+          "UNKNOWN",
+          "RECEIVED",
+          "PENDING",
+          "ACCEPTED_ON_L2",
+          "ACCEPTED_ON_L1",
+          "REJECTED"
+        ],
         "description": "The status of the transaction. May be unknown in case node is not aware of it"
       },
       "VOYAGER_TXN_TYPE": {
         "type": "string",
-        "enum": ["invoke", "deploy"],
+        "enum": [
+          "invoke",
+          "deploy"
+        ],
         "description": "The txn type of the transaction from Voyager. May not be a full list here and subject to change"
       },
       "VOYAGER_TXN_STATUS": {
         "type": "string",
-        "enum": ["Accepted on L2", "Accepted on L1"],
+        "enum": [
+          "Accepted on L2",
+          "Accepted on L1"
+        ],
         "description": "The status of the transaction. May be unknown in case node is not aware of it"
       },
       "TYPED_DATA_SIGNATURE": {

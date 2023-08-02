@@ -1,6 +1,17 @@
 # Changelog
 
 
+## [2.0.1](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v2.0.0...starknet-snap-v2.0.1) (2023-07-17)
+
+
+### ⚠ BREAKING CHANGES
+* starknet.js to 5.16.0
+
+### Features
+
+* Upgrade starknet library from 4.22.0 to 5.16.0
+
+
 ## [1.7.0](https://github.com/ConsenSys/starknet-snap/compare/starknet-snap-v1.6.0...starknet-snap-v1.7.0) (2023-04-21)
 
 

@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
 
+## [1.14.2](https://github.com/Consensys/starknet-snap/compare/wallet-ui-v1.14.1...wallet-ui-v1.14.2) (2023-07-17)
+
+
+### Bug Fixes
+* remove html tag from alert dialog ([#114](https://github.com/Consensys/starknet-snap/issues/114)) ([7231bb7](https://github.com/Consensys/starknet-snap/commit/7231bb7fa4671283b2e7b4cbf5a519d56a57697a))
+
 ## [1.14.1](https://github.com/ConsenSys/starknet-snap/compare/wallet-ui-v1.14.0...wallet-ui-v1.14.1) (2023-04-24)
 
 
