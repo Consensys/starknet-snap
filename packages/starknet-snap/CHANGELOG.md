@@ -1,6 +1,13 @@
 # Changelog
 
 
+## [2.0.2](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v2.0.1...starknet-snap-v2.0.2) (2023-08-16)
+
+
+### Features
+
+*  Bumps ses from 0.18.2 to 0.18.7 ([#57](https://github.com/Consensys/starknet-snap/security/dependabot/57)) ([5b55275](https://github.com/Consensys/starknet-snap/commit/5b55275c0532c233dcf1f539213b17567047fd73))
+
 ## [2.0.1](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v2.0.0...starknet-snap-v2.0.1) (2023-07-17)
 
 
