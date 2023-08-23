@@ -36,5 +36,5 @@ export const TandCLink = styled.a`
   font-weight: ${(props) => props.theme.typography.bold.fontWeight};
   font-family: ${(props) => props.theme.typography.bold.fontFamily};
   margin-left: ${(props) => props.theme.spacing.tiny2};
-  color : ${(props) => props.theme.palette.grey.black};
+  color: ${(props) => props.theme.palette.grey.black};
 `;

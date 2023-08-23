@@ -9,16 +9,15 @@ export const FooterView = () => {
         <MetamaskSnaps>MetaMask Snaps</MetamaskSnaps>
 
         <TandCWrapper>
-        <CopyText>&copy;{currentYr} consensys</CopyText>
-        <TandCLink href="https://consensys.io/terms-of-use" target="_blank">
-          Terms of Use
-        </TandCLink>
-        <TandCLink href="https://consensys.io/privacy-policy" target="_blank">
-          Privacy Policy
-        </TandCLink>
-      </TandCWrapper>
+          <CopyText>&copy;{currentYr} consensys</CopyText>
+          <TandCLink href="https://consensys.io/terms-of-use" target="_blank">
+            Terms of Use
+          </TandCLink>
+          <TandCLink href="https://consensys.io/privacy-policy" target="_blank">
+            Privacy Policy
+          </TandCLink>
+        </TandCWrapper>
       </Wrapper>
-      
     </>
   );
 };
