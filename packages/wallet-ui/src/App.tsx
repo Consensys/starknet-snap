@@ -34,7 +34,7 @@ function App() {
 
   useEffect(() => {
     if (!provider) {
-      return
+      return;
     }
     if (connected) {
       initSnap();

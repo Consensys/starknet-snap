@@ -21,7 +21,6 @@ export const useHasMetamask = () => {
           dispatch(setProvider(null));
           setHasMetamask(false);
         }
-
       } catch (err) {
         dispatch(setProvider(null));
         setHasMetamask(false);
@@ -30,10 +29,10 @@ export const useHasMetamask = () => {
       }
     };
     init();
-  }, []);
+  }, [dispatch]);
 
   return {
-    hasMetamask
+    hasMetamask,
   };
 };
 
@@ -52,25 +51,23 @@ export const detectMetamask = async () => {
 
 export const getProvider = async () => {
   let { ethereum } = window as any;
-  let providers = [ethereum]
+  let providers = [ethereum];
 
   //ethereum.detected or ethereum.providers may exist when more than 1 wallet installed
   if ('detected' in ethereum) {
-    providers = ethereum['detected']
+    providers = ethereum['detected'];
+  } else if ('providers' in ethereum) {
+    providers = ethereum['providers'];
   }
-  else if ('providers' in ethereum) {
-    providers = ethereum['providers']
-  }
-  
+
   //delect provider by sending request
   for (const provider of providers) {
-    if (provider && await isSupportSnap(provider))
-    {
+    if (provider && (await isSupportSnap(provider))) {
       window.ethereum = provider;
-      return window.ethereum
+      return window.ethereum;
     }
   }
-  return null
+  return null;
 };
 
 const isSupportSnap = async (provider: any) => {
@@ -78,7 +75,7 @@ const isSupportSnap = async (provider: any) => {
     await provider.request({
       method: 'wallet_getSnaps',
     });
-    return true
+    return true;
   } catch {
     return false;
   }
