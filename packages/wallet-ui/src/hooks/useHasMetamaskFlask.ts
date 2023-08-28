@@ -1,3 +1,4 @@
+//TODO: remove when metamask is released with snap support
 import detectEthereumProvider from '@metamask/detect-provider';
 import { useEffect, useState } from 'react';
 

@@ -23,7 +23,7 @@ library.add(fas, far);
 
 function App() {
   const { initSnap, getWalletData, checkConnection } = useStarkNetSnap();
-  const { connected, forceReconnect } = useAppSelector((state) => state.wallet);
+  const { connected, forceReconnect, provider } = useAppSelector((state) => state.wallet);
   const { infoModalVisible, minVersionModalVisible } = useAppSelector((state) => state.modals);
   const { loader } = useAppSelector((state) => state.UI);
   const networks = useAppSelector((state) => state.networks);
@@ -33,6 +33,9 @@ function App() {
   const address = accounts?.length > 0 ? (accounts[0] as unknown as string) : '0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx';
 
   useEffect(() => {
+    if (!provider) {
+      return
+    }
     if (connected) {
       initSnap();
     }
@@ -40,15 +43,15 @@ function App() {
       checkConnection();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [connected, forceReconnect, hasMetamask]);
+  }, [connected, forceReconnect, hasMetamask, provider]);
 
   useEffect(() => {
-    if (networks.items.length > 0) {
+    if (provider && networks.items.length > 0) {
       const chainId = networks.items[networks.activeNetwork].chainId;
       getWalletData(chainId);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [networks.activeNetwork]);
+  }, [networks.activeNetwork, provider]);
 
   const loading = loader.isLoading;
 
