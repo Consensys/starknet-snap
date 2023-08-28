@@ -1,6 +1,7 @@
 import { BIP44AddressKeyDeriver } from '@metamask/key-tree';
 import Mutex from 'async-mutex/lib/Mutex';
 import { SnapState, VoyagerTransactionType } from './snapState';
+import { GetTransactionReceiptResponse } from 'starknet';
 
 export interface ApiParams {
   state: SnapState;
@@ -140,4 +141,9 @@ export interface RecoverAccountsRequestParams extends BaseRequestParams {
   startScanIndex?: string | number;
   maxScanned?: string | number;
   maxMissed?: string | number;
+}
+
+export interface RpcV4GetTransactionReceiptResponse {
+  execution_status?: string;
+  finality_status?: string;
 }

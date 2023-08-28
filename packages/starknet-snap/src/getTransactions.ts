@@ -51,7 +51,8 @@ export async function getTransactions(params: ApiParams) {
     }
     logger.log(`getTransactions\nmassagedTxns initial total: ${massagedTxns.length}`);
 
-    // Retrieve the RECEIVED, PENDING, and ACCEPTED_ON_L2 txns from snap state
+    // Retrieve the Finaility Status: RECEIVED, PENDING, and ACCEPTED_ON_L2 txns from snap state
+    // Retrieve the Execution Status: REJECTED txns from snap state
     let storedUnsettledTxns = snapUtils.getTransactions(
       state,
       network.chainId,
@@ -60,10 +61,11 @@ export async function getTransactions(params: ApiParams) {
       undefined,
       [
         TransactionStatus.RECEIVED,
+        TransactionStatus.ACCEPTED_ON_L2,
         TransactionStatus.NOT_RECEIVED,
         TransactionStatus.PENDING,
-        TransactionStatus.ACCEPTED_ON_L2,
       ],
+      [TransactionStatus.REJECTED],
       minTimeStamp,
     );
 
@@ -76,48 +78,52 @@ export async function getTransactions(params: ApiParams) {
         [VoyagerTransactionType.DEPLOY, VoyagerTransactionType.DEPLOY_ACCOUNT],
         [
           TransactionStatus.RECEIVED,
+          TransactionStatus.ACCEPTED_ON_L2,
           TransactionStatus.NOT_RECEIVED,
           TransactionStatus.PENDING,
-          TransactionStatus.ACCEPTED_ON_L2,
         ],
+        undefined,
         undefined,
       );
       logger.log(`getTransactions\nstoredUnsettledDeployTxns:\n${toJson(storedUnsettledDeployTxns)}`);
       storedUnsettledTxns = [...storedUnsettledTxns, ...storedUnsettledDeployTxns];
     }
 
-    // For each "unsettled" txn, update the status and timestamp from the same txn found in massagedTxns
-    storedUnsettledTxns.forEach((txn) => {
-      const foundMassagedTxn = massagedTxns.find(
-        (massagedTxn) => num.toBigInt(massagedTxn.txnHash) === num.toBigInt(txn.txnHash),
-      );
-      txn.status = foundMassagedTxn?.status ?? txn.status;
-      txn.timestamp = foundMassagedTxn?.timestamp ?? txn.timestamp;
-    });
+    // For each "unsettled" txn, update the timestamp from the same txn found in massagedTxns
+    const requireUpdateStatus = [];
+    if (massagedTxns) {
+      storedUnsettledTxns.forEach((txn: Transaction, idx: number) => {
+        const foundMassagedTxn = massagedTxns.find(
+          (massagedTxn) => num.toBigInt(massagedTxn.txnHash) === num.toBigInt(txn.txnHash),
+        );
+        if (!foundMassagedTxn) {
+          requireUpdateStatus.push(idx);
+        } else {
+          txn.timestamp = foundMassagedTxn?.timestamp;
+          txn.finalityStatus = foundMassagedTxn?.finalityStatus;
+          txn.executionStatus = foundMassagedTxn?.executionStatus;
+          txn.status = ''; // DEPRECATION
+        }
+      });
+    }
 
     logger.log(`getTransactions\nstoredUnsettledTxns:\n${toJson(storedUnsettledTxns)}`);
 
-    // Retrieve the REJECTED txns from snap state
-    const storedRejectedTxns = snapUtils.getTransactions(
-      state,
-      network.chainId,
-      senderAddress,
-      contractAddress,
-      undefined,
-      TransactionStatus.REJECTED,
-      minTimeStamp,
-    );
-    logger.log(`getTransactions\nstoredRejectedTxns:\n${toJson(storedRejectedTxns)}`);
-
-    // For each "unsettled" txn, get the latest status from the provider (RPC or sequencer)
-    await Promise.allSettled(
-      storedUnsettledTxns.map(async (txn) => {
-        const txnStatus = await utils.getTransactionStatus(txn.txnHash, network);
-        txn.status = txnStatus ?? txn.status;
-        txn.failureReason = txn.failureReason || '';
-      }),
-    );
-    logger.log(`getTransactions\nstoredUnsettledTxns after updated status:\n${toJson(storedUnsettledTxns)}`);
+    // For each "unsettled" txn, get the latest status from the provider (RPC)
+    if (requireUpdateStatus) {
+      await Promise.allSettled(
+        requireUpdateStatus.map(async (idx) => {
+          const txn = storedUnsettledTxns[idx];
+          const { finalityStatus, executionStatus } = await utils.getTransactionStatus(txn.txnHash, network);
+          txn.finalityStatus = finalityStatus;
+          txn.executionStatus = executionStatus;
+          txn.status = ''; // DEPRECATION
+          txn.failureReason = txn.failureReason || '';
+          storedUnsettledTxns[idx] = txn;
+        }),
+      );
+      logger.log(`getTransactions\nstoredUnsettledTxns after updated status:\n${toJson(storedUnsettledTxns)}`);
+    }
 
     // Update the transactions in state in a single call
     await snapUtils.upsertTransactions(storedUnsettledTxns, wallet, saveMutex);
@@ -132,7 +138,7 @@ export async function getTransactions(params: ApiParams) {
     await snapUtils.removeAcceptedTransaction(minTimeStamp, wallet, saveMutex);
 
     // Sort in timestamp descending order
-    massagedTxns = [...massagedTxns, ...storedUnsettledTxns, ...storedRejectedTxns].sort(
+    massagedTxns = [...massagedTxns, ...storedUnsettledTxns].sort(
       (a: Transaction, b: Transaction) => b.timestamp - a.timestamp,
     );
     logger.log(`getTransactions\nmassagedTxns:\n${toJson(massagedTxns)}`);

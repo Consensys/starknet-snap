@@ -11,6 +11,9 @@ import {
   Transaction,
   VoyagerTransactionType,
   TransactionStatus,
+  TransactionStatusType,
+  FinailityStatus,
+  ExecutionStatus,
 } from '../types/snapState';
 import {
   MAXIMUM_NETWORK_NAME_LENGTH,
@@ -411,7 +414,8 @@ export function getTransactions(
   senderAddress: string | undefined,
   contractAddress: string | undefined,
   txnType: VoyagerTransactionType | string | string[] | undefined,
-  status: string | string[] | undefined,
+  finality_status: string | string[] | undefined,
+  execution_status: string | string[] | undefined,
   minTimestamp: number | undefined, // in ms
 ): Transaction[] {
   let filteredTxns: Transaction[] = [];
@@ -436,18 +440,35 @@ export function getTransactions(
         filteredTxns = filteredTxns.filter((txn) => txn.txnType === txnType);
       }
     }
-    if (status) {
-      if (Array.isArray(status)) {
-        filteredTxns = filteredTxns.filter((txn) =>
-          status.map((x) => x.toLowerCase()).includes(txn.status.toLowerCase()),
-        );
-      } else {
-        filteredTxns = filteredTxns.filter((txn) => txn.status.toLowerCase() === status.toLowerCase());
-      }
+    if (finality_status) {
+      filteredTxns = filiterStatus(filteredTxns, finality_status, TransactionStatusType.FINALITY);
+    }
+    if (execution_status) {
+      filteredTxns = filiterStatus(filteredTxns, execution_status, TransactionStatusType.EXECUTION);
     }
   }
 
   return filteredTxns;
+}
+
+export function filiterStatus(
+  txns: Transaction[],
+  status: string | string[] | undefined,
+  status_prop: TransactionStatusType,
+) {
+  if (status) {
+    let lowerCaseStatuses = Array.isArray(status) ? status.map((x) => x.toLowerCase()) : [status.toLowerCase()];
+    // filter DEPRECATION first and then filiter desired status
+    return txns.filter(
+      (txn: Transaction | Object) =>
+        (txn[TransactionStatusType.DEPRECATION] &&
+          lowerCaseStatuses.includes(txn[TransactionStatusType.DEPRECATION].toLowerCase())) ||
+        (txn.hasOwnProperty(status_prop) &&
+          txn[status_prop] &&
+          lowerCaseStatuses.includes(txn[status_prop].toLowerCase())),
+    );
+  }
+  return txns;
 }
 
 export async function upsertTransaction(txn: Transaction, wallet, mutex: Mutex, state: SnapState = undefined) {
@@ -475,6 +496,8 @@ export async function upsertTransaction(txn: Transaction, wallet, mutex: Mutex, 
         return;
       }
       storedTxn.status = txn.status;
+      storedTxn.executionStatus = txn.executionStatus;
+      storedTxn.finalityStatus = txn.finalityStatus;
       storedTxn.failureReason = txn.failureReason;
       storedTxn.timestamp = txn.timestamp;
     }
@@ -509,6 +532,8 @@ export async function upsertTransactions(txns: Transaction[], wallet, mutex: Mut
         state.transactions.push(txn);
       } else {
         storedTxn.status = txn.status;
+        storedTxn.executionStatus = txn.executionStatus;
+        storedTxn.finalityStatus = txn.finalityStatus;
         storedTxn.failureReason = txn.failureReason;
         storedTxn.timestamp = txn.timestamp;
       }
@@ -543,7 +568,10 @@ export async function removeAcceptedTransaction(
     state.transactions = state.transactions.filter(
       (txn) =>
         (txn.status !== TransactionStatus.ACCEPTED_ON_L2 && txn.status !== TransactionStatus.ACCEPTED_ON_L1) ||
-        (txn.status === TransactionStatus.ACCEPTED_ON_L2 && txn.timestamp * 1000 >= minTimeStamp),
+        (txn.finalityStatus !== TransactionStatus.ACCEPTED_ON_L2 &&
+          txn.finalityStatus !== TransactionStatus.ACCEPTED_ON_L1) ||
+        ((txn.finalityStatus === TransactionStatus.ACCEPTED_ON_L2 || txn.status === TransactionStatus.ACCEPTED_ON_L2) &&
+          txn.timestamp * 1000 >= minTimeStamp),
     );
     await wallet.request({
       method: 'snap_manageState',

@@ -23,11 +23,12 @@ import {
   validateAndParseAddress as _validateAndParseAddress,
 } from 'starknet';
 import type { Hex } from '@noble/curves/abstract/utils';
-import { Network, SnapState, Transaction, TransactionType } from '../types/snapState';
+import { ExecutionStatus, FinailityStatus, Network, SnapState, Transaction, TransactionType } from '../types/snapState';
 import { PROXY_CONTRACT_HASH, TRANSFER_SELECTOR_HEX } from './constants';
 import { getAddressKey } from './keyPair';
 import { getAccount, getAccounts, getTransactionFromVoyagerUrl, getTransactionsFromVoyagerUrl } from './snapUtils';
 import { logger } from './logger';
+import { RpcV4GetTransactionReceiptResponse } from '../types/snapApi';
 
 export const getCallDataArray = (callDataStr: string): string[] => {
   return (callDataStr ?? '')
@@ -152,10 +153,12 @@ export const getSigner = async (userAccAddress: string, network: Network): Promi
 };
 
 export const getTransactionStatus = async (transactionHash: num.BigNumberish, network: Network) => {
-  // ensure always calling the sequencer endpoint since the rpc endpoint and
-  // does not support retrieving status of failed txn yet.
-  const provider = getProvider(network, true);
-  return (await provider.getTransactionReceipt(transactionHash)).status;
+  const provider = getProvider(network);
+  const receipt = (await provider.getTransactionReceipt(transactionHash)) as RpcV4GetTransactionReceiptResponse;
+  return {
+    executionStatus: receipt.execution_status,
+    finalityStatus: receipt.finality_status,
+  };
 };
 
 export const getTransaction = async (transactionHash: num.BigNumberish, network: Network) => {
@@ -264,9 +267,12 @@ export const getMassagedTransactions = async (
   let massagedTxns = await Promise.all(
     txns.map(async (txn) => {
       let txnResp: GetTransactionResponse;
+      let statusResp;
       try {
         txnResp = await getTransaction(txn.hash, network);
+        statusResp = await getTransactionStatus(txn.hash, network);
         logger.log(`getMassagedTransactions: txnResp:\n${toJson(txnResp)}`);
+        logger.log(`getMassagedTransactions: statusResp:\n${toJson(statusResp)}`);
       } catch (err) {
         logger.error(`getMassagedTransactions: error received from getTransaction: ${err}`);
       }
@@ -280,7 +286,9 @@ export const getMassagedTransactions = async (
         contractFuncName: num.toBigInt(txnResp.calldata?.[2] || '') === bigIntTransferSelectorHex ? 'transfer' : '',
         contractCallData: txnResp.calldata?.slice(6, txnResp.calldata?.length - 1) || [],
         timestamp: txn.timestamp,
-        status: txnResp['status'] || txn.status || '',
+        status: '', //DEPRECATION
+        finalityStatus: statusResp.finalityStatus || '',
+        executionStatus: statusResp.executionStatus || '',
         eventIds: [],
         failureReason: '',
       };

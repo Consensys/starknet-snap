@@ -15,7 +15,7 @@ describe('Test function: logger', function () {
     debug: () => sinon.stub(console, 'debug'),
   };
   const spyempty = () => sinon.stub(logutils, 'emptyLog');
-  
+
   afterEach(function () {
     sinon.restore();
     sinon.reset();
