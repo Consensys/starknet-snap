@@ -69,7 +69,7 @@ resource "aws_cloudfront_distribution" "dist" {
   enabled             = true
   default_root_object = "index.html"
 
-  aliases         = var.alternative_domain_names
+  aliases         = var.domain_name != "" ? [var.domain_name] : var.alternative_domain_names
   price_class     = "PriceClass_100"
   is_ipv6_enabled = true
   tags            = var.tags
