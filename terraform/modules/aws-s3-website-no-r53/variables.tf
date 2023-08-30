@@ -21,11 +21,6 @@ variable "acl" {
   default     = "private"
 }
 
-variable "hosted_zone_id" {
-  description = "Route 53 hosted zone id"
-  type        = string
-}
-
 variable "domain_name" {
   description = "Domain name."
   type        = string
