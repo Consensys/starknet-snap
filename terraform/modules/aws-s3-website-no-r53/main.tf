@@ -69,7 +69,7 @@ resource "aws_cloudfront_distribution" "dist" {
   enabled             = true
   default_root_object = "index.html"
 
-  aliases         = [var.domain_name]
+  aliases         = var.domain_name
   price_class     = "PriceClass_100"
   is_ipv6_enabled = true
   tags            = var.tags
@@ -131,16 +131,4 @@ resource "aws_cloudfront_distribution" "dist" {
     minimum_protocol_version = "TLSv1.2_2021"
   }
 
-}
-
-resource "aws_route53_record" "dist" {
-  zone_id = var.hosted_zone_id
-  name    = var.domain_name
-  type    = "A"
-
-  alias {
-    name                   = aws_cloudfront_distribution.dist.domain_name
-    zone_id                = aws_cloudfront_distribution.dist.hosted_zone_id
-    evaluate_target_health = false
-  }
 }
