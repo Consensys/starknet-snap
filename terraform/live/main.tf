@@ -139,7 +139,7 @@ module "s3_snaps_page_dev_new" {
   bucket_name          = local.dev_snaps_domain_name_new
   domain_name          = local.dev_snaps_domain_name_new
   certificate_arn      = local.snaps_cert_new
-  cloudfront_functions = local.cloudfront_functions
+  cloudfront_functions = local.cloudfront_functions_new
   tags                 = module.tags.common
 }
 
