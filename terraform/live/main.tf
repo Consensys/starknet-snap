@@ -148,7 +148,7 @@ module "s3_snaps_page_dev" {
   domain_name          = local.dev_snaps_domain_name
   certificate_arn      = module.snaps_cert.acm_certificate_arn
   hosted_zone_id       = local.snaps_hosted_zone_id
-  cloudfront_functions = local.cloudfront_functions
+  cloudfront_functions = local.cloudfront_functions_new
   tags                 = module.tags.common
 }
 
