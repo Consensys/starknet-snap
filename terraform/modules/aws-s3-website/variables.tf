@@ -48,3 +48,9 @@ variable "lambda_function_arn" {
   type        = list(string)
   default     = []
 }
+
+variable "alternative_domain_names" {
+  description = "Alternative Domain Names"
+  type        = list(string)
+  default     = []
+}
