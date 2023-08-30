@@ -108,7 +108,7 @@ module "s3_dev" {
   source = "../modules/aws-s3-website"
 
   bucket_name     = local.dev_domain_name
-  doamin_name     = local.dev_domain_name
+  domain_name     = local.dev_domain_name
   certificate_arn = module.cert.acm_certificate_arn
   cloudfront_functions = {
     headers = {
