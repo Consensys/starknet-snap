@@ -29,7 +29,6 @@ variable "hosted_zone_id" {
 variable "domain_name" {
   description = "Domain name."
   type        = string
-  default     = ""
 }
 
 variable "certificate_arn" {
