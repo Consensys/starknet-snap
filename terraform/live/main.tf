@@ -3,11 +3,14 @@
 #############
 
 locals {
-  hosted_zone_name    = "starknet-snap.consensys-solutions.net"
-  hosted_zone_id      = aws_route53_zone.main.zone_id
-  dev_domain_name     = "app-dev.${local.hosted_zone_name}"
-  staging_domain_name = "app-staging.${local.hosted_zone_name}"
-  prod_domain_name    = "app.${local.hosted_zone_name}"
+  hosted_zone_name                = "starknet-snap.consensys-solutions.net"
+  hosted_zone_id                  = aws_route53_zone.main.zone_id
+  dev_domain_name                 = "app-dev.${local.hosted_zone_name}"
+  dev_domain_name_alternative     = "dev.snaps.consensys.io"
+  staging_domain_name             = "app-staging.${local.hosted_zone_name}"
+  staging_domain_name_alternative = "staging.snaps.consensys.io"
+  prod_domain_name                = "app.${local.hosted_zone_name}"
+  prod_domain_name_alternative    = "snaps.consensys.io"
 
   # snaps 
   snaps_hosted_zone_name    = "snaps.consensys.net"
@@ -101,8 +104,11 @@ resource "aws_cloudfront_function" "starknet_add_header" {
 module "s3_dev" {
   source = "../modules/aws-s3-website"
 
-  bucket_name     = local.dev_domain_name
-  domain_name     = local.dev_domain_name
+  bucket_name = local.dev_domain_name
+  alternative_domain_names = [
+    local.dev_domain_name,
+    local.dev_domain_name_alternative,
+  ]
   certificate_arn = module.cert.acm_certificate_arn
   cloudfront_functions = {
     headers = {

@@ -29,6 +29,7 @@ variable "hosted_zone_id" {
 variable "domain_name" {
   description = "Domain name."
   type        = string
+  default     = ""
 }
 
 variable "certificate_arn" {
@@ -45,6 +46,12 @@ variable "cloudfront_functions" {
 
 variable "lambda_function_arn" {
   description = "Lambda function arn"
+  type        = list(string)
+  default     = []
+}
+
+variable "alternative_domain_names" {
+  description = "Alternative Domain Names"
   type        = list(string)
   default     = []
 }
