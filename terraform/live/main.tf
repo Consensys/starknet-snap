@@ -33,6 +33,17 @@ locals {
       event_type = "viewer-response"
     }
   }
+
+  cloudfront_functions_new = {
+    redirect = {
+      arn        = aws_cloudfront_function.starknet_redirect_mm.arn
+      event_type = "viewer-request"
+    }
+    headers = {
+      arn        = aws_cloudfront_function.starknet_add_header.arn
+      event_type = "viewer-response"
+    }
+  }
 }
 
 resource "aws_route53_zone" "main" {
@@ -82,6 +93,14 @@ module "snaps_cert" {
 #############
 ## Cloufront configurations
 #############
+
+resource "aws_cloudfront_function" "starknet_redirect_mm" {
+  name    = "starknet-snap-redirect-mm"
+  runtime = "cloudfront-js-1.0"
+  comment = "starknet-snap-redirect-mm"
+  publish = true
+  code    = file("${path.module}/functions/redirect-mm.js")
+}
 
 resource "aws_cloudfront_function" "starknet_redirect" {
   name    = "starknet-snap-redirect"
@@ -137,7 +156,7 @@ module "s3_snaps_page_dev_new" {
   bucket_name          = local.dev_snaps_domain_name_new
   domain_name          = local.dev_snaps_domain_name_new
   certificate_arn      = local.dev_snaps_cert_new
-  cloudfront_functions = local.cloudfront_functions
+  cloudfront_functions = local.cloudfront_functions_new
   tags                 = module.tags.common
 }
 
