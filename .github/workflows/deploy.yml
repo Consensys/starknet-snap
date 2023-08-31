@@ -51,8 +51,8 @@ jobs:
           yarn workspace @consensys/starknet-snap build
           
           npm publish ./packages/starknet-snap  --tag staging --access public 2>&1 > /dev/null || :
-          aws s3 sync ./packages/wallet-ui/build s3://app-staging.starknet-snap.consensys-solutions.net/starknet
           aws s3 sync ./packages/wallet-ui/build s3://staging.snaps.consensys.net/starknet
+          aws s3 sync ./packages/wallet-ui/build s3://staging.snaps.consensys.io/starknet
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         if: inputs.environment == 'staging'
@@ -67,6 +67,7 @@ jobs:
           
           npm publish ./packages/starknet-snap --tag latest --access public 2>&1 > /dev/null || :
           aws s3 sync ./packages/wallet-ui/build s3://snaps.consensys.net/starknet
+          aws s3 sync ./packages/wallet-ui/build s3://snaps.consensys.io/starknet
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         if: inputs.environment == 'production'
@@ -76,7 +77,12 @@ jobs:
           AWS_CLOUDFRONT_DISTRIBUTIONS_ID: ${{ vars.AWS_CLOUDFRONT_DISTRIBUTIONS_ID }}
         run: |
           echo "Distribution ID : $AWS_CLOUDFRONT_DISTRIBUTIONS_ID"
-          id="$(aws cloudfront create-invalidation --distribution-id $AWS_CLOUDFRONT_DISTRIBUTIONS_ID --paths "/starknet/*" | grep Id | awk -F'"' '{ print $4}')"
-          echo "Waiting for invalidation $id"
-          aws cloudfront wait invalidation-completed --id $id --distribution-id $AWS_CLOUDFRONT_DISTRIBUTIONS_ID
-          echo "Invalidation $id completed"
+          for process in $(echo $AWS_CLOUDFRONT_DISTRIBUTIONS_ID | sed "s/,/ /g")
+          do
+              echo "Processing Distribution ID : $process"
+              id="$(aws cloudfront create-invalidation --distribution-id $process --paths "/starknet/*" | grep Id | awk -F'"' '{ print $4}')"
+              echo "Waiting for invalidation $id"
+              aws cloudfront wait invalidation-completed --id $id --distribution-id $process
+              echo "Invalidation $id completed"
+          done
+

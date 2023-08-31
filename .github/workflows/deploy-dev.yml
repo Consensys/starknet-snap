@@ -55,15 +55,19 @@ jobs:
 
       - name: Deploy to Dev
         run: | 
-          aws s3 sync ./packages/wallet-ui/build s3://app-dev.starknet-snap.consensys-solutions.net/starknet
           aws s3 sync ./packages/wallet-ui/build s3://dev.snaps.consensys.net/starknet
+          aws s3 sync ./packages/wallet-ui/build s3://dev.snaps.consensys.io/starknet
 
       - name: invalid aws cloudfront cache
         env: 
           AWS_CLOUDFRONT_DISTRIBUTIONS_ID: ${{ vars.AWS_CLOUDFRONT_DISTRIBUTIONS_ID }}
         run: |
           echo "Distribution ID : $AWS_CLOUDFRONT_DISTRIBUTIONS_ID"
-          id="$(aws cloudfront create-invalidation --distribution-id $AWS_CLOUDFRONT_DISTRIBUTIONS_ID --paths "/index.html" | grep Id | awk -F'"' '{ print $4}')"
-          echo "Waiting for invalidation $id"
-          aws cloudfront wait invalidation-completed --id $id --distribution-id $AWS_CLOUDFRONT_DISTRIBUTIONS_ID
-          echo "Invalidation $id completed"
+          for process in $(echo $AWS_CLOUDFRONT_DISTRIBUTIONS_ID | sed "s/,/ /g")
+          do
+              echo "Processing Distribution ID : $process"
+              id="$(aws cloudfront create-invalidation --distribution-id $process --paths "/starknet/*" | grep Id | awk -F'"' '{ print $4}')"
+              echo "Waiting for invalidation $id"
+              aws cloudfront wait invalidation-completed --id $id --distribution-id $process
+              echo "Invalidation $id completed"
+          done
