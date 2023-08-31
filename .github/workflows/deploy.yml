@@ -85,4 +85,3 @@ jobs:
               aws cloudfront wait invalidation-completed --id $id --distribution-id $process
               echo "Invalidation $id completed"
           done
-
