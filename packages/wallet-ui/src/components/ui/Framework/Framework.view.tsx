@@ -18,7 +18,7 @@ export const FrameworkView = ({ connected, children }: Props) => {
       </ColMiddle>
       {bannerOpen && (
         <Banner>
-          This is an alpha version of the dApp, improvements are made regularly{' '}
+          This is the Open Beta version of the dapp, updates are made regularly{' '}
           <CloseIcon icon={'close'} onClick={() => setBannerOpen(false)} />
         </Banner>
       )}

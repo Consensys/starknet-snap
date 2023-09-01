@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 import starknetSrc from 'assets/images/starknet-logo.svg';
-import foxIconSrc from 'assets/images/flask-fox-icon.svg';
+import foxIconSrc from 'assets/images/metamask-fox-icon.svg';
 import { Button } from 'components/ui/atom/Button';
 
 export const Wrapper = styled.div`
@@ -58,7 +58,7 @@ export const ConnectButton = styled(Button).attrs((props) => ({
   padding-bottom: 16px;
 `;
 
-export const FlaskIcon = styled.img.attrs(() => ({
+export const MetamaskIcon = styled.img.attrs(() => ({
   src: foxIconSrc,
 }))`
   margin-right: 8px;

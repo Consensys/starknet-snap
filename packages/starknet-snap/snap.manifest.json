@@ -7,10 +7,11 @@
     "url": "https://github.com/ConsenSys/starknet-snap.git"
   },
   "source": {
-    "shasum": "87SYWE2gN9g0/JSiHposnh1U+aK2BKgOmv2zJM/SQE0=",
+    "shasum": "hPL26eqNX3uVruF+LFbBizstppqV0kGEznQ1v74LkIo=",
     "location": {
       "npm": {
         "filePath": "dist/bundle.js",
+        "iconPath": "images/icon.svg",
         "packageName": "@consensys/starknet-snap",
         "registry": "https://registry.npmjs.org"
       }

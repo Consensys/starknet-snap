@@ -13,6 +13,7 @@ export interface WalletState {
   erc20TokenBalanceSelected: Erc20TokenBalance;
   transactions: Transaction[];
   transactionDeploy?: Transaction;
+  provider?: any; //TODO: metamask SDK is not export types
 }
 
 const initialState: WalletState = {
@@ -24,12 +25,16 @@ const initialState: WalletState = {
   erc20TokenBalanceSelected: {} as Erc20TokenBalance,
   transactions: [],
   transactionDeploy: undefined,
+  provider: undefined,
 };
 
 export const walletSlice = createSlice({
   name: 'wallet',
   initialState,
   reducers: {
+    setProvider: (state, { payload }) => {
+      state.provider = payload;
+    },
     setWalletConnection: (state, { payload }) => {
       state.connected = payload;
     },
@@ -102,6 +107,7 @@ export const {
   setTransactions,
   setTransactionDeploy,
   resetWallet,
+  setProvider,
 } = walletSlice.actions;
 
 export default walletSlice.reducer;

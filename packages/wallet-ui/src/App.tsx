@@ -15,40 +15,43 @@ import { PopIn } from 'components/ui/molecule/PopIn';
 import { LoadingBackdrop } from 'components/ui/molecule/LoadingBackdrop';
 import { ConnectInfoModal } from 'components/ui/organism/ConnectInfoModal';
 import 'toastr2/dist/toastr.min.css';
-import { NoFlaskModal } from 'components/ui/organism/NoFlaskModal';
+import { NoMetamaskModal } from 'components/ui/organism/NoMetamaskModal';
 import { MinVersionModal } from './components/ui/organism/MinVersionModal';
-import { useHasMetamaskFlask } from 'hooks/useHasMetamaskFlask';
+import { useHasMetamask } from 'hooks/useHasMetamask';
 
 library.add(fas, far);
 
 function App() {
   const { initSnap, getWalletData, checkConnection } = useStarkNetSnap();
-  const { connected, forceReconnect } = useAppSelector((state) => state.wallet);
+  const { connected, forceReconnect, provider } = useAppSelector((state) => state.wallet);
   const { infoModalVisible, minVersionModalVisible } = useAppSelector((state) => state.modals);
   const { loader } = useAppSelector((state) => state.UI);
   const networks = useAppSelector((state) => state.networks);
   const { accounts } = useAppSelector((state) => state.wallet);
-  const { hasMetamaskFlask } = useHasMetamaskFlask();
+  const { hasMetamask } = useHasMetamask();
 
   const address = accounts?.length > 0 ? (accounts[0] as unknown as string) : '0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx';
 
   useEffect(() => {
+    if (!provider) {
+      return;
+    }
     if (connected) {
       initSnap();
     }
-    if (hasMetamaskFlask && !connected && !forceReconnect) {
+    if (hasMetamask && !connected && !forceReconnect) {
       checkConnection();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [connected, forceReconnect, hasMetamaskFlask]);
+  }, [connected, forceReconnect, hasMetamask, provider]);
 
   useEffect(() => {
-    if (networks.items.length > 0) {
+    if (provider && networks.items.length > 0) {
       const chainId = networks.items[networks.activeNetwork].chainId;
       getWalletData(chainId);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [networks.activeNetwork]);
+  }, [networks.activeNetwork, provider]);
 
   const loading = loader.isLoading;
 
@@ -57,12 +60,12 @@ function App() {
       <GlobalStyle />
       <FrameworkView connected={connected}>
         <PopIn isOpen={!connected && !loading} showClose={false}>
-          <NoFlaskModal />
+          <NoMetamaskModal />
         </PopIn>
         <PopIn isOpen={minVersionModalVisible} showClose={false}>
           <MinVersionModal />
         </PopIn>
-        <PopIn isOpen={!loading && !!hasMetamaskFlask && !connected} showClose={false}>
+        <PopIn isOpen={!loading && !!hasMetamask && !connected} showClose={false}>
           <ConnectModal />
         </PopIn>
         <PopIn isOpen={infoModalVisible} showClose={false}>
