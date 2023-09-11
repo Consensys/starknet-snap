@@ -1,6 +1,4 @@
-import chai, { expect } from 'chai';
-import sinon from 'sinon';
-import sinonChai from 'sinon-chai';
+import { expect } from 'chai';
 import { num } from 'starknet';
 import {
   createAccountProxyTxn,
@@ -18,14 +16,12 @@ import { VoyagerTransactionType, TransactionStatus } from '../../../src/types/sn
 
 import * as filter from '../../../src/utils/transaction/filter';
 
-chai.use(sinonChai);
-const sandbox = sinon.createSandbox();
 describe('Test function: getTransactions', function () {
   const transactions = [txn1, txn2, txn3, txn4, txn5, createAccountProxyTxn, initAccountTxn];
   const transactions2 = [txn1, txn2, txn3, txn5, RejectedTxn, RejectedTxn2];
   describe('TimestampFilter', () => {
     it('Should filter transactions based on timestamp', () => {
-      let timestamp = 1653553084;
+      const timestamp = 1653553084;
       let timestampForTest = 1653553083;
       const cloneTransactions = transactions.reduce((acc, txn) => {
         acc.push({ ...txn, timestamp: timestampForTest });
@@ -40,7 +36,7 @@ describe('Test function: getTransactions', function () {
 
   describe('SenderAddressFilter', () => {
     it('Should filter transactions based on senderAddress', () => {
-      let senderAddress = transactions[0].senderAddress;
+      const senderAddress = transactions[0].senderAddress;
       const cloneTransactions = transactions.reduce((acc, txn) => {
         acc.push({ ...txn, senderAddress: senderAddress });
         return acc;
@@ -53,7 +49,7 @@ describe('Test function: getTransactions', function () {
 
   describe('ContractAddressFilter', () => {
     it('Should filter transactions based on contract address', () => {
-      let contractAddress = transactions[0].contractAddress;
+      const contractAddress = transactions[0].contractAddress;
       const cloneTransactions = transactions.reduce((acc, txn) => {
         acc.push({ ...txn, contractAddress: contractAddress });
         return acc;

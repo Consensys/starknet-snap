@@ -1,7 +1,6 @@
 import { BIP44AddressKeyDeriver } from '@metamask/key-tree';
 import Mutex from 'async-mutex/lib/Mutex';
 import { SnapState, VoyagerTransactionType } from './snapState';
-import { GetTransactionReceiptResponse } from 'starknet';
 
 export interface ApiParams {
   state: SnapState;

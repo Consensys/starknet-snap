@@ -4,7 +4,6 @@ import sinonChai from 'sinon-chai';
 import { WalletMock } from '../wallet.mock.test';
 import * as utils from '../../src/utils/starknetUtils';
 import * as snapUtils from '../../src/utils/snapUtils';
-import { LogLevel, logger } from '../../src/utils/logger';
 import { SnapState } from '../../src/types/snapState';
 import { STARKNET_TESTNET_NETWORK, STARKNET_MAINNET_NETWORK } from '../../src/utils/constants';
 import {

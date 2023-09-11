@@ -550,7 +550,7 @@ export async function removeAcceptedTransaction(
   });
 }
 
-export function toMap<k, v>(arr: Array<any>, key: string): Map<k, v> {
+export function toMap<k, v>(arr: Array<v>, key: string): Map<k, v> {
   return arr.reduce((map, obj: v) => {
     map.set(obj[key], obj);
     return map;

@@ -23,7 +23,7 @@ import {
   validateAndParseAddress as _validateAndParseAddress,
 } from 'starknet';
 import type { Hex } from '@noble/curves/abstract/utils';
-import { ExecutionStatus, FinailityStatus, Network, SnapState, Transaction, TransactionType } from '../types/snapState';
+import { Network, SnapState, Transaction, TransactionType } from '../types/snapState';
 import { PROXY_CONTRACT_HASH, TRANSFER_SELECTOR_HEX } from './constants';
 import { getAddressKey } from './keyPair';
 import { getAccount, getAccounts, getTransactionFromVoyagerUrl, getTransactionsFromVoyagerUrl } from './snapUtils';
