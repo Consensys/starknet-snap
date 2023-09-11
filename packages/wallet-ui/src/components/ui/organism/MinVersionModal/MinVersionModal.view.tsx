@@ -9,8 +9,8 @@ export const MinVersionModalView = () => {
         To use this dapp, please install the latest version by following those steps:
         <ul>
           <li>
-            Delete the current version in MetaMask Flask by going in Settings {'>'} Snaps {'>'} @consensys/starknet-snap{' '}
-            {'>'} See details {'>'} Remove Snap
+            Delete the current version in MetaMask by going in Settings {'>'} Snaps {'>'} @consensys/starknet-snap {'>'}{' '}
+            See details {'>'} Remove Snap
           </li>
           <li>Refresh the page</li>
           <li>Click on connect, the new version will be proposed for installation.</li>

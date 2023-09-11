@@ -5,7 +5,7 @@ import {
   ConnectButton,
   Description,
   DescriptionCentered,
-  FlaskIcon,
+  MetamaskIcon,
   ReadMore,
   StarknetLogo,
   Title,
@@ -38,8 +38,8 @@ export const ConnectModalView = () => {
         </Description>
         <ReadMore onClick={handleReadMoreClick}>Read more</ReadMore>
       </WhatIsSnapDiv>
-      <ConnectButton customIconLeft={<FlaskIcon />} onClick={connectToSnap}>
-        Connect with MetaMask Flask
+      <ConnectButton customIconLeft={<MetamaskIcon />} onClick={connectToSnap}>
+        Connect with MetaMask
       </ConnectButton>
     </Wrapper>
   );

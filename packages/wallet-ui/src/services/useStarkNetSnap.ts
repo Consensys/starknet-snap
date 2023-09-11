@@ -25,9 +25,8 @@ import semver from 'semver/preload';
 export const useStarkNetSnap = () => {
   const dispatch = useAppDispatch();
   const { loader } = useAppSelector((state) => state.UI);
-  const { transactions, erc20TokenBalances } = useAppSelector((state) => state.wallet);
+  const { transactions, erc20TokenBalances, provider } = useAppSelector((state) => state.wallet);
   const { activeNetwork } = useAppSelector((state) => state.networks);
-  const { ethereum } = window as any;
   const snapId = process.env.REACT_APP_SNAP_ID ? process.env.REACT_APP_SNAP_ID : 'local:http://localhost:8081/';
   const snapVersion = process.env.REACT_APP_SNAP_VERSION ? process.env.REACT_APP_SNAP_VERSION : '*';
   const minSnapVersion = process.env.REACT_APP_MIN_SNAP_VERSION ? process.env.REACT_APP_MIN_SNAP_VERSION : '2.0.1';
@@ -39,7 +38,7 @@ export const useStarkNetSnap = () => {
 
   const connectToSnap = () => {
     dispatch(enableLoadingWithMessage('Connecting...'));
-    ethereum
+    provider
       .request({
         method: 'wallet_requestSnaps',
         params: {
@@ -58,7 +57,7 @@ export const useStarkNetSnap = () => {
 
   const checkConnection = () => {
     dispatch(enableLoadingWithMessage('Connecting...'));
-    ethereum
+    provider
       .request({
         method: 'wallet_invokeSnap',
         params: {
@@ -83,7 +82,7 @@ export const useStarkNetSnap = () => {
   };
 
   const getNetworks = async () => {
-    const data = (await ethereum.request({
+    const data = (await provider.request({
       method: 'wallet_invokeSnap',
       params: {
         snapId,
@@ -99,7 +98,7 @@ export const useStarkNetSnap = () => {
   };
 
   const getTokens = async (chainId: string) => {
-    const tokens = (await ethereum.request({
+    const tokens = (await provider.request({
       method: 'wallet_invokeSnap',
       params: {
         snapId,
@@ -119,7 +118,7 @@ export const useStarkNetSnap = () => {
     const START_SCAN_INDEX = 0;
     const MAX_SCANNED = 1;
     const MAX_MISSED = 1;
-    const scannedAccounts = (await ethereum.request({
+    const scannedAccounts = (await provider.request({
       method: 'wallet_invokeSnap',
       params: {
         snapId,
@@ -139,7 +138,7 @@ export const useStarkNetSnap = () => {
   };
 
   const getAccounts = async (chainId: string) => {
-    const data = (await ethereum.request({
+    const data = (await provider.request({
       method: 'wallet_invokeSnap',
       params: {
         snapId,
@@ -156,7 +155,7 @@ export const useStarkNetSnap = () => {
   };
 
   const addAccount = async (chainId: string) => {
-    const data = (await ethereum.request({
+    const data = (await provider.request({
       method: 'wallet_invokeSnap',
       params: {
         snapId,
@@ -175,7 +174,7 @@ export const useStarkNetSnap = () => {
   };
 
   const oldVersionDetected = async () => {
-    const snaps = await ethereum.request({ method: 'wallet_getSnaps' });
+    const snaps = await provider.request({ method: 'wallet_getSnaps' });
     if (typeof snaps[snapId]?.version !== 'undefined') {
       // console.log(`snaps[snapId][version]: ${snaps[snapId]?.version}`);
       // console.log(`snaps[snapId][version].split('_')[0]: ${snaps[snapId]?.version?.split('-')?.[0]}`);
@@ -266,7 +265,7 @@ export const useStarkNetSnap = () => {
 
   async function getPrivateKeyFromAddress(address: string, chainId: string) {
     try {
-      await ethereum.request({
+      await provider.request({
         method: 'wallet_invokeSnap',
         params: {
           snapId,
@@ -294,7 +293,7 @@ export const useStarkNetSnap = () => {
     chainId: string,
   ) {
     try {
-      const response = await ethereum.request({
+      const response = await provider.request({
         method: 'wallet_invokeSnap',
         params: {
           snapId,
@@ -328,7 +327,7 @@ export const useStarkNetSnap = () => {
   ) {
     dispatch(enableLoadingWithMessage('Sending transaction...'));
     try {
-      const response = await ethereum.request({
+      const response = await provider.request({
         method: 'wallet_invokeSnap',
         params: {
           snapId,
@@ -370,7 +369,7 @@ export const useStarkNetSnap = () => {
     }
 
     try {
-      const data = await ethereum.request({
+      const data = await provider.request({
         method: 'wallet_invokeSnap',
         params: {
           snapId,
@@ -436,7 +435,7 @@ export const useStarkNetSnap = () => {
   ) => {
     dispatch(enableLoadingWithMessage('Adding Token...'));
     try {
-      const token = await ethereum.request({
+      const token = await provider.request({
         method: 'wallet_invokeSnap',
         params: {
           snapId,
@@ -490,7 +489,7 @@ export const useStarkNetSnap = () => {
 
   const getTokenBalance = async (tokenAddress: string, userAddress: string, chainId: string) => {
     try {
-      const response = await ethereum.request({
+      const response = await provider.request({
         method: 'wallet_invokeSnap',
         params: {
           snapId,
