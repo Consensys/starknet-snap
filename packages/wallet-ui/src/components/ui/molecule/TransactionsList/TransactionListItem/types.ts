@@ -35,17 +35,19 @@ export const getTxnDate = (transaction: Transaction): string => {
 };
 
 export const getTxnStatus = (transaction: Transaction): string => {
-  return transaction.status ? transaction.status
-    .replaceAll('_', ' ')
-    .split(' ')
-    .map((word) => {
-      word = word.toLowerCase();
-      if (word !== 'on') {
-        word = word.charAt(0).toUpperCase() + word.slice(1);
-      }
-      return word;
-    })
-    .join(' ') : ""
+  return transaction.status
+    ? transaction.status
+        .replaceAll('_', ' ')
+        .split(' ')
+        .map((word) => {
+          word = word.toLowerCase();
+          if (word !== 'on') {
+            word = word.charAt(0).toUpperCase() + word.slice(1);
+          }
+          return word;
+        })
+        .join(' ')
+    : '';
 };
 
 export const getTxnToFromLabel = (transaction: Transaction): string => {
@@ -63,7 +65,9 @@ export const getTxnToFromLabel = (transaction: Transaction): string => {
 };
 
 export const getTxnFailureReason = (transaction: Transaction): string => {
-  return transaction.status && transaction.status.toLowerCase() === TransactionStatus.REJECTED.toLowerCase() && transaction?.failureReason
+  return transaction.status &&
+    transaction.status.toLowerCase() === TransactionStatus.REJECTED.toLowerCase() &&
+    transaction?.failureReason
     ? ` (${transaction.failureReason})`
     : '';
 };

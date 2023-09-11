@@ -11,7 +11,6 @@ import {
   Transaction,
   VoyagerTransactionType,
   TransactionStatus,
-  TransactionStatusType,
 } from '../types/snapState';
 import {
   MAXIMUM_NETWORK_NAME_LENGTH,
@@ -421,8 +420,8 @@ export function getTransactions(
   senderAddress: string | undefined,
   contractAddress: string | undefined,
   txnType: VoyagerTransactionType | string | string[] | undefined,
-  finality_status: string | string[] | undefined,
-  execution_status: string | string[] | undefined,
+  finalityStatus: string | string[] | undefined,
+  executionStatus: string | string[] | undefined,
   minTimestamp: number | undefined, // in ms
 ): Transaction[] {
   let filteredTxns: Transaction[] = [];
@@ -433,7 +432,7 @@ export function getTransactions(
       new SenderAddressFilter(senderAddress ? num.toBigInt(senderAddress) : undefined),
       new ContractAddressFilter(contractAddress ? num.toBigInt(contractAddress) : undefined),
       new TxnTypeFilter(txnType),
-      new StatusFilter(finality_status, execution_status),
+      new StatusFilter(finalityStatus, executionStatus),
     ]);
   }
   return filteredTxns;
