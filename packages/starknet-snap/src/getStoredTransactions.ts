@@ -24,6 +24,7 @@ export async function getStoredTransactions(params: ApiParams) {
       requestParamsObj.contractAddress,
       requestParamsObj.txnType,
       undefined,
+      undefined,
       minTimeStamp,
     );
 

@@ -12,8 +12,6 @@ import {
   VoyagerTransactionType,
   TransactionStatus,
   TransactionStatusType,
-  FinailityStatus,
-  ExecutionStatus,
 } from '../types/snapState';
 import {
   MAXIMUM_NETWORK_NAME_LENGTH,
@@ -27,6 +25,15 @@ import {
 } from './constants';
 import convert from 'ethereum-unit-converter';
 import { AddErc20TokenRequestParams, AddNetworkRequestParams } from '../types/snapApi';
+import {
+  filterTransactions,
+  TimestampFilter,
+  ContractAddressFilter,
+  SenderAddressFilter,
+  TxnTypeFilter,
+  StatusFilter,
+  ChainIdFilter,
+} from './transaction/filter';
 import { logger } from './logger';
 
 function hasOnlyAsciiChars(str: string) {
@@ -419,56 +426,17 @@ export function getTransactions(
   minTimestamp: number | undefined, // in ms
 ): Transaction[] {
   let filteredTxns: Transaction[] = [];
-
   if (state.transactions) {
-    filteredTxns = state.transactions.filter((txn) => Number(txn.chainId) === Number(chainId));
-    if (minTimestamp) {
-      filteredTxns = filteredTxns.filter((txn) => txn.timestamp * 1000 >= minTimestamp);
-    }
-    if (senderAddress) {
-      const bigIntSenderAddress = num.toBigInt(senderAddress);
-      filteredTxns = filteredTxns.filter((txn) => num.toBigInt(txn.senderAddress) === bigIntSenderAddress);
-    }
-    if (contractAddress) {
-      const bigIntContractAddress = num.toBigInt(contractAddress);
-      filteredTxns = filteredTxns.filter((txn) => num.toBigInt(txn.contractAddress) === bigIntContractAddress);
-    }
-    if (txnType) {
-      if (Array.isArray(txnType)) {
-        filteredTxns = filteredTxns.filter((txn) => txnType.includes(txn.txnType));
-      } else {
-        filteredTxns = filteredTxns.filter((txn) => txn.txnType === txnType);
-      }
-    }
-    if (finality_status) {
-      filteredTxns = filiterStatus(filteredTxns, finality_status, TransactionStatusType.FINALITY);
-    }
-    if (execution_status) {
-      filteredTxns = filiterStatus(filteredTxns, execution_status, TransactionStatusType.EXECUTION);
-    }
+    filteredTxns = filterTransactions(state.transactions, [
+      new ChainIdFilter(Number(chainId)),
+      new TimestampFilter(minTimestamp),
+      new SenderAddressFilter(senderAddress ? num.toBigInt(senderAddress) : undefined),
+      new ContractAddressFilter(contractAddress ? num.toBigInt(contractAddress) : undefined),
+      new TxnTypeFilter(txnType),
+      new StatusFilter(finality_status, execution_status),
+    ]);
   }
-
   return filteredTxns;
-}
-
-export function filiterStatus(
-  txns: Transaction[],
-  status: string | string[] | undefined,
-  status_prop: TransactionStatusType,
-) {
-  if (status) {
-    let lowerCaseStatuses = Array.isArray(status) ? status.map((x) => x.toLowerCase()) : [status.toLowerCase()];
-    // filter DEPRECATION first and then filiter desired status
-    return txns.filter(
-      (txn: Transaction | Object) =>
-        (txn[TransactionStatusType.DEPRECATION] &&
-          lowerCaseStatuses.includes(txn[TransactionStatusType.DEPRECATION].toLowerCase())) ||
-        (txn.hasOwnProperty(status_prop) &&
-          txn[status_prop] &&
-          lowerCaseStatuses.includes(txn[status_prop].toLowerCase())),
-    );
-  }
-  return txns;
 }
 
 export async function upsertTransaction(txn: Transaction, wallet, mutex: Mutex, state: SnapState = undefined) {
@@ -581,4 +549,11 @@ export async function removeAcceptedTransaction(
       },
     });
   });
+}
+
+export function toMap<k, v>(arr: Array<any>, key: string): Map<k, v> {
+  return arr.reduce((map, obj: v) => {
+    map.set(obj[key], obj);
+    return map;
+  }, new Map<k, v>());
 }

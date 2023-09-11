@@ -4,6 +4,7 @@ import sinonChai from 'sinon-chai';
 import { WalletMock } from '../wallet.mock.test';
 import * as utils from '../../src/utils/starknetUtils';
 import * as snapUtils from '../../src/utils/snapUtils';
+import { LogLevel, logger } from '../../src/utils/logger';
 import { SnapState } from '../../src/types/snapState';
 import { STARKNET_TESTNET_NETWORK, STARKNET_MAINNET_NETWORK } from '../../src/utils/constants';
 import {
@@ -13,6 +14,8 @@ import {
   expectedMassagedTxns,
   getTxnFromSequencerResp1,
   getTxnFromSequencerResp2,
+  getTxnStatusAcceptL2Resp,
+  getTxnStatusResp,
   getTxnsFromVoyagerResp,
   initAccountTxn,
   txn1,
@@ -27,7 +30,6 @@ import { ApiParams, GetTransactionsRequestParams } from '../../src/types/snapApi
 
 chai.use(sinonChai);
 const sandbox = sinon.createSandbox();
-
 describe('Test function: getTransactions', function () {
   const walletStub = new WalletMock();
   const state: SnapState = {
@@ -58,10 +60,14 @@ describe('Test function: getTransactions', function () {
       }
     });
     sandbox.stub(utils, 'getTransactionStatus').callsFake(async (...args) => {
-      if (args?.[0] === expectedMassagedTxn5.txnHash) {
+      if (args?.[0] === getTxnsFromVoyagerResp.items[0].hash) {
+        return getTxnStatusResp;
+      } else if (args?.[0] === getTxnsFromVoyagerResp.items[1].hash) {
+        return getTxnStatusResp;
+      } else if (args?.[0] === expectedMassagedTxn5.txnHash) {
         return undefined;
       }
-      return 'ACCEPTED_ON_L2';
+      return getTxnStatusAcceptL2Resp;
     });
     walletStub.rpcStubs.snap_manageState.resolves(state);
   });
@@ -80,7 +86,6 @@ describe('Test function: getTransactions', function () {
 
     const result = await getTransactions(apiParams);
 
-    console.log({ result });
     expect(walletStub.rpcStubs.snap_manageState).to.have.been.called;
     expect(result.length).to.be.eq(4);
     expect(result).to.be.eql(expectedMassagedTxns);

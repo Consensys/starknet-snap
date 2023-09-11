@@ -92,7 +92,7 @@ export const estimateFeeBulk = async (
 ): Promise<EstimateFee[]> => {
   // ensure always calling the sequencer endpoint since the rpc endpoint and
   // starknet.js are not supported yet.
-  const provider = getProvider(network, true);
+  const provider = getProvider(network);
   const account = new Account(provider, senderAddress, privateKey);
   return account.estimateFeeBulk(txnInvocation, { blockIdentifier: 'latest' });
 };
@@ -176,7 +176,6 @@ export const getTransactionsFromVoyager = async (
   if (toAddress) {
     toQueryStr = `to=${num.toHex(num.toBigInt(toAddress))}&`;
   }
-
   // "ps" only effective on value: 10, 25, 50 as what's currently available in Voyager page
   return getData(`${getTransactionsFromVoyagerUrl(network)}?${toQueryStr}ps=${pageSize}&p=${pageNum}`);
 };

@@ -1,6 +1,14 @@
 import { JsonBIP44CoinTypeNode } from '@metamask/key-tree';
-import { constants, num, TransactionStatus } from 'starknet';
-import { AccContract, Erc20Token, Network, Transaction, VoyagerTransactionType } from '../src/types/snapState';
+import { constants, num } from 'starknet';
+import {
+  AccContract,
+  Erc20Token,
+  Network,
+  Transaction,
+  VoyagerTransactionType,
+  ExecutionStatus,
+  FinailityStatus,
+} from '../src/types/snapState';
 import { STARKNET_MAINNET_NETWORK, STARKNET_TESTNET_NETWORK } from '../src/utils/constants';
 
 export const invalidNetwork: Network = {
@@ -134,7 +142,15 @@ export const sendTransactionFailedResp = {
   transaction_hash: '',
 };
 
-export const getTxnStatusResp = TransactionStatus.ACCEPTED_ON_L1;
+export const getTxnStatusResp = {
+  executionStatus: ExecutionStatus.SUCCEEDED,
+  finalityStatus: FinailityStatus.ACCEPTED_ON_L1,
+};
+
+export const getTxnStatusAcceptL2Resp = {
+  executionStatus: ExecutionStatus.SUCCEEDED,
+  finalityStatus: FinailityStatus.ACCEPTED_ON_L2,
+};
 
 export const createAccountProxyTxn: Transaction = {
   chainId: STARKNET_TESTNET_NETWORK.chainId,
@@ -161,6 +177,36 @@ export const initAccountTxn: Transaction = {
   txnType: VoyagerTransactionType.INVOKE,
   failureReason: '',
   status: '',
+  eventIds: [],
+};
+
+export const RejectedTxn: Transaction = {
+  chainId: STARKNET_TESTNET_NETWORK.chainId,
+  contractAddress: account1.address,
+  contractCallData: [], //[account1.publicKey, num.toHex(constants.ZERO)],
+  contractFuncName: '', //'initialize',
+  senderAddress: account1.address,
+  timestamp: 1653559059,
+  txnHash: initAccountResp.transaction_hash,
+  txnType: VoyagerTransactionType.INVOKE,
+  failureReason: '',
+  status: 'REJECTED',
+  eventIds: [],
+};
+
+export const RejectedTxn2: Transaction = {
+  chainId: STARKNET_TESTNET_NETWORK.chainId,
+  contractAddress: account1.address,
+  contractCallData: [], //[account1.publicKey, num.toHex(constants.ZERO)],
+  contractFuncName: '', //'initialize',
+  senderAddress: account1.address,
+  timestamp: 1653559059,
+  txnHash: initAccountResp.transaction_hash,
+  txnType: VoyagerTransactionType.INVOKE,
+  failureReason: '',
+  status: '',
+  executionStatus: ExecutionStatus.REJECTED,
+  finalityStatus: FinailityStatus.ACCEPTED_ON_L1,
   eventIds: [],
 };
 
@@ -583,7 +629,9 @@ export const expectedMassagedTxn4: Transaction = {
   eventIds: [],
   failureReason: '',
   senderAddress: '0x05a98ec74a40383cf99896bfea2ec5e6aad16c7eed50025a5f569d585ebb13a2',
-  status: 'ACCEPTED_ON_L2',
+  status: '',
+  finalityStatus: 'ACCEPTED_ON_L2',
+  executionStatus: 'SUCCEEDED',
   timestamp: 1653569059,
   txnHash: '0x45ff16a2fd6b489d2e17673addba34af372907b0b23ff9068a23afa49c6138b',
   txnType: 'invoke',
@@ -598,6 +646,8 @@ export const expectedMassagedTxn5: Transaction = {
   failureReason: '',
   senderAddress: '0x05a98ec74a40383cf99896bfea2ec5e6aad16c7eed50025a5f569d585ebb13a2',
   status: 'PENDING',
+  finalityStatus: undefined,
+  executionStatus: undefined,
   timestamp: 1653569160,
   txnHash: '0x75ff16a2fd6b489d2e17673addba34af372907b0b23ff9068a23afa49c61999',
   txnType: 'invoke',
@@ -613,7 +663,9 @@ export const expectedMassagedTxns: Transaction[] = [
     contractFuncName: 'transfer',
     contractCallData: ['0x14361d05e560796ad3152e083b609f5205f3bd76039327326746ba7f769a666', '0xde0b6b3a7640000', '0x0'],
     timestamp: 1655109666,
-    status: 'ACCEPTED_ON_L1',
+    status: '',
+    finalityStatus: 'ACCEPTED_ON_L1',
+    executionStatus: 'SUCCEEDED',
     eventIds: [],
     failureReason: '',
   },
@@ -626,7 +678,9 @@ export const expectedMassagedTxns: Transaction[] = [
     contractFuncName: '',
     contractCallData: [],
     timestamp: 1654834401,
-    status: 'ACCEPTED_ON_L1',
+    status: '',
+    finalityStatus: 'ACCEPTED_ON_L1',
+    executionStatus: 'SUCCEEDED',
     eventIds: [],
     failureReason: '',
   },

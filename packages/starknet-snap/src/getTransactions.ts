@@ -2,7 +2,7 @@ import { toJson } from './utils/serializer';
 import { num } from 'starknet';
 import { validateAndParseAddress } from '../src/utils/starknetUtils';
 import { ApiParams, GetTransactionsRequestParams } from './types/snapApi';
-import { Transaction, TransactionStatus, VoyagerTransactionType } from './types/snapState';
+import { ExecutionStatus, Transaction, TransactionStatus, VoyagerTransactionType } from './types/snapState';
 import { DEFAULT_GET_TXNS_LAST_NUM_OF_DAYS, DEFAULT_GET_TXNS_PAGE_SIZE } from './utils/constants';
 import * as snapUtils from './utils/snapUtils';
 import * as utils from './utils/starknetUtils';
@@ -65,10 +65,14 @@ export async function getTransactions(params: ApiParams) {
         TransactionStatus.NOT_RECEIVED,
         TransactionStatus.PENDING,
       ],
-      [TransactionStatus.REJECTED],
+      ExecutionStatus.REJECTED,
       minTimeStamp,
     );
 
+    logger.log(`getTransactions\storedUnsettledTxns:\n${toJson(storedUnsettledTxns)}`);
+
+    // Retrieve the Finaility Status: RECEIVED, PENDING, and ACCEPTED_ON_L2 txns from snap state
+    // Retrieve the Execution Status: REJECTED txns from snap state
     if (withDeployTxn) {
       const storedUnsettledDeployTxns = snapUtils.getTransactions(
         state,
@@ -82,7 +86,7 @@ export async function getTransactions(params: ApiParams) {
           TransactionStatus.NOT_RECEIVED,
           TransactionStatus.PENDING,
         ],
-        undefined,
+        ExecutionStatus.REJECTED,
         undefined,
       );
       logger.log(`getTransactions\nstoredUnsettledDeployTxns:\n${toJson(storedUnsettledDeployTxns)}`);
@@ -92,10 +96,10 @@ export async function getTransactions(params: ApiParams) {
     // For each "unsettled" txn, update the timestamp from the same txn found in massagedTxns
     const requireUpdateStatus = [];
     if (massagedTxns) {
+      const massagedTxnsMap = snapUtils.toMap<bigint, Transaction>(massagedTxns, 'txnHash');
+
       storedUnsettledTxns.forEach((txn: Transaction, idx: number) => {
-        const foundMassagedTxn = massagedTxns.find(
-          (massagedTxn) => num.toBigInt(massagedTxn.txnHash) === num.toBigInt(txn.txnHash),
-        );
+        const foundMassagedTxn = massagedTxnsMap.get(num.toBigInt(txn.txnHash));
         if (!foundMassagedTxn) {
           requireUpdateStatus.push(idx);
         } else {
@@ -134,7 +138,7 @@ export async function getTransactions(params: ApiParams) {
     });
     logger.log(`getTransactions\nmassagedTxns after filtered total:\n${massagedTxns.length}`);
 
-    // Clean up all ACCEPTED_ON_L1 and ACCEPTED_ON_L2 txns that has timestamp less than minTimeStamp as they will be retrievable from the Voyager "api/txns" endpoint
+    // Clean up all ACCEPTED_ON_L1 and ACCEPTED_ON_L2 txns from state that has timestamp less than minTimeStamp as they will be retrievable from the Voyager "api/txns" endpoint
     await snapUtils.removeAcceptedTransaction(minTimeStamp, wallet, saveMutex);
 
     // Sort in timestamp descending order
