@@ -1,24 +1,17 @@
 # Changelog
 
 
-## [2.1.0](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v2.0.2...starknet-snap-v2.1.0) (2023-09-05)
-
-
-### Features
-
-* migrate metamask flask handle to metamask ([#121](https://github.com/Consensys/starknet-snap/issues/121)) ([5eff492](https://github.com/Consensys/starknet-snap/commit/5eff492cedb1bfa299e30b584fda8c936248fb9a))
-
-
-### Bug Fixes
-
-* update proposedName ([#133](https://github.com/Consensys/starknet-snap/issues/133)) ([28dfb15](https://github.com/Consensys/starknet-snap/commit/28dfb152c8e252ecc3c6ea0cdb42e202ac858fc3))
-
-## [2.0.2](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v2.0.1...starknet-snap-v2.0.2) (2023-08-16)
+## [2.0.2](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v2.0.1...starknet-snap-v2.0.2) (2023-09-05)
 
 
 ### Features
 
 *  Bumps ses from 0.18.2 to 0.18.7 ([#57](https://github.com/Consensys/starknet-snap/security/dependabot/57)) ([5b55275](https://github.com/Consensys/starknet-snap/commit/5b55275c0532c233dcf1f539213b17567047fd73))
+
+* migrate metamask flask handle to metamask ([#121](https://github.com/Consensys/starknet-snap/issues/121)) ([5eff492](https://github.com/Consensys/starknet-snap/commit/5eff492cedb1bfa299e30b584fda8c936248fb9a))
+
+* update proposedName ([#133](https://github.com/Consensys/starknet-snap/issues/133)) ([28dfb15](https://github.com/Consensys/starknet-snap/commit/28dfb152c8e252ecc3c6ea0cdb42e202ac858fc3))
+
 
 ## [2.0.1](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v2.0.0...starknet-snap-v2.0.1) (2023-07-17)
 
