@@ -41,7 +41,7 @@ export async function extractPrivateKey(params: ApiParams) {
         method: 'snap_dialog',
         params: {
           type: DialogType.Alert,
-          content: panel([text('StarkNet Account Private Key'), copyable(userPrivateKey)]),
+          content: panel([text('Starknet Account Private Key'), copyable(userPrivateKey)]),
         },
       });
     }

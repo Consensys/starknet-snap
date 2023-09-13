@@ -22,7 +22,7 @@ export enum VoyagerTransactionType { // for retrieving txns from Voyager
   INVOKE = 'invoke',
 }
 
-export enum TransactionStatus { // for retrieving txn from StarkNet feeder gateway
+export enum TransactionStatus { // for retrieving txn from Starknet feeder gateway
   RECEIVED = 'RECEIVED',
   PENDING = 'PENDING',
   ACCEPTED_ON_L2 = 'ACCEPTED_ON_L2',

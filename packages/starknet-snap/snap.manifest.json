@@ -1,6 +1,6 @@
 {
   "version": "2.0.2",
-  "description": "StarkNet Snap",
+  "description": "Manage Starknet accounts and assets with MetaMask.",
   "proposedName": "StarkNet",
   "repository": {
     "type": "git",

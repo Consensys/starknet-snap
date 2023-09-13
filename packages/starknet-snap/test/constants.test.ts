@@ -54,7 +54,7 @@ export const account4: AccContract = {
 
 export const token1: Erc20Token = {
   address: '0x244c20d51109adcf604fde1bbf878e5dcd549b3877ac87911ec6a158bd7aa62',
-  name: 'StarkNet ERC-20 sample',
+  name: 'Starknet ERC-20 sample',
   symbol: 'SNET',
   decimals: 18,
   chainId: constants.StarknetChainId.SN_GOERLI,
