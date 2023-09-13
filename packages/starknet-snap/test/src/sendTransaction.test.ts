@@ -223,7 +223,7 @@ describe('Test function: sendTransaction', function () {
           },
           {
             type: 'copyable',
-            value: '0x4882a372da3dfe1c53170ad75893832469bf87b62b13e84662565c4a88f25cd',
+            value: '0x04882a372da3dfe1c53170ad75893832469bf87b62b13e84662565c4a88f25cd',
           },
           {
             type: 'text',
@@ -231,7 +231,7 @@ describe('Test function: sendTransaction', function () {
           },
           {
             type: 'copyable',
-            value: '0x4882a372da3dfe1c53170ad75893832469bf87b62b13e84662565c4a88f25cd',
+            value: '0x04882a372da3dfe1c53170ad75893832469bf87b62b13e84662565c4a88f25cd',
           },
           {
             type: 'text',

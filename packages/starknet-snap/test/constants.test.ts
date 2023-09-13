@@ -13,7 +13,7 @@ export const invalidNetwork: Network = {
 };
 
 export const account1: AccContract = {
-  address: '0x4882a372da3dfe1c53170ad75893832469bf87b62b13e84662565c4a88f25cd',
+  address: '0x04882a372da3dfe1c53170ad75893832469bf87b62b13e84662565c4a88f25cd',
   addressSalt: '0x0154c7b20442ee954f50831702ca844ec185ad484c21719575d351583deec90b',
   addressIndex: 0,
   derivationPath: "m / bip32:44' / bip32:9004' / bip32:0' / bip32:0",
@@ -23,7 +23,7 @@ export const account1: AccContract = {
 };
 
 export const account2: AccContract = {
-  address: '0x353c982282cb6dea5afc3db185910d6967c1dac6b813bcc6981e6438ea290dd',
+  address: '0x0353c982282cb6dea5afc3db185910d6967c1dac6b813bcc6981e6438ea290dd',
   addressSalt: '0x019e59f349e1aa813ab4556c5836d0472e5e1ae82d1e5c3b3e8aabfeb290befd',
   addressIndex: 1,
   derivationPath: "m / bip32:44' / bip32:9004' / bip32:0' / bip32:0",
@@ -33,7 +33,7 @@ export const account2: AccContract = {
 };
 
 export const account3: AccContract = {
-  address: '0x128a26755280f0bf9bb3a3fc4948ee54e00142761eeef8c5cea5890ad49a96b',
+  address: '0x0128a26755280f0bf9bb3a3fc4948ee54e00142761eeef8c5cea5890ad49a96b',
   addressSalt: '0x0797efd8e3971dfca4f928485860896201320ce2997ca4789d9343204219599d',
   addressIndex: 2,
   derivationPath: "m / bip32:44' / bip32:9004' / bip32:0' / bip32:0",
@@ -43,7 +43,7 @@ export const account3: AccContract = {
 };
 
 export const account4: AccContract = {
-  address: '0x5a98ec74a40383cf99896bfea2ec5e6aad16c7eed50025a5f569d585ebb13a2',
+  address: '0x05a98ec74a40383cf99896bfea2ec5e6aad16c7eed50025a5f569d585ebb13a2',
   addressSalt: '0x0110e50179b0ef539fd1558571698a98cfe90d6829ff8203bfe577fdda6fc44e',
   addressIndex: 3,
   derivationPath: "m / bip32:44' / bip32:9004' / bip32:0' / bip32:0",
@@ -104,12 +104,12 @@ export const getBip44EntropyStub = async (...args: unknown[]) => {
 
 export const createAccountProxyMainnetResp = {
   transaction_hash: '0x3b690b4c9dd639881a46f6a344ee90254562175ed7a7f5a028f69b8c32ccb47',
-  contract_address: '0x4882a372da3dfe1c53170ad75893832469bf87b62b13e84662565c4a88f25cd',
+  contract_address: '0x04882a372da3dfe1c53170ad75893832469bf87b62b13e84662565c4a88f25cd',
 };
 
 export const createAccountProxyMainnetResp2 = {
   transaction_hash: '0x60d85f7411349c0b4bc94cf1a6659dccb945f82865592ae7aaa494fa62b6965',
-  contract_address: '0x353c982282cb6dea5afc3db185910d6967c1dac6b813bcc6981e6438ea290dd',
+  contract_address: '0x0353c982282cb6dea5afc3db185910d6967c1dac6b813bcc6981e6438ea290dd',
 };
 
 export const createAccountProxyResp = {
@@ -274,7 +274,7 @@ export const estimateFeeResp2 = {
   suggestedMaxFee: num.toBigInt('0x14a5d6744ed9'),
 };
 
-export const unfoundUserAddress = '0x18dfa1955a0154524203f81c5668d6a78c708375ee8908dcb55a49c6ec87190';
+export const unfoundUserAddress = '0x018dfa1955a0154524203f81c5668d6a78c708375ee8908dcb55a49c6ec87190';
 export const unfoundUserPrivateKey = '0x610d87a5c02459f8643f9ad6a9bc70597d1a8a0ab4d645346b7eadc5266ad4d';
 export const unfoundUserPublicKey = '0x4b36a2b0a1e9d2af3416914798de776e37d9e0ab9a50d2dec30485dca64bb8';
 export const foundUserPrivateKey = '0x3cddbb7f3694ce84bd9598820834015d979d78e63474a5b00e59b41b0563f4e';
@@ -293,11 +293,11 @@ export const testnetPublicKeys = [
 ];
 
 export const testnetAccAddresses = [
-  '0x4882a372da3dfe1c53170ad75893832469bf87b62b13e84662565c4a88f25cd',
-  '0x353c982282cb6dea5afc3db185910d6967c1dac6b813bcc6981e6438ea290dd',
-  '0x18dfa1955a0154524203f81c5668d6a78c708375ee8908dcb55a49c6ec87190',
-  '0x12f772099692e75ed792aaa4a61cd5cf3dfe9833931aa67296d208bb609312e',
-  '0x541299104160a88ce08b8f1d5d3f8fe565214c5d2651034842e0b596f730a46',
+  '0x04882a372da3dfe1c53170ad75893832469bf87b62b13e84662565c4a88f25cd',
+  '0x0353c982282cb6dea5afc3db185910d6967c1dac6b813bcc6981e6438ea290dd',
+  '0x018dfa1955a0154524203f81c5668d6a78c708375ee8908dcb55a49c6ec87190',
+  '0x012f772099692e75ed792aaa4a61cd5cf3dfe9833931aa67296d208bb609312e',
+  '0x0541299104160a88ce08b8f1d5d3f8fe565214c5d2651034842e0b596f730a46',
   '0x2d8cdaf0d5de527fb48fa64e8c4a29b7bc1131d30a6e4350fcd960d376a65c0',
   '0x419eebcde2675d0716faf85992a815f64bb05a3b02a5c3805fa9908ad032434',
   '0x1320d99ed97884f476cfa0899d24892eb829f0f69ae1972df3c9516fd7795ec',
@@ -319,11 +319,11 @@ export const mainnetPublicKeys = [
 ];
 
 export const mainnetAccAddresses = [
-  '0x4882a372da3dfe1c53170ad75893832469bf87b62b13e84662565c4a88f25cd',
-  '0x353c982282cb6dea5afc3db185910d6967c1dac6b813bcc6981e6438ea290dd',
-  '0x18dfa1955a0154524203f81c5668d6a78c708375ee8908dcb55a49c6ec87190',
-  '0x12f772099692e75ed792aaa4a61cd5cf3dfe9833931aa67296d208bb609312e',
-  '0x541299104160a88ce08b8f1d5d3f8fe565214c5d2651034842e0b596f730a46',
+  '0x04882a372da3dfe1c53170ad75893832469bf87b62b13e84662565c4a88f25cd',
+  '0x0353c982282cb6dea5afc3db185910d6967c1dac6b813bcc6981e6438ea290dd',
+  '0x018dfa1955a0154524203f81c5668d6a78c708375ee8908dcb55a49c6ec87190',
+  '0x012f772099692e75ed792aaa4a61cd5cf3dfe9833931aa67296d208bb609312e',
+  '0x0541299104160a88ce08b8f1d5d3f8fe565214c5d2651034842e0b596f730a46',
   '0x2d8cdaf0d5de527fb48fa64e8c4a29b7bc1131d30a6e4350fcd960d376a65c0',
   '0x419eebcde2675d0716faf85992a815f64bb05a3b02a5c3805fa9908ad032434',
   '0x1320d99ed97884f476cfa0899d24892eb829f0f69ae1972df3c9516fd7795ec',
