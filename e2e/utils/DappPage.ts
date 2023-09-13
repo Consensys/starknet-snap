@@ -9,7 +9,7 @@ export default class DappPage {
 
   ConnectButton = `//*[text()="Connect with MetaMask Flask"]`;
   BalanceValue = `#root > div > div > div.sc-gHLcSH.eQkxgj > div.sc-jtcaXd.gRiExi > div.sc-elYLMi.ifySaH > div.sc-fLlhyt.fvAMhi > div.sc-bczRLJ.dWqeJI > span.sc-gsnTZi.bZeyGO`;
-  MainnetLabel = `//*[text()="StarkNet Mainnet"]`;
+  MainnetLabel = `//*[text()="Starknet Mainnet"]`;
   BurgerMenu = `//*[@id="headlessui-menu-button-:r2:"]/div`;
   CopyAddressButton = `//*[@id="root"]/div/div/div[2]/div[5]/div[1]/div[4]/div[2]/div/button/span`;
   AccountIcon = `//h3[text()="My account"]/../div/div[1]/div[1]`;
@@ -54,7 +54,7 @@ export default class DappPage {
 
   async checkUserIsconnected(): Promise<void> {
     await this.page.locator(this.BurgerMenu).click();
-    await this.page.waitForSelector('//*[text()="Connected to StarkNet Snap"]')
+    await this.page.waitForSelector('//*[text()="Connected to Starknet Snap"]')
   }
 
   async waitForLodingPage(): Promise<void> {
@@ -77,7 +77,7 @@ export default class DappPage {
   async checkAccountInfo(): Promise<void> {
     await this.page.locator('//*[@id="root"]/div/div/div[2]/div[5]/div[1]/div[4]/div[1]').click();
     await this.page.waitForSelector('//*[text()="Network"]');
-    await this.page.waitForSelector('//*[text()="StarkNet account"]');
+    await this.page.waitForSelector('//*[text()="Starknet account"]');
     await this.page.waitForSelector('//div[contains(text(), "0x")]');
     await this.page.waitForSelector('//*[text()="This account was generated with your MetaMask Secret Recovery Phrase."]');
     await this.page.locator('//*[contains(text(), "GOT IT")]').click();

@@ -126,7 +126,7 @@ export const MenuView = ({ connected, ...otherProps }: IProps) => {
                     color={theme.palette.success.main}
                     style={{ fontSize: '12px', lineHeight: '12px', padding: '0px 10px' }}
                   />
-                  <MenuItemText>Connected to StarkNet Snap</MenuItemText>
+                  <MenuItemText>Connected to Starknet Snap</MenuItemText>
                 </div>
               </Menu.Item>
             </MenuSection>

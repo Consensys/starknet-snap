@@ -13,7 +13,7 @@ export const NoMetamaskModalView = () => {
       <StarknetLogo />
       <Title>You don't have the MetaMask extension</Title>
       <DescriptionCentered>
-        You need to install MetaMask extension in order to use the StarkNet Snap.
+        You need to install MetaMask extension in order to use the Starknet Snap.
         <br />
         <br />
       </DescriptionCentered>

@@ -38,7 +38,7 @@ describe('Test function: addNetwork', function () {
 
   it('should add the network correctly (should throw error as temporarily disabled)', async function () {
     const requestObject: AddNetworkRequestParams = {
-      networkName: 'StarkNet Unit SN_GOERLI',
+      networkName: 'Starknet Unit SN_GOERLI',
       networkChainId: '0x534e5f474f777',
       networkBaseUrl: 'https://alpha-unit-SN_GOERLI.starknet.io',
       networkNodeUrl: '',
@@ -55,7 +55,7 @@ describe('Test function: addNetwork', function () {
 
   it('should update the network correctly (should throw error as temporarily disabled)', async function () {
     const requestObject: AddNetworkRequestParams = {
-      networkName: 'StarkNet Unit SN_GOERLI 2',
+      networkName: 'Starknet Unit SN_GOERLI 2',
       networkChainId: '0x534e5f474f777',
       networkBaseUrl: 'https://alpha-unit-SN_GOERLI-2.starknet.io',
       networkNodeUrl: '',
@@ -71,7 +71,7 @@ describe('Test function: addNetwork', function () {
 
   it('should not update snap state with the duplicated network (should throw error as temporarily disabled)', async function () {
     const requestObject: AddNetworkRequestParams = {
-      networkName: 'StarkNet Unit SN_GOERLI 2',
+      networkName: 'Starknet Unit SN_GOERLI 2',
       networkChainId: '0x534e5f474f777',
       networkBaseUrl: 'https://alpha-unit-SN_GOERLI-2.starknet.io',
       networkNodeUrl: '',
@@ -88,7 +88,7 @@ describe('Test function: addNetwork', function () {
   it('should throw error if upsertNetwork failed', async function () {
     sandbox.stub(snapUtils, 'upsertNetwork').throws(new Error());
     const requestObject: AddNetworkRequestParams = {
-      networkName: 'StarkNet Unit SN_GOERLI 2',
+      networkName: 'Starknet Unit SN_GOERLI 2',
       networkChainId: '0x534e5f474f777',
       networkBaseUrl: 'https://alpha-unit-SN_GOERLI-2.starknet.io',
       networkNodeUrl: '',
@@ -125,7 +125,7 @@ describe('Test function: addNetwork', function () {
 
   it('should throw an error if the network chain id is undefined', async function () {
     const requestObject: AddNetworkRequestParams = {
-      networkName: 'StarkNet Unit SN_GOERLI 2',
+      networkName: 'Starknet Unit SN_GOERLI 2',
       networkChainId: undefined,
       networkBaseUrl: 'https://alpha-unit-SN_GOERLI-2.starknet.io',
       networkNodeUrl: '',
@@ -143,7 +143,7 @@ describe('Test function: addNetwork', function () {
 
   it('should throw an error if both the network base url and node url are empty string', async function () {
     const requestObject: AddNetworkRequestParams = {
-      networkName: 'StarkNet Unit SN_GOERLI 2',
+      networkName: 'Starknet Unit SN_GOERLI 2',
       networkChainId: '0x534e5f474f777',
       networkBaseUrl: '',
       networkNodeUrl: '',
@@ -179,7 +179,7 @@ describe('Test function: addNetwork', function () {
 
   it('should throw an error if the network name is longer than 64 chars', async function () {
     const requestObject: AddNetworkRequestParams = {
-      networkName: 'StarkNet Unit SN_GOERLI xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+      networkName: 'Starknet Unit SN_GOERLI xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
       networkChainId: '0x534e5f474f777',
       networkBaseUrl: 'https://alpha-unit-SN_GOERLI-2.starknet.io',
       networkNodeUrl: '',
@@ -215,7 +215,7 @@ describe('Test function: addNetwork', function () {
 
   it('should throw an error if the network chainId is not in hex string', async function () {
     const requestObject: AddNetworkRequestParams = {
-      networkName: 'StarkNet Unit SN_GOERLI',
+      networkName: 'Starknet Unit SN_GOERLI',
       networkChainId: '534e5f474f777',
       networkBaseUrl: 'https://alpha-unit-SN_GOERLI-2.starknet.io',
       networkNodeUrl: '',
@@ -233,7 +233,7 @@ describe('Test function: addNetwork', function () {
 
   it('should throw an error if the network base URL is not valid', async function () {
     const requestObject: AddNetworkRequestParams = {
-      networkName: 'StarkNet Unit SN_GOERLI',
+      networkName: 'Starknet Unit SN_GOERLI',
       networkChainId: '0x534e5f474f777',
       networkBaseUrl: 'wss://alpha-unit-SN_GOERLI-2.starknet.io',
       networkNodeUrl: '',
@@ -251,7 +251,7 @@ describe('Test function: addNetwork', function () {
 
   it('should throw an error if the network node URL is not valid', async function () {
     const requestObject: AddNetworkRequestParams = {
-      networkName: 'StarkNet Unit SN_GOERLI',
+      networkName: 'Starknet Unit SN_GOERLI',
       networkChainId: '0x534e5f474f777',
       networkBaseUrl: '',
       networkNodeUrl: 'wss://alpha-unit-SN_GOERLI-2.starknet.io',
@@ -269,7 +269,7 @@ describe('Test function: addNetwork', function () {
 
   it('should throw an error if the network Voyager URL is not valid', async function () {
     const requestObject: AddNetworkRequestParams = {
-      networkName: 'StarkNet Unit SN_GOERLI',
+      networkName: 'Starknet Unit SN_GOERLI',
       networkChainId: '0x534e5f474f777',
       networkBaseUrl: '',
       networkNodeUrl: 'http://alpha-unit-SN_GOERLI-2.starknet.io',
@@ -288,12 +288,12 @@ describe('Test function: addNetwork', function () {
 
   it('should throw an error if the network account class hash is not valid', async function () {
     const requestObject: AddNetworkRequestParams = {
-      networkName: 'StarkNet Unit SN_GOERLI',
+      networkName: 'Starknet Unit SN_GOERLI',
       networkChainId: '0x534e5f474f777',
       networkBaseUrl: '',
       networkNodeUrl: 'http://alpha-unit-SN_GOERLI-2.starknet.io',
       accountClassHash: '0x811111111111111111111111111111111111111111111111111111111111111',
-      // a valid StarkNet hash is essentially a cario felt, which is a 251 bit positive number
+      // a valid Starknet hash is essentially a cario felt, which is a 251 bit positive number
       // which means it can only be 63 hex character long with the leading char being [1-7]
     };
     apiParams.requestParams = requestObject;
@@ -309,7 +309,7 @@ describe('Test function: addNetwork', function () {
 
   it('should throw an error if the network chainId is one of the preloaded network chainId', async function () {
     const requestObject: AddNetworkRequestParams = {
-      networkName: 'StarkNet Unit SN_GOERLI',
+      networkName: 'Starknet Unit SN_GOERLI',
       networkChainId: '0x534e5f474f45524c49',
       networkBaseUrl: 'http://alpha-unit-SN_GOERLI-2.starknet.io',
       networkNodeUrl: '',

@@ -17,7 +17,7 @@ export const Default = () => {
           <h3>What is a snap?</h3>
           <p>
             A snap is a program that runs in an isolated environment that can extend the functionality of MetaMask. In
-            this case, StarkNet uses Snaps to add support for—and create an account on—StarkNet using MetaMask.
+            this case, Starknet uses Snaps to add support for—and create an account on—Starknet using MetaMask.
           </p>
           <button onClick={() => setIsOpen(false)}>Close</button>
         </div>
@@ -36,7 +36,7 @@ export const WithoutCloseButton = () => {
           <h3>What is a snap?</h3>
           <p>
             A snap is a program that runs in an isolated environment that can extend the functionality of MetaMask. In
-            this case, StarkNet uses Snaps to add support for—and create an account on—StarkNet using MetaMask.
+            this case, Starknet uses Snaps to add support for—and create an account on—Starknet using MetaMask.
           </p>
           <button onClick={() => setIsOpen(false)}>Close</button>
         </div>
@@ -56,7 +56,7 @@ export const InitialFocus = () => {
           <h3>What is a snap?</h3>
           <p>
             A snap is a program that runs in an isolated environment that can extend the functionality of MetaMask. In
-            this case, StarkNet uses Snaps to add support for—and create an account on—StarkNet using MetaMask.
+            this case, Starknet uses Snaps to add support for—and create an account on—Starknet using MetaMask.
           </p>
           <button onClick={() => setIsOpen(false)}>Close</button>
           <p>

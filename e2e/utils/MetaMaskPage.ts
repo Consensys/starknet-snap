@@ -62,7 +62,7 @@ export default class MetaMaskPage {
     await this.page.reload()
     await this.page.locator('//button[text()="Approve"]').click();
     await this.page.reload()
-    await this.page.waitForSelector('//h3[text()="StarkNet Account Private Key"]');
+    await this.page.waitForSelector('//h3[text()="Starknet Account Private Key"]');
     await this.page.waitForSelector('//textarea[contains(text(), "0x")]');
     await this.page.reload()
     await this.page.locator('//button[text()="Approve"]').click();
