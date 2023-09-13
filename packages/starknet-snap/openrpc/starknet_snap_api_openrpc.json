@@ -1,7 +1,7 @@
 {
   "openrpc": "1.0.0-rc1",
   "info": {
-    "version": "2.0.2",
+    "version": "2.1.0",
     "title": "Starknet MetaMask Snap API",
     "license": {}
   },
