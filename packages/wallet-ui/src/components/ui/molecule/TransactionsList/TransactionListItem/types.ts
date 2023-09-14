@@ -35,34 +35,32 @@ export const getTxnDate = (transaction: Transaction): string => {
 };
 
 export const getTxnStatus = (transaction: Transaction): string => {
-  let statusStr = []
+  let statusStr = [];
   if (transaction.finalityStatus === transaction.executionStatus) {
-    return transaction.finalityStatus ? formatStatus(transaction.finalityStatus) : ''
+    return transaction.finalityStatus ? formatStatus(transaction.finalityStatus) : '';
   }
-  if (transaction.finalityStatus)
-  {
-    statusStr.push(formatStatus(transaction.finalityStatus))
+  if (transaction.finalityStatus) {
+    statusStr.push(formatStatus(transaction.finalityStatus));
   }
-  if (transaction.executionStatus)
-  {
-    statusStr.push(formatStatus(transaction.executionStatus))
+  if (transaction.executionStatus) {
+    statusStr.push(formatStatus(transaction.executionStatus));
   }
-  return statusStr.join(' / ')
+  return statusStr.join(' / ');
 };
 
 export const formatStatus = (status: string): string => {
   return status
-  .replaceAll('_', ' ')
-  .split(' ')
-  .map((word) => {
-    word = word.toLowerCase();
-    if (word !== 'on') {
-      word = word.charAt(0).toUpperCase() + word.slice(1);
-    }
-    return word;
-  })
-  .join(' ')
-}
+    .replaceAll('_', ' ')
+    .split(' ')
+    .map((word) => {
+      word = word.toLowerCase();
+      if (word !== 'on') {
+        word = word.charAt(0).toUpperCase() + word.slice(1);
+      }
+      return word;
+    })
+    .join(' ');
+};
 
 export const getTxnToFromLabel = (transaction: Transaction): string => {
   const txnName = getTxnName(transaction);
