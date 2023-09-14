@@ -210,6 +210,22 @@ export const RejectedTxn2: Transaction = {
   eventIds: [],
 };
 
+export const unsettedTransactionInMassagedTxn: Transaction = {
+  chainId: STARKNET_TESTNET_NETWORK.chainId,
+  contractAddress: '0x7394cbe418daa16e42b87ba67372d4ab4a5df0b05c6e554d158458ce245bc10',
+  contractCallData: ['0x14361d05e560796ad3152e083b609f5205f3bd76039327326746ba7f769a666', '0xde0b6b3a7640000', '0x0'],
+  contractFuncName: 'transfer',
+  senderAddress: '0x5a98ec74a40383cf99896bfea2ec5e6aad16c7eed50025a5f569d585ebb13a2',
+  timestamp: 1655109666,
+  txnHash: '0x1366c2f9f46b1a86ba0c28b5a08fa0aa3750c4d1cbe06e97e72bd46ae2ac1f9',
+  txnType: VoyagerTransactionType.INVOKE,
+  failureReason: '',
+  status: 'RECEIVED',
+  executionStatus: 'RECEIVED',
+  finalityStatus: 'RECEIVED',
+  eventIds: [],
+};
+
 export const txn1: Transaction = {
   chainId: STARKNET_MAINNET_NETWORK.chainId,
   contractAddress: '0x06a09ccb1caaecf3d9683efe335a667b2169a409d19c589ba1eb771cd210af75',

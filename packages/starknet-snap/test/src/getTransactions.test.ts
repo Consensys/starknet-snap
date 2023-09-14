@@ -16,6 +16,7 @@ import {
   getTxnStatusAcceptL2Resp,
   getTxnStatusResp,
   getTxnsFromVoyagerResp,
+  unsettedTransactionInMassagedTxn,
   initAccountTxn,
   txn1,
   txn2,
@@ -26,16 +27,27 @@ import {
 import { getTransactions } from '../../src/getTransactions';
 import { Mutex } from 'async-mutex';
 import { ApiParams, GetTransactionsRequestParams } from '../../src/types/snapApi';
+import { num } from 'starknet';
 
 chai.use(sinonChai);
 const sandbox = sinon.createSandbox();
 describe('Test function: getTransactions', function () {
   const walletStub = new WalletMock();
+  let getTransactionStatusStub = null;
   const state: SnapState = {
     accContracts: [],
     erc20Tokens: [],
     networks: [STARKNET_TESTNET_NETWORK, STARKNET_MAINNET_NETWORK],
-    transactions: [txn1, txn2, txn3, txn4, txn5, createAccountProxyTxn, initAccountTxn],
+    transactions: [
+      unsettedTransactionInMassagedTxn,
+      txn1,
+      txn2,
+      txn3,
+      txn4,
+      txn5,
+      createAccountProxyTxn,
+      initAccountTxn,
+    ],
   };
   const apiParams: ApiParams = {
     state,
@@ -58,7 +70,7 @@ describe('Test function: getTransactions', function () {
         return null;
       }
     });
-    sandbox.stub(utils, 'getTransactionStatus').callsFake(async (...args) => {
+    getTransactionStatusStub = sandbox.stub(utils, 'getTransactionStatus').callsFake(async (...args) => {
       if (args?.[0] === getTxnsFromVoyagerResp.items[0].hash) {
         return getTxnStatusResp;
       } else if (args?.[0] === getTxnsFromVoyagerResp.items[1].hash) {
@@ -86,6 +98,27 @@ describe('Test function: getTransactions', function () {
     const result = await getTransactions(apiParams);
 
     expect(walletStub.rpcStubs.snap_manageState).to.have.been.called;
+    expect(result.length).to.be.eq(4);
+    expect(result).to.be.eql(expectedMassagedTxns);
+  });
+
+  it('should merge the transactions stored in snap state correctly', async function () {
+    const requestObject: GetTransactionsRequestParams = {
+      senderAddress: txn4.senderAddress,
+      pageSize: '10',
+    };
+    apiParams.requestParams = requestObject;
+
+    const result = await getTransactions(apiParams);
+    const mergeTxn = result.find(
+      (e) => num.toBigInt(e.txnHash) === num.toBigInt(unsettedTransactionInMassagedTxn.txnHash),
+    );
+    expect(getTransactionStatusStub.callCount).to.be.eq(4);
+    expect(walletStub.rpcStubs.snap_manageState).to.have.been.called;
+    expect(mergeTxn).not.to.be.undefined;
+    expect(mergeTxn.status).to.be.eq('');
+    expect(mergeTxn.finalityStatus).to.be.eq(getTxnStatusResp.finalityStatus);
+    expect(mergeTxn.executionStatus).to.be.eq(getTxnStatusResp.executionStatus);
     expect(result.length).to.be.eq(4);
     expect(result).to.be.eql(expectedMassagedTxns);
   });
