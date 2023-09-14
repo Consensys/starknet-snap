@@ -1,6 +1,20 @@
 # Changelog
 
 
+## [2.1.0](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v2.0.2...starknet-snap-v2.1.0) (2023-09-13)
+
+
+### Features
+
+* changed name from StarkNet to Starknet ([#138](https://github.com/Consensys/starknet-snap/issues/138)) ([a153ee1](https://github.com/Consensys/starknet-snap/commit/a153ee1a04e6c742b7a6fc326d0c7556af082ee5))
+* migrate metamask flask handle to metamask ([#121](https://github.com/Consensys/starknet-snap/issues/121)) ([5eff492](https://github.com/Consensys/starknet-snap/commit/5eff492cedb1bfa299e30b584fda8c936248fb9a))
+
+
+### Bug Fixes
+
+* fix account address ([#137](https://github.com/Consensys/starknet-snap/issues/137)) ([f406d43](https://github.com/Consensys/starknet-snap/commit/f406d43cacdf08894d94988a750af46680e91114))
+* update proposedName ([#133](https://github.com/Consensys/starknet-snap/issues/133)) ([28dfb15](https://github.com/Consensys/starknet-snap/commit/28dfb152c8e252ecc3c6ea0cdb42e202ac858fc3))
+
 ## [2.0.2](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v2.0.1...starknet-snap-v2.0.2) (2023-09-05)
 
 
@@ -96,7 +110,7 @@
 
 ### Features
 
-* temporarily reverted back to use StarkNet feeder gateway APIs as default provider ([#39](https://github.com/ConsenSys/starknet-snap/issues/39)) ([ed05913](https://github.com/ConsenSys/starknet-snap/commit/ed059130c6b4cddd28965302eb3824529d1328ac))
+* temporarily reverted back to use Starknet feeder gateway APIs as default provider ([#39](https://github.com/ConsenSys/starknet-snap/issues/39)) ([ed05913](https://github.com/ConsenSys/starknet-snap/commit/ed059130c6b4cddd28965302eb3824529d1328ac))
 
 ## [0.11.0](https://github.com/ConsenSys/starknet-snap/compare/starknet-snap-v0.10.0...starknet-snap-v0.11.0) (2022-10-25)
 

@@ -14,7 +14,7 @@ export const MAXIMUM_TOKEN_SYMBOL_LENGTH = 16;
 export const TRANSFER_SELECTOR_HEX = '0x83afd3f4caedc6eebf44246fe54e38c95e3179a5ec9ea81740eca5b482d12e';
 
 export const STARKNET_MAINNET_NETWORK: Network = {
-  name: 'StarkNet Mainnet',
+  name: 'Starknet Mainnet',
   chainId: constants.StarknetChainId.SN_MAIN,
   baseUrl: 'https://alpha-mainnet.starknet.io',
   nodeUrl: 'https://starknet-mainnet.infura.io/v3/60c7253fb48147658095fe0460ac9ee9',

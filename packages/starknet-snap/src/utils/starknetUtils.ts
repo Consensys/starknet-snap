@@ -382,7 +382,10 @@ export const getAccContractAddressAndCallData = (accountClassHash: string, publi
     selector: hash.getSelectorFromName('initialize'),
     calldata: CallData.compile({ signer: publicKey, guardian: '0' }),
   });
-  const address = hash.calculateContractAddressFromHash(publicKey, PROXY_CONTRACT_HASH, callData, 0);
+  let address = hash.calculateContractAddressFromHash(publicKey, PROXY_CONTRACT_HASH, callData, 0);
+  if (address.length < 66) {
+    address = address.replace('0x', '0x' + '0'.repeat(66 - address.length));
+  }
   return {
     address,
     callData,

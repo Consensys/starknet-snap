@@ -1920,15 +1920,15 @@ __metadata:
   linkType: hard
 
 "@consensys/starknet-snap@file:../starknet-snap::locator=wallet-ui%40workspace%3Apackages%2Fwallet-ui":
-  version: 2.0.1
-  resolution: "@consensys/starknet-snap@file:../starknet-snap#../starknet-snap::hash=7d114b&locator=wallet-ui%40workspace%3Apackages%2Fwallet-ui"
+  version: 2.0.2
+  resolution: "@consensys/starknet-snap@file:../starknet-snap#../starknet-snap::hash=9acd3c&locator=wallet-ui%40workspace%3Apackages%2Fwallet-ui"
   dependencies:
     async-mutex: ^0.3.2
     ethereum-unit-converter: ^0.0.17
     ethers: ^5.5.1
     starknet: ^5.14.0
     starknet_v4.22.0: "npm:starknet@4.22.0"
-  checksum: 418e26d54f67cbf4a21e61bae59126b426a9a50dad29672febf934af5c5ea586b1b68888902a92ecef23bbd31b1bec6fe9f5c865c60c299fe75681ac2b4d305a
+  checksum: 21677bd773696e6fecd4420babb8407904a7e14d3cb4da2e80844060ec97015834e97f0e0c10f7144f14ee29b3b27f8bbf413dbb3335f062bc2f4af41d577f5e
   languageName: node
   linkType: hard
 

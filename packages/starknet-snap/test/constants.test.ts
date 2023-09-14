@@ -21,7 +21,7 @@ export const invalidNetwork: Network = {
 };
 
 export const account1: AccContract = {
-  address: '0x4882a372da3dfe1c53170ad75893832469bf87b62b13e84662565c4a88f25cd',
+  address: '0x04882a372da3dfe1c53170ad75893832469bf87b62b13e84662565c4a88f25cd',
   addressSalt: '0x0154c7b20442ee954f50831702ca844ec185ad484c21719575d351583deec90b',
   addressIndex: 0,
   derivationPath: "m / bip32:44' / bip32:9004' / bip32:0' / bip32:0",
@@ -31,7 +31,7 @@ export const account1: AccContract = {
 };
 
 export const account2: AccContract = {
-  address: '0x353c982282cb6dea5afc3db185910d6967c1dac6b813bcc6981e6438ea290dd',
+  address: '0x0353c982282cb6dea5afc3db185910d6967c1dac6b813bcc6981e6438ea290dd',
   addressSalt: '0x019e59f349e1aa813ab4556c5836d0472e5e1ae82d1e5c3b3e8aabfeb290befd',
   addressIndex: 1,
   derivationPath: "m / bip32:44' / bip32:9004' / bip32:0' / bip32:0",
@@ -41,7 +41,7 @@ export const account2: AccContract = {
 };
 
 export const account3: AccContract = {
-  address: '0x128a26755280f0bf9bb3a3fc4948ee54e00142761eeef8c5cea5890ad49a96b',
+  address: '0x0128a26755280f0bf9bb3a3fc4948ee54e00142761eeef8c5cea5890ad49a96b',
   addressSalt: '0x0797efd8e3971dfca4f928485860896201320ce2997ca4789d9343204219599d',
   addressIndex: 2,
   derivationPath: "m / bip32:44' / bip32:9004' / bip32:0' / bip32:0",
@@ -51,7 +51,7 @@ export const account3: AccContract = {
 };
 
 export const account4: AccContract = {
-  address: '0x5a98ec74a40383cf99896bfea2ec5e6aad16c7eed50025a5f569d585ebb13a2',
+  address: '0x05a98ec74a40383cf99896bfea2ec5e6aad16c7eed50025a5f569d585ebb13a2',
   addressSalt: '0x0110e50179b0ef539fd1558571698a98cfe90d6829ff8203bfe577fdda6fc44e',
   addressIndex: 3,
   derivationPath: "m / bip32:44' / bip32:9004' / bip32:0' / bip32:0",
@@ -62,7 +62,7 @@ export const account4: AccContract = {
 
 export const token1: Erc20Token = {
   address: '0x244c20d51109adcf604fde1bbf878e5dcd549b3877ac87911ec6a158bd7aa62',
-  name: 'StarkNet ERC-20 sample',
+  name: 'Starknet ERC-20 sample',
   symbol: 'SNET',
   decimals: 18,
   chainId: constants.StarknetChainId.SN_GOERLI,
@@ -85,9 +85,9 @@ export const token3: Erc20Token = {
 };
 
 export const signature1 =
-  '3044022001240ead6d946a3901a80771c249111dbdabd566a5ff8f5ef6404319bc740d9a022004fa6a41b05328cb8408dcd60db880c70a4884b5f19bc0b7ef56ed2746129f07';
+  '3044022001bbc0696d02f85696608c9029973d7d5cf714be2a8188424578c40016262fff022004e388edeb3ceb1fd023b165c9a91cc39b97d58f77beb53b6b90ee9261d9f90c';
 export const signature2 =
-  '3044022004a30c7974f65e03369c6f91a4a781528b77f329f5a8f459ed633e4566807a590220079e7576b474cba89ebd4aea0ab8ea36be179c286e752d2955d46cef79f65f96';
+  '304402200510bd78f928984364253c04201185ab6ccc386278c8fe1aeda0deab7a476e3f02200442916a82f917f520071da038d6dc3eb4446824ce26893355ad4c4a9343729c';
 
 // Derived from seed phrase: "dog simple gown ankle release anger local pulp rose river approve miracle"
 export const bip44Entropy: JsonBIP44CoinTypeNode = {
@@ -112,12 +112,12 @@ export const getBip44EntropyStub = async (...args: unknown[]) => {
 
 export const createAccountProxyMainnetResp = {
   transaction_hash: '0x3b690b4c9dd639881a46f6a344ee90254562175ed7a7f5a028f69b8c32ccb47',
-  contract_address: '0x4882a372da3dfe1c53170ad75893832469bf87b62b13e84662565c4a88f25cd',
+  contract_address: '0x04882a372da3dfe1c53170ad75893832469bf87b62b13e84662565c4a88f25cd',
 };
 
 export const createAccountProxyMainnetResp2 = {
   transaction_hash: '0x60d85f7411349c0b4bc94cf1a6659dccb945f82865592ae7aaa494fa62b6965',
-  contract_address: '0x353c982282cb6dea5afc3db185910d6967c1dac6b813bcc6981e6438ea290dd',
+  contract_address: '0x0353c982282cb6dea5afc3db185910d6967c1dac6b813bcc6981e6438ea290dd',
 };
 
 export const createAccountProxyResp = {
@@ -320,7 +320,7 @@ export const estimateFeeResp2 = {
   suggestedMaxFee: num.toBigInt('0x14a5d6744ed9'),
 };
 
-export const unfoundUserAddress = '0x18dfa1955a0154524203f81c5668d6a78c708375ee8908dcb55a49c6ec87190';
+export const unfoundUserAddress = '0x018dfa1955a0154524203f81c5668d6a78c708375ee8908dcb55a49c6ec87190';
 export const unfoundUserPrivateKey = '0x610d87a5c02459f8643f9ad6a9bc70597d1a8a0ab4d645346b7eadc5266ad4d';
 export const unfoundUserPublicKey = '0x4b36a2b0a1e9d2af3416914798de776e37d9e0ab9a50d2dec30485dca64bb8';
 export const foundUserPrivateKey = '0x3cddbb7f3694ce84bd9598820834015d979d78e63474a5b00e59b41b0563f4e';
@@ -339,11 +339,11 @@ export const testnetPublicKeys = [
 ];
 
 export const testnetAccAddresses = [
-  '0x4882a372da3dfe1c53170ad75893832469bf87b62b13e84662565c4a88f25cd',
-  '0x353c982282cb6dea5afc3db185910d6967c1dac6b813bcc6981e6438ea290dd',
-  '0x18dfa1955a0154524203f81c5668d6a78c708375ee8908dcb55a49c6ec87190',
-  '0x12f772099692e75ed792aaa4a61cd5cf3dfe9833931aa67296d208bb609312e',
-  '0x541299104160a88ce08b8f1d5d3f8fe565214c5d2651034842e0b596f730a46',
+  '0x04882a372da3dfe1c53170ad75893832469bf87b62b13e84662565c4a88f25cd',
+  '0x0353c982282cb6dea5afc3db185910d6967c1dac6b813bcc6981e6438ea290dd',
+  '0x018dfa1955a0154524203f81c5668d6a78c708375ee8908dcb55a49c6ec87190',
+  '0x012f772099692e75ed792aaa4a61cd5cf3dfe9833931aa67296d208bb609312e',
+  '0x0541299104160a88ce08b8f1d5d3f8fe565214c5d2651034842e0b596f730a46',
   '0x2d8cdaf0d5de527fb48fa64e8c4a29b7bc1131d30a6e4350fcd960d376a65c0',
   '0x419eebcde2675d0716faf85992a815f64bb05a3b02a5c3805fa9908ad032434',
   '0x1320d99ed97884f476cfa0899d24892eb829f0f69ae1972df3c9516fd7795ec',
@@ -365,11 +365,11 @@ export const mainnetPublicKeys = [
 ];
 
 export const mainnetAccAddresses = [
-  '0x4882a372da3dfe1c53170ad75893832469bf87b62b13e84662565c4a88f25cd',
-  '0x353c982282cb6dea5afc3db185910d6967c1dac6b813bcc6981e6438ea290dd',
-  '0x18dfa1955a0154524203f81c5668d6a78c708375ee8908dcb55a49c6ec87190',
-  '0x12f772099692e75ed792aaa4a61cd5cf3dfe9833931aa67296d208bb609312e',
-  '0x541299104160a88ce08b8f1d5d3f8fe565214c5d2651034842e0b596f730a46',
+  '0x04882a372da3dfe1c53170ad75893832469bf87b62b13e84662565c4a88f25cd',
+  '0x0353c982282cb6dea5afc3db185910d6967c1dac6b813bcc6981e6438ea290dd',
+  '0x018dfa1955a0154524203f81c5668d6a78c708375ee8908dcb55a49c6ec87190',
+  '0x012f772099692e75ed792aaa4a61cd5cf3dfe9833931aa67296d208bb609312e',
+  '0x0541299104160a88ce08b8f1d5d3f8fe565214c5d2651034842e0b596f730a46',
   '0x2d8cdaf0d5de527fb48fa64e8c4a29b7bc1131d30a6e4350fcd960d376a65c0',
   '0x419eebcde2675d0716faf85992a815f64bb05a3b02a5c3805fa9908ad032434',
   '0x1320d99ed97884f476cfa0899d24892eb829f0f69ae1972df3c9516fd7795ec',
