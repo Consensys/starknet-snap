@@ -13,7 +13,7 @@ export const MockedState = ({}) => {
       {
         accountClassHash: '0x3e327de1c40540b98d05cbcb13552008e36f0ec8d61d46956d2f9752c294328',
         chainId: '0x534e5f4d41494e',
-        name: 'StarkNet Mainnet',
+        name: 'Starknet Mainnet',
         baseUrl: 'https://alpha-mainnet.starknet.io',
         nodeUrl: '',
         voyagerUrl: 'https://voyager.online',

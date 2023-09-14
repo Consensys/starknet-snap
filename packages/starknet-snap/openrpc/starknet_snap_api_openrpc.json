@@ -1,15 +1,15 @@
 {
   "openrpc": "1.0.0-rc1",
   "info": {
-    "version": "2.0.2",
-    "title": "StarkNet MetaMask Snap API",
+    "version": "2.1.0",
+    "title": "Starknet MetaMask Snap API",
     "license": {}
   },
   "servers": [],
   "methods": [
     {
       "name": "starkNet_extractPrivateKey",
-      "summary": "Extract private key from deployed StarkNet account and display in MetaMask",
+      "summary": "Extract private key from deployed Starknet account and display in MetaMask",
       "paramStructure": "by-name",
       "params": [
         {
@@ -23,8 +23,8 @@
         },
         {
           "name": "chainId",
-          "summary": "Id of the target StarkNet network",
-          "description": "Id of the target StarkNet network (default to StarkNet Goerli Testnet)",
+          "summary": "Id of the target Starknet network",
+          "description": "Id of the target Starknet network (default to Starknet Goerli Testnet)",
           "required": false,
           "schema": {
             "$ref": "#/components/schemas/CHAIN_ID"
@@ -44,7 +44,7 @@
     },
     {
       "name": "starkNet_extractPublicKey",
-      "summary": "Extract public key from an StarkNet account address",
+      "summary": "Extract public key from an Starknet account address",
       "paramStructure": "by-name",
       "params": [
         {
@@ -58,8 +58,8 @@
         },
         {
           "name": "chainId",
-          "summary": "Id of the target StarkNet network",
-          "description": "Id of the target StarkNet network (default to StarkNet Goerli Testnet)",
+          "summary": "Id of the target Starknet network",
+          "description": "Id of the target Starknet network (default to Starknet Goerli Testnet)",
           "required": false,
           "schema": {
             "$ref": "#/components/schemas/CHAIN_ID"
@@ -102,8 +102,8 @@
         },
         {
           "name": "chainId",
-          "summary": "Id of the target StarkNet network",
-          "description": "Id of the target StarkNet network (default to StarkNet Goerli Testnet)",
+          "summary": "Id of the target Starknet network",
+          "description": "Id of the target Starknet network (default to Starknet Goerli Testnet)",
           "required": false,
           "schema": {
             "$ref": "#/components/schemas/CHAIN_ID"
@@ -112,8 +112,8 @@
       ],
       "result": {
         "name": "result",
-        "summary": "Response from StarkNet’s \"gateway/add_transaction\" endpoint",
-        "description": "Response from StarkNet’s \"gateway/add_transaction\" endpoint",
+        "summary": "Response from Starknet’s \"gateway/add_transaction\" endpoint",
+        "description": "Response from Starknet’s \"gateway/add_transaction\" endpoint",
         "schema": {
           "$ref": "#/components/schemas/CREATE_ACCOUNT_RESULT"
         }
@@ -157,8 +157,8 @@
         },
         {
           "name": "chainId",
-          "summary": "Id of the target StarkNet network",
-          "description": "Id of the target StarkNet network (default to StarkNet Goerli Testnet)",
+          "summary": "Id of the target Starknet network",
+          "description": "Id of the target Starknet network (default to Starknet Goerli Testnet)",
           "required": false,
           "schema": {
             "$ref": "#/components/schemas/CHAIN_ID"
@@ -183,8 +183,8 @@
       "params": [
         {
           "name": "chainId",
-          "summary": "Id of the target StarkNet network",
-          "description": "Id of the target StarkNet network (default to StarkNet Goerli Testnet)",
+          "summary": "Id of the target Starknet network",
+          "description": "Id of the target Starknet network (default to Starknet Goerli Testnet)",
           "required": false,
           "schema": {
             "$ref": "#/components/schemas/CHAIN_ID"
@@ -244,8 +244,8 @@
         },
         {
           "name": "chainId",
-          "summary": "Id of the target StarkNet network",
-          "description": "Id of the target StarkNet network (default to StarkNet Goerli Testnet)",
+          "summary": "Id of the target Starknet network",
+          "description": "Id of the target Starknet network (default to Starknet Goerli Testnet)",
           "required": false,
           "schema": {
             "$ref": "#/components/schemas/CHAIN_ID"
@@ -254,8 +254,8 @@
       ],
       "result": {
         "name": "result",
-        "summary": "Response from StarkNet’s \"feeder_gateway/estimate_fee\" endpoint",
-        "description": "Response from StarkNet’s \"feeder_gateway/estimate_fee\" endpoint",
+        "summary": "Response from Starknet’s \"feeder_gateway/estimate_fee\" endpoint",
+        "description": "Response from Starknet’s \"feeder_gateway/estimate_fee\" endpoint",
         "schema": {
           "$ref": "#/components/schemas/ESTIMATE_FEE_RESULT"
         }
@@ -279,8 +279,8 @@
         },
         {
           "name": "chainId",
-          "summary": "Id of the target StarkNet network",
-          "description": "Id of the target StarkNet network (default to StarkNet Goerli Testnet)",
+          "summary": "Id of the target Starknet network",
+          "description": "Id of the target Starknet network (default to Starknet Goerli Testnet)",
           "required": false,
           "schema": {
             "$ref": "#/components/schemas/CHAIN_ID"
@@ -289,8 +289,8 @@
       ],
       "result": {
         "name": "result",
-        "summary": "Response from StarkNet’s \"feeder_gateway/estimate_fee\" endpoint",
-        "description": "Response from StarkNet’s \"feeder_gateway/estimate_fee\" endpoint",
+        "summary": "Response from Starknet’s \"feeder_gateway/estimate_fee\" endpoint",
+        "description": "Response from Starknet’s \"feeder_gateway/estimate_fee\" endpoint",
         "schema": {
           "$ref": "#/components/schemas/ESTIMATE_FEE_RESULT"
         }
@@ -349,8 +349,8 @@
         },
         {
           "name": "chainId",
-          "summary": "Id of the target StarkNet network",
-          "description": "Id of the target StarkNet network (default to StarkNet Goerli Testnet)",
+          "summary": "Id of the target Starknet network",
+          "description": "Id of the target Starknet network (default to Starknet Goerli Testnet)",
           "required": false,
           "schema": {
             "$ref": "#/components/schemas/CHAIN_ID"
@@ -359,8 +359,8 @@
       ],
       "result": {
         "name": "result",
-        "summary": "Response from StarkNet’s \"gateway/add_transaction\" endpoint",
-        "description": "Response from StarkNet’s \"gateway/add_transaction\" endpoint",
+        "summary": "Response from Starknet’s \"gateway/add_transaction\" endpoint",
+        "description": "Response from Starknet’s \"gateway/add_transaction\" endpoint",
         "schema": {
           "$ref": "#/components/schemas/SEND_TRANSACTION_RESULT"
         }
@@ -383,8 +383,8 @@
         },
         {
           "name": "chainId",
-          "summary": "Id of the target StarkNet network",
-          "description": "Id of the target StarkNet network (default to StarkNet Goerli Testnet)",
+          "summary": "Id of the target Starknet network",
+          "description": "Id of the target Starknet network (default to Starknet Goerli Testnet)",
           "required": false,
           "schema": {
             "$ref": "#/components/schemas/CHAIN_ID"
@@ -465,8 +465,8 @@
         },
         {
           "name": "chainId",
-          "summary": "Id of the target StarkNet network",
-          "description": "Id of the target StarkNet network (default to StarkNet Goerli Testnet)",
+          "summary": "Id of the target Starknet network",
+          "description": "Id of the target Starknet network (default to Starknet Goerli Testnet)",
           "required": false,
           "schema": {
             "$ref": "#/components/schemas/CHAIN_ID"
@@ -517,8 +517,8 @@
         },
         {
           "name": "chainId",
-          "summary": "Id of the target StarkNet network",
-          "description": "Id of the target StarkNet network (default to StarkNet Goerli Testnet)",
+          "summary": "Id of the target Starknet network",
+          "description": "Id of the target Starknet network (default to Starknet Goerli Testnet)",
           "required": false,
           "schema": {
             "$ref": "#/components/schemas/CHAIN_ID"
@@ -527,8 +527,8 @@
       ],
       "result": {
         "name": "result",
-        "summary": "Response from StarkNet’s \"feeder_gateway/call_contract\" endpoint",
-        "description": "Response from StarkNet’s \"feeder_gateway/call_contract\" endpoint",
+        "summary": "Response from Starknet’s \"feeder_gateway/call_contract\" endpoint",
+        "description": "Response from Starknet’s \"feeder_gateway/call_contract\" endpoint",
         "schema": {
           "$ref": "#/components/schemas/GET_VALUE_RESULT"
         }
@@ -560,8 +560,8 @@
         },
         {
           "name": "chainId",
-          "summary": "Id of the target StarkNet network",
-          "description": "Id of the target StarkNet network (default to StarkNet Goerli Testnet)",
+          "summary": "Id of the target Starknet network",
+          "description": "Id of the target Starknet network (default to Starknet Goerli Testnet)",
           "required": false,
           "schema": {
             "$ref": "#/components/schemas/CHAIN_ID"
@@ -603,8 +603,8 @@
         },
         {
           "name": "chainId",
-          "summary": "Id of the target StarkNet network",
-          "description": "Id of the target StarkNet network (default to StarkNet Goerli Testnet)",
+          "summary": "Id of the target Starknet network",
+          "description": "Id of the target Starknet network (default to Starknet Goerli Testnet)",
           "required": false,
           "schema": {
             "$ref": "#/components/schemas/CHAIN_ID"
@@ -655,8 +655,8 @@
         },
         {
           "name": "chainId",
-          "summary": "Id of the target StarkNet network",
-          "description": "Id of the target StarkNet network (default to StarkNet Goerli Testnet)",
+          "summary": "Id of the target Starknet network",
+          "description": "Id of the target Starknet network (default to Starknet Goerli Testnet)",
           "required": false,
           "schema": {
             "$ref": "#/components/schemas/CHAIN_ID"
@@ -717,8 +717,8 @@
         },
         {
           "name": "chainId",
-          "summary": "Id of the target StarkNet network",
-          "description": "Id of the target StarkNet network (default to StarkNet Goerli Testnet)",
+          "summary": "Id of the target Starknet network",
+          "description": "Id of the target Starknet network (default to Starknet Goerli Testnet)",
           "required": false,
           "schema": {
             "$ref": "#/components/schemas/CHAIN_ID"
@@ -742,8 +742,8 @@
       "params": [
         {
           "name": "chainId",
-          "summary": "Id of the target StarkNet network",
-          "description": "Id of the target StarkNet network (default to StarkNet Goerli Testnet)",
+          "summary": "Id of the target Starknet network",
+          "description": "Id of the target Starknet network (default to Starknet Goerli Testnet)",
           "required": false,
           "schema": {
             "$ref": "#/components/schemas/CHAIN_ID"
@@ -762,14 +762,14 @@
     },
     {
       "name": "starkNet_addNetwork",
-      "summary": "Adds a StarkNet network to the network list in snap’s state",
+      "summary": "Adds a Starknet network to the network list in snap’s state",
       "description": "Currently disabled (by always returning error)",
       "paramStructure": "by-name",
       "params": [
         {
           "name": "networkName",
-          "summary": "Name of the StarkNet network",
-          "description": "Name of the StarkNet network (no longer than 64 ASCII characters and can't be all spaces)",
+          "summary": "Name of the Starknet network",
+          "description": "Name of the Starknet network (no longer than 64 ASCII characters and can't be all spaces)",
           "required": true,
           "schema": {
             "type": "string"
@@ -777,8 +777,8 @@
         },
         {
           "name": "networkChainId",
-          "summary": "Id of the StarkNet network",
-          "description": "Id of the StarkNet network",
+          "summary": "Id of the Starknet network",
+          "description": "Id of the Starknet network",
           "required": true,
           "schema": {
             "$ref": "#/components/schemas/CHAIN_ID"
@@ -823,8 +823,8 @@
       ],
       "result": {
         "name": "result",
-        "summary": "Object of the added StarkNet network",
-        "description": "Object of the added StarkNet network",
+        "summary": "Object of the added Starknet network",
+        "description": "Object of the added Starknet network",
         "schema": {
           "$ref": "#/components/schemas/ADD_NETWORK_RESULT"
         }
@@ -833,14 +833,14 @@
     },
     {
       "name": "starkNet_getStoredNetworks",
-      "summary": "Gets a list of stored StarkNet networks",
-      "description": "Gets a list of stored StarkNet networks",
+      "summary": "Gets a list of stored Starknet networks",
+      "description": "Gets a list of stored Starknet networks",
       "paramStructure": "by-name",
       "params": [],
       "result": {
         "name": "result",
-        "summary": "List of the stored StarkNet networks",
-        "description": "List of the stored StarkNet networks",
+        "summary": "List of the stored Starknet networks",
+        "description": "List of the stored Starknet networks",
         "schema": {
           "$ref": "#/components/schemas/GET_STORED_NETWORKS_RESULT"
         }
@@ -858,13 +858,13 @@
       },
       "PROTOCOL_VERSION": {
         "title": "protocolVersion",
-        "description": "StarkNet protocol version, given in hex representation.",
+        "description": "Starknet protocol version, given in hex representation.",
         "type": "string",
         "pattern": "^0x[a-fA-F0-9]+$"
       },
       "CHAIN_ID": {
         "title": "chainId",
-        "description": "StarkNet chain id, given in hex representation.",
+        "description": "Starknet chain id, given in hex representation.",
         "type": "string",
         "pattern": "^0x[a-fA-F0-9]+$"
       },
@@ -879,7 +879,7 @@
       },
       "TXN_HASH": {
         "$ref": "#/components/schemas/FELT",
-        "description": "The transaction hash, as assigned in StarkNet",
+        "description": "The transaction hash, as assigned in Starknet",
         "title": "A transaction's hash"
       },
       "FELT": {
@@ -955,7 +955,7 @@
           },
           "chainId": {
             "$ref": "#/components/schemas/CHAIN_ID",
-            "description": "Id of the StarkNet network where the token resides"
+            "description": "Id of the Starknet network where the token resides"
           }
         }
       },
@@ -988,7 +988,7 @@
           },
           "chainId": {
             "$ref": "#/components/schemas/CHAIN_ID",
-            "description": "Id of the StarkNet network where the token resides"
+            "description": "Id of the Starknet network where the token resides"
           }
         }
       },
@@ -997,7 +997,7 @@
         "properties": {
           "name": {
             "type": "string",
-            "description": "Name of the StarkNet network"
+            "description": "Name of the Starknet network"
           },
           "baseUrl": {
             "type": "string",
@@ -1017,7 +1017,7 @@
           },
           "chainId": {
             "$ref": "#/components/schemas/CHAIN_ID",
-            "description": "Id of the StarkNet network"
+            "description": "Id of the Starknet network"
           }
         }
       },
@@ -1076,7 +1076,7 @@
           },
           "chainId": {
             "$ref": "#/components/schemas/CHAIN_ID",
-            "description": "Id of the StarkNet network where the txn submitted to"
+            "description": "Id of the Starknet network where the txn submitted to"
           }
         }
       },

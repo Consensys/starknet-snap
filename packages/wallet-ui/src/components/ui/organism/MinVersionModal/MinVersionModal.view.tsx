@@ -4,7 +4,7 @@ export const MinVersionModalView = () => {
   return (
     <Wrapper>
       <StarknetLogo />
-      <Title>A new version of the StarkNet Snap is available</Title>
+      <Title>A new version of the Starknet Snap is available</Title>
       <Description>
         To use this dapp, please install the latest version by following those steps:
         <ul>

@@ -1,3 +1,3 @@
 # starknet-snap
 
-The MetaMask Snap for StarkNet.
+The MetaMask Snap for Starknet.

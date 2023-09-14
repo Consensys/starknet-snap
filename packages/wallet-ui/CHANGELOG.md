@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
 
+## [1.16.0](https://github.com/Consensys/starknet-snap/compare/wallet-ui-v1.15.0...wallet-ui-v1.16.0) (2023-09-13)
+
+
+### Features
+
+* changed name from StarkNet to Starknet ([#138](https://github.com/Consensys/starknet-snap/issues/138)) ([a153ee1](https://github.com/Consensys/starknet-snap/commit/a153ee1a04e6c742b7a6fc326d0c7556af082ee5))
+
+## [1.15.0](https://github.com/Consensys/starknet-snap/compare/wallet-ui-v1.14.2...wallet-ui-v1.15.0) (2023-09-05)
+
+
+### Features
+
+* add cookie banner ([#127](https://github.com/Consensys/starknet-snap/issues/127)) ([64a94de](https://github.com/Consensys/starknet-snap/commit/64a94de6194fd31ab68ae7eeb5b4c84c3e455889))
+* add t and c at footer ([#120](https://github.com/Consensys/starknet-snap/issues/120)) ([f33de15](https://github.com/Consensys/starknet-snap/commit/f33de1512155d7d265d32a5f2ac8b95a88a41575))
+* migrate metamask flask handle to metamask ([#121](https://github.com/Consensys/starknet-snap/issues/121)) ([5eff492](https://github.com/Consensys/starknet-snap/commit/5eff492cedb1bfa299e30b584fda8c936248fb9a))
+
 ## [1.14.2](https://github.com/Consensys/starknet-snap/compare/wallet-ui-v1.14.1...wallet-ui-v1.14.2) (2023-07-17)
 
 
