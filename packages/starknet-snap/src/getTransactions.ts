@@ -94,7 +94,7 @@ export async function getTransactions(params: ApiParams) {
     }
 
     const updateStatusPromises = [];
-    const massagedTxnsMap = snapUtils.toMap<bigint, Transaction>(massagedTxns, 'txnHash', num.toBigInt);
+    const massagedTxnsMap = snapUtils.toMap<bigint, Transaction, string>(massagedTxns, 'txnHash', num.toBigInt);
 
     storedUnsettledTxns.forEach((txn: Transaction) => {
       const foundMassagedTxn = massagedTxnsMap.get(num.toBigInt(txn.txnHash));

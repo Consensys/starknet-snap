@@ -550,9 +550,9 @@ export async function removeAcceptedTransaction(
   });
 }
 
-export function toMap<k, v>(arr: Array<v>, key: string, keyConverter?: (v: any) => k): Map<k, v> {
+export function toMap<k, v, z>(arr: Array<v>, key: string, keyConverter?: (v: z) => k): Map<k, v> {
   return arr.reduce((map, obj: v) => {
-    map.set(keyConverter && typeof keyConverter === 'function' ? keyConverter(obj[key]) : obj[key], obj);
+    map.set(keyConverter && typeof keyConverter === 'function' ? keyConverter(obj[key] as z) : obj[key], obj);
     return map;
   }, new Map<k, v>());
 }

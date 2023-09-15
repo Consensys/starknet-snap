@@ -209,7 +209,7 @@ describe('Test function: getTransactions.updateStatus', function () {
   let txns = [];
   beforeEach(function () {
     txns = [{ ...unsettedTransactionInMassagedTxn }];
-    getTransactionStatusStub = sandbox.stub(utils, 'getTransactionStatus').callsFake(async (...args) => {
+    getTransactionStatusStub = sandbox.stub(utils, 'getTransactionStatus').callsFake(async () => {
       return getTxnStatusAcceptL2Resp;
     });
   });
