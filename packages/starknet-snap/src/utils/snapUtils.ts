@@ -534,12 +534,11 @@ export async function removeAcceptedTransaction(
 
     state.transactions = state.transactions.filter(
       (txn) =>
-        (txn.status !== TransactionStatus.ACCEPTED_ON_L2 && txn.status !== TransactionStatus.ACCEPTED_ON_L1) ||
         (txn.finalityStatus !== TransactionStatus.ACCEPTED_ON_L2 &&
           txn.finalityStatus !== TransactionStatus.ACCEPTED_ON_L1) ||
-        ((txn.finalityStatus === TransactionStatus.ACCEPTED_ON_L2 || txn.status === TransactionStatus.ACCEPTED_ON_L2) &&
-          txn.timestamp * 1000 >= minTimeStamp),
+        (txn.finalityStatus === TransactionStatus.ACCEPTED_ON_L2 && txn.timestamp * 1000 >= minTimeStamp),
     );
+
     await wallet.request({
       method: 'snap_manageState',
       params: {
@@ -550,9 +549,9 @@ export async function removeAcceptedTransaction(
   });
 }
 
-export function toMap<k, v>(arr: Array<v>, key: string): Map<k, v> {
+export function toMap<k, v, z>(arr: Array<v>, key: string, keyConverter?: (v: z) => k): Map<k, v> {
   return arr.reduce((map, obj: v) => {
-    map.set(obj[key], obj);
+    map.set(keyConverter && typeof keyConverter === 'function' ? keyConverter(obj[key] as z) : obj[key], obj);
     return map;
   }, new Map<k, v>());
 }
