@@ -2,7 +2,7 @@ import { toJson } from './utils/serializer';
 import { num } from 'starknet';
 import { validateAndParseAddress } from '../src/utils/starknetUtils';
 import { ApiParams, GetTransactionsRequestParams } from './types/snapApi';
-import { ExecutionStatus, Transaction, TransactionStatus, VoyagerTransactionType } from './types/snapState';
+import { ExecutionStatus, Transaction, TransactionStatus, VoyagerTransactionType, Network } from './types/snapState';
 import { DEFAULT_GET_TXNS_LAST_NUM_OF_DAYS, DEFAULT_GET_TXNS_PAGE_SIZE } from './utils/constants';
 import * as snapUtils from './utils/snapUtils';
 import * as utils from './utils/starknetUtils';
@@ -90,40 +90,20 @@ export async function getTransactions(params: ApiParams) {
         undefined,
       );
       logger.log(`getTransactions\nstoredUnsettledDeployTxns:\n${toJson(storedUnsettledDeployTxns)}`);
-      storedUnsettledTxns = [...storedUnsettledTxns, ...storedUnsettledDeployTxns];
+      storedUnsettledTxns = storedUnsettledTxns.concat(storedUnsettledDeployTxns);
     }
 
-    // For each "unsettled" txn, update the timestamp from the same txn found in massagedTxns
-    const requireUpdateStatus = [];
+    const updateStatusPromises = [];
     const massagedTxnsMap = snapUtils.toMap<bigint, Transaction>(massagedTxns, 'txnHash', num.toBigInt);
 
-    storedUnsettledTxns.forEach((txn: Transaction, idx: number) => {
+    storedUnsettledTxns.forEach((txn: Transaction) => {
       const foundMassagedTxn = massagedTxnsMap.get(num.toBigInt(txn.txnHash));
       if (!foundMassagedTxn) {
-        const statusUpdatePromise = async (idx) => {
-          try {
-            // it is possible to fail in getTransactionStatus, but it wont throw error as expected, hence the status will be remain
-            const { finalityStatus, executionStatus } = await utils.getTransactionStatus(
-              storedUnsettledTxns[idx].txnHash,
-              network,
-            );
-            storedUnsettledTxns[idx].finalityStatus = finalityStatus;
-            storedUnsettledTxns[idx].executionStatus = executionStatus;
-            storedUnsettledTxns[idx].status = ''; // DEPRECATION
-            storedUnsettledTxns[idx].failureReason = storedUnsettledTxns[idx].failureReason || '';
-          } catch (e) {
-            logger.error(
-              `Problem found in statusUpdatePromise:\n txn: ${storedUnsettledTxns[idx].txnHash}, err: \n${e.message}`,
-            );
-          } finally {
-            // statusUpdatePromise is run in parallel, hence mutex is require to lock the massagedTxns array
-            return saveMutex.runExclusive(async () => {
-              massagedTxns.push(storedUnsettledTxns[idx]);
-            });
-          }
-        };
-        requireUpdateStatus.push(statusUpdatePromise(idx));
+        // For each "unsettled" txn, fetch the status when the txn not found in massagedTxns and push to massagedTxns
+        updateStatusPromises.push(updateStatus(txn, network));
+        massagedTxns.push(txn);
       } else {
+        // For each "unsettled" txn, update the timestamp and status from the same txn found in massagedTxns
         txn.timestamp = foundMassagedTxn?.timestamp;
         txn.finalityStatus = foundMassagedTxn?.finalityStatus;
         txn.executionStatus = foundMassagedTxn?.executionStatus;
@@ -134,8 +114,8 @@ export async function getTransactions(params: ApiParams) {
     logger.log(`getTransactions\nstoredUnsettledTxns:\n${toJson(storedUnsettledTxns)}`);
 
     // For each "unsettled" txn, get the latest status from the provider (RPC)
-    if (requireUpdateStatus) {
-      await Promise.allSettled(requireUpdateStatus);
+    if (updateStatusPromises) {
+      await Promise.allSettled(updateStatusPromises);
       logger.log(`getTransactions\nstoredUnsettledTxns after updated status:\n${toJson(storedUnsettledTxns)}`);
     }
 
@@ -153,5 +133,16 @@ export async function getTransactions(params: ApiParams) {
   } catch (err) {
     logger.error(`Problem found: ${err}`);
     throw err;
+  }
+}
+
+export async function updateStatus(txn: Transaction, network: Network) {
+  try {
+    const { finalityStatus, executionStatus } = await utils.getTransactionStatus(txn.txnHash, network);
+    txn.finalityStatus = finalityStatus;
+    txn.executionStatus = executionStatus;
+    txn.status = ''; // DEPRECATION
+  } catch (e) {
+    logger.error(`Problem found in updateStatus:\n txn: ${txn.txnHash}, err: \n${e.message}`);
   }
 }

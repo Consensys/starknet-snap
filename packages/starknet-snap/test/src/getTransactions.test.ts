@@ -24,7 +24,7 @@ import {
   txn4,
   txn5,
 } from '../constants.test';
-import { getTransactions } from '../../src/getTransactions';
+import { getTransactions, updateStatus } from '../../src/getTransactions';
 import { Mutex } from 'async-mutex';
 import { ApiParams, GetTransactionsRequestParams } from '../../src/types/snapApi';
 import { num } from 'starknet';
@@ -39,14 +39,14 @@ describe('Test function: getTransactions', function () {
     erc20Tokens: [],
     networks: [STARKNET_TESTNET_NETWORK, STARKNET_MAINNET_NETWORK],
     transactions: [
-      unsettedTransactionInMassagedTxn,
-      txn1,
-      txn2,
-      txn3,
-      txn4,
-      txn5,
-      createAccountProxyTxn,
-      initAccountTxn,
+      { ...unsettedTransactionInMassagedTxn },
+      { ...txn1 },
+      { ...txn2 },
+      { ...txn3 },
+      { ...txn4 },
+      { ...txn5 },
+      { ...createAccountProxyTxn },
+      { ...initAccountTxn },
     ],
   };
   const apiParams: ApiParams = {
@@ -201,5 +201,41 @@ describe('Test function: getTransactions', function () {
     } finally {
       expect(result).to.be.an('Error');
     }
+  });
+});
+
+describe('Test function: getTransactions.updateStatus', function () {
+  let getTransactionStatusStub = null;
+  let txns = [];
+  beforeEach(function () {
+    txns = [{ ...unsettedTransactionInMassagedTxn }];
+    getTransactionStatusStub = sandbox.stub(utils, 'getTransactionStatus').callsFake(async (...args) => {
+      return getTxnStatusAcceptL2Resp;
+    });
+  });
+
+  afterEach(function () {
+    sandbox.restore();
+  });
+
+  it('should update status correctly', async function () {
+    await updateStatus(txns[0], STARKNET_TESTNET_NETWORK);
+    expect(getTransactionStatusStub.callCount).to.be.eq(1);
+    expect(txns[0].finalityStatus).to.be.eq(getTxnStatusAcceptL2Resp.finalityStatus);
+    expect(txns[0].executionStatus).to.be.eq(getTxnStatusAcceptL2Resp.executionStatus);
+    expect(txns[0].status).to.be.eq('');
+  });
+
+  describe('when getTransactionStatus throw error', function () {
+    beforeEach(function () {
+      sandbox.restore();
+      getTransactionStatusStub = sandbox.stub(utils, 'getTransactionStatus').throws(new Error());
+    });
+    it('should not throw error', async function () {
+      await updateStatus(txns[0], STARKNET_TESTNET_NETWORK);
+      expect(txns[0].finalityStatus).to.be.eq(unsettedTransactionInMassagedTxn.finalityStatus);
+      expect(txns[0].executionStatus).to.be.eq(unsettedTransactionInMassagedTxn.executionStatus);
+      expect(txns[0].status).to.be.eq(unsettedTransactionInMassagedTxn.status);
+    });
   });
 });
