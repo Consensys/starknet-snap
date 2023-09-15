@@ -31,15 +31,6 @@ export const STARKNET_TESTNET_NETWORK: Network = {
   accountClassHash: '0x033434ad846cdd5f23eb73ff09fe6fddd568284a0fb7d1be20ee482f044dabe2', // from argent-x repo
 };
 
-export const STARKNET_TESTNET2_NETWORK: Network = {
-  name: 'Goerli Testnet 2',
-  chainId: constants.StarknetChainId.SN_GOERLI2,
-  baseUrl: 'https://alpha4-2.starknet.io',
-  nodeUrl: 'https://starknet-goerli2.infura.io/v3/60c7253fb48147658095fe0460ac9ee9',
-  voyagerUrl: 'https://goerli-2.voyager.online',
-  accountClassHash: '0x033434ad846cdd5f23eb73ff09fe6fddd568284a0fb7d1be20ee482f044dabe2', // from argent-x repo
-};
-
 export const STARKNET_INTEGRATION_NETWORK: Network = {
   name: 'Goerli Integration',
   chainId: constants.StarknetChainId.SN_GOERLI,
@@ -63,14 +54,6 @@ export const ETHER_TESTNET: Erc20Token = {
   symbol: 'ETH',
   decimals: 18,
   chainId: STARKNET_TESTNET_NETWORK.chainId,
-};
-
-export const ETHER_TESTNET2: Erc20Token = {
-  address: '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
-  name: 'Ether',
-  symbol: 'ETH',
-  decimals: 18,
-  chainId: STARKNET_TESTNET2_NETWORK.chainId,
 };
 
 export const DAI_MAINNET: Erc20Token = {
@@ -129,12 +112,7 @@ export const TEST_TOKEN_TESTNET: Erc20Token = {
   chainId: STARKNET_TESTNET_NETWORK.chainId,
 };
 
-export const PRELOADED_TOKENS = [ETHER_MAINNET, ETHER_TESTNET, ETHER_TESTNET2];
-export const PRELOADED_NETWORKS = [
-  STARKNET_MAINNET_NETWORK,
-  STARKNET_TESTNET_NETWORK,
-  STARKNET_TESTNET2_NETWORK,
-  STARKNET_INTEGRATION_NETWORK,
-];
+export const PRELOADED_TOKENS = [ETHER_MAINNET, ETHER_TESTNET];
+export const PRELOADED_NETWORKS = [STARKNET_MAINNET_NETWORK, STARKNET_TESTNET_NETWORK, STARKNET_INTEGRATION_NETWORK];
 
 export const PROXY_CONTRACT_HASH = '0x25ec026985a3bf9d0cc1fe17326b245dfdc3ff89b8fde106542a3ea56c5a918'; // from argent-x repo

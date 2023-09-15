@@ -20,7 +20,6 @@ import {
   STARKNET_INTEGRATION_NETWORK,
   STARKNET_MAINNET_NETWORK,
   STARKNET_TESTNET_NETWORK,
-  STARKNET_TESTNET2_NETWORK,
 } from './utils/constants';
 import { upsertErc20Token, upsertNetwork } from './utils/snapUtils';
 import { getStoredNetworks } from './getStoredNetworks';
@@ -83,7 +82,6 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ origin, request }) => 
   } else {
     await upsertNetwork(STARKNET_TESTNET_NETWORK, snap, saveMutex, state);
   }
-  await upsertNetwork(STARKNET_TESTNET2_NETWORK, snap, saveMutex, state);
   for (const token of PRELOADED_TOKENS) {
     await upsertErc20Token(token, snap, saveMutex, state);
   }

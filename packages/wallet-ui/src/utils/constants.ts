@@ -23,11 +23,6 @@ export const TOKENS: any = {
       coingeckoId: 'usd-coin',
     },
   },
-  [constants.StarknetChainId.TESTNET2]: {
-    '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7': {
-      coingeckoId: 'ethereum',
-    },
-  },
 };
 
 export const DECIMALS_DISPLAYED_MAX_LENGTH = 11;
@@ -37,8 +32,6 @@ export const COINGECKO_API = 'https://api.coingecko.com/api/v3/';
 export const STARKNET_MAINNET_EXPLORER = 'https://voyager.online/';
 
 export const STARKNET_TESTNET_EXPLORER = 'https://goerli.voyager.online/';
-
-export const STARKNET_TESTNET2_EXPLORER = 'https://goerli-2.voyager.online/';
 
 export const SNAPS_DOC_URL = 'https://docs.metamask.io/guide/snaps.html';
 
