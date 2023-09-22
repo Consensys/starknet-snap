@@ -77,8 +77,8 @@ export const getTxnToFromLabel = (transaction: Transaction): string => {
 };
 
 export const getTxnFailureReason = (transaction: Transaction): string => {
-  return transaction.status &&
-    transaction.status.toLowerCase() === TransactionStatus.REJECTED.toLowerCase() &&
+  return transaction.executionStatus &&
+    transaction.executionStatus.toLowerCase() === TransactionStatus.REJECTED.toLowerCase() &&
     transaction?.failureReason
     ? ` (${transaction.failureReason})`
     : '';
