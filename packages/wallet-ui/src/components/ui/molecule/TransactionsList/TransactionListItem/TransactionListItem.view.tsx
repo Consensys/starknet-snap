@@ -57,7 +57,6 @@ export const TransactionListItemView = ({ transaction }: Props) => {
   const txnStatus = getTxnStatus(transaction);
   const txnToFromLabel = getTxnToFromLabel(transaction);
   const txnFailureReason = getTxnFailureReason(transaction);
-
   return (
     <Wrapper onClick={() => openExplorerTab(transaction.txnHash, 'tx', transaction.chainId)}>
       <Left>
@@ -68,7 +67,7 @@ export const TransactionListItemView = ({ transaction }: Props) => {
           <Label>{txnName}</Label>
           <Description>
             {txnDate}
-            <Status status={txnStatus}>
+            <Status status={transaction.executionStatus}>
               {' '}
               . {txnStatus}
               {txnFailureReason}

@@ -35,7 +35,21 @@ export const getTxnDate = (transaction: Transaction): string => {
 };
 
 export const getTxnStatus = (transaction: Transaction): string => {
-  return transaction.status
+  let statusStr = [];
+  if (transaction.finalityStatus === transaction.executionStatus) {
+    return transaction.finalityStatus ? formatStatus(transaction.finalityStatus) : '';
+  }
+  if (transaction.finalityStatus) {
+    statusStr.push(formatStatus(transaction.finalityStatus));
+  }
+  if (transaction.executionStatus) {
+    statusStr.push(formatStatus(transaction.executionStatus));
+  }
+  return statusStr.join(' / ');
+};
+
+export const formatStatus = (status: string): string => {
+  return status
     .replaceAll('_', ' ')
     .split(' ')
     .map((word) => {
@@ -63,7 +77,9 @@ export const getTxnToFromLabel = (transaction: Transaction): string => {
 };
 
 export const getTxnFailureReason = (transaction: Transaction): string => {
-  return transaction.status.toLowerCase() === TransactionStatus.REJECTED.toLowerCase() && transaction?.failureReason
+  return transaction.executionStatus &&
+    transaction.executionStatus.toLowerCase() === TransactionStatus.REJECTED.toLowerCase() &&
+    transaction?.failureReason
     ? ` (${transaction.failureReason})`
     : '';
 };

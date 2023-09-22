@@ -56,6 +56,25 @@ export enum TransactionStatus { // for retrieving txn from Starknet feeder gatew
   REJECTED = 'REJECTED',
 }
 
+export enum FinailityStatus {
+  PENDING = 'PENDING',
+  ACCEPTED_ON_L2 = 'ACCEPTED_ON_L2',
+  ACCEPTED_ON_L1 = 'ACCEPTED_ON_L1',
+  NOT_RECEIVED = 'NOT_RECEIVED',
+}
+
+export enum ExecutionStatus {
+  SUCCEEDED = 'SUCCEEDED',
+  REVERTED = 'REVERTED',
+  REJECTED = 'REJECTED',
+}
+
+export enum TransactionStatusType { // for retrieving txn from StarkNet feeder gateway
+  FINALITY = 'finalityStatus',
+  EXECUTION = 'executionStatus',
+  DEPRECATION = 'status',
+}
+
 export interface Transaction {
   txnHash: string; // in hex
   txnType: VoyagerTransactionType | string;
@@ -64,7 +83,9 @@ export interface Transaction {
   contractAddress: string; // in hex
   contractFuncName: string;
   contractCallData: RawCalldata;
-  status: TransactionStatus | string;
+  status?: TransactionStatus | string;
+  executionStatus?: TransactionStatus | string;
+  finalityStatus?: TransactionStatus | string;
   failureReason: string;
   eventIds: string[];
   timestamp: number;

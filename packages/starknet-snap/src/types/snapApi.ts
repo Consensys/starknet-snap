@@ -141,3 +141,8 @@ export interface RecoverAccountsRequestParams extends BaseRequestParams {
   maxScanned?: string | number;
   maxMissed?: string | number;
 }
+
+export interface RpcV4GetTransactionReceiptResponse {
+  execution_status?: string;
+  finality_status?: string;
+}

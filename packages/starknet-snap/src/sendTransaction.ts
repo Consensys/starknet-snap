@@ -123,7 +123,9 @@ export async function sendTransaction(params: ApiParams) {
             throw new Error(`contractCallData could not be converted, ${e.message || e}`);
           }
         }),
-        status: TransactionStatus.RECEIVED,
+        finalityStatus: TransactionStatus.RECEIVED,
+        executionStatus: TransactionStatus.RECEIVED,
+        status: '', //DEPRECATED LATER
         failureReason: '',
         eventIds: [],
         timestamp: Math.floor(Date.now() / 1000),

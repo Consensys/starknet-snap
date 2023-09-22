@@ -14,15 +14,17 @@ interface IIconeStyled {
 
 const getStatusColor = (status?: TransactionStatusOptions | string) => {
   switch (status) {
-    case 'Accepted on L1':
-    case 'Accepted on L2':
+    case 'ACCEPTED ON L1':
+    case 'ACCEPTED ON L2':
+    case 'SUCCEEDED':
       return theme.palette.success.dark;
-    case 'Received':
+    case 'RECEIVED':
       return theme.palette.info.main;
-    case 'Rejected':
-    case 'Not Received':
+    case 'REJECTED':
+    case 'NOT RECEIVED':
+    case 'REVERTED':
       return theme.palette.error.main;
-    case 'Pending':
+    case 'PENDING':
       return theme.palette.warning.main;
     default:
       return theme.palette.grey.grey1;
