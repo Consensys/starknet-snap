@@ -28,7 +28,6 @@
   <br />
 
   <button class="connect">Connect</button>
-  <button class="sendHello">Send Hello</button>
   <button class="sendPing">Send Ping</button>
   <br>
   <label for="targetChainId">Target Chain Id in Hex (optional, default Goerli testnet)</label>
@@ -275,7 +274,6 @@
 
   const snapId = `local:${window.location.href}`;
   const connectButton = document.querySelector('button.connect')
-  const sendHelloButton = document.querySelector('button.sendHello')
   const sendPingButton = document.querySelector('button.sendPing')
   const getErc20BalanceForm = document.getElementById('getErc20Balance')
   const getEstimateFeeForm = document.getElementById('getEstimateFee')
@@ -299,7 +297,6 @@
   const recoverUserAccountsForm = document.getElementById('recoverUserAccounts')
 
   connectButton.addEventListener('click', connect)
-  sendHelloButton.addEventListener('click', sendHello)
   sendPingButton.addEventListener('click', sendPing)
   getDeployedAccContractsForm.addEventListener('submit', getDeployedAccContracts)
   getErc20BalanceForm.addEventListener('submit', getErc20Balance)
@@ -337,24 +334,6 @@
         [snapId]: {}
       }
     })
-  }
-
-  // here we call the snap's "hello" method
-  async function sendHello() {
-    try {
-      const response = await ethereum.request({
-        method: 'wallet_invokeSnap',
-        params: {
-          snapId, 
-          request: {
-            method: 'hello'
-          }
-        }
-      })
-    } catch (err) {
-      console.error(err)
-      alert('Problem happened: ' + err.message || err)
-    }
   }
 
   // here we call the snap's "ping" method
