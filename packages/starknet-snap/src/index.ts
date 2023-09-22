@@ -20,7 +20,6 @@ import {
   STARKNET_INTEGRATION_NETWORK,
   STARKNET_MAINNET_NETWORK,
   STARKNET_TESTNET_NETWORK,
-  STARKNET_TESTNET2_NETWORK,
 } from './utils/constants';
 import { upsertErc20Token, upsertNetwork } from './utils/snapUtils';
 import { getStoredNetworks } from './getStoredNetworks';
@@ -31,8 +30,6 @@ import { Mutex } from 'async-mutex';
 import { OnRpcRequestHandler } from '@metamask/snaps-types';
 import { ApiParams, ApiRequestParams } from './types/snapApi';
 import { estimateAccDeployFee } from './estimateAccountDeployFee';
-import { DialogType } from '@metamask/rpc-methods';
-import { copyable, heading, panel } from '@metamask/snaps-ui';
 import { logger } from './utils/logger';
 
 declare const snap;
@@ -83,7 +80,6 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ origin, request }) => 
   } else {
     await upsertNetwork(STARKNET_TESTNET_NETWORK, snap, saveMutex, state);
   }
-  await upsertNetwork(STARKNET_TESTNET2_NETWORK, snap, saveMutex, state);
   for (const token of PRELOADED_TOKENS) {
     await upsertErc20Token(token, snap, saveMutex, state);
   }
@@ -98,21 +94,6 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ origin, request }) => 
   };
 
   switch (request.method) {
-    case 'hello':
-      logger.log(`Snap State:\n${toJson(state, 2)}`);
-      return snap.request({
-        method: 'snap_dialog',
-        params: {
-          type: DialogType.Alert,
-          content: panel([
-            heading(`${origin}, Hello!`),
-            copyable(
-              `# of accounts: ${state.accContracts.length}\n\n# of netwoks: ${state.networks.length}\n\n# of erc20Tokens: ${state.erc20Tokens.length}\n\n# of txns: ${state.transactions.length}`,
-            ),
-          ]),
-        },
-      });
-
     case 'starkNet_createAccount':
       apiParams.keyDeriver = await getAddressKeyDeriver(snap);
       return createAccount(apiParams);
