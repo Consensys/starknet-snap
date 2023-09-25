@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
 
+## [1.18.0](https://github.com/Consensys/starknet-snap/compare/wallet-ui-v1.17.0...wallet-ui-v1.18.0) (2023-09-22)
+
+
+### Features
+
+* sf-510 deprecation of status field for snap ([#135](https://github.com/Consensys/starknet-snap/issues/135)) ([59711bb](https://github.com/Consensys/starknet-snap/commit/59711bbdbe6fd744fb35cf7cf18b1394d6f7c9e6))
+
 ## [1.17.0](https://github.com/Consensys/starknet-snap/compare/wallet-ui-v1.16.0...wallet-ui-v1.17.0) (2023-09-14)
 
 

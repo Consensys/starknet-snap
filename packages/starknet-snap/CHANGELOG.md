@@ -1,6 +1,18 @@
 # Changelog
 
 
+## [2.2.0](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v2.1.0...starknet-snap-v2.2.0) (2023-09-22)
+
+
+### Features
+
+* sf-510 deprecation of status field for snap ([#135](https://github.com/Consensys/starknet-snap/issues/135)) ([59711bb](https://github.com/Consensys/starknet-snap/commit/59711bbdbe6fd744fb35cf7cf18b1394d6f7c9e6))
+
+
+### Bug Fixes
+
+* remove hello method ([#146](https://github.com/Consensys/starknet-snap/issues/146)) ([241c1a7](https://github.com/Consensys/starknet-snap/commit/241c1a7d9f08b5bdad1551b384516e359f4132eb))
+
 ## [2.1.0](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v2.0.2...starknet-snap-v2.1.0) (2023-09-13)
 
 
