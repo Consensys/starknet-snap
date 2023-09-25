@@ -55,7 +55,6 @@ jobs:
 
       - name: Deploy to Dev
         run: | 
-          aws s3 sync ./packages/wallet-ui/build s3://dev.snaps.consensys.net/starknet
           aws s3 sync ./packages/wallet-ui/build s3://dev.snaps.consensys.io/starknet
 
       - name: invalid aws cloudfront cache

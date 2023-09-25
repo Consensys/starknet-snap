@@ -35,6 +35,13 @@ locals {
       event_type = "viewer-response"
     }
   }
+
+  cloudfront_functions_for_deprecated_domain = {
+    redirect = {
+      arn        = aws_cloudfront_function.deprecated_domain_redirect.arn
+      event_type = "viewer-request"
+    }
+  }
 }
 
 resource "aws_route53_zone" "main" {
@@ -93,6 +100,14 @@ resource "aws_cloudfront_function" "starknet_redirect" {
   code    = file("${path.module}/functions/redirect-mm.js")
 }
 
+resource "aws_cloudfront_function" "deprecated_domain_redirect" {
+  name    = "starknet-snap-deprecated-domain-redirect"
+  runtime = "cloudfront-js-1.0"
+  comment = "deprecated-domain-redirect"
+  publish = true
+  code    = file("${path.module}/functions/redirect.js")
+}
+
 resource "aws_cloudfront_function" "starknet_add_header" {
   name    = "starknet-snap-add-header"
   runtime = "cloudfront-js-1.0"
@@ -106,21 +121,21 @@ resource "aws_cloudfront_function" "starknet_add_header" {
 ## Dev
 #############
 
-module "s3_dev" {
-  source = "../modules/aws-s3-website"
+# module "s3_dev" {
+#   source = "../modules/aws-s3-website"
 
-  bucket_name     = local.dev_domain_name
-  domain_name     = local.dev_domain_name
-  certificate_arn = module.cert.acm_certificate_arn
-  cloudfront_functions = {
-    headers = {
-      arn        = aws_cloudfront_function.starknet_add_header.arn
-      event_type = "viewer-response"
-    }
-  }
-  hosted_zone_id = local.hosted_zone_id
-  tags           = module.tags.common
-}
+#   bucket_name     = local.dev_domain_name
+#   domain_name     = local.dev_domain_name
+#   certificate_arn = module.cert.acm_certificate_arn
+#   cloudfront_functions = {
+#     headers = {
+#       arn        = aws_cloudfront_function.starknet_add_header.arn
+#       event_type = "viewer-response"
+#     }
+#   }
+#   hosted_zone_id = local.hosted_zone_id
+#   tags           = module.tags.common
+# }
 
 module "s3_snaps_page_dev" {
   source = "../modules/aws-s3-website"
@@ -129,7 +144,7 @@ module "s3_snaps_page_dev" {
   domain_name          = local.dev_snaps_domain_name
   certificate_arn      = module.snaps_cert.acm_certificate_arn
   hosted_zone_id       = local.snaps_hosted_zone_id
-  cloudfront_functions = local.cloudfront_functions
+  cloudfront_functions = local.cloudfront_functions_for_deprecated_domain
   tags                 = module.tags.common
 }
 
@@ -147,21 +162,21 @@ module "s3_snaps_page_dev_new" {
 ## Staging
 #############
 
-module "s3_staging" {
-  source = "../modules/aws-s3-website"
+# module "s3_staging" {
+#   source = "../modules/aws-s3-website"
 
-  bucket_name     = local.staging_domain_name
-  domain_name     = local.staging_domain_name
-  certificate_arn = module.cert.acm_certificate_arn
-  hosted_zone_id  = local.hosted_zone_id
-  cloudfront_functions = {
-    headers = {
-      arn        = aws_cloudfront_function.starknet_add_header.arn
-      event_type = "viewer-response"
-    }
-  }
-  tags = module.tags.common
-}
+#   bucket_name     = local.staging_domain_name
+#   domain_name     = local.staging_domain_name
+#   certificate_arn = module.cert.acm_certificate_arn
+#   hosted_zone_id  = local.hosted_zone_id
+#   cloudfront_functions = {
+#     headers = {
+#       arn        = aws_cloudfront_function.starknet_add_header.arn
+#       event_type = "viewer-response"
+#     }
+#   }
+#   tags = module.tags.common
+# }
 
 module "s3_snaps_page_staging" {
   source = "../modules/aws-s3-website"
@@ -170,7 +185,7 @@ module "s3_snaps_page_staging" {
   domain_name          = local.staging_snaps_domain_name
   certificate_arn      = module.snaps_cert.acm_certificate_arn
   hosted_zone_id       = local.snaps_hosted_zone_id
-  cloudfront_functions = local.cloudfront_functions
+  cloudfront_functions = local.cloudfront_functions_for_deprecated_domain
   tags                 = module.tags.common
 }
 
@@ -187,21 +202,21 @@ module "s3_snaps_page_staging_new" {
 ## Prod
 #############
 
-module "s3_prod" {
-  source = "../modules/aws-s3-website"
+# module "s3_prod" {
+#   source = "../modules/aws-s3-website"
 
-  bucket_name     = local.prod_domain_name
-  domain_name     = local.prod_domain_name
-  certificate_arn = module.cert.acm_certificate_arn
-  hosted_zone_id  = local.hosted_zone_id
-  cloudfront_functions = {
-    headers = {
-      arn        = aws_cloudfront_function.starknet_add_header.arn
-      event_type = "viewer-response"
-    }
-  }
-  tags = module.tags.common
-}
+#   bucket_name     = local.prod_domain_name
+#   domain_name     = local.prod_domain_name
+#   certificate_arn = module.cert.acm_certificate_arn
+#   hosted_zone_id  = local.hosted_zone_id
+#   cloudfront_functions = {
+#     headers = {
+#       arn        = aws_cloudfront_function.starknet_add_header.arn
+#       event_type = "viewer-response"
+#     }
+#   }
+#   tags = module.tags.common
+# }
 
 module "s3_snaps_page_prod" {
   source = "../modules/aws-s3-website"
@@ -210,7 +225,7 @@ module "s3_snaps_page_prod" {
   domain_name          = local.prod_snaps_domain_name
   certificate_arn      = module.snaps_cert.acm_certificate_arn
   hosted_zone_id       = local.snaps_hosted_zone_id
-  cloudfront_functions = local.cloudfront_functions
+  cloudfront_functions = local.cloudfront_functions_for_deprecated_domain
   tags                 = module.tags.common
 }
 

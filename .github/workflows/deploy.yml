@@ -51,7 +51,6 @@ jobs:
           yarn workspace @consensys/starknet-snap build
           
           npm publish ./packages/starknet-snap  --tag staging --access public 2>&1 > /dev/null || :
-          aws s3 sync ./packages/wallet-ui/build s3://staging.snaps.consensys.net/starknet
           aws s3 sync ./packages/wallet-ui/build s3://staging.snaps.consensys.io/starknet
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
@@ -66,7 +65,6 @@ jobs:
           yarn workspace @consensys/starknet-snap build
           
           npm publish ./packages/starknet-snap --tag latest --access public 2>&1 > /dev/null || :
-          aws s3 sync ./packages/wallet-ui/build s3://snaps.consensys.net/starknet
           aws s3 sync ./packages/wallet-ui/build s3://snaps.consensys.io/starknet
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
