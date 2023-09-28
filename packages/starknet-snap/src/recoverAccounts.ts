@@ -1,6 +1,6 @@
 import { toJson } from './utils/serializer';
 import { num } from 'starknet';
-import { getSigner, getKeysFromAddressIndex, getAccContractAddressAndCallData } from './utils/starknetUtils';
+import { getKeysFromAddressIndex, getCorrectContractAddress, isUpgradeRequired } from './utils/starknetUtils';
 import { getNetworkFromChainId, getValidNumber, upsertAccount } from './utils/snapUtils';
 import { AccContract } from './types/snapState';
 import { ApiParams, RecoverAccountsRequestParams } from './types/snapApi';
@@ -45,20 +45,18 @@ export async function recoverAccounts(params: ApiParams) {
         state,
         i,
       );
-      const { address: contractAddress } = getAccContractAddressAndCallData(network.accountClassHash, publicKey);
+      const { address: contractAddress, signerPubKey: signerPublicKey } = await getCorrectContractAddress(
+        network,
+        publicKey,
+      );
       logger.log(`recoverAccounts: index ${i}:\ncontractAddress = ${contractAddress}\npublicKey = ${publicKey}`);
 
-      let signerPublicKey = '';
-
-      try {
-        signerPublicKey = await getSigner(contractAddress, network);
-        logger.log(`recoverAccounts: index ${i}\nsignerPublicKey: ${signerPublicKey}`);
-      } catch (err) {
-        logger.log(`recoverAccounts: index ${i}\nerr in get signer: ${toJson(err)}`);
-        signerPublicKey = '';
-      }
-
+      let _isUpgradeRequired = false;
       if (signerPublicKey) {
+        _isUpgradeRequired = await isUpgradeRequired(network, contractAddress);
+        logger.log(
+          `recoverAccounts: index ${i}:\ncontractAddress = ${contractAddress}\nisUpgradeRequired = ${_isUpgradeRequired}`,
+        );
         if (num.toBigInt(signerPublicKey) === num.toBigInt(publicKey)) {
           logger.log(`recoverAccounts: index ${i} matched\npublicKey: ${publicKey}`);
         }
@@ -75,6 +73,7 @@ export async function recoverAccounts(params: ApiParams) {
         derivationPath,
         deployTxnHash: '',
         chainId: network.chainId,
+        upgradeRequired: _isUpgradeRequired,
       };
 
       logger.log(`recoverAccounts: index ${i}\nuserAccount: ${toJson(userAccount)}`);

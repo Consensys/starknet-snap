@@ -52,8 +52,11 @@ export async function signMessage(params: ApiParams) {
 
     const typedDataSignature = getTypedDataMessageSignature(signerPrivateKey, typedDataMessage, signerAddress);
 
-    logger.log(`signMessage:\ntypedDataSignature: ${toJson(typedDataSignature)}`);
-    return typedDataSignature.toDERHex();
+    const result = typedDataSignature.toDERHex();
+
+    logger.log(`signMessage:\ntypedDataSignature: ${result}`);
+
+    return result;
   } catch (err) {
     logger.error(`Problem found: ${err}`);
     throw err;
