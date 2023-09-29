@@ -14,9 +14,7 @@ export async function extractPrivateKey(params: ApiParams) {
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
     const userAddress = requestParamsObj.userAddress;
     if (!userAddress) {
-      throw new Error(
-        `The given user address need to be non-empty string, got: ${toJson(userAddress)}`,
-      );
+      throw new Error(`The given user address need to be non-empty string, got: ${toJson(userAddress)}`);
     }
 
     try {
@@ -25,8 +23,8 @@ export async function extractPrivateKey(params: ApiParams) {
       throw new Error(`The given user address is invalid: ${userAddress}`);
     }
 
-    if (await isUpgradeRequired(network, userAddress)){
-      throw new Error('Upgrade required')
+    if (await isUpgradeRequired(network, userAddress)) {
+      throw new Error('Upgrade required');
     }
 
     const response = await wallet.request({
@@ -38,7 +36,6 @@ export async function extractPrivateKey(params: ApiParams) {
     });
 
     if (response === true) {
-      
       const { privateKey: userPrivateKey } = await getKeysFromAddress(keyDeriver, network, state, userAddress);
 
       await wallet.request({

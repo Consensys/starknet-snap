@@ -45,8 +45,8 @@ export async function estimateFee(params: ApiParams) {
       throw new Error(`The given sender address is invalid: ${senderAddress}`);
     }
 
-    if (await isUpgradeRequired(network, senderAddress)){
-      throw new Error('Upgrade required')
+    if (await isUpgradeRequired(network, senderAddress)) {
+      throw new Error('Upgrade required');
     }
 
     const { privateKey: senderPrivateKey, publicKey } = await getKeysFromAddress(

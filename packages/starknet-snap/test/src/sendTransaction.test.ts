@@ -8,7 +8,6 @@ import * as snapUtils from '../../src/utils/snapUtils';
 import { SnapState } from '../../src/types/snapState';
 import { sendTransaction } from '../../src/sendTransaction';
 import * as estimateFeeSnap from '../../src/estimateFee';
-import * as createAccountSnap from '../../src/createAccount';
 import { STARKNET_TESTNET_NETWORK } from '../../src/utils/constants';
 import {
   account1,
@@ -52,7 +51,7 @@ describe('Test function: sendTransaction', function () {
     contractFuncName: 'transfer',
     contractCallData: '0x0256d8f49882cc9366037415f48fa9fd2b5b7344ded7573ebfcef7c90e3e6b75,100000000000000000000,0',
     senderAddress: account1.address,
-    chainId: STARKNET_TESTNET_NETWORK.chainId
+    chainId: STARKNET_TESTNET_NETWORK.chainId,
   };
 
   beforeEach(async function () {
@@ -67,9 +66,6 @@ describe('Test function: sendTransaction', function () {
 
   describe('when request param validation fail', function () {
     let invalidRequest: SendTransactionRequestParams = Object.assign({}, requestObject);
-
-    beforeEach(function () {
-    });
 
     afterEach(function () {
       invalidRequest = Object.assign({}, requestObject);
@@ -86,7 +82,9 @@ describe('Test function: sendTransaction', function () {
         result = err;
       } finally {
         expect(result).to.be.an('Error');
-        expect(result.message).to.be.include('The given contract address, sender address, and function name need to be non-empty string');
+        expect(result.message).to.be.include(
+          'The given contract address, sender address, and function name need to be non-empty string',
+        );
       }
     });
 
@@ -114,7 +112,9 @@ describe('Test function: sendTransaction', function () {
         result = err;
       } finally {
         expect(result).to.be.an('Error');
-        expect(result.message).to.be.include('The given contract address, sender address, and function name need to be non-empty string');
+        expect(result.message).to.be.include(
+          'The given contract address, sender address, and function name need to be non-empty string',
+        );
       }
     });
 
@@ -142,7 +142,9 @@ describe('Test function: sendTransaction', function () {
         result = err;
       } finally {
         expect(result).to.be.an('Error');
-        expect(result.message).to.be.include('The given contract address, sender address, and function name need to be non-empty string');
+        expect(result.message).to.be.include(
+          'The given contract address, sender address, and function name need to be non-empty string',
+        );
       }
     });
 
@@ -161,7 +163,6 @@ describe('Test function: sendTransaction', function () {
   });
 
   describe('when request param validation pass', function () {
-
     beforeEach(async function () {
       apiParams.requestParams = Object.assign({}, requestObject);
     });
@@ -206,14 +207,10 @@ describe('Test function: sendTransaction', function () {
 
     describe('when account is not require upgrade', function () {
       let executeTxnResp;
-      let estimateFeeStub: sinon.SinonStub;
-      let estimateFeeBulkStub: sinon.SinonStub;
       let executeTxnStub: sinon.SinonStub;
-      let isAccountDeployedStub: sinon.SinonStub;
-
       beforeEach(async function () {
         sandbox.stub(utils, 'isUpgradeRequired').resolves(false);
-        estimateFeeStub = sandbox.stub(estimateFeeSnap, 'estimateFee').resolves({
+        sandbox.stub(estimateFeeSnap, 'estimateFee').resolves({
           suggestedMaxFee: estimateFeeResp.suggestedMaxFee.toString(10),
           overallFee: estimateFeeResp.overall_fee.toString(10),
           gasConsumed: '0',
@@ -235,7 +232,6 @@ describe('Test function: sendTransaction', function () {
         expect(walletStub.rpcStubs.snap_manageState).not.to.have.been.called;
         expect(result).to.be.eql(false);
       });
-
 
       it('should use heading, text and copyable component', async function () {
         sandbox.stub(utils, 'isAccountAddressDeployed').resolves(true);
@@ -301,7 +297,6 @@ describe('Test function: sendTransaction', function () {
         expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledWith(expectedDialogParams);
       });
 
-
       describe('when account is cairo 0', function () {
         //TODO
       });
@@ -320,7 +315,8 @@ describe('Test function: sendTransaction', function () {
             const requestObject: SendTransactionRequestParams = {
               contractAddress: '0x07394cbe418daa16e42b87ba67372d4ab4a5df0b05c6e554d158458ce245bc10',
               contractFuncName: 'transfer',
-              contractCallData: '0x0256d8f49882cc9366037415f48fa9fd2b5b7344ded7573ebfcef7c90e3e6b75,100000000000000000000,0',
+              contractCallData:
+                '0x0256d8f49882cc9366037415f48fa9fd2b5b7344ded7573ebfcef7c90e3e6b75,100000000000000000000,0',
               senderAddress: account1.address,
             };
             apiParams.requestParams = requestObject;
@@ -331,12 +327,13 @@ describe('Test function: sendTransaction', function () {
           });
 
           it('should send a transaction for transferring 10 tokens but not update snap state if transaction_hash is missing from response', async function () {
-            executeTxnStub.restore()
+            executeTxnStub.restore();
             executeTxnStub = sandbox.stub(utils, 'executeTxn').resolves(sendTransactionFailedResp);
             const requestObject: SendTransactionRequestParams = {
               contractAddress: '0x07394cbe418daa16e42b87ba67372d4ab4a5df0b05c6e554d158458ce245bc10',
               contractFuncName: 'transfer',
-              contractCallData: '0x0256d8f49882cc9366037415f48fa9fd2b5b7344ded7573ebfcef7c90e3e6b75,100000000000000000000,0',
+              contractCallData:
+                '0x0256d8f49882cc9366037415f48fa9fd2b5b7344ded7573ebfcef7c90e3e6b75,100000000000000000000,0',
               senderAddress: account1.address,
             };
             apiParams.requestParams = requestObject;
@@ -350,7 +347,8 @@ describe('Test function: sendTransaction', function () {
             const requestObject: SendTransactionRequestParams = {
               contractAddress: '0x07394cbe418daa16e42b87ba67372d4ab4a5df0b05c6e554d158458ce245bc10',
               contractFuncName: 'transfer',
-              contractCallData: '0x0256d8f49882cc9366037415f48fa9fd2b5b7344ded7573ebfcef7c90e3e6b75,100000000000000000000,0',
+              contractCallData:
+                '0x0256d8f49882cc9366037415f48fa9fd2b5b7344ded7573ebfcef7c90e3e6b75,100000000000000000000,0',
               senderAddress: account1.address,
               maxFee: '15135825227039',
             };
@@ -393,7 +391,8 @@ describe('Test function: sendTransaction', function () {
             const requestObject: SendTransactionRequestParams = {
               contractAddress: '0x07394cbe418daa16e42b87ba67372d4ab4a5df0b05c6e554d158458ce245bc10',
               contractFuncName: 'transfer',
-              contractCallData: '0x0256d8f49882cc9366037415f48fa9fd2b5b7344ded7573ebfcef7c90e3e6b75,100000000000000000000,0',
+              contractCallData:
+                '0x0256d8f49882cc9366037415f48fa9fd2b5b7344ded7573ebfcef7c90e3e6b75,100000000000000000000,0',
               senderAddress: unfoundUserAddress,
             };
             apiParams.requestParams = requestObject;
@@ -407,7 +406,8 @@ describe('Test function: sendTransaction', function () {
             const requestObject: SendTransactionRequestParams = {
               contractAddress: '0x06a09ccb1caaecf3d9683efe335a667b2169a409d19c589ba1eb771cd210af75',
               contractFuncName: 'transfer',
-              contractCallData: '0x0256d8f49882cc9366037415f48fa9fd2b5b7344ded7573ebfcef7c90e3e6b75,100000000000000000000,0',
+              contractCallData:
+                '0x0256d8f49882cc9366037415f48fa9fd2b5b7344ded7573ebfcef7c90e3e6b75,100000000000000000000,0',
               senderAddress: unfoundUserAddress,
             };
             apiParams.requestParams = requestObject;
@@ -422,7 +422,8 @@ describe('Test function: sendTransaction', function () {
             const requestObject: SendTransactionRequestParams = {
               contractAddress: '0x07394cbe418daa16e42b87ba67372d4ab4a5df0b05c6e554d158458ce245bc10',
               contractFuncName: 'transfer',
-              contractCallData: '0x0256d8f49882cc9366037415f48fa9fd2b5b7344ded7573ebfcef7c90e3e6b75,100000000000000000000,0',
+              contractCallData:
+                '0x0256d8f49882cc9366037415f48fa9fd2b5b7344ded7573ebfcef7c90e3e6b75,100000000000000000000,0',
               senderAddress: unfoundUserAddress,
             };
             apiParams.requestParams = requestObject;
@@ -456,7 +457,8 @@ describe('Test function: sendTransaction', function () {
             const requestObject: SendTransactionRequestParams = {
               contractAddress: '0x07394cbe418daa16e42b87ba67372d4ab4a5df0b05c6e554d158458ce245bc10',
               contractFuncName: 'transfer',
-              contractCallData: '0x0256d8f49882cc9366037415f48fa9fd2b5b7344ded7573ebfcef7c90e3e6b75,100000000000000000000,0',
+              contractCallData:
+                '0x0256d8f49882cc9366037415f48fa9fd2b5b7344ded7573ebfcef7c90e3e6b75,100000000000000000000,0',
               senderAddress: account1.address,
             };
             apiParams.requestParams = requestObject;

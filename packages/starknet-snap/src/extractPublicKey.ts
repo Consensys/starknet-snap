@@ -26,8 +26,8 @@ export async function extractPublicKey(params: ApiParams) {
       throw new Error(`The given user address is invalid: ${requestParamsObj.userAddress}`);
     }
 
-    if (await isUpgradeRequired(network, userAddress)){
-      throw new Error('Upgrade required')
+    if (await isUpgradeRequired(network, userAddress)) {
+      throw new Error('Upgrade required');
     }
 
     let userPublicKey;

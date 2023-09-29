@@ -7,13 +7,7 @@ import { estimateFee } from '../../src/estimateFee';
 import { SnapState } from '../../src/types/snapState';
 import { STARKNET_TESTNET_NETWORK } from '../../src/utils/constants';
 import { getAddressKeyDeriver } from '../../src/utils/keyPair';
-import {
-  account2,
-  estimateDeployFeeResp4,
-  estimateFeeResp,
-  estimateFeeResp2,
-  getBip44EntropyStub,
-} from '../constants.test';
+import { account2, estimateDeployFeeResp4, estimateFeeResp, getBip44EntropyStub } from '../constants.test';
 import { Mutex } from 'async-mutex';
 import { ApiParams, EstimateFeeRequestParams } from '../../src/types/snapApi';
 
@@ -54,15 +48,14 @@ describe('Test function: estimateFee', function () {
 
   describe('when request param validation fail', function () {
     let invalidRequest = Object.assign({}, requestObject);
-    beforeEach(async function () {
-    })
+
     afterEach(async function () {
-      invalidRequest =  Object.assign({}, requestObject);
-    })
+      invalidRequest = Object.assign({}, requestObject);
+    });
 
     it('should throw an error if the function name is undefined', async function () {
-      invalidRequest.contractFuncName = undefined
-      apiParams.requestParams = invalidRequest
+      invalidRequest.contractFuncName = undefined;
+      apiParams.requestParams = invalidRequest;
       let result;
       try {
         result = await estimateFee(apiParams);
@@ -74,8 +67,8 @@ describe('Test function: estimateFee', function () {
     });
 
     it('should throw an error if the contract address is invalid', async function () {
-      invalidRequest.contractAddress = 'wrongAddress'
-      apiParams.requestParams = invalidRequest
+      invalidRequest.contractAddress = 'wrongAddress';
+      apiParams.requestParams = invalidRequest;
       let result;
       try {
         result = await estimateFee(apiParams);
@@ -87,8 +80,8 @@ describe('Test function: estimateFee', function () {
     });
 
     it('should throw an error if the sender address is invalid', async function () {
-      invalidRequest.senderAddress = 'wrongAddress'
-      apiParams.requestParams = invalidRequest
+      invalidRequest.senderAddress = 'wrongAddress';
+      apiParams.requestParams = invalidRequest;
       let result;
       try {
         result = await estimateFee(apiParams);
@@ -98,23 +91,23 @@ describe('Test function: estimateFee', function () {
         expect(result).to.be.an('Error');
       }
     });
-  })
+  });
 
   describe('when request param validation pass', function () {
     beforeEach(async function () {
       apiParams.requestParams = Object.assign({}, requestObject);
-    })
-    
+    });
+
     afterEach(async function () {
       apiParams.requestParams = Object.assign({}, requestObject);
-    })
+    });
 
     describe('when account require upgrade', function () {
       let isUpgradeRequiredStub: sinon.SinonStub;
       beforeEach(async function () {
         isUpgradeRequiredStub = sandbox.stub(utils, 'isUpgradeRequired').resolves(true);
-      })
-  
+      });
+
       it('should throw error if upgrade required', async function () {
         let result;
         try {
@@ -125,23 +118,22 @@ describe('Test function: estimateFee', function () {
           expect(isUpgradeRequiredStub).to.have.been.calledOnceWith(STARKNET_TESTNET_NETWORK, account2.address);
           expect(result).to.be.an('Error');
         }
-      })
-    })
+      });
+    });
 
     describe('when account is not require upgrade', function () {
-      let isUpgradeRequiredStub: sinon.SinonStub;
       let estimateFeeBulkStub: sinon.SinonStub;
       let estimateFeeStub: sinon.SinonStub;
-      
+
       beforeEach(async function () {
-        isUpgradeRequiredStub = sandbox.stub(utils, 'isUpgradeRequired').resolves(false);
-      })
-      
+        sandbox.stub(utils, 'isUpgradeRequired').resolves(false);
+      });
+
       describe('when account is deployed', function () {
         beforeEach(async function () {
-          estimateFeeBulkStub = sandbox.stub(utils, 'estimateFeeBulk')
+          estimateFeeBulkStub = sandbox.stub(utils, 'estimateFeeBulk');
           sandbox.stub(utils, 'isAccountDeployed').resolves(true);
-        })
+        });
 
         it('should estimate the fee correctly', async function () {
           estimateFeeStub = sandbox.stub(utils, 'estimateFee').resolves(estimateFeeResp);
@@ -155,7 +147,7 @@ describe('Test function: estimateFee', function () {
         it('should throw error if estimateFee failed', async function () {
           estimateFeeStub = sandbox.stub(utils, 'estimateFee').throws('Error');
           apiParams.requestParams = requestObject;
-    
+
           let result;
           try {
             await estimateFee(apiParams);
@@ -167,17 +159,18 @@ describe('Test function: estimateFee', function () {
             expect(estimateFeeBulkStub).callCount(0);
           }
         });
-      })
-      
+      });
+
       describe('when account is not deployed', function () {
         beforeEach(async function () {
-          estimateFeeStub = sandbox.stub(utils, 'estimateFee')
+          estimateFeeStub = sandbox.stub(utils, 'estimateFee');
           sandbox.stub(utils, 'isAccountDeployed').resolves(false);
-        })
-        
+        });
 
         it('should estimate the fee including deploy txn correctly', async function () {
-          estimateFeeBulkStub = sandbox.stub(utils, 'estimateFeeBulk').resolves([estimateFeeResp, estimateDeployFeeResp4]);
+          estimateFeeBulkStub = sandbox
+            .stub(utils, 'estimateFeeBulk')
+            .resolves([estimateFeeResp, estimateDeployFeeResp4]);
           const expectedSuggestedMaxFee = estimateDeployFeeResp4.suggestedMaxFee + estimateFeeResp.suggestedMaxFee;
           const result = await estimateFee(apiParams);
           expect(result.suggestedMaxFee).to.be.eq(expectedSuggestedMaxFee.toString(10));
@@ -188,7 +181,7 @@ describe('Test function: estimateFee', function () {
         it('should throw error if estimateFee failed', async function () {
           estimateFeeBulkStub = sandbox.stub(utils, 'estimateFeeBulk').throws('Error');
           apiParams.requestParams = requestObject;
-    
+
           let result;
           try {
             await estimateFee(apiParams);
@@ -200,7 +193,7 @@ describe('Test function: estimateFee', function () {
             expect(estimateFeeBulkStub).callCount(1);
           }
         });
-      })
-    })
-  })
+      });
+    });
+  });
 });

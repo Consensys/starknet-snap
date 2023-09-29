@@ -19,11 +19,9 @@ export async function signMessage(params: ApiParams) {
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
 
     logger.log(`signMessage:\nsignerAddress: ${signerAddress}\ntypedDataMessage: ${toJson(typedDataMessage)}`);
-    
+
     if (!signerAddress) {
-      throw new Error(
-        `The given signer address need to be non-empty string, got: ${toJson(signerAddress)}`,
-      );
+      throw new Error(`The given signer address need to be non-empty string, got: ${toJson(signerAddress)}`);
     }
 
     try {
@@ -32,8 +30,8 @@ export async function signMessage(params: ApiParams) {
       throw new Error(`The given signer address is invalid: ${signerAddress}`);
     }
 
-    if (await isUpgradeRequired(network, signerAddress)){
-      throw new Error('Upgrade required')
+    if (await isUpgradeRequired(network, signerAddress)) {
+      throw new Error('Upgrade required');
     }
 
     const response = await wallet.request({

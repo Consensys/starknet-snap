@@ -51,13 +51,10 @@ describe('Test function: signMessage', function () {
   describe('when request param validation fail', function () {
     let invalidRequest = Object.assign({}, requestObject);
 
-    beforeEach(async function () {
-    })
-
     afterEach(async function () {
-      invalidRequest =  Object.assign({}, requestObject);
-      apiParams.requestParams = requestObject
-    })
+      invalidRequest = Object.assign({}, requestObject);
+      apiParams.requestParams = requestObject;
+    });
 
     it('should throw an error if the signerAddress is undefined', async function () {
       invalidRequest.signerAddress = undefined;
@@ -71,7 +68,7 @@ describe('Test function: signMessage', function () {
         expect(result).to.be.an('Error');
       }
     });
-  
+
     it('should throw an error if the signerAddress is an invalid address', async function () {
       invalidRequest.signerAddress = 'wrongAddress';
       apiParams.requestParams = invalidRequest;
@@ -84,17 +81,16 @@ describe('Test function: signMessage', function () {
         expect(result).to.be.an('Error');
       }
     });
-  })
+  });
 
   describe('when request param validation pass', function () {
-
     beforeEach(async function () {
       apiParams.requestParams = Object.assign({}, requestObject);
-    })
-    
+    });
+
     afterEach(async function () {
       apiParams.requestParams = Object.assign({}, requestObject);
-    })
+    });
 
     describe('when require upgrade checking fail', function () {
       it('should throw error', async function () {
@@ -108,15 +104,15 @@ describe('Test function: signMessage', function () {
           expect(isUpgradeRequiredStub).to.have.been.calledOnceWith(STARKNET_TESTNET_NETWORK, account1.address);
           expect(result).to.be.an('Error');
         }
-      })
-    })
+      });
+    });
 
     describe('when account require upgrade', function () {
       let isUpgradeRequiredStub: sinon.SinonStub;
       beforeEach(async function () {
         isUpgradeRequiredStub = sandbox.stub(utils, 'isUpgradeRequired').resolves(true);
-      })
-  
+      });
+
       it('should throw error if upgrade required', async function () {
         let result;
         try {
@@ -127,13 +123,13 @@ describe('Test function: signMessage', function () {
           expect(isUpgradeRequiredStub).to.have.been.calledOnceWith(STARKNET_TESTNET_NETWORK, account1.address);
           expect(result).to.be.an('Error');
         }
-      })
-    })
+      });
+    });
 
     describe('when account is not require upgrade', function () {
       beforeEach(async function () {
         sandbox.stub(utils, 'isUpgradeRequired').resolves(false);
-      })
+      });
 
       it('should return false if the user not confirmed', async function () {
         walletStub.rpcStubs.snap_dialog.resolves(false);
@@ -150,7 +146,7 @@ describe('Test function: signMessage', function () {
 
       describe('when account is cairo 0', function () {
         //TODO
-      })
+      });
 
       describe('when account is cairo 1', function () {
         it('should sign a message from an user account correctly', async function () {
@@ -166,7 +162,7 @@ describe('Test function: signMessage', function () {
               type: 'panel',
               children: [
                 { type: 'heading', value: 'Do you want to sign this message ?' },
-      
+
                 {
                   type: 'text',
                   value: `**Message:**`,
@@ -191,7 +187,7 @@ describe('Test function: signMessage', function () {
           expect(walletStub.rpcStubs.snap_manageState).not.to.have.been.called;
           expect(result).to.be.eql(signature1);
         });
-      
+
         it('should sign a message from an unfound user account correctly', async function () {
           const requestObject: SignMessageRequestParams = {
             signerAddress: unfoundUserAddress,
@@ -203,7 +199,7 @@ describe('Test function: signMessage', function () {
           expect(walletStub.rpcStubs.snap_manageState).not.to.have.been.called;
           expect(result).to.be.eql(signature2);
         });
-      
+
         it('should throw error if getKeysFromAddress failed', async function () {
           sandbox.stub(utils, 'getKeysFromAddress').throws(new Error());
           const requestObject: SignMessageRequestParams = {
@@ -211,7 +207,7 @@ describe('Test function: signMessage', function () {
             typedDataMessage: undefined, // will use typedDataExample.json
           };
           apiParams.requestParams = requestObject;
-      
+
           let result;
           try {
             await signMessage(apiParams);
@@ -223,7 +219,7 @@ describe('Test function: signMessage', function () {
           expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledOnce;
           expect(walletStub.rpcStubs.snap_manageState).not.to.have.been.called;
         });
-      })
-    })
-  })
+      });
+    });
+  });
 });

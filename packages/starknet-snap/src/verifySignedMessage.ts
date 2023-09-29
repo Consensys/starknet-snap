@@ -40,8 +40,8 @@ export async function verifySignedMessage(params: ApiParams) {
       throw new Error(`The given signer address is invalid: ${verifySignerAddress}`);
     }
 
-    if (await isUpgradeRequired(network, verifySignerAddress)){
-      throw new Error('Upgrade required')
+    if (await isUpgradeRequired(network, verifySignerAddress)) {
+      throw new Error('Upgrade required');
     }
 
     const { privateKey: signerPrivateKey } = await getKeysFromAddress(keyDeriver, network, state, verifySignerAddress);
