@@ -21712,6 +21712,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"semver@npm:^7.5.2":
+  version: 7.5.4
+  resolution: "semver@npm:7.5.4"
+  dependencies:
+    lru-cache: ^6.0.0
+  bin:
+    semver: bin/semver.js
+  checksum: 12d8ad952fa353b0995bf180cdac205a4068b759a140e5d3c608317098b3575ac2f1e09182206bf2eb26120e1c0ed8fb92c48c592f6099680de56bb071423ca3
+  languageName: node
+  linkType: hard
+
 "send@npm:0.18.0":
   version: 0.18.0
   resolution: "send@npm:0.18.0"
@@ -24447,7 +24458,7 @@ __metadata:
     react-scripts: 5.0.1
     redux-persist: ^6.0.0
     rimraf: ^3.0.2
-    semver: ^7.3.7
+    semver: ^7.5.2
     starknet: ^4.22.0
     styled-components: ^5.3.5
     toastr2: ^3.0.0-alpha.18
