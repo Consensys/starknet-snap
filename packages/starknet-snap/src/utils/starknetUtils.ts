@@ -484,7 +484,7 @@ export const getKeysFromAddressIndex = async (
   };
 };
 
-export const isAccountDeployedCario0 = async (network: Network, publicKey: string) => {
+export const isAccountDeployedCairo0 = async (network: Network, publicKey: string) => {
   const { address } = getAccContractAddressAndCallDataCairo0(network.accountClassHash, publicKey);
   return isAccountAddressDeployed(network, address, 0);
 };
@@ -540,10 +540,10 @@ export const validateAndParseAddress = (address: num.BigNumberish, length = 63) 
   return _validateAndParseAddressFn(address);
 };
 
-export const isUpgradeRequired = async (network: Network, cario0address: string) => {
+export const isUpgradeRequired = async (network: Network, address: string) => {
   try {
-    logger.log(`isUpgradeRequired: cario0address = ${cario0address}`);
-    const version = await getVersion(cario0address, network);
+    logger.log(`isUpgradeRequired: address = ${address}`);
+    const version = await getVersion(address, network);
     const versionArr = version.split('.');
     return Number(versionArr[1]) < MIN_ACC_CONTRACT_VERSION[1];
   } catch (err) {
@@ -556,13 +556,13 @@ export const isUpgradeRequired = async (network: Network, cario0address: string)
 
 export const getCorrectContractAddress = async (network: Network, publicKey: string) => {
   const { address: contractAddress } = getAccContractAddressAndCallData(network.accountClassHash, publicKey);
-  const { address: contractAddressCario0 } = getAccContractAddressAndCallDataCairo0(
+  const { address: contractAddressCairo0 } = getAccContractAddressAndCallDataCairo0(
     network.accountClassHashV0,
     publicKey,
   );
   let pk = '';
   logger.log(
-    `getContractAddressByKey: contractAddressCario1 = ${contractAddress}\ncontractAddressCario0 = ${contractAddressCario0}\npublicKey = ${publicKey}`,
+    `getContractAddressByKey: contractAddressCario1 = ${contractAddress}\ncontractAddressCairo0 = ${contractAddressCairo0}\npublicKey = ${publicKey}`,
   );
   try {
     pk = await getOwner(contractAddress, network);
@@ -573,10 +573,10 @@ export const getCorrectContractAddress = async (network: Network, publicKey: str
     }
     logger.log(`getContractAddressByKey: cairo 1 contract not found`);
     try {
-      pk = await getSigner(contractAddressCario0, network);
+      pk = await getSigner(contractAddressCairo0, network);
       logger.log(`getContractAddressByKey: cairo 0 contract found`);
       return {
-        address: contractAddressCario0,
+        address: contractAddressCairo0,
         signerPubKey: pk,
       };
     } catch (err) {

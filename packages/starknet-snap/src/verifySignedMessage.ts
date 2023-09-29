@@ -4,6 +4,7 @@ import {
   verifyTypedDataMessageSignature,
   getFullPublicKeyPairFromPrivateKey,
   getKeysFromAddress,
+  isUpgradeRequired,
 } from './utils/starknetUtils';
 import { getNetworkFromChainId } from './utils/snapUtils';
 import { ApiParams, VerifySignedMessageRequestParams } from './types/snapApi';
@@ -14,19 +15,6 @@ export async function verifySignedMessage(params: ApiParams) {
   try {
     const { state, keyDeriver, requestParams } = params;
     const requestParamsObj = requestParams as VerifySignedMessageRequestParams;
-
-    if (!requestParamsObj.signerAddress || !requestParamsObj.signature) {
-      throw new Error(
-        `The given signer address and signature need to be non-empty string, got: ${toJson(requestParamsObj)}`,
-      );
-    }
-
-    try {
-      validateAndParseAddress(requestParamsObj.signerAddress);
-    } catch (err) {
-      throw new Error(`The given signer address is invalid: ${requestParamsObj.signerAddress}`);
-    }
-
     const verifySignerAddress = requestParamsObj.signerAddress;
     const verifySignature = requestParamsObj.signature;
     const verifyTypedDataMessage = requestParamsObj.typedDataMessage
@@ -39,6 +27,22 @@ export async function verifySignedMessage(params: ApiParams) {
         verifyTypedDataMessage,
       )}`,
     );
+
+    if (!verifySignerAddress || !verifySignature) {
+      throw new Error(
+        `The given signer address and signature need to be non-empty string, got: ${toJson(requestParamsObj)}`,
+      );
+    }
+
+    try {
+      validateAndParseAddress(verifySignerAddress);
+    } catch (err) {
+      throw new Error(`The given signer address is invalid: ${verifySignerAddress}`);
+    }
+
+    if (await isUpgradeRequired(network, verifySignerAddress)){
+      throw new Error('Upgrade required')
+    }
 
     const { privateKey: signerPrivateKey } = await getKeysFromAddress(keyDeriver, network, state, verifySignerAddress);
 

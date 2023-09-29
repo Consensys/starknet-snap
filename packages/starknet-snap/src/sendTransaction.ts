@@ -4,7 +4,7 @@ import { validateAndParseAddress } from '../src/utils/starknetUtils';
 import { estimateFee } from './estimateFee';
 import { Transaction, TransactionStatus, VoyagerTransactionType } from './types/snapState';
 import { getNetworkFromChainId, getSigningTxnText, upsertTransaction } from './utils/snapUtils';
-import { getKeysFromAddress, getCallDataArray, executeTxn, isAccountDeployed } from './utils/starknetUtils';
+import { getKeysFromAddress, getCallDataArray, executeTxn, isAccountDeployed, isUpgradeRequired } from './utils/starknetUtils';
 import { ApiParams, SendTransactionRequestParams } from './types/snapApi';
 import { createAccount } from './createAccount';
 import { DialogType } from '@metamask/rpc-methods';
@@ -40,6 +40,11 @@ export async function sendTransaction(params: ApiParams) {
     const contractCallData = getCallDataArray(requestParamsObj.contractCallData);
     const senderAddress = requestParamsObj.senderAddress;
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
+
+    if (await isUpgradeRequired(network, senderAddress)){
+      throw new Error('Upgrade required')
+    }
+
     const {
       privateKey: senderPrivateKey,
       publicKey,
@@ -120,7 +125,8 @@ export async function sendTransaction(params: ApiParams) {
           try {
             return num.toHex(num.toBigInt(data));
           } catch (e) {
-            throw new Error(`contractCallData could not be converted, ${e.message || e}`);
+            //data is already send to chain, hence we should not throw error
+            return '0x0'
           }
         }),
         finalityStatus: TransactionStatus.RECEIVED,
