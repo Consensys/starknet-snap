@@ -557,7 +557,6 @@ export const isUpgradeRequired = async (network: Network, address: string) => {
 export const getCorrectContractAddress = async (network: Network, publicKey: string) => {
   const { address: contractAddress } = getAccContractAddressAndCallData(network.accountClassHash, publicKey);
   const { address: contractAddressCairo0 } = getAccContractAddressAndCallDataCairo0(
-  const { address: contractAddressCairo0 } = getAccContractAddressAndCallDataCairo0(
     network.accountClassHashV0,
     publicKey,
   );
@@ -575,10 +574,8 @@ export const getCorrectContractAddress = async (network: Network, publicKey: str
     logger.log(`getContractAddressByKey: cairo 1 contract not found`);
     try {
       pk = await getSigner(contractAddressCairo0, network);
-      pk = await getSigner(contractAddressCairo0, network);
       logger.log(`getContractAddressByKey: cairo 0 contract found`);
       return {
-        address: contractAddressCairo0,
         address: contractAddressCairo0,
         signerPubKey: pk,
       };
