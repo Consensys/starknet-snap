@@ -494,10 +494,10 @@ export const isAccountDeployed = async (network: Network, publicKey: string) => 
   return isAccountAddressDeployed(network, address, 1);
 };
 
-export const isAccountAddressDeployed = async (network: Network, address: string, carioVersion = 1) => {
+export const isAccountAddressDeployed = async (network: Network, address: string, cairoVersion = 1) => {
   let accountDeployed = true;
   try {
-    switch (carioVersion) {
+    switch (cairoVersion) {
       case 0:
         await getSigner(address, network);
         break;
@@ -505,7 +505,7 @@ export const isAccountAddressDeployed = async (network: Network, address: string
         await getOwner(address, network);
         break;
       default:
-        throw new Error(`Not supported cairo version ${carioVersion}`);
+        throw new Error(`Not supported cairo version ${cairoVersion}`);
     }
   } catch (err) {
     if (!err.message.includes('Contract not found')) {
@@ -557,6 +557,7 @@ export const isUpgradeRequired = async (network: Network, address: string) => {
 export const getCorrectContractAddress = async (network: Network, publicKey: string) => {
   const { address: contractAddress } = getAccContractAddressAndCallData(network.accountClassHash, publicKey);
   const { address: contractAddressCairo0 } = getAccContractAddressAndCallDataCairo0(
+  const { address: contractAddressCairo0 } = getAccContractAddressAndCallDataCairo0(
     network.accountClassHashV0,
     publicKey,
   );
@@ -574,8 +575,10 @@ export const getCorrectContractAddress = async (network: Network, publicKey: str
     logger.log(`getContractAddressByKey: cairo 1 contract not found`);
     try {
       pk = await getSigner(contractAddressCairo0, network);
+      pk = await getSigner(contractAddressCairo0, network);
       logger.log(`getContractAddressByKey: cairo 0 contract found`);
       return {
+        address: contractAddressCairo0,
         address: contractAddressCairo0,
         signerPubKey: pk,
       };
