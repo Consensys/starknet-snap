@@ -13,7 +13,6 @@ import {
   isAccountDeployed,
 } from './utils/starknetUtils';
 
-import { PROXY_CONTRACT_HASH } from './utils/constants';
 import { logger } from './utils/logger';
 
 export async function estimateFee(params: ApiParams) {
@@ -71,7 +70,7 @@ export async function estimateFee(params: ApiParams) {
     if (!accountDeployed) {
       const { callData } = getAccContractAddressAndCallData(network.accountClassHash, publicKey);
       const deployAccountpayload = {
-        classHash: PROXY_CONTRACT_HASH,
+        classHash: network.accountClassHash,
         contractAddress: senderAddress,
         constructorCalldata: callData,
         addressSalt: publicKey,
