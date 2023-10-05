@@ -32,6 +32,11 @@ describe('Test function: signMessage', function () {
     saveMutex: new Mutex(),
   };
 
+  const requestObject: SignMessageRequestParams = {
+    signerAddress: account1.address,
+    typedDataMessage: toJson(typedDataExample),
+  };
+
   beforeEach(async function () {
     walletStub.rpcStubs.snap_getBip44Entropy.callsFake(getBip44EntropyStub);
     apiParams.keyDeriver = await getAddressKeyDeriver(walletStub);
@@ -43,120 +48,178 @@ describe('Test function: signMessage', function () {
     sandbox.restore();
   });
 
-  it('should sign a message from an user account correctly', async function () {
-    const requestObject: SignMessageRequestParams = {
-      signerAddress: account1.address,
-      typedDataMessage: undefined, // will use typedDataExample.json
-    };
-    apiParams.requestParams = requestObject;
-    const result: boolean | string = await signMessage(apiParams);
-    const expectedDialogParams = {
-      type: 'confirmation',
-      content: {
-        type: 'panel',
-        children: [
-          { type: 'heading', value: 'Do you want to sign this message ?' },
+  describe('when request param validation fail', function () {
+    let invalidRequest = Object.assign({}, requestObject);
 
-          {
-            type: 'text',
-            value: `**Message:**`,
-          },
-          {
-            type: 'copyable',
-            value: toJson(typedDataExample),
-          },
-          {
-            type: 'text',
-            value: `**Signer address:**`,
-          },
-          {
-            type: 'copyable',
-            value: `${account1.address}`,
-          },
-        ],
-      },
-    };
-    expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledOnce;
-    expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledWith(expectedDialogParams);
-    expect(walletStub.rpcStubs.snap_manageState).not.to.have.been.called;
-    expect(result).to.be.eql(signature1);
+    afterEach(async function () {
+      invalidRequest = Object.assign({}, requestObject);
+      apiParams.requestParams = requestObject;
+    });
+
+    it('should throw an error if the signerAddress is undefined', async function () {
+      invalidRequest.signerAddress = undefined;
+      apiParams.requestParams = invalidRequest;
+      let result;
+      try {
+        result = await signMessage(apiParams);
+      } catch (err) {
+        result = err;
+      } finally {
+        expect(result).to.be.an('Error');
+      }
+    });
+
+    it('should throw an error if the signerAddress is an invalid address', async function () {
+      invalidRequest.signerAddress = 'wrongAddress';
+      apiParams.requestParams = invalidRequest;
+      let result;
+      try {
+        result = await signMessage(apiParams);
+      } catch (err) {
+        result = err;
+      } finally {
+        expect(result).to.be.an('Error');
+      }
+    });
   });
 
-  it('should sign a message from an unfound user account correctly', async function () {
-    const requestObject: SignMessageRequestParams = {
-      signerAddress: unfoundUserAddress,
-      typedDataMessage: toJson(typedDataExample),
-    };
-    apiParams.requestParams = requestObject;
-    const result = await signMessage(apiParams);
-    expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledOnce;
-    expect(walletStub.rpcStubs.snap_manageState).not.to.have.been.called;
-    expect(result).to.be.eql(signature2);
-  });
+  describe('when request param validation pass', function () {
+    beforeEach(async function () {
+      apiParams.requestParams = Object.assign({}, requestObject);
+    });
 
-  it('should throw error if getKeysFromAddress failed', async function () {
-    sandbox.stub(utils, 'getKeysFromAddress').throws(new Error());
-    const requestObject: SignMessageRequestParams = {
-      signerAddress: account1.address,
-      typedDataMessage: undefined, // will use typedDataExample.json
-    };
-    apiParams.requestParams = requestObject;
+    afterEach(async function () {
+      apiParams.requestParams = Object.assign({}, requestObject);
+    });
 
-    let result;
-    try {
-      await signMessage(apiParams);
-    } catch (err) {
-      result = err;
-    } finally {
-      expect(result).to.be.an('Error');
-    }
-    expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledOnce;
-    expect(walletStub.rpcStubs.snap_manageState).not.to.have.been.called;
-  });
+    describe('when require upgrade checking fail', function () {
+      it('should throw error', async function () {
+        const isUpgradeRequiredStub = sandbox.stub(utils, 'isUpgradeRequired').throws('network error');
+        let result;
+        try {
+          result = await signMessage(apiParams);
+        } catch (err) {
+          result = err;
+        } finally {
+          expect(isUpgradeRequiredStub).to.have.been.calledOnceWith(STARKNET_TESTNET_NETWORK, account1.address);
+          expect(result).to.be.an('Error');
+        }
+      });
+    });
 
-  it('should return false if the user not confirmed', async function () {
-    walletStub.rpcStubs.snap_dialog.resolves(false);
-    const requestObject: SignMessageRequestParams = {
-      signerAddress: account1.address,
-      typedDataMessage: undefined, // will use typedDataExample.json
-    };
-    apiParams.requestParams = requestObject;
-    const result = await signMessage(apiParams);
-    expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledOnce;
-    expect(walletStub.rpcStubs.snap_manageState).not.to.have.been.called;
-    expect(result).to.be.eql(false);
-  });
+    describe('when account require upgrade', function () {
+      let isUpgradeRequiredStub: sinon.SinonStub;
+      beforeEach(async function () {
+        isUpgradeRequiredStub = sandbox.stub(utils, 'isUpgradeRequired').resolves(true);
+      });
 
-  it('should throw an error if the signerAddress is undefined', async function () {
-    const requestObject: SignMessageRequestParams = {
-      signerAddress: undefined,
-      typedDataMessage: toJson(typedDataExample),
-    };
-    apiParams.requestParams = requestObject;
-    let result;
-    try {
-      result = await signMessage(apiParams);
-    } catch (err) {
-      result = err;
-    } finally {
-      expect(result).to.be.an('Error');
-    }
-  });
+      it('should throw error if upgrade required', async function () {
+        let result;
+        try {
+          result = await signMessage(apiParams);
+        } catch (err) {
+          result = err;
+        } finally {
+          expect(isUpgradeRequiredStub).to.have.been.calledOnceWith(STARKNET_TESTNET_NETWORK, account1.address);
+          expect(result).to.be.an('Error');
+        }
+      });
+    });
 
-  it('should throw an error if the signerAddress is an invalid address', async function () {
-    const invalidAddress = 'wrongAddress';
-    const requestObject: SignMessageRequestParams = {
-      signerAddress: invalidAddress,
-      typedDataMessage: toJson(typedDataExample),
-    };
-    apiParams.requestParams = requestObject;
-    let result;
-    try {
-      result = await signMessage(apiParams);
-    } catch (err) {
-      result = err;
-    } finally {
-      expect(result).to.be.an('Error');
-    }
+    describe('when account is not require upgrade', function () {
+      beforeEach(async function () {
+        sandbox.stub(utils, 'isUpgradeRequired').resolves(false);
+      });
+
+      it('should return false if the user not confirmed', async function () {
+        walletStub.rpcStubs.snap_dialog.resolves(false);
+        const requestObject: SignMessageRequestParams = {
+          signerAddress: account1.address,
+          typedDataMessage: undefined, // will use typedDataExample.json
+        };
+        apiParams.requestParams = requestObject;
+        const result = await signMessage(apiParams);
+        expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledOnce;
+        expect(walletStub.rpcStubs.snap_manageState).not.to.have.been.called;
+        expect(result).to.be.eql(false);
+      });
+
+      describe('when account is cairo 0', function () {
+        //TODO
+      });
+
+      describe('when account is cairo 1', function () {
+        it('should sign a message from an user account correctly', async function () {
+          const requestObject: SignMessageRequestParams = {
+            signerAddress: account1.address,
+            typedDataMessage: undefined, // will use typedDataExample.json
+          };
+          apiParams.requestParams = requestObject;
+          const result: boolean | string = await signMessage(apiParams);
+          const expectedDialogParams = {
+            type: 'confirmation',
+            content: {
+              type: 'panel',
+              children: [
+                { type: 'heading', value: 'Do you want to sign this message ?' },
+
+                {
+                  type: 'text',
+                  value: `**Message:**`,
+                },
+                {
+                  type: 'copyable',
+                  value: toJson(typedDataExample),
+                },
+                {
+                  type: 'text',
+                  value: `**Signer address:**`,
+                },
+                {
+                  type: 'copyable',
+                  value: `${account1.address}`,
+                },
+              ],
+            },
+          };
+          expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledOnce;
+          expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledWith(expectedDialogParams);
+          expect(walletStub.rpcStubs.snap_manageState).not.to.have.been.called;
+          expect(result).to.be.eql(signature1);
+        });
+
+        it('should sign a message from an unfound user account correctly', async function () {
+          const requestObject: SignMessageRequestParams = {
+            signerAddress: unfoundUserAddress,
+            typedDataMessage: toJson(typedDataExample),
+          };
+          apiParams.requestParams = requestObject;
+          const result = await signMessage(apiParams);
+          expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledOnce;
+          expect(walletStub.rpcStubs.snap_manageState).not.to.have.been.called;
+          expect(result).to.be.eql(signature2);
+        });
+
+        it('should throw error if getKeysFromAddress failed', async function () {
+          sandbox.stub(utils, 'getKeysFromAddress').throws(new Error());
+          const requestObject: SignMessageRequestParams = {
+            signerAddress: account1.address,
+            typedDataMessage: undefined, // will use typedDataExample.json
+          };
+          apiParams.requestParams = requestObject;
+
+          let result;
+          try {
+            await signMessage(apiParams);
+          } catch (err) {
+            result = err;
+          } finally {
+            expect(result).to.be.an('Error');
+          }
+          expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledOnce;
+          expect(walletStub.rpcStubs.snap_manageState).not.to.have.been.called;
+        });
+      });
+    });
   });
 });

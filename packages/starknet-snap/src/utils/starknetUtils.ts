@@ -540,10 +540,10 @@ export const validateAndParseAddress = (address: num.BigNumberish, length = 63) 
   return _validateAndParseAddressFn(address);
 };
 
-export const isUpgradeRequired = async (network: Network, cairo0address: string) => {
+export const isUpgradeRequired = async (network: Network, address: string) => {
   try {
-    logger.log(`isUpgradeRequired: cairo0address = ${cairo0address}`);
-    const version = await getVersion(cairo0address, network);
+    logger.log(`isUpgradeRequired: address = ${address}`);
+    const version = await getVersion(address, network);
     const versionArr = version.split('.');
     return Number(versionArr[1]) < MIN_ACC_CONTRACT_VERSION[1];
   } catch (err) {
@@ -562,7 +562,7 @@ export const getCorrectContractAddress = async (network: Network, publicKey: str
   );
   let pk = '';
   logger.log(
-    `getContractAddressByKey: contractAddressCairo1 = ${contractAddress}\ncontractAddressCairo0 = ${contractAddressCairo0}\npublicKey = ${publicKey}`,
+    `getContractAddressByKey: contractAddressCario1 = ${contractAddress}\ncontractAddressCairo0 = ${contractAddressCairo0}\npublicKey = ${publicKey}`,
   );
   try {
     pk = await getOwner(contractAddress, network);

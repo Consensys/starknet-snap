@@ -22,11 +22,16 @@ describe('Test function: extractPrivateKey', function () {
     networks: [STARKNET_TESTNET_NETWORK],
     transactions: [],
   };
+
   const apiParams: ApiParams = {
     state,
     requestParams: {},
     wallet: walletStub,
     saveMutex: new Mutex(),
+  };
+
+  const requestObject: ExtractPrivateKeyRequestParams = {
+    userAddress: account1.address,
   };
 
   beforeEach(async function () {
@@ -39,87 +44,147 @@ describe('Test function: extractPrivateKey', function () {
     sandbox.restore();
   });
 
-  it('should get the private key of the specified user account correctly', async function () {
-    walletStub.rpcStubs.snap_dialog.resolves(true);
-    const requestObject: ExtractPrivateKeyRequestParams = {
-      userAddress: account1.address,
-    };
-    apiParams.requestParams = requestObject;
-    const result = await extractPrivateKey(apiParams);
-    expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledTwice;
-    expect(walletStub.rpcStubs.snap_manageState).not.to.have.been.called;
-    expect(result).to.be.equal(null);
+  describe('when request param validation fail', function () {
+    let invalidRequest = Object.assign({}, requestObject);
+
+    afterEach(async function () {
+      invalidRequest = Object.assign({}, requestObject);
+    });
+
+    it('should throw an error if the user address is undefined', async function () {
+      invalidRequest.userAddress = undefined;
+      apiParams.requestParams = invalidRequest;
+      let result;
+      try {
+        result = await extractPrivateKey(apiParams);
+      } catch (err) {
+        result = err;
+      } finally {
+        expect(result).to.be.an('Error');
+      }
+    });
+
+    it('should throw an error if the user address is invalid', async function () {
+      invalidRequest.userAddress = 'wrongAddress';
+      apiParams.requestParams = invalidRequest;
+      let result;
+      try {
+        result = await extractPrivateKey(apiParams);
+      } catch (err) {
+        result = err;
+      } finally {
+        expect(result).to.be.an('Error');
+      }
+    });
   });
 
-  it('should get the private key of the unfound user account correctly', async function () {
-    walletStub.rpcStubs.snap_dialog.resolves(true);
-    const requestObject: ExtractPrivateKeyRequestParams = {
-      userAddress: unfoundUserAddress,
-    };
-    apiParams.requestParams = requestObject;
-    const result = await extractPrivateKey(apiParams);
-    expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledTwice;
-    expect(walletStub.rpcStubs.snap_manageState).not.to.have.been.called;
-    expect(result).to.be.eql(null);
-  });
+  describe('when request param validation pass', function () {
+    beforeEach(async function () {
+      apiParams.requestParams = Object.assign({}, requestObject);
+    });
 
-  it('should not get the private key of the specified user account if user rejected', async function () {
-    walletStub.rpcStubs.snap_dialog.resolves(false);
-    const requestObject: ExtractPrivateKeyRequestParams = {
-      userAddress: account1.address,
-    };
-    apiParams.requestParams = requestObject;
-    const result = await extractPrivateKey(apiParams);
-    expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledOnce;
-    expect(walletStub.rpcStubs.snap_manageState).not.to.have.been.called;
-    expect(result).to.be.equal(null);
-  });
+    afterEach(async function () {
+      apiParams.requestParams = Object.assign({}, requestObject);
+    });
 
-  it('should throw error if getKeysFromAddress failed', async function () {
-    sandbox.stub(utils, 'getKeysFromAddress').throws(new Error());
-    walletStub.rpcStubs.snap_dialog.resolves(true);
-    const requestObject: ExtractPrivateKeyRequestParams = {
-      userAddress: account1.address,
-    };
-    apiParams.requestParams = requestObject;
+    describe('when require upgrade checking fail', function () {
+      it('should throw error', async function () {
+        const isUpgradeRequiredStub = sandbox.stub(utils, 'isUpgradeRequired').throws('network error');
+        let result;
+        try {
+          result = await extractPrivateKey(apiParams);
+        } catch (err) {
+          result = err;
+        } finally {
+          expect(isUpgradeRequiredStub).to.have.been.calledOnceWith(STARKNET_TESTNET_NETWORK, account1.address);
+          expect(result).to.be.an('Error');
+        }
+      });
+    });
 
-    let result;
-    try {
-      await extractPrivateKey(apiParams);
-    } catch (err) {
-      result = err;
-    } finally {
-      expect(result).to.be.an('Error');
-    }
-  });
+    describe('when account require upgrade', function () {
+      let isUpgradeRequiredStub: sinon.SinonStub;
+      beforeEach(async function () {
+        isUpgradeRequiredStub = sandbox.stub(utils, 'isUpgradeRequired').resolves(true);
+      });
 
-  it('should throw an error if the user address is undefined', async function () {
-    const requestObject: ExtractPrivateKeyRequestParams = {
-      userAddress: undefined,
-    };
-    apiParams.requestParams = requestObject;
-    let result;
-    try {
-      result = await extractPrivateKey(apiParams);
-    } catch (err) {
-      result = err;
-    } finally {
-      expect(result).to.be.an('Error');
-    }
-  });
+      it('should throw error if upgrade required', async function () {
+        let result;
+        try {
+          result = await extractPrivateKey(apiParams);
+        } catch (err) {
+          result = err;
+        } finally {
+          expect(isUpgradeRequiredStub).to.have.been.calledOnceWith(STARKNET_TESTNET_NETWORK, account1.address);
+          expect(result).to.be.an('Error');
+        }
+      });
+    });
 
-  it('should throw an error if the user address is invalid', async function () {
-    const requestObject: ExtractPrivateKeyRequestParams = {
-      userAddress: 'wrongAddress',
-    };
-    apiParams.requestParams = requestObject;
-    let result;
-    try {
-      result = await extractPrivateKey(apiParams);
-    } catch (err) {
-      result = err;
-    } finally {
-      expect(result).to.be.an('Error');
-    }
+    describe('when account is not require upgrade', function () {
+      beforeEach(async function () {
+        sandbox.stub(utils, 'isUpgradeRequired').resolves(false);
+      });
+
+      describe('when account is cairo 0', function () {
+        //TODO
+      });
+
+      describe('when account is cairo 1', function () {
+        it('should get the private key of the specified user account correctly', async function () {
+          walletStub.rpcStubs.snap_dialog.resolves(true);
+          const requestObject: ExtractPrivateKeyRequestParams = {
+            userAddress: account1.address,
+          };
+          apiParams.requestParams = requestObject;
+          const result = await extractPrivateKey(apiParams);
+          expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledTwice;
+          expect(walletStub.rpcStubs.snap_manageState).not.to.have.been.called;
+          expect(result).to.be.equal(null);
+        });
+
+        it('should get the private key of the unfound user account correctly', async function () {
+          walletStub.rpcStubs.snap_dialog.resolves(true);
+          const requestObject: ExtractPrivateKeyRequestParams = {
+            userAddress: unfoundUserAddress,
+          };
+          apiParams.requestParams = requestObject;
+          const result = await extractPrivateKey(apiParams);
+          expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledTwice;
+          expect(walletStub.rpcStubs.snap_manageState).not.to.have.been.called;
+          expect(result).to.be.eql(null);
+        });
+
+        it('should not get the private key of the specified user account if user rejected', async function () {
+          walletStub.rpcStubs.snap_dialog.resolves(false);
+          const requestObject: ExtractPrivateKeyRequestParams = {
+            userAddress: account1.address,
+          };
+          apiParams.requestParams = requestObject;
+          const result = await extractPrivateKey(apiParams);
+          expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledOnce;
+          expect(walletStub.rpcStubs.snap_manageState).not.to.have.been.called;
+          expect(result).to.be.equal(null);
+        });
+
+        it('should throw error if getKeysFromAddress failed', async function () {
+          sandbox.stub(utils, 'getKeysFromAddress').throws(new Error());
+          walletStub.rpcStubs.snap_dialog.resolves(true);
+          const requestObject: ExtractPrivateKeyRequestParams = {
+            userAddress: account1.address,
+          };
+          apiParams.requestParams = requestObject;
+
+          let result;
+          try {
+            await extractPrivateKey(apiParams);
+          } catch (err) {
+            result = err;
+          } finally {
+            expect(result).to.be.an('Error');
+          }
+        });
+      });
+    });
   });
 });
