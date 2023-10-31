@@ -255,6 +255,16 @@
       <input type="submit" id="signTypedDataMessage" value="Sign Message">
     </fieldset>
   </form>
+  <form id="signTransaction">
+    <fieldset>
+      <legend>Sign Transaction</legend>
+      <label for="transactions">Transactions</label>
+      <input type="text" id="transactions" name="transactions"><br>
+      <label for="transactionsDetail">transactions Detail</label>
+      <input type="text" id="signerUserAddress" name="transactionsDetail"><br>
+      <input type="submit" id="signTransaction" value="Sign Transaction">
+    </fieldset>
+  </form>
   <form id="verifyTypedDataSignature">
     <fieldset>
       <legend>Verify Typed Data Message Signature</legend>
@@ -285,6 +295,7 @@
   const retrievePrivateKeyFromAddressForm = document.getElementById('retrievePrivateKeyFromAddress')
   const retrievePublicKeyFromAddressForm = document.getElementById('retrievePublicKeyFromAddress')
   const signTypedDataMessageForm = document.getElementById('signTypedDataMessage')
+  const signTransactionForm = document.getElementById('signTransaction')
   const verifyTypedDataSignatureForm = document.getElementById('verifyTypedDataSignature')
   const addErc20TokenForm = document.getElementById('addErc20Token')
   const getStoredErc20TokensForm = document.getElementById('getStoredErc20Tokens')
@@ -308,6 +319,7 @@
   retrievePrivateKeyFromAddressForm.addEventListener('submit', retrievePrivateKeyFromAddress)
   retrievePublicKeyFromAddressForm.addEventListener('submit', retrievePublicKeyFromAddress)
   signTypedDataMessageForm.addEventListener('submit', signTypedDataMessage)
+  signTransactionForm.addEventListener('submit', signTransaction)
   verifyTypedDataSignatureForm.addEventListener('submit', verifyTypedDataSignature)
   addErc20TokenForm.addEventListener('submit', addErc20Token)
   getStoredErc20TokensForm.addEventListener('submit', getStoredErc20Tokens)
@@ -649,6 +661,36 @@
             params: {
               typedDataMessage,
               signerAddress,
+              chainId,
+              ...getReqFlagsFromCheckbox()
+            }
+          }
+        }
+      })
+    } catch (err) {
+      console.error(err)
+      alert('Problem happened: ' + err.message || err)
+    }
+  }
+
+   // here we call the snap's "starkNet_signMessage" method
+   async function signTransaction(e) {
+    e.preventDefault() // to prevent default form behavior
+
+    const transaction = document.getElementById('transactions').value
+    const transactionsDetail = document.getElementById('transactionsDetail').value
+    const chainId = document.getElementById('targetChainId').value
+
+    try {
+      const response = await ethereum.request({
+        method: 'wallet_invokeSnap',
+        params: {
+          snapId, 
+          request: {
+            method: 'starkNet_signTransaction',
+            params: {
+              transaction,
+              transactionsDetail,
               chainId,
               ...getReqFlagsFromCheckbox()
             }
