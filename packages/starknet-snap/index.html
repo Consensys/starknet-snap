@@ -267,6 +267,17 @@
       <input type="submit" id="verifyTypedDataSignature" value="Verify Signature">
     </fieldset>
   </form>
+
+  <form id="declareContract">
+    <fieldset>
+      <legend>Declare Contract</legend>
+      <label for="declareContractContract">Contract</label>
+      <input type="text" id="declareContractContract" name="declareContractContract"><br>
+      <label for="declareContractCasm">Casm</label>
+      <input type="text" id="declareContractCasm" name="declareContractCasm"><br>
+      <input type="submit" id="declareContract" value="Declare Contract">
+    </fieldset>
+  </form>
 </body>
 
 <script type='module'>
@@ -295,6 +306,7 @@
   const getStoredTransactionsForm = document.getElementById('getStoredTransactions')
   const getTransactionsForm = document.getElementById('getTransactions')
   const recoverUserAccountsForm = document.getElementById('recoverUserAccounts')
+  const declareContractFrom = document.getElementById('declareContract')
 
   connectButton.addEventListener('click', connect)
   sendPingButton.addEventListener('click', sendPing)
@@ -318,6 +330,7 @@
   getStoredTransactionsForm.addEventListener('submit', getStoredTransactions)
   getTransactionsForm.addEventListener('submit', getTransactions)
   recoverUserAccountsForm.addEventListener('submit', recoverUserAccounts)
+  declareContractFrom.addEventListener('submit', declareContract)
 
   function getReqFlagsFromCheckbox() {
     return {
@@ -976,6 +989,36 @@
               maxScanned,
               maxMissed,
               chainId,
+              ...getReqFlagsFromCheckbox(),
+            },
+          },
+        }
+      })
+    } catch (err) {
+      console.error(err)
+      alert('Problem happened: ' + err.message || err)
+    }
+  }
+
+  async function declareContract(e) {
+    e.preventDefault() // to prevent default form behavior
+
+    const contract = document.getElementById('declareContractContract').value
+    const casm = document.getElementById('declareContractCasm').value
+    
+    try {
+      const response = await ethereum.request({
+        method: 'wallet_invokeSnap',
+        params: {
+          snapId, 
+          request: {
+            method: 'starkNet_declareContract',
+            params: {
+              chainId,
+              contractPayload: {
+                contract,
+                casm,
+              },
               ...getReqFlagsFromCheckbox(),
             },
           },
