@@ -1,6 +1,6 @@
-import { Signature, Signer, stark } from 'starknet';
+import { Signature } from 'starknet';
 import { ApiParams, SignTransactionParams } from './types/snapApi';
-import { getKeysFromAddress } from './utils/starknetUtils';
+import { getKeysFromAddress, signTransactions } from './utils/starknetUtils';
 import { getNetworkFromChainId } from './utils/snapUtils';
 
 export async function signTransaction(params: ApiParams): Promise<Signature> {
@@ -9,19 +9,17 @@ export async function signTransaction(params: ApiParams): Promise<Signature> {
   const userAddress = requestParamsObj.userAddress;
   const network = getNetworkFromChainId(state, requestParamsObj.chainId);
   const { privateKey } = await getKeysFromAddress(keyDeriver, network, state, userAddress);
-  const signer = new Signer(privateKey);
 
   try {
-    const signatures = await signer.signTransaction(
+    const signatures = await signTransactions(
+      privateKey,
       requestParamsObj.transactions,
       requestParamsObj.transactionsDetail,
       requestParamsObj.abis,
     );
-    const formattedSignatures = stark.signatureToDecimalArray(signatures);
-    const publicSigner = await signer.getPubKey();
-
-    return [publicSigner, ...formattedSignatures];
+    return signatures;
   } catch (error) {
-    throw new Error('Error signing the transaction');
+    console.error(`Problem found: ${error}`);
+    throw error;
   }
 }

@@ -17,14 +17,14 @@ export const shortenAddress = (address: string, num = 3) => {
 export const openExplorerTab = (
   address: string,
   type = 'contract',
-  chainId = constants.StarknetChainId.TESTNET as string,
+  chainId = constants.StarknetChainId.SN_GOERLI as string,
 ) => {
   let explorerUrl = STARKNET_TESTNET_EXPLORER;
   switch (chainId) {
-    case constants.StarknetChainId.MAINNET:
+    case constants.StarknetChainId.SN_MAIN:
       explorerUrl = STARKNET_MAINNET_EXPLORER;
       break;
-    case constants.StarknetChainId.TESTNET:
+    case constants.StarknetChainId.SN_GOERLI:
       explorerUrl = STARKNET_TESTNET_EXPLORER;
       break;
   }

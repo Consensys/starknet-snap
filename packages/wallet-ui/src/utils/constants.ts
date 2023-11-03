@@ -1,12 +1,12 @@
 import { constants } from 'starknet';
 
 export const TOKENS: any = {
-  [constants.StarknetChainId.MAINNET]: {
+  [constants.StarknetChainId.SN_MAIN]: {
     '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7': {
       coingeckoId: 'ethereum',
     },
   },
-  [constants.StarknetChainId.TESTNET]: {
+  [constants.StarknetChainId.SN_GOERLI]: {
     '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7': {
       coingeckoId: 'ethereum',
     },
