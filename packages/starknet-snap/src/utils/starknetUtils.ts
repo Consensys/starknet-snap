@@ -20,7 +20,10 @@ import {
   ProviderOptions,
   GetTransactionResponse,
   Invocations,
+  InvocationsDetails,
+  Abi,
   validateAndParseAddress as _validateAndParseAddress,
+  cairo,
 } from 'starknet';
 import type { Hex } from '@noble/curves/abstract/utils';
 import { Network, SnapState, Transaction, TransactionType } from '../types/snapState';
@@ -102,12 +105,12 @@ export const executeTxn = async (
   senderAddress: string,
   privateKey: string | Uint8Array,
   txnInvocation: Call | Call[],
-  maxFee: num.BigNumberish,
-  nonce?: number,
+  abis?: Abi[],
+  invocationsDetails?: InvocationsDetails,
 ): Promise<InvokeFunctionResponse> => {
   const provider = getProvider(network);
   const account = new Account(provider, senderAddress, privateKey);
-  return account.execute(txnInvocation, undefined, { nonce, maxFee });
+  return account.execute(txnInvocation, abis, invocationsDetails);
 };
 
 export const deployAccount = async (

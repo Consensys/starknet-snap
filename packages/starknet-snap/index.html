@@ -36,7 +36,7 @@
     <input type="checkbox" id="isDev" name="isDev" /><br />
     <label for="debugLevel">Log Level</label>
     <select id="debugLevel">
-      <option value="6" selected="selected">All</option>
+      <option value="ALL" selected="selected">All</option>
       <option value="0">Off</option>
       <option value="1">Error</option>
     </select>
@@ -267,6 +267,21 @@
         <input type="submit" id="verifyTypedDataSignature" value="Verify Signature" />
       </fieldset>
     </form>
+
+    <form id="executeTxn">
+      <fieldset>
+        <legend>Execute Txn</legend>
+        <label for="executetxn_senderAddress">Sender Address</label>
+        <input type="text" id="executetxn_senderAddress" name="executetxn_senderAddress" /><br />
+        <label for="executetxn_txnInvocation">Txn Invocation(s)</label>
+        <input type="text" id="executetxn_txnInvocation" name="executetxn_txnInvocation" /><br />
+        <label for="executetxn_abis">Abi(s)</label>
+        <input type="text" id="executetxn_abis" name="executetxn_abis" /><br />
+        <label for="executetxn_invocationsDetails">Invocations Details</label>
+        <input type="text" id="executetxn_invocationsDetails" name="executetxn_invocationsDetails" /><br />
+        <input type="submit" id="executeTxn" value="Execute Txn" />
+      </fieldset>
+    </form>
   </body>
 
   <script type="module">
@@ -358,6 +373,10 @@
       {
         id: 'recoverUserAccounts',
         method: recoverUserAccounts,
+      },
+      {
+        id: 'executeTxn',
+        method: ExecuteTxn,
       },
     ];
 
@@ -648,6 +667,22 @@
         maxScanned,
         maxMissed,
       });
+    }
+
+    async function ExecuteTxn(e) {
+      e.preventDefault(); // to prevent default form behavior
+
+      const senderAddress = document.getElementById('executetxn_senderAddress').value;
+      const txnInvocation = document.getElementById('executetxn_txnInvocation').value
+      const abis = document.getElementById('executetxn_abis').value;
+      const invocationsDetails = document.getElementById('executetxn_invocationsDetails').value
+      
+      await callSnap('starkNet_executeTxn', {
+        senderAddress,
+        txnInvocation: txnInvocation ? JSON.parse(txnInvocation) : undefined,
+        abis: abis ? JSON.parse(abis) : undefined,
+        invocationsDetails: invocationsDetails ? JSON.parse(invocationsDetails) : undefined
+      })
     }
 
     async function callSnap(method, params) {
