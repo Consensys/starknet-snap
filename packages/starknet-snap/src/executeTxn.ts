@@ -29,7 +29,7 @@ export async function executeTxn(params: ApiParams) {
       method: 'snap_dialog',
       params: {
         type: DialogType.Confirmation,
-        content: panel([heading('Do you want to sign this transaction(s) ?'), ...snapComponents]),
+        content: panel([heading('Do you want to sign this transaction(s)?'), ...snapComponents]),
       },
     });
 

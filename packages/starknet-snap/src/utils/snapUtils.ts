@@ -240,7 +240,7 @@ export function getTxnSnapTxt(
   }
 
   if (invocationsDetails?.maxFee) {
-    components.push(text('**Max Fee:**'));
+    components.push(text('**Max Fee(ETH):**'));
     components.push(copyable(convert(invocationsDetails.maxFee, 'wei', 'ether')));
   }
   if (invocationsDetails?.nonce) {
