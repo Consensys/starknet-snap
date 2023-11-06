@@ -23,7 +23,6 @@ import {
   InvocationsDetails,
   Abi,
   validateAndParseAddress as _validateAndParseAddress,
-  cairo,
 } from 'starknet';
 import type { Hex } from '@noble/curves/abstract/utils';
 import { Network, SnapState, Transaction, TransactionType } from '../types/snapState';
