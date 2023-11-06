@@ -21,6 +21,7 @@ import {
   GetTransactionResponse,
   Invocations,
   validateAndParseAddress as _validateAndParseAddress,
+  EstimateFeeDetails,
 } from 'starknet';
 import type { Hex } from '@noble/curves/abstract/utils';
 import { Network, SnapState, Transaction, TransactionType } from '../types/snapState';
@@ -89,12 +90,13 @@ export const estimateFeeBulk = async (
   senderAddress: string,
   privateKey: string | Uint8Array,
   txnInvocation: Invocations,
+  invocationsDetails: EstimateFeeDetails = { blockIdentifier: 'latest' },
 ): Promise<EstimateFee[]> => {
   // ensure always calling the sequencer endpoint since the rpc endpoint and
   // starknet.js are not supported yet.
   const provider = getProvider(network);
   const account = new Account(provider, senderAddress, privateKey);
-  return account.estimateFeeBulk(txnInvocation, { blockIdentifier: 'latest' });
+  return account.estimateFeeBulk(txnInvocation, invocationsDetails);
 };
 
 export const executeTxn = async (

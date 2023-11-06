@@ -36,7 +36,7 @@
     <input type="checkbox" id="isDev" name="isDev" /><br />
     <label for="debugLevel">Log Level</label>
     <select id="debugLevel">
-      <option value="6" selected="selected">All</option>
+      <option value="ALL" selected="selected">All</option>
       <option value="0">Off</option>
       <option value="1">Error</option>
     </select>
@@ -267,6 +267,18 @@
         <input type="submit" id="verifyTypedDataSignature" value="Verify Signature" />
       </fieldset>
     </form>
+    <form id="estimateFees">
+      <fieldset>
+        <legend>Estimate Fees</legend>
+        <label for="estimateFees_senderAddress">Sender Address</label>
+        <input type="text" id="estimateFees_senderAddress" name="estimateFees_senderAddress" /><br />
+        <label for="estimateFees_invocations">Invocations</label>
+        <input type="text" id="estimateFees_invocations" name="estimateFees_invocations" /><br />
+        <label for="estimateFees_invocationDetails">Invocation Details</label>
+        <input type="text" id="estimateFees_invocationDetails" name="estimateFees_invocationDetails" /><br />
+        <input type="submit" id="estimateFees" value="Estimate Fees" />
+      </fieldset>
+    </form>
   </body>
 
   <script type="module">
@@ -359,6 +371,10 @@
         id: 'recoverUserAccounts',
         method: recoverUserAccounts,
       },
+      {
+        id: 'estimateFees',
+        method: estimateFees,
+      }
     ];
 
     for (const form of formWithSubmit) {
@@ -647,6 +663,20 @@
         startScanIndex,
         maxScanned,
         maxMissed,
+      });
+    }
+
+    async function estimateFees(e) {
+      e.preventDefault(); // to prevent default form behavior
+
+      const senderAddress = document.getElementById('estimateFees_senderAddress').value;
+      const invocationDetails = document.getElementById('estimateFees_invocationDetails').value;
+      const invocations = document.getElementById('estimateFees_invocations').value;
+      
+      await callSnap('starkNet_estimateFees', {
+        senderAddress,
+        invocations: invocations ? JSON.parse(invocations): undefined,
+        invocationDetails: invocationDetails ? JSON.parse(invocationDetails) : undefined
       });
     }
 
