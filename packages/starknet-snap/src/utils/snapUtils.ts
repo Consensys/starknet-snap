@@ -1,6 +1,6 @@
 import { toJson } from './serializer';
 import { Mutex } from 'async-mutex';
-import { num } from 'starknet';
+import { num, InvocationsDetails, DeclareContractPayload } from 'starknet';
 import { validateAndParseAddress } from './starknetUtils';
 import { Component, text, copyable } from '@metamask/snaps-ui';
 import {
@@ -218,6 +218,57 @@ export function getSigningTxnText(
   tokenTransferComponents1.push(copyable(network.name));
 
   return tokenTransferComponents1.concat(tokenTransferComponents2);
+}
+
+export function getDeclareSnapTxt(
+  senderAddress: string,
+  network: Network,
+  contractPayload: DeclareContractPayload,
+  invocationsDetails?: InvocationsDetails,
+) {
+  const components = [];
+  components.push(text('**Network:**'));
+  components.push(copyable(network.name));
+  components.push(text('**Signer Address:**'));
+  components.push(copyable(senderAddress));
+
+  if (contractPayload.contract) {
+    components.push(text('**Contract:**'));
+    if (typeof contractPayload.contract === 'string' || contractPayload.contract instanceof String) {
+      components.push(copyable(contractPayload.contract.toString()));
+    } else {
+      components.push(copyable(JSON.stringify(contractPayload.contract, null, 2)));
+    }
+  }
+
+  if (contractPayload.compiledClassHash) {
+    components.push(text('**Complied Class Hash:**'));
+    components.push(copyable(contractPayload.compiledClassHash));
+  }
+
+  if (contractPayload.classHash) {
+    components.push(text('**Class Hash:**'));
+    components.push(copyable(contractPayload.classHash));
+  }
+
+  if (contractPayload.casm) {
+    components.push(text('**Casm:**'));
+    components.push(copyable(JSON.stringify(contractPayload.casm, null, 2)));
+  }
+
+  if (invocationsDetails?.maxFee !== undefined) {
+    components.push(text('**Max Fee(ETH):**'));
+    components.push(copyable(convert(invocationsDetails.maxFee, 'wei', 'ether')));
+  }
+  if (invocationsDetails?.nonce !== undefined) {
+    components.push(text('**Nonce:**'));
+    components.push(copyable(invocationsDetails.nonce.toString()));
+  }
+  if (invocationsDetails?.version !== undefined) {
+    components.push(text('**Version:**'));
+    components.push(copyable(invocationsDetails.version.toString()));
+  }
+  return components;
 }
 
 export function getAddTokenText(

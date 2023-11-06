@@ -36,7 +36,7 @@
     <input type="checkbox" id="isDev" name="isDev" /><br />
     <label for="debugLevel">Log Level</label>
     <select id="debugLevel">
-      <option value="6" selected="selected">All</option>
+      <option value="ALL" selected="selected">All</option>
       <option value="0">Off</option>
       <option value="1">Error</option>
     </select>
@@ -271,12 +271,12 @@
       <fieldset>
         <legend>Declare Contract</legend>
         <label for="declareContract_senderAddress">Sender Address</label>
-        <input type="text" id="declareContract_senderAddress" name="declareContract_senderAddress"><br>
+        <input type="text" id="declareContract_senderAddress" name="declareContract_senderAddress" /><br />
         <label for="declareContract_contract">Contract payload</label>
-        <input type="text" id="declareContract_contract" name="declareContract_contract"><br>
+        <input type="text" id="declareContract_contract" name="declareContract_contract" /><br />
         <label for="declareContract_invocationsDetails">InvocationsDetails</label>
-        <input type="text" id="declareContract_invocationsDetails" name="declareContract_invocationsDetails"><br>
-        <input type="submit" id="declareContract" value="Declare Contract">
+        <input type="text" id="declareContract_invocationsDetails" name="declareContract_invocationsDetails" /><br />
+        <input type="submit" id="declareContract" value="Declare Contract" />
       </fieldset>
     </form>
   </body>
@@ -370,6 +370,10 @@
       {
         id: 'recoverUserAccounts',
         method: recoverUserAccounts,
+      },
+      {
+        id: 'declareContract',
+        method: declareContract,
       },
     ];
 
@@ -663,22 +667,19 @@
     }
 
     async function declareContract(e) {
-      e.preventDefault() // to prevent default form behavior
+      e.preventDefault(); // to prevent default form behavior
 
-      const senderAddress = document.getElementById('declareContract_senderAddress').value
-      const contractPayload = document.getElementById('declareContract_contract').value
-      const invocationsDetails = document.getElementById('declareContract_invocationsDetails').value
-      
-      await callSnap(
-        'starkNet_declareContract',
-        {
-          senderAddress,
-          contractPayload,
-          invocationsDetails,
-        }
-      )
+      const senderAddress = document.getElementById('declareContract_senderAddress').value;
+      const contractPayload = document.getElementById('declareContract_contract').value;
+      const invocationsDetails = document.getElementById('declareContract_invocationsDetails').value;
+
+      await callSnap('starkNet_declareContract', {
+        senderAddress,
+        contractPayload: contractPayload ? JSON.parse(contractPayload) : contractPayload,
+        invocationsDetails: invocationsDetails ? JSON.parse(invocationsDetails) : invocationsDetails,
+      });
     }
-    
+
     async function callSnap(method, params) {
       try {
         const chainId = document.getElementById('targetChainId').value;

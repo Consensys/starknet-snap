@@ -147,7 +147,7 @@ export interface RecoverAccountsRequestParams extends BaseRequestParams {
 export interface DeclareContractRequestParams extends BaseRequestParams {
   senderAddress: string;
   contractPayload: DeclareContractPayload;
-  transactionsDetail?: InvocationsDetails;
+  invocationsDetails?: InvocationsDetails;
 }
 
 export interface RpcV4GetTransactionReceiptResponse {
