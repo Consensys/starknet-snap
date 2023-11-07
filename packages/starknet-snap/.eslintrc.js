@@ -11,6 +11,5 @@ module.exports = {
   },
   plugins: ['@typescript-eslint'],
   rules: {
-    'max-warnings': [2, { count: 100 }],
   },
 };

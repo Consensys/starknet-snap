@@ -494,14 +494,7 @@ export const signTransactions = async (
   abis: Abi[],
 ): Promise<Signature> => {
   const signer = new Signer(privateKey);
-
-  try {
-    const signatures = await signer.signTransaction(transactions, transactionsDetail, abis);
-    const formattedSignatures = stark.signatureToDecimalArray(signatures);
-
-    return formattedSignatures;
-  } catch (error) {
-    console.error(`Problem found: ${error}`);
-    throw error;
-  }
+  const signatures = await signer.signTransaction(transactions, transactionsDetail, abis);
+  const formattedSignatures = stark.signatureToDecimalArray(signatures);
+  return formattedSignatures;
 };
