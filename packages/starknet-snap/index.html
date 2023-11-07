@@ -255,6 +255,16 @@
         <input type="submit" id="signTypedDataMessage" value="Sign Message" />
       </fieldset>
     </form>
+    <form id="signTransaction">
+      <fieldset>
+        <legend>Sign Transaction</legend>
+        <label for="transactions">Transactions</label>
+        <input type="text" id="transactions" name="transactions" /><br />
+        <label for="transactionsDetail">transactions Detail</label>
+        <input type="text" id="signerUserAddress" name="transactionsDetail" /><br />
+        <input type="submit" id="signTransaction" value="Sign Transaction" />
+      </fieldset>
+    </form>
     <form id="verifyTypedDataSignature">
       <fieldset>
         <legend>Verify Typed Data Message Signature</legend>
@@ -318,6 +328,10 @@
       {
         id: 'signTypedDataMessage',
         method: signTypedDataMessage,
+      },
+      {
+        id: 'signTransaction',
+        method: signTransaction,
       },
       {
         id: 'verifyTypedDataSignature',
@@ -505,6 +519,16 @@
       const signerAddress = document.getElementById('signerUserAddress').value;
 
       await callSnap('starkNet_signMessage', { typedDataMessage, signerAddress });
+    }
+
+    // here we call the snap's "starkNet_signTransaction" method
+    async function signTransaction(e) {
+      e.preventDefault(); // to prevent default form behavior
+
+      const transaction = document.getElementById('transactions').value;
+      const transactionsDetail = document.getElementById('transactionsDetail').value;
+
+      await callSnap('starkNet_signTransaction', { transaction, transactionsDetail });
     }
 
     // here we call the snap's "starkNet_verifySignedMessage" method
