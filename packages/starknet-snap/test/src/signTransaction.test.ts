@@ -11,7 +11,7 @@ import { Mutex } from 'async-mutex';
 import { ApiParams, SignTransactionParams } from '../../src/types/snapApi';
 import typedDataExample from '../../src/typedData/typedDataExample.json';
 import { toJson } from '../../src/utils/serializer';
-import {constants} from 'starknet';
+import { constants } from 'starknet';
 import * as utils from '../../src/utils/starknetUtils';
 
 chai.use(sinonChai);
@@ -54,8 +54,8 @@ describe('Test function: signMessage', function () {
       cairoVersion: '0',
       nonce: '0x1',
       version: '0x0',
-      maxFee: 100
-    }
+      maxFee: 100,
+    },
   };
 
   beforeEach(async function () {
@@ -73,9 +73,7 @@ describe('Test function: signMessage', function () {
     apiParams.requestParams = requestObject;
   });
 
-
   it('should sign a transaction from an user account correctly', async function () {
-
     const result = await signTransaction(apiParams);
 
     const expectedDialogParams = {
