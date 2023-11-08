@@ -27,7 +27,7 @@ import {
 import { getTransactions, updateStatus } from '../../src/getTransactions';
 import { Mutex } from 'async-mutex';
 import { ApiParams, GetTransactionsRequestParams } from '../../src/types/snapApi';
-import { num } from 'starknet';
+import { num, InvokeTransactionReceiptResponse } from 'starknet';
 
 chai.use(sinonChai);
 const sandbox = sinon.createSandbox();
@@ -72,13 +72,13 @@ describe('Test function: getTransactions', function () {
     });
     getTransactionStatusStub = sandbox.stub(utils, 'getTransactionStatus').callsFake(async (...args) => {
       if (args?.[0] === getTxnsFromVoyagerResp.items[0].hash) {
-        return getTxnStatusResp;
+        return getTxnStatusResp as unknown as InvokeTransactionReceiptResponse;
       } else if (args?.[0] === getTxnsFromVoyagerResp.items[1].hash) {
-        return getTxnStatusResp;
+        return getTxnStatusResp as unknown as InvokeTransactionReceiptResponse;
       } else if (args?.[0] === expectedMassagedTxn5.txnHash) {
-        return undefined;
+        return undefined as unknown as InvokeTransactionReceiptResponse;
       }
-      return getTxnStatusAcceptL2Resp;
+      return getTxnStatusAcceptL2Resp as unknown as InvokeTransactionReceiptResponse;
     });
     walletStub.rpcStubs.snap_manageState.resolves(state);
   });
@@ -117,8 +117,8 @@ describe('Test function: getTransactions', function () {
     expect(walletStub.rpcStubs.snap_manageState).to.have.been.called;
     expect(mergeTxn).not.to.be.undefined;
     expect(mergeTxn.status).to.be.eq('');
-    expect(mergeTxn.finalityStatus).to.be.eq(getTxnStatusResp.finalityStatus);
-    expect(mergeTxn.executionStatus).to.be.eq(getTxnStatusResp.executionStatus);
+    expect(mergeTxn.finalityStatus).to.be.eq(getTxnStatusResp.finality_status);
+    expect(mergeTxn.executionStatus).to.be.eq(getTxnStatusResp.execution_status);
     expect(result.length).to.be.eq(4);
     expect(result).to.be.eql(expectedMassagedTxns);
   });
@@ -209,9 +209,9 @@ describe('Test function: getTransactions.updateStatus', function () {
   let txns = [];
   beforeEach(function () {
     txns = [{ ...unsettedTransactionInMassagedTxn }];
-    getTransactionStatusStub = sandbox.stub(utils, 'getTransactionStatus').callsFake(async () => {
-      return getTxnStatusAcceptL2Resp;
-    });
+    getTransactionStatusStub = sandbox
+      .stub(utils, 'getTransactionStatus')
+      .resolves(getTxnStatusAcceptL2Resp as unknown as InvokeTransactionReceiptResponse);
   });
 
   afterEach(function () {
@@ -221,8 +221,8 @@ describe('Test function: getTransactions.updateStatus', function () {
   it('should update status correctly', async function () {
     await updateStatus(txns[0], STARKNET_TESTNET_NETWORK);
     expect(getTransactionStatusStub.callCount).to.be.eq(1);
-    expect(txns[0].finalityStatus).to.be.eq(getTxnStatusAcceptL2Resp.finalityStatus);
-    expect(txns[0].executionStatus).to.be.eq(getTxnStatusAcceptL2Resp.executionStatus);
+    expect(txns[0].finalityStatus).to.be.eq(getTxnStatusAcceptL2Resp.finality_status);
+    expect(txns[0].executionStatus).to.be.eq(getTxnStatusAcceptL2Resp.execution_status);
     expect(txns[0].status).to.be.eq('');
   });
 

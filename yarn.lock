@@ -2034,14 +2034,14 @@ __metadata:
 
 "@consensys/starknet-snap@file:../starknet-snap::locator=wallet-ui%40workspace%3Apackages%2Fwallet-ui":
   version: 2.2.0
-  resolution: "@consensys/starknet-snap@file:../starknet-snap#../starknet-snap::hash=09b51d&locator=wallet-ui%40workspace%3Apackages%2Fwallet-ui"
+  resolution: "@consensys/starknet-snap@file:../starknet-snap#../starknet-snap::hash=dbba6d&locator=wallet-ui%40workspace%3Apackages%2Fwallet-ui"
   dependencies:
     async-mutex: ^0.3.2
     ethereum-unit-converter: ^0.0.17
     ethers: ^5.5.1
-    starknet: ^5.14.0
+    starknet: ^5.19.5
     starknet_v4.22.0: "npm:starknet@4.22.0"
-  checksum: fee364b7c342fedbbeda32f0d35fc90a826ad42d2948e329f5893ab03e25536b57dd15a342428bda8e628a4416f01dc0102d63450056f0a4799e700279d34fec
+  checksum: 46a039b92b2bc7adeed5ccb21a42cdcd504e511890dedb12be3a95960f0d2058ef878aea390e14518739a79bd59f0d2b331fcbcb834424b82497edf7a75700d7
   languageName: node
   linkType: hard
 
@@ -2075,7 +2075,7 @@ __metadata:
     sinon: ^13.0.2
     sinon-chai: ^3.7.0
     standard-version: ^9.5.0
-    starknet: ^5.14.0
+    starknet: ^5.19.5
     starknet_v4.22.0: "npm:starknet@4.22.0"
     ts-node: ^10.8.1
     typescript: ^4.6.3
@@ -4085,12 +4085,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@noble/curves@npm:~1.0.0":
-  version: 1.0.0
-  resolution: "@noble/curves@npm:1.0.0"
+"@noble/curves@npm:~1.2.0":
+  version: 1.2.0
+  resolution: "@noble/curves@npm:1.2.0"
   dependencies:
-    "@noble/hashes": 1.3.0
-  checksum: 6bcef44d626c640dc8961819d68dd67dffb907e3b973b7c27efe0ecdd9a5c6ce62c7b9e3dfc930c66605dced7f1ec0514d191c09a2ce98d6d52b66e3315ffa79
+    "@noble/hashes": 1.3.2
+  checksum: bb798d7a66d8e43789e93bc3c2ddff91a1e19fdb79a99b86cd98f1e5eff0ee2024a2672902c2576ef3577b6f282f3b5c778bebd55761ddbb30e36bf275e83dd0
   languageName: node
   linkType: hard
 
@@ -4108,10 +4108,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@noble/hashes@npm:1.3.0":
-  version: 1.3.0
-  resolution: "@noble/hashes@npm:1.3.0"
-  checksum: d7ddb6d7c60f1ce1f87facbbef5b724cdea536fc9e7f59ae96e0fc9de96c8f1a2ae2bdedbce10f7dcc621338dfef8533daa73c873f2b5c87fa1a4e05a95c2e2e
+"@noble/hashes@npm:1.3.2, @noble/hashes@npm:~1.3.2":
+  version: 1.3.2
+  resolution: "@noble/hashes@npm:1.3.2"
+  checksum: fe23536b436539d13f90e4b9be843cc63b1b17666a07634a2b1259dded6f490be3d050249e6af98076ea8f2ea0d56f578773c2197f2aa0eeaa5fba5bc18ba474
   languageName: node
   linkType: hard
 
@@ -4119,13 +4119,6 @@ __metadata:
   version: 1.1.5
   resolution: "@noble/hashes@npm:1.1.5"
   checksum: de3f095a7ac1cbf5b4b3d09f193288d4f2eec35fbadf2ed9fd7e47d8a3042fef410052ba62dc0296a185f994c11192f5357fdb1bd9178c905efd82e946c53b00
-  languageName: node
-  linkType: hard
-
-"@noble/hashes@npm:~1.3.0":
-  version: 1.3.1
-  resolution: "@noble/hashes@npm:1.3.1"
-  checksum: 7fdefc0f7a0c1ec27acc6ff88841793e3f93ec4ce6b8a6a12bfc0dd70ae6b7c4c82fe305fdfeda1735d5ad4a9eebe761e6693b3d355689c559e91242f4bc95b1
   languageName: node
   linkType: hard
 
@@ -4394,6 +4387,16 @@ __metadata:
     "@noble/hashes": ~1.2.0
     "@scure/base": ~1.1.0
   checksum: fbb594c50696fa9c14e891d872f382e50a3f919b6c96c55ef2fb10c7102c546dafb8f099a62bd114c12a00525b595dcf7381846f383f0ddcedeaa6e210747d2f
+  languageName: node
+  linkType: hard
+
+"@scure/starknet@npm:~0.3.0":
+  version: 0.3.0
+  resolution: "@scure/starknet@npm:0.3.0"
+  dependencies:
+    "@noble/curves": ~1.2.0
+    "@noble/hashes": ~1.3.2
+  checksum: 2f291a7aef9298f362a6b01e3b9dd0d414c53fc34fd71b6f15555307e236117cbce598351c6f77fc14dd7f06737c0b20871c030519fbaaa834411b319741f595
   languageName: node
   linkType: hard
 
@@ -17505,16 +17508,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"micro-starknet@npm:~0.2.1":
-  version: 0.2.3
-  resolution: "micro-starknet@npm:0.2.3"
-  dependencies:
-    "@noble/curves": ~1.0.0
-    "@noble/hashes": ~1.3.0
-  checksum: f1ae152348d1ca0bd0b4d09cb7901aee5cb1e815dcbfb6c3a623d107c169fad00808e154e7ca8abf2b16639a83044bc602c66fc3e0eb0de89a5c81815ff9b2ef
-  languageName: node
-  linkType: hard
-
 "microevent.ts@npm:~0.1.1":
   version: 0.1.1
   resolution: "microevent.ts@npm:0.1.1"
@@ -22770,17 +22763,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"starknet@npm:^5.14.0":
-  version: 5.16.0
-  resolution: "starknet@npm:5.16.0"
+"starknet@npm:^5.19.5":
+  version: 5.22.0
+  resolution: "starknet@npm:5.22.0"
   dependencies:
-    "@noble/curves": ~1.0.0
+    "@noble/curves": ~1.2.0
+    "@scure/starknet": ~0.3.0
     isomorphic-fetch: ^3.0.0
     lossless-json: ^2.0.8
-    micro-starknet: ~0.2.1
     pako: ^2.0.4
     url-join: ^4.0.1
-  checksum: 745e68d698aacb4836fb638a907b9844c566f0a3a169a80722eef73c7d0c48fe1a31a458f32ed248bc63587e4b3811067ae37e3e573d84bec1a205cd45e678db
+  checksum: f3dd18ae82b10b3069e4ec79f62caf58c20cc456861bab4af27c9f06d3f8a6e10c7b16b17c68c4087d3f1cd6d28d5c46c8d6ae6e24832437ac741a6a002427c3
   languageName: node
   linkType: hard
 

@@ -21,14 +21,21 @@ import {
   GetTransactionResponse,
   Invocations,
   validateAndParseAddress as _validateAndParseAddress,
+  InvokeTransactionResponse,
 } from 'starknet';
 import type { Hex } from '@noble/curves/abstract/utils';
 import { Network, SnapState, Transaction, TransactionType } from '../types/snapState';
 import { PROXY_CONTRACT_HASH, TRANSFER_SELECTOR_HEX } from './constants';
 import { getAddressKey } from './keyPair';
-import { getAccount, getAccounts, getTransactionFromVoyagerUrl, getTransactionsFromVoyagerUrl } from './snapUtils';
+import {
+  getAccount,
+  getAccounts,
+  getTransactionFromVoyagerUrl,
+  getTransactionsFromVoyagerUrl,
+  toSet,
+} from './snapUtils';
 import { logger } from './logger';
-import { RpcV4GetTransactionReceiptResponse } from '../types/snapApi';
+const bigIntTransferSelectorHex = num.toBigInt(TRANSFER_SELECTOR_HEX);
 
 export const getCallDataArray = (callDataStr: string): string[] => {
   return (callDataStr ?? '')
@@ -56,6 +63,11 @@ export const getProvider = (network: Network, forceSequencer = false): Provider 
   return new Provider(providerParam);
 };
 
+export const getAccountInstance = (network: Network, address: string, privateKey: string | Uint8Array) => {
+  const provider = getProvider(network);
+  return new Account(provider, address, privateKey, '0');
+};
+
 export const callContract = async (
   network: Network,
   contractAddress: string,
@@ -79,9 +91,9 @@ export const estimateFee = async (
   privateKey: string | Uint8Array,
   txnInvocation: Call | Call[],
 ): Promise<EstimateFee> => {
-  const provider = getProvider(network);
-  const account = new Account(provider, senderAddress, privateKey);
-  return account.estimateInvokeFee(txnInvocation, { blockIdentifier: 'latest' });
+  return getAccountInstance(network, senderAddress, privateKey).estimateInvokeFee(txnInvocation, {
+    blockIdentifier: 'latest',
+  });
 };
 
 export const estimateFeeBulk = async (
@@ -90,11 +102,9 @@ export const estimateFeeBulk = async (
   privateKey: string | Uint8Array,
   txnInvocation: Invocations,
 ): Promise<EstimateFee[]> => {
-  // ensure always calling the sequencer endpoint since the rpc endpoint and
-  // starknet.js are not supported yet.
-  const provider = getProvider(network);
-  const account = new Account(provider, senderAddress, privateKey);
-  return account.estimateFeeBulk(txnInvocation, { blockIdentifier: 'latest' });
+  return getAccountInstance(network, senderAddress, privateKey).estimateFeeBulk(txnInvocation, {
+    blockIdentifier: 'latest',
+  });
 };
 
 export const executeTxn = async (
@@ -105,9 +115,7 @@ export const executeTxn = async (
   maxFee: num.BigNumberish,
   nonce?: number,
 ): Promise<InvokeFunctionResponse> => {
-  const provider = getProvider(network);
-  const account = new Account(provider, senderAddress, privateKey);
-  return account.execute(txnInvocation, undefined, { nonce, maxFee });
+  return getAccountInstance(network, senderAddress, privateKey).execute(txnInvocation, undefined, { nonce, maxFee });
 };
 
 export const deployAccount = async (
@@ -118,15 +126,13 @@ export const deployAccount = async (
   privateKey: string | Uint8Array,
   maxFee: num.BigNumberish,
 ): Promise<DeployContractResponse> => {
-  const provider = getProvider(network);
-  const account = new Account(provider, contractAddress, privateKey);
   const deployAccountPayload = {
     classHash: PROXY_CONTRACT_HASH,
     contractAddress: contractAddress,
     constructorCalldata: contractCallData,
     addressSalt,
   };
-  return account.deployAccount(deployAccountPayload, { maxFee });
+  return getAccountInstance(network, contractAddress, privateKey).deployAccount(deployAccountPayload, { maxFee });
 };
 
 export const estimateAccountDeployFee = async (
@@ -136,15 +142,13 @@ export const estimateAccountDeployFee = async (
   addressSalt: num.BigNumberish,
   privateKey: string | Uint8Array,
 ): Promise<EstimateFee> => {
-  const provider = getProvider(network);
-  const account = new Account(provider, contractAddress, privateKey);
   const deployAccountPayload = {
     classHash: PROXY_CONTRACT_HASH,
     contractAddress: contractAddress,
     constructorCalldata: contractCallData,
     addressSalt,
   };
-  return account.estimateAccountDeployFee(deployAccountPayload);
+  return getAccountInstance(network, contractAddress, privateKey).estimateAccountDeployFee(deployAccountPayload);
 };
 
 export const getSigner = async (userAccAddress: string, network: Network): Promise<string> => {
@@ -154,11 +158,7 @@ export const getSigner = async (userAccAddress: string, network: Network): Promi
 
 export const getTransactionStatus = async (transactionHash: num.BigNumberish, network: Network) => {
   const provider = getProvider(network);
-  const receipt = (await provider.getTransactionReceipt(transactionHash)) as RpcV4GetTransactionReceiptResponse;
-  return {
-    executionStatus: receipt.execution_status,
-    finalityStatus: receipt.finality_status,
-  };
+  return await provider.getTransactionReceipt(transactionHash);
 };
 
 export const getTransaction = async (transactionHash: num.BigNumberish, network: Network) => {
@@ -246,6 +246,31 @@ const getTransactionsFromVoyagerHelper = async (
   };
 };
 
+export const buildInvokeTxn = (
+  network: Network,
+  txn: { hash: string; type?: string; timestamp: number; contract_address: string },
+  invokeTxn: InvokeTransactionResponse,
+  status: {
+    finality_status: string;
+    execution_status: string;
+  },
+): Transaction => {
+  return {
+    txnHash: invokeTxn.transaction_hash || txn.hash,
+    txnType: txn.type?.toLowerCase(),
+    chainId: network.chainId,
+    senderAddress: invokeTxn.sender_address || invokeTxn.contract_address || txn.contract_address || '',
+    contractAddress: invokeTxn.calldata?.[1]?.toString() || invokeTxn.contract_address || txn.contract_address || '',
+    contractFuncName: num.toBigInt(invokeTxn.calldata?.[2] || '') === bigIntTransferSelectorHex ? 'transfer' : '',
+    contractCallData: invokeTxn.calldata?.slice(6, invokeTxn.calldata?.length - 1) || [],
+    timestamp: txn.timestamp,
+    status: '', //DEPRECATION
+    finalityStatus: status.finality_status || '',
+    executionStatus: status.execution_status || '',
+    eventIds: [],
+    failureReason: '',
+  };
+};
 export const getMassagedTransactions = async (
   toAddress: num.BigNumberish,
   contractAddress: num.BigNumberish,
@@ -262,7 +287,6 @@ export const getMassagedTransactions = async (
     network,
   );
 
-  const bigIntTransferSelectorHex = num.toBigInt(TRANSFER_SELECTOR_HEX);
   let massagedTxns = await Promise.all(
     txns.map(async (txn) => {
       let txnResp: GetTransactionResponse;
@@ -270,29 +294,14 @@ export const getMassagedTransactions = async (
       try {
         txnResp = await getTransaction(txn.hash, network);
         statusResp = await getTransactionStatus(txn.hash, network);
+
         logger.log(`getMassagedTransactions: txnResp:\n${toJson(txnResp)}`);
         logger.log(`getMassagedTransactions: statusResp:\n${toJson(statusResp)}`);
       } catch (err) {
         logger.error(`getMassagedTransactions: error received from getTransaction: ${err}`);
       }
 
-      const massagedTxn: Transaction = {
-        txnHash: txnResp.transaction_hash || txn.hash,
-        txnType: txn.type?.toLowerCase(),
-        chainId: network.chainId,
-        senderAddress: txnResp.sender_address || txnResp.contract_address || txn.contract_address || '',
-        contractAddress: txnResp.calldata?.[1] || txnResp.contract_address || txn.contract_address || '',
-        contractFuncName: num.toBigInt(txnResp.calldata?.[2] || '') === bigIntTransferSelectorHex ? 'transfer' : '',
-        contractCallData: txnResp.calldata?.slice(6, txnResp.calldata?.length - 1) || [],
-        timestamp: txn.timestamp,
-        status: '', //DEPRECATION
-        finalityStatus: statusResp.finalityStatus || '',
-        executionStatus: statusResp.executionStatus || '',
-        eventIds: [],
-        failureReason: '',
-      };
-
-      return massagedTxn;
+      return buildInvokeTxn(network, txn, txnResp as InvokeTransactionResponse, statusResp);
     }),
   );
 
@@ -301,10 +310,12 @@ export const getMassagedTransactions = async (
 
   if (contractAddress) {
     const bigIntContractAddress = num.toBigInt(contractAddress);
+
+    const deployTxnSet = toSet<string, { hash: string }, string>(deployTxns, 'hash');
+
     massagedTxns = massagedTxns.filter(
       (massagedTxn) =>
-        num.toBigInt(massagedTxn.contractAddress) === bigIntContractAddress ||
-        deployTxns.find((deployTxn) => deployTxn.hash === massagedTxn.txnHash),
+        num.toBigInt(massagedTxn.contractAddress) === bigIntContractAddress || deployTxnSet.has(massagedTxn.txnHash),
     );
   }
 

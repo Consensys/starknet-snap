@@ -138,9 +138,12 @@ export async function getTransactions(params: ApiParams) {
 
 export async function updateStatus(txn: Transaction, network: Network) {
   try {
-    const { finalityStatus, executionStatus } = await utils.getTransactionStatus(txn.txnHash, network);
-    txn.finalityStatus = finalityStatus;
-    txn.executionStatus = executionStatus;
+    const statusResp = (await utils.getTransactionStatus(txn.txnHash, network)) as {
+      finality_status: string;
+      execution_status: string;
+    };
+    txn.finalityStatus = statusResp.finality_status || txn.finalityStatus;
+    txn.executionStatus = statusResp.execution_status || txn.executionStatus;
     txn.status = ''; // DEPRECATION
   } catch (e) {
     logger.error(`Problem found in updateStatus:\n txn: ${txn.txnHash}, err: \n${e.message}`);

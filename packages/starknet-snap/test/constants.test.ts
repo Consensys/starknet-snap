@@ -143,13 +143,13 @@ export const sendTransactionFailedResp = {
 };
 
 export const getTxnStatusResp = {
-  executionStatus: ExecutionStatus.SUCCEEDED,
-  finalityStatus: FinailityStatus.ACCEPTED_ON_L1,
+  execution_status: ExecutionStatus.SUCCEEDED,
+  finality_status: FinailityStatus.ACCEPTED_ON_L1,
 };
 
 export const getTxnStatusAcceptL2Resp = {
-  executionStatus: ExecutionStatus.SUCCEEDED,
-  finalityStatus: FinailityStatus.ACCEPTED_ON_L2,
+  execution_status: ExecutionStatus.SUCCEEDED,
+  finality_status: FinailityStatus.ACCEPTED_ON_L2,
 };
 
 export const createAccountProxyTxn: Transaction = {

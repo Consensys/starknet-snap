@@ -555,3 +555,11 @@ export function toMap<k, v, z>(arr: Array<v>, key: string, keyConverter?: (v: z)
     return map;
   }, new Map<k, v>());
 }
+
+export function toSet<k, v, z>(arr: Array<v>, key: string, converter?: (v: z) => k): Set<k> {
+  const set = new Set<k>();
+  arr.forEach((obj: v) => {
+    set.add(converter && typeof converter === 'function' ? converter(obj[key]) : obj[key]);
+  });
+  return set;
+}

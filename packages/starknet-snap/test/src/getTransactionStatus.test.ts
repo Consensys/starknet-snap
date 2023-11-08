@@ -9,6 +9,7 @@ import { STARKNET_TESTNET_NETWORK } from '../../src/utils/constants';
 import { getTxnStatusResp } from '../constants.test';
 import { Mutex } from 'async-mutex';
 import { ApiParams, GetTransactionStatusRequestParams } from '../../src/types/snapApi';
+import { InvokeTransactionReceiptResponse } from 'starknet';
 
 chai.use(sinonChai);
 const sandbox = sinon.createSandbox();
@@ -34,9 +35,9 @@ describe('Test function: getTransactionStatus', function () {
   });
 
   it('should get the transaction status correctly', async function () {
-    sandbox.stub(utils, 'getTransactionStatus').callsFake(async () => {
-      return getTxnStatusResp;
-    });
+    sandbox
+      .stub(utils, 'getTransactionStatus')
+      .resolves(getTxnStatusResp as unknown as InvokeTransactionReceiptResponse);
     const requestObject: GetTransactionStatusRequestParams = {
       transactionHash: '0x27f204588cadd08a7914f6a9808b34de0cbfc4cb53aa053663e7fd3a34dbc26',
     };
