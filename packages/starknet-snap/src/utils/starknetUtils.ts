@@ -22,6 +22,7 @@ import {
   Invocations,
   validateAndParseAddress as _validateAndParseAddress,
   DeclareContractPayload,
+  DeclareContractResponse,
   InvocationsDetails,
 } from 'starknet';
 import type { Hex } from '@noble/curves/abstract/utils';
@@ -31,7 +32,6 @@ import { getAddressKey } from './keyPair';
 import { getAccount, getAccounts, getTransactionFromVoyagerUrl, getTransactionsFromVoyagerUrl } from './snapUtils';
 import { logger } from './logger';
 import { RpcV4GetTransactionReceiptResponse } from '../types/snapApi';
-import { DeclareContractResponse } from 'starknet_v4.22.0';
 
 export const getCallDataArray = (callDataStr: string): string[] => {
   return (callDataStr ?? '')
