@@ -9,8 +9,6 @@ import { createAccountProxyTxn, getBip44EntropyStub, account1, signature3 } from
 import { getAddressKeyDeriver } from '../../src/utils/keyPair';
 import { Mutex } from 'async-mutex';
 import { ApiParams, SignTransactionParams } from '../../src/types/snapApi';
-import typedDataExample from '../../src/typedData/typedDataExample.json';
-import { toJson } from '../../src/utils/serializer';
 import { constants } from 'starknet';
 import * as utils from '../../src/utils/starknetUtils';
 
@@ -75,56 +73,30 @@ describe('Test function: signMessage', function () {
 
   it('should sign a transaction from an user account correctly', async function () {
     const result = await signTransaction(apiParams);
-
-    const expectedDialogParams = {
-      type: 'confirmation',
-      content: {
-        type: 'panel',
-        children: [
-          { type: 'heading', value: 'Do you want to sign this transaction ?' },
-
-          {
-            type: 'text',
-            value: `**Message:**`,
-          },
-          {
-            type: 'copyable',
-            value: toJson(typedDataExample),
-          },
-          {
-            type: 'text',
-            value: `**Signer address:**`,
-          },
-          {
-            type: 'copyable',
-            value: `${account1.address}`,
-          },
-        ],
-      },
-    };
-    //TODO : add those tests when adding snap dialog to signTransaction
-    //expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledOnce;
-    //expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledWith(expectedDialogParams);
+    expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledOnce;
     expect(result).to.be.eql(signature3);
   });
 
   it('should throw error if signTransaction fail', async function () {
     sandbox.stub(utils, 'signTransactions').throws(new Error());
-
     let result;
     try {
       await signTransaction(apiParams);
     } catch (err) {
       result = err;
     } finally {
+      expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledOnce;
       expect(result).to.be.an('Error');
     }
-    //expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledOnce;
   });
-  //TODO : add this test when adding snap dialog to signTransaction
-  // it('should return false if user rejected to sign the transaction', async function () {
-  //   walletStub.rpcStubs.snap_dialog.resolves(false);
-  //   const result = await signTransaction(apiParams);
-  //   expect(result).to.equal(false);
-  // });
+
+  it('should return false if user deny to sign the transaction', async function () {
+    const stub = sandbox.stub(utils, 'signTransactions');
+    walletStub.rpcStubs.snap_dialog.resolves(false);
+
+    const result = await signTransaction(apiParams);
+    expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledOnce;
+    expect(stub).to.have.been.callCount(0);
+    expect(result).to.be.eql(false);
+  });
 });

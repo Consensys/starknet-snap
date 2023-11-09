@@ -36,7 +36,7 @@
     <input type="checkbox" id="isDev" name="isDev" /><br />
     <label for="debugLevel">Log Level</label>
     <select id="debugLevel">
-      <option value="6" selected="selected">All</option>
+      <option value="ALL" selected="selected">All</option>
       <option value="0">Off</option>
       <option value="1">Error</option>
     </select>
@@ -258,10 +258,12 @@
     <form id="signTransaction">
       <fieldset>
         <legend>Sign Transaction</legend>
-        <label for="transactions">Transactions</label>
-        <input type="text" id="transactions" name="transactions" /><br />
-        <label for="transactionsDetail">transactions Detail</label>
-        <input type="text" id="signerUserAddress" name="transactionsDetail" /><br />
+        <label for="signTransaction_userAddress">User Account Address</label>
+        <input type="text" id="signTransaction_userAddress" name="signTransaction_userAddress" /><br />
+        <label for="signTransaction_transactions">Transactions</label>
+        <input type="text" id="signTransaction_transactions" name="signTransaction_transactions" /><br />
+        <label for="signTransaction_transactionsDetail">transactions Detail</label>
+        <input type="text" id="signTransaction_transactionsDetail" name="signTransaction_transactionsDetail" /><br />
         <input type="submit" id="signTransaction" value="Sign Transaction" />
       </fieldset>
     </form>
@@ -525,10 +527,15 @@
     async function signTransaction(e) {
       e.preventDefault(); // to prevent default form behavior
 
-      const transaction = document.getElementById('transactions').value;
-      const transactionsDetail = document.getElementById('transactionsDetail').value;
+      const userAddress = document.getElementById('signTransaction_userAddress').value;
+      const transactions = document.getElementById('signTransaction_transactions').value;
+      const transactionsDetail = document.getElementById('signTransaction_transactionsDetail').value;
 
-      await callSnap('starkNet_signTransaction', { transaction, transactionsDetail });
+      await callSnap('starkNet_signTransaction', {
+        userAddress,
+        transactions: transactions ? JSON.parse(transactions) : {},
+        transactionsDetail: transactionsDetail ? JSON.parse(transactionsDetail) : {},
+      });
     }
 
     // here we call the snap's "starkNet_verifySignedMessage" method

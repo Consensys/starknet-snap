@@ -152,5 +152,5 @@ export interface RpcV4GetTransactionReceiptResponse {
 export interface SignTransactionParams extends BaseRequestParams, ExtractPrivateKeyRequestParams {
   transactions: Call[];
   transactionsDetail: InvocationsSignerDetails;
-  abis?: Abi[] | undefined;
+  abis?: Abi[];
 }

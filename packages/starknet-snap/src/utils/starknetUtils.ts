@@ -495,6 +495,5 @@ export const signTransactions = async (
 ): Promise<Signature> => {
   const signer = new Signer(privateKey);
   const signatures = await signer.signTransaction(transactions, transactionsDetail, abis);
-  const formattedSignatures = stark.signatureToDecimalArray(signatures);
-  return formattedSignatures;
+  return stark.signatureToDecimalArray(signatures);
 };
