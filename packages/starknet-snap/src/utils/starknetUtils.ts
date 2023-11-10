@@ -21,6 +21,11 @@ import {
   GetTransactionResponse,
   Invocations,
   validateAndParseAddress as _validateAndParseAddress,
+  Signer,
+  Signature,
+  stark,
+  InvocationsSignerDetails,
+  Abi,
 } from 'starknet';
 import type { Hex } from '@noble/curves/abstract/utils';
 import { Network, SnapState, Transaction, TransactionType } from '../types/snapState';
@@ -480,4 +485,15 @@ export const validateAndParseAddress = (address: num.BigNumberish, length = 63) 
   const trimmedAddress = address.toString().replace(/^0x0?/, '');
   if (trimmedAddress.length !== length) throw new Error(`Address ${address} has an invalid length`);
   return _validateAndParseAddressFn(address);
+};
+
+export const signTransactions = async (
+  privateKey: string,
+  transactions: Call[],
+  transactionsDetail: InvocationsSignerDetails,
+  abis: Abi[],
+): Promise<Signature> => {
+  const signer = new Signer(privateKey);
+  const signatures = await signer.signTransaction(transactions, transactionsDetail, abis);
+  return stark.signatureToDecimalArray(signatures);
 };

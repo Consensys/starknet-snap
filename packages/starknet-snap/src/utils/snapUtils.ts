@@ -1,6 +1,6 @@
 import { toJson } from './serializer';
 import { Mutex } from 'async-mutex';
-import { num } from 'starknet';
+import { num, Abi, InvocationsSignerDetails, Call } from 'starknet';
 import { validateAndParseAddress } from './starknetUtils';
 import { Component, text, copyable } from '@metamask/snaps-ui';
 import {
@@ -218,6 +218,58 @@ export function getSigningTxnText(
   tokenTransferComponents1.push(copyable(network.name));
 
   return tokenTransferComponents1.concat(tokenTransferComponents2);
+}
+
+export function getSignTxnTxt(
+  senderAddress: string,
+  network: Network,
+  txnInvocation: Call[],
+  invocationsDetails: InvocationsSignerDetails,
+  abis?: Abi[],
+) {
+  const components = [];
+  components.push(text('**Network:**'));
+  components.push(copyable(network.name));
+  components.push(text('**Signer Address:**'));
+  components.push(copyable(senderAddress));
+
+  components.push(text('**Transaction Invocation:**'));
+  components.push(copyable(JSON.stringify(txnInvocation, null, 2)));
+
+  if (abis && abis.length > 0) {
+    components.push(text('**Abis:**'));
+    components.push(copyable(JSON.stringify(abis, null, 2)));
+  }
+
+  if (invocationsDetails?.maxFee !== undefined) {
+    components.push(text('**Max Fee(ETH):**'));
+    components.push(copyable(convert(invocationsDetails.maxFee, 'wei', 'ether')));
+  }
+  if (invocationsDetails?.nonce !== undefined) {
+    components.push(text('**Nonce:**'));
+    components.push(copyable(invocationsDetails.nonce.toString()));
+  }
+  if (invocationsDetails?.version !== undefined) {
+    components.push(text('**Version:**'));
+    components.push(copyable(invocationsDetails.version.toString()));
+  }
+
+  if (invocationsDetails?.walletAddress !== undefined) {
+    components.push(text('**walletAddress:**'));
+    components.push(copyable(invocationsDetails.walletAddress.toString()));
+  }
+
+  if (invocationsDetails?.chainId !== undefined) {
+    components.push(text('**chainId:**'));
+    components.push(copyable(invocationsDetails.chainId.toString()));
+  }
+
+  if (invocationsDetails?.cairoVersion !== undefined) {
+    components.push(text('**cairoVersion:**'));
+    components.push(copyable(invocationsDetails.cairoVersion.toString()));
+  }
+
+  return components;
 }
 
 export function getAddTokenText(

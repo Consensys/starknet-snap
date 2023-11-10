@@ -36,7 +36,7 @@
     <input type="checkbox" id="isDev" name="isDev" /><br />
     <label for="debugLevel">Log Level</label>
     <select id="debugLevel">
-      <option value="6" selected="selected">All</option>
+      <option value="ALL" selected="selected">All</option>
       <option value="0">Off</option>
       <option value="1">Error</option>
     </select>
@@ -255,6 +255,18 @@
         <input type="submit" id="signTypedDataMessage" value="Sign Message" />
       </fieldset>
     </form>
+    <form id="signTransaction">
+      <fieldset>
+        <legend>Sign Transaction</legend>
+        <label for="signTransaction_userAddress">User Account Address</label>
+        <input type="text" id="signTransaction_userAddress" name="signTransaction_userAddress" /><br />
+        <label for="signTransaction_transactions">Transactions</label>
+        <input type="text" id="signTransaction_transactions" name="signTransaction_transactions" /><br />
+        <label for="signTransaction_transactionsDetail">transactions Detail</label>
+        <input type="text" id="signTransaction_transactionsDetail" name="signTransaction_transactionsDetail" /><br />
+        <input type="submit" id="signTransaction" value="Sign Transaction" />
+      </fieldset>
+    </form>
     <form id="verifyTypedDataSignature">
       <fieldset>
         <legend>Verify Typed Data Message Signature</legend>
@@ -318,6 +330,10 @@
       {
         id: 'signTypedDataMessage',
         method: signTypedDataMessage,
+      },
+      {
+        id: 'signTransaction',
+        method: signTransaction,
       },
       {
         id: 'verifyTypedDataSignature',
@@ -505,6 +521,21 @@
       const signerAddress = document.getElementById('signerUserAddress').value;
 
       await callSnap('starkNet_signMessage', { typedDataMessage, signerAddress });
+    }
+
+    // here we call the snap's "starkNet_signTransaction" method
+    async function signTransaction(e) {
+      e.preventDefault(); // to prevent default form behavior
+
+      const userAddress = document.getElementById('signTransaction_userAddress').value;
+      const transactions = document.getElementById('signTransaction_transactions').value;
+      const transactionsDetail = document.getElementById('signTransaction_transactionsDetail').value;
+
+      await callSnap('starkNet_signTransaction', {
+        userAddress,
+        transactions: transactions ? JSON.parse(transactions) : {},
+        transactionsDetail: transactionsDetail ? JSON.parse(transactionsDetail) : {},
+      });
     }
 
     // here we call the snap's "starkNet_verifySignedMessage" method
