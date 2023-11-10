@@ -175,6 +175,11 @@ export const getValidNumber = (
   return obj === '' || isNaN(toNum) || toNum > maxVal || toNum < minVal ? defaultValue : toNum;
 };
 
+export function addDialogTxt(components: Array<Component>, label: string, value: string) {
+  components.push(text(`**${label}:**`));
+  components.push(copyable(value));
+}
+
 export function getTxnSnapTxt(
   senderAddress: string,
   network: Network,
@@ -183,33 +188,26 @@ export function getTxnSnapTxt(
   invocationsDetails?: InvocationsDetails,
 ) {
   const components = [];
-  components.push(text('**Network:**'));
-  components.push(copyable(network.name));
-  components.push(text('**Signer Address:**'));
-  components.push(copyable(senderAddress));
-  components.push(text('**Transaction Invocation:**'));
-  components.push(copyable(JSON.stringify(txnInvocation, null, 2)));
+  addDialogTxt(components, 'Network', network.name);
+  addDialogTxt(components, 'Signer Address', senderAddress);
+  addDialogTxt(components, 'Transaction Invocation', JSON.stringify(txnInvocation, null, 2));
   if (abis && abis.length > 0) {
-    components.push(text('**Abis:**'));
-    components.push(copyable(JSON.stringify(abis, null, 2)));
+    addDialogTxt(components, 'Abis', JSON.stringify(abis, null, 2));
   }
 
   if (invocationsDetails?.maxFee) {
-    components.push(text('**Max Fee(ETH):**'));
-    components.push(copyable(convert(invocationsDetails.maxFee, 'wei', 'ether')));
+    addDialogTxt(components, 'Max Fee(ETH)', convert(invocationsDetails.maxFee, 'wei', 'ether'));
   }
   if (invocationsDetails?.nonce) {
-    components.push(text('**Nonce:**'));
-    components.push(copyable(invocationsDetails.nonce.toString()));
+    addDialogTxt(components, 'Nonce', invocationsDetails.nonce.toString());
   }
   if (invocationsDetails?.version) {
-    components.push(text('**Version:**'));
-    components.push(copyable(invocationsDetails.version.toString()));
+    addDialogTxt(components, 'Version', invocationsDetails.version.toString());
   }
   return components;
 }
 
-export function getSigningTxnText(
+export function getSendTxnText(
   state: SnapState,
   contractAddress: string,
   contractFuncName: string,
@@ -220,8 +218,13 @@ export function getSigningTxnText(
 ): Array<Component> {
   // Retrieve the ERC-20 token from snap state for confirmation display purpose
   const token = getErc20Token(state, contractAddress, network.chainId);
-  const tokenTransferComponents1 = [];
-  const tokenTransferComponents2 = [];
+  const components = [];
+  addDialogTxt(components, 'Signer Address', senderAddress);
+  addDialogTxt(components, 'Contract', contractAddress);
+  addDialogTxt(components, 'Call Data', `[${contractCallData.join(', ')}]`);
+  addDialogTxt(components, 'Estimated Gas Fee(ETH)', convert(maxFee, 'wei', 'ether'));
+  addDialogTxt(components, 'Network', network.name);
+
   if (token && contractFuncName === 'transfer') {
     try {
       let amount = '';
@@ -230,28 +233,15 @@ export function getSigningTxnText(
       } else {
         amount = (Number(contractCallData[1]) * Math.pow(10, -1 * token.decimals)).toFixed(token.decimals);
       }
-      tokenTransferComponents2.push(text('**Sender Address:**'));
-      tokenTransferComponents2.push(copyable(senderAddress));
-      tokenTransferComponents2.push(text('**Recipient Address:**'));
-      tokenTransferComponents2.push(copyable(contractCallData[0]));
-      tokenTransferComponents2.push(text(`**Amount(${token.symbol}):**`));
-      tokenTransferComponents2.push(copyable(amount));
+      addDialogTxt(components, 'Sender Address', senderAddress);
+      addDialogTxt(components, 'Recipient Address', contractCallData[0]);
+      addDialogTxt(components, `Amount(${token.symbol})`, amount);
     } catch (err) {
       logger.error(`getSigningTxnText: error found in amount conversion: ${err}`);
     }
   }
-  tokenTransferComponents1.push(text('**Signer Address:**'));
-  tokenTransferComponents1.push(copyable(senderAddress));
-  tokenTransferComponents1.push(text('**Contract:**'));
-  tokenTransferComponents1.push(copyable(contractAddress));
-  tokenTransferComponents1.push(text('**Call Data:**'));
-  tokenTransferComponents1.push(copyable(`[${contractCallData.join(', ')}]`));
-  tokenTransferComponents1.push(text('**Estimated Gas Fee(ETH):**'));
-  tokenTransferComponents1.push(copyable(convert(maxFee, 'wei', 'ether')));
-  tokenTransferComponents1.push(text('**Network:**'));
-  tokenTransferComponents1.push(copyable(network.name));
 
-  return tokenTransferComponents1.concat(tokenTransferComponents2);
+  return components;
 }
 
 export function getSignTxnTxt(
@@ -262,45 +252,34 @@ export function getSignTxnTxt(
   abis?: Abi[],
 ) {
   const components = [];
-  components.push(text('**Network:**'));
-  components.push(copyable(network.name));
-  components.push(text('**Signer Address:**'));
-  components.push(copyable(senderAddress));
-
-  components.push(text('**Transaction Invocation:**'));
-  components.push(copyable(JSON.stringify(txnInvocation, null, 2)));
+  addDialogTxt(components, 'Network', network.name);
+  addDialogTxt(components, 'Signer Address', senderAddress);
+  addDialogTxt(components, 'Transaction Invocation', JSON.stringify(txnInvocation, null, 2));
 
   if (abis && abis.length > 0) {
-    components.push(text('**Abis:**'));
-    components.push(copyable(JSON.stringify(abis, null, 2)));
+    addDialogTxt(components, 'Abis', JSON.stringify(abis, null, 2));
   }
 
   if (invocationsDetails?.maxFee !== undefined) {
-    components.push(text('**Max Fee(ETH):**'));
-    components.push(copyable(convert(invocationsDetails.maxFee, 'wei', 'ether')));
+    addDialogTxt(components, 'Max Fee(ETH)', convert(invocationsDetails.maxFee, 'wei', 'ether'));
   }
   if (invocationsDetails?.nonce !== undefined) {
-    components.push(text('**Nonce:**'));
-    components.push(copyable(invocationsDetails.nonce.toString()));
+    addDialogTxt(components, 'Nonce', invocationsDetails.nonce.toString());
   }
   if (invocationsDetails?.version !== undefined) {
-    components.push(text('**Version:**'));
-    components.push(copyable(invocationsDetails.version.toString()));
+    addDialogTxt(components, 'Version', invocationsDetails.version.toString());
   }
 
   if (invocationsDetails?.walletAddress !== undefined) {
-    components.push(text('**walletAddress:**'));
-    components.push(copyable(invocationsDetails.walletAddress.toString()));
+    addDialogTxt(components, 'Wallet Address', invocationsDetails.walletAddress.toString());
   }
 
   if (invocationsDetails?.chainId !== undefined) {
-    components.push(text('**chainId:**'));
-    components.push(copyable(invocationsDetails.chainId.toString()));
+    addDialogTxt(components, 'Chain Id', invocationsDetails.chainId.toString());
   }
 
   if (invocationsDetails?.cairoVersion !== undefined) {
-    components.push(text('**cairoVersion:**'));
-    components.push(copyable(invocationsDetails.cairoVersion.toString()));
+    addDialogTxt(components, 'Cairo Version', invocationsDetails.cairoVersion.toString());
   }
 
   return components;
@@ -313,46 +292,33 @@ export function getDeclareSnapTxt(
   invocationsDetails?: InvocationsDetails,
 ) {
   const components = [];
-  components.push(text('**Network:**'));
-  components.push(copyable(network.name));
-  components.push(text('**Signer Address:**'));
-  components.push(copyable(senderAddress));
+  addDialogTxt(components, 'Network', network.name);
+  addDialogTxt(components, 'Signer Address', senderAddress);
 
   if (contractPayload.contract) {
-    components.push(text('**Contract:**'));
-    if (typeof contractPayload.contract === 'string' || contractPayload.contract instanceof String) {
-      components.push(copyable(contractPayload.contract.toString()));
-    } else {
-      components.push(copyable(JSON.stringify(contractPayload.contract, null, 2)));
-    }
+    const _contractPayload =
+      typeof contractPayload.contract === 'string' || contractPayload.contract instanceof String
+        ? contractPayload.contract.toString()
+        : JSON.stringify(contractPayload.contract, null, 2);
+    addDialogTxt(components, 'Contract', _contractPayload);
   }
-
   if (contractPayload.compiledClassHash) {
-    components.push(text('**Complied Class Hash:**'));
-    components.push(copyable(contractPayload.compiledClassHash));
+    addDialogTxt(components, 'Complied Class Hash', contractPayload.compiledClassHash);
   }
-
   if (contractPayload.classHash) {
-    components.push(text('**Class Hash:**'));
-    components.push(copyable(contractPayload.classHash));
+    addDialogTxt(components, 'Class Hash', contractPayload.classHash);
   }
-
   if (contractPayload.casm) {
-    components.push(text('**Casm:**'));
-    components.push(copyable(JSON.stringify(contractPayload.casm, null, 2)));
+    addDialogTxt(components, 'Casm', JSON.stringify(contractPayload.casm, null, 2));
   }
-
   if (invocationsDetails?.maxFee !== undefined) {
-    components.push(text('**Max Fee(ETH):**'));
-    components.push(copyable(convert(invocationsDetails.maxFee, 'wei', 'ether')));
+    addDialogTxt(components, 'Max Fee(ETH)', convert(invocationsDetails.maxFee, 'wei', 'ether'));
   }
   if (invocationsDetails?.nonce !== undefined) {
-    components.push(text('**Nonce:**'));
-    components.push(copyable(invocationsDetails.nonce.toString()));
+    addDialogTxt(components, 'Nonce', invocationsDetails.nonce.toString());
   }
   if (invocationsDetails?.version !== undefined) {
-    components.push(text('**Version:**'));
-    components.push(copyable(invocationsDetails.version.toString()));
+    addDialogTxt(components, 'Version', invocationsDetails.version.toString());
   }
   return components;
 }
@@ -364,7 +330,13 @@ export function getAddTokenText(
   tokenDecimals: number,
   network: Network,
 ) {
-  return `Token Address: ${tokenAddress}\n\nToken Name: ${tokenName}\n\nToken Symbol: ${tokenSymbol}\n\nToken Decimals: ${tokenDecimals}\n\nNetwork: ${network.name}`;
+  const components = [];
+  addDialogTxt(components, 'Network', network.name);
+  addDialogTxt(components, 'Token Address', tokenAddress);
+  addDialogTxt(components, 'Token name', tokenName);
+  addDialogTxt(components, 'Token Symbol', tokenSymbol);
+  addDialogTxt(components, 'Token Decimals', tokenDecimals.toString());
+  return components;
 }
 
 export function getAccount(state: SnapState, accountAddress: string, chainId: string) {
