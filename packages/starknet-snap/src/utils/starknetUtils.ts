@@ -21,6 +21,7 @@ import {
   GetTransactionResponse,
   Invocations,
   validateAndParseAddress as _validateAndParseAddress,
+  EstimateFeeDetails,
   DeclareContractPayload,
   DeclareContractResponse,
   InvocationsDetails,
@@ -109,12 +110,13 @@ export const estimateFeeBulk = async (
   senderAddress: string,
   privateKey: string | Uint8Array,
   txnInvocation: Invocations,
+  invocationsDetails: EstimateFeeDetails = { blockIdentifier: 'latest' },
 ): Promise<EstimateFee[]> => {
   // ensure always calling the sequencer endpoint since the rpc endpoint and
   // starknet.js are not supported yet.
   const provider = getProvider(network);
   const account = new Account(provider, senderAddress, privateKey);
-  return account.estimateFeeBulk(txnInvocation, { blockIdentifier: 'latest' });
+  return account.estimateFeeBulk(txnInvocation, invocationsDetails);
 };
 
 export const executeTxn = async (
