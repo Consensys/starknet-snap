@@ -279,6 +279,7 @@ describe('Test function: createAccount', function () {
     sandbox.stub(utils, 'deployAccount').callsFake(async () => {
       return createAccountFailedProxyResp;
     });
+    sandbox.stub(utils, 'callContract').resolves(getBalanceResp);
     sandbox.stub(utils, 'getSigner').throws(new Error());
     sandbox.stub(utils, 'estimateAccountDeployFee').callsFake(async () => {
       return estimateDeployFeeResp;
@@ -298,6 +299,7 @@ describe('Test function: createAccount', function () {
     sandbox.stub(utils, 'deployAccount').callsFake(async () => {
       return createAccountProxyResp;
     });
+    sandbox.stub(utils, 'callContract').resolves(getBalanceResp);
     sandbox.stub(utils, 'getSigner').throws(new Error());
     sandbox.stub(utils, 'estimateAccountDeployFee').callsFake(async () => {
       return estimateDeployFeeResp;

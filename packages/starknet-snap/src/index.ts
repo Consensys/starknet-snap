@@ -2,6 +2,7 @@ import { toJson } from './utils/serializer';
 import { getAddressKeyDeriver } from './utils/keyPair';
 import { createAccount } from './createAccount';
 import { signMessage } from './signMessage';
+import { signTransaction } from './signTransaction';
 import { getErc20TokenBalance } from './getErc20TokenBalance';
 import { getTransactionStatus } from './getTransactionStatus';
 import { sendTransaction } from './sendTransaction';
@@ -113,6 +114,10 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ origin, request }) => 
     case 'starkNet_signMessage':
       apiParams.keyDeriver = await getAddressKeyDeriver(snap);
       return signMessage(apiParams);
+
+    case 'starkNet_signTransaction':
+      apiParams.keyDeriver = await getAddressKeyDeriver(snap);
+      return signTransaction(apiParams);
 
     case 'starkNet_verifySignedMessage':
       apiParams.keyDeriver = await getAddressKeyDeriver(snap);
