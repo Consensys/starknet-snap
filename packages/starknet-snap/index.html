@@ -255,6 +255,18 @@
         <input type="submit" id="signTypedDataMessage" value="Sign Message" />
       </fieldset>
     </form>
+    <form id="signTransaction">
+      <fieldset>
+        <legend>Sign Transaction</legend>
+        <label for="signTransaction_userAddress">User Account Address</label>
+        <input type="text" id="signTransaction_userAddress" name="signTransaction_userAddress" /><br />
+        <label for="signTransaction_transactions">Transactions</label>
+        <input type="text" id="signTransaction_transactions" name="signTransaction_transactions" /><br />
+        <label for="signTransaction_transactionsDetail">transactions Detail</label>
+        <input type="text" id="signTransaction_transactionsDetail" name="signTransaction_transactionsDetail" /><br />
+        <input type="submit" id="signTransaction" value="Sign Transaction" />
+      </fieldset>
+    </form>
     <form id="verifyTypedDataSignature">
       <fieldset>
         <legend>Verify Typed Data Message Signature</legend>
@@ -265,6 +277,18 @@
         <label for="verifySignature">Signer Signature</label>
         <input type="text" id="verifySignature" name="verifySignature" /><br />
         <input type="submit" id="verifyTypedDataSignature" value="Verify Signature" />
+      </fieldset>
+    </form>
+    <form id="declareContract">
+      <fieldset>
+        <legend>Declare Contract</legend>
+        <label for="declareContract_senderAddress">Sender Address</label>
+        <input type="text" id="declareContract_senderAddress" name="declareContract_senderAddress" /><br />
+        <label for="declareContract_contract">Contract payload</label>
+        <input type="text" id="declareContract_contract" name="declareContract_contract" /><br />
+        <label for="declareContract_invocationsDetails">InvocationsDetails</label>
+        <input type="text" id="declareContract_invocationsDetails" name="declareContract_invocationsDetails" /><br />
+        <input type="submit" id="declareContract" value="Declare Contract" />
       </fieldset>
     </form>
     <form id="estimateFees">
@@ -330,6 +354,10 @@
       {
         id: 'signTypedDataMessage',
         method: signTypedDataMessage,
+      },
+      {
+        id: 'signTransaction',
+        method: signTransaction,
       },
       {
         id: 'verifyTypedDataSignature',
@@ -523,6 +551,21 @@
       await callSnap('starkNet_signMessage', { typedDataMessage, signerAddress });
     }
 
+    // here we call the snap's "starkNet_signTransaction" method
+    async function signTransaction(e) {
+      e.preventDefault(); // to prevent default form behavior
+
+      const userAddress = document.getElementById('signTransaction_userAddress').value;
+      const transactions = document.getElementById('signTransaction_transactions').value;
+      const transactionsDetail = document.getElementById('signTransaction_transactionsDetail').value;
+
+      await callSnap('starkNet_signTransaction', {
+        userAddress,
+        transactions: transactions ? JSON.parse(transactions) : {},
+        transactionsDetail: transactionsDetail ? JSON.parse(transactionsDetail) : {},
+      });
+    }
+
     // here we call the snap's "starkNet_verifySignedMessage" method
     async function verifyTypedDataSignature(e) {
       e.preventDefault(); // to prevent default form behavior
@@ -663,6 +706,20 @@
         startScanIndex,
         maxScanned,
         maxMissed,
+      });
+    }
+
+    async function declareContract(e) {
+      e.preventDefault(); // to prevent default form behavior
+
+      const senderAddress = document.getElementById('declareContract_senderAddress').value;
+      const contractPayload = document.getElementById('declareContract_contract').value;
+      const invocationsDetails = document.getElementById('declareContract_invocationsDetails').value;
+
+      await callSnap('starkNet_declareContract', {
+        senderAddress,
+        contractPayload: contractPayload ? JSON.parse(contractPayload) : contractPayload,
+        invocationsDetails: invocationsDetails ? JSON.parse(invocationsDetails) : invocationsDetails,
       });
     }
 

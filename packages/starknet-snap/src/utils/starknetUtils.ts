@@ -22,6 +22,14 @@ import {
   Invocations,
   validateAndParseAddress as _validateAndParseAddress,
   EstimateFeeDetails,
+  DeclareContractPayload,
+  DeclareContractResponse,
+  InvocationsDetails,
+  Signer,
+  Signature,
+  stark,
+  InvocationsSignerDetails,
+  Abi,
 } from 'starknet';
 import type { Hex } from '@noble/curves/abstract/utils';
 import { Network, SnapState, Transaction, TransactionType } from '../types/snapState';
@@ -72,6 +80,18 @@ export const callContract = async (
     },
     'latest',
   );
+};
+
+export const declareContract = async (
+  network: Network,
+  senderAddress: string,
+  privateKey: string | Uint8Array,
+  contractPayload: DeclareContractPayload,
+  transactionsDetail?: InvocationsDetails,
+): Promise<DeclareContractResponse> => {
+  const provider = getProvider(network);
+  const account = new Account(provider, senderAddress, privateKey);
+  return account.declare(contractPayload, transactionsDetail);
 };
 
 export const estimateFee = async (
@@ -482,4 +502,15 @@ export const validateAndParseAddress = (address: num.BigNumberish, length = 63) 
   const trimmedAddress = address.toString().replace(/^0x0?/, '');
   if (trimmedAddress.length !== length) throw new Error(`Address ${address} has an invalid length`);
   return _validateAndParseAddressFn(address);
+};
+
+export const signTransactions = async (
+  privateKey: string,
+  transactions: Call[],
+  transactionsDetail: InvocationsSignerDetails,
+  abis: Abi[],
+): Promise<Signature> => {
+  const signer = new Signer(privateKey);
+  const signatures = await signer.signTransaction(transactions, transactionsDetail, abis);
+  return stark.signatureToDecimalArray(signatures);
 };

@@ -1,7 +1,15 @@
 import { BIP44AddressKeyDeriver } from '@metamask/key-tree';
 import Mutex from 'async-mutex/lib/Mutex';
 import { SnapState, VoyagerTransactionType } from './snapState';
-import { Invocations, EstimateFeeDetails } from 'starknet';
+import {
+  Abi,
+  Call,
+  InvocationsSignerDetails,
+  DeclareContractPayload,
+  InvocationsDetails,
+  Invocations,
+  EstimateFeeDetails,
+} from 'starknet';
 
 export interface ApiParams {
   state: SnapState;
@@ -31,7 +39,9 @@ export type ApiRequestParams =
   | GetStoredTransactionsRequestParams
   | GetTransactionsRequestParams
   | RecoverAccountsRequestParams
-  | EstimateFeesRequestParams;
+  | EstimateFeesRequestParams
+  | DeclareContractRequestParams
+  | SignTransactionParams;
 
 export interface BaseRequestParams {
   chainId?: string;
@@ -150,7 +160,19 @@ export interface EstimateFeesRequestParams extends BaseRequestParams {
   invocationDetails?: EstimateFeeDetails;
 }
 
+export interface DeclareContractRequestParams extends BaseRequestParams {
+  senderAddress: string;
+  contractPayload: DeclareContractPayload;
+  invocationsDetails?: InvocationsDetails;
+}
+
 export interface RpcV4GetTransactionReceiptResponse {
   execution_status?: string;
   finality_status?: string;
+}
+
+export interface SignTransactionParams extends BaseRequestParams, ExtractPrivateKeyRequestParams {
+  transactions: Call[];
+  transactionsDetail: InvocationsSignerDetails;
+  abis?: Abi[];
 }
