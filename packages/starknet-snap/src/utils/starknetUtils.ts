@@ -21,6 +21,9 @@ import {
   GetTransactionResponse,
   Invocations,
   validateAndParseAddress as _validateAndParseAddress,
+  DeclareContractPayload,
+  DeclareContractResponse,
+  InvocationsDetails,
   Signer,
   Signature,
   stark,
@@ -76,6 +79,18 @@ export const callContract = async (
     },
     'latest',
   );
+};
+
+export const declareContract = async (
+  network: Network,
+  senderAddress: string,
+  privateKey: string | Uint8Array,
+  contractPayload: DeclareContractPayload,
+  transactionsDetail?: InvocationsDetails,
+): Promise<DeclareContractResponse> => {
+  const provider = getProvider(network);
+  const account = new Account(provider, senderAddress, privateKey);
+  return account.declare(contractPayload, transactionsDetail);
 };
 
 export const estimateFee = async (

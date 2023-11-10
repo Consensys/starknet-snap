@@ -31,6 +31,7 @@ import { Mutex } from 'async-mutex';
 import { OnRpcRequestHandler } from '@metamask/snaps-types';
 import { ApiParams, ApiRequestParams } from './types/snapApi';
 import { estimateAccDeployFee } from './estimateAccountDeployFee';
+import { declareContract } from './declareContract';
 import { logger } from './utils/logger';
 
 declare const snap;
@@ -164,6 +165,10 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ origin, request }) => 
     case 'starkNet_recoverAccounts':
       apiParams.keyDeriver = await getAddressKeyDeriver(snap);
       return recoverAccounts(apiParams);
+
+    case 'starkNet_declareContract':
+      apiParams.keyDeriver = await getAddressKeyDeriver(snap);
+      return declareContract(apiParams);
 
     default:
       throw new Error('Method not found.');
