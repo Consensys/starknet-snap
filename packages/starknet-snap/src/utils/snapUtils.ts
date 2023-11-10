@@ -333,7 +333,7 @@ export function getAddTokenText(
   const components = [];
   addDialogTxt(components, 'Network', network.name);
   addDialogTxt(components, 'Token Address', tokenAddress);
-  addDialogTxt(components, 'Token name', tokenName);
+  addDialogTxt(components, 'Token Name', tokenName);
   addDialogTxt(components, 'Token Symbol', tokenSymbol);
   addDialogTxt(components, 'Token Decimals', tokenDecimals.toString());
   return components;

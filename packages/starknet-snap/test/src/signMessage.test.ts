@@ -67,7 +67,7 @@ describe('Test function: signMessage', function () {
           },
           {
             type: 'text',
-            value: `**Signer address:**`,
+            value: `**Signer Address:**`,
           },
           {
             type: 'copyable',
