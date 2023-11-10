@@ -97,14 +97,10 @@ export async function sendTransaction(params: ApiParams) {
 
     //In case this is the first transaction we assign a nonce of 1 to make sure it does after the deploy transaction
     const nonceSendTransaction = accountDeployed ? undefined : 1;
-    const txnResp = await executeTxn(
-      network,
-      senderAddress,
-      senderPrivateKey,
-      txnInvocation,
+    const txnResp = await executeTxn(network, senderAddress, senderPrivateKey, txnInvocation, undefined, {
       maxFee,
-      nonceSendTransaction,
-    );
+      nonce: nonceSendTransaction,
+    });
 
     logger.log(`sendTransaction:\ntxnResp: ${toJson(txnResp)}`);
 

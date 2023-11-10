@@ -175,6 +175,40 @@ export const getValidNumber = (
   return obj === '' || isNaN(toNum) || toNum > maxVal || toNum < minVal ? defaultValue : toNum;
 };
 
+export function getTxnSnapTxt(
+  senderAddress: string,
+  network: Network,
+  txnInvocation: Call | Call[],
+  abis?: Abi[],
+  invocationsDetails?: InvocationsDetails,
+) {
+  const components = [];
+  components.push(text('**Network:**'));
+  components.push(copyable(network.name));
+  components.push(text('**Signer Address:**'));
+  components.push(copyable(senderAddress));
+  components.push(text('**Transaction Invocation:**'));
+  components.push(copyable(JSON.stringify(txnInvocation, null, 2)));
+  if (abis && abis.length > 0) {
+    components.push(text('**Abis:**'));
+    components.push(copyable(JSON.stringify(abis, null, 2)));
+  }
+
+  if (invocationsDetails?.maxFee) {
+    components.push(text('**Max Fee(ETH):**'));
+    components.push(copyable(convert(invocationsDetails.maxFee, 'wei', 'ether')));
+  }
+  if (invocationsDetails?.nonce) {
+    components.push(text('**Nonce:**'));
+    components.push(copyable(invocationsDetails.nonce.toString()));
+  }
+  if (invocationsDetails?.version) {
+    components.push(text('**Version:**'));
+    components.push(copyable(invocationsDetails.version.toString()));
+  }
+  return components;
+}
+
 export function getSigningTxnText(
   state: SnapState,
   contractAddress: string,

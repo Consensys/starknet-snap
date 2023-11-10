@@ -31,6 +31,7 @@ import { Mutex } from 'async-mutex';
 import { OnRpcRequestHandler } from '@metamask/snaps-types';
 import { ApiParams, ApiRequestParams } from './types/snapApi';
 import { estimateAccDeployFee } from './estimateAccountDeployFee';
+import { executeTxn } from './executeTxn';
 import { estimateFees } from './estimateFees';
 import { declareContract } from './declareContract';
 import { logger } from './utils/logger';
@@ -166,6 +167,10 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ origin, request }) => 
     case 'starkNet_recoverAccounts':
       apiParams.keyDeriver = await getAddressKeyDeriver(snap);
       return recoverAccounts(apiParams);
+
+    case 'starkNet_executeTxn':
+      apiParams.keyDeriver = await getAddressKeyDeriver(snap);
+      return executeTxn(apiParams);
 
     case 'starkNet_estimateFees':
       apiParams.keyDeriver = await getAddressKeyDeriver(snap);

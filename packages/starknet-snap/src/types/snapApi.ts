@@ -39,6 +39,7 @@ export type ApiRequestParams =
   | GetStoredTransactionsRequestParams
   | GetTransactionsRequestParams
   | RecoverAccountsRequestParams
+  | ExecuteTxnRequestParams
   | EstimateFeesRequestParams
   | DeclareContractRequestParams
   | SignTransactionParams;
@@ -152,6 +153,13 @@ export interface RecoverAccountsRequestParams extends BaseRequestParams {
   startScanIndex?: string | number;
   maxScanned?: string | number;
   maxMissed?: string | number;
+}
+
+export interface ExecuteTxnRequestParams extends BaseRequestParams {
+  senderAddress: string;
+  txnInvocation: Call | Call[];
+  abis?: Abi[];
+  invocationsDetails?: InvocationsDetails;
 }
 
 export interface EstimateFeesRequestParams extends BaseRequestParams {
