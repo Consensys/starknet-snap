@@ -20,8 +20,6 @@ import {
   ProviderOptions,
   GetTransactionResponse,
   Invocations,
-  InvocationsDetails,
-  Abi,
   validateAndParseAddress as _validateAndParseAddress,
   DeclareContractPayload,
   DeclareContractResponse,
