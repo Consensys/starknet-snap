@@ -2,6 +2,7 @@ import { toJson } from './utils/serializer';
 import { getAddressKeyDeriver } from './utils/keyPair';
 import { createAccount } from './createAccount';
 import { signMessage } from './signMessage';
+import { signTransaction } from './signTransaction';
 import { getErc20TokenBalance } from './getErc20TokenBalance';
 import { getTransactionStatus } from './getTransactionStatus';
 import { sendTransaction } from './sendTransaction';
@@ -31,6 +32,7 @@ import { OnRpcRequestHandler } from '@metamask/snaps-types';
 import { ApiParams, ApiRequestParams } from './types/snapApi';
 import { estimateAccDeployFee } from './estimateAccountDeployFee';
 import { executeTxn } from './executeTxn';
+import { declareContract } from './declareContract';
 import { logger } from './utils/logger';
 
 declare const snap;
@@ -114,6 +116,10 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ origin, request }) => 
       apiParams.keyDeriver = await getAddressKeyDeriver(snap);
       return signMessage(apiParams);
 
+    case 'starkNet_signTransaction':
+      apiParams.keyDeriver = await getAddressKeyDeriver(snap);
+      return signTransaction(apiParams);
+
     case 'starkNet_verifySignedMessage':
       apiParams.keyDeriver = await getAddressKeyDeriver(snap);
       return verifySignedMessage(apiParams);
@@ -164,6 +170,10 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ origin, request }) => 
     case 'starkNet_executeTxn':
       apiParams.keyDeriver = await getAddressKeyDeriver(snap);
       return executeTxn(apiParams);
+
+    case 'starkNet_declareContract':
+      apiParams.keyDeriver = await getAddressKeyDeriver(snap);
+      return declareContract(apiParams);
 
     default:
       throw new Error('Method not found.');

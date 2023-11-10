@@ -13,6 +13,7 @@ import {
   estimateFeeResp,
   estimateFeeResp2,
   getBip44EntropyStub,
+  getBalanceResp,
 } from '../constants.test';
 import { Mutex } from 'async-mutex';
 import { ApiParams, EstimateFeeRequestParams } from '../../src/types/snapApi';
@@ -45,6 +46,7 @@ describe('Test function: estimateFee', function () {
   beforeEach(async function () {
     walletStub.rpcStubs.snap_getBip44Entropy.callsFake(getBip44EntropyStub);
     apiParams.keyDeriver = await getAddressKeyDeriver(walletStub);
+    sandbox.stub(utils, 'callContract').resolves(getBalanceResp);
   });
 
   afterEach(function () {
@@ -98,7 +100,7 @@ describe('Test function: estimateFee', function () {
     sandbox.stub(utils, 'getSigner').callsFake(async () => {
       return account2.publicKey;
     });
-    sandbox.stub(utils, 'estimateFeeBulk').throws(new Error());
+    sandbox.stub(utils, 'estimateFee').throws(new Error());
     apiParams.requestParams = requestObject;
 
     let result;

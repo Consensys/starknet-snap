@@ -1,6 +1,6 @@
 import { toJson } from './serializer';
 import { Mutex } from 'async-mutex';
-import { num, InvocationsDetails, Call, Abi } from 'starknet';
+import { num, InvocationsDetails, DeclareContractPayload, Abi, InvocationsSignerDetails, Call } from 'starknet';
 import { validateAndParseAddress } from './starknetUtils';
 import { Component, text, copyable } from '@metamask/snaps-ui';
 import {
@@ -175,6 +175,40 @@ export const getValidNumber = (
   return obj === '' || isNaN(toNum) || toNum > maxVal || toNum < minVal ? defaultValue : toNum;
 };
 
+export function getTxnSnapTxt(
+  senderAddress: string,
+  network: Network,
+  txnInvocation: Call | Call[],
+  abis?: Abi[],
+  invocationsDetails?: InvocationsDetails,
+) {
+  const components = [];
+  components.push(text('**Network:**'));
+  components.push(copyable(network.name));
+  components.push(text('**Signer Address:**'));
+  components.push(copyable(senderAddress));
+  components.push(text('**Transaction Invocation:**'));
+  components.push(copyable(JSON.stringify(txnInvocation, null, 2)));
+  if (abis && abis.length > 0) {
+    components.push(text('**Abis:**'));
+    components.push(copyable(JSON.stringify(abis, null, 2)));
+  }
+
+  if (invocationsDetails?.maxFee) {
+    components.push(text('**Max Fee(ETH):**'));
+    components.push(copyable(convert(invocationsDetails.maxFee, 'wei', 'ether')));
+  }
+  if (invocationsDetails?.nonce) {
+    components.push(text('**Nonce:**'));
+    components.push(copyable(invocationsDetails.nonce.toString()));
+  }
+  if (invocationsDetails?.version) {
+    components.push(text('**Version:**'));
+    components.push(copyable(invocationsDetails.version.toString()));
+  }
+  return components;
+}
+
 export function getSigningTxnText(
   state: SnapState,
   contractAddress: string,
@@ -220,11 +254,62 @@ export function getSigningTxnText(
   return tokenTransferComponents1.concat(tokenTransferComponents2);
 }
 
-export function getTxnSnapTxt(
+export function getSignTxnTxt(
   senderAddress: string,
   network: Network,
-  txnInvocation: Call | Call[],
+  txnInvocation: Call[],
+  invocationsDetails: InvocationsSignerDetails,
   abis?: Abi[],
+) {
+  const components = [];
+  components.push(text('**Network:**'));
+  components.push(copyable(network.name));
+  components.push(text('**Signer Address:**'));
+  components.push(copyable(senderAddress));
+
+  components.push(text('**Transaction Invocation:**'));
+  components.push(copyable(JSON.stringify(txnInvocation, null, 2)));
+
+  if (abis && abis.length > 0) {
+    components.push(text('**Abis:**'));
+    components.push(copyable(JSON.stringify(abis, null, 2)));
+  }
+
+  if (invocationsDetails?.maxFee !== undefined) {
+    components.push(text('**Max Fee(ETH):**'));
+    components.push(copyable(convert(invocationsDetails.maxFee, 'wei', 'ether')));
+  }
+  if (invocationsDetails?.nonce !== undefined) {
+    components.push(text('**Nonce:**'));
+    components.push(copyable(invocationsDetails.nonce.toString()));
+  }
+  if (invocationsDetails?.version !== undefined) {
+    components.push(text('**Version:**'));
+    components.push(copyable(invocationsDetails.version.toString()));
+  }
+
+  if (invocationsDetails?.walletAddress !== undefined) {
+    components.push(text('**walletAddress:**'));
+    components.push(copyable(invocationsDetails.walletAddress.toString()));
+  }
+
+  if (invocationsDetails?.chainId !== undefined) {
+    components.push(text('**chainId:**'));
+    components.push(copyable(invocationsDetails.chainId.toString()));
+  }
+
+  if (invocationsDetails?.cairoVersion !== undefined) {
+    components.push(text('**cairoVersion:**'));
+    components.push(copyable(invocationsDetails.cairoVersion.toString()));
+  }
+
+  return components;
+}
+
+export function getDeclareSnapTxt(
+  senderAddress: string,
+  network: Network,
+  contractPayload: DeclareContractPayload,
   invocationsDetails?: InvocationsDetails,
 ) {
   const components = [];
@@ -232,22 +317,40 @@ export function getTxnSnapTxt(
   components.push(copyable(network.name));
   components.push(text('**Signer Address:**'));
   components.push(copyable(senderAddress));
-  components.push(text('**Transaction Invocation:**'));
-  components.push(copyable(JSON.stringify(txnInvocation, null, 2)));
-  if (abis && abis.length > 0) {
-    components.push(text('**Abis:**'));
-    components.push(copyable(JSON.stringify(abis, null, 2)));
+
+  if (contractPayload.contract) {
+    components.push(text('**Contract:**'));
+    if (typeof contractPayload.contract === 'string' || contractPayload.contract instanceof String) {
+      components.push(copyable(contractPayload.contract.toString()));
+    } else {
+      components.push(copyable(JSON.stringify(contractPayload.contract, null, 2)));
+    }
   }
 
-  if (invocationsDetails?.maxFee) {
+  if (contractPayload.compiledClassHash) {
+    components.push(text('**Complied Class Hash:**'));
+    components.push(copyable(contractPayload.compiledClassHash));
+  }
+
+  if (contractPayload.classHash) {
+    components.push(text('**Class Hash:**'));
+    components.push(copyable(contractPayload.classHash));
+  }
+
+  if (contractPayload.casm) {
+    components.push(text('**Casm:**'));
+    components.push(copyable(JSON.stringify(contractPayload.casm, null, 2)));
+  }
+
+  if (invocationsDetails?.maxFee !== undefined) {
     components.push(text('**Max Fee(ETH):**'));
     components.push(copyable(convert(invocationsDetails.maxFee, 'wei', 'ether')));
   }
-  if (invocationsDetails?.nonce) {
+  if (invocationsDetails?.nonce !== undefined) {
     components.push(text('**Nonce:**'));
     components.push(copyable(invocationsDetails.nonce.toString()));
   }
-  if (invocationsDetails?.version) {
+  if (invocationsDetails?.version !== undefined) {
     components.push(text('**Version:**'));
     components.push(copyable(invocationsDetails.version.toString()));
   }
