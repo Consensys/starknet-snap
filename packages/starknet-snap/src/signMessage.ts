@@ -1,6 +1,5 @@
 import { toJson } from './utils/serializer';
-import typedDataExample from './typedData/typedDataExample.json';
-import { getTypedDataMessageSignature, getKeysFromAddress } from './utils/starknetUtils';
+import { signMessage as signMessageUtil, getKeysFromAddress } from './utils/starknetUtils';
 import { getNetworkFromChainId, addDialogTxt } from './utils/snapUtils';
 import { ApiParams, SignMessageRequestParams } from './types/snapApi';
 import { validateAndParseAddress } from '../src/utils/starknetUtils';
@@ -26,9 +25,7 @@ export async function signMessage(params: ApiParams) {
     }
 
     const signerAddress = requestParamsObj.signerAddress;
-    const typedDataMessage = requestParamsObj.typedDataMessage
-      ? JSON.parse(requestParamsObj.typedDataMessage)
-      : typedDataExample;
+    const typedDataMessage = requestParamsObj.typedDataMessage;
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
 
     logger.log(`signMessage:\nsignerAddress: ${signerAddress}\ntypedDataMessage: ${toJson(typedDataMessage)}`);
@@ -37,21 +34,25 @@ export async function signMessage(params: ApiParams) {
     addDialogTxt(components, 'Message', toJson(typedDataMessage));
     addDialogTxt(components, 'Signer Address', signerAddress);
 
-    const response = await wallet.request({
-      method: 'snap_dialog',
-      params: {
-        type: DialogType.Confirmation,
-        content: panel([heading('Do you want to sign this message ?'), ...components]),
-      },
-    });
-    if (!response) return false;
+    if (requestParamsObj.enableAutherize === true) {
+      const response = await wallet.request({
+        method: 'snap_dialog',
+        params: {
+          type: DialogType.Confirmation,
+          content: panel([heading('Do you want to sign this message?'), ...components]),
+        },
+      });
+
+      if (!response) return false;
+    }
 
     const { privateKey: signerPrivateKey } = await getKeysFromAddress(keyDeriver, network, state, signerAddress);
 
-    const typedDataSignature = getTypedDataMessageSignature(signerPrivateKey, typedDataMessage, signerAddress);
+    const typedDataSignature = signMessageUtil(signerPrivateKey, typedDataMessage, signerAddress);
 
     logger.log(`signMessage:\ntypedDataSignature: ${toJson(typedDataSignature)}`);
-    return typedDataSignature.toDERHex();
+
+    return typedDataSignature;
   } catch (err) {
     logger.error(`Problem found: ${err}`);
     throw err;
