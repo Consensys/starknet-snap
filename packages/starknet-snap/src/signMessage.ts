@@ -1,11 +1,11 @@
 import { toJson } from './utils/serializer';
 import typedDataExample from './typedData/typedDataExample.json';
 import { getTypedDataMessageSignature, getKeysFromAddress } from './utils/starknetUtils';
-import { getNetworkFromChainId } from './utils/snapUtils';
+import { getNetworkFromChainId, addDialogTxt } from './utils/snapUtils';
 import { ApiParams, SignMessageRequestParams } from './types/snapApi';
 import { validateAndParseAddress } from '../src/utils/starknetUtils';
 import { DialogType } from '@metamask/rpc-methods';
-import { heading, panel, copyable, text } from '@metamask/snaps-ui';
+import { heading, panel } from '@metamask/snaps-ui';
 import { logger } from './utils/logger';
 
 export async function signMessage(params: ApiParams) {
@@ -33,17 +33,15 @@ export async function signMessage(params: ApiParams) {
 
     logger.log(`signMessage:\nsignerAddress: ${signerAddress}\ntypedDataMessage: ${toJson(typedDataMessage)}`);
 
+    const components = [];
+    addDialogTxt(components, 'Message', toJson(typedDataMessage));
+    addDialogTxt(components, 'Signer Address', signerAddress);
+
     const response = await wallet.request({
       method: 'snap_dialog',
       params: {
         type: DialogType.Confirmation,
-        content: panel([
-          heading('Do you want to sign this message ?'),
-          text(`**Message:**`),
-          copyable(toJson(typedDataMessage)),
-          text(`**Signer address:**`),
-          copyable(`${signerAddress}`),
-        ]),
+        content: panel([heading('Do you want to sign this message ?'), ...components]),
       },
     });
     if (!response) return false;

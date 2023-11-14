@@ -6,10 +6,11 @@ import {
   upsertErc20Token,
   getValidNumber,
   validateAddErc20TokenParams,
+  getAddTokenText,
 } from './utils/snapUtils';
 import { DEFAULT_DECIMAL_PLACES } from './utils/constants';
 import { DialogType } from '@metamask/rpc-methods';
-import { heading, panel, text, copyable } from '@metamask/snaps-ui';
+import { heading, panel } from '@metamask/snaps-ui';
 
 export async function addErc20Token(params: ApiParams) {
   try {
@@ -36,16 +37,7 @@ export async function addErc20Token(params: ApiParams) {
         type: DialogType.Confirmation,
         content: panel([
           heading('Do you want to add this token?'),
-          text('**Token Address:**'),
-          copyable(tokenAddress),
-          text('**Token Name:**'),
-          copyable(tokenName),
-          text('**Token Symbol:**'),
-          copyable(tokenSymbol),
-          text('**Token Decimals:**'),
-          copyable(tokenDecimals.toString()),
-          text('**Network:**'),
-          copyable(network.name),
+          ...getAddTokenText(tokenAddress, tokenName, tokenSymbol, tokenDecimals, network),
         ]),
       },
     });
