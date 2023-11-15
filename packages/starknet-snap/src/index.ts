@@ -16,6 +16,8 @@ import { SnapState } from './types/snapState';
 import { extractPrivateKey } from './extractPrivateKey';
 import { extractPublicKey } from './extractPublicKey';
 import { addNetwork } from './addNetwork';
+import { switchNetwork } from './switchNetwork';
+import { getCurrentNetwork } from './getCurrentNetwork';
 import {
   PRELOADED_TOKENS,
   STARKNET_INTEGRATION_NETWORK,
@@ -154,6 +156,12 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ origin, request }) => 
 
     case 'starkNet_addNetwork':
       return addNetwork(apiParams);
+
+    case 'starkNet_switchNetwork':
+      return switchNetwork(apiParams);
+
+    case 'starkNet_getCurrentNetwork':
+      return getCurrentNetwork(apiParams);
 
     case 'starkNet_getStoredNetworks':
       return getStoredNetworks(apiParams);

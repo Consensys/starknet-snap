@@ -81,7 +81,7 @@
     </form>
     <form id="addNetwork">
       <fieldset>
-        <legend>Add Network (Currently disabled)</legend>
+        <legend>Add Network</legend>
         <label for="addNetworkName">Network Name</label>
         <input type="text" id="addNetworkName" name="addNetworkName" /><br />
         <label for="addNetworkChainId">Network Chain ID (in hex)</label>
@@ -95,6 +95,20 @@
         <label for="addNetworkAccClassHash">Account Class Hash</label>
         <input type="text" id="addNetworkAccClassHash" name="addNetworkAccClassHash" /><br />
         <input type="submit" id="addNetwork" value="Add Network" />
+      </fieldset>
+    </form>
+    <form id="switchNetwork">
+      <fieldset>
+        <legend>Switch Network</legend>
+        <label for="switchNetwork_ChainId">Network Chain ID (in hex)</label>
+        <input type="text" id="switchNetwork_ChainId" name="switchNetwork_ChainId" />
+        <input type="submit" id="switchNetwork" value="Switch Network" />
+      </fieldset>
+    </form>
+    <form id="getCurrentNetwork">
+      <fieldset>
+        <legend>Get Current Network</legend>
+        <input type="submit" id="getCurrentNetwork" value="Get Current Network" />
       </fieldset>
     </form>
     <form id="getStoredNetworks">
@@ -398,6 +412,14 @@
         method: addNetwork,
       },
       {
+        id: 'switchNetwork',
+        method: switchNetwork,
+      },
+      {
+        id: 'getCurrentNetwork',
+        method: getCurrentNetwork,
+      },
+      {
         id: 'getStoredNetworks',
         method: getStoredNetworks,
       },
@@ -420,7 +442,7 @@
       {
         id: 'estimateFees',
         method: estimateFees,
-      }
+      },
     ];
 
     for (const form of formWithSubmit) {
@@ -667,6 +689,24 @@
       });
     }
 
+    // here we call the snap's "starkNet_switchNetwork" method
+    async function switchNetwork(e) {
+      e.preventDefault(); // to prevent default form behavior
+
+      const networkChainId = document.getElementById('switchNetwork_ChainId').value;
+      
+      await callSnap('starkNet_switchNetwork', {
+        chainId: networkChainId,
+      });
+    }
+
+    // here we call the snap's "starkNet_getCurrentNetwork" method
+    async function getCurrentNetwork(e) {
+      e.preventDefault(); // to prevent default form behavior
+
+      await callSnap('starkNet_getCurrentNetwork', {});
+    }
+
     // here we call the snap's "starkNet_getStoredNetworks" method
     async function getStoredNetworks(e) {
       e.preventDefault(); // to prevent default form behavior
@@ -731,16 +771,16 @@
       e.preventDefault(); // to prevent default form behavior
 
       const senderAddress = document.getElementById('executetxn_senderAddress').value;
-      const txnInvocation = document.getElementById('executetxn_txnInvocation').value
+      const txnInvocation = document.getElementById('executetxn_txnInvocation').value;
       const abis = document.getElementById('executetxn_abis').value;
-      const invocationsDetails = document.getElementById('executetxn_invocationsDetails').value
-      
+      const invocationsDetails = document.getElementById('executetxn_invocationsDetails').value;
+
       await callSnap('starkNet_executeTxn', {
         senderAddress,
         txnInvocation: txnInvocation ? JSON.parse(txnInvocation) : undefined,
         abis: abis ? JSON.parse(abis) : undefined,
-        invocationsDetails: invocationsDetails ? JSON.parse(invocationsDetails) : undefined
-      })
+        invocationsDetails: invocationsDetails ? JSON.parse(invocationsDetails) : undefined,
+      });
     }
 
     async function declareContract(e) {
@@ -763,18 +803,19 @@
       const senderAddress = document.getElementById('estimateFees_senderAddress').value;
       const invocationDetails = document.getElementById('estimateFees_invocationDetails').value;
       const invocations = document.getElementById('estimateFees_invocations').value;
-      
+
       await callSnap('starkNet_estimateFees', {
         senderAddress,
-        invocations: invocations ? JSON.parse(invocations): undefined,
-        invocationDetails: invocationDetails ? JSON.parse(invocationDetails) : undefined
+        invocations: invocations ? JSON.parse(invocations) : undefined,
+        invocationDetails: invocationDetails ? JSON.parse(invocationDetails) : undefined,
       });
     }
 
     async function callSnap(method, params) {
       try {
         const chainId = document.getElementById('targetChainId').value;
-
+        //0x534e5f474f45524c42
+        console.log(params)
         const response = await ethereum.request({
           method: 'wallet_invokeSnap',
           params: {

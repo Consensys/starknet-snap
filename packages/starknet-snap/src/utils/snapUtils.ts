@@ -71,26 +71,25 @@ function isValidNetworkName(networkName: string) {
 
 function isPreloadedTokenName(tokenName: string, chainId: string) {
   return !!PRELOADED_TOKENS.find(
-    (token) => token.name.trim() === tokenName.trim() && Number(token.chainId) === Number(chainId),
+    (token) => token.name.trim() === tokenName.trim() && isSameChainId(token.chainId, chainId),
   );
 }
 
 function isPreloadedTokenSymbol(tokenSymbol: string, chainId: string) {
   return !!PRELOADED_TOKENS.find(
-    (token) => token.symbol.trim() === tokenSymbol.trim() && Number(token.chainId) === Number(chainId),
+    (token) => token.symbol.trim() === tokenSymbol.trim() && isSameChainId(token.chainId, chainId),
   );
 }
 
 function isPreloadedTokenAddress(tokenAddress: string, chainId: string) {
   const bigIntTokenAddress = num.toBigInt(tokenAddress);
   return !!PRELOADED_TOKENS.find(
-    (token) => num.toBigInt(token.address) === bigIntTokenAddress && Number(token.chainId) === Number(chainId),
+    (token) => num.toBigInt(token.address) === bigIntTokenAddress && isSameChainId(token.chainId, chainId),
   );
 }
 
-function isPreloadedNetworkChainId(networkChainId: string) {
-  const bigIntNetworkChainId = num.toBigInt(networkChainId);
-  return !!PRELOADED_NETWORKS.find((network) => num.toBigInt(network.chainId) === bigIntNetworkChainId);
+function isPreloadedNetworkChainId(chainId: string) {
+  return !!PRELOADED_NETWORKS.find((network) => isSameChainId(network.chainId, chainId));
 }
 
 function isPreloadedNetworkName(networkName: string) {
@@ -165,6 +164,10 @@ export function validateAddNetworkParams(params: AddNetworkRequestParams) {
   }
 }
 
+export function isSameChainId(chainId1: string, chainId2: string) {
+  return num.toBigInt(chainId1) === num.toBigInt(chainId2);
+}
+
 export const getValidNumber = (
   obj,
   defaultValue: number,
@@ -178,6 +181,22 @@ export const getValidNumber = (
 export function addDialogTxt(components: Array<Component>, label: string, value: string) {
   components.push(text(`**${label}:**`));
   components.push(copyable(value));
+}
+
+export function getNetworkTxt(network: Network) {
+  const components = [];
+  addDialogTxt(components, 'Chain Name', network.name);
+  addDialogTxt(components, 'Chain ID', network.chainId);
+  if (network.baseUrl) {
+    addDialogTxt(components, 'Base URL', network.baseUrl);
+  }
+  if (network.nodeUrl) {
+    addDialogTxt(components, 'RPC URL', network.nodeUrl);
+  }
+  if (network.voyagerUrl) {
+    addDialogTxt(components, 'Explorer URL', network.voyagerUrl);
+  }
+  return components;
 }
 
 export function getTxnSnapTxt(
@@ -342,13 +361,13 @@ export function getAddTokenText(
 export function getAccount(state: SnapState, accountAddress: string, chainId: string) {
   const bigIntAccountAddress = num.toBigInt(accountAddress);
   return state.accContracts?.find(
-    (acc) => num.toBigInt(acc.address) === bigIntAccountAddress && Number(acc.chainId) === Number(chainId),
+    (acc) => num.toBigInt(acc.address) === bigIntAccountAddress && isSameChainId(acc.chainId, chainId),
   );
 }
 
 export function getAccounts(state: SnapState, chainId: string) {
   return state.accContracts
-    .filter((acc) => Number(acc.chainId) === Number(chainId))
+    .filter((acc) => isSameChainId(acc.chainId, chainId))
     .sort((a: AccContract, b: AccContract) => a.addressIndex - b.addressIndex);
 }
 
@@ -393,7 +412,7 @@ export async function upsertAccount(userAccount: AccContract, wallet, mutex: Mut
 
 export function getNetwork(state: SnapState, chainId: string) {
   return state.networks?.find(
-    (network) => Number(network.chainId) === Number(chainId) && !Boolean(network?.useOldAccounts),
+    (network) => isSameChainId(network.chainId, chainId) && !Boolean(network?.useOldAccounts),
   );
 }
 
@@ -443,16 +462,16 @@ export async function upsertNetwork(network: Network, wallet, mutex: Mutex, stat
 export function getErc20Token(state: SnapState, tokenAddress: string, chainId: string) {
   const bigIntTokenAddress = num.toBigInt(tokenAddress);
   return state.erc20Tokens?.find(
-    (token) => num.toBigInt(token.address) === bigIntTokenAddress && Number(token.chainId) === Number(chainId),
+    (token) => num.toBigInt(token.address) === bigIntTokenAddress && isSameChainId(token.chainId, chainId),
   );
 }
 
 export function getErc20Tokens(state: SnapState, chainId: string) {
-  return state.erc20Tokens?.filter((token) => Number(token.chainId) === Number(chainId));
+  return state.erc20Tokens?.filter((token) => isSameChainId(token.chainId, chainId));
 }
 
 export function getEtherErc20Token(state: SnapState, chainId: string) {
-  return state.erc20Tokens?.find((token) => Number(token.chainId) === Number(chainId) && token.symbol === 'ETH');
+  return state.erc20Tokens?.find((token) => isSameChainId(token.chainId, chainId) && token.symbol === 'ETH');
 }
 
 export async function upsertErc20Token(erc20Token: Erc20Token, wallet, mutex: Mutex, state: SnapState = undefined) {
@@ -505,7 +524,7 @@ export function getNetworkFromChainId(state: SnapState, targerChainId: string | 
 }
 
 export function getChainIdHex(network: Network) {
-  return `0x${Number(network.chainId).toString(16)}`;
+  return `0x${num.toBigInt(network.chainId).toString(16)}`;
 }
 
 export function getTransactionFromVoyagerUrl(network: Network) {
@@ -519,7 +538,7 @@ export function getTransactionsFromVoyagerUrl(network: Network) {
 export function getTransaction(state: SnapState, txnHash: string, chainId: string) {
   const bigIntTxnHash = num.toBigInt(txnHash);
   return state.transactions?.find(
-    (txn) => num.toBigInt(txn.txnHash) === bigIntTxnHash && Number(txn.chainId) === Number(chainId),
+    (txn) => num.toBigInt(txn.txnHash) === bigIntTxnHash && isSameChainId(txn.chainId, chainId),
   );
 }
 
@@ -536,7 +555,7 @@ export function getTransactions(
   let filteredTxns: Transaction[] = [];
   if (state.transactions) {
     filteredTxns = filterTransactions(state.transactions, [
-      new ChainIdFilter(Number(chainId)),
+      new ChainIdFilter(chainId),
       new TimestampFilter(minTimestamp),
       new SenderAddressFilter(senderAddress ? num.toBigInt(senderAddress) : undefined),
       new ContractAddressFilter(contractAddress ? num.toBigInt(contractAddress) : undefined),
@@ -647,6 +666,33 @@ export async function removeAcceptedTransaction(
           txn.finalityStatus !== TransactionStatus.ACCEPTED_ON_L1) ||
         (txn.finalityStatus === TransactionStatus.ACCEPTED_ON_L2 && txn.timestamp * 1000 >= minTimeStamp),
     );
+
+    await wallet.request({
+      method: 'snap_manageState',
+      params: {
+        operation: 'update',
+        newState: state,
+      },
+    });
+  });
+}
+
+export function getCurrentNetwork(state: SnapState) {
+  return state.currentNetwork || STARKNET_TESTNET_NETWORK;
+}
+
+export async function setCurrentNetwork(network: Network, wallet, mutex: Mutex, state: SnapState = undefined) {
+  return mutex.runExclusive(async () => {
+    if (!state) {
+      state = await wallet.request({
+        method: 'snap_manageState',
+        params: {
+          operation: 'get',
+        },
+      });
+    }
+
+    state.currentNetwork = network;
 
     await wallet.request({
       method: 'snap_manageState',

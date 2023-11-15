@@ -75,7 +75,7 @@ describe('Test function: getTransactions', function () {
     it('Should filter transactions based on chainId', () => {
       const orgChainId = transactions[0].chainId;
       transactions[0].chainId = '99';
-      const chainIdFilter = new filter.ChainIdFilter(Number(transactions[0].chainId));
+      const chainIdFilter = new filter.ChainIdFilter(transactions[0].chainId);
       const filteredTxnList = filter.filterTransactions(transactions, [chainIdFilter]);
       expect(filteredTxnList).to.have.lengthOf(1);
       transactions[0].chainId = orgChainId;

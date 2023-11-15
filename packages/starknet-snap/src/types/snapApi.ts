@@ -184,3 +184,7 @@ export interface SignTransactionParams extends BaseRequestParams, ExtractPrivate
   transactionsDetail: InvocationsSignerDetails;
   abis?: Abi[];
 }
+
+export interface SwitchNetworkRequestParams extends BaseRequestParams {
+  chainId: string;
+}

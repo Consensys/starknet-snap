@@ -1,11 +1,14 @@
 import { toJson } from './utils/serializer';
 import { AddNetworkRequestParams, ApiParams } from './types/snapApi';
-import { validateAddNetworkParams } from './utils/snapUtils';
+import { validateAddNetworkParams, upsertNetwork, getNetworkTxt } from './utils/snapUtils';
 import { logger } from './utils/logger';
+import { Network } from './types/snapState';
+import { DialogType } from '@metamask/rpc-methods';
+import { panel, heading } from '@metamask/snaps-ui';
 
 export async function addNetwork(params: ApiParams) {
   try {
-    const { requestParams } = params;
+    const { state, wallet, saveMutex, requestParams } = params;
     const requestParamsObj = requestParams as AddNetworkRequestParams;
 
     if (
@@ -22,7 +25,28 @@ export async function addNetwork(params: ApiParams) {
 
     validateAddNetworkParams(requestParamsObj);
 
-    throw new Error('addNetwork is currently disabled');
+    const network = {
+      name: requestParamsObj.networkName,
+      chainId: requestParamsObj.networkChainId,
+      baseUrl: requestParamsObj.networkBaseUrl,
+      nodeUrl: requestParamsObj.networkNodeUrl,
+      voyagerUrl: requestParamsObj.networkVoyagerUrl,
+    } as Network;
+
+    const components = getNetworkTxt(network);
+
+    const response = await wallet.request({
+      method: 'snap_dialog',
+      params: {
+        type: DialogType.Confirmation,
+        content: panel([heading('Do you want to add this network?'), ...components]),
+      },
+    });
+    if (!response) return false;
+
+    await upsertNetwork(network, wallet, saveMutex, state);
+
+    return true;
   } catch (err) {
     logger.error(`Problem found: ${err}`);
     throw err;
