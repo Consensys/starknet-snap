@@ -281,6 +281,34 @@
         <input type="submit" id="signTransaction" value="Sign Transaction" />
       </fieldset>
     </form>
+    <form id="signDeployAccountTransaction">
+      <fieldset>
+        <legend>Sign Deploy Account Transaction</legend>
+        <label for="signDeployAccountTransaction_userAddress">User Account Address</label>
+        <input
+          type="text"
+          id="signDeployAccountTransaction_userAddress"
+          name="signDeployAccountTransaction_userAddress"
+        /><br />
+        <label for="signDeployAccountTransaction_transaction">Transaction</label>
+        <input
+          type="text"
+          id="signDeployAccountTransaction_transaction"
+          name="signDeployAccountTransaction_transaction"
+        /><br />
+        <input type="submit" id="signDeployAccountTransaction" value="Sign Deploy Account Transaction" />
+      </fieldset>
+    </form>
+    <form id="signDeclareTransaction">
+      <fieldset>
+        <legend>Sign Declare Transaction</legend>
+        <label for="signDeclareTransaction_userAddress">User Account Address</label>
+        <input type="text" id="signDeclareTransaction_userAddress" name="signDeclareTransaction_userAddress" /><br />
+        <label for="signDeclareTransaction_transaction">Transaction</label>
+        <input type="text" id="signDeclareTransaction_transaction" name="signDeclareTransaction_transaction" /><br />
+        <input type="submit" id="signDeclareTransaction" value="Sign Declare Transaction" />
+      </fieldset>
+    </form>
     <form id="verifyTypedDataSignature">
       <fieldset>
         <legend>Verify Typed Data Message Signature</legend>
@@ -386,6 +414,14 @@
       {
         id: 'signTransaction',
         method: signTransaction,
+      },
+      {
+        id: 'signDeployAccountTransaction',
+        method: signDeployAccountTransaction,
+      },
+      {
+        id: 'signDeclareTransaction',
+        method: signDeclareTransaction,
       },
       {
         id: 'verifyTypedDataSignature',
@@ -588,7 +624,10 @@
       const typedDataMessage = document.getElementById('typedDataMessage').value;
       const signerAddress = document.getElementById('signerUserAddress').value;
 
-      await callSnap('starkNet_signMessage', { typedDataMessage, signerAddress });
+      await callSnap('starkNet_signMessage', {
+        typedDataMessage: typedDataMessage ? JSON.parse(typedDataMessage) : {},
+        signerAddress,
+      });
     }
 
     // here we call the snap's "starkNet_signTransaction" method
@@ -600,9 +639,35 @@
       const transactionsDetail = document.getElementById('signTransaction_transactionsDetail').value;
 
       await callSnap('starkNet_signTransaction', {
-        userAddress,
+        signerAddress: userAddress,
         transactions: transactions ? JSON.parse(transactions) : {},
         transactionsDetail: transactionsDetail ? JSON.parse(transactionsDetail) : {},
+      });
+    }
+
+    // here we call the snap's "starkNet_signDeployAccounrTransaction" method
+    async function signDeployAccountTransaction(e) {
+      e.preventDefault(); // to prevent default form behavior
+
+      const userAddress = document.getElementById('signDeployAccountTransaction_userAddress').value;
+      const transaction = document.getElementById('signDeployAccountTransaction_transaction').value;
+
+      await callSnap('starkNet_signDeployAccounrTransaction', {
+        signerAddress: userAddress,
+        transaction: transaction ? JSON.parse(transaction) : {},
+      });
+    }
+
+    // here we call the snap's "starkNet_signDeclareTransaction" method
+    async function signDeclareTransaction(e) {
+      e.preventDefault(); // to prevent default form behavior
+
+      const userAddress = document.getElementById('signDeclareTransaction_userAddress').value;
+      const transaction = document.getElementById('signDeclareTransaction_transaction').value;
+
+      await callSnap('starkNet_signDeclareTransaction', {
+        signerAddress: userAddress,
+        transaction: transaction ? JSON.parse(transaction) : {},
       });
     }
 

@@ -9,6 +9,9 @@ import {
   InvocationsDetails,
   Invocations,
   EstimateFeeDetails,
+  DeployAccountSignerDetails,
+  DeclareSignerDetails,
+  typedData,
 } from 'starknet';
 
 export interface ApiParams {
@@ -42,7 +45,7 @@ export type ApiRequestParams =
   | ExecuteTxnRequestParams
   | EstimateFeesRequestParams
   | DeclareContractRequestParams
-  | SignTransactionParams;
+  | SignTransactionRequestParams;
 
 export interface BaseRequestParams {
   chainId?: string;
@@ -72,9 +75,8 @@ export interface ExtractPublicKeyRequestParams extends BaseRequestParams {
   userAddress: string;
 }
 
-export interface SignMessageRequestParams extends BaseRequestParams {
-  signerAddress: string;
-  typedDataMessage?: string;
+export interface SignMessageRequestParams extends SignRequestParams, BaseRequestParams {
+  typedDataMessage: typedData.TypedData;
 }
 
 export interface VerifySignedMessageRequestParams extends BaseRequestParams {
@@ -179,10 +181,23 @@ export interface RpcV4GetTransactionReceiptResponse {
   finality_status?: string;
 }
 
-export interface SignTransactionParams extends BaseRequestParams, ExtractPrivateKeyRequestParams {
+export interface SignRequestParams {
+  signerAddress: string;
+  enableAutherize?: boolean;
+}
+
+export interface SignTransactionRequestParams extends SignRequestParams, BaseRequestParams {
   transactions: Call[];
   transactionsDetail: InvocationsSignerDetails;
   abis?: Abi[];
+}
+
+export interface SignDeployAccountTransactionRequestParams extends SignRequestParams, BaseRequestParams {
+  transaction: DeployAccountSignerDetails;
+}
+
+export interface SignDeclareTransactionRequestParams extends SignRequestParams, BaseRequestParams {
+  transaction: DeclareSignerDetails;
 }
 
 export interface SwitchNetworkRequestParams extends BaseRequestParams {

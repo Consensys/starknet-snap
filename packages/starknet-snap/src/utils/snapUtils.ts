@@ -1,6 +1,14 @@
 import { toJson } from './serializer';
 import { Mutex } from 'async-mutex';
-import { num, InvocationsDetails, DeclareContractPayload, Abi, InvocationsSignerDetails, Call } from 'starknet';
+import {
+  num,
+  InvocationsDetails,
+  DeclareContractPayload,
+  Abi,
+  DeclareSignerDetails,
+  Call,
+  DeployAccountSignerDetails,
+} from 'starknet';
 import { validateAndParseAddress } from './starknetUtils';
 import { Component, text, copyable } from '@metamask/snaps-ui';
 import {
@@ -264,43 +272,14 @@ export function getSendTxnText(
 }
 
 export function getSignTxnTxt(
-  senderAddress: string,
+  signerAddress: string,
   network: Network,
-  txnInvocation: Call[],
-  invocationsDetails: InvocationsSignerDetails,
-  abis?: Abi[],
+  txnInvocation: Call[] | DeclareSignerDetails | DeployAccountSignerDetails,
 ) {
   const components = [];
   addDialogTxt(components, 'Network', network.name);
-  addDialogTxt(components, 'Signer Address', senderAddress);
-  addDialogTxt(components, 'Transaction Invocation', JSON.stringify(txnInvocation, null, 2));
-
-  if (abis && abis.length > 0) {
-    addDialogTxt(components, 'Abis', JSON.stringify(abis, null, 2));
-  }
-
-  if (invocationsDetails?.maxFee !== undefined) {
-    addDialogTxt(components, 'Max Fee(ETH)', convert(invocationsDetails.maxFee, 'wei', 'ether'));
-  }
-  if (invocationsDetails?.nonce !== undefined) {
-    addDialogTxt(components, 'Nonce', invocationsDetails.nonce.toString());
-  }
-  if (invocationsDetails?.version !== undefined) {
-    addDialogTxt(components, 'Version', invocationsDetails.version.toString());
-  }
-
-  if (invocationsDetails?.walletAddress !== undefined) {
-    addDialogTxt(components, 'Wallet Address', invocationsDetails.walletAddress.toString());
-  }
-
-  if (invocationsDetails?.chainId !== undefined) {
-    addDialogTxt(components, 'Chain Id', invocationsDetails.chainId.toString());
-  }
-
-  if (invocationsDetails?.cairoVersion !== undefined) {
-    addDialogTxt(components, 'Cairo Version', invocationsDetails.cairoVersion.toString());
-  }
-
+  addDialogTxt(components, 'Signer Address', signerAddress);
+  addDialogTxt(components, 'Transaction', JSON.stringify(txnInvocation, null, 2));
   return components;
 }
 

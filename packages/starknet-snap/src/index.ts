@@ -36,6 +36,8 @@ import { estimateAccDeployFee } from './estimateAccountDeployFee';
 import { executeTxn } from './executeTxn';
 import { estimateFees } from './estimateFees';
 import { declareContract } from './declareContract';
+import { signDeclareTransaction } from './signDeclareTransaction';
+import { signDeployAccountTransaction } from './signDeployAccountTransaction';
 import { logger } from './utils/logger';
 
 declare const snap;
@@ -122,6 +124,14 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ origin, request }) => 
     case 'starkNet_signTransaction':
       apiParams.keyDeriver = await getAddressKeyDeriver(snap);
       return signTransaction(apiParams);
+
+    case 'starkNet_signDeclareTransaction':
+      apiParams.keyDeriver = await getAddressKeyDeriver(snap);
+      return signDeclareTransaction(apiParams);
+
+    case 'starkNet_signDeployAccountTransaction':
+      apiParams.keyDeriver = await getAddressKeyDeriver(snap);
+      return signDeployAccountTransaction(apiParams);
 
     case 'starkNet_verifySignedMessage':
       apiParams.keyDeriver = await getAddressKeyDeriver(snap);
