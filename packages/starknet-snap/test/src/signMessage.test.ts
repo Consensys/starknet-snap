@@ -6,8 +6,15 @@ import { WalletMock } from '../wallet.mock.test';
 import { SnapState } from '../../src/types/snapState';
 import { signMessage } from '../../src/signMessage';
 import typedDataExample from '../../src/typedData/typedDataExample.json';
+import { ArraySignatureType } from 'starknet';
 import { STARKNET_TESTNET_NETWORK } from '../../src/utils/constants';
-import { account1, getBip44EntropyStub, signature1, signature2, unfoundUserAddress } from '../constants.test';
+import {
+  account1,
+  getBip44EntropyStub,
+  signature4SignMessageWithUnfoundAddress,
+  unfoundUserAddress,
+  signature4SignMessage,
+} from '../constants.test';
 import { getAddressKeyDeriver } from '../../src/utils/keyPair';
 import * as utils from '../../src/utils/starknetUtils';
 import { Mutex } from 'async-mutex';
@@ -32,9 +39,17 @@ describe('Test function: signMessage', function () {
     saveMutex: new Mutex(),
   };
 
+  const requestObject: SignMessageRequestParams = {
+    chainId: STARKNET_TESTNET_NETWORK.chainId,
+    signerAddress: account1.address,
+    typedDataMessage: typedDataExample,
+    enableAutherize: true,
+  };
+
   beforeEach(async function () {
     walletStub.rpcStubs.snap_getBip44Entropy.callsFake(getBip44EntropyStub);
     apiParams.keyDeriver = await getAddressKeyDeriver(walletStub);
+    apiParams.requestParams = requestObject;
     walletStub.rpcStubs.snap_dialog.resolves(true);
   });
 
@@ -44,18 +59,13 @@ describe('Test function: signMessage', function () {
   });
 
   it('should sign a message from an user account correctly', async function () {
-    const requestObject: SignMessageRequestParams = {
-      signerAddress: account1.address,
-      typedDataMessage: undefined, // will use typedDataExample.json
-    };
-    apiParams.requestParams = requestObject;
-    const result: boolean | string = await signMessage(apiParams);
+    const result: boolean | ArraySignatureType = await signMessage(apiParams);
     const expectedDialogParams = {
       type: 'confirmation',
       content: {
         type: 'panel',
         children: [
-          { type: 'heading', value: 'Do you want to sign this message ?' },
+          { type: 'heading', value: 'Do you want to sign this message?' },
 
           {
             type: 'text',
@@ -67,7 +77,7 @@ describe('Test function: signMessage', function () {
           },
           {
             type: 'text',
-            value: `**Signer address:**`,
+            value: `**Signer Address:**`,
           },
           {
             type: 'copyable',
@@ -79,29 +89,21 @@ describe('Test function: signMessage', function () {
     expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledOnce;
     expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledWith(expectedDialogParams);
     expect(walletStub.rpcStubs.snap_manageState).not.to.have.been.called;
-    expect(result).to.be.eql(signature1);
+    expect(result).to.be.eql(signature4SignMessage);
   });
 
   it('should sign a message from an unfound user account correctly', async function () {
-    const requestObject: SignMessageRequestParams = {
-      signerAddress: unfoundUserAddress,
-      typedDataMessage: toJson(typedDataExample),
-    };
-    apiParams.requestParams = requestObject;
+    const requestObject = apiParams.requestParams as SignMessageRequestParams;
+    requestObject.signerAddress = unfoundUserAddress;
     const result = await signMessage(apiParams);
     expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledOnce;
     expect(walletStub.rpcStubs.snap_manageState).not.to.have.been.called;
-    expect(result).to.be.eql(signature2);
+    expect(result).to.be.eql(signature4SignMessageWithUnfoundAddress);
+    requestObject.signerAddress = account1.address;
   });
 
   it('should throw error if getKeysFromAddress failed', async function () {
     sandbox.stub(utils, 'getKeysFromAddress').throws(new Error());
-    const requestObject: SignMessageRequestParams = {
-      signerAddress: account1.address,
-      typedDataMessage: undefined, // will use typedDataExample.json
-    };
-    apiParams.requestParams = requestObject;
-
     let result;
     try {
       await signMessage(apiParams);
@@ -116,11 +118,6 @@ describe('Test function: signMessage', function () {
 
   it('should return false if the user not confirmed', async function () {
     walletStub.rpcStubs.snap_dialog.resolves(false);
-    const requestObject: SignMessageRequestParams = {
-      signerAddress: account1.address,
-      typedDataMessage: undefined, // will use typedDataExample.json
-    };
-    apiParams.requestParams = requestObject;
     const result = await signMessage(apiParams);
     expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledOnce;
     expect(walletStub.rpcStubs.snap_manageState).not.to.have.been.called;
@@ -130,7 +127,7 @@ describe('Test function: signMessage', function () {
   it('should throw an error if the signerAddress is undefined', async function () {
     const requestObject: SignMessageRequestParams = {
       signerAddress: undefined,
-      typedDataMessage: toJson(typedDataExample),
+      typedDataMessage: typedDataExample,
     };
     apiParams.requestParams = requestObject;
     let result;
@@ -147,7 +144,7 @@ describe('Test function: signMessage', function () {
     const invalidAddress = 'wrongAddress';
     const requestObject: SignMessageRequestParams = {
       signerAddress: invalidAddress,
-      typedDataMessage: toJson(typedDataExample),
+      typedDataMessage: typedDataExample,
     };
     apiParams.requestParams = requestObject;
     let result;
@@ -158,5 +155,23 @@ describe('Test function: signMessage', function () {
     } finally {
       expect(result).to.be.an('Error');
     }
+  });
+
+  it('should skip dialog if enableAutherize is false', async function () {
+    const paramsObject = apiParams.requestParams as SignMessageRequestParams;
+    paramsObject.enableAutherize = false;
+    const result = await signMessage(apiParams);
+    expect(walletStub.rpcStubs.snap_dialog).to.have.been.callCount(0);
+    expect(result).to.be.eql(signature4SignMessage);
+    paramsObject.enableAutherize = true;
+  });
+
+  it('should skip dialog if enableAutherize is omit', async function () {
+    const paramsObject = apiParams.requestParams as SignMessageRequestParams;
+    paramsObject.enableAutherize = undefined;
+    const result = await signMessage(apiParams);
+    expect(walletStub.rpcStubs.snap_dialog).to.have.been.callCount(0);
+    expect(result).to.be.eql(signature4SignMessage);
+    paramsObject.enableAutherize = true;
   });
 });

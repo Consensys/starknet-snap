@@ -30,6 +30,8 @@ import {
   stark,
   InvocationsSignerDetails,
   Abi,
+  DeclareSignerDetails,
+  DeployAccountSignerDetails,
 } from 'starknet';
 import type { Hex } from '@noble/curves/abstract/utils';
 import { Network, SnapState, Transaction, TransactionType } from '../types/snapState';
@@ -442,7 +444,7 @@ export const getKeysFromAddress = async (
   if (!isNaN(addressIndex)) {
     return getKeysFromAddressIndex(keyDeriver, network.chainId, state, addressIndex);
   }
-  console.log(`getNextAddressIndex:\nAddress not found: ${address}`);
+  logger.log(`getNextAddressIndex:\nAddress not found: ${address}`);
   throw new Error(`Address not found: ${address}`);
 };
 
@@ -512,5 +514,33 @@ export const signTransactions = async (
 ): Promise<Signature> => {
   const signer = new Signer(privateKey);
   const signatures = await signer.signTransaction(transactions, transactionsDetail, abis);
+  return stark.signatureToDecimalArray(signatures);
+};
+
+export const signDeployAccountTransaction = async (
+  privateKey: string,
+  transaction: DeployAccountSignerDetails,
+): Promise<Signature> => {
+  const signer = new Signer(privateKey);
+  const signatures = await signer.signDeployAccountTransaction(transaction);
+  return stark.signatureToDecimalArray(signatures);
+};
+
+export const signDeclareTransaction = async (
+  privateKey: string,
+  transaction: DeclareSignerDetails,
+): Promise<Signature> => {
+  const signer = new Signer(privateKey);
+  const signatures = await signer.signDeclareTransaction(transaction);
+  return stark.signatureToDecimalArray(signatures);
+};
+
+export const signMessage = async (
+  privateKey: Hex,
+  typedDataMessage: typedData.TypedData,
+  signerUserAddress: string,
+) => {
+  const signer = new Signer(privateKey);
+  const signatures = await signer.signMessage(typedDataMessage, signerUserAddress);
   return stark.signatureToDecimalArray(signatures);
 };

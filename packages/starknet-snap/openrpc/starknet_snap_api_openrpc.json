@@ -1018,7 +1018,7 @@
       "paramStructure": "by-name",
       "params": [
         {
-          "name": "userAddress",
+          "name": "signerAddress",
           "summary": "Address of the account contract",
           "description": "Address of the account contract",
           "required": true,
@@ -1075,6 +1075,98 @@
         }
       },
       "errors": []
+    },
+    {
+      "name": "starkNet_signDeclareTransaction",
+      "summary": "Sign Declare transaction",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "signerAddress",
+          "summary": "Address of the account contract",
+          "description": "Address of the account contract",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/ADDRESS"
+          }
+        },
+        {
+          "name": "chainId",
+          "summary": "Id of the target Starknet network",
+          "description": "Id of the target Starknet network (default to Starknet Goerli Testnet)",
+          "required": false,
+          "schema": {
+            "$ref": "#/components/schemas/CHAIN_ID"
+          }
+        },
+        {
+          "name": "transaction",
+          "summary": "Declare transaction payload",
+          "description": "Declare transaction payload",
+          "required": true,
+          "schema": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DECLARE_TRANSACTION_PAYLOAD"
+            }
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "summary": "Sign Transaction result",
+        "description": "Sign Transaction result consist of list of string",
+        "schema": {
+          "type": "array"
+        }
+      },
+      "errors": []
+    },
+    {
+      "name": "starkNet_signDeployAccountTransaction",
+      "summary": "Sign Deploy Account transaction",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "signerAddress",
+          "summary": "Address of the account contract",
+          "description": "Address of the account contract",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/ADDRESS"
+          }
+        },
+        {
+          "name": "chainId",
+          "summary": "Id of the target Starknet network",
+          "description": "Id of the target Starknet network (default to Starknet Goerli Testnet)",
+          "required": false,
+          "schema": {
+            "$ref": "#/components/schemas/CHAIN_ID"
+          }
+        },
+        {
+          "name": "transaction",
+          "summary": "Deploy Account transaction payload",
+          "description": "DecDeploy Accountlare transaction payload",
+          "required": true,
+          "schema": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DEPLOY_ACCOUNT_TRANSACTION_PAYLOAD"
+            }
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "summary": "Sign Transaction result",
+        "description": "Sign Transaction result consist of list of string",
+        "schema": {
+          "type": "array"
+        }
+      },
+      "errors": []
     }
   ],
   "components": {
@@ -1114,6 +1206,64 @@
           },
           "casm": {
             "type": "object"
+          },
+          "compiledClassHash": {
+            "type": "string"
+          }
+        }
+      },
+      "DECLARE_TRANSACTION_PAYLOAD" : {
+        "type": "object",
+        "properties": {
+          "classHash": {
+            "type": "string"
+          },
+          "senderAddress": {
+            "$ref": "#/components/schemas/FELT"
+          },
+          "chainId": {
+            "$ref": "#/components/schemas/CHAIN_ID"
+          },
+          "maxFee": {
+            "type": "integer"
+          },
+          "nonce": {
+            "type": "integer"
+          },
+          "version": {
+            "type": "integer"
+          },
+          "compiledClassHash": {
+            "type": "string"
+          }
+        }
+      },
+      "DEPLOY_ACCOUNT_TRANSACTION_PAYLOAD" : {
+        "type": "object",
+        "properties": {
+          "classHash": {
+            "type": "string"
+          },
+          "contractAddress": {
+            "$ref": "#/components/schemas/FELT"
+          },
+          "constructorCalldata": {
+            "type": "array"
+          },
+          "addressSalt": {
+            "type": "string"
+          },
+          "chainId": {
+            "$ref": "#/components/schemas/CHAIN_ID"
+          },
+          "maxFee": {
+            "type": "integer"
+          },
+          "nonce": {
+            "type": "integer"
+          },
+          "version": {
+            "type": "integer"
           },
           "compiledClassHash": {
             "type": "string"

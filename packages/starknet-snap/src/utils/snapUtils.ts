@@ -1,6 +1,14 @@
 import { toJson } from './serializer';
 import { Mutex } from 'async-mutex';
-import { num, InvocationsDetails, DeclareContractPayload, Abi, InvocationsSignerDetails, Call } from 'starknet';
+import {
+  num,
+  InvocationsDetails,
+  DeclareContractPayload,
+  Abi,
+  DeclareSignerDetails,
+  Call,
+  DeployAccountSignerDetails,
+} from 'starknet';
 import { validateAndParseAddress } from './starknetUtils';
 import { Component, text, copyable } from '@metamask/snaps-ui';
 import {
@@ -71,26 +79,25 @@ function isValidNetworkName(networkName: string) {
 
 function isPreloadedTokenName(tokenName: string, chainId: string) {
   return !!PRELOADED_TOKENS.find(
-    (token) => token.name.trim() === tokenName.trim() && Number(token.chainId) === Number(chainId),
+    (token) => token.name.trim() === tokenName.trim() && isSameChainId(token.chainId, chainId),
   );
 }
 
 function isPreloadedTokenSymbol(tokenSymbol: string, chainId: string) {
   return !!PRELOADED_TOKENS.find(
-    (token) => token.symbol.trim() === tokenSymbol.trim() && Number(token.chainId) === Number(chainId),
+    (token) => token.symbol.trim() === tokenSymbol.trim() && isSameChainId(token.chainId, chainId),
   );
 }
 
 function isPreloadedTokenAddress(tokenAddress: string, chainId: string) {
   const bigIntTokenAddress = num.toBigInt(tokenAddress);
   return !!PRELOADED_TOKENS.find(
-    (token) => num.toBigInt(token.address) === bigIntTokenAddress && Number(token.chainId) === Number(chainId),
+    (token) => num.toBigInt(token.address) === bigIntTokenAddress && isSameChainId(token.chainId, chainId),
   );
 }
 
-function isPreloadedNetworkChainId(networkChainId: string) {
-  const bigIntNetworkChainId = num.toBigInt(networkChainId);
-  return !!PRELOADED_NETWORKS.find((network) => num.toBigInt(network.chainId) === bigIntNetworkChainId);
+function isPreloadedNetworkChainId(chainId: string) {
+  return !!PRELOADED_NETWORKS.find((network) => isSameChainId(network.chainId, chainId));
 }
 
 function isPreloadedNetworkName(networkName: string) {
@@ -165,6 +172,10 @@ export function validateAddNetworkParams(params: AddNetworkRequestParams) {
   }
 }
 
+export function isSameChainId(chainId1: string, chainId2: string) {
+  return num.toBigInt(chainId1) === num.toBigInt(chainId2);
+}
+
 export const getValidNumber = (
   obj,
   defaultValue: number,
@@ -175,6 +186,27 @@ export const getValidNumber = (
   return obj === '' || isNaN(toNum) || toNum > maxVal || toNum < minVal ? defaultValue : toNum;
 };
 
+export function addDialogTxt(components: Array<Component>, label: string, value: string) {
+  components.push(text(`**${label}:**`));
+  components.push(copyable(value));
+}
+
+export function getNetworkTxt(network: Network) {
+  const components = [];
+  addDialogTxt(components, 'Chain Name', network.name);
+  addDialogTxt(components, 'Chain ID', network.chainId);
+  if (network.baseUrl) {
+    addDialogTxt(components, 'Base URL', network.baseUrl);
+  }
+  if (network.nodeUrl) {
+    addDialogTxt(components, 'RPC URL', network.nodeUrl);
+  }
+  if (network.voyagerUrl) {
+    addDialogTxt(components, 'Explorer URL', network.voyagerUrl);
+  }
+  return components;
+}
+
 export function getTxnSnapTxt(
   senderAddress: string,
   network: Network,
@@ -183,33 +215,26 @@ export function getTxnSnapTxt(
   invocationsDetails?: InvocationsDetails,
 ) {
   const components = [];
-  components.push(text('**Network:**'));
-  components.push(copyable(network.name));
-  components.push(text('**Signer Address:**'));
-  components.push(copyable(senderAddress));
-  components.push(text('**Transaction Invocation:**'));
-  components.push(copyable(JSON.stringify(txnInvocation, null, 2)));
+  addDialogTxt(components, 'Network', network.name);
+  addDialogTxt(components, 'Signer Address', senderAddress);
+  addDialogTxt(components, 'Transaction Invocation', JSON.stringify(txnInvocation, null, 2));
   if (abis && abis.length > 0) {
-    components.push(text('**Abis:**'));
-    components.push(copyable(JSON.stringify(abis, null, 2)));
+    addDialogTxt(components, 'Abis', JSON.stringify(abis, null, 2));
   }
 
   if (invocationsDetails?.maxFee) {
-    components.push(text('**Max Fee(ETH):**'));
-    components.push(copyable(convert(invocationsDetails.maxFee, 'wei', 'ether')));
+    addDialogTxt(components, 'Max Fee(ETH)', convert(invocationsDetails.maxFee, 'wei', 'ether'));
   }
   if (invocationsDetails?.nonce) {
-    components.push(text('**Nonce:**'));
-    components.push(copyable(invocationsDetails.nonce.toString()));
+    addDialogTxt(components, 'Nonce', invocationsDetails.nonce.toString());
   }
   if (invocationsDetails?.version) {
-    components.push(text('**Version:**'));
-    components.push(copyable(invocationsDetails.version.toString()));
+    addDialogTxt(components, 'Version', invocationsDetails.version.toString());
   }
   return components;
 }
 
-export function getSigningTxnText(
+export function getSendTxnText(
   state: SnapState,
   contractAddress: string,
   contractFuncName: string,
@@ -220,8 +245,13 @@ export function getSigningTxnText(
 ): Array<Component> {
   // Retrieve the ERC-20 token from snap state for confirmation display purpose
   const token = getErc20Token(state, contractAddress, network.chainId);
-  const tokenTransferComponents1 = [];
-  const tokenTransferComponents2 = [];
+  const components = [];
+  addDialogTxt(components, 'Signer Address', senderAddress);
+  addDialogTxt(components, 'Contract', contractAddress);
+  addDialogTxt(components, 'Call Data', `[${contractCallData.join(', ')}]`);
+  addDialogTxt(components, 'Estimated Gas Fee(ETH)', convert(maxFee, 'wei', 'ether'));
+  addDialogTxt(components, 'Network', network.name);
+
   if (token && contractFuncName === 'transfer') {
     try {
       let amount = '';
@@ -230,79 +260,26 @@ export function getSigningTxnText(
       } else {
         amount = (Number(contractCallData[1]) * Math.pow(10, -1 * token.decimals)).toFixed(token.decimals);
       }
-      tokenTransferComponents2.push(text('**Sender Address:**'));
-      tokenTransferComponents2.push(copyable(senderAddress));
-      tokenTransferComponents2.push(text('**Recipient Address:**'));
-      tokenTransferComponents2.push(copyable(contractCallData[0]));
-      tokenTransferComponents2.push(text(`**Amount(${token.symbol}):**`));
-      tokenTransferComponents2.push(copyable(amount));
+      addDialogTxt(components, 'Sender Address', senderAddress);
+      addDialogTxt(components, 'Recipient Address', contractCallData[0]);
+      addDialogTxt(components, `Amount(${token.symbol})`, amount);
     } catch (err) {
       logger.error(`getSigningTxnText: error found in amount conversion: ${err}`);
     }
   }
-  tokenTransferComponents1.push(text('**Signer Address:**'));
-  tokenTransferComponents1.push(copyable(senderAddress));
-  tokenTransferComponents1.push(text('**Contract:**'));
-  tokenTransferComponents1.push(copyable(contractAddress));
-  tokenTransferComponents1.push(text('**Call Data:**'));
-  tokenTransferComponents1.push(copyable(`[${contractCallData.join(', ')}]`));
-  tokenTransferComponents1.push(text('**Estimated Gas Fee(ETH):**'));
-  tokenTransferComponents1.push(copyable(convert(maxFee, 'wei', 'ether')));
-  tokenTransferComponents1.push(text('**Network:**'));
-  tokenTransferComponents1.push(copyable(network.name));
 
-  return tokenTransferComponents1.concat(tokenTransferComponents2);
+  return components;
 }
 
 export function getSignTxnTxt(
-  senderAddress: string,
+  signerAddress: string,
   network: Network,
-  txnInvocation: Call[],
-  invocationsDetails: InvocationsSignerDetails,
-  abis?: Abi[],
+  txnInvocation: Call[] | DeclareSignerDetails | DeployAccountSignerDetails,
 ) {
   const components = [];
-  components.push(text('**Network:**'));
-  components.push(copyable(network.name));
-  components.push(text('**Signer Address:**'));
-  components.push(copyable(senderAddress));
-
-  components.push(text('**Transaction Invocation:**'));
-  components.push(copyable(JSON.stringify(txnInvocation, null, 2)));
-
-  if (abis && abis.length > 0) {
-    components.push(text('**Abis:**'));
-    components.push(copyable(JSON.stringify(abis, null, 2)));
-  }
-
-  if (invocationsDetails?.maxFee !== undefined) {
-    components.push(text('**Max Fee(ETH):**'));
-    components.push(copyable(convert(invocationsDetails.maxFee, 'wei', 'ether')));
-  }
-  if (invocationsDetails?.nonce !== undefined) {
-    components.push(text('**Nonce:**'));
-    components.push(copyable(invocationsDetails.nonce.toString()));
-  }
-  if (invocationsDetails?.version !== undefined) {
-    components.push(text('**Version:**'));
-    components.push(copyable(invocationsDetails.version.toString()));
-  }
-
-  if (invocationsDetails?.walletAddress !== undefined) {
-    components.push(text('**walletAddress:**'));
-    components.push(copyable(invocationsDetails.walletAddress.toString()));
-  }
-
-  if (invocationsDetails?.chainId !== undefined) {
-    components.push(text('**chainId:**'));
-    components.push(copyable(invocationsDetails.chainId.toString()));
-  }
-
-  if (invocationsDetails?.cairoVersion !== undefined) {
-    components.push(text('**cairoVersion:**'));
-    components.push(copyable(invocationsDetails.cairoVersion.toString()));
-  }
-
+  addDialogTxt(components, 'Network', network.name);
+  addDialogTxt(components, 'Signer Address', signerAddress);
+  addDialogTxt(components, 'Transaction', JSON.stringify(txnInvocation, null, 2));
   return components;
 }
 
@@ -313,46 +290,33 @@ export function getDeclareSnapTxt(
   invocationsDetails?: InvocationsDetails,
 ) {
   const components = [];
-  components.push(text('**Network:**'));
-  components.push(copyable(network.name));
-  components.push(text('**Signer Address:**'));
-  components.push(copyable(senderAddress));
+  addDialogTxt(components, 'Network', network.name);
+  addDialogTxt(components, 'Signer Address', senderAddress);
 
   if (contractPayload.contract) {
-    components.push(text('**Contract:**'));
-    if (typeof contractPayload.contract === 'string' || contractPayload.contract instanceof String) {
-      components.push(copyable(contractPayload.contract.toString()));
-    } else {
-      components.push(copyable(JSON.stringify(contractPayload.contract, null, 2)));
-    }
+    const _contractPayload =
+      typeof contractPayload.contract === 'string' || contractPayload.contract instanceof String
+        ? contractPayload.contract.toString()
+        : JSON.stringify(contractPayload.contract, null, 2);
+    addDialogTxt(components, 'Contract', _contractPayload);
   }
-
   if (contractPayload.compiledClassHash) {
-    components.push(text('**Complied Class Hash:**'));
-    components.push(copyable(contractPayload.compiledClassHash));
+    addDialogTxt(components, 'Complied Class Hash', contractPayload.compiledClassHash);
   }
-
   if (contractPayload.classHash) {
-    components.push(text('**Class Hash:**'));
-    components.push(copyable(contractPayload.classHash));
+    addDialogTxt(components, 'Class Hash', contractPayload.classHash);
   }
-
   if (contractPayload.casm) {
-    components.push(text('**Casm:**'));
-    components.push(copyable(JSON.stringify(contractPayload.casm, null, 2)));
+    addDialogTxt(components, 'Casm', JSON.stringify(contractPayload.casm, null, 2));
   }
-
   if (invocationsDetails?.maxFee !== undefined) {
-    components.push(text('**Max Fee(ETH):**'));
-    components.push(copyable(convert(invocationsDetails.maxFee, 'wei', 'ether')));
+    addDialogTxt(components, 'Max Fee(ETH)', convert(invocationsDetails.maxFee, 'wei', 'ether'));
   }
   if (invocationsDetails?.nonce !== undefined) {
-    components.push(text('**Nonce:**'));
-    components.push(copyable(invocationsDetails.nonce.toString()));
+    addDialogTxt(components, 'Nonce', invocationsDetails.nonce.toString());
   }
   if (invocationsDetails?.version !== undefined) {
-    components.push(text('**Version:**'));
-    components.push(copyable(invocationsDetails.version.toString()));
+    addDialogTxt(components, 'Version', invocationsDetails.version.toString());
   }
   return components;
 }
@@ -364,19 +328,25 @@ export function getAddTokenText(
   tokenDecimals: number,
   network: Network,
 ) {
-  return `Token Address: ${tokenAddress}\n\nToken Name: ${tokenName}\n\nToken Symbol: ${tokenSymbol}\n\nToken Decimals: ${tokenDecimals}\n\nNetwork: ${network.name}`;
+  const components = [];
+  addDialogTxt(components, 'Network', network.name);
+  addDialogTxt(components, 'Token Address', tokenAddress);
+  addDialogTxt(components, 'Token Name', tokenName);
+  addDialogTxt(components, 'Token Symbol', tokenSymbol);
+  addDialogTxt(components, 'Token Decimals', tokenDecimals.toString());
+  return components;
 }
 
 export function getAccount(state: SnapState, accountAddress: string, chainId: string) {
   const bigIntAccountAddress = num.toBigInt(accountAddress);
   return state.accContracts?.find(
-    (acc) => num.toBigInt(acc.address) === bigIntAccountAddress && Number(acc.chainId) === Number(chainId),
+    (acc) => num.toBigInt(acc.address) === bigIntAccountAddress && isSameChainId(acc.chainId, chainId),
   );
 }
 
 export function getAccounts(state: SnapState, chainId: string) {
   return state.accContracts
-    .filter((acc) => Number(acc.chainId) === Number(chainId))
+    .filter((acc) => isSameChainId(acc.chainId, chainId))
     .sort((a: AccContract, b: AccContract) => a.addressIndex - b.addressIndex);
 }
 
@@ -421,7 +391,7 @@ export async function upsertAccount(userAccount: AccContract, wallet, mutex: Mut
 
 export function getNetwork(state: SnapState, chainId: string) {
   return state.networks?.find(
-    (network) => Number(network.chainId) === Number(chainId) && !Boolean(network?.useOldAccounts),
+    (network) => isSameChainId(network.chainId, chainId) && !Boolean(network?.useOldAccounts),
   );
 }
 
@@ -471,16 +441,16 @@ export async function upsertNetwork(network: Network, wallet, mutex: Mutex, stat
 export function getErc20Token(state: SnapState, tokenAddress: string, chainId: string) {
   const bigIntTokenAddress = num.toBigInt(tokenAddress);
   return state.erc20Tokens?.find(
-    (token) => num.toBigInt(token.address) === bigIntTokenAddress && Number(token.chainId) === Number(chainId),
+    (token) => num.toBigInt(token.address) === bigIntTokenAddress && isSameChainId(token.chainId, chainId),
   );
 }
 
 export function getErc20Tokens(state: SnapState, chainId: string) {
-  return state.erc20Tokens?.filter((token) => Number(token.chainId) === Number(chainId));
+  return state.erc20Tokens?.filter((token) => isSameChainId(token.chainId, chainId));
 }
 
 export function getEtherErc20Token(state: SnapState, chainId: string) {
-  return state.erc20Tokens?.find((token) => Number(token.chainId) === Number(chainId) && token.symbol === 'ETH');
+  return state.erc20Tokens?.find((token) => isSameChainId(token.chainId, chainId) && token.symbol === 'ETH');
 }
 
 export async function upsertErc20Token(erc20Token: Erc20Token, wallet, mutex: Mutex, state: SnapState = undefined) {
@@ -533,7 +503,7 @@ export function getNetworkFromChainId(state: SnapState, targerChainId: string | 
 }
 
 export function getChainIdHex(network: Network) {
-  return `0x${Number(network.chainId).toString(16)}`;
+  return `0x${num.toBigInt(network.chainId).toString(16)}`;
 }
 
 export function getTransactionFromVoyagerUrl(network: Network) {
@@ -547,7 +517,7 @@ export function getTransactionsFromVoyagerUrl(network: Network) {
 export function getTransaction(state: SnapState, txnHash: string, chainId: string) {
   const bigIntTxnHash = num.toBigInt(txnHash);
   return state.transactions?.find(
-    (txn) => num.toBigInt(txn.txnHash) === bigIntTxnHash && Number(txn.chainId) === Number(chainId),
+    (txn) => num.toBigInt(txn.txnHash) === bigIntTxnHash && isSameChainId(txn.chainId, chainId),
   );
 }
 
@@ -564,7 +534,7 @@ export function getTransactions(
   let filteredTxns: Transaction[] = [];
   if (state.transactions) {
     filteredTxns = filterTransactions(state.transactions, [
-      new ChainIdFilter(Number(chainId)),
+      new ChainIdFilter(chainId),
       new TimestampFilter(minTimestamp),
       new SenderAddressFilter(senderAddress ? num.toBigInt(senderAddress) : undefined),
       new ContractAddressFilter(contractAddress ? num.toBigInt(contractAddress) : undefined),
@@ -675,6 +645,33 @@ export async function removeAcceptedTransaction(
           txn.finalityStatus !== TransactionStatus.ACCEPTED_ON_L1) ||
         (txn.finalityStatus === TransactionStatus.ACCEPTED_ON_L2 && txn.timestamp * 1000 >= minTimeStamp),
     );
+
+    await wallet.request({
+      method: 'snap_manageState',
+      params: {
+        operation: 'update',
+        newState: state,
+      },
+    });
+  });
+}
+
+export function getCurrentNetwork(state: SnapState) {
+  return state.currentNetwork || STARKNET_TESTNET_NETWORK;
+}
+
+export async function setCurrentNetwork(network: Network, wallet, mutex: Mutex, state: SnapState = undefined) {
+  return mutex.runExclusive(async () => {
+    if (!state) {
+      state = await wallet.request({
+        method: 'snap_manageState',
+        params: {
+          operation: 'get',
+        },
+      });
+    }
+
+    state.currentNetwork = network;
 
     await wallet.request({
       method: 'snap_manageState',

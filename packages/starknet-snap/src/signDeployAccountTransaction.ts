@@ -1,23 +1,26 @@
 import { toJson } from './utils/serializer';
 import { Signature } from 'starknet';
-import { ApiParams, SignTransactionRequestParams } from './types/snapApi';
-import { getKeysFromAddress, signTransactions } from './utils/starknetUtils';
+import { ApiParams, SignDeployAccountTransactionRequestParams } from './types/snapApi';
+import {
+  getKeysFromAddress,
+  signDeployAccountTransaction as signDeployAccountTransactionUtil,
+} from './utils/starknetUtils';
 import { getNetworkFromChainId, getSignTxnTxt } from './utils/snapUtils';
 import { DialogType } from '@metamask/rpc-methods';
 import { heading, panel } from '@metamask/snaps-ui';
 import { logger } from '../src/utils/logger';
 
-export async function signTransaction(params: ApiParams): Promise<Signature | boolean> {
+export async function signDeployAccountTransaction(params: ApiParams): Promise<Signature | boolean> {
   try {
     const { state, keyDeriver, requestParams, wallet } = params;
-    const requestParamsObj = requestParams as SignTransactionRequestParams;
+    const requestParamsObj = requestParams as SignDeployAccountTransactionRequestParams;
     const signerAddress = requestParamsObj.signerAddress;
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
     const { privateKey } = await getKeysFromAddress(keyDeriver, network, state, signerAddress);
 
-    logger.log(`signTransaction params: ${toJson(requestParamsObj.transactions, 2)}}`);
+    logger.log(`signDeployAccountTransaction params: ${toJson(requestParamsObj.transaction, 2)}}`);
 
-    const snapComponents = getSignTxnTxt(signerAddress, network, requestParamsObj.transactions);
+    const snapComponents = getSignTxnTxt(signerAddress, network, requestParamsObj.transaction);
 
     if (requestParamsObj.enableAutherize === true) {
       const response = await wallet.request({
@@ -31,14 +34,7 @@ export async function signTransaction(params: ApiParams): Promise<Signature | bo
       if (!response) return false;
     }
 
-    const signatures = await signTransactions(
-      privateKey,
-      requestParamsObj.transactions,
-      requestParamsObj.transactionsDetail,
-      requestParamsObj.abis,
-    );
-
-    return signatures;
+    return await signDeployAccountTransactionUtil(privateKey, requestParamsObj.transaction);
   } catch (error) {
     logger.error(`Problem found: ${error}`);
     throw error;
