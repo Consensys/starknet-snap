@@ -444,7 +444,7 @@ export const getKeysFromAddress = async (
   if (!isNaN(addressIndex)) {
     return getKeysFromAddressIndex(keyDeriver, network.chainId, state, addressIndex);
   }
-  console.log(`getNextAddressIndex:\nAddress not found: ${address}`);
+  logger.log(`getNextAddressIndex:\nAddress not found: ${address}`);
   throw new Error(`Address not found: ${address}`);
 };
 

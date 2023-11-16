@@ -199,3 +199,7 @@ export interface SignDeployAccountTransactionRequestParams extends SignRequestPa
 export interface SignDeclareTransactionRequestParams extends SignRequestParams, BaseRequestParams {
   transaction: DeclareSignerDetails;
 }
+
+export interface SwitchNetworkRequestParams extends BaseRequestParams {
+  chainId: string;
+}

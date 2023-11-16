@@ -11,6 +11,7 @@ import {
 import { DEFAULT_DECIMAL_PLACES } from './utils/constants';
 import { DialogType } from '@metamask/rpc-methods';
 import { heading, panel } from '@metamask/snaps-ui';
+import { logger } from './utils/logger';
 
 export async function addErc20Token(params: ApiParams) {
   try {
@@ -53,10 +54,10 @@ export async function addErc20Token(params: ApiParams) {
 
     await upsertErc20Token(erc20Token, wallet, saveMutex);
 
-    console.log(`addErc20Token:\nerc20Token: ${toJson(erc20Token)}`);
+    logger.log(`addErc20Token:\nerc20Token: ${toJson(erc20Token)}`);
     return erc20Token;
   } catch (err) {
-    console.error(`Problem found: ${err}`);
+    logger.error(`Problem found: ${err}`);
     throw err;
   }
 }

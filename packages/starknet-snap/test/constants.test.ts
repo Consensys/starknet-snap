@@ -309,6 +309,20 @@ export const txn5: Transaction = {
   eventIds: [],
 };
 
+export const mainnetTxn1: Transaction = {
+  chainId: STARKNET_MAINNET_NETWORK.chainId,
+  contractAddress: '0x07394cbe418daa16e42b87ba67372d4ab4a5df0b05c6e554d158458ce245bc10',
+  contractCallData: ['0x0256d8f49882cc9366037415f48fa9fd2b5b7344ded7573ebfcef7c90e3e6b75', '2000000000000000000', '0'],
+  contractFuncName: 'transfer',
+  senderAddress: '0x05a98ec74a40383cf99896bfea2ec5e6aad16c7eed50025a5f569d585ebb13a2',
+  timestamp: 1653569160,
+  txnHash: '0x75ff16a2fd6b489d2e17673addba34af372907b0b23ff9068a23afa49c61999',
+  txnType: VoyagerTransactionType.INVOKE,
+  failureReason: '',
+  status: 'PENDING',
+  eventIds: [],
+};
+
 export const getBalanceResp = {
   result: ['0x0', '0x0'],
 };
