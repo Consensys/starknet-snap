@@ -44,6 +44,7 @@ describe('Test function: switchNetwork', function () {
   it('should switch the network correctly', async function () {
     const requestObject: SwitchNetworkRequestParams = {
       chainId: STARKNET_MAINNET_NETWORK.chainId,
+      enableAutherize: true,
     };
     apiParams.requestParams = requestObject;
     const result = await switchNetwork(apiParams);
@@ -54,9 +55,23 @@ describe('Test function: switchNetwork', function () {
     expect(state.networks.length).to.be.eql(2);
   });
 
+  it('should skip autherize when enableAutherize is false or omit', async function () {
+    const requestObject: SwitchNetworkRequestParams = {
+      chainId: STARKNET_MAINNET_NETWORK.chainId,
+    };
+    apiParams.requestParams = requestObject;
+    const result = await switchNetwork(apiParams);
+    expect(result).to.be.eql(true);
+    expect(stateStub).to.be.calledOnce;
+    expect(dialogStub).to.be.callCount(0);
+    expect(state.currentNetwork).to.be.eql(STARKNET_MAINNET_NETWORK);
+    expect(state.networks.length).to.be.eql(2);
+  });
+
   it('should throw an error if network not found', async function () {
     const requestObject: SwitchNetworkRequestParams = {
       chainId: '123',
+      enableAutherize: true,
     };
     apiParams.requestParams = requestObject;
     let result;
@@ -76,6 +91,7 @@ describe('Test function: switchNetwork', function () {
     sandbox.stub(snapUtils, 'setCurrentNetwork').throws(new Error());
     const requestObject: SwitchNetworkRequestParams = {
       chainId: STARKNET_TESTNET_NETWORK.chainId,
+      enableAutherize: true,
     };
     apiParams.requestParams = requestObject;
     let result;
