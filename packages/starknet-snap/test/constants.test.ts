@@ -18,7 +18,6 @@ export const invalidNetwork: Network = {
   nodeUrl: '',
   voyagerUrl: '',
   accountClassHash: '',
-  accountClassHashV0: '',
 };
 
 export const account1: AccContract = {

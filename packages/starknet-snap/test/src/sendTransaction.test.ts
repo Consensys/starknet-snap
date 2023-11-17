@@ -226,7 +226,7 @@ describe('Test function: sendTransaction', function () {
         });
         describe('when account is deployed', function () {
           beforeEach(async function () {
-            sandbox.stub(utils, 'isAccountAddressDeployed').resolves(true);
+            sandbox.stub(utils, 'isAccountDeployed').resolves(true);
           });
 
           it('should send a transaction for transferring 10 tokens correctly', async function () {
@@ -268,7 +268,7 @@ describe('Test function: sendTransaction', function () {
 
       describe('when account is deployed', function () {
         beforeEach(async function () {
-          sandbox.stub(utils, 'isAccountAddressDeployed').resolves(true);
+          sandbox.stub(utils, 'isAccountDeployed').resolves(true);
         });
 
         it('should send a transaction for transferring 10 tokens correctly', async function () {
@@ -410,7 +410,7 @@ describe('Test function: sendTransaction', function () {
 
       describe('when account is not deployed', function () {
         beforeEach(async function () {
-          sandbox.stub(utils, 'isAccountAddressDeployed').resolves(false);
+          sandbox.stub(utils, 'isAccountDeployed').resolves(false);
         });
 
         it('should send a transaction for transferring 10 tokens and a transaction for deploy correctly', async function () {

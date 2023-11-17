@@ -51,11 +51,12 @@ export async function sendTransaction(params: ApiParams) {
       throw new Error('Upgrade required');
     }
 
-    const {
-      privateKey: senderPrivateKey,
-      publicKey,
-      addressIndex,
-    } = await getKeysFromAddress(keyDeriver, network, state, senderAddress);
+    const { privateKey: senderPrivateKey, addressIndex } = await getKeysFromAddress(
+      keyDeriver,
+      network,
+      state,
+      senderAddress,
+    );
     let maxFee = requestParamsObj.maxFee ? num.toBigInt(requestParamsObj.maxFee) : constants.ZERO;
     if (maxFee === constants.ZERO) {
       const { suggestedMaxFee } = await estimateFee(params);
@@ -88,7 +89,7 @@ export async function sendTransaction(params: ApiParams) {
 
     logger.log(`sendTransaction:\ntxnInvocation: ${toJson(txnInvocation)}\nmaxFee: ${maxFee.toString()}}`);
 
-    const accountDeployed = await isAccountDeployed(network, publicKey);
+    const accountDeployed = await isAccountDeployed(network, senderAddress);
     if (!accountDeployed) {
       //Deploy account before sending the transaction
       logger.log('sendTransaction:\nFirst transaction : send deploy transaction');

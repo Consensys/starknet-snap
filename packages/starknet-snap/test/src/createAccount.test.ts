@@ -63,7 +63,7 @@ describe('Test function: createAccount', function () {
   });
 
   it('should only return derived address without sending deploy txn correctly in mainnet if deploy is false', async function () {
-    sandbox.stub(utils, 'isAccountAddressDeployed').resolves(false);
+    sandbox.stub(utils, 'isAccountDeployed').resolves(false);
     const requestObject: CreateAccountRequestParams = {
       chainId: STARKNET_MAINNET_NETWORK.chainId,
     };
@@ -86,7 +86,7 @@ describe('Test function: createAccount', function () {
     sandbox.stub(utils, 'deployAccount').callsFake(async () => {
       return createAccountProxyMainnetResp;
     });
-    sandbox.stub(utils, 'isAccountAddressDeployed').resolves(false);
+    sandbox.stub(utils, 'isAccountDeployed').resolves(false);
     sandbox.stub(utils, 'getBalance').callsFake(async () => {
       return getBalanceResp[0];
     });
@@ -122,7 +122,7 @@ describe('Test function: createAccount', function () {
     sandbox.stub(utils, 'deployAccount').callsFake(async () => {
       return createAccountProxyMainnetResp2;
     });
-    sandbox.stub(utils, 'isAccountAddressDeployed').resolves(false);
+    sandbox.stub(utils, 'isAccountDeployed').resolves(false);
     sandbox.stub(utils, 'getBalance').callsFake(async () => {
       return getBalanceResp[0];
     });
@@ -157,7 +157,7 @@ describe('Test function: createAccount', function () {
     sandbox.stub(utils, 'deployAccount').callsFake(async () => {
       return createAccountProxyResp;
     });
-    sandbox.stub(utils, 'isAccountAddressDeployed').resolves(false);
+    sandbox.stub(utils, 'isAccountDeployed').resolves(false);
     sandbox.stub(utils, 'getBalance').callsFake(async () => {
       return getBalanceResp[0];
     });
@@ -206,7 +206,7 @@ describe('Test function: createAccount', function () {
     sandbox.stub(utils, 'deployAccount').callsFake(async () => {
       return createAccountProxyResp;
     });
-    sandbox.stub(utils, 'isAccountAddressDeployed').resolves(true);
+    sandbox.stub(utils, 'isAccountDeployed').resolves(true);
     sandbox.stub(utils, 'getBalance').callsFake(async () => {
       return getBalanceResp[0];
     });
@@ -227,7 +227,7 @@ describe('Test function: createAccount', function () {
     sandbox.stub(utils, 'deployAccount').callsFake(async () => {
       return createAccountProxyResp;
     });
-    sandbox.stub(utils, 'isAccountAddressDeployed').resolves(false);
+    sandbox.stub(utils, 'isAccountDeployed').resolves(false);
     sandbox.stub(utils, 'getBalance').callsFake(async () => {
       return getBalanceResp[0];
     });
@@ -248,7 +248,7 @@ describe('Test function: createAccount', function () {
     sandbox.stub(utils, 'deployAccount').callsFake(async () => {
       return createAccountProxyResp;
     });
-    sandbox.stub(utils, 'isAccountAddressDeployed').resolves(false);
+    sandbox.stub(utils, 'isAccountDeployed').resolves(false);
     sandbox.stub(utils, 'getBalance').callsFake(async () => {
       return getBalanceResp[0];
     });
@@ -269,7 +269,7 @@ describe('Test function: createAccount', function () {
     sandbox.stub(utils, 'deployAccount').callsFake(async () => {
       return createAccountProxyResp;
     });
-    sandbox.stub(utils, 'isAccountAddressDeployed').resolves(false);
+    sandbox.stub(utils, 'isAccountDeployed').resolves(false);
     sandbox.stub(utils, 'getBalance').throws(new Error());
     sandbox.stub(utils, 'estimateAccountDeployFee').callsFake(async () => {
       return estimateDeployFeeResp2;
@@ -288,7 +288,7 @@ describe('Test function: createAccount', function () {
     sandbox.stub(utils, 'deployAccount').callsFake(async () => {
       return createAccountFailedProxyResp;
     });
-    sandbox.stub(utils, 'isAccountAddressDeployed').resolves(false);
+    sandbox.stub(utils, 'isAccountDeployed').resolves(false);
     sandbox.stub(utils, 'callContract').resolves(getBalanceResp);
     sandbox.stub(utils, 'getSigner').throws(new Error());
     sandbox.stub(utils, 'estimateAccountDeployFee').callsFake(async () => {
@@ -309,7 +309,7 @@ describe('Test function: createAccount', function () {
     sandbox.stub(utils, 'deployAccount').callsFake(async () => {
       return createAccountProxyResp;
     });
-    sandbox.stub(utils, 'isAccountAddressDeployed').resolves(false);
+    sandbox.stub(utils, 'isAccountDeployed').resolves(false);
     sandbox.stub(utils, 'callContract').resolves(getBalanceResp);
     sandbox.stub(utils, 'getSigner').throws(new Error());
     sandbox.stub(utils, 'estimateAccountDeployFee').callsFake(async () => {
@@ -328,8 +328,8 @@ describe('Test function: createAccount', function () {
     }
   });
 
-  it('should throw error if isAccountAddressDeployed failed', async function () {
-    const isAccountAddressDeployedStub = sandbox.stub(utils, 'isAccountAddressDeployed').throws(new Error());
+  it('should throw error if isAccountDeployed failed', async function () {
+    const isAccountAddressDeployedStub = sandbox.stub(utils, 'isAccountDeployed').throws(new Error());
     const deployAccountStub = sandbox.stub(utils, 'deployAccount');
     const estimateAccountDeployFeeStub = sandbox.stub(utils, 'estimateAccountDeployFee');
     const getBalanceStub = sandbox.stub(utils, 'getBalance');

@@ -421,6 +421,12 @@ export const getNextAddressIndex = (chainId: string, state: SnapState, derivatio
   return uninitializedAccount?.addressIndex ?? accounts.length;
 };
 
+/**
+ * calculate contract address by publicKey, supported for carioVersions [1]
+ *
+ * @param  publicKey - address's publicKey.
+ * @returns - address and calldata.
+ */
 export const getAccContractAddressAndCallData = (publicKey) => {
   const callData = CallData.compile({
     signer: publicKey,
@@ -438,6 +444,12 @@ export const getAccContractAddressAndCallData = (publicKey) => {
   };
 };
 
+/**
+ * calculate contract address by publicKey, supported for carioVersions [0]
+ *
+ * @param  publicKey - address's publicKey.
+ * @returns - address and calldata.
+ */
 export const getAccContractAddressAndCallDataCairo0 = (publicKey) => {
   const callData = CallData.compile({
     implementation: ACCOUNT_CLASS_HASH_V0,
@@ -496,37 +508,23 @@ export const getKeysFromAddressIndex = async (
   };
 };
 
-export const isAccountDeployedCairo0 = async (network: Network, publicKey: string) => {
-  const { address } = getAccContractAddressAndCallDataCairo0(publicKey);
-  return isAccountAddressDeployed(network, address, 0);
-};
-
-export const isAccountDeployed = async (network: Network, publicKey: string) => {
-  const { address } = getAccContractAddressAndCallData(publicKey);
-  return isAccountAddressDeployed(network, address, 1);
-};
-
-export const isAccountAddressDeployed = async (network: Network, address: string, cairoVersion = 1) => {
-  let accountDeployed = true;
+/**
+ * Check address is deployed by using getVersion, supported for carioVersions [0,1]
+ *
+ * @param  network - Network.
+ * @param  address - Input address.
+ * @returns - boolean.
+ */
+export const isAccountDeployed = async (network: Network, address: string) => {
   try {
-    switch (cairoVersion) {
-      case 0:
-        await getSigner(address, network);
-        break;
-      case 1:
-        await getOwner(address, network);
-        break;
-      default:
-        throw new Error(`Not supported cairo version ${cairoVersion}`);
-    }
+    await getVersion(address, network);
+    return true;
   } catch (err) {
     if (!err.message.includes('Contract not found')) {
       throw err;
     }
-    accountDeployed = false;
+    return false;
   }
-
-  return accountDeployed;
 };
 
 export const addFeesFromAllTransactions = (fees: EstimateFee[]): EstimateFee => {
@@ -552,6 +550,16 @@ export const validateAndParseAddress = (address: num.BigNumberish, length = 63) 
   return _validateAndParseAddressFn(address);
 };
 
+/**
+ * Find address index from the keyDeriver, supported for carioVersions [0,1]
+ *
+ * @param  chainId - Network ChainId.
+ * @param  address - Input address.
+ * @param  keyDeriver - keyDeriver from MetaMask wallet.
+ * @param  state - MetaMask Snap state.
+ * @param  maxScan - Number of scaning in the keyDeriver.
+ * @returns - address index and cairoVersion.
+ */
 export const findAddressIndex = async (
   chainId: string,
   address: string,
@@ -575,6 +583,13 @@ export const findAddressIndex = async (
   throw new Error(`Address not found: ${address}`);
 };
 
+/**
+ * Check address needed upgrade by using getVersion and compare with MIN_ACC_CONTRACT_VERSION, supported for carioVersions [0,1]
+ *
+ * @param  network - Network.
+ * @param  address - Input address.
+ * @returns - boolean.
+ */
 export const isUpgradeRequired = async (network: Network, address: string) => {
   try {
     logger.log(`isUpgradeRequired: address = ${address}`);
@@ -590,6 +605,13 @@ export const isUpgradeRequired = async (network: Network, address: string) => {
   }
 };
 
+/**
+ * Get user address by public key, return address if the address has deployed, prioritize cario 1 over cario 0, supported for carioVersions [0,1]
+ *
+ * @param  network - Network.
+ * @param  publicKey - address's public key.
+ * @returns - address and address's public key.
+ */
 export const getCorrectContractAddress = async (network: Network, publicKey: string) => {
   const { address: contractAddress } = getAccContractAddressAndCallData(publicKey);
   const { address: contractAddressCairo0 } = getAccContractAddressAndCallDataCairo0(publicKey);

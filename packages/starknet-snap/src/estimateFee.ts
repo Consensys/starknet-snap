@@ -65,7 +65,7 @@ export async function estimateFee(params: ApiParams) {
     logger.log(`estimateFee:\ntxnInvocation: ${toJson(txnInvocation)}`);
 
     //Estimate deploy account fee if the signer has not been deployed yet
-    const accountDeployed = await isAccountDeployed(network, publicKey);
+    const accountDeployed = await isAccountDeployed(network, senderAddress);
     let bulkTransactions: Invocations = [
       {
         type: TransactionType.INVOKE,

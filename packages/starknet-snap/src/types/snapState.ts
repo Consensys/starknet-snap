@@ -34,7 +34,6 @@ export interface Network {
   nodeUrl: string;
   voyagerUrl: string;
   accountClassHash: string; // in hex
-  accountClassHashV0?: string; // in hex
   useOldAccounts?: boolean;
 }
 

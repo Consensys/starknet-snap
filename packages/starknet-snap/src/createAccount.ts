@@ -5,7 +5,7 @@ import {
   deployAccount,
   getBalance,
   estimateAccountDeployFee,
-  isAccountAddressDeployed,
+  isAccountDeployed,
 } from './utils/starknetUtils';
 import {
   getEtherErc20Token,
@@ -72,7 +72,7 @@ export async function createAccount(params: ApiParams, silentMode = false) {
           };
       }
 
-      const signerAssigned = await isAccountAddressDeployed(network, contractAddress);
+      const signerAssigned = await isAccountDeployed(network, contractAddress);
 
       if (!signerAssigned) {
         try {
