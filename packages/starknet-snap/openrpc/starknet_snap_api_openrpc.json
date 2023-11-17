@@ -44,7 +44,7 @@
     },
     {
       "name": "starkNet_extractPublicKey",
-      "summary": "Extract public key from an Starknet account address",
+      "summary": "Extract public key from a Starknet account address",
       "paramStructure": "by-name",
       "params": [
         {
@@ -147,8 +147,8 @@
         },
         {
           "name": "maxMissed",
-          "summary": "Maximum number of unitialized addresses hit during the recovery process",
-          "description": "Maximum number of unitialized addresses (i.e. account with no signer) hit during the recovery process (default to 1)",
+          "summary": "Maximum number of uninitialized addresses hit during the recovery process",
+          "description": "Maximum number of uninitialized addresses (i.e. account with no signer) hit during the recovery process (default to 1)",
           "required": false,
           "schema": {
             "type": "integer",
@@ -882,7 +882,7 @@
         {
           "name": "invocationDetails",
           "summary": "Transaction configurate parameters",
-          "description": "A struct consist of maxFee, nonce and version",
+          "description": "A struct consists of maxFee, nonce and version",
           "required": false,
           "schema": {
             "$ref": "#/components/schemas/INVOCATION_DETAILS"
@@ -925,7 +925,7 @@
         {
           "name": "txnInvocation",
           "summary": "Transaction(s)",
-          "description": "Array or Object that consist of transaction payload",
+          "description": "Array or Object that consists of transaction payload",
           "required": true,
           "schema": {
             "$ref": "#/components/schemas/INVOCATION_PAYLOAD"
@@ -934,7 +934,7 @@
         {
           "name": "abis",
           "summary": "abis",
-          "description": "Array or Object that consist of abi",
+          "description": "Array or Object that consists of abi",
           "required": false,
           "schema": {
             "$ref": "#/components/schemas/ABIS"
@@ -943,7 +943,7 @@
         {
           "name": "invocationDetails",
           "summary": "Transaction configurate parameters",
-          "description": "A struct consist of maxFee, nonce and version",
+          "description": "A struct consists of maxFee, nonce and version",
           "required": false,
           "schema": {
             "$ref": "#/components/schemas/INVOCATION_DETAILS"
@@ -953,7 +953,7 @@
       "result": {
         "name": "result",
         "summary": "Transaction result",
-        "description": "Transaction result consist of transaction hash",
+        "description": "Transaction result consists of transaction hash",
         "schema": {
           "$ref": "#/components/schemas/SEND_TRANSACTION_RESULT"
         }
@@ -986,7 +986,7 @@
         {
           "name": "contractPayload",
           "summary": "Payload of the contract",
-          "description": "Object that consist of contract payload",
+          "description": "Object that consists of contract payload",
           "required": true,
           "schema": {
             "$ref": "#/components/schemas/CONTRACT_PAYLOAD"
@@ -995,7 +995,7 @@
         {
           "name": "invocationDetails",
           "summary": "Transaction configurate parameters",
-          "description": "A struct consist of maxFee, nonce and version",
+          "description": "A struct consists of maxFee, nonce and version",
           "required": false,
           "schema": {
             "$ref": "#/components/schemas/INVOCATION_DETAILS"
@@ -1005,7 +1005,7 @@
       "result": {
         "name": "result",
         "summary": "Transaction result",
-        "description": "Transaction result consist of transaction hash and class hash",
+        "description": "Transaction result consists of transaction hash and class hash",
         "schema": {
           "$ref": "#/components/schemas/DECLARE_CONTRACT_RESULT"
         }
@@ -1050,7 +1050,7 @@
         {
           "name": "abis",
           "summary": "abis",
-          "description": "Array or Object that consist of abi",
+          "description": "Array or Object that consists of abi",
           "required": false,
           "schema": {
             "$ref": "#/components/schemas/ABIS"
@@ -1059,7 +1059,7 @@
         {
           "name": "transactionsDetail",
           "summary": "Transaction Sign configurate parameters",
-          "description": "A struct consist of maxFee, nonce, version, walletAddress, chainId and cairoVersion",
+          "description": "A struct consists of maxFee, nonce, version, walletAddress, chainId and cairoVersion",
           "required": false,
           "schema": {
             "$ref": "#/components/schemas/SIGNER_INVOCATION_DETAILS"
@@ -1069,7 +1069,7 @@
       "result": {
         "name": "result",
         "summary": "Sign Transaction result",
-        "description": "Sign Transaction result consist of list of string",
+        "description": "Sign Transaction result consists of list of string",
         "schema": {
           "type": "array"
         }
@@ -1595,7 +1595,7 @@
           },
           "overallFee": {
             "type": "string",
-            "description": "Overall gas fee in in decimal string"
+            "description": "Overall gas fee in decimal string"
           },
           "gasConsumed": {
             "type": "string",
@@ -1626,7 +1626,7 @@
             },
             "overallFee": {
               "type": "string",
-              "description": "Overall gas fee in in decimal string"
+              "description": "Overall gas fee in decimal string"
             },
             "gasConsumed": {
               "type": "string",
