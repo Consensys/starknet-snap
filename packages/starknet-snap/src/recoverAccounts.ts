@@ -4,8 +4,6 @@ import { getSigner, getKeysFromAddressIndex, getAccContractAddressAndCallData } 
 import { getNetworkFromChainId, getValidNumber, upsertAccount } from './utils/snapUtils';
 import { AccContract } from './types/snapState';
 import { ApiParams, RecoverAccountsRequestParams } from './types/snapApi';
-import { DialogType } from '@metamask/rpc-methods';
-import { heading, panel, text } from '@metamask/snaps-ui';
 import { logger } from './utils/logger';
 
 export async function recoverAccounts(params: ApiParams) {
