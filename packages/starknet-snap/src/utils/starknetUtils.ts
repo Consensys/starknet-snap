@@ -35,7 +35,7 @@ import {
 } from 'starknet';
 import type { Hex } from '@noble/curves/abstract/utils';
 import { Network, SnapState, Transaction, TransactionType } from '../types/snapState';
-import { PROXY_CONTRACT_HASH, TRANSFER_SELECTOR_HEX } from './constants';
+import { ACCOUNT_CLASS_HASH_V0, PROXY_CONTRACT_HASH, TRANSFER_SELECTOR_HEX } from './constants';
 import { getAddressKey } from './keyPair';
 import { getAccount, getAccounts, getTransactionFromVoyagerUrl, getTransactionsFromVoyagerUrl } from './snapUtils';
 import { logger } from './logger';
@@ -400,9 +400,9 @@ export const getNextAddressIndex = (chainId: string, state: SnapState, derivatio
   return uninitializedAccount?.addressIndex ?? accounts.length;
 };
 
-export const getAccContractAddressAndCallData = (accountClassHash: string, publicKey) => {
+export const getAccContractAddressAndCallData = (publicKey) => {
   const callData = CallData.compile({
-    implementation: accountClassHash,
+    implementation: ACCOUNT_CLASS_HASH_V0,
     selector: hash.getSelectorFromName('initialize'),
     calldata: CallData.compile({ signer: publicKey, guardian: '0' }),
   });
@@ -432,7 +432,7 @@ export const getKeysFromAddress = async (
     const bigIntAddress = num.toBigInt(address);
     for (let i = 0; i < maxScan; i++) {
       const { publicKey } = await getKeysFromAddressIndex(keyDeriver, network.chainId, state, i);
-      const { address: calculatedAddress } = getAccContractAddressAndCallData(network.accountClassHash, publicKey);
+      const { address: calculatedAddress } = getAccContractAddressAndCallData(publicKey);
       if (num.toBigInt(calculatedAddress) === bigIntAddress) {
         addressIndex = i;
         logger.log(`getNextAddressIndex:\nFound address in scan: ${addressIndex} ${address}`);
@@ -474,7 +474,7 @@ export const getKeysFromAddressIndex = async (
 export const isAccountDeployed = async (network: Network, publicKey: string) => {
   let accountDeployed = true;
   try {
-    const { address: signerContractAddress } = getAccContractAddressAndCallData(network.accountClassHash, publicKey);
+    const { address: signerContractAddress } = getAccContractAddressAndCallData(publicKey);
     await getSigner(signerContractAddress, network);
   } catch (err) {
     accountDeployed = false;

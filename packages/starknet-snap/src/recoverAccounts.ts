@@ -45,7 +45,7 @@ export async function recoverAccounts(params: ApiParams) {
         state,
         i,
       );
-      const { address: contractAddress } = getAccContractAddressAndCallData(network.accountClassHash, publicKey);
+      const { address: contractAddress } = getAccContractAddressAndCallData(publicKey);
       logger.log(`recoverAccounts: index ${i}:\ncontractAddress = ${contractAddress}\npublicKey = ${publicKey}`);
 
       let signerPublicKey = '';

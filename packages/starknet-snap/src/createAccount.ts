@@ -38,10 +38,7 @@ export async function createAccount(params: ApiParams, silentMode = false) {
       addressIndex: addressIndexInUsed,
       derivationPath,
     } = await getKeysFromAddressIndex(keyDeriver, network.chainId, state, addressIndex);
-    const { address: contractAddress, callData: contractCallData } = getAccContractAddressAndCallData(
-      network.accountClassHash,
-      publicKey,
-    );
+    const { address: contractAddress, callData: contractCallData } = getAccContractAddressAndCallData(publicKey);
     logger.log(
       `createAccount:\ncontractAddress = ${contractAddress}\npublicKey = ${publicKey}\naddressIndex = ${addressIndexInUsed}`,
     );

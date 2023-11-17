@@ -13,7 +13,7 @@ export const MAXIMUM_TOKEN_SYMBOL_LENGTH = 16;
 
 export const TRANSFER_SELECTOR_HEX = '0x83afd3f4caedc6eebf44246fe54e38c95e3179a5ec9ea81740eca5b482d12e';
 
-export const ACCOUNT_CLASS_HASH = '0x033434ad846cdd5f23eb73ff09fe6fddd568284a0fb7d1be20ee482f044dabe2'; // from argent-x repo
+export const ACCOUNT_CLASS_HASH_V0 = '0x033434ad846cdd5f23eb73ff09fe6fddd568284a0fb7d1be20ee482f044dabe2'; // from argent-x repo
 
 export const STARKNET_MAINNET_NETWORK: Network = {
   name: 'Starknet Mainnet',
