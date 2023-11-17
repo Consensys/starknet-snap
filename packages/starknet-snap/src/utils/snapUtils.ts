@@ -157,14 +157,6 @@ export function validateAddNetworkParams(params: AddNetworkRequestParams) {
     throw new Error(`The given network Voyager URL is not an valid HTTP/HTTPS URL: ${params.networkVoyagerUrl}`);
   }
 
-  if (params.accountClassHash) {
-    try {
-      validateAndParseAddress(params.accountClassHash);
-    } catch (err) {
-      throw new Error(`The given account class hash is invalid: ${params.accountClassHash}`);
-    }
-  }
-
   if (isPreloadedNetworkChainId(params.networkChainId) || isPreloadedNetworkName(params.networkName)) {
     throw new Error(
       'The given network chainId or name is the same as one of the preloaded networks, and thus cannot be added',
@@ -425,7 +417,6 @@ export async function upsertNetwork(network: Network, wallet, mutex: Mutex, stat
       storedNetwork.baseUrl = network.baseUrl;
       storedNetwork.nodeUrl = network.nodeUrl;
       storedNetwork.voyagerUrl = network.voyagerUrl;
-      storedNetwork.accountClassHash = network.accountClassHash;
     }
 
     await wallet.request({

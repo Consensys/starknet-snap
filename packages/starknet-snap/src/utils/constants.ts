@@ -21,7 +21,7 @@ export const STARKNET_MAINNET_NETWORK: Network = {
   baseUrl: 'https://alpha-mainnet.starknet.io',
   nodeUrl: 'https://starknet-mainnet.infura.io/v3/60c7253fb48147658095fe0460ac9ee9',
   voyagerUrl: 'https://voyager.online',
-  accountClassHash: '0x033434ad846cdd5f23eb73ff09fe6fddd568284a0fb7d1be20ee482f044dabe2', // from argent-x repo
+  accountClassHash: '', // from argent-x repo
 };
 
 export const STARKNET_TESTNET_NETWORK: Network = {
@@ -30,7 +30,7 @@ export const STARKNET_TESTNET_NETWORK: Network = {
   baseUrl: 'https://alpha4.starknet.io',
   nodeUrl: 'https://starknet-goerli.infura.io/v3/60c7253fb48147658095fe0460ac9ee9',
   voyagerUrl: 'https://goerli.voyager.online',
-  accountClassHash: '0x033434ad846cdd5f23eb73ff09fe6fddd568284a0fb7d1be20ee482f044dabe2', // from argent-x repo
+  accountClassHash: '', // from argent-x repo
 };
 
 export const STARKNET_INTEGRATION_NETWORK: Network = {
@@ -39,7 +39,7 @@ export const STARKNET_INTEGRATION_NETWORK: Network = {
   baseUrl: 'https://external.integration.starknet.io',
   nodeUrl: '',
   voyagerUrl: '',
-  accountClassHash: '0x033434ad846cdd5f23eb73ff09fe6fddd568284a0fb7d1be20ee482f044dabe2', // from argent-x repo
+  accountClassHash: '', // from argent-x repo
 };
 
 export const ETHER_MAINNET: Erc20Token = {

@@ -20,20 +20,6 @@ export async function recoverAccounts(params: ApiParams) {
 
     logger.log(`recoverAccounts:\nstartIndex: ${startIndex}, maxScanned: ${maxScanned}, maxMissed: ${maxMissed}`);
 
-    if (!network.accountClassHash) {
-      await wallet.request({
-        method: 'snap_dialog',
-        params: {
-          type: DialogType.Alert,
-          content: panel([
-            heading('Failed to recover accounts'),
-            text('Recover Accounts not supported in network without class hash'),
-          ]),
-        },
-      });
-      return null;
-    }
-
     let i = startIndex,
       j = 0;
     const scannedAccounts: AccContract[] = [];
