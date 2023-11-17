@@ -7,10 +7,11 @@
 
 The Starknet snap allows developers to **deploy Starknet accounts, make transactions on Starknet, and interact with Starknet smart contracts.** It can be connected with any dapp to access Starknet and developers can experiment integrating their dapp with this snap today. 
 
-[Starknet dapp](https://snaps.consensys.net/starknet)
+[Starknet Snap](https://snaps.metamask.io/snap/npm/consensys/starknet-snap)
 
-[Blog post](https://consensys.net/blog/metamask/metamask-integrates-starkware-into-first-of-its-kind-zk-rollup-snap/)
+[Starknet Dapp](https://snaps.consensys.io/starknet)
 
+[Blog Post](https://consensys.io/blog/metamask/metamask-integrates-starkware-into-first-of-its-kind-zk-rollup-snap/)
 
 # Development
 ### Prerequisites
@@ -61,6 +62,40 @@ yarn workspace wallet-ui storybook
 - Wallet UI dapp: http://localhost:3000/
 - Storybook: http://localhost:6006/
 
+# Dapp intergation Guide
+
+### How to install
+From the dApp, issue the following RPC request to install the Snap, make sure it is using the latest version
+```javascript
+provider.request({
+  method: 'wallet_requestSnaps',
+  params: {
+    ["npm:@consensys/starknet-snap"]: { version: "2.2.0"}, //Snap's version
+  },
+})
+```
+
+### Interact with Starknet Snap's Api
+From the dApp, issue the following RPC request to interact with the Snap
+
+e.g
+```javascript
+provider.request({
+  method: 'wallet_invokeSnap',
+  params: {
+    snapId: "npm:@consensys/starknet-snap",
+    request: {
+      method: 'starkNet_getStoredUserAccounts', //Snap method
+      params: {
+        chainId : "1", //Snap method's parameter
+      },
+    },
+  },
+}))
+```
+### Starknet Snap's Api
+The corresponding request payload and response for latest Starknet Snap's Api are documented in the [openrpc spec](https://github.com/Consensys/starknet-snap/blob/starknet-snap-v2.2.0/packages/starknet-snap/openrpc/starknet_snap_api_openrpc.json)
+
 # Licenses
 
 This project is dual-licensed under Apache 2.0 and MIT terms:
@@ -68,4 +103,4 @@ This project is dual-licensed under Apache 2.0 and MIT terms:
 - Apache License, Version 2.0, (LICENSE-APACHE or http://www.apache.org/licenses/LICENSE-2.0)
 - MIT license (LICENSE-MIT or http://opensource.org/licenses/MIT)
 
-Copyright (c) 2022 ConsenSys Software Inc.
+Copyright (c) 2023 ConsenSys Software Inc.

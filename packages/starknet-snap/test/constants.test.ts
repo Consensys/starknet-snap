@@ -61,6 +61,16 @@ export const account4: AccContract = {
   chainId: constants.StarknetChainId.SN_GOERLI,
 };
 
+export const Cario1Account1: AccContract = {
+  address: '0x043e3d703b005b8367a9783fb680713349c519202aa01e9beb170bdf710ae20b',
+  addressSalt: '0x019e59f349e1aa813ab4556c5836d0472e5e1ae82d1e5c3b3e8aabfeb290befd',
+  addressIndex: 1,
+  derivationPath: "m / bip32:44' / bip32:9004' / bip32:0' / bip32:0",
+  deployTxnHash: '0x5bc00132b8f2fc0f673dc232594b26727e712b204a2716f9dc28a8c5f607b5e',
+  publicKey: '0x019e59f349e1aa813ab4556c5836d0472e5e1ae82d1e5c3b3e8aabfeb290befd',
+  chainId: constants.StarknetChainId.SN_GOERLI,
+};
+
 export const token1: Erc20Token = {
   address: '0x244c20d51109adcf604fde1bbf878e5dcd549b3877ac87911ec6a158bd7aa62',
   name: 'Starknet ERC-20 sample',
@@ -90,6 +100,23 @@ export const signature1 =
 export const signature2 =
   '30440220052956ac852275b6004c4e8042450f6dce83059f068029b037cc47338c80d062022002bc0e712f03e341bb3532fc356b779d84fcb4dbfe8ed34de2db66e121971d92';
 
+export const signature4Cario1SignMessage = [
+  '2941323345698930086258187297320132789256148405011604592758945785805412997864',
+  '1024747634926675542679366527128384456926978174336360356924884281219915547518',
+];
+export const signature4SignMessage = [
+  '784041227270069705374122994163964526105670242785431143890307285886848872447',
+  '2211270729821731368290303126976610283184761443640531855459727543936510195980',
+];
+export const signature4SignMessageWithUnfoundAddress = [
+  '2334603173889607172621639019166048758876763440301330097513705152117706117218',
+  '1236892621218974511001789530309582149943950152899985052022949903736308702610',
+];
+
+export const signature3 = [
+  '607985888254383597713678062496326274484078117880260232069103402822721981909',
+  '2165861203006010568296813740808310355035386348183576985427784501900302491063',
+];
 // Derived from seed phrase: "dog simple gown ankle release anger local pulp rose river approve miracle"
 export const bip44Entropy: JsonBIP44CoinTypeNode = {
   depth: 2,
@@ -296,6 +323,20 @@ export const txn4: Transaction = {
 
 export const txn5: Transaction = {
   chainId: STARKNET_TESTNET_NETWORK.chainId,
+  contractAddress: '0x07394cbe418daa16e42b87ba67372d4ab4a5df0b05c6e554d158458ce245bc10',
+  contractCallData: ['0x0256d8f49882cc9366037415f48fa9fd2b5b7344ded7573ebfcef7c90e3e6b75', '2000000000000000000', '0'],
+  contractFuncName: 'transfer',
+  senderAddress: '0x05a98ec74a40383cf99896bfea2ec5e6aad16c7eed50025a5f569d585ebb13a2',
+  timestamp: 1653569160,
+  txnHash: '0x75ff16a2fd6b489d2e17673addba34af372907b0b23ff9068a23afa49c61999',
+  txnType: VoyagerTransactionType.INVOKE,
+  failureReason: '',
+  status: 'PENDING',
+  eventIds: [],
+};
+
+export const mainnetTxn1: Transaction = {
+  chainId: STARKNET_MAINNET_NETWORK.chainId,
   contractAddress: '0x07394cbe418daa16e42b87ba67372d4ab4a5df0b05c6e554d158458ce245bc10',
   contractCallData: ['0x0256d8f49882cc9366037415f48fa9fd2b5b7344ded7573ebfcef7c90e3e6b75', '2000000000000000000', '0'],
   contractFuncName: 'transfer',

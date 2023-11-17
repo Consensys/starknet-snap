@@ -75,10 +75,7 @@ describe('Test function: createAccount', function () {
       state,
       -1,
     );
-    const { address: contractAddress } = utils.getAccContractAddressAndCallData(
-      STARKNET_MAINNET_NETWORK.accountClassHash,
-      publicKey,
-    );
+    const { address: contractAddress } = utils.getAccContractAddressAndCallData(publicKey);
     expect(walletStub.rpcStubs.snap_manageState).to.have.been.callCount(0);
     expect(result.address).to.be.eq(contractAddress);
     expect(state.accContracts.length).to.be.eq(0);
@@ -292,6 +289,8 @@ describe('Test function: createAccount', function () {
       return createAccountFailedProxyResp;
     });
     sandbox.stub(utils, 'isAccountAddressDeployed').resolves(false);
+    sandbox.stub(utils, 'callContract').resolves(getBalanceResp);
+    sandbox.stub(utils, 'getSigner').throws(new Error());
     sandbox.stub(utils, 'estimateAccountDeployFee').callsFake(async () => {
       return estimateDeployFeeResp;
     });
@@ -311,6 +310,8 @@ describe('Test function: createAccount', function () {
       return createAccountProxyResp;
     });
     sandbox.stub(utils, 'isAccountAddressDeployed').resolves(false);
+    sandbox.stub(utils, 'callContract').resolves(getBalanceResp);
+    sandbox.stub(utils, 'getSigner').throws(new Error());
     sandbox.stub(utils, 'estimateAccountDeployFee').callsFake(async () => {
       return estimateDeployFeeResp;
     });

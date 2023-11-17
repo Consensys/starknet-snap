@@ -253,14 +253,8 @@ describe('Test function: getCorrectContractAddress', function () {
 
   it('should permutation both Cairo0 and Cario1 address', async function () {
     await utils.getCorrectContractAddress(STARKNET_TESTNET_NETWORK, PK);
-    expect(getAccContractAddressAndCallDataStub).to.have.been.calledOnceWith(
-      STARKNET_TESTNET_NETWORK.accountClassHash,
-      PK,
-    );
-    expect(getAccContractAddressAndCallDataCairo0Stub).to.have.been.calledOnceWith(
-      STARKNET_TESTNET_NETWORK.accountClassHashV0,
-      PK,
-    );
+    expect(getAccContractAddressAndCallDataStub).to.have.been.calledOnceWith(PK);
+    expect(getAccContractAddressAndCallDataCairo0Stub).to.have.been.calledOnceWith(PK);
   });
 
   it('should return Cairo1 address with pubic key when Cario1 deployed', async function () {

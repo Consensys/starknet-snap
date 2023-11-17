@@ -846,6 +846,327 @@
         }
       },
       "errors": []
+    },
+    {
+      "name": "starkNet_estimateFees",
+      "summary": "Get multiple estimated gas fee",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "senderAddress",
+          "summary": "Address of the account contract",
+          "description": "Address of the account contract",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/ADDRESS"
+          }
+        },
+        {
+          "name": "chainId",
+          "summary": "Id of the target Starknet network",
+          "description": "Id of the target Starknet network (default to Starknet Goerli Testnet)",
+          "required": false,
+          "schema": {
+            "$ref": "#/components/schemas/CHAIN_ID"
+          }
+        },
+        {
+          "name": "invocations",
+          "summary": "Transaction(s)",
+          "description": "Array with consist of transaction payload and transaction type",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/INVOCATIONS"
+          }
+        },
+        {
+          "name": "invocationDetails",
+          "summary": "Transaction configurate parameters",
+          "description": "A struct consist of maxFee, nonce and version",
+          "required": false,
+          "schema": {
+            "$ref": "#/components/schemas/INVOCATION_DETAILS"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "summary": "List of gas fee estimate object",
+        "description": "List of gas fee estimate object",
+        "schema": {
+          "$ref": "#/components/schemas/ESTIMATE_FEE_RESULTS"
+        }
+      },
+      "errors": []
+    },
+    {
+      "name": "starkNet_executeTxn",
+      "summary": "Execute multiple txn",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "senderAddress",
+          "summary": "Address of the account contract",
+          "description": "Address of the account contract",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/ADDRESS"
+          }
+        },
+        {
+          "name": "chainId",
+          "summary": "Id of the target Starknet network",
+          "description": "Id of the target Starknet network (default to Starknet Goerli Testnet)",
+          "required": false,
+          "schema": {
+            "$ref": "#/components/schemas/CHAIN_ID"
+          }
+        },
+        {
+          "name": "txnInvocation",
+          "summary": "Transaction(s)",
+          "description": "Array or Object that consist of transaction payload",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/INVOCATION_PAYLOAD"
+          }
+        },
+        {
+          "name": "abis",
+          "summary": "abis",
+          "description": "Array or Object that consist of abi",
+          "required": false,
+          "schema": {
+            "$ref": "#/components/schemas/ABIS"
+          }
+        },
+        {
+          "name": "invocationDetails",
+          "summary": "Transaction configurate parameters",
+          "description": "A struct consist of maxFee, nonce and version",
+          "required": false,
+          "schema": {
+            "$ref": "#/components/schemas/INVOCATION_DETAILS"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "summary": "Transaction result",
+        "description": "Transaction result consist of transaction hash",
+        "schema": {
+          "$ref": "#/components/schemas/SEND_TRANSACTION_RESULT"
+        }
+      },
+      "errors": []
+    },
+    {
+      "name": "starkNet_declareContract",
+      "summary": "Declare contract",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "senderAddress",
+          "summary": "Address of the account contract",
+          "description": "Address of the account contract",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/ADDRESS"
+          }
+        },
+        {
+          "name": "chainId",
+          "summary": "Id of the target Starknet network",
+          "description": "Id of the target Starknet network (default to Starknet Goerli Testnet)",
+          "required": false,
+          "schema": {
+            "$ref": "#/components/schemas/CHAIN_ID"
+          }
+        },
+        {
+          "name": "contractPayload",
+          "summary": "Payload of the contract",
+          "description": "Object that consist of contract payload",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/CONTRACT_PAYLOAD"
+          }
+        },
+        {
+          "name": "invocationDetails",
+          "summary": "Transaction configurate parameters",
+          "description": "A struct consist of maxFee, nonce and version",
+          "required": false,
+          "schema": {
+            "$ref": "#/components/schemas/INVOCATION_DETAILS"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "summary": "Transaction result",
+        "description": "Transaction result consist of transaction hash and class hash",
+        "schema": {
+          "$ref": "#/components/schemas/DECLARE_CONTRACT_RESULT"
+        }
+      },
+      "errors": []
+    },
+    {
+      "name": "starkNet_signTransaction",
+      "summary": "Sign transaction",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "signerAddress",
+          "summary": "Address of the account contract",
+          "description": "Address of the account contract",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/ADDRESS"
+          }
+        },
+        {
+          "name": "chainId",
+          "summary": "Id of the target Starknet network",
+          "description": "Id of the target Starknet network (default to Starknet Goerli Testnet)",
+          "required": false,
+          "schema": {
+            "$ref": "#/components/schemas/CHAIN_ID"
+          }
+        },
+        {
+          "name": "transactions",
+          "summary": "List of calldata payload",
+          "description": "List of calldata payload",
+          "required": true,
+          "schema": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CALLDATA"
+            }
+          }
+        },
+        {
+          "name": "abis",
+          "summary": "abis",
+          "description": "Array or Object that consist of abi",
+          "required": false,
+          "schema": {
+            "$ref": "#/components/schemas/ABIS"
+          }
+        },
+        {
+          "name": "transactionsDetail",
+          "summary": "Transaction Sign configurate parameters",
+          "description": "A struct consist of maxFee, nonce, version, walletAddress, chainId and cairoVersion",
+          "required": false,
+          "schema": {
+            "$ref": "#/components/schemas/SIGNER_INVOCATION_DETAILS"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "summary": "Sign Transaction result",
+        "description": "Sign Transaction result consist of list of string",
+        "schema": {
+          "type": "array"
+        }
+      },
+      "errors": []
+    },
+    {
+      "name": "starkNet_signDeclareTransaction",
+      "summary": "Sign Declare transaction",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "signerAddress",
+          "summary": "Address of the account contract",
+          "description": "Address of the account contract",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/ADDRESS"
+          }
+        },
+        {
+          "name": "chainId",
+          "summary": "Id of the target Starknet network",
+          "description": "Id of the target Starknet network (default to Starknet Goerli Testnet)",
+          "required": false,
+          "schema": {
+            "$ref": "#/components/schemas/CHAIN_ID"
+          }
+        },
+        {
+          "name": "transaction",
+          "summary": "Declare transaction payload",
+          "description": "Declare transaction payload",
+          "required": true,
+          "schema": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DECLARE_TRANSACTION_PAYLOAD"
+            }
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "summary": "Sign Transaction result",
+        "description": "Sign Transaction result consist of list of string",
+        "schema": {
+          "type": "array"
+        }
+      },
+      "errors": []
+    },
+    {
+      "name": "starkNet_signDeployAccountTransaction",
+      "summary": "Sign Deploy Account transaction",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "signerAddress",
+          "summary": "Address of the account contract",
+          "description": "Address of the account contract",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/ADDRESS"
+          }
+        },
+        {
+          "name": "chainId",
+          "summary": "Id of the target Starknet network",
+          "description": "Id of the target Starknet network (default to Starknet Goerli Testnet)",
+          "required": false,
+          "schema": {
+            "$ref": "#/components/schemas/CHAIN_ID"
+          }
+        },
+        {
+          "name": "transaction",
+          "summary": "Deploy Account transaction payload",
+          "description": "DecDeploy Accountlare transaction payload",
+          "required": true,
+          "schema": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DEPLOY_ACCOUNT_TRANSACTION_PAYLOAD"
+            }
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "summary": "Sign Transaction result",
+        "description": "Sign Transaction result consist of list of string",
+        "schema": {
+          "type": "array"
+        }
+      },
+      "errors": []
     }
   ],
   "components": {
@@ -868,6 +1189,156 @@
         "type": "string",
         "pattern": "^0x[a-fA-F0-9]+$"
       },
+      "ABIS": {
+        "type": "array"
+      },
+      "CALLDATA": {
+        "type": "array"
+      },
+      "CONTRACT_PAYLOAD": {
+        "type": "object",
+        "properties": {
+          "contract": {
+            "type": "string"
+          },
+          "classHash": {
+            "type": "string"
+          },
+          "casm": {
+            "type": "object"
+          },
+          "compiledClassHash": {
+            "type": "string"
+          }
+        }
+      },
+      "DECLARE_TRANSACTION_PAYLOAD" : {
+        "type": "object",
+        "properties": {
+          "classHash": {
+            "type": "string"
+          },
+          "senderAddress": {
+            "$ref": "#/components/schemas/FELT"
+          },
+          "chainId": {
+            "$ref": "#/components/schemas/CHAIN_ID"
+          },
+          "maxFee": {
+            "type": "integer"
+          },
+          "nonce": {
+            "type": "integer"
+          },
+          "version": {
+            "type": "integer"
+          },
+          "compiledClassHash": {
+            "type": "string"
+          }
+        }
+      },
+      "DEPLOY_ACCOUNT_TRANSACTION_PAYLOAD" : {
+        "type": "object",
+        "properties": {
+          "classHash": {
+            "type": "string"
+          },
+          "contractAddress": {
+            "$ref": "#/components/schemas/FELT"
+          },
+          "constructorCalldata": {
+            "type": "array"
+          },
+          "addressSalt": {
+            "type": "string"
+          },
+          "chainId": {
+            "$ref": "#/components/schemas/CHAIN_ID"
+          },
+          "maxFee": {
+            "type": "integer"
+          },
+          "nonce": {
+            "type": "integer"
+          },
+          "version": {
+            "type": "integer"
+          },
+          "compiledClassHash": {
+            "type": "string"
+          }
+        }
+      },
+      "INVOCATION_PAYLOAD": {
+        "type": "object",
+        "properties": {
+          "entrypoint": {
+            "type": "string"
+          },
+          "contractAddress": {
+            "$ref": "#/components/schemas/FELT"
+          },
+          "calldata": {
+            "$ref": "#/components/schemas/CALLDATA"
+          }
+        }
+      },
+      "INVOCATION": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["DECLARE", "DEPLOY", "DEPLOY_ACCOUNT", "INVOKE_FUNCTION"]
+          },
+          "payload": {
+            "$ref": "#/components/schemas/INVOCATION_PAYLOAD"
+          }
+        }
+      },
+      "INVOCATIONS": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/INVOCATION"
+        }
+      },
+      "INVOCATION_DETAILS": {
+        "type": "object",
+        "properties": {
+          "maxFee": {
+            "type": "integer"
+          },
+          "nonce": {
+            "type": "integer"
+          },
+          "version": {
+            "type": "integer"
+          }
+        }
+      },
+      "SIGNER_INVOCATION_DETAILS": {
+        "type": "object",
+        "properties": {
+          "maxFee": {
+            "type": "integer"
+          },
+          "nonce": {
+            "type": "integer"
+          },
+          "version": {
+            "type": "integer"
+          },
+          "walletAddress": {
+            "type": "string"
+          },
+          "chainId": {
+            "type": "string"
+          },
+          "cairoVersion": {
+            "type": "string"
+          }
+        }
+      },
       "ADDRESS": {
         "$ref": "#/components/schemas/FELT"
       },
@@ -881,6 +1352,11 @@
         "$ref": "#/components/schemas/FELT",
         "description": "The transaction hash, as assigned in Starknet",
         "title": "A transaction's hash"
+      },
+      "CLASS_HASH": {
+        "$ref": "#/components/schemas/FELT",
+        "description": "The class hash, as assigned in Starknet",
+        "title": "A class's hash"
       },
       "FELT": {
         "type": "string",
@@ -899,30 +1375,17 @@
       },
       "TXN_STATUS": {
         "type": "string",
-        "enum": [
-          "UNKNOWN",
-          "RECEIVED",
-          "PENDING",
-          "ACCEPTED_ON_L2",
-          "ACCEPTED_ON_L1",
-          "REJECTED"
-        ],
+        "enum": ["UNKNOWN", "RECEIVED", "PENDING", "ACCEPTED_ON_L2", "ACCEPTED_ON_L1", "REJECTED"],
         "description": "The status of the transaction. May be unknown in case node is not aware of it"
       },
       "VOYAGER_TXN_TYPE": {
         "type": "string",
-        "enum": [
-          "invoke",
-          "deploy"
-        ],
+        "enum": ["invoke", "deploy"],
         "description": "The txn type of the transaction from Voyager. May not be a full list here and subject to change"
       },
       "VOYAGER_TXN_STATUS": {
         "type": "string",
-        "enum": [
-          "Accepted on L2",
-          "Accepted on L1"
-        ],
+        "enum": ["Accepted on L2", "Accepted on L1"],
         "description": "The status of the transaction. May be unknown in case node is not aware of it"
       },
       "TYPED_DATA_SIGNATURE": {
@@ -1093,16 +1556,25 @@
           }
         }
       },
-      "SEND_TRANSACTION_RESULT": {
+      "DECLARE_CONTRACT_RESULT": {
         "type": "object",
         "properties": {
           "transaction_hash": {
             "$ref": "#/components/schemas/TXN_HASH",
             "description": "The hash identifying the transaction"
           },
-          "code": {
-            "type": "string",
-            "description": "Response code of the sent txn"
+          "class_hash": {
+            "$ref": "#/components/schemas/CLASS_HASH",
+            "description": "The hash identifying the class"
+          }
+        }
+      },
+      "SEND_TRANSACTION_RESULT": {
+        "type": "object",
+        "properties": {
+          "transaction_hash": {
+            "$ref": "#/components/schemas/TXN_HASH",
+            "description": "The hash identifying the transaction"
           }
         }
       },
@@ -1140,6 +1612,30 @@
           "includeDeploy": {
             "type": "boolean",
             "description": "Indicate whether deploy txn is included (for first send txn)"
+          }
+        }
+      },
+      "ESTIMATE_FEE_RESULTS": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "suggestedMaxFee": {
+              "type": "string",
+              "description": "Estimated gas fee with overhead added in decimal string"
+            },
+            "overallFee": {
+              "type": "string",
+              "description": "Overall gas fee in in decimal string"
+            },
+            "gasConsumed": {
+              "type": "string",
+              "description": "Total amount of consumed gas in decimal string"
+            },
+            "gasPrice": {
+              "type": "string",
+              "description": "Price for each gas unit in decimal string"
+            }
           }
         }
       },

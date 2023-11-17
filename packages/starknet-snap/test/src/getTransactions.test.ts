@@ -23,6 +23,7 @@ import {
   txn3,
   txn4,
   txn5,
+  mainnetTxn1,
 } from '../constants.test';
 import { getTransactions, updateStatus } from '../../src/getTransactions';
 import { Mutex } from 'async-mutex';
@@ -45,6 +46,7 @@ describe('Test function: getTransactions', function () {
       { ...txn3 },
       { ...txn4 },
       { ...txn5 },
+      { ...mainnetTxn1 },
       { ...createAccountProxyTxn },
       { ...initAccountTxn },
     ],

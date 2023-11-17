@@ -22,10 +22,7 @@ export async function estimateAccDeployFee(params: ApiParams) {
       addressIndex: addressIndexInUsed,
       privateKey,
     } = await getKeysFromAddressIndex(keyDeriver, network.chainId, state, addressIndex);
-    const { address: contractAddress, callData: contractCallData } = getAccContractAddressAndCallData(
-      network.accountClassHash,
-      publicKey,
-    );
+    const { address: contractAddress, callData: contractCallData } = getAccContractAddressAndCallData(publicKey);
     logger.log(
       `estimateAccountDeployFee:\ncontractAddress = ${contractAddress}\npublicKey = ${publicKey}\naddressIndex = ${addressIndexInUsed}`,
     );

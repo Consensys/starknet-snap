@@ -106,12 +106,12 @@ export class StatusFilter implements ITransactionFilter {
 }
 
 export class ChainIdFilter implements ITransactionFilter {
-  chainId: number | undefined;
-  constructor(chainId: number | undefined) {
+  chainId: string | undefined;
+  constructor(chainId: string | undefined) {
     this.chainId = chainId;
   }
   apply(txn: Transaction): boolean {
-    if (this.chainId) return Number(txn.chainId) === Number(this.chainId);
+    if (this.chainId) return num.toBigInt(txn.chainId) === num.toBigInt(this.chainId);
 
     return true;
   }

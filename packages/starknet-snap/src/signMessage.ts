@@ -1,11 +1,10 @@
 import { toJson } from './utils/serializer';
-import typedDataExample from './typedData/typedDataExample.json';
-import { getTypedDataMessageSignature, getKeysFromAddress, isUpgradeRequired } from './utils/starknetUtils';
-import { getNetworkFromChainId } from './utils/snapUtils';
+import { signMessage as signMessageUtil, getKeysFromAddress, isUpgradeRequired } from './utils/starknetUtils';
+import { getNetworkFromChainId, addDialogTxt } from './utils/snapUtils';
 import { ApiParams, SignMessageRequestParams } from './types/snapApi';
 import { validateAndParseAddress } from '../src/utils/starknetUtils';
 import { DialogType } from '@metamask/rpc-methods';
-import { heading, panel, copyable, text } from '@metamask/snaps-ui';
+import { heading, panel } from '@metamask/snaps-ui';
 import { logger } from './utils/logger';
 
 export async function signMessage(params: ApiParams) {
@@ -13,9 +12,7 @@ export async function signMessage(params: ApiParams) {
     const { state, wallet, keyDeriver, requestParams } = params;
     const requestParamsObj = requestParams as SignMessageRequestParams;
     const signerAddress = requestParamsObj.signerAddress;
-    const typedDataMessage = requestParamsObj.typedDataMessage
-      ? JSON.parse(requestParamsObj.typedDataMessage)
-      : typedDataExample;
+    const typedDataMessage = requestParamsObj.typedDataMessage;
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
 
     logger.log(`signMessage:\nsignerAddress: ${signerAddress}\ntypedDataMessage: ${toJson(typedDataMessage)}`);
@@ -34,30 +31,29 @@ export async function signMessage(params: ApiParams) {
       throw new Error('Upgrade required');
     }
 
-    const response = await wallet.request({
-      method: 'snap_dialog',
-      params: {
-        type: DialogType.Confirmation,
-        content: panel([
-          heading('Do you want to sign this message ?'),
-          text(`**Message:**`),
-          copyable(toJson(typedDataMessage)),
-          text(`**Signer address:**`),
-          copyable(`${signerAddress}`),
-        ]),
-      },
-    });
-    if (!response) return false;
+    const components = [];
+    addDialogTxt(components, 'Message', toJson(typedDataMessage));
+    addDialogTxt(components, 'Signer Address', signerAddress);
+
+    if (requestParamsObj.enableAutherize === true) {
+      const response = await wallet.request({
+        method: 'snap_dialog',
+        params: {
+          type: DialogType.Confirmation,
+          content: panel([heading('Do you want to sign this message?'), ...components]),
+        },
+      });
+
+      if (!response) return false;
+    }
 
     const { privateKey: signerPrivateKey } = await getKeysFromAddress(keyDeriver, network, state, signerAddress);
 
-    const typedDataSignature = getTypedDataMessageSignature(signerPrivateKey, typedDataMessage, signerAddress);
+    const typedDataSignature = signMessageUtil(signerPrivateKey, typedDataMessage, signerAddress);
 
-    const result = typedDataSignature.toDERHex();
+    logger.log(`signMessage:\ntypedDataSignature: ${toJson(typedDataSignature)}`);
 
-    logger.log(`signMessage:\ntypedDataSignature: ${result}`);
-
-    return result;
+    return typedDataSignature;
   } catch (err) {
     logger.error(`Problem found: ${err}`);
     throw err;

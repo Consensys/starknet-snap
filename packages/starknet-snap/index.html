@@ -1,992 +1,905 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+  <head>
     <meta charset="utf-8" />
     <title>Hello, Snaps!</title>
     <link rel="icon" type="image/svg" href="./images/icon.svg" />
-</head>
+  </head>
 
-<body>
-  <h1>Hello, Snaps!</h1>
-  <details>
-    <summary>Instructions</summary>
-    <ul>
-      <li>First, click "Connect". Then, try out the other buttons!</li>
-      <li>Please note that:</li>
+  <body>
+    <h1>Hello, Snaps!</h1>
+    <details>
+      <summary>Instructions</summary>
       <ul>
-        <li>
-          The <code>snap.manifest.json</code> and <code>package.json</code> must be located in the server root
-          directory..
-        </li>
-        <li>
-          The Snap bundle must be hosted at the location specified by the <code>location</code> field of
-          <code>snap.manifest.json</code>.
-        </li>
+        <li>First, click "Connect". Then, try out the other buttons!</li>
+        <li>Please note that:</li>
+        <ul>
+          <li>
+            The <code>snap.manifest.json</code> and <code>package.json</code> must be located in the server root
+            directory..
+          </li>
+          <li>
+            The Snap bundle must be hosted at the location specified by the <code>location</code> field of
+            <code>snap.manifest.json</code>.
+          </li>
+        </ul>
       </ul>
-    </ul>
-  </details>
-  <br />
+    </details>
+    <br />
 
-  <button class="connect">Connect</button>
-  <button class="sendPing">Send Ping</button>
-  <br>
-  <label for="targetChainId">Target Chain Id in Hex (optional, default Goerli testnet)</label>
-  <input type="text" id="targetChainId" name="targetChainId"><br>
-  <label for="isDev">Use Starknet Integration network for Goerli testnet</label>
-  <input type="checkbox" id="isDev" name="isDev"><br>
-  <label for="debugLevel">Log Level</label>
-  <select id="debugLevel">
-    <option value="6" selected="selected">All</option>
-    <option value="0">Off</option>
-    <option value="1">Error</option>
-  </select>
-  <br>
-  <form id="recoverUserAccounts">
-    <fieldset>
-      <legend>Recover User Accounts</legend>
-      <label for="startScanIndex">Start Scan Index (optional, default 0)</label>
-      <input type="text" id="startScanIndex" name="startScanIndex"><br>
-      <label for="maxScanned">Max Scanned (optional, default 1)</label>
-      <input type="text" id="maxScanned" name="maxScanned"><br>
-      <label for="maxMissed">Max Missed (optional, default 1)</label>
-      <input type="text" id="maxMissed" name="maxMissed"><br>
-      <input type="submit" id="recoverUserAccounts" value="Recover User Accounts">
-    </fieldset>
-  </form>
-  <form id="getDeployedAccContracts">
-    <fieldset>
-      <legend>Get Stored User Accounts</legend>
-      <input type="submit" id="getDeployedAccContracts" value="Get Stored User Accounts">
-    </fieldset>
-  </form>
-  <form id="addErc20Token">
-    <fieldset>
-      <legend>Add ERC-20 Token</legend>
-      <label for="addTokenAddress">Token Address</label>
-      <input type="text" id="addTokenAddress" name="addTokenAddress"><br>
-      <label for="addTokenName">Token Name</label>
-      <input type="text" id="addTokenName" name="addTokenName"><br>
-      <label for="addTokenSymbol">Token Symbol</label>
-      <input type="text" id="addTokenSymbol" name="addTokenSymbol"><br>
-      <label for="addTokenDecimals">Token Decimals (optional, default 18)</label>
-      <input type="text" id="addTokenDecimals" name="addTokenDecimals"><br>
-      <input type="submit" id="addErc20Token" value="Add ERC-20 Token">
-    </fieldset>
-  </form>
-  <form id="getStoredErc20Tokens">
-    <fieldset>
-      <legend>Get Stored ERC-20 Tokens</legend>
-      <input type="submit" id="getStoredErc20Tokens" value="Get Stored ERC-20 Tokens">
-    </fieldset>
-  </form>
-  <form id="addNetwork">
-    <fieldset>
-      <legend>Add Network (Currently disabled)</legend>
-      <label for="addNetworkName">Network Name</label>
-      <input type="text" id="addNetworkName" name="addNetworkName"><br>
-      <label for="addNetworkChainId">Network Chain ID (in hex)</label>
-      <input type="text" id="addNetworkChainId" name="addNetworkChainId"><br>
-      <label for="addNetworkBaseUrl">Network Gateway API Base URL</label>
-      <input type="text" id="addNetworkBaseUrl" name="addNetworkBaseUrl"><br>
-      <label for="addNetworkNodeUrl">Network RPC Node URL</label>
-      <input type="text" id="addNetworkNodeUrl" name="addNetworkNodeUrl"><br>
-      <label for="addNetworkVoyagerUrl">Network Voyager URL</label>
-      <input type="text" id="addNetworkVoyagerUrl" name="addNetworkVoyagerUrl"><br>
-      <label for="addNetworkAccClassHash">Account Class Hash</label>
-      <input type="text" id="addNetworkAccClassHash" name="addNetworkAccClassHash"><br>
-      <input type="submit" id="addNetwork" value="Add Network">
-    </fieldset>
-  </form>
-  <form id="getStoredNetworks">
-    <fieldset>
-      <legend>Get Stored Networks</legend>
-      <input type="submit" id="getStoredNetworks" value="Get Stored Networks">
-    </fieldset>
-  </form>
-  <form id="getStoredTransactions">
-    <fieldset>
-      <legend>Get Stored Transactions (Obsolete)</legend>
-      <label for="getTxnSenderAddress">Sender Address</label>
-      <input type="text" id="getTxnSenderAddress" name="getTxnSenderAddress"><br>
-      <label for="getTxnContractAddress">Contract Address</label>
-      <input type="text" id="getTxnContractAddress" name="getTxnContractAddress"><br>
-      <label for="txnType">Transaction Type</label>
-      <input type="text" id="txnType" name="txnType"><br>
-      <label for="txnInLastNumOfDays">Txns in Last Number of Days (optional, default: 10)</label>
-      <input type="text" id="txnInLastNumOfDays" name="txnInLastNumOfDays"><br>
-      <input type="submit" id="getStoredTransactions" value="Get Stored Transactions">
-    </fieldset>
-  </form>
-  <form id="getTransactions">
-    <fieldset>
-      <legend>Get Transactions from Voyager</legend>
-      <label for="getTxnsOnlyFromState">Only from Snap State</label>
-      <input type="checkbox" id="getTxnsOnlyFromState" name="getTxnsOnlyFromState"><br>
-      <label for="getTxnsWithDeployTxn">Include Deploy Txn</label>
-      <input type="checkbox" id="getTxnsWithDeployTxn" name="getTxnsWithDeployTxn"><br>
-      <label for="getTxnsSenderAddress">Sender Address</label>
-      <input type="text" id="getTxnsSenderAddress" name="getTxnsSenderAddress"><br>
-      <label for="getTxnsContractAddress">Contract Address (optional)</label>
-      <input type="text" id="getTxnsContractAddress" name="getTxnsContractAddress"><br>
-      <label for="getTxnsPageSize">Page Size (optional, default: 10)</label>
-      <input type="text" id="getTxnsPageSize" name="getTxnsPageSize"><br>
-      <label for="getTxnsInLastNumOfDays">Txns in Last Number of Days (optional, default: 10)</label>
-      <input type="text" id="getTxnsInLastNumOfDays" name="getTxnsInLastNumOfDays"><br>
-      <input type="submit" id="getTransactions" value="Get Transactions">
-    </fieldset>
-  </form>
-  <form id="getTransactionStatus">
-    <fieldset>
-      <legend>Get Transaction Status</legend>
-      <label for="transactionHash">Transaction Hash</label>
-      <input type="text" id="transactionHash" name="transactionHash"><br>
-      <input type="submit" id="getTransactionStatus" value="Get Txn Status">
-    </fieldset>
-  </form>
-  <form id="getErc20Balance">
-    <fieldset>
-      <legend>Get the ERC-20 balance of an user</legend>
-      <label for="tokenAddress">Token Address</label>
-      <input type="text" id="tokenAddress" name="tokenAddress"><br>
-      <label for="userAccAddress">User Account Address</label>
-      <input type="text" id="userAccAddress" name="userAccAddress"><br>
-      <input type="submit" id="getErc20Balance" value="Get Balance">
-    </fieldset>
-  </form>
-  <form id="getEstimateFee">
-    <fieldset>
-      <legend>Get Estimate Fee</legend>
-      <label for="contractAddress">Contract Address</label>
-      <input type="text" id="contractAddress" name="contractAddress"><br>
-      <label for="contractFuncName">Contract Function Name</label>
-      <input type="text" id="contractFuncName" name="contractFuncName"><br>
-      <label for="contractCallData">Contract Call Data (comma as separator)</label>
-      <input type="text" id="contractCallData" name="contractCallData"><br>
-      <label for="feeSenderAddress">Sender Address</label>
-      <input type="text" id="feeSenderAddress" name="feeSenderAddress"><br>
-      <input type="submit" id="getEstimateFee" value="Get Estimate Fee">
-    </fieldset>
-  </form>
-  <form id="getEstimateAccountDeployFee">
-    <fieldset>
-      <legend>Get Estimate Account Deploy Fee</legend>
-      <label for="addressIndex">Specific Address Index (optional)</label>
-      <input type="text" id="estimateDeployFeeAddressIndex" name="estimateDeployFeeAddressIndex"><br>
-      <input type="submit" id="getEstimateAccountDeployFee" value="Get Estimate Account Deploy Fee">
-    </fieldset>
-  </form>
-  <form id="callContract">
-    <fieldset>
-      <legend>Call Contract (READ-ONLY)</legend>
-      <label for="callContractAddress">Contract Address</label>
-      <input type="text" id="callContractAddress" name="callContractAddress"><br>
-      <label for="callContractFuncName">Contract Function Name</label>
-      <input type="text" id="callContractFuncName" name="callContractFuncName"><br>
-      <label for="callContractCallData">Contract Call Data (comma as separator)</label>
-      <input type="text" id="callContractCallData" name="callContractCallData"><br>
-      <input type="submit" id="callContract" value="Call Contract">
-    </fieldset>
-  </form>
-  <form id="sendTransaction">
-    <fieldset>
-      <legend>Send Transaction</legend>
-      <label for="txnContractAddress">Contract Address</label>
-      <input type="text" id="txnContractAddress" name="txnContractAddress"><br>
-      <label for="txnContractFuncName">Contract Function Name</label>
-      <input type="text" id="txnContractFuncName" name="txnContractFuncName"><br>
-      <label for="txnContractCallData">Contract Call Data (comma as separator)</label>
-      <input type="text" id="txnContractCallData" name="txnContractCallData"><br>
-      <label for="txnSenderAddress">Sender Address</label>
-      <input type="text" id="txnSenderAddress" name="txnSenderAddress"><br>
-      <label for="txnMaxFee">Max Fee (optional, default 0)</label>
-      <input type="text" id="txnMaxFee" name="txnMaxFee"><br>
-      <input type="submit" id="sendTransaction" value="Send Transaction">
-    </fieldset>
-  </form>
-  <form id="transferErc20">
-    <fieldset>
-      <legend>Transfer ERC-20</legend>
-      <label for="tokenAddress">Token Address</label>
-      <input type="text" id="transferTokenAddress" name="transferTokenAddress"><br>
-      <label for="recipientAddress">Recipient Address</label>
-      <input type="text" id="recipientAddress" name="recipientAddress"><br>
-      <label for="transferAmount">TransferAmount</label>
-      <input type="text" id="transferAmount" name="transferAmount"><br>
-      <label for="senderAddress">Sender Address</label>
-      <input type="text" id="senderAddress" name="senderAddress"><br>
-      <label for="transferMaxFee">Max Fee (optional, default 0)</label>
-      <input type="text" id="transferMaxFee" name="transferMaxFee"><br>
-      <input type="submit" id="transferErc20" value="Transfer ERC-20">
-    </fieldset>
-  </form>
-  <form id="deployUserAccContract">
-    <fieldset>
-      <legend>Deploy User Account Contract</legend>
-      <label for="addressIndex">Specific Address Index (optional)</label>
-      <input type="text" id="addressIndex" name="addressIndex"><br>
-      <label for="sendDeployTxn">Send Deploy Txn</label>
-      <input type="checkbox" id="sendDeployTxn" name="sendDeployTxn"><br>
-      <input type="submit" id="deployUserAccContract" value="Deploy User Account SC">
-    </fieldset>
-  </form>
-  <form id="retrievePrivateKeyFromAddress">
-    <fieldset>
-      <legend>Retrieve Private Key from User Address</legend>
-      <label for="userAddress">User Account Address</label>
-      <input type="text" id="userAddress" name="userAddress"><br>
-      <input type="submit" id="retrievePrivateKeyFromAddress" value="Retrieve Private Key">
-    </fieldset>
-  </form>
-  <form id="retrievePublicKeyFromAddress">
-    <fieldset>
-      <legend>Retrieve Public Key from User Address</legend>
-      <label for="pkUserAddress">User Account Address</label>
-      <input type="text" id="pkUserAddress" name="pkUserAddress"><br>
-      <input type="submit" id="retrievePublicKeyFromAddress" value="Retrieve Public Key">
-    </fieldset>
-  </form>
-  <form id="signTypedDataMessage">
-    <fieldset>
-      <legend>Sign Typed Data Message</legend>
-      <label for="typedDataMessage">Typed Data Message</label>
-      <input type="text" id="typedDataMessage" name="typedDataMessage"><br>
-      <label for="signerUserAddress">Signer User Account Address</label>
-      <input type="text" id="signerUserAddress" name="signerUserAddress"><br>
-      <input type="submit" id="signTypedDataMessage" value="Sign Message">
-    </fieldset>
-  </form>
-  <form id="verifyTypedDataSignature">
-    <fieldset>
-      <legend>Verify Typed Data Message Signature</legend>
-      <label for="verifyTypedDataMessage">Typed Data Message</label>
-      <input type="text" id="verifyTypedDataMessage" name="verifyTypedDataMessage"><br>
-      <label for="verifySignerUserAddress">Signer User Account Address</label>
-      <input type="text" id="verifySignerUserAddress" name="verifySignerUserAddress"><br>
-      <label for="verifySignature">Signer Signature</label>
-      <input type="text" id="verifySignature" name="verifySignature"><br>
-      <input type="submit" id="verifyTypedDataSignature" value="Verify Signature">
-    </fieldset>
-  </form>
-</body>
+    <button class="connect">Connect</button>
+    <button class="sendPing">Send Ping</button>
+    <br />
+    <label for="targetChainId">Target Chain Id in Hex (optional, default Goerli testnet)</label>
+    <input type="text" id="targetChainId" name="targetChainId" /><br />
+    <label for="isDev">Use Starknet Integration network for Goerli testnet</label>
+    <input type="checkbox" id="isDev" name="isDev" /><br />
+    <label for="debugLevel">Log Level</label>
+    <select id="debugLevel">
+      <option value="ALL" selected="selected">All</option>
+      <option value="0">Off</option>
+      <option value="1">Error</option>
+    </select>
+    <br />
+    <form id="recoverUserAccounts">
+      <fieldset>
+        <legend>Recover User Accounts</legend>
+        <label for="startScanIndex">Start Scan Index (optional, default 0)</label>
+        <input type="text" id="startScanIndex" name="startScanIndex" /><br />
+        <label for="maxScanned">Max Scanned (optional, default 1)</label>
+        <input type="text" id="maxScanned" name="maxScanned" /><br />
+        <label for="maxMissed">Max Missed (optional, default 1)</label>
+        <input type="text" id="maxMissed" name="maxMissed" /><br />
+        <input type="submit" id="recoverUserAccounts" value="Recover User Accounts" />
+      </fieldset>
+    </form>
+    <form id="getDeployedAccContracts">
+      <fieldset>
+        <legend>Get Stored User Accounts</legend>
+        <input type="submit" id="getDeployedAccContracts" value="Get Stored User Accounts" />
+      </fieldset>
+    </form>
+    <form id="addErc20Token">
+      <fieldset>
+        <legend>Add ERC-20 Token</legend>
+        <label for="addTokenAddress">Token Address</label>
+        <input type="text" id="addTokenAddress" name="addTokenAddress" /><br />
+        <label for="addTokenName">Token Name</label>
+        <input type="text" id="addTokenName" name="addTokenName" /><br />
+        <label for="addTokenSymbol">Token Symbol</label>
+        <input type="text" id="addTokenSymbol" name="addTokenSymbol" /><br />
+        <label for="addTokenDecimals">Token Decimals (optional, default 18)</label>
+        <input type="text" id="addTokenDecimals" name="addTokenDecimals" /><br />
+        <input type="submit" id="addErc20Token" value="Add ERC-20 Token" />
+      </fieldset>
+    </form>
+    <form id="getStoredErc20Tokens">
+      <fieldset>
+        <legend>Get Stored ERC-20 Tokens</legend>
+        <input type="submit" id="getStoredErc20Tokens" value="Get Stored ERC-20 Tokens" />
+      </fieldset>
+    </form>
+    <form id="addNetwork">
+      <fieldset>
+        <legend>Add Network</legend>
+        <label for="addNetworkName">Network Name</label>
+        <input type="text" id="addNetworkName" name="addNetworkName" /><br />
+        <label for="addNetworkChainId">Network Chain ID (in hex)</label>
+        <input type="text" id="addNetworkChainId" name="addNetworkChainId" /><br />
+        <label for="addNetworkBaseUrl">Network Gateway API Base URL</label>
+        <input type="text" id="addNetworkBaseUrl" name="addNetworkBaseUrl" /><br />
+        <label for="addNetworkNodeUrl">Network RPC Node URL</label>
+        <input type="text" id="addNetworkNodeUrl" name="addNetworkNodeUrl" /><br />
+        <label for="addNetworkVoyagerUrl">Network Voyager URL</label>
+        <input type="text" id="addNetworkVoyagerUrl" name="addNetworkVoyagerUrl" /><br />
+        <label for="addNetworkAccClassHash">Account Class Hash</label>
+        <input type="text" id="addNetworkAccClassHash" name="addNetworkAccClassHash" /><br />
+        <input type="submit" id="addNetwork" value="Add Network" />
+      </fieldset>
+    </form>
+    <form id="switchNetwork">
+      <fieldset>
+        <legend>Switch Network</legend>
+        <label for="switchNetwork_ChainId">Network Chain ID (in hex)</label>
+        <input type="text" id="switchNetwork_ChainId" name="switchNetwork_ChainId" />
+        <input type="submit" id="switchNetwork" value="Switch Network" />
+      </fieldset>
+    </form>
+    <form id="getCurrentNetwork">
+      <fieldset>
+        <legend>Get Current Network</legend>
+        <input type="submit" id="getCurrentNetwork" value="Get Current Network" />
+      </fieldset>
+    </form>
+    <form id="getStoredNetworks">
+      <fieldset>
+        <legend>Get Stored Networks</legend>
+        <input type="submit" id="getStoredNetworks" value="Get Stored Networks" />
+      </fieldset>
+    </form>
+    <form id="getStoredTransactions">
+      <fieldset>
+        <legend>Get Stored Transactions (Obsolete)</legend>
+        <label for="getTxnSenderAddress">Sender Address</label>
+        <input type="text" id="getTxnSenderAddress" name="getTxnSenderAddress" /><br />
+        <label for="getTxnContractAddress">Contract Address</label>
+        <input type="text" id="getTxnContractAddress" name="getTxnContractAddress" /><br />
+        <label for="txnType">Transaction Type</label>
+        <input type="text" id="txnType" name="txnType" /><br />
+        <label for="txnInLastNumOfDays">Txns in Last Number of Days (optional, default: 10)</label>
+        <input type="text" id="txnInLastNumOfDays" name="txnInLastNumOfDays" /><br />
+        <input type="submit" id="getStoredTransactions" value="Get Stored Transactions" />
+      </fieldset>
+    </form>
+    <form id="getTransactions">
+      <fieldset>
+        <legend>Get Transactions from Voyager</legend>
+        <label for="getTxnsOnlyFromState">Only from Snap State</label>
+        <input type="checkbox" id="getTxnsOnlyFromState" name="getTxnsOnlyFromState" /><br />
+        <label for="getTxnsWithDeployTxn">Include Deploy Txn</label>
+        <input type="checkbox" id="getTxnsWithDeployTxn" name="getTxnsWithDeployTxn" /><br />
+        <label for="getTxnsSenderAddress">Sender Address</label>
+        <input type="text" id="getTxnsSenderAddress" name="getTxnsSenderAddress" /><br />
+        <label for="getTxnsContractAddress">Contract Address (optional)</label>
+        <input type="text" id="getTxnsContractAddress" name="getTxnsContractAddress" /><br />
+        <label for="getTxnsPageSize">Page Size (optional, default: 10)</label>
+        <input type="text" id="getTxnsPageSize" name="getTxnsPageSize" /><br />
+        <label for="getTxnsInLastNumOfDays">Txns in Last Number of Days (optional, default: 10)</label>
+        <input type="text" id="getTxnsInLastNumOfDays" name="getTxnsInLastNumOfDays" /><br />
+        <input type="submit" id="getTransactions" value="Get Transactions" />
+      </fieldset>
+    </form>
+    <form id="getTransactionStatus">
+      <fieldset>
+        <legend>Get Transaction Status</legend>
+        <label for="transactionHash">Transaction Hash</label>
+        <input type="text" id="transactionHash" name="transactionHash" /><br />
+        <input type="submit" id="getTransactionStatus" value="Get Txn Status" />
+      </fieldset>
+    </form>
+    <form id="getErc20Balance">
+      <fieldset>
+        <legend>Get the ERC-20 balance of an user</legend>
+        <label for="tokenAddress">Token Address</label>
+        <input type="text" id="tokenAddress" name="tokenAddress" /><br />
+        <label for="userAccAddress">User Account Address</label>
+        <input type="text" id="userAccAddress" name="userAccAddress" /><br />
+        <input type="submit" id="getErc20Balance" value="Get Balance" />
+      </fieldset>
+    </form>
+    <form id="getEstimateFee">
+      <fieldset>
+        <legend>Get Estimate Fee</legend>
+        <label for="contractAddress">Contract Address</label>
+        <input type="text" id="contractAddress" name="contractAddress" /><br />
+        <label for="contractFuncName">Contract Function Name</label>
+        <input type="text" id="contractFuncName" name="contractFuncName" /><br />
+        <label for="contractCallData">Contract Call Data (comma as separator)</label>
+        <input type="text" id="contractCallData" name="contractCallData" /><br />
+        <label for="feeSenderAddress">Sender Address</label>
+        <input type="text" id="feeSenderAddress" name="feeSenderAddress" /><br />
+        <input type="submit" id="getEstimateFee" value="Get Estimate Fee" />
+      </fieldset>
+    </form>
+    <form id="getEstimateAccountDeployFee">
+      <fieldset>
+        <legend>Get Estimate Account Deploy Fee</legend>
+        <label for="addressIndex">Specific Address Index (optional)</label>
+        <input type="text" id="estimateDeployFeeAddressIndex" name="estimateDeployFeeAddressIndex" /><br />
+        <input type="submit" id="getEstimateAccountDeployFee" value="Get Estimate Account Deploy Fee" />
+      </fieldset>
+    </form>
+    <form id="callContract">
+      <fieldset>
+        <legend>Call Contract (READ-ONLY)</legend>
+        <label for="callContractAddress">Contract Address</label>
+        <input type="text" id="callContractAddress" name="callContractAddress" /><br />
+        <label for="callContractFuncName">Contract Function Name</label>
+        <input type="text" id="callContractFuncName" name="callContractFuncName" /><br />
+        <label for="callContractCallData">Contract Call Data (comma as separator)</label>
+        <input type="text" id="callContractCallData" name="callContractCallData" /><br />
+        <input type="submit" id="callContract" value="Call Contract" />
+      </fieldset>
+    </form>
+    <form id="sendTransaction">
+      <fieldset>
+        <legend>Send Transaction</legend>
+        <label for="txnContractAddress">Contract Address</label>
+        <input type="text" id="txnContractAddress" name="txnContractAddress" /><br />
+        <label for="txnContractFuncName">Contract Function Name</label>
+        <input type="text" id="txnContractFuncName" name="txnContractFuncName" /><br />
+        <label for="txnContractCallData">Contract Call Data (comma as separator)</label>
+        <input type="text" id="txnContractCallData" name="txnContractCallData" /><br />
+        <label for="txnSenderAddress">Sender Address</label>
+        <input type="text" id="txnSenderAddress" name="txnSenderAddress" /><br />
+        <label for="txnMaxFee">Max Fee (optional, default 0)</label>
+        <input type="text" id="txnMaxFee" name="txnMaxFee" /><br />
+        <input type="submit" id="sendTransaction" value="Send Transaction" />
+      </fieldset>
+    </form>
+    <form id="transferErc20">
+      <fieldset>
+        <legend>Transfer ERC-20</legend>
+        <label for="tokenAddress">Token Address</label>
+        <input type="text" id="transferTokenAddress" name="transferTokenAddress" /><br />
+        <label for="recipientAddress">Recipient Address</label>
+        <input type="text" id="recipientAddress" name="recipientAddress" /><br />
+        <label for="transferAmount">TransferAmount</label>
+        <input type="text" id="transferAmount" name="transferAmount" /><br />
+        <label for="senderAddress">Sender Address</label>
+        <input type="text" id="senderAddress" name="senderAddress" /><br />
+        <label for="transferMaxFee">Max Fee (optional, default 0)</label>
+        <input type="text" id="transferMaxFee" name="transferMaxFee" /><br />
+        <input type="submit" id="transferErc20" value="Transfer ERC-20" />
+      </fieldset>
+    </form>
+    <form id="deployUserAccContract">
+      <fieldset>
+        <legend>Deploy User Account Contract</legend>
+        <label for="addressIndex">Specific Address Index (optional)</label>
+        <input type="text" id="addressIndex" name="addressIndex" /><br />
+        <label for="sendDeployTxn">Send Deploy Txn</label>
+        <input type="checkbox" id="sendDeployTxn" name="sendDeployTxn" /><br />
+        <input type="submit" id="deployUserAccContract" value="Deploy User Account SC" />
+      </fieldset>
+    </form>
+    <form id="retrievePrivateKeyFromAddress">
+      <fieldset>
+        <legend>Retrieve Private Key from User Address</legend>
+        <label for="userAddress">User Account Address</label>
+        <input type="text" id="userAddress" name="userAddress" /><br />
+        <input type="submit" id="retrievePrivateKeyFromAddress" value="Retrieve Private Key" />
+      </fieldset>
+    </form>
+    <form id="retrievePublicKeyFromAddress">
+      <fieldset>
+        <legend>Retrieve Public Key from User Address</legend>
+        <label for="pkUserAddress">User Account Address</label>
+        <input type="text" id="pkUserAddress" name="pkUserAddress" /><br />
+        <input type="submit" id="retrievePublicKeyFromAddress" value="Retrieve Public Key" />
+      </fieldset>
+    </form>
+    <form id="signTypedDataMessage">
+      <fieldset>
+        <legend>Sign Typed Data Message</legend>
+        <label for="typedDataMessage">Typed Data Message</label>
+        <input type="text" id="typedDataMessage" name="typedDataMessage" /><br />
+        <label for="signerUserAddress">Signer User Account Address</label>
+        <input type="text" id="signerUserAddress" name="signerUserAddress" /><br />
+        <input type="submit" id="signTypedDataMessage" value="Sign Message" />
+      </fieldset>
+    </form>
+    <form id="signTransaction">
+      <fieldset>
+        <legend>Sign Transaction</legend>
+        <label for="signTransaction_userAddress">User Account Address</label>
+        <input type="text" id="signTransaction_userAddress" name="signTransaction_userAddress" /><br />
+        <label for="signTransaction_transactions">Transactions</label>
+        <input type="text" id="signTransaction_transactions" name="signTransaction_transactions" /><br />
+        <label for="signTransaction_transactionsDetail">transactions Detail</label>
+        <input type="text" id="signTransaction_transactionsDetail" name="signTransaction_transactionsDetail" /><br />
+        <input type="submit" id="signTransaction" value="Sign Transaction" />
+      </fieldset>
+    </form>
+    <form id="signDeployAccountTransaction">
+      <fieldset>
+        <legend>Sign Deploy Account Transaction</legend>
+        <label for="signDeployAccountTransaction_userAddress">User Account Address</label>
+        <input
+          type="text"
+          id="signDeployAccountTransaction_userAddress"
+          name="signDeployAccountTransaction_userAddress"
+        /><br />
+        <label for="signDeployAccountTransaction_transaction">Transaction</label>
+        <input
+          type="text"
+          id="signDeployAccountTransaction_transaction"
+          name="signDeployAccountTransaction_transaction"
+        /><br />
+        <input type="submit" id="signDeployAccountTransaction" value="Sign Deploy Account Transaction" />
+      </fieldset>
+    </form>
+    <form id="signDeclareTransaction">
+      <fieldset>
+        <legend>Sign Declare Transaction</legend>
+        <label for="signDeclareTransaction_userAddress">User Account Address</label>
+        <input type="text" id="signDeclareTransaction_userAddress" name="signDeclareTransaction_userAddress" /><br />
+        <label for="signDeclareTransaction_transaction">Transaction</label>
+        <input type="text" id="signDeclareTransaction_transaction" name="signDeclareTransaction_transaction" /><br />
+        <input type="submit" id="signDeclareTransaction" value="Sign Declare Transaction" />
+      </fieldset>
+    </form>
+    <form id="verifyTypedDataSignature">
+      <fieldset>
+        <legend>Verify Typed Data Message Signature</legend>
+        <label for="verifyTypedDataMessage">Typed Data Message</label>
+        <input type="text" id="verifyTypedDataMessage" name="verifyTypedDataMessage" /><br />
+        <label for="verifySignerUserAddress">Signer User Account Address</label>
+        <input type="text" id="verifySignerUserAddress" name="verifySignerUserAddress" /><br />
+        <label for="verifySignature">Signer Signature</label>
+        <input type="text" id="verifySignature" name="verifySignature" /><br />
+        <input type="submit" id="verifyTypedDataSignature" value="Verify Signature" />
+      </fieldset>
+    </form>
+    <form id="declareContract">
+      <fieldset>
+        <legend>Declare Contract</legend>
+        <label for="declareContract_senderAddress">Sender Address</label>
+        <input type="text" id="declareContract_senderAddress" name="declareContract_senderAddress" /><br />
+        <label for="declareContract_contract">Contract payload</label>
+        <input type="text" id="declareContract_contract" name="declareContract_contract" /><br />
+        <label for="declareContract_invocationsDetails">InvocationsDetails</label>
+        <input type="text" id="declareContract_invocationsDetails" name="declareContract_invocationsDetails" /><br />
+        <input type="submit" id="declareContract" value="Declare Contract" />
+      </fieldset>
+    </form>
+    <form id="executeTxn">
+      <fieldset>
+        <legend>Execute Txn</legend>
+        <label for="executetxn_senderAddress">Sender Address</label>
+        <input type="text" id="executetxn_senderAddress" name="executetxn_senderAddress" /><br />
+        <label for="executetxn_txnInvocation">Txn Invocation(s)</label>
+        <input type="text" id="executetxn_txnInvocation" name="executetxn_txnInvocation" /><br />
+        <label for="executetxn_abis">Abi(s)</label>
+        <input type="text" id="executetxn_abis" name="executetxn_abis" /><br />
+        <label for="executetxn_invocationsDetails">Invocations Details</label>
+        <input type="text" id="executetxn_invocationsDetails" name="executetxn_invocationsDetails" /><br />
+        <input type="submit" id="executeTxn" value="Execute Txn" />
+      </fieldset>
+    </form>
+    <form id="estimateFees">
+      <fieldset>
+        <legend>Estimate Fees</legend>
+        <label for="estimateFees_senderAddress">Sender Address</label>
+        <input type="text" id="estimateFees_senderAddress" name="estimateFees_senderAddress" /><br />
+        <label for="estimateFees_invocations">Invocations</label>
+        <input type="text" id="estimateFees_invocations" name="estimateFees_invocations" /><br />
+        <label for="estimateFees_invocationDetails">Invocation Details</label>
+        <input type="text" id="estimateFees_invocationDetails" name="estimateFees_invocationDetails" /><br />
+        <input type="submit" id="estimateFees" value="Estimate Fees" />
+      </fieldset>
+    </form>
+  </body>
 
-<script type='module'>
-  //import { gzip } from 'https://cdn.skypack.dev/pako';
+  <script type="module">
+    //import { gzip } from 'https://cdn.skypack.dev/pako';
 
-  const snapId = `local:${window.location.href}`;
-  const connectButton = document.querySelector('button.connect')
-  const sendPingButton = document.querySelector('button.sendPing')
-  const getErc20BalanceForm = document.getElementById('getErc20Balance')
-  const getEstimateFeeForm = document.getElementById('getEstimateFee')
-  const getEstimateAccountDeployFeeForm = document.getElementById('getEstimateAccountDeployFee')
-  const getDeployedAccContractsForm = document.getElementById('getDeployedAccContracts')
-  const transferErc20Form = document.getElementById('transferErc20')
-  const getTransactionStatusForm = document.getElementById('getTransactionStatus')
-  const deployUserAccContractForm = document.getElementById('deployUserAccContract')
-  const retrievePrivateKeyFromAddressForm = document.getElementById('retrievePrivateKeyFromAddress')
-  const retrievePublicKeyFromAddressForm = document.getElementById('retrievePublicKeyFromAddress')
-  const signTypedDataMessageForm = document.getElementById('signTypedDataMessage')
-  const verifyTypedDataSignatureForm = document.getElementById('verifyTypedDataSignature')
-  const addErc20TokenForm = document.getElementById('addErc20Token')
-  const getStoredErc20TokensForm = document.getElementById('getStoredErc20Tokens')
-  const sendTransactionForm = document.getElementById('sendTransaction')
-  const callContractForm = document.getElementById('callContract')
-  const addNetworkForm = document.getElementById('addNetwork')
-  const getStoredNetworksForm = document.getElementById('getStoredNetworks')
-  const getStoredTransactionsForm = document.getElementById('getStoredTransactions')
-  const getTransactionsForm = document.getElementById('getTransactions')
-  const recoverUserAccountsForm = document.getElementById('recoverUserAccounts')
+    const snapId = `local:${window.location.href}`;
+    const connectButton = document.querySelector('button.connect');
+    const sendPingButton = document.querySelector('button.sendPing');
+    connectButton.addEventListener('click', connect);
+    sendPingButton.addEventListener('click', sendPing);
 
-  connectButton.addEventListener('click', connect)
-  sendPingButton.addEventListener('click', sendPing)
-  getDeployedAccContractsForm.addEventListener('submit', getDeployedAccContracts)
-  getErc20BalanceForm.addEventListener('submit', getErc20Balance)
-  getEstimateFeeForm.addEventListener('submit', getEstimateFee)
-  getEstimateAccountDeployFeeForm.addEventListener('submit', getEstimateAccountDeployFee)
-  transferErc20Form.addEventListener('submit', transferErc20)
-  getTransactionStatusForm.addEventListener('submit', getTransactionStatus)
-  deployUserAccContractForm.addEventListener('submit', deployUserAccContract)
-  retrievePrivateKeyFromAddressForm.addEventListener('submit', retrievePrivateKeyFromAddress)
-  retrievePublicKeyFromAddressForm.addEventListener('submit', retrievePublicKeyFromAddress)
-  signTypedDataMessageForm.addEventListener('submit', signTypedDataMessage)
-  verifyTypedDataSignatureForm.addEventListener('submit', verifyTypedDataSignature)
-  addErc20TokenForm.addEventListener('submit', addErc20Token)
-  getStoredErc20TokensForm.addEventListener('submit', getStoredErc20Tokens)
-  sendTransactionForm.addEventListener('submit', sendTransaction)
-  callContractForm.addEventListener('submit', callContract)
-  addNetworkForm.addEventListener('submit', addNetwork)
-  getStoredNetworksForm.addEventListener('submit', getStoredNetworks)
-  getStoredTransactionsForm.addEventListener('submit', getStoredTransactions)
-  getTransactionsForm.addEventListener('submit', getTransactions)
-  recoverUserAccountsForm.addEventListener('submit', recoverUserAccounts)
+    const formWithSubmit = [
+      {
+        id: 'getErc20Balance',
+        method: getErc20Balance,
+      },
+      {
+        id: 'getEstimateFee',
+        method: getEstimateFee,
+      },
+      {
+        id: 'getEstimateAccountDeployFee',
+        method: getEstimateAccountDeployFee,
+      },
+      {
+        id: 'getDeployedAccContracts',
+        method: getDeployedAccContracts,
+      },
+      {
+        id: 'transferErc20',
+        method: transferErc20,
+      },
+      {
+        id: 'getTransactionStatus',
+        method: getTransactionStatus,
+      },
+      {
+        id: 'deployUserAccContract',
+        method: deployUserAccContract,
+      },
+      {
+        id: 'retrievePrivateKeyFromAddress',
+        method: retrievePrivateKeyFromAddress,
+      },
+      {
+        id: 'retrievePublicKeyFromAddress',
+        method: retrievePublicKeyFromAddress,
+      },
+      {
+        id: 'signTypedDataMessage',
+        method: signTypedDataMessage,
+      },
+      {
+        id: 'signTransaction',
+        method: signTransaction,
+      },
+      {
+        id: 'signDeployAccountTransaction',
+        method: signDeployAccountTransaction,
+      },
+      {
+        id: 'signDeclareTransaction',
+        method: signDeclareTransaction,
+      },
+      {
+        id: 'verifyTypedDataSignature',
+        method: verifyTypedDataSignature,
+      },
+      {
+        id: 'addErc20Token',
+        method: addErc20Token,
+      },
+      {
+        id: 'getStoredErc20Tokens',
+        method: getStoredErc20Tokens,
+      },
+      {
+        id: 'sendTransaction',
+        method: sendTransaction,
+      },
+      {
+        id: 'callContract',
+        method: callContract,
+      },
+      {
+        id: 'addNetwork',
+        method: addNetwork,
+      },
+      {
+        id: 'switchNetwork',
+        method: switchNetwork,
+      },
+      {
+        id: 'getCurrentNetwork',
+        method: getCurrentNetwork,
+      },
+      {
+        id: 'getStoredNetworks',
+        method: getStoredNetworks,
+      },
+      {
+        id: 'getStoredTransactions',
+        method: getStoredTransactions,
+      },
+      {
+        id: 'getTransactions',
+        method: getTransactions,
+      },
+      {
+        id: 'recoverUserAccounts',
+        method: recoverUserAccounts,
+      },
+      {
+        id: 'executeTxn',
+        method: executeTxn,
+      },
+      {
+        id: 'estimateFees',
+        method: estimateFees,
+      },
+    ];
 
-  function getReqFlagsFromCheckbox() {
-    return {
-      isDev: document.getElementById('isDev').checked,
-      debugLevel: document.getElementById('debugLevel').value,
+    for (const form of formWithSubmit) {
+      const formElement = document.getElementById(form.id);
+      formElement.addEventListener('submit', form.method);
     }
-  }
 
-  // here we get permissions to interact with and install the snap
-  async function connect() {
-    await ethereum.request({
-      method: 'wallet_requestSnaps',
-      params: {
-        [snapId]: {}
+    function getReqFlagsFromCheckbox() {
+      return {
+        isDev: document.getElementById('isDev').checked,
+        debugLevel: document.getElementById('debugLevel').value,
+      };
+    }
+
+    // here we get permissions to interact with and install the snap
+    async function connect() {
+      await ethereum.request({
+        method: 'wallet_requestSnaps',
+        params: {
+          [snapId]: {},
+        },
+      });
+    }
+
+    // here we call the snap's "ping" method
+    async function sendPing() {
+      try {
+        const response = await ethereum.request({
+          method: 'wallet_invokeSnap',
+          params: {
+            snapId,
+            request: {
+              method: 'ping',
+            },
+          },
+        });
+        alert(response);
+      } catch (err) {
+        console.error(err);
+        alert('Problem happened: ' + err.message || err);
       }
-    })
-  }
-
-  // here we call the snap's "ping" method
-  async function sendPing() {
-    try {
-      const response = await ethereum.request({
-        method: 'wallet_invokeSnap',
-        params: {
-          snapId, 
-          request: {
-            method: 'ping'
-          }
-        }
-      })
-      alert(response);
-    } catch (err) {
-      console.error(err)
-      alert('Problem happened: ' + err.message || err)
     }
-  }
 
-  // here we call the snap's "starkNet_getErc20TokenBalance" method
-  async function getErc20Balance(e) {
-    e.preventDefault() // to prevent default form behavior 
+    // here we call the snap's "starkNet_getErc20TokenBalance" method
+    async function getErc20Balance(e) {
+      e.preventDefault(); // to prevent default form behavior
 
-    const tokenAddress = document.getElementById('tokenAddress').value
-    const userAddress = document.getElementById('userAccAddress').value
-    const chainId = document.getElementById('targetChainId').value
+      const tokenAddress = document.getElementById('tokenAddress').value;
+      const userAddress = document.getElementById('userAccAddress').value;
+      const chainId = document.getElementById('targetChainId').value;
 
-    try {
-      const response = await ethereum.request({
-        method: 'wallet_invokeSnap',
-        params: {
-          snapId, 
-          request: {
-            method: 'starkNet_getErc20TokenBalance',
-            params: {
-              tokenAddress,
-              userAddress,
-              chainId,
-              ...getReqFlagsFromCheckbox()
-            }
-          }
-        }
-      })
-
-      console.log(`response: ${response}`);
-    } catch (err) {
-      console.error(err)
-      alert('Problem happened: ' + err.message || err)
+      await callSnap('starkNet_getErc20TokenBalance', { tokenAddress, userAddress });
     }
-  }
 
-  // here we call the snap's "starkNet_estimateFee" method
-  async function getEstimateFee(e) {
-    e.preventDefault() // to prevent default form behavior 
+    // here we call the snap's "starkNet_estimateFee" method
+    async function getEstimateFee(e) {
+      e.preventDefault(); // to prevent default form behavior
 
-    const contractAddress = document.getElementById('contractAddress').value
-    const contractFuncName = document.getElementById('contractFuncName').value
-    const contractCallData = document.getElementById('contractCallData').value
-    const senderAddress = document.getElementById('feeSenderAddress').value
-    const chainId = document.getElementById('targetChainId').value
+      const contractAddress = document.getElementById('contractAddress').value;
+      const contractFuncName = document.getElementById('contractFuncName').value;
+      const contractCallData = document.getElementById('contractCallData').value;
+      const senderAddress = document.getElementById('feeSenderAddress').value;
 
-    try {
-      const response = await ethereum.request({
-        method: 'wallet_invokeSnap',
-        params: {
-          snapId, 
-          request: {
-            method: 'starkNet_estimateFee',
-            params: {
-              contractAddress,
-              contractFuncName,
-              contractCallData,
-              senderAddress,
-              chainId,
-              ...getReqFlagsFromCheckbox()
-            }
-          }
-        }
-      })
-
-      console.log(`response: ${response}`);
-    } catch (err) {
-      console.error(err)
-      alert('Problem happened: ' + err.message || err)
+      await callSnap('starkNet_estimateFee', { contractAddress, contractFuncName, contractCallData, senderAddress });
     }
-  }
 
-  // here we call the snap's "starkNet_estimateAccountDeployFee" method
-  async function getEstimateAccountDeployFee(e) {
-    e.preventDefault() // to prevent default form behavior
+    // here we call the snap's "starkNet_estimateAccountDeployFee" method
+    async function getEstimateAccountDeployFee(e) {
+      e.preventDefault(); // to prevent default form behavior
 
-    const addressIndex = document.getElementById('estimateDeployFeeAddressIndex').value
-    const chainId = document.getElementById('targetChainId').value
+      const addressIndex = document.getElementById('estimateDeployFeeAddressIndex').value;
 
-    try {
-      const response = await ethereum.request({
-        method: 'wallet_invokeSnap',
-        params: {
-          snapId, 
-          request: {
-            method: 'starkNet_estimateAccountDeployFee',
-            params: {
-              addressIndex,
-              chainId,
-              ...getReqFlagsFromCheckbox(),
+      await callSnap('starkNet_estimateAccountDeployFee', { addressIndex });
+    }
+
+    // here we call the snap's "starkNet_sendTransaction" method
+    async function transferErc20(e) {
+      e.preventDefault(); // to prevent default form behavior
+
+      const erc20Address = document.getElementById('transferTokenAddress').value;
+      const recipientAddress = document.getElementById('recipientAddress').value;
+      const transferAmount = document.getElementById('transferAmount').value;
+      const senderAddress = document.getElementById('senderAddress').value;
+      const maxFee = document.getElementById('transferMaxFee').value;
+
+      await callSnap('starkNet_sendTransaction', {
+        erc20Address,
+        recipientAddress,
+        transferAmount,
+        senderAddress,
+        maxFee,
+      });
+    }
+
+    // here we call the snap's "starkNet_getStoredUserAccounts" method
+    async function getDeployedAccContracts(e) {
+      e.preventDefault(); // to prevent default form behavior
+
+      await callSnap('starkNet_getStoredUserAccounts', {});
+    }
+
+    // here we call the snap's "starkNet_getTransactionStatus" method
+    async function getTransactionStatus(e) {
+      e.preventDefault(); // to prevent default form behavior
+
+      const transactionHash = document.getElementById('transactionHash').value;
+
+      await callSnap('starkNet_getTransactionStatus', { transactionHash });
+    }
+
+    // here we call the snap's "starkNet_createAccount" method
+    async function deployUserAccContract(e) {
+      e.preventDefault(); // to prevent default form behavior
+
+      const addressIndex = document.getElementById('addressIndex').value;
+      const deploy = document.getElementById('sendDeployTxn').checked;
+
+      await callSnap('starkNet_createAccount', { addressIndex, deploy });
+    }
+
+    // here we call the snap's "starkNet_extractPrivateKey" method
+    async function retrievePrivateKeyFromAddress(e) {
+      e.preventDefault(); // to prevent default form behavior
+
+      const userAddress = document.getElementById('userAddress').value;
+
+      await callSnap('starkNet_extractPrivateKey', { userAddress });
+    }
+
+    // here we call the snap's "starkNet_extractPublicKey" method
+    async function retrievePublicKeyFromAddress(e) {
+      e.preventDefault(); // to prevent default form behavior
+
+      const userAddress = document.getElementById('pkUserAddress').value;
+
+      await callSnap('starkNet_extractPublicKey', { userAddress });
+    }
+
+    // here we call the snap's "starkNet_signMessage" method
+    async function signTypedDataMessage(e) {
+      e.preventDefault(); // to prevent default form behavior
+
+      const typedDataMessage = document.getElementById('typedDataMessage').value;
+      const signerAddress = document.getElementById('signerUserAddress').value;
+
+      await callSnap('starkNet_signMessage', {
+        typedDataMessage: typedDataMessage ? JSON.parse(typedDataMessage) : {},
+        signerAddress,
+      });
+    }
+
+    // here we call the snap's "starkNet_signTransaction" method
+    async function signTransaction(e) {
+      e.preventDefault(); // to prevent default form behavior
+
+      const userAddress = document.getElementById('signTransaction_userAddress').value;
+      const transactions = document.getElementById('signTransaction_transactions').value;
+      const transactionsDetail = document.getElementById('signTransaction_transactionsDetail').value;
+
+      await callSnap('starkNet_signTransaction', {
+        signerAddress: userAddress,
+        transactions: transactions ? JSON.parse(transactions) : {},
+        transactionsDetail: transactionsDetail ? JSON.parse(transactionsDetail) : {},
+      });
+    }
+
+    // here we call the snap's "starkNet_signDeployAccounrTransaction" method
+    async function signDeployAccountTransaction(e) {
+      e.preventDefault(); // to prevent default form behavior
+
+      const userAddress = document.getElementById('signDeployAccountTransaction_userAddress').value;
+      const transaction = document.getElementById('signDeployAccountTransaction_transaction').value;
+
+      await callSnap('starkNet_signDeployAccounrTransaction', {
+        signerAddress: userAddress,
+        transaction: transaction ? JSON.parse(transaction) : {},
+      });
+    }
+
+    // here we call the snap's "starkNet_signDeclareTransaction" method
+    async function signDeclareTransaction(e) {
+      e.preventDefault(); // to prevent default form behavior
+
+      const userAddress = document.getElementById('signDeclareTransaction_userAddress').value;
+      const transaction = document.getElementById('signDeclareTransaction_transaction').value;
+
+      await callSnap('starkNet_signDeclareTransaction', {
+        signerAddress: userAddress,
+        transaction: transaction ? JSON.parse(transaction) : {},
+      });
+    }
+
+    // here we call the snap's "starkNet_verifySignedMessage" method
+    async function verifyTypedDataSignature(e) {
+      e.preventDefault(); // to prevent default form behavior
+
+      const typedDataMessage = document.getElementById('verifyTypedDataMessage').value;
+      const signerAddress = document.getElementById('verifySignerUserAddress').value;
+      const signature = document.getElementById('verifySignature').value;
+
+      await callSnap('starkNet_verifySignedMessage', { typedDataMessage, signerAddress, signature });
+    }
+
+    // here we call the snap's "starkNet_addErc20Token" method
+    async function addErc20Token(e) {
+      e.preventDefault(); // to prevent default form behavior
+
+      const tokenAddress = document.getElementById('addTokenAddress').value;
+      const tokenName = document.getElementById('addTokenName').value;
+      const tokenSymbol = document.getElementById('addTokenSymbol').value;
+      const tokenDecimals = document.getElementById('addTokenDecimals').value;
+
+      await callSnap('starkNet_addErc20Token', { tokenAddress, tokenName, tokenSymbol, tokenDecimals });
+    }
+
+    // here we call the snap's "starkNet_getStoredErc20Tokens" method
+    async function getStoredErc20Tokens(e) {
+      e.preventDefault(); // to prevent default form behavior
+
+      await callSnap('starkNet_getStoredErc20Tokens', {});
+    }
+
+    // here we call the snap's "starkNet_sendTransaction" method
+    async function sendTransaction(e) {
+      e.preventDefault(); // to prevent default form behavior
+
+      const contractAddress = document.getElementById('txnContractAddress').value;
+      const contractFuncName = document.getElementById('txnContractFuncName').value;
+      const contractCallData = document.getElementById('txnContractCallData').value;
+      const senderAddress = document.getElementById('txnSenderAddress').value;
+      const maxFee = document.getElementById('txnMaxFee').value;
+      const chainId = document.getElementById('targetChainId').value;
+
+      await callSnap('starkNet_sendTransaction', {
+        contractAddress,
+        contractFuncName,
+        contractCallData,
+        senderAddress,
+        maxFee,
+      });
+    }
+
+    // here we call the snap's "starkNet_getValue" method
+    async function callContract(e) {
+      e.preventDefault(); // to prevent default form behavior
+
+      const contractAddress = document.getElementById('callContractAddress').value;
+      const contractFuncName = document.getElementById('callContractFuncName').value;
+      const contractCallData = document.getElementById('callContractCallData').value;
+      const chainId = document.getElementById('targetChainId').value;
+
+      await callSnap('starkNet_getValue', { contractAddress, contractFuncName, contractCallData });
+    }
+
+    // here we call the snap's "starkNet_addNetwork" method
+    async function addNetwork(e) {
+      e.preventDefault(); // to prevent default form behavior
+
+      const networkName = document.getElementById('addNetworkName').value;
+      const networkChainId = document.getElementById('addNetworkChainId').value;
+      const networkBaseUrl = document.getElementById('addNetworkBaseUrl').value;
+      const networkNodeUrl = document.getElementById('addNetworkNodeUrl').value;
+      const networkVoyagerUrl = document.getElementById('addNetworkVoyagerUrl').value;
+      const accountClassHash = document.getElementById('addNetworkAccClassHash').value;
+
+      await callSnap('starkNet_addNetwork', {
+        networkName,
+        networkChainId,
+        networkBaseUrl,
+        networkNodeUrl,
+        networkVoyagerUrl,
+        accountClassHash,
+      });
+    }
+
+    // here we call the snap's "starkNet_switchNetwork" method
+    async function switchNetwork(e) {
+      e.preventDefault(); // to prevent default form behavior
+
+      const networkChainId = document.getElementById('switchNetwork_ChainId').value;
+      
+      await callSnap('starkNet_switchNetwork', {
+        chainId: networkChainId,
+      });
+    }
+
+    // here we call the snap's "starkNet_getCurrentNetwork" method
+    async function getCurrentNetwork(e) {
+      e.preventDefault(); // to prevent default form behavior
+
+      await callSnap('starkNet_getCurrentNetwork', {});
+    }
+
+    // here we call the snap's "starkNet_getStoredNetworks" method
+    async function getStoredNetworks(e) {
+      e.preventDefault(); // to prevent default form behavior
+
+      await callSnap('starkNet_getStoredNetworks', {});
+    }
+
+    // here we call the snap's "starkNet_getStoredTransactions" method
+    async function getStoredTransactions(e) {
+      e.preventDefault(); // to prevent default form behavior
+
+      const senderAddress = document.getElementById('getTxnSenderAddress').value;
+      const contractAddress = document.getElementById('getTxnContractAddress').value;
+      const txnType = document.getElementById('txnType').value;
+      const txnsInLastNumOfDays = document.getElementById('txnInLastNumOfDays').value;
+
+      await callSnap('starkNet_getStoredTransactions', {
+        senderAddress,
+        contractAddress,
+        txnType,
+        txnsInLastNumOfDays,
+      });
+    }
+
+    // here we call the snap's "starkNet_getTransactions" method
+    async function getTransactions(e) {
+      e.preventDefault(); // to prevent default form behavior
+
+      const senderAddress = document.getElementById('getTxnsSenderAddress').value;
+      const contractAddress = document.getElementById('getTxnsContractAddress').value;
+      const pageSize = document.getElementById('getTxnsPageSize').value;
+      const txnsInLastNumOfDays = document.getElementById('getTxnsInLastNumOfDays').value;
+      const onlyFromState = document.getElementById('getTxnsOnlyFromState').checked;
+      const withDeployTxn = document.getElementById('getTxnsWithDeployTxn').checked;
+
+      await callSnap('starkNet_getTransactions', {
+        senderAddress,
+        contractAddress,
+        pageSize,
+        txnsInLastNumOfDays,
+        onlyFromState,
+        withDeployTxn,
+      });
+    }
+
+    // here we call the snap's "starkNet_recoverAccounts" method
+    async function recoverUserAccounts(e) {
+      e.preventDefault(); // to prevent default form behavior
+
+      const startScanIndex = document.getElementById('startScanIndex').value;
+      const maxScanned = document.getElementById('maxScanned').value;
+      const maxMissed = document.getElementById('maxMissed').value;
+
+      await callSnap('starkNet_recoverAccounts', {
+        startScanIndex,
+        maxScanned,
+        maxMissed,
+      });
+    }
+
+    async function executeTxn(e) {
+      e.preventDefault(); // to prevent default form behavior
+
+      const senderAddress = document.getElementById('executetxn_senderAddress').value;
+      const txnInvocation = document.getElementById('executetxn_txnInvocation').value;
+      const abis = document.getElementById('executetxn_abis').value;
+      const invocationsDetails = document.getElementById('executetxn_invocationsDetails').value;
+
+      await callSnap('starkNet_executeTxn', {
+        senderAddress,
+        txnInvocation: txnInvocation ? JSON.parse(txnInvocation) : undefined,
+        abis: abis ? JSON.parse(abis) : undefined,
+        invocationsDetails: invocationsDetails ? JSON.parse(invocationsDetails) : undefined,
+      });
+    }
+
+    async function declareContract(e) {
+      e.preventDefault(); // to prevent default form behavior
+
+      const senderAddress = document.getElementById('declareContract_senderAddress').value;
+      const contractPayload = document.getElementById('declareContract_contract').value;
+      const invocationsDetails = document.getElementById('declareContract_invocationsDetails').value;
+
+      await callSnap('starkNet_declareContract', {
+        senderAddress,
+        contractPayload: contractPayload ? JSON.parse(contractPayload) : contractPayload,
+        invocationsDetails: invocationsDetails ? JSON.parse(invocationsDetails) : invocationsDetails,
+      });
+    }
+
+    async function estimateFees(e) {
+      e.preventDefault(); // to prevent default form behavior
+
+      const senderAddress = document.getElementById('estimateFees_senderAddress').value;
+      const invocationDetails = document.getElementById('estimateFees_invocationDetails').value;
+      const invocations = document.getElementById('estimateFees_invocations').value;
+
+      await callSnap('starkNet_estimateFees', {
+        senderAddress,
+        invocations: invocations ? JSON.parse(invocations) : undefined,
+        invocationDetails: invocationDetails ? JSON.parse(invocationDetails) : undefined,
+      });
+    }
+
+    async function callSnap(method, params) {
+      try {
+        const chainId = document.getElementById('targetChainId').value;
+        //0x534e5f474f45524c42
+        console.log(params)
+        const response = await ethereum.request({
+          method: 'wallet_invokeSnap',
+          params: {
+            snapId,
+            request: {
+              method: method,
+              params: {
+                chainId,
+                ...getReqFlagsFromCheckbox(),
+                ...params,
+              },
             },
           },
-        }
-      })
-    } catch (err) {
-      console.error(err)
-      alert('Problem happened: ' + err.message || err)
+        });
+        console.log(`${method} response:`, response);
+      } catch (err) {
+        console.error(`${method} problem happened:`, err);
+        alert(`${method} problem happened: ${err.message || err}`);
+      }
     }
-  }
-
-  // here we call the snap's "starkNet_sendTransaction" method
-  async function transferErc20(e) {
-    e.preventDefault() // to prevent default form behavior 
-
-    const erc20Address = document.getElementById('transferTokenAddress').value
-    const recipientAddress = document.getElementById('recipientAddress').value
-    const transferAmount = document.getElementById('transferAmount').value
-    const senderAddress = document.getElementById('senderAddress').value
-    const maxFee = document.getElementById('transferMaxFee').value
-    const chainId = document.getElementById('targetChainId').value
-
-    try {
-      const response = await ethereum.request({
-        method: 'wallet_invokeSnap',
-        params: {
-          snapId, 
-          request: {
-            method: 'starkNet_sendTransaction',
-            params: {
-              contractAddress: erc20Address,
-              contractFuncName: 'transfer',
-              contractCallData: `${recipientAddress},${transferAmount},0`,
-              senderAddress,
-              maxFee,
-              chainId,
-              ...getReqFlagsFromCheckbox()
-            }
-          }
-        }
-      })
-
-      console.log(`response: ${response}`);
-    } catch (err) {
-      console.error(err)
-      alert('Problem happened: ' + err.message || err)
-    }
-  }
-
-  // here we call the snap's "starkNet_getStoredUserAccounts" method
-  async function getDeployedAccContracts(e) {
-    e.preventDefault() // to prevent default form behavior 
-
-    const chainId = document.getElementById('targetChainId').value
-
-    try {
-      const response = await ethereum.request({
-        method: 'wallet_invokeSnap',
-        params: { 
-          snapId, 
-          request: {
-            method: 'starkNet_getStoredUserAccounts',
-            params: {
-              chainId,
-              ...getReqFlagsFromCheckbox()
-            },
-          }
-        }
-      })
-      alert(JSON.stringify(response));
-    } catch (err) {
-      console.error(err)
-      alert('Problem happened: ' + err.message || err)
-    }
-  }
-
-  // here we call the snap's "starkNet_getTransactionStatus" method
-  async function getTransactionStatus(e) {
-    e.preventDefault() // to prevent default form behavior 
-
-    const transactionHash = document.getElementById('transactionHash').value
-    const chainId = document.getElementById('targetChainId').value
-
-    try {
-      const response = await ethereum.request({
-        method: 'wallet_invokeSnap',
-        params: {
-          snapId, 
-          request: {
-            method: 'starkNet_getTransactionStatus',
-            params: {
-              transactionHash,
-              chainId,
-              ...getReqFlagsFromCheckbox()
-            }
-          }
-        }
-      })
-    } catch (err) {
-      console.error(err)
-      alert('Problem happened: ' + err.message || err)
-    }
-  }
-
-  // here we call the snap's "starkNet_createAccount" method
-  async function deployUserAccContract(e) {
-    e.preventDefault() // to prevent default form behavior
-
-    const addressIndex = document.getElementById('addressIndex').value
-    const chainId = document.getElementById('targetChainId').value
-    const deploy = document.getElementById('sendDeployTxn').checked
-
-    try {
-      const response = await ethereum.request({
-        method: 'wallet_invokeSnap',
-        params: {
-          snapId, 
-          request: {
-            method: 'starkNet_createAccount',
-            params: {
-              addressIndex,
-              deploy,
-              chainId,
-              ...getReqFlagsFromCheckbox()
-            }
-          }
-        }
-      })
-    } catch (err) {
-      console.error(err)
-      alert('Problem happened: ' + err.message || err)
-    }
-  }
-  
-  // here we call the snap's "starkNet_extractPrivateKey" method
-  async function retrievePrivateKeyFromAddress(e) {
-    e.preventDefault() // to prevent default form behavior
-
-    const userAddress = document.getElementById('userAddress').value
-    const chainId = document.getElementById('targetChainId').value
-
-    try {
-      const response = await ethereum.request({
-        method: 'wallet_invokeSnap',
-        params: {
-          snapId, 
-          request: {
-            method: 'starkNet_extractPrivateKey',
-            params: {
-              userAddress,
-              chainId,
-              ...getReqFlagsFromCheckbox()
-            }
-          }
-        }
-      })
-    } catch (err) {
-      console.error(err)
-      alert('Problem happened: ' + err.message || err)
-    }
-  }
-
-  // here we call the snap's "starkNet_extractPublicKey" method
-  async function retrievePublicKeyFromAddress(e) {
-    e.preventDefault() // to prevent default form behavior
-
-    const userAddress = document.getElementById('pkUserAddress').value
-    const chainId = document.getElementById('targetChainId').value
-
-    try {
-      const response = await ethereum.request({
-        method: 'wallet_invokeSnap',
-        params: {
-          snapId, 
-          request: {
-            method: 'starkNet_extractPublicKey',
-            params: {
-              userAddress,
-              chainId,
-              ...getReqFlagsFromCheckbox()
-            }
-          }
-        }
-        
-      })
-    } catch (err) {
-      console.error(err)
-      alert('Problem happened: ' + err.message || err)
-    }
-  }
-
-  // here we call the snap's "starkNet_signMessage" method
-  async function signTypedDataMessage(e) {
-    e.preventDefault() // to prevent default form behavior
-
-    const typedDataMessage = document.getElementById('typedDataMessage').value
-    const signerAddress = document.getElementById('signerUserAddress').value
-    const chainId = document.getElementById('targetChainId').value
-
-    try {
-      const response = await ethereum.request({
-        method: 'wallet_invokeSnap',
-        params: {
-          snapId, 
-          request: {
-            method: 'starkNet_signMessage',
-            params: {
-              typedDataMessage,
-              signerAddress,
-              chainId,
-              ...getReqFlagsFromCheckbox()
-            }
-          }
-        }
-      })
-    } catch (err) {
-      console.error(err)
-      alert('Problem happened: ' + err.message || err)
-    }
-  }
-
-  // here we call the snap's "starkNet_verifySignedMessage" method
-  async function verifyTypedDataSignature(e) {
-    e.preventDefault() // to prevent default form behavior
-
-    const typedDataMessage = document.getElementById('verifyTypedDataMessage').value
-    const signerAddress = document.getElementById('verifySignerUserAddress').value
-    const signature = document.getElementById('verifySignature').value
-    const chainId = document.getElementById('targetChainId').value
-
-    try {
-      const response = await ethereum.request({
-        method: 'wallet_invokeSnap',
-        params: {
-          snapId, 
-          request: {
-            method: 'starkNet_verifySignedMessage',
-            params: {
-              typedDataMessage,
-              signerAddress,
-              signature,
-              chainId,
-              ...getReqFlagsFromCheckbox()
-            }
-          }
-        }
-      })
-    } catch (err) {
-      console.error(err)
-      alert('Problem happened: ' + err.message || err)
-    }
-  }
-
-  // here we call the snap's "starkNet_addErc20Token" method
-  async function addErc20Token(e) {
-    e.preventDefault() // to prevent default form behavior
-
-    const tokenAddress = document.getElementById('addTokenAddress').value
-    const tokenName = document.getElementById('addTokenName').value
-    const tokenSymbol = document.getElementById('addTokenSymbol').value
-    const tokenDecimals = document.getElementById('addTokenDecimals').value
-    const chainId = document.getElementById('targetChainId').value
-
-    try {
-      const response = await ethereum.request({
-        method: 'wallet_invokeSnap',
-        params: {
-          snapId, 
-          request: {
-            method: 'starkNet_addErc20Token',
-            params: {
-              tokenAddress,
-              tokenName,
-              tokenSymbol,
-              tokenDecimals,
-              chainId,
-              ...getReqFlagsFromCheckbox()
-            }
-          }
-        }
-      })
-    } catch (err) {
-      console.error(err)
-      alert('Problem happened: ' + err.message || err)
-    }
-  }
-
-   // here we call the snap's "starkNet_getStoredErc20Tokens" method
-   async function getStoredErc20Tokens(e) {
-    e.preventDefault() // to prevent default form behavior
-
-    const chainId = document.getElementById('targetChainId').value
-
-    try {
-      const response = await ethereum.request({
-        method: 'wallet_invokeSnap',
-        params: {
-          snapId, 
-          request: {
-            method: 'starkNet_getStoredErc20Tokens',
-            params: {
-              chainId,
-              ...getReqFlagsFromCheckbox()
-            }
-          }
-        }
-      })
-    } catch (err) {
-      console.error(err)
-      alert('Problem happened: ' + err.message || err)
-    }
-  }
-
-  // here we call the snap's "starkNet_sendTransaction" method
-  async function sendTransaction(e) {
-    e.preventDefault() // to prevent default form behavior 
-
-    const contractAddress = document.getElementById('txnContractAddress').value
-    const contractFuncName = document.getElementById('txnContractFuncName').value
-    const contractCallData = document.getElementById('txnContractCallData').value
-    const senderAddress = document.getElementById('txnSenderAddress').value
-    const maxFee = document.getElementById('txnMaxFee').value
-    const chainId = document.getElementById('targetChainId').value
-
-    try {
-      const response = await ethereum.request({
-        method: 'wallet_invokeSnap',
-        params: {
-          snapId, 
-          request: {
-            method: 'starkNet_sendTransaction',
-            params: {
-              contractAddress,
-              contractFuncName,
-              contractCallData,
-              senderAddress,
-              maxFee,
-              chainId,
-              ...getReqFlagsFromCheckbox()
-            }
-          }
-        }
-      })
-
-      console.log(`response: ${response}`);
-    } catch (err) {
-      console.error(err)
-      alert('Problem happened: ' + err.message || err)
-    }
-  }
-
-  // here we call the snap's "starkNet_getValue" method
-  async function callContract(e) {
-    e.preventDefault() // to prevent default form behavior 
-
-    const contractAddress = document.getElementById('callContractAddress').value
-    const contractFuncName = document.getElementById('callContractFuncName').value
-    const contractCallData = document.getElementById('callContractCallData').value
-    const chainId = document.getElementById('targetChainId').value
-
-    try {
-      const response = await ethereum.request({
-        method: 'wallet_invokeSnap',
-        params: {
-          snapId, 
-          request: {
-            method: 'starkNet_getValue',
-            params: {
-              contractAddress,
-              contractFuncName,
-              contractCallData,
-              chainId,
-              ...getReqFlagsFromCheckbox()
-            }
-          }
-        }
-      })
-
-      console.log(`response: ${response}`);
-    } catch (err) {
-      console.error(err)
-      alert('Problem happened: ' + err.message || err)
-    }
-  }
-
-  // here we call the snap's "starkNet_addNetwork" method
-  async function addNetwork(e) {
-    e.preventDefault() // to prevent default form behavior
-
-    const networkName = document.getElementById('addNetworkName').value
-    const networkChainId = document.getElementById('addNetworkChainId').value
-    const networkBaseUrl = document.getElementById('addNetworkBaseUrl').value
-    const networkNodeUrl = document.getElementById('addNetworkNodeUrl').value
-    const networkVoyagerUrl = document.getElementById('addNetworkVoyagerUrl').value
-    const accountClassHash = document.getElementById('addNetworkAccClassHash').value
-
-    try {
-      const response = await ethereum.request({
-        method: 'wallet_invokeSnap',
-        params: {
-          snapId, 
-          request: {
-            method: 'starkNet_addNetwork',
-            params: {
-              networkName,
-              networkChainId,
-              networkBaseUrl,
-              networkNodeUrl,
-              networkVoyagerUrl,
-              accountClassHash,
-              ...getReqFlagsFromCheckbox()
-            }
-          }
-        }
-      })
-    } catch (err) {
-      console.error(err)
-      alert('Problem happened: ' + err.message || err)
-    }
-  }
-
-  // here we call the snap's "starkNet_getStoredNetworks" method
-  async function getStoredNetworks(e) {
-    e.preventDefault() // to prevent default form behavior
-    
-    try {
-      const response = await ethereum.request({
-        method: 'wallet_invokeSnap',
-        params: {
-          snapId, 
-          request: {
-            method: 'starkNet_getStoredNetworks',
-            params: {},
-          }
-        }
-      })
-      alert(JSON.stringify(response));
-    } catch (err) {
-      console.error(err)
-      alert('Problem happened: ' + err.message || err)
-    }
-  }
-
-  // here we call the snap's "starkNet_getStoredTransactions" method
-  async function getStoredTransactions(e) {
-    e.preventDefault() // to prevent default form behavior
-
-    const senderAddress = document.getElementById('getTxnSenderAddress').value
-    const contractAddress = document.getElementById('getTxnContractAddress').value
-    const txnType = document.getElementById('txnType').value
-    const txnsInLastNumOfDays = document.getElementById('txnInLastNumOfDays').value
-    const chainId = document.getElementById('targetChainId').value
-
-    try {
-      const response = await ethereum.request({
-        method: 'wallet_invokeSnap',
-        params: {
-          snapId, 
-          request: {
-            method: 'starkNet_getStoredTransactions',
-            params: {
-              senderAddress,
-              contractAddress,
-              txnType,
-              txnsInLastNumOfDays,
-              chainId,
-              ...getReqFlagsFromCheckbox()
-            }
-          }
-        }
-      })
-    } catch (err) {
-      console.error(err)
-      alert('Problem happened: ' + err.message || err)
-    }
-  }
-
-  // here we call the snap's "starkNet_getTransactions" method
-  async function getTransactions(e) {
-    e.preventDefault() // to prevent default form behavior
-
-    const senderAddress = document.getElementById('getTxnsSenderAddress').value
-    const contractAddress = document.getElementById('getTxnsContractAddress').value
-    const pageSize = document.getElementById('getTxnsPageSize').value
-    const txnsInLastNumOfDays = document.getElementById('getTxnsInLastNumOfDays').value
-    const chainId = document.getElementById('targetChainId').value
-    const onlyFromState = document.getElementById('getTxnsOnlyFromState').checked
-    const withDeployTxn = document.getElementById('getTxnsWithDeployTxn').checked
-
-    try {
-      const response = await ethereum.request({
-        method: 'wallet_invokeSnap',
-        params: {
-          snapId, 
-          request: {
-            method: 'starkNet_getTransactions',
-            params: {
-              senderAddress,
-              contractAddress,
-              pageSize,
-              txnsInLastNumOfDays,
-              onlyFromState,
-              withDeployTxn,
-              chainId,
-              ...getReqFlagsFromCheckbox()
-            }
-          }
-        }
-      })
-    } catch (err) {
-      console.error(err)
-      alert('Problem happened: ' + err.message || err)
-    }
-  }
-
-  // here we call the snap's "starkNet_recoverAccounts" method
-  async function recoverUserAccounts(e) {
-    e.preventDefault() // to prevent default form behavior
-
-    const startScanIndex = document.getElementById('startScanIndex').value
-    const maxScanned = document.getElementById('maxScanned').value
-    const maxMissed = document.getElementById('maxMissed').value
-    const chainId = document.getElementById('targetChainId').value
-
-    try {
-      const response = await ethereum.request({
-        method: 'wallet_invokeSnap',
-        params: {
-          snapId, 
-          request: {
-            method: 'starkNet_recoverAccounts',
-            params: {
-              startScanIndex,
-              maxScanned,
-              maxMissed,
-              chainId,
-              ...getReqFlagsFromCheckbox(),
-            },
-          },
-        }
-      })
-    } catch (err) {
-      console.error(err)
-      alert('Problem happened: ' + err.message || err)
-    }
-  }
-
-</script>
-
+  </script>
 </html>

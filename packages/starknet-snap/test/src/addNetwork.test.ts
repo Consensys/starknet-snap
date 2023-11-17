@@ -26,9 +26,13 @@ describe('Test function: addNetwork', function () {
     wallet: walletStub,
     saveMutex: new Mutex(),
   };
-
+  let stateStub: sinon.SinonStub;
+  let dialogStub: sinon.SinonStub;
   beforeEach(function () {
-    walletStub.rpcStubs.snap_manageState.resolves(state);
+    stateStub = walletStub.rpcStubs.snap_manageState;
+    dialogStub = walletStub.rpcStubs.snap_dialog;
+    stateStub.resolves(state);
+    dialogStub.resolves(true);
   });
 
   afterEach(function () {
@@ -36,68 +40,60 @@ describe('Test function: addNetwork', function () {
     sandbox.restore();
   });
 
-  it('should add the network correctly (should throw error as temporarily disabled)', async function () {
+  it('should add the network correctly', async function () {
     const requestObject: AddNetworkRequestParams = {
       networkName: 'Starknet Unit SN_GOERLI',
       networkChainId: '0x534e5f474f777',
       networkBaseUrl: 'https://alpha-unit-SN_GOERLI.starknet.io',
-      networkNodeUrl: '',
+      networkNodeUrl: 'https://alpha-unit-SN_GOERLI.starknet.io',
     };
     apiParams.requestParams = requestObject;
-    try {
-      await addNetwork(apiParams);
-      return;
-    } catch (err) {
-      expect(err).to.be.an('Error');
-      expect(err.message).to.be.eql('addNetwork is currently disabled');
-    }
+    const result = await addNetwork(apiParams);
+    expect(result).to.be.eql(true);
+    expect(stateStub).to.be.calledOnce;
+    expect(state.networks.length).to.be.eql(3);
   });
 
-  it('should update the network correctly (should throw error as temporarily disabled)', async function () {
+  it('should update the network correctly', async function () {
     const requestObject: AddNetworkRequestParams = {
       networkName: 'Starknet Unit SN_GOERLI 2',
       networkChainId: '0x534e5f474f777',
       networkBaseUrl: 'https://alpha-unit-SN_GOERLI-2.starknet.io',
-      networkNodeUrl: '',
+      networkNodeUrl: 'https://alpha-unit-SN_GOERLI.starknet.io',
     };
     apiParams.requestParams = requestObject;
-    try {
-      await addNetwork(apiParams);
-    } catch (err) {
-      expect(err).to.be.an('Error');
-      expect(err.message).to.be.eql('addNetwork is currently disabled');
-    }
+    const result = await addNetwork(apiParams);
+    expect(result).to.be.eql(true);
+    expect(stateStub).to.be.calledOnce;
+    expect(state.networks.length).to.be.eql(3);
   });
 
-  it('should not update snap state with the duplicated network (should throw error as temporarily disabled)', async function () {
+  it('should not update snap state with the duplicated network', async function () {
     const requestObject: AddNetworkRequestParams = {
       networkName: 'Starknet Unit SN_GOERLI 2',
       networkChainId: '0x534e5f474f777',
       networkBaseUrl: 'https://alpha-unit-SN_GOERLI-2.starknet.io',
-      networkNodeUrl: '',
+      networkNodeUrl: 'https://alpha-unit-SN_GOERLI.starknet.io',
     };
     apiParams.requestParams = requestObject;
-    try {
-      await addNetwork(apiParams);
-    } catch (err) {
-      expect(err).to.be.an('Error');
-      expect(err.message).to.be.eql('addNetwork is currently disabled');
-    }
+    const result = await addNetwork(apiParams);
+    expect(result).to.be.eql(true);
+    expect(stateStub).to.be.callCount(0);
+    expect(state.networks.length).to.be.eql(3);
   });
 
-  it('should throw error if upsertNetwork failed', async function () {
+  it('should throw an error if upsertNetwork failed', async function () {
     sandbox.stub(snapUtils, 'upsertNetwork').throws(new Error());
     const requestObject: AddNetworkRequestParams = {
       networkName: 'Starknet Unit SN_GOERLI 2',
       networkChainId: '0x534e5f474f777',
       networkBaseUrl: 'https://alpha-unit-SN_GOERLI-2.starknet.io',
-      networkNodeUrl: '',
+      networkNodeUrl: 'https://alpha-unit-SN_GOERLI.starknet.io',
     };
     apiParams.requestParams = requestObject;
-
     let result;
     try {
-      await addNetwork(apiParams);
+      result = await addNetwork(apiParams);
     } catch (err) {
       result = err;
     } finally {
@@ -286,34 +282,12 @@ describe('Test function: addNetwork', function () {
     }
   });
 
-  it('should throw an error if the network account class hash is not valid', async function () {
-    const requestObject: AddNetworkRequestParams = {
-      networkName: 'Starknet Unit SN_GOERLI',
-      networkChainId: '0x534e5f474f777',
-      networkBaseUrl: '',
-      networkNodeUrl: 'http://alpha-unit-SN_GOERLI-2.starknet.io',
-      accountClassHash: '0x811111111111111111111111111111111111111111111111111111111111111',
-      // a valid Starknet hash is essentially a cario felt, which is a 251 bit positive number
-      // which means it can only be 63 hex character long with the leading char being [1-7]
-    };
-    apiParams.requestParams = requestObject;
-    let result;
-    try {
-      result = await addNetwork(apiParams);
-    } catch (err) {
-      result = err;
-    } finally {
-      expect(result).to.be.an('Error');
-    }
-  });
-
   it('should throw an error if the network chainId is one of the preloaded network chainId', async function () {
     const requestObject: AddNetworkRequestParams = {
       networkName: 'Starknet Unit SN_GOERLI',
       networkChainId: '0x534e5f474f45524c49',
       networkBaseUrl: 'http://alpha-unit-SN_GOERLI-2.starknet.io',
       networkNodeUrl: '',
-      accountClassHash: '0x3e327de1c40540b98d05cbcb13552008e36f0ec8d61d46956d2f9752c294328',
     };
     apiParams.requestParams = requestObject;
     let result;
@@ -328,11 +302,10 @@ describe('Test function: addNetwork', function () {
 
   it('should throw an error if the network name is one of the preloaded network name', async function () {
     const requestObject: AddNetworkRequestParams = {
-      networkName: 'Goerli SN_GOERLI',
-      networkChainId: '0x12345678',
-      networkBaseUrl: 'http://alpha-unit-SN_GOERLI-2.starknet.io',
-      networkNodeUrl: '',
-      accountClassHash: '0x3e327de1c40540b98d05cbcb13552008e36f0ec8d61d46956d2f9752c294328',
+      networkName: STARKNET_TESTNET_NETWORK.name,
+      networkChainId: STARKNET_TESTNET_NETWORK.chainId,
+      networkBaseUrl: STARKNET_TESTNET_NETWORK.baseUrl,
+      networkNodeUrl: STARKNET_TESTNET_NETWORK.nodeUrl,
     };
     apiParams.requestParams = requestObject;
     let result;

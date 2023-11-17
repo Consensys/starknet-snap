@@ -1,6 +1,18 @@
 import { BIP44AddressKeyDeriver } from '@metamask/key-tree';
 import Mutex from 'async-mutex/lib/Mutex';
 import { SnapState, VoyagerTransactionType } from './snapState';
+import {
+  Abi,
+  Call,
+  InvocationsSignerDetails,
+  DeclareContractPayload,
+  InvocationsDetails,
+  Invocations,
+  EstimateFeeDetails,
+  DeployAccountSignerDetails,
+  DeclareSignerDetails,
+  typedData,
+} from 'starknet';
 
 export interface ApiParams {
   state: SnapState;
@@ -29,7 +41,11 @@ export type ApiRequestParams =
   | GetStoredNetworksRequestParams
   | GetStoredTransactionsRequestParams
   | GetTransactionsRequestParams
-  | RecoverAccountsRequestParams;
+  | RecoverAccountsRequestParams
+  | ExecuteTxnRequestParams
+  | EstimateFeesRequestParams
+  | DeclareContractRequestParams
+  | SignTransactionRequestParams;
 
 export interface BaseRequestParams {
   chainId?: string;
@@ -59,9 +75,8 @@ export interface ExtractPublicKeyRequestParams extends BaseRequestParams {
   userAddress: string;
 }
 
-export interface SignMessageRequestParams extends BaseRequestParams {
-  signerAddress: string;
-  typedDataMessage?: string;
+export interface SignMessageRequestParams extends SignRequestParams, BaseRequestParams {
+  typedDataMessage: typedData.TypedData;
 }
 
 export interface VerifySignedMessageRequestParams extends BaseRequestParams {
@@ -142,7 +157,49 @@ export interface RecoverAccountsRequestParams extends BaseRequestParams {
   maxMissed?: string | number;
 }
 
+export interface ExecuteTxnRequestParams extends BaseRequestParams {
+  senderAddress: string;
+  txnInvocation: Call | Call[];
+  abis?: Abi[];
+  invocationsDetails?: InvocationsDetails;
+}
+
+export interface EstimateFeesRequestParams extends BaseRequestParams {
+  senderAddress: string;
+  invocations: Invocations;
+  invocationDetails?: EstimateFeeDetails;
+}
+
+export interface DeclareContractRequestParams extends BaseRequestParams {
+  senderAddress: string;
+  contractPayload: DeclareContractPayload;
+  invocationsDetails?: InvocationsDetails;
+}
+
 export interface RpcV4GetTransactionReceiptResponse {
   execution_status?: string;
   finality_status?: string;
+}
+
+export interface SignRequestParams {
+  signerAddress: string;
+  enableAutherize?: boolean;
+}
+
+export interface SignTransactionRequestParams extends SignRequestParams, BaseRequestParams {
+  transactions: Call[];
+  transactionsDetail: InvocationsSignerDetails;
+  abis?: Abi[];
+}
+
+export interface SignDeployAccountTransactionRequestParams extends SignRequestParams, BaseRequestParams {
+  transaction: DeployAccountSignerDetails;
+}
+
+export interface SignDeclareTransactionRequestParams extends SignRequestParams, BaseRequestParams {
+  transaction: DeclareSignerDetails;
+}
+
+export interface SwitchNetworkRequestParams extends BaseRequestParams {
+  chainId: string;
 }

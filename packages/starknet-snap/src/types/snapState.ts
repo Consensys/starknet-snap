@@ -5,6 +5,7 @@ export interface SnapState {
   erc20Tokens: Erc20Token[];
   networks: Network[];
   transactions: Transaction[];
+  currentNetwork?: Network;
 }
 
 export interface AccContract {
