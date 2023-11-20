@@ -69,7 +69,7 @@ export async function estimateFee(params: ApiParams) {
       },
     ];
     if (!accountDeployed) {
-      const { callData } = getAccContractAddressAndCallData(network.accountClassHash, publicKey);
+      const { callData } = getAccContractAddressAndCallData(publicKey);
       const deployAccountpayload = {
         classHash: PROXY_CONTRACT_HASH,
         contractAddress: senderAddress,

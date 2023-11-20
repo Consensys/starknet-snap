@@ -282,34 +282,12 @@ describe('Test function: addNetwork', function () {
     }
   });
 
-  it('should throw an error if the network account class hash is not valid', async function () {
-    const requestObject: AddNetworkRequestParams = {
-      networkName: 'Starknet Unit SN_GOERLI',
-      networkChainId: '0x534e5f474f777',
-      networkBaseUrl: '',
-      networkNodeUrl: 'http://alpha-unit-SN_GOERLI-2.starknet.io',
-      accountClassHash: '0x811111111111111111111111111111111111111111111111111111111111111',
-      // a valid Starknet hash is essentially a cario felt, which is a 251 bit positive number
-      // which means it can only be 63 hex character long with the leading char being [1-7]
-    };
-    apiParams.requestParams = requestObject;
-    let result;
-    try {
-      result = await addNetwork(apiParams);
-    } catch (err) {
-      result = err;
-    } finally {
-      expect(result).to.be.an('Error');
-    }
-  });
-
   it('should throw an error if the network chainId is one of the preloaded network chainId', async function () {
     const requestObject: AddNetworkRequestParams = {
       networkName: 'Starknet Unit SN_GOERLI',
       networkChainId: '0x534e5f474f45524c49',
       networkBaseUrl: 'http://alpha-unit-SN_GOERLI-2.starknet.io',
       networkNodeUrl: '',
-      accountClassHash: '0x3e327de1c40540b98d05cbcb13552008e36f0ec8d61d46956d2f9752c294328',
     };
     apiParams.requestParams = requestObject;
     let result;
@@ -328,7 +306,6 @@ describe('Test function: addNetwork', function () {
       networkChainId: STARKNET_TESTNET_NETWORK.chainId,
       networkBaseUrl: STARKNET_TESTNET_NETWORK.baseUrl,
       networkNodeUrl: STARKNET_TESTNET_NETWORK.nodeUrl,
-      accountClassHash: STARKNET_TESTNET_NETWORK.accountClassHash,
     };
     apiParams.requestParams = requestObject;
     let result;

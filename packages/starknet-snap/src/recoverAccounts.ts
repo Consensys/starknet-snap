@@ -4,8 +4,6 @@ import { getSigner, getKeysFromAddressIndex, getAccContractAddressAndCallData } 
 import { getNetworkFromChainId, getValidNumber, upsertAccount } from './utils/snapUtils';
 import { AccContract } from './types/snapState';
 import { ApiParams, RecoverAccountsRequestParams } from './types/snapApi';
-import { DialogType } from '@metamask/rpc-methods';
-import { heading, panel, text } from '@metamask/snaps-ui';
 import { logger } from './utils/logger';
 
 export async function recoverAccounts(params: ApiParams) {
@@ -20,20 +18,6 @@ export async function recoverAccounts(params: ApiParams) {
 
     logger.log(`recoverAccounts:\nstartIndex: ${startIndex}, maxScanned: ${maxScanned}, maxMissed: ${maxMissed}`);
 
-    if (!network.accountClassHash) {
-      await wallet.request({
-        method: 'snap_dialog',
-        params: {
-          type: DialogType.Alert,
-          content: panel([
-            heading('Failed to recover accounts'),
-            text('Recover Accounts not supported in network without class hash'),
-          ]),
-        },
-      });
-      return null;
-    }
-
     let i = startIndex,
       j = 0;
     const scannedAccounts: AccContract[] = [];
@@ -45,7 +29,7 @@ export async function recoverAccounts(params: ApiParams) {
         state,
         i,
       );
-      const { address: contractAddress } = getAccContractAddressAndCallData(network.accountClassHash, publicKey);
+      const { address: contractAddress } = getAccContractAddressAndCallData(publicKey);
       logger.log(`recoverAccounts: index ${i}:\ncontractAddress = ${contractAddress}\npublicKey = ${publicKey}`);
 
       let signerPublicKey = '';

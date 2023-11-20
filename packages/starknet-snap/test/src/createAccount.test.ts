@@ -70,10 +70,7 @@ describe('Test function: createAccount', function () {
       state,
       -1,
     );
-    const { address: contractAddress } = utils.getAccContractAddressAndCallData(
-      STARKNET_MAINNET_NETWORK.accountClassHash,
-      publicKey,
-    );
+    const { address: contractAddress } = utils.getAccContractAddressAndCallData(publicKey);
     expect(walletStub.rpcStubs.snap_manageState).to.have.been.callCount(0);
     expect(result.address).to.be.eq(contractAddress);
     expect(state.accContracts.length).to.be.eq(0);
