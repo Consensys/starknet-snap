@@ -82,16 +82,32 @@ export const WBTC_TESTNET: Erc20Token = {
   chainId: STARKNET_TESTNET_NETWORK.chainId,
 };
 
+export const USDC_MAINNET: Erc20Token = {
+  address: '0x053c91253bc9682c04929ca02ed00b3e423f6710d2ee7e0d5ebb06f3ecf368a8',
+  name: 'USD Coin',
+  symbol: 'USDC',
+  decimals: 6,
+  chainId: STARKNET_MAINNET_NETWORK.chainId,
+};
+
 export const USDC_TESTNET: Erc20Token = {
-  address: '0x005a643907b9a4bc6a55e9069c4fd5fd1f5c79a22470690f75556c4736e34426',
+  address: '0x053c91253bc9682c04929ca02ed00b3e423f6710d2ee7e0d5ebb06f3ecf368a8',
   name: 'USD Coin',
   symbol: 'USDC',
   decimals: 6,
   chainId: STARKNET_TESTNET_NETWORK.chainId,
 };
 
+export const USDT_MAINNET: Erc20Token = {
+  address: '0x068f5c6a61780768455de69077e07e89787839bf8166decfbf92b645209c0fb8',
+  name: 'Tether USD',
+  symbol: 'USDT',
+  decimals: 6,
+  chainId: STARKNET_MAINNET_NETWORK.chainId,
+};
+
 export const USDT_TESTNET: Erc20Token = {
-  address: '0x386e8d061177f19b3b485c20e31137e6f6bc497cc635ccdfcab96fadf5add6a',
+  address: '0x068f5c6a61780768455de69077e07e89787839bf8166decfbf92b645209c0fb8',
   name: 'Tether USD',
   symbol: 'USDT',
   decimals: 6,
@@ -114,7 +130,7 @@ export const TEST_TOKEN_TESTNET: Erc20Token = {
   chainId: STARKNET_TESTNET_NETWORK.chainId,
 };
 
-export const PRELOADED_TOKENS = [ETHER_MAINNET, ETHER_TESTNET];
+export const PRELOADED_TOKENS = [ETHER_MAINNET, ETHER_TESTNET, USDC_MAINNET, USDC_TESTNET, USDT_MAINNET, USDT_TESTNET];
 export const PRELOADED_NETWORKS = [STARKNET_MAINNET_NETWORK, STARKNET_TESTNET_NETWORK, STARKNET_INTEGRATION_NETWORK];
 
 export const PROXY_CONTRACT_HASH = '0x25ec026985a3bf9d0cc1fe17326b245dfdc3ff89b8fde106542a3ea56c5a918'; // from argent-x repo
