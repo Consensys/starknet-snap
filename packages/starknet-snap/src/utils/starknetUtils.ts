@@ -46,6 +46,7 @@ import { getAddressKey } from './keyPair';
 import { getAccount, getAccounts, getTransactionFromVoyagerUrl, getTransactionsFromVoyagerUrl } from './snapUtils';
 import { logger } from './logger';
 import { RpcV4GetTransactionReceiptResponse } from '../types/snapApi';
+import { hexToString } from './formatterUtils';
 
 export const getCallDataArray = (callDataStr: string): string[] => {
   return (callDataStr ?? '')
@@ -593,13 +594,16 @@ export const findAddressIndex = async (
 export const isUpgradeRequired = async (network: Network, address: string) => {
   try {
     logger.log(`isUpgradeRequired: address = ${address}`);
-    const version = await getVersion(address, network);
+    const hexResp = await getVersion(address, network);
+    const version = hexToString(hexResp);
+    logger.log(`isUpgradeRequired: hexResp = ${hexResp}, version = ${version}`);
     const versionArr = version.split('.');
     return Number(versionArr[1]) < MIN_ACC_CONTRACT_VERSION[1];
   } catch (err) {
     if (!err.message.includes('Contract not found')) {
       throw err;
     }
+    logger.error(`isUpgradeRequired: error:`, err);
     //[TODO] if address is cario0 but not deployed we should throw error
     return false;
   }

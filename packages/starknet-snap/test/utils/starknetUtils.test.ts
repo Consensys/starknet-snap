@@ -193,13 +193,13 @@ describe('Test function: isUpgradeRequired', function () {
   });
 
   it('should return true when upgrade is required', async function () {
-    sandbox.stub(utils, 'getVersion').callsFake(async () => '0.2.3');
+    sandbox.stub(utils, 'getVersion').callsFake(async () => '0x302e322e33');
     const result = await utils.isUpgradeRequired(STARKNET_TESTNET_NETWORK, userAddress);
     expect(result).to.be.eq(true);
   });
 
   it('should return false when upgrade is not required', async function () {
-    sandbox.stub(utils, 'getVersion').callsFake(async () => '0.3.0');
+    sandbox.stub(utils, 'getVersion').callsFake(async () => '0x302e332e30');
     const result = await utils.isUpgradeRequired(STARKNET_TESTNET_NETWORK, userAddress);
     expect(result).to.be.eq(false);
   });
