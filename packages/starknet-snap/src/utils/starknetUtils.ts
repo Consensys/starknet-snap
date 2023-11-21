@@ -151,7 +151,7 @@ export const deployAccount = async (
   const provider = getProvider(network);
   const account = new Account(provider, contractAddress, privateKey, '1');
   const deployAccountPayload = {
-    classHash: '0x1a736d6ed154502257f02b1ccdf4d9d1089f80811cd6acad48e6b6a9d1f2003',
+    classHash: ACCOUNT_CLASS_HASH_V1,
     contractAddress: contractAddress,
     constructorCalldata: contractCallData,
     addressSalt,
@@ -169,7 +169,7 @@ export const estimateAccountDeployFee = async (
   const provider = getProvider(network);
   const account = new Account(provider, contractAddress, privateKey, '1');
   const deployAccountPayload = {
-    classHash: '0x1a736d6ed154502257f02b1ccdf4d9d1089f80811cd6acad48e6b6a9d1f2003',
+    classHash: ACCOUNT_CLASS_HASH_V1,
     contractAddress: contractAddress,
     constructorCalldata: contractCallData,
     addressSalt,
