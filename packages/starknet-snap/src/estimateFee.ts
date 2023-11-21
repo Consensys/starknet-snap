@@ -74,7 +74,6 @@ export async function estimateFee(params: ApiParams) {
     ];
     if (!accountDeployed) {
       const { callData } = getAccContractAddressAndCallData(publicKey);
-
       const deployAccountpayload = {
         classHash: ACCOUNT_CLASS_HASH_V1,
         contractAddress: senderAddress,
