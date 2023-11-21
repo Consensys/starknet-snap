@@ -623,6 +623,8 @@ export const getCorrectContractAddress = async (network: Network, publicKey: str
   logger.log(
     `getContractAddressByKey: contractAddressCario1 = ${contractAddress}\ncontractAddressCairo0 = ${contractAddressCairo0}\npublicKey = ${publicKey}`,
   );
+
+  //test if it is a cairo 1 account
   try {
     pk = await getOwner(contractAddress, network);
     logger.log(`getContractAddressByKey: cairo 1 contract found`);
@@ -631,6 +633,23 @@ export const getCorrectContractAddress = async (network: Network, publicKey: str
       throw err;
     }
     logger.log(`getContractAddressByKey: cairo 1 contract not found`);
+
+    //test if it is a upgraded cairo 0 account
+    try {
+      pk = await getOwner(contractAddressCairo0, network);
+      logger.log(`getContractAddressByKey: upgraded cairo 0 contract found`);
+      return {
+        address: contractAddressCairo0,
+        signerPubKey: pk,
+      };
+    } catch (err) {
+      if (!err.message.includes('Contract not found')) {
+        throw err;
+      }
+      logger.log(`getContractAddressByKey: upgraded cairo 0 contract not found`);
+    }
+
+    //test if it is a deployed cairo 0 account
     try {
       pk = await getSigner(contractAddressCairo0, network);
       logger.log(`getContractAddressByKey: cairo 0 contract found`);
@@ -645,6 +664,8 @@ export const getCorrectContractAddress = async (network: Network, publicKey: str
       logger.log(`getContractAddressByKey: cairo 0 contract not found`);
     }
   }
+
+  //return new/deployed cairo 1 account
   return {
     address: contractAddress,
     signerPubKey: pk,
