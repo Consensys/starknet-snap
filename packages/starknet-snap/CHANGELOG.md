@@ -1,6 +1,29 @@
 # Changelog
 
 
+## [2.3.0](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v2.2.0...starknet-snap-v2.3.0) (2023-11-20)
+
+
+### Features
+
+* add declare method ([#159](https://github.com/Consensys/starknet-snap/issues/159)) ([538704e](https://github.com/Consensys/starknet-snap/commit/538704ee77dad7bd4ab0c0dc932aa9a4d23dec55))
+* add method support get-starknet ([#173](https://github.com/Consensys/starknet-snap/issues/173)) ([a857eed](https://github.com/Consensys/starknet-snap/commit/a857eed85ff0a8acfcc54965e7419ea77333189e))
+* add multi transaction to snap ([#161](https://github.com/Consensys/starknet-snap/issues/161)) ([eaee37b](https://github.com/Consensys/starknet-snap/commit/eaee37b3dc9cf8402ad46a5f879c6c5a8601322e))
+* add open rpc json ([#167](https://github.com/Consensys/starknet-snap/issues/167)) ([3bab995](https://github.com/Consensys/starknet-snap/commit/3bab995dc6e36d8e1af51ca58afd280edf677134))
+* add switch network and get current network ([#174](https://github.com/Consensys/starknet-snap/issues/174)) ([560751f](https://github.com/Consensys/starknet-snap/commit/560751f8019e5aa1ef049b7df37086965acbe149))
+* add usdc usdt ([#176](https://github.com/Consensys/starknet-snap/issues/176)) ([a48dccb](https://github.com/Consensys/starknet-snap/commit/a48dccbcc0e1ca3217e7961d21cfcee2d45ddc0e))
+* estimate fees ([#162](https://github.com/Consensys/starknet-snap/issues/162)) ([0aee946](https://github.com/Consensys/starknet-snap/commit/0aee946753297adf676b4d67a50fb3082178e998))
+* replace account class hash with constant value ([#178](https://github.com/Consensys/starknet-snap/issues/178)) ([f588c9c](https://github.com/Consensys/starknet-snap/commit/f588c9c902818f7b690838ef0b4b81e499ca4fc5))
+* sign transaction ongoing ([#158](https://github.com/Consensys/starknet-snap/issues/158)) ([0b7a8b1](https://github.com/Consensys/starknet-snap/commit/0b7a8b106bd8dd3ddb7e4389f825d6dc35319374))
+* simplify dialog text render method ([#170](https://github.com/Consensys/starknet-snap/issues/170)) ([9f1c593](https://github.com/Consensys/starknet-snap/commit/9f1c59349f2370db1670a98a611c4f332e998a70))
+* update snap demo html ([#160](https://github.com/Consensys/starknet-snap/issues/160)) ([b53cc7f](https://github.com/Consensys/starknet-snap/commit/b53cc7f7215ddf88eedaa9d187b2edb2b3e5a904))
+
+
+### Bug Fixes
+
+* add mock to unit test on estimateFee and createAccount ([#166](https://github.com/Consensys/starknet-snap/issues/166)) ([d500465](https://github.com/Consensys/starknet-snap/commit/d500465dc95294b2a5e45707911cbf9dfd994c9b))
+* typos ([#172](https://github.com/Consensys/starknet-snap/issues/172)) ([d745354](https://github.com/Consensys/starknet-snap/commit/d7453547d7828050c4e98873d864d2361ccdf8a5))
+
 ## [2.2.0](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v2.1.0...starknet-snap-v2.2.0) (2023-09-22)
 
 

@@ -61,4 +61,4 @@ The Github terraform repository needs the following action secrets, gathered usi
 
 ## References
 
-* [AWS Region Abreviations](https://docs.aws.amazon.com/AmazonS3/latest/userguide/aws-usage-report-understand.html)
+* [AWS Region Abbreviations](https://docs.aws.amazon.com/AmazonS3/latest/userguide/aws-usage-report-understand.html)

@@ -13,7 +13,7 @@ export const MAXIMUM_TOKEN_SYMBOL_LENGTH = 16;
 
 export const TRANSFER_SELECTOR_HEX = '0x83afd3f4caedc6eebf44246fe54e38c95e3179a5ec9ea81740eca5b482d12e';
 
-export const ACCOUNT_CLASS_HASH = '0x033434ad846cdd5f23eb73ff09fe6fddd568284a0fb7d1be20ee482f044dabe2'; // from argent-x repo
+export const ACCOUNT_CLASS_HASH_V0 = '0x033434ad846cdd5f23eb73ff09fe6fddd568284a0fb7d1be20ee482f044dabe2'; // from argent-x repo
 
 export const STARKNET_MAINNET_NETWORK: Network = {
   name: 'Starknet Mainnet',
@@ -21,7 +21,7 @@ export const STARKNET_MAINNET_NETWORK: Network = {
   baseUrl: 'https://alpha-mainnet.starknet.io',
   nodeUrl: 'https://starknet-mainnet.infura.io/v3/60c7253fb48147658095fe0460ac9ee9',
   voyagerUrl: 'https://voyager.online',
-  accountClassHash: '0x033434ad846cdd5f23eb73ff09fe6fddd568284a0fb7d1be20ee482f044dabe2', // from argent-x repo
+  accountClassHash: '', // from argent-x repo
 };
 
 export const STARKNET_TESTNET_NETWORK: Network = {
@@ -30,7 +30,7 @@ export const STARKNET_TESTNET_NETWORK: Network = {
   baseUrl: 'https://alpha4.starknet.io',
   nodeUrl: 'https://starknet-goerli.infura.io/v3/60c7253fb48147658095fe0460ac9ee9',
   voyagerUrl: 'https://goerli.voyager.online',
-  accountClassHash: '0x033434ad846cdd5f23eb73ff09fe6fddd568284a0fb7d1be20ee482f044dabe2', // from argent-x repo
+  accountClassHash: '', // from argent-x repo
 };
 
 export const STARKNET_INTEGRATION_NETWORK: Network = {
@@ -39,7 +39,7 @@ export const STARKNET_INTEGRATION_NETWORK: Network = {
   baseUrl: 'https://external.integration.starknet.io',
   nodeUrl: '',
   voyagerUrl: '',
-  accountClassHash: '0x033434ad846cdd5f23eb73ff09fe6fddd568284a0fb7d1be20ee482f044dabe2', // from argent-x repo
+  accountClassHash: '', // from argent-x repo
 };
 
 export const ETHER_MAINNET: Erc20Token = {
@@ -82,16 +82,32 @@ export const WBTC_TESTNET: Erc20Token = {
   chainId: STARKNET_TESTNET_NETWORK.chainId,
 };
 
+export const USDC_MAINNET: Erc20Token = {
+  address: '0x053c91253bc9682c04929ca02ed00b3e423f6710d2ee7e0d5ebb06f3ecf368a8',
+  name: 'USD Coin',
+  symbol: 'USDC',
+  decimals: 6,
+  chainId: STARKNET_MAINNET_NETWORK.chainId,
+};
+
 export const USDC_TESTNET: Erc20Token = {
-  address: '0x005a643907b9a4bc6a55e9069c4fd5fd1f5c79a22470690f75556c4736e34426',
+  address: '0x053c91253bc9682c04929ca02ed00b3e423f6710d2ee7e0d5ebb06f3ecf368a8',
   name: 'USD Coin',
   symbol: 'USDC',
   decimals: 6,
   chainId: STARKNET_TESTNET_NETWORK.chainId,
 };
 
+export const USDT_MAINNET: Erc20Token = {
+  address: '0x068f5c6a61780768455de69077e07e89787839bf8166decfbf92b645209c0fb8',
+  name: 'Tether USD',
+  symbol: 'USDT',
+  decimals: 6,
+  chainId: STARKNET_MAINNET_NETWORK.chainId,
+};
+
 export const USDT_TESTNET: Erc20Token = {
-  address: '0x386e8d061177f19b3b485c20e31137e6f6bc497cc635ccdfcab96fadf5add6a',
+  address: '0x068f5c6a61780768455de69077e07e89787839bf8166decfbf92b645209c0fb8',
   name: 'Tether USD',
   symbol: 'USDT',
   decimals: 6,
@@ -114,7 +130,7 @@ export const TEST_TOKEN_TESTNET: Erc20Token = {
   chainId: STARKNET_TESTNET_NETWORK.chainId,
 };
 
-export const PRELOADED_TOKENS = [ETHER_MAINNET, ETHER_TESTNET];
+export const PRELOADED_TOKENS = [ETHER_MAINNET, ETHER_TESTNET, USDC_MAINNET, USDC_TESTNET, USDT_MAINNET, USDT_TESTNET];
 export const PRELOADED_NETWORKS = [STARKNET_MAINNET_NETWORK, STARKNET_TESTNET_NETWORK, STARKNET_INTEGRATION_NETWORK];
 
 export const PROXY_CONTRACT_HASH = '0x25ec026985a3bf9d0cc1fe17326b245dfdc3ff89b8fde106542a3ea56c5a918'; // from argent-x repo

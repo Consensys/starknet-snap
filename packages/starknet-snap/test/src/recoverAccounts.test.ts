@@ -178,26 +178,4 @@ describe('Test function: recoverAccounts', function () {
       expect(result).to.be.an('Error');
     }
   });
-
-  it('should show confirmation box with failure msg if network accountClassHash is missing', async function () {
-    const maxScanned = 5;
-    const maxMissed = 3;
-    const validPublicKeys = 2;
-    const getSignerStub = sandbox.stub(utils, 'getSigner');
-    for (let i = 0; i < validPublicKeys; i++) {
-      getSignerStub.onCall(i).resolves(testnetPublicKeys[i]);
-    }
-    getSignerStub.throws(new Error());
-
-    const requestObject: RecoverAccountsRequestParams = {
-      startScanIndex: 0,
-      maxScanned,
-      maxMissed,
-      chainId: INVALID_NETWORK.chainId,
-    };
-    apiParams.requestParams = requestObject;
-    const result = await recoverAccounts(apiParams);
-    expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledOnce;
-    expect(result).eql(null);
-  });
 });
