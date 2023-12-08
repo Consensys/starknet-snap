@@ -1195,7 +1195,7 @@
       "result": {
         "name": "result",
         "summary": "Stark name of the given account address",
-        "description": "Stark name of the given account address (if none is set, returns an array containing a single zero)",
+        "description": "Stark name of the given account address",
         "schema": {
           "type": "string"
         }
