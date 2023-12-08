@@ -575,6 +575,27 @@ export const useStarkNetSnap = () => {
     }
   };
 
+  const getStarkName = async (userAddress: string, chainId: string) => {
+    try {
+      return await provider.request({
+        method: 'wallet_invokeSnap',
+        params: {
+          snapId,
+          request: {
+            method: 'starkNet_getStarkName',
+            params: {
+              ...defaultParam,
+              userAddress,
+              chainId,
+            },
+          },
+        },
+      });
+    } catch (err) {
+      throw err;
+    }
+  };
+
   return {
     connectToSnap,
     getNetworks,
@@ -595,6 +616,7 @@ export const useStarkNetSnap = () => {
     refreshTokensUSDPrice,
     switchNetwork,
     getCurrentNetwork,
+    getStarkName,
     satisfiesVersion: oldVersionDetected,
   };
 };
