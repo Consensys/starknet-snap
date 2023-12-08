@@ -12,7 +12,6 @@ import {
 import { openExplorerTab } from 'utils/utils';
 import { useAppSelector } from 'hooks/redux';
 import { useStarkNetSnap } from 'services';
-import { useEffect, useState } from 'react';
 
 interface Props {
   address: string;
@@ -20,22 +19,8 @@ interface Props {
 
 export const AccountDetailsModalView = ({ address }: Props) => {
   const networks = useAppSelector((state) => state.networks);
-  const { getPrivateKeyFromAddress, getStarkName } = useStarkNetSnap();
+  const { getPrivateKeyFromAddress } = useStarkNetSnap();
   const chainId = networks?.items[networks.activeNetwork]?.chainId;
-  const [starkName, setStarkName] = useState<string | undefined>(undefined);
-
-  useEffect(() => {
-    if (address) {
-      getStarkName(address, chainId)
-        .then((name) => {
-          setStarkName(name);
-        })
-        .catch(() => {
-          setStarkName(undefined);
-        });
-    }
-  }, [address]);
-
   return (
     <div>
       <AccountImageDiv>
@@ -47,7 +32,7 @@ export const AccountDetailsModalView = ({ address }: Props) => {
           {/* <ModifyIcon /> */}
         </TitleDiv>
         <AddressQrCode value={address} />
-        <AddressCopy address={address} starkName={starkName} />
+        <AddressCopy address={address} />
       </Wrapper>
       <ButtonDiv>
         <ButtonStyled backgroundTransparent borderVisible onClick={() => openExplorerTab(address, 'contract', chainId)}>
