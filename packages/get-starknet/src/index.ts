@@ -1,5 +1,3 @@
-/// The adapter is supposed to wrap a metamask inject provider
-/// and implement the IStarknetWindowObject interface
 import {
   type AddStarknetChainParameters,
   IStarknetWindowObject,
