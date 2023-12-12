@@ -12,6 +12,7 @@
     "url": "https://github.com/ConsenSys/starknet-snap.git"
   },
   "scripts": {
+    "setup": "yarn install --frozen-lockfile",
     "build": "tsc --project tsconfig.build.json",
     "build:clean": "rimraf dist && yarn build",
     "lint": "yarn lint:eslint && yarn lint:misc --check && yarn lint:dependencies",
