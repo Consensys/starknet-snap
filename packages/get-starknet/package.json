@@ -1,0 +1,47 @@
+{
+  "name": "@consensys/get-starknet",
+  "version": "1.0.0",
+  "license": "(Apache-2.0 OR MIT)",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "/dist"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ConsenSys/starknet-snap.git"
+  },
+  "scripts": {
+    "build": "tsc --project tsconfig.build.json",
+    "build:clean": "rimraf dist && yarn build",
+    "lint": "yarn lint:eslint && yarn lint:misc --check && yarn lint:dependencies",
+    "lint:dependencies": "depcheck",
+    "lint:eslint": "eslint . --cache --ext js,ts",
+    "lint:fix": "yarn lint:eslint --fix && yarn lint:misc --write && yarn lint:dependencies",
+    "lint:misc": "prettier '**/*.json' '**/*.md' '!CHANGELOG.md' '**/*.yml' '!.yarnrc.yml' --ignore-path .gitignore --no-error-on-unmatched-pattern"
+  },
+  "keywords": [],
+  "author": "Consensys",
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.20.0",
+    "@typescript-eslint/parser": "^5.20.0",
+    "depcheck": "^1.4.7",
+    "eslint": "^8.13.0",
+    "get-starknet-core": "^3.2.0",
+    "prettier": "^2.6.2",
+    "rimraf": "^3.0.2",
+    "typescript": "^4.6.3"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "nyc": {
+    "exclude": [
+      "**/*.test.ts"
+    ]
+  },
+  "dependencies": {
+    "starknet": "^5.14.0"
+  }
+}
