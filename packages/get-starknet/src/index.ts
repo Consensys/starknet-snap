@@ -12,6 +12,7 @@ import { MetaMaskSnap } from './snap';
 import { MetaMaskProvider } from './type';
 import { AccountInterface, Provider, ProviderInterface } from 'starknet';
 
+//Test CICD
 export class MetaMaskSnapWallet implements IStarknetWindowObject {
   id: string;
   name: string;

@@ -6,7 +6,7 @@ on:
       - 'feat/add-get-starknet-package'
       - 'releases/**'
     paths:
-      - "packages/get-starknet"
+      - "packages/get-starknet/**"
 permissions:
   contents: write
 jobs:
