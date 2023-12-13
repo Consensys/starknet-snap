@@ -15,11 +15,9 @@
     "setup": "yarn install --frozen-lockfile",
     "build": "tsc --project tsconfig.build.json",
     "build:clean": "rimraf dist && yarn build",
-    "lint": "yarn lint:eslint && yarn lint:misc --check && yarn lint:dependencies",
-    "lint:dependencies": "depcheck",
-    "lint:eslint": "eslint . --cache --ext js,ts",
-    "lint:fix": "yarn lint:eslint --fix && yarn lint:misc --write && yarn lint:dependencies",
-    "lint:misc": "prettier '**/*.json' '**/*.md' '!CHANGELOG.md' '**/*.yml' '!.yarnrc.yml' --ignore-path .gitignore --no-error-on-unmatched-pattern"
+    "prettier": "prettier --write \"src/**/*.ts\"",
+    "lint": "eslint . --max-warnings 0 -f json -o eslint-report.json",
+    "lint:fix": "eslint '**/*.{js,ts,tsx}' --fix"
   },
   "keywords": [],
   "author": "Consensys",

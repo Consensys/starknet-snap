@@ -1,4 +1,8 @@
-import { type AddStarknetChainParameters, type SwitchStarknetChainParameter, type WatchAssetParameters } from 'get-starknet-core';
+import {
+  type AddStarknetChainParameters,
+  type SwitchStarknetChainParameter,
+  type WatchAssetParameters,
+} from 'get-starknet-core';
 import { AccContract, MetaMaskProvider, Network, RequestSnapResponse } from './type';
 import {
   Abi,
