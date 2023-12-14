@@ -16,7 +16,7 @@
     "build": "tsc --project tsconfig.build.json",
     "build:clean": "rimraf dist && yarn build",
     "prettier": "prettier --write \"src/**/*.ts\"",
-    "lint": "eslint . --max-warnings 0 -f json -o eslint-report.json",
+    "lint": "eslint 'src/*.{js,ts,tsx}' --max-warnings 0 -f json -o eslint-report.json",
     "lint:fix": "eslint '**/*.{js,ts,tsx}' --fix"
   },
   "keywords": [],
