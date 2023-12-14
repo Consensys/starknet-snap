@@ -10,6 +10,7 @@ import { MetaMaskSnapWallet } from '@consensys/get-starknet';
 const walletInstance = new MetaMaskSnapWallet(
   provider, snapVersion
 );
-//`provider` refer to the instance from window.ethereum
-//`snapVersion` refer to the version of the snap that is interacting with
 ```
+
+`provider` refer to the instance from window.ethereum
+`snapVersion` refer to the version of the snap that is interacting with

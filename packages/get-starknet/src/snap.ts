@@ -295,7 +295,6 @@ export class MetaMaskSnap {
     }
   }
 
-  //TODO cache it
   async getCurrentNetwork(): Promise<Network> {
     const response = (await this.#provider.request({
       method: 'wallet_invokeSnap',
