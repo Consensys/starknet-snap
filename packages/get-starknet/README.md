@@ -1,4 +1,4 @@
-# Metamask Get Starkent
+# MetaMask Get Starknet
 
 This repository contains a node module that makes it easy to integrate the Starknet Snap through the generic IStarknetWindowObject.
 
