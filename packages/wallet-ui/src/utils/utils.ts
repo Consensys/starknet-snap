@@ -4,6 +4,8 @@ import {
   DECIMALS_DISPLAYED_MAX_LENGTH,
   STARKNET_MAINNET_EXPLORER,
   STARKNET_TESTNET_EXPLORER,
+  STARKNET_SEPOLIA_TESTNET_EXPLORER,
+  SEPOLIA_CHAINID,
   TIMEOUT_DURATION,
 } from './constants';
 import { Erc20Token, Erc20TokenBalance } from 'types';
@@ -13,6 +15,7 @@ export const shortenAddress = (address: string, num = 3) => {
   if (!address) return '';
   return !!address && `${address.substring(0, num + 2)}...${address.substring(address.length - num - 1)}`;
 };
+
 
 export const openExplorerTab = (
   address: string,
@@ -26,6 +29,9 @@ export const openExplorerTab = (
       break;
     case constants.StarknetChainId.TESTNET:
       explorerUrl = STARKNET_TESTNET_EXPLORER;
+      break;
+    case SEPOLIA_CHAINID:
+      explorerUrl = STARKNET_SEPOLIA_TESTNET_EXPLORER;
       break;
   }
   window.open(explorerUrl + type + '/' + address, '_blank')?.focus();
