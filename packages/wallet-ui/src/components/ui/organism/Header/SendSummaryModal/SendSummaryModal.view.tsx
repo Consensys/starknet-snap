@@ -60,11 +60,6 @@ export const SendSummaryModalView = ({ address, amount, chainId, closeModal }: P
         setEstimatingGas(true);
         const amountBN = ethers.utils.parseUnits(amount, wallet.erc20TokenBalanceSelected.decimals);
         const callData = address + ',' + amountBN.toString() + ',0';
-        console.log({amountBN});
-        console.log({callData});
-        console.log(wallet.accounts[0]);
-        console.log('address token: ',wallet.erc20TokenBalanceSelected.address);
-        console.log({chainId});
         estimateFees(
           wallet.erc20TokenBalanceSelected.address,
           'transfer',
@@ -74,7 +69,6 @@ export const SendSummaryModalView = ({ address, amount, chainId, closeModal }: P
         )
           .then((response) => {
             if (response.message && response.message.includes('Error')) {
-              console.log("error 1");
               toastr.error('Error when trying to calculate the gas fees');
               setGasFeesError(true);
             } else {
@@ -84,7 +78,6 @@ export const SendSummaryModalView = ({ address, amount, chainId, closeModal }: P
           })
           .catch(() => {
             toastr.error('Error when trying to calculate the gas fees');
-            console.log("error 2");
           });
       }
     };
