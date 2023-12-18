@@ -16,7 +16,6 @@ export const shortenAddress = (address: string, num = 3) => {
   return !!address && `${address.substring(0, num + 2)}...${address.substring(address.length - num - 1)}`;
 };
 
-
 export const openExplorerTab = (
   address: string,
   type = 'contract',

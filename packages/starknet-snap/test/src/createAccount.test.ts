@@ -6,7 +6,11 @@ import * as utils from '../../src/utils/starknetUtils';
 import * as snapUtils from '../../src/utils/snapUtils';
 import { createAccount } from '../../src/createAccount';
 import { SnapState } from '../../src/types/snapState';
-import { STARKNET_MAINNET_NETWORK, STARKNET_TESTNET_NETWORK, STARKNET_SEPOLIA_TESTNET_NETWORK } from '../../src/utils/constants';
+import {
+  STARKNET_MAINNET_NETWORK,
+  STARKNET_TESTNET_NETWORK,
+  STARKNET_SEPOLIA_TESTNET_NETWORK,
+} from '../../src/utils/constants';
 import {
   createAccountProxyTxn,
   createAccountProxyResp,

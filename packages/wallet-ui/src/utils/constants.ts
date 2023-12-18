@@ -1,7 +1,7 @@
 import { constants } from 'starknet';
 
 // TODO: Importing directly from constants when upgrading to starknet.js v6
-export const SEPOLIA_CHAINID = "0x534e5f5345504f4c4941";
+export const SEPOLIA_CHAINID = '0x534e5f5345504f4c4941';
 
 export const TOKENS: any = {
   [constants.StarknetChainId.MAINNET]: {

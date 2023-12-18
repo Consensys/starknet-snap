@@ -3,9 +3,13 @@ import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import { WalletMock } from '../wallet.mock.test';
 import { SnapState, VoyagerTransactionType } from '../../src/types/snapState';
-import { STARKNET_TESTNET_NETWORK, STARKNET_MAINNET_NETWORK, STARKNET_SEPOLIA_TESTNET_NETWORK } from '../../src/utils/constants';
+import {
+  STARKNET_TESTNET_NETWORK,
+  STARKNET_MAINNET_NETWORK,
+  STARKNET_SEPOLIA_TESTNET_NETWORK,
+} from '../../src/utils/constants';
 import { getStoredTransactions } from '../../src/getStoredTransactions';
-import { createAccountProxyTxn, initAccountTxn, invalidNetwork, txn1, txn2, txn3, createAccountProxyTxnOnSepolia } from '../constants.test';
+import { createAccountProxyTxn, initAccountTxn, invalidNetwork, txn1, txn2, txn3 } from '../constants.test';
 import * as snapUtils from '../../src/utils/snapUtils';
 import { Mutex } from 'async-mutex';
 import { ApiParams, GetStoredTransactionsRequestParams } from '../../src/types/snapApi';
@@ -18,7 +22,7 @@ describe('Test function: getStoredTransactions', function () {
   const state: SnapState = {
     accContracts: [],
     erc20Tokens: [],
-    networks: [STARKNET_TESTNET_NETWORK, STARKNET_MAINNET_NETWORK,STARKNET_SEPOLIA_TESTNET_NETWORK, invalidNetwork],
+    networks: [STARKNET_TESTNET_NETWORK, STARKNET_MAINNET_NETWORK, STARKNET_SEPOLIA_TESTNET_NETWORK, invalidNetwork],
     transactions: [txn1, txn2, txn3, createAccountProxyTxn, initAccountTxn],
   };
   const apiParams: ApiParams = {

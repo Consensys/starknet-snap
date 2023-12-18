@@ -9,7 +9,11 @@ import {
   ExecutionStatus,
   FinailityStatus,
 } from '../src/types/snapState';
-import { STARKNET_MAINNET_NETWORK, STARKNET_TESTNET_NETWORK, STARKNET_SEPOLIA_TESTNET_NETWORK } from '../src/utils/constants';
+import {
+  STARKNET_MAINNET_NETWORK,
+  STARKNET_TESTNET_NETWORK,
+  STARKNET_SEPOLIA_TESTNET_NETWORK,
+} from '../src/utils/constants';
 
 export const invalidNetwork: Network = {
   name: 'Network with emot',
