@@ -41,6 +41,7 @@ const SN_SEPOLIA = {
   nodeUrl: 'https://starknet-sepolia.infura.io/v3/60c7253fb48147658095fe0460ac9ee9',
   voyagerUrl: 'https://sepolia.voyager.online',
 };
+
 export const STARKNET_SEPOLIA_TESTNET_NETWORK: Network = {
   name: SN_SEPOLIA.name,
   chainId: SN_SEPOLIA.chainId,
