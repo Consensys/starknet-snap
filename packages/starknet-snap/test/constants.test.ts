@@ -9,7 +9,11 @@ import {
   ExecutionStatus,
   FinailityStatus,
 } from '../src/types/snapState';
-import { STARKNET_MAINNET_NETWORK, STARKNET_TESTNET_NETWORK } from '../src/utils/constants';
+import {
+  STARKNET_MAINNET_NETWORK,
+  STARKNET_TESTNET_NETWORK,
+  STARKNET_SEPOLIA_TESTNET_NETWORK,
+} from '../src/utils/constants';
 
 export const invalidNetwork: Network = {
   name: 'Network with emot',
@@ -167,6 +171,20 @@ export const getTxnStatusAcceptL2Resp = {
 
 export const createAccountProxyTxn: Transaction = {
   chainId: STARKNET_TESTNET_NETWORK.chainId,
+  contractAddress: createAccountProxyResp.contract_address,
+  contractCallData: [],
+  contractFuncName: '',
+  senderAddress: createAccountProxyResp.contract_address,
+  timestamp: 1653559059,
+  txnHash: createAccountProxyResp.transaction_hash,
+  txnType: VoyagerTransactionType.DEPLOY,
+  failureReason: '',
+  status: '',
+  eventIds: [],
+};
+
+export const createAccountProxyTxnOnSepolia: Transaction = {
+  chainId: STARKNET_SEPOLIA_TESTNET_NETWORK.chainId,
   contractAddress: createAccountProxyResp.contract_address,
   contractCallData: [],
   contractFuncName: '',

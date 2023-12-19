@@ -5,7 +5,11 @@ import { WalletMock } from '../wallet.mock.test';
 import * as utils from '../../src/utils/starknetUtils';
 import * as snapUtils from '../../src/utils/snapUtils';
 import { SnapState } from '../../src/types/snapState';
-import { STARKNET_MAINNET_NETWORK, STARKNET_TESTNET_NETWORK } from '../../src/utils/constants';
+import {
+  STARKNET_MAINNET_NETWORK,
+  STARKNET_TESTNET_NETWORK,
+  STARKNET_SEPOLIA_TESTNET_NETWORK,
+} from '../../src/utils/constants';
 import {
   createAccountProxyTxn,
   testnetAccAddresses,
@@ -30,7 +34,7 @@ describe('Test function: recoverAccounts', function () {
   const state: SnapState = {
     accContracts: [],
     erc20Tokens: [],
-    networks: [STARKNET_TESTNET_NETWORK, STARKNET_MAINNET_NETWORK, INVALID_NETWORK],
+    networks: [STARKNET_TESTNET_NETWORK, STARKNET_MAINNET_NETWORK, STARKNET_SEPOLIA_TESTNET_NETWORK, INVALID_NETWORK],
     transactions: [],
   };
   const apiParams: ApiParams = {
