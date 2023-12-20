@@ -1,6 +1,14 @@
 # Changelog
 
 
+## [2.4.0](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v2.3.0...starknet-snap-v2.4.0) (2023-12-19)
+
+
+### Features
+
+* implement network switch in UI ([#175](https://github.com/Consensys/starknet-snap/issues/175)) ([4b4ace7](https://github.com/Consensys/starknet-snap/commit/4b4ace7f41998c36c7924dcfb07dde061a714d45))
+* sepolia network ([#187](https://github.com/Consensys/starknet-snap/issues/187)) ([45b0463](https://github.com/Consensys/starknet-snap/commit/45b04633149bf1b9568feeb8c2f475d52a0e45a8))
+
 ## [2.3.0](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v2.2.0...starknet-snap-v2.3.0) (2023-11-20)
 
 
