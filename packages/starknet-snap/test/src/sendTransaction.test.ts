@@ -255,7 +255,7 @@ describe('Test function: sendTransaction', function () {
           },
           {
             type: 'copyable',
-            value: 'Goerli Testnet',
+            value: 'Goerli Testnet (deprecated soon)',
           },
         ],
       },

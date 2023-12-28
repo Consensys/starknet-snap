@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
 
+## [1.19.0](https://github.com/Consensys/starknet-snap/compare/wallet-ui-v1.18.0...wallet-ui-v1.19.0) (2023-12-19)
+
+
+### Features
+
+* implement network switch in UI ([#175](https://github.com/Consensys/starknet-snap/issues/175)) ([4b4ace7](https://github.com/Consensys/starknet-snap/commit/4b4ace7f41998c36c7924dcfb07dde061a714d45))
+* sepolia network ([#187](https://github.com/Consensys/starknet-snap/issues/187)) ([45b0463](https://github.com/Consensys/starknet-snap/commit/45b04633149bf1b9568feeb8c2f475d52a0e45a8))
+
+
+### Bug Fixes
+
+* fix wallet cant connect after disconnect ([#179](https://github.com/Consensys/starknet-snap/issues/179)) ([6907f29](https://github.com/Consensys/starknet-snap/commit/6907f2942dab662191d8182b6be58561fa1c2876))
+
 ## [1.18.0](https://github.com/Consensys/starknet-snap/compare/wallet-ui-v1.17.0...wallet-ui-v1.18.0) (2023-09-22)
 
 

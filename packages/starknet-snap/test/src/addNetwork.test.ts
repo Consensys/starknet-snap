@@ -4,7 +4,11 @@ import sinonChai from 'sinon-chai';
 import { WalletMock } from '../wallet.mock.test';
 import { SnapState } from '../../src/types/snapState';
 import * as snapUtils from '../../src/utils/snapUtils';
-import { STARKNET_MAINNET_NETWORK, STARKNET_TESTNET_NETWORK } from '../../src/utils/constants';
+import {
+  STARKNET_MAINNET_NETWORK,
+  STARKNET_TESTNET_NETWORK,
+  STARKNET_SEPOLIA_TESTNET_NETWORK,
+} from '../../src/utils/constants';
 import { addNetwork } from '../../src/addNetwork';
 import { Mutex } from 'async-mutex';
 import { AddNetworkRequestParams, ApiParams } from '../../src/types/snapApi';
@@ -17,7 +21,7 @@ describe('Test function: addNetwork', function () {
   const state: SnapState = {
     accContracts: [],
     erc20Tokens: [],
-    networks: [STARKNET_TESTNET_NETWORK, STARKNET_MAINNET_NETWORK],
+    networks: [STARKNET_TESTNET_NETWORK, STARKNET_MAINNET_NETWORK, STARKNET_SEPOLIA_TESTNET_NETWORK],
     transactions: [],
   };
   const apiParams: ApiParams = {
@@ -51,7 +55,7 @@ describe('Test function: addNetwork', function () {
     const result = await addNetwork(apiParams);
     expect(result).to.be.eql(true);
     expect(stateStub).to.be.calledOnce;
-    expect(state.networks.length).to.be.eql(3);
+    expect(state.networks.length).to.be.eql(4);
   });
 
   it('should update the network correctly', async function () {
@@ -65,7 +69,7 @@ describe('Test function: addNetwork', function () {
     const result = await addNetwork(apiParams);
     expect(result).to.be.eql(true);
     expect(stateStub).to.be.calledOnce;
-    expect(state.networks.length).to.be.eql(3);
+    expect(state.networks.length).to.be.eql(4);
   });
 
   it('should not update snap state with the duplicated network', async function () {
@@ -79,7 +83,7 @@ describe('Test function: addNetwork', function () {
     const result = await addNetwork(apiParams);
     expect(result).to.be.eql(true);
     expect(stateStub).to.be.callCount(0);
-    expect(state.networks.length).to.be.eql(3);
+    expect(state.networks.length).to.be.eql(4);
   });
 
   it('should throw an error if upsertNetwork failed', async function () {
