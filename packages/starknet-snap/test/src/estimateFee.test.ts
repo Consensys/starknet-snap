@@ -9,7 +9,7 @@ import { ACCOUNT_CLASS_HASH_V1, STARKNET_TESTNET_NETWORK } from '../../src/utils
 import { getAddressKeyDeriver } from '../../src/utils/keyPair';
 import {
   account2,
-  Cario1Account1,
+  Cairo1Account1,
   estimateDeployFeeResp4,
   estimateFeeResp,
   getBip44EntropyStub,
@@ -138,11 +138,11 @@ describe('Test function: estimateFee', function () {
         sandbox.stub(utils, 'isUpgradeRequired').resolves(false);
       });
 
-      describe('when account is cario1 address', function () {
+      describe('when account is cairo1 address', function () {
         beforeEach(async function () {
           apiParams.requestParams = {
             ...apiParams.requestParams,
-            senderAddress: Cario1Account1.address,
+            senderAddress: Cairo1Account1.address,
           };
         });
 
@@ -178,7 +178,7 @@ describe('Test function: estimateFee', function () {
               apiParams.keyDeriver,
               STARKNET_TESTNET_NETWORK,
               state,
-              Cario1Account1.address,
+              Cairo1Account1.address,
             );
             const { callData } = utils.getAccContractAddressAndCallData(publicKey);
             const apiRequest = apiParams.requestParams as EstimateFeeRequestParams;
@@ -188,7 +188,7 @@ describe('Test function: estimateFee', function () {
                 type: TransactionType.DEPLOY_ACCOUNT,
                 payload: {
                   classHash: ACCOUNT_CLASS_HASH_V1,
-                  contractAddress: Cario1Account1.address,
+                  contractAddress: Cairo1Account1.address,
                   constructorCalldata: callData,
                   addressSalt: publicKey,
                 },
@@ -208,7 +208,7 @@ describe('Test function: estimateFee', function () {
             expect(estimateFeeBulkStub).callCount(1);
             expect(estimateFeeBulkStub).to.be.calledWith(
               STARKNET_TESTNET_NETWORK,
-              Cario1Account1.address,
+              Cairo1Account1.address,
               privateKey,
               expectedBulkTransaction,
             );
@@ -232,7 +232,7 @@ describe('Test function: estimateFee', function () {
         });
       });
 
-      describe('when account is cario0 address', function () {
+      describe('when account is cairo0 address', function () {
         describe('when account is deployed', function () {
           beforeEach(async function () {
             estimateFeeBulkStub = sandbox.stub(utils, 'estimateFeeBulk');
@@ -264,7 +264,7 @@ describe('Test function: estimateFee', function () {
           });
         });
         describe('when account is not deployed', function () {
-          //not support cario0 address if not deployed
+          //not support cairo0 address if not deployed
         });
       });
     });

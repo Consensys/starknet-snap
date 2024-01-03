@@ -21,7 +21,7 @@ import {
   token2,
   token3,
   unfoundUserAddress,
-  Cario1Account1,
+  Cairo1Account1,
 } from '../constants.test';
 import { getAddressKeyDeriver } from '../../src/utils/keyPair';
 import { Mutex } from 'async-mutex';
@@ -238,7 +238,7 @@ describe('Test function: sendTransaction', function () {
         });
 
         describe('when account is not deployed', function () {
-          // not support cario0 address not deployed account
+          // not support cairo0 address not deployed account
         });
       });
     });
@@ -249,7 +249,7 @@ describe('Test function: sendTransaction', function () {
       beforeEach(async function () {
         apiParams.requestParams = {
           ...apiParams.requestParams,
-          senderAddress: Cario1Account1.address,
+          senderAddress: Cairo1Account1.address,
         };
         sandbox.stub(utils, 'isUpgradeRequired').resolves(false);
         sandbox.stub(estimateFeeSnap, 'estimateFee').resolves({

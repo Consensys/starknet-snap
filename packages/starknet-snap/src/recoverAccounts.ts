@@ -1,6 +1,6 @@
 import { toJson } from './utils/serializer';
 import { num } from 'starknet';
-import { getKeysFromAddressIndex, getCorrectContractAddress, isUpgradeRequired } from './utils/starknetUtils';
+import { getKeysFromAddressIndex, getCorrectContractAddress } from './utils/starknetUtils';
 import { getNetworkFromChainId, getValidNumber, upsertAccount } from './utils/snapUtils';
 import { AccContract } from './types/snapState';
 import { ApiParams, RecoverAccountsRequestParams } from './types/snapApi';
@@ -29,17 +29,15 @@ export async function recoverAccounts(params: ApiParams) {
         state,
         i,
       );
-      const { address: contractAddress, signerPubKey: signerPublicKey } = await getCorrectContractAddress(
+      const { address: contractAddress, signerPubKey: signerPublicKey, upgradeRequired } = await getCorrectContractAddress(
         network,
         publicKey,
       );
-      logger.log(`recoverAccounts: index ${i}:\ncontractAddress = ${contractAddress}\npublicKey = ${publicKey}`);
+      logger.log(`recoverAccounts: index ${i}:\ncontractAddress = ${contractAddress}\npublicKey = ${publicKey}\nisUpgradeRequired = ${upgradeRequired}`);
 
-      let _isUpgradeRequired = false;
       if (signerPublicKey) {
-        _isUpgradeRequired = await isUpgradeRequired(network, contractAddress);
         logger.log(
-          `recoverAccounts: index ${i}:\ncontractAddress = ${contractAddress}\nisUpgradeRequired = ${_isUpgradeRequired}`,
+          `recoverAccounts: index ${i}:\ncontractAddress = ${contractAddress}\n`,
         );
         if (num.toBigInt(signerPublicKey) === num.toBigInt(publicKey)) {
           logger.log(`recoverAccounts: index ${i} matched\npublicKey: ${publicKey}`);
@@ -57,7 +55,7 @@ export async function recoverAccounts(params: ApiParams) {
         derivationPath,
         deployTxnHash: '',
         chainId: network.chainId,
-        upgradeRequired: _isUpgradeRequired,
+        upgradeRequired: upgradeRequired,
       };
 
       logger.log(`recoverAccounts: index ${i}\nuserAccount: ${toJson(userAccount)}`);

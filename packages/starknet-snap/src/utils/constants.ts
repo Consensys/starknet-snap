@@ -137,3 +137,7 @@ export const PRELOADED_NETWORKS = [STARKNET_MAINNET_NETWORK, STARKNET_TESTNET_NE
 export const PROXY_CONTRACT_HASH = '0x25ec026985a3bf9d0cc1fe17326b245dfdc3ff89b8fde106542a3ea56c5a918'; // for cairo 0 proxy contract
 
 export const MIN_ACC_CONTRACT_VERSION = [0, 3, 0];
+
+export const CAIRO_VERSION = '1';
+
+export const CAIRO_VERSION_LEGACY = '0';

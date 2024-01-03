@@ -60,7 +60,7 @@ export const account4: AccContract = {
   chainId: constants.StarknetChainId.SN_GOERLI,
 };
 
-export const Cario1Account1: AccContract = {
+export const Cairo1Account1: AccContract = {
   address: '0x043e3d703b005b8367a9783fb680713349c519202aa01e9beb170bdf710ae20b',
   addressSalt: '0x019e59f349e1aa813ab4556c5836d0472e5e1ae82d1e5c3b3e8aabfeb290befd',
   addressIndex: 1,
@@ -99,7 +99,7 @@ export const signature1 =
 export const signature2 =
   '30440220052956ac852275b6004c4e8042450f6dce83059f068029b037cc47338c80d062022002bc0e712f03e341bb3532fc356b779d84fcb4dbfe8ed34de2db66e121971d92';
 
-export const signature4Cario1SignMessage = [
+export const signature4Cairo1SignMessage = [
   '2941323345698930086258187297320132789256148405011604592758945785805412997864',
   '1024747634926675542679366527128384456926978174336360356924884281219915547518',
 ];

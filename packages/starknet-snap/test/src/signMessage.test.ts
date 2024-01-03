@@ -8,12 +8,12 @@ import typedDataExample from '../../src/typedData/typedDataExample.json';
 import { STARKNET_TESTNET_NETWORK } from '../../src/utils/constants';
 import {
   account1,
-  Cario1Account1,
+  Cairo1Account1,
   getBip44EntropyStub,
   signature4SignMessageWithUnfoundAddress,
   unfoundUserAddress,
   signature4SignMessage,
-  signature4Cario1SignMessage,
+  signature4Cairo1SignMessage,
 } from '../constants.test';
 import { getAddressKeyDeriver } from '../../src/utils/keyPair';
 import * as utils from '../../src/utils/starknetUtils';
@@ -155,7 +155,7 @@ describe('Test function: signMessage', function () {
       beforeEach(async function () {
         apiParams.requestParams = {
           ...apiParams.requestParams,
-          signerAddress: Cario1Account1.address,
+          signerAddress: Cairo1Account1.address,
         };
         sandbox.stub(utils, 'isUpgradeRequired').resolves(false);
       });
@@ -164,7 +164,7 @@ describe('Test function: signMessage', function () {
         const result = await signMessage(apiParams);
         expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledOnce;
         expect(walletStub.rpcStubs.snap_manageState).not.to.have.been.called;
-        expect(result).to.be.eql(signature4Cario1SignMessage);
+        expect(result).to.be.eql(signature4Cairo1SignMessage);
       });
 
       it('should sign a message from an unfound user account correctly', async function () {
