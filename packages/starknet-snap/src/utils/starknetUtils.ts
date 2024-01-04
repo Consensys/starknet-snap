@@ -578,8 +578,8 @@ export const findAddressIndex = async (
   const bigIntAddress = num.toBigInt(address);
   for (let i = 0; i < maxScan; i++) {
     const { publicKey } = await getKeysFromAddressIndex(keyDeriver, chainId, state, i);
-    const { address: calculatedAddress } = getAccContractAddressAndCallData(publicKey);
-    const { address: calculatedAddressLegacy } = getAccContractAddressAndCallDataLegacy(publicKey);
+    const { address: calculatedAddress, addressLegacy: calculatedAddressLegacy } = getPermutationAddresses(publicKey);
+
     if (num.toBigInt(calculatedAddress) === bigIntAddress || num.toBigInt(calculatedAddressLegacy) === bigIntAddress) {
       logger.log(`findAddressIndex:\nFound address in scan: ${i} ${address}`);
       return {
@@ -590,6 +590,22 @@ export const findAddressIndex = async (
   }
   throw new Error(`Address not found: ${address}`);
 };
+
+/**
+ * Get address permutation by public key
+ *
+ * @param  pk - Public key.
+ * @returns - address and addressLegacy.
+ */
+export const getPermutationAddresses = (pk:string) => {
+  const { address } = getAccContractAddressAndCallData(pk);
+  const { address: addressLegacy } = getAccContractAddressAndCallDataLegacy(pk);
+
+  return {
+    address,
+    addressLegacy
+  }
+}
 
 /**
  * Check address needed upgrade by using getVersion and compare with MIN_ACC_CONTRACT_VERSION
@@ -607,7 +623,7 @@ export const isUpgradeRequired = async (network: Network, address: string) => {
     if (!err.message.includes('Contract not found')) {
       throw err;
     }
-    //[TODO] if address is cairo0 but not deployed we should throw error
+    //[TODO] if address is cairo0 but not deployed we throw error
     return false;
   }
 };
@@ -625,18 +641,17 @@ export const isGTEMinVersion = (version: string) => {
 };
 
 /**
- * Get user address by public key, return address if the address has deployed, prioritize cairo 1 over cairo 0, supported for cairoVersions [0,1]
+ * Get user address by public key, return address if the address has deployed
  *
  * @param  network - Network.
  * @param  publicKey - address's public key.
  * @returns - address and address's public key.
  */
 export const getCorrectContractAddress = async (network: Network, publicKey: string) => {
-  const { address: contractAddress } = getAccContractAddressAndCallData(publicKey);
-  const { address: contractAddressLegacy } = getAccContractAddressAndCallDataLegacy(publicKey);
+  const {address: contractAddress, addressLegacy: contractAddressLegacy} = getPermutationAddresses(publicKey)
   
   logger.log(
-    `getContractAddressByKey: contractAddressCairo1 = ${contractAddress}\ncontractAddressLegacy = ${contractAddressLegacy}\npublicKey = ${publicKey}`,
+    `getContractAddressByKey: contractAddress = ${contractAddress}\ncontractAddressLegacy = ${contractAddressLegacy}\npublicKey = ${publicKey}`,
   );
 
   let address = contractAddress;

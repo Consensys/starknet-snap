@@ -11,6 +11,7 @@ import {
   getBip44EntropyStub,
   account1,
   account2,
+  account3
 } from '../constants.test';
 import { SnapState } from '../../src/types/snapState';
 import { Calldata, num } from 'starknet';
@@ -18,6 +19,58 @@ import { hexToString } from '../../src/utils/formatterUtils';
 
 chai.use(sinonChai);
 const sandbox = sinon.createSandbox();
+
+describe('Test function: findAddressIndex', function () {
+  const state: SnapState = {
+    accContracts: [],
+    erc20Tokens: [],
+    networks: [STARKNET_TESTNET_NETWORK],
+    transactions: [],
+  };
+
+  beforeEach(function () {
+    sandbox.stub(utils, 'getKeysFromAddressIndex').resolves({
+      privateKey: 'pk',
+      publicKey: 'pubkey',
+      addressIndex: 1,
+      derivationPath: `m / bip32:1' / bip32:1' / bip32:1' / bip32:1'`
+    })
+    sandbox.stub(utils, 'getPermutationAddresses').returns({
+      address: account1.address, addressLegacy: account2.address})
+  })
+
+  afterEach(function () {
+    sandbox.restore();
+  });
+
+  it('should find address index', async function () {
+    const result = await utils.findAddressIndex(STARKNET_TESTNET_NETWORK.chainId, account1.address, 'div', state, 1)
+    expect(result).to.be.contains({
+      index: 0,
+      cairoVersion: 1,
+    })
+  });
+
+  it('should find address index address match account legacy', async function () {
+    const result = await utils.findAddressIndex(STARKNET_TESTNET_NETWORK.chainId, account2.address, 'div', state, 1)
+    expect(result).to.be.contains({
+      index: 0,
+      cairoVersion: 0,
+    })
+  });
+
+  it('should throw error if address not found', async function () {
+    let result = null;
+    try {
+      result = await utils.findAddressIndex(STARKNET_TESTNET_NETWORK.chainId, account3.address, 'div', state, 1)
+    } catch (err) {
+      result = err;
+    } finally {
+      expect(result).to.be.an('Error');
+      expect(result?.message).to.be.eq(`Address not found: ${account3.address}`);
+    }
+  });
+});
 
 describe('Test function: callContract', function () {
   const walletStub = new WalletMock();
@@ -122,6 +175,31 @@ describe('Test function: validateAndParseAddress', function () {
     expect(() => utils.validateAndParseAddress(largeHex)).to.throw(
       'Address 0x3f679957fd2a034d7c32aecb500b62e9d9b4708ebd1383edaa9534fb36b951a665019a has an invalid length',
     );
+  });
+});
+
+describe('Test function: getPermutationAddresses', function () {
+  let getAccContractAddressAndCallDataStub: sinon.SinonStub;
+  let getAccContractAddressAndCallDataLegacy: sinon.SinonStub;
+  const PK = 'PK';
+
+  beforeEach(function () {
+    getAccContractAddressAndCallDataStub = sandbox.stub(utils, 'getAccContractAddressAndCallData').returns({address: account1.address, callData: [] as Calldata});
+    getAccContractAddressAndCallDataLegacy = sandbox.stub(utils, 'getAccContractAddressAndCallDataLegacy').returns({address: account2.address, callData: [] as Calldata});
+  });
+
+  afterEach(function () {
+    sandbox.restore();
+  });
+
+  it('should return all addresses', async function () {
+    const result = await utils.getPermutationAddresses(PK);
+    expect(result).to.be.contains({
+      address: account1.address,
+      addressLegacy: account2.address,
+    });
+    expect(getAccContractAddressAndCallDataStub).to.have.been.calledOnceWith(PK);
+    expect(getAccContractAddressAndCallDataLegacy).to.have.been.calledOnceWith(PK);
   });
 });
 

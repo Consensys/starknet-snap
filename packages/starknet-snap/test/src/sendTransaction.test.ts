@@ -73,7 +73,7 @@ describe('Test function: sendTransaction', function () {
       apiParams.requestParams = requestObject;
     });
 
-    it('it should show error when request contractAddress is not given', async function () {
+    it('should show error when request contractAddress is not given', async function () {
       invalidRequest.contractAddress = undefined;
       apiParams.requestParams = invalidRequest;
       let result;
@@ -89,7 +89,7 @@ describe('Test function: sendTransaction', function () {
       }
     });
 
-    it('it should show error when request contractAddress is invalid', async function () {
+    it('should show error when request contractAddress is invalid', async function () {
       invalidRequest.contractAddress = '0x0';
       apiParams.requestParams = invalidRequest;
       let result;
@@ -103,7 +103,7 @@ describe('Test function: sendTransaction', function () {
       }
     });
 
-    it('it should show error when request senderAddress is not given', async function () {
+    it('should show error when request senderAddress is not given', async function () {
       invalidRequest.senderAddress = undefined;
       apiParams.requestParams = invalidRequest;
       let result;
@@ -119,7 +119,7 @@ describe('Test function: sendTransaction', function () {
       }
     });
 
-    it('it should show error when request contractAddress is invalid', async function () {
+    it('should show error when request contractAddress is invalid', async function () {
       invalidRequest.senderAddress = '0x0';
       apiParams.requestParams = invalidRequest;
       let result;
@@ -133,7 +133,7 @@ describe('Test function: sendTransaction', function () {
       }
     });
 
-    it('it should show error when request contractFuncName is not given', async function () {
+    it('should show error when request contractFuncName is not given', async function () {
       invalidRequest.contractFuncName = undefined;
       apiParams.requestParams = invalidRequest;
       let result;
@@ -149,7 +149,7 @@ describe('Test function: sendTransaction', function () {
       }
     });
 
-    it('it should show error when request network not found', async function () {
+    it('should show error when request network not found', async function () {
       invalidRequest.chainId = '0x0';
       apiParams.requestParams = invalidRequest;
       let result;
@@ -172,78 +172,41 @@ describe('Test function: sendTransaction', function () {
       apiParams.requestParams = Object.assign({}, requestObject);
     });
 
-    describe('when account is cairo 0', function () {
-      describe('when require upgrade checking fail', function () {
-        it('should throw error', async function () {
-          const isUpgradeRequiredStub = sandbox.stub(utils, 'isUpgradeRequired').throws('network error');
-          let result;
-          try {
-            result = await sendTransaction(apiParams);
-          } catch (err) {
-            result = err;
-          } finally {
-            expect(isUpgradeRequiredStub).to.have.been.calledOnceWith(STARKNET_TESTNET_NETWORK, account1.address);
-            expect(result).to.be.an('Error');
-          }
-        });
-      });
-
-      describe('when account require upgrade', function () {
-        let isUpgradeRequiredStub: sinon.SinonStub;
-        beforeEach(async function () {
-          isUpgradeRequiredStub = sandbox.stub(utils, 'isUpgradeRequired').resolves(true);
-        });
-
-        it('should throw error if upgrade required', async function () {
-          let result;
-          try {
-            result = await sendTransaction(apiParams);
-          } catch (err) {
-            result = err;
-          } finally {
-            expect(isUpgradeRequiredStub).to.have.been.calledOnceWith(STARKNET_TESTNET_NETWORK, account1.address);
-            expect(result).to.be.an('Error');
-          }
-        });
-      });
-
-      describe('when account do not require upgrade', function () {
-        let executeTxnResp;
-        beforeEach(async function () {
-          sandbox.stub(utils, 'isUpgradeRequired').resolves(false);
-          sandbox.stub(estimateFeeSnap, 'estimateFee').resolves({
-            suggestedMaxFee: estimateFeeResp.suggestedMaxFee.toString(10),
-            overallFee: estimateFeeResp.overall_fee.toString(10),
-            gasConsumed: '0',
-            gasPrice: '0',
-            unit: 'wei',
-            includeDeploy: true,
-          });
-          executeTxnResp = sendTransactionResp;
-          sandbox.stub(utils, 'executeTxn').resolves(executeTxnResp);
-          walletStub.rpcStubs.snap_manageState.resolves(state);
-          walletStub.rpcStubs.snap_dialog.resolves(true);
-        });
-        describe('when account is deployed', function () {
-          beforeEach(async function () {
-            sandbox.stub(utils, 'isAccountDeployed').resolves(true);
-          });
-
-          it('should send a transaction for transferring 10 tokens correctly', async function () {
-            const result = await sendTransaction(apiParams);
-            expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledOnce;
-            expect(walletStub.rpcStubs.snap_manageState).to.have.been.called;
-            expect(result).to.be.eql(sendTransactionResp);
-          });
-        });
-
-        describe('when account is not deployed', function () {
-          // not support cairo0 address not deployed account
-        });
+    describe('when require upgrade checking fail', function () {
+      it('should throw error', async function () {
+        const isUpgradeRequiredStub = sandbox.stub(utils, 'isUpgradeRequired').throws('network error');
+        let result;
+        try {
+          result = await sendTransaction(apiParams);
+        } catch (err) {
+          result = err;
+        } finally {
+          expect(isUpgradeRequiredStub).to.have.been.calledOnceWith(STARKNET_TESTNET_NETWORK, account1.address);
+          expect(result).to.be.an('Error');
+        }
       });
     });
 
-    describe('when account is cairo 1', function () {
+    describe('when account require upgrade', function () {
+      let isUpgradeRequiredStub: sinon.SinonStub;
+      beforeEach(async function () {
+        isUpgradeRequiredStub = sandbox.stub(utils, 'isUpgradeRequired').resolves(true);
+      });
+
+      it('should throw error if upgrade required', async function () {
+        let result;
+        try {
+          result = await sendTransaction(apiParams);
+        } catch (err) {
+          result = err;
+        } finally {
+          expect(isUpgradeRequiredStub).to.have.been.calledOnceWith(STARKNET_TESTNET_NETWORK, account1.address);
+          expect(result).to.be.an('Error');
+        }
+      });
+    });
+
+    describe('when account do not require upgrade', function () {
       let executeTxnResp;
       let executeTxnStub: sinon.SinonStub;
       beforeEach(async function () {
@@ -413,7 +376,7 @@ describe('Test function: sendTransaction', function () {
           sandbox.stub(utils, 'isAccountDeployed').resolves(false);
         });
 
-        it('should send a transaction for transferring 10 tokens and a transaction for deploy correctly', async function () {
+        it('send a transaction for transferring 10 tokens and a transaction for deploy correctly', async function () {
           sandbox.stub(utils, 'deployAccount').callsFake(async () => {
             return createAccountProxyResp;
           });

@@ -12,7 +12,6 @@ import {
   getBip44EntropyStub,
   signature4SignMessageWithUnfoundAddress,
   unfoundUserAddress,
-  signature4SignMessage,
   signature4Cairo1SignMessage,
 } from '../constants.test';
 import { getAddressKeyDeriver } from '../../src/utils/keyPair';
@@ -102,56 +101,56 @@ describe('Test function: signMessage', function () {
       apiParams.requestParams = Object.assign({}, requestObject);
     });
 
-    describe('when account is cairo 0', function () {
-      describe('when require upgrade checking fail', function () {
-        it('should throw error', async function () {
-          const isUpgradeRequiredStub = sandbox.stub(utils, 'isUpgradeRequired').throws('network error');
-          let result;
-          try {
-            result = await signMessage(apiParams);
-          } catch (err) {
-            result = err;
-          } finally {
-            expect(isUpgradeRequiredStub).to.have.been.calledOnceWith(STARKNET_TESTNET_NETWORK, account1.address);
-            expect(result).to.be.an('Error');
-          }
-        });
-      });
+    it('skip dialog if enableAutherize is false or omit', async function () {
+      sandbox.stub(utils, 'isUpgradeRequired').resolves(false);
+      const paramsObject = apiParams.requestParams as SignMessageRequestParams;
 
-      describe('when account require upgrade', function () {
-        let isUpgradeRequiredStub: sinon.SinonStub;
-        beforeEach(async function () {
-          isUpgradeRequiredStub = sandbox.stub(utils, 'isUpgradeRequired').resolves(true);
-        });
+      paramsObject.enableAutherize = false;
+      await signMessage(apiParams);
+      expect(walletStub.rpcStubs.snap_dialog).to.have.been.callCount(0);
 
-        it('should throw error if upgrade required', async function () {
-          let result;
-          try {
-            result = await signMessage(apiParams);
-          } catch (err) {
-            result = err;
-          } finally {
-            expect(isUpgradeRequiredStub).to.have.been.calledOnceWith(STARKNET_TESTNET_NETWORK, account1.address);
-            expect(result).to.be.an('Error');
-          }
-        });
-      });
+      paramsObject.enableAutherize = undefined;
+      await signMessage(apiParams);
+      expect(walletStub.rpcStubs.snap_dialog).to.have.been.callCount(0);
 
-      describe('when account is not require upgrade', function () {
-        beforeEach(async function () {
-          sandbox.stub(utils, 'isUpgradeRequired').resolves(false);
-        });
+      paramsObject.enableAutherize = true;
+    });
 
-        it('should sign a message from an user account correctly', async function () {
-          const result = await signMessage(apiParams);
-          expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledOnce;
-          expect(walletStub.rpcStubs.snap_manageState).not.to.have.been.called;
-          expect(result).to.be.eql(signature4SignMessage);
-        });
+    describe('when require upgrade checking fail', function () {
+      it('should throw error', async function () {
+        const isUpgradeRequiredStub = sandbox.stub(utils, 'isUpgradeRequired').throws('network error');
+        let result;
+        try {
+          result = await signMessage(apiParams);
+        } catch (err) {
+          result = err;
+        } finally {
+          expect(isUpgradeRequiredStub).to.have.been.calledOnceWith(STARKNET_TESTNET_NETWORK, account1.address);
+          expect(result).to.be.an('Error');
+        }
       });
     });
 
-    describe('when account is cairo 1', function () {
+    describe('when account require upgrade', function () {
+      let isUpgradeRequiredStub: sinon.SinonStub;
+      beforeEach(async function () {
+        isUpgradeRequiredStub = sandbox.stub(utils, 'isUpgradeRequired').resolves(true);
+      });
+
+      it('should throw error if upgrade required', async function () {
+        let result;
+        try {
+          result = await signMessage(apiParams);
+        } catch (err) {
+          result = err;
+        } finally {
+          expect(isUpgradeRequiredStub).to.have.been.calledOnceWith(STARKNET_TESTNET_NETWORK, account1.address);
+          expect(result).to.be.an('Error');
+        }
+      });
+    });
+
+    describe('when account is not require upgrade', function () {
       beforeEach(async function () {
         apiParams.requestParams = {
           ...apiParams.requestParams,
@@ -159,7 +158,7 @@ describe('Test function: signMessage', function () {
         };
         sandbox.stub(utils, 'isUpgradeRequired').resolves(false);
       });
-
+  
       it('should sign a message from an user account correctly', async function () {
         const result = await signMessage(apiParams);
         expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledOnce;
@@ -197,21 +196,6 @@ describe('Test function: signMessage', function () {
         expect(walletStub.rpcStubs.snap_manageState).not.to.have.been.called;
         expect(result).to.be.eql(false);
       });
-    });
-
-    it('should skip dialog if enableAutherize is false or omit', async function () {
-      sandbox.stub(utils, 'isUpgradeRequired').resolves(false);
-      const paramsObject = apiParams.requestParams as SignMessageRequestParams;
-
-      paramsObject.enableAutherize = false;
-      await signMessage(apiParams);
-      expect(walletStub.rpcStubs.snap_dialog).to.have.been.callCount(0);
-
-      paramsObject.enableAutherize = undefined;
-      await signMessage(apiParams);
-      expect(walletStub.rpcStubs.snap_dialog).to.have.been.callCount(0);
-
-      paramsObject.enableAutherize = true;
     });
   });
 });

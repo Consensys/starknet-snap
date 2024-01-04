@@ -40,11 +40,9 @@ describe('Test function: estimateFees', function () {
     sandbox.restore();
   });
 
-  it('should estimate the fee including deploy txn correctly', async function () {
+  it('should estimate fees correctly', async function () {
     const feeResult = [estimateDeployFeeResp2, estimateDeployFeeResp3];
-    sandbox.stub(utils, 'estimateFeeBulk').callsFake(async () => {
-      return feeResult;
-    });
+    sandbox.stub(utils, 'estimateFeeBulk').resolves(feeResult);
     apiParams.requestParams = {
       senderAddress: account2.address,
       chainId: STARKNET_TESTNET_NETWORK.chainId,
@@ -58,6 +56,9 @@ describe('Test function: estimateFees', function () {
           },
         },
       ],
+      invocationsDetails: {
+        nonce: '1'
+      }
     };
     const expectedResult = feeResult.map((fee) => ({
       overall_fee: fee.overall_fee.toString(10) || '0',
@@ -65,14 +66,13 @@ describe('Test function: estimateFees', function () {
       gas_price: fee.gas_price.toString(10) || '0',
       suggestedMaxFee: fee.suggestedMaxFee.toString(10) || '0',
     }));
+
     const result = await estimateFees(apiParams);
+
     expect(result).to.eql(expectedResult);
   });
 
   it('should throw error if estimateFee failed', async function () {
-    sandbox.stub(utils, 'getSigner').callsFake(async () => {
-      return account2.publicKey;
-    });
     sandbox.stub(utils, 'estimateFeeBulk').throws(new Error());
     apiParams.requestParams = {
       senderAddress: account2.address,
