@@ -125,47 +125,41 @@ describe('Test function: extractPublicKey', function () {
         sandbox.stub(utils, 'isUpgradeRequired').resolves(false);
       });
 
-      describe('when account is cairo 0', function () {
-        //TODO
+      it('should get the public key of the specified user account correctly', async function () {
+        const requestObject: ExtractPublicKeyRequestParams = {
+          userAddress: account1.address,
+        };
+        apiParams.requestParams = requestObject;
+        const result = await extractPublicKey(apiParams);
+        expect(walletStub.rpcStubs.snap_manageState).not.to.have.been.called;
+        expect(result).to.be.eql(account1.publicKey);
       });
 
-      describe('when account is cairo 1', function () {
-        it('should get the public key of the specified user account correctly', async function () {
-          const requestObject: ExtractPublicKeyRequestParams = {
-            userAddress: account1.address,
-          };
-          apiParams.requestParams = requestObject;
-          const result = await extractPublicKey(apiParams);
-          expect(walletStub.rpcStubs.snap_manageState).not.to.have.been.called;
-          expect(result).to.be.eql(account1.publicKey);
-        });
+      it('should get the public key of the unfound user account correctly', async function () {
+        const requestObject: ExtractPublicKeyRequestParams = {
+          userAddress: unfoundUserAddress,
+        };
+        apiParams.requestParams = requestObject;
+        const result = await extractPublicKey(apiParams);
+        expect(walletStub.rpcStubs.snap_manageState).not.to.have.been.called;
+        expect(result).to.be.eql(unfoundUserPublicKey);
+      });
 
-        it('should get the public key of the unfound user account correctly', async function () {
-          const requestObject: ExtractPublicKeyRequestParams = {
-            userAddress: unfoundUserAddress,
-          };
-          apiParams.requestParams = requestObject;
-          const result = await extractPublicKey(apiParams);
-          expect(walletStub.rpcStubs.snap_manageState).not.to.have.been.called;
-          expect(result).to.be.eql(unfoundUserPublicKey);
-        });
+      it('should throw error if getKeysFromAddress failed', async function () {
+        sandbox.stub(utils, 'getKeysFromAddress').throws(new Error());
+        const requestObject: ExtractPublicKeyRequestParams = {
+          userAddress: unfoundUserAddress,
+        };
+        apiParams.requestParams = requestObject;
 
-        it('should throw error if getKeysFromAddress failed', async function () {
-          sandbox.stub(utils, 'getKeysFromAddress').throws(new Error());
-          const requestObject: ExtractPublicKeyRequestParams = {
-            userAddress: unfoundUserAddress,
-          };
-          apiParams.requestParams = requestObject;
-
-          let result;
-          try {
-            await extractPublicKey(apiParams);
-          } catch (err) {
-            result = err;
-          } finally {
-            expect(result).to.be.an('Error');
-          }
-        });
+        let result;
+        try {
+          await extractPublicKey(apiParams);
+        } catch (err) {
+          result = err;
+        } finally {
+          expect(result).to.be.an('Error');
+        }
       });
     });
   });

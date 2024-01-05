@@ -32,6 +32,7 @@ import {
   Abi,
   DeclareSignerDetails,
   DeployAccountSignerDetails,
+  CairoVersion,
 } from 'starknet';
 import type { Hex } from '@noble/curves/abstract/utils';
 import { Network, SnapState, Transaction, TransactionType } from '../types/snapState';
@@ -41,6 +42,8 @@ import {
   MIN_ACC_CONTRACT_VERSION,
   ACCOUNT_CLASS_HASH_V0,
   ACCOUNT_CLASS_HASH_V1,
+  CAIRO_VERSION,
+  CAIRO_VERSION_LEGACY,
 } from './constants';
 import { getAddressKey } from './keyPair';
 import { getAccount, getAccounts, getTransactionFromVoyagerUrl, getTransactionsFromVoyagerUrl } from './snapUtils';
@@ -110,7 +113,7 @@ export const estimateFee = async (
   txnInvocation: Call | Call[],
 ): Promise<EstimateFee> => {
   const provider = getProvider(network);
-  const account = new Account(provider, senderAddress, privateKey, '1');
+  const account = new Account(provider, senderAddress, privateKey, CAIRO_VERSION);
   return account.estimateInvokeFee(txnInvocation, { blockIdentifier: 'latest' });
 };
 
@@ -124,7 +127,7 @@ export const estimateFeeBulk = async (
   // ensure always calling the sequencer endpoint since the rpc endpoint and
   // starknet.js are not supported yet.
   const provider = getProvider(network);
-  const account = new Account(provider, senderAddress, privateKey, '1');
+  const account = new Account(provider, senderAddress, privateKey, CAIRO_VERSION);
   return account.estimateFeeBulk(txnInvocation, invocationsDetails);
 };
 
@@ -137,7 +140,7 @@ export const executeTxn = async (
   invocationsDetails?: InvocationsDetails,
 ): Promise<InvokeFunctionResponse> => {
   const provider = getProvider(network);
-  const account = new Account(provider, senderAddress, privateKey, '1');
+  const account = new Account(provider, senderAddress, privateKey, CAIRO_VERSION);
   return account.execute(txnInvocation, abis, invocationsDetails);
 };
 
@@ -150,7 +153,7 @@ export const deployAccount = async (
   maxFee: num.BigNumberish,
 ): Promise<DeployContractResponse> => {
   const provider = getProvider(network);
-  const account = new Account(provider, contractAddress, privateKey, '1');
+  const account = new Account(provider, contractAddress, privateKey, CAIRO_VERSION);
   const deployAccountPayload = {
     classHash: ACCOUNT_CLASS_HASH_V1,
     contractAddress: contractAddress,
@@ -168,7 +171,7 @@ export const estimateAccountDeployFee = async (
   privateKey: string | Uint8Array,
 ): Promise<EstimateFee> => {
   const provider = getProvider(network);
-  const account = new Account(provider, contractAddress, privateKey, '1');
+  const account = new Account(provider, contractAddress, privateKey, CAIRO_VERSION);
   const deployAccountPayload = {
     classHash: ACCOUNT_CLASS_HASH_V1,
     contractAddress: contractAddress,
@@ -191,6 +194,10 @@ export const getVersion = async (userAccAddress: string, network: Network): Prom
 export const getOwner = async (userAccAddress: string, network: Network): Promise<string> => {
   const resp = await callContract(network, userAccAddress, 'get_owner');
   return resp.result[0];
+};
+
+export const getContractOwner = async (userAccAddress: string, network: Network, version: CairoVersion): Promise<string> => {
+  return version === '0' ? getSigner(userAccAddress, network) : getOwner(userAccAddress, network);
 };
 
 export const getBalance = async (address: string, tokenAddress: string, network: Network) => {
@@ -423,7 +430,7 @@ export const getNextAddressIndex = (chainId: string, state: SnapState, derivatio
 };
 
 /**
- * calculate contract address by publicKey, supported for carioVersions [1]
+ * calculate contract address by publicKey
  *
  * @param  publicKey - address's publicKey.
  * @returns - address and calldata.
@@ -446,12 +453,12 @@ export const getAccContractAddressAndCallData = (publicKey) => {
 };
 
 /**
- * calculate contract address by publicKey, supported for carioVersions [0]
+ * calculate contract address by publicKey
  *
  * @param  publicKey - address's publicKey.
  * @returns - address and calldata.
  */
-export const getAccContractAddressAndCallDataCairo0 = (publicKey) => {
+export const getAccContractAddressAndCallDataLegacy = (publicKey) => {
   const callData = CallData.compile({
     implementation: ACCOUNT_CLASS_HASH_V0,
     selector: hash.getSelectorFromName('initialize'),
@@ -510,7 +517,7 @@ export const getKeysFromAddressIndex = async (
 };
 
 /**
- * Check address is deployed by using getVersion, supported for carioVersions [0,1]
+ * Check address is deployed by using getVersion
  *
  * @param  network - Network.
  * @param  address - Input address.
@@ -552,7 +559,7 @@ export const validateAndParseAddress = (address: num.BigNumberish, length = 63) 
 };
 
 /**
- * Find address index from the keyDeriver, supported for carioVersions [0,1]
+ * Find address index from the keyDeriver
  *
  * @param  chainId - Network ChainId.
  * @param  address - Input address.
@@ -571,9 +578,9 @@ export const findAddressIndex = async (
   const bigIntAddress = num.toBigInt(address);
   for (let i = 0; i < maxScan; i++) {
     const { publicKey } = await getKeysFromAddressIndex(keyDeriver, chainId, state, i);
-    const { address: calculatedAddress } = getAccContractAddressAndCallData(publicKey);
-    const { address: calculatedAddressCairo0 } = getAccContractAddressAndCallDataCairo0(publicKey);
-    if (num.toBigInt(calculatedAddress) === bigIntAddress || num.toBigInt(calculatedAddressCairo0) === bigIntAddress) {
+    const { address: calculatedAddress, addressLegacy: calculatedAddressLegacy } = getPermutationAddresses(publicKey);
+
+    if (num.toBigInt(calculatedAddress) === bigIntAddress || num.toBigInt(calculatedAddressLegacy) === bigIntAddress) {
       logger.log(`findAddressIndex:\nFound address in scan: ${i} ${address}`);
       return {
         index: i,
@@ -585,7 +592,23 @@ export const findAddressIndex = async (
 };
 
 /**
- * Check address needed upgrade by using getVersion and compare with MIN_ACC_CONTRACT_VERSION, supported for carioVersions [0,1]
+ * Get address permutation by public key
+ *
+ * @param  pk - Public key.
+ * @returns - address and addressLegacy.
+ */
+export const getPermutationAddresses = (pk:string) => {
+  const { address } = getAccContractAddressAndCallData(pk);
+  const { address: addressLegacy } = getAccContractAddressAndCallDataLegacy(pk);
+
+  return {
+    address,
+    addressLegacy
+  }
+}
+
+/**
+ * Check address needed upgrade by using getVersion and compare with MIN_ACC_CONTRACT_VERSION
  *
  * @param  network - Network.
  * @param  address - Input address.
@@ -595,80 +618,74 @@ export const isUpgradeRequired = async (network: Network, address: string) => {
   try {
     logger.log(`isUpgradeRequired: address = ${address}`);
     const hexResp = await getVersion(address, network);
-    const version = hexToString(hexResp);
-    logger.log(`isUpgradeRequired: hexResp = ${hexResp}, version = ${version}`);
-    const versionArr = version.split('.');
-    return Number(versionArr[1]) < MIN_ACC_CONTRACT_VERSION[1];
+    return isGTEMinVersion(hexToString(hexResp)) ? false : true;
   } catch (err) {
     if (!err.message.includes('Contract not found')) {
       throw err;
     }
-    logger.error(`isUpgradeRequired: error:`, err);
-    //[TODO] if address is cario0 but not deployed we should throw error
+    //[TODO] if address is cairo0 but not deployed we throw error
     return false;
   }
 };
 
 /**
- * Get user address by public key, return address if the address has deployed, prioritize cario 1 over cario 0, supported for carioVersions [0,1]
+ * Compare version number with MIN_ACC_CONTRACT_VERSION
+ *
+ * @param  version - version, e.g (2.3.0).
+ * @returns - boolean.
+ */
+export const isGTEMinVersion = (version: string) => {
+  logger.log(`isGTEMinVersion: version = ${version}`);
+  const versionArr = version.split('.');
+  return Number(versionArr[1]) >= MIN_ACC_CONTRACT_VERSION[1];
+};
+
+/**
+ * Get user address by public key, return address if the address has deployed
  *
  * @param  network - Network.
  * @param  publicKey - address's public key.
  * @returns - address and address's public key.
  */
 export const getCorrectContractAddress = async (network: Network, publicKey: string) => {
-  const { address: contractAddress } = getAccContractAddressAndCallData(publicKey);
-  const { address: contractAddressCairo0 } = getAccContractAddressAndCallDataCairo0(publicKey);
-  let pk = '';
+  const {address: contractAddress, addressLegacy: contractAddressLegacy} = getPermutationAddresses(publicKey)
+  
   logger.log(
-    `getContractAddressByKey: contractAddressCario1 = ${contractAddress}\ncontractAddressCairo0 = ${contractAddressCairo0}\npublicKey = ${publicKey}`,
+    `getContractAddressByKey: contractAddress = ${contractAddress}\ncontractAddressLegacy = ${contractAddressLegacy}\npublicKey = ${publicKey}`,
   );
 
-  //test if it is a cairo 1 account
+  let address = contractAddress;
+  let upgradeRequired = false;
+  let pk = '';
+
   try {
-    pk = await getOwner(contractAddress, network);
-    logger.log(`getContractAddressByKey: cairo 1 contract found`);
-  } catch (err) {
-    if (!err.message.includes('Contract not found')) {
-      throw err;
+    await getVersion(contractAddress, network);
+    pk = await getContractOwner(address, network, CAIRO_VERSION);
+  } catch (e) {
+    if (!e.message.includes('Contract not found')) {
+      throw e;
     }
-    logger.log(`getContractAddressByKey: cairo 1 contract not found`);
+  
+    logger.log(`getContractAddressByKey: cairo ${CAIRO_VERSION} contract cant found, try cairo ${CAIRO_VERSION_LEGACY}`);
 
-    //test if it is a upgraded cairo 0 account
     try {
-      pk = await getOwner(contractAddressCairo0, network);
-      logger.log(`getContractAddressByKey: upgraded cairo 0 contract found`);
-      return {
-        address: contractAddressCairo0,
-        signerPubKey: pk,
-      };
-    } catch (err) {
-      if (!err.message.includes('Contract not found')) {
-        throw err;
+      const version = await getVersion(contractAddressLegacy, network);
+      upgradeRequired = isGTEMinVersion(hexToString(version)) ? false : true;
+      pk = await getContractOwner(contractAddressLegacy, network, upgradeRequired ? CAIRO_VERSION_LEGACY : CAIRO_VERSION);
+      address = contractAddressLegacy
+    } catch (e) {
+      if (!e.message.includes('Contract not found')) {
+        throw e;
       }
-      logger.log(`getContractAddressByKey: upgraded cairo 0 contract not found`);
-    }
 
-    //test if it is a deployed cairo 0 account
-    try {
-      pk = await getSigner(contractAddressCairo0, network);
-      logger.log(`getContractAddressByKey: cairo 0 contract found`);
-      return {
-        address: contractAddressCairo0,
-        signerPubKey: pk,
-      };
-    } catch (err) {
-      if (!err.message.includes('Contract not found')) {
-        throw err;
-      }
-      logger.log(`getContractAddressByKey: cairo 0 contract not found`);
+      logger.log(`getContractAddressByKey: no deployed contract found, fallback to cairo ${CAIRO_VERSION}`);
     }
   }
 
-  //return new/deployed cairo 1 account
   return {
-    address: contractAddress,
+    address,
     signerPubKey: pk,
+    upgradeRequired: upgradeRequired,
   };
 };
 

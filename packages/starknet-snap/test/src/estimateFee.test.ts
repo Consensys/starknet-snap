@@ -9,7 +9,7 @@ import { ACCOUNT_CLASS_HASH_V1, STARKNET_TESTNET_NETWORK } from '../../src/utils
 import { getAddressKeyDeriver } from '../../src/utils/keyPair';
 import {
   account2,
-  Cario1Account1,
+  Cairo1Account1,
   estimateDeployFeeResp4,
   estimateFeeResp,
   getBip44EntropyStub,
@@ -136,135 +136,94 @@ describe('Test function: estimateFee', function () {
 
       beforeEach(async function () {
         sandbox.stub(utils, 'isUpgradeRequired').resolves(false);
+        apiParams.requestParams = {
+          ...apiParams.requestParams,
+          senderAddress: Cairo1Account1.address,
+        };
       });
 
-      describe('when account is cario1 address', function () {
+      describe('when account is deployed', function () {
         beforeEach(async function () {
-          apiParams.requestParams = {
-            ...apiParams.requestParams,
-            senderAddress: Cario1Account1.address,
-          };
+          estimateFeeBulkStub = sandbox.stub(utils, 'estimateFeeBulk');
+          sandbox.stub(utils, 'isAccountDeployed').resolves(true);
         });
 
-        describe('when account is deployed', function () {
-          beforeEach(async function () {
-            estimateFeeBulkStub = sandbox.stub(utils, 'estimateFeeBulk');
-            sandbox.stub(utils, 'isAccountDeployed').resolves(true);
-          });
+        it('should estimate the fee correctly', async function () {
+          estimateFeeStub = sandbox.stub(utils, 'estimateFee').resolves(estimateFeeResp);
+          const result = await estimateFee(apiParams);
+          expect(result.suggestedMaxFee).to.be.eq(estimateFeeResp.suggestedMaxFee.toString(10));
+          expect(estimateFeeStub).callCount(1);
+          expect(estimateFeeBulkStub).callCount(0);
+        });
+      });
 
-          it('should estimate the fee correctly', async function () {
-            estimateFeeStub = sandbox.stub(utils, 'estimateFee').resolves(estimateFeeResp);
-            const result = await estimateFee(apiParams);
-            expect(result.suggestedMaxFee).to.be.eq(estimateFeeResp.suggestedMaxFee.toString(10));
-            expect(estimateFeeStub).callCount(1);
-            expect(estimateFeeBulkStub).callCount(0);
-          });
+      describe('when account is not deployed', function () {
+        beforeEach(async function () {
+          estimateFeeStub = sandbox.stub(utils, 'estimateFee');
+          sandbox.stub(utils, 'isAccountDeployed').resolves(false);
         });
 
-        describe('when account is not deployed', function () {
-          beforeEach(async function () {
-            estimateFeeStub = sandbox.stub(utils, 'estimateFee');
-            sandbox.stub(utils, 'isAccountDeployed').resolves(false);
-          });
+        it('should estimate the fee including deploy txn correctly', async function () {
+          estimateFeeBulkStub = sandbox
+            .stub(utils, 'estimateFeeBulk')
+            .resolves([estimateFeeResp, estimateDeployFeeResp4]);
+          const expectedSuggestedMaxFee = estimateDeployFeeResp4.suggestedMaxFee + estimateFeeResp.suggestedMaxFee;
+          const result = await estimateFee(apiParams);
 
-          it('should estimate the fee including deploy txn correctly', async function () {
-            estimateFeeBulkStub = sandbox
-              .stub(utils, 'estimateFeeBulk')
-              .resolves([estimateFeeResp, estimateDeployFeeResp4]);
-            const expectedSuggestedMaxFee = estimateDeployFeeResp4.suggestedMaxFee + estimateFeeResp.suggestedMaxFee;
-            const result = await estimateFee(apiParams);
+          const { privateKey, publicKey } = await utils.getKeysFromAddress(
+            apiParams.keyDeriver,
+            STARKNET_TESTNET_NETWORK,
+            state,
+            Cairo1Account1.address,
+          );
+          const { callData } = utils.getAccContractAddressAndCallData(publicKey);
+          const apiRequest = apiParams.requestParams as EstimateFeeRequestParams;
 
-            const { privateKey, publicKey } = await utils.getKeysFromAddress(
-              apiParams.keyDeriver,
-              STARKNET_TESTNET_NETWORK,
-              state,
-              Cario1Account1.address,
-            );
-            const { callData } = utils.getAccContractAddressAndCallData(publicKey);
-            const apiRequest = apiParams.requestParams as EstimateFeeRequestParams;
-
-            const expectedBulkTransaction = [
-              {
-                type: TransactionType.DEPLOY_ACCOUNT,
-                payload: {
-                  classHash: ACCOUNT_CLASS_HASH_V1,
-                  contractAddress: Cario1Account1.address,
-                  constructorCalldata: callData,
-                  addressSalt: publicKey,
-                },
+          const expectedBulkTransaction = [
+            {
+              type: TransactionType.DEPLOY_ACCOUNT,
+              payload: {
+                classHash: ACCOUNT_CLASS_HASH_V1,
+                contractAddress: Cairo1Account1.address,
+                constructorCalldata: callData,
+                addressSalt: publicKey,
               },
-              {
-                type: TransactionType.INVOKE,
-                payload: {
-                  contractAddress: apiRequest.contractAddress,
-                  entrypoint: apiRequest.contractFuncName,
-                  calldata: utils.getCallDataArray(apiRequest.contractCallData),
-                },
+            },
+            {
+              type: TransactionType.INVOKE,
+              payload: {
+                contractAddress: apiRequest.contractAddress,
+                entrypoint: apiRequest.contractFuncName,
+                calldata: utils.getCallDataArray(apiRequest.contractCallData),
               },
-            ];
+            },
+          ];
 
-            expect(result.suggestedMaxFee).to.be.eq(expectedSuggestedMaxFee.toString(10));
+          expect(result.suggestedMaxFee).to.be.eq(expectedSuggestedMaxFee.toString(10));
+          expect(estimateFeeStub).callCount(0);
+          expect(estimateFeeBulkStub).callCount(1);
+          expect(estimateFeeBulkStub).to.be.calledWith(
+            STARKNET_TESTNET_NETWORK,
+            Cairo1Account1.address,
+            privateKey,
+            expectedBulkTransaction,
+          );
+        });
+
+        it('should throw error if estimateFee failed', async function () {
+          estimateFeeBulkStub = sandbox.stub(utils, 'estimateFeeBulk').throws('Error');
+          apiParams.requestParams = requestObject;
+
+          let result;
+          try {
+            await estimateFee(apiParams);
+          } catch (err) {
+            result = err;
+          } finally {
+            expect(result).to.be.an('Error');
             expect(estimateFeeStub).callCount(0);
             expect(estimateFeeBulkStub).callCount(1);
-            expect(estimateFeeBulkStub).to.be.calledWith(
-              STARKNET_TESTNET_NETWORK,
-              Cario1Account1.address,
-              privateKey,
-              expectedBulkTransaction,
-            );
-          });
-
-          it('should throw error if estimateFee failed', async function () {
-            estimateFeeBulkStub = sandbox.stub(utils, 'estimateFeeBulk').throws('Error');
-            apiParams.requestParams = requestObject;
-
-            let result;
-            try {
-              await estimateFee(apiParams);
-            } catch (err) {
-              result = err;
-            } finally {
-              expect(result).to.be.an('Error');
-              expect(estimateFeeStub).callCount(0);
-              expect(estimateFeeBulkStub).callCount(1);
-            }
-          });
-        });
-      });
-
-      describe('when account is cario0 address', function () {
-        describe('when account is deployed', function () {
-          beforeEach(async function () {
-            estimateFeeBulkStub = sandbox.stub(utils, 'estimateFeeBulk');
-            sandbox.stub(utils, 'isAccountDeployed').resolves(true);
-          });
-
-          it('should estimate the fee correctly', async function () {
-            estimateFeeStub = sandbox.stub(utils, 'estimateFee').resolves(estimateFeeResp);
-            const result = await estimateFee(apiParams);
-            expect(result.suggestedMaxFee).to.be.eq(estimateFeeResp.suggestedMaxFee.toString(10));
-            expect(estimateFeeStub).callCount(1);
-            expect(estimateFeeBulkStub).callCount(0);
-          });
-
-          it('should throw error if estimateFee failed', async function () {
-            estimateFeeStub = sandbox.stub(utils, 'estimateFee').throws('Error');
-            apiParams.requestParams = requestObject;
-
-            let result;
-            try {
-              await estimateFee(apiParams);
-            } catch (err) {
-              result = err;
-            } finally {
-              expect(result).to.be.an('Error');
-              expect(estimateFeeStub).callCount(1);
-              expect(estimateFeeBulkStub).callCount(0);
-            }
-          });
-        });
-        describe('when account is not deployed', function () {
-          //not support cario0 address if not deployed
+          }
         });
       });
     });

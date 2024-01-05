@@ -20,7 +20,7 @@ export async function estimateFees(params: ApiParams) {
       senderAddress,
       senderPrivateKey,
       requestParamsObj.invocations,
-      requestParamsObj.invocationDetails ? requestParamsObj.invocationDetails : undefined,
+      requestParamsObj.invocationDetails,
     );
 
     return fees.map((fee) => ({

@@ -132,54 +132,48 @@ describe('Test function: verifySignedMessage', function () {
         sandbox.stub(utils, 'isUpgradeRequired').resolves(false);
       });
 
-      describe('when account is cairo 0', function () {
-        //TODO
+      it('should verify a signed message from an user account correctly', async function () {
+        const requestObject: VerifySignedMessageRequestParams = {
+          signerAddress: account1.address,
+          typedDataMessage: undefined, // will use typedDataExample.json
+          signature: signature1,
+        };
+        apiParams.requestParams = requestObject;
+        const result = await verifySignedMessage(apiParams);
+        expect(walletStub.rpcStubs.snap_manageState).not.to.have.been.called;
+        expect(result).to.be.eql(true);
       });
 
-      describe('when account is cairo 1', function () {
-        it('should verify a signed message from an user account correctly', async function () {
-          const requestObject: VerifySignedMessageRequestParams = {
-            signerAddress: account1.address,
-            typedDataMessage: undefined, // will use typedDataExample.json
-            signature: signature1,
-          };
-          apiParams.requestParams = requestObject;
-          const result = await verifySignedMessage(apiParams);
-          expect(walletStub.rpcStubs.snap_manageState).not.to.have.been.called;
-          expect(result).to.be.eql(true);
-        });
+      it('should verify a signed message from an unfound user account correctly', async function () {
+        const requestObject: VerifySignedMessageRequestParams = {
+          signerAddress: unfoundUserAddress,
+          typedDataMessage: toJson(typedDataExample),
+          signature: signature2,
+        };
+        apiParams.requestParams = requestObject;
+        const result = await verifySignedMessage(apiParams);
+        expect(walletStub.rpcStubs.snap_manageState).not.to.have.been.called;
+        expect(result).to.be.eql(true);
+      });
 
-        it('should verify a signed message from an unfound user account correctly', async function () {
-          const requestObject: VerifySignedMessageRequestParams = {
-            signerAddress: unfoundUserAddress,
-            typedDataMessage: toJson(typedDataExample),
-            signature: signature2,
-          };
-          apiParams.requestParams = requestObject;
-          const result = await verifySignedMessage(apiParams);
-          expect(walletStub.rpcStubs.snap_manageState).not.to.have.been.called;
-          expect(result).to.be.eql(true);
-        });
+      it('should throw error if getKeysFromAddress failed', async function () {
+        sandbox.stub(utils, 'getKeysFromAddress').throws(new Error());
+        const requestObject: VerifySignedMessageRequestParams = {
+          signerAddress: account1.address,
+          typedDataMessage: undefined, // will use typedDataExample.json
+          signature: signature1,
+        };
+        apiParams.requestParams = requestObject;
 
-        it('should throw error if getKeysFromAddress failed', async function () {
-          sandbox.stub(utils, 'getKeysFromAddress').throws(new Error());
-          const requestObject: VerifySignedMessageRequestParams = {
-            signerAddress: account1.address,
-            typedDataMessage: undefined, // will use typedDataExample.json
-            signature: signature1,
-          };
-          apiParams.requestParams = requestObject;
-
-          let result;
-          try {
-            await verifySignedMessage(apiParams);
-          } catch (err) {
-            result = err;
-          } finally {
-            expect(result).to.be.an('Error');
-          }
-          expect(walletStub.rpcStubs.snap_manageState).not.to.have.been.called;
-        });
+        let result;
+        try {
+          await verifySignedMessage(apiParams);
+        } catch (err) {
+          result = err;
+        } finally {
+          expect(result).to.be.an('Error');
+        }
+        expect(walletStub.rpcStubs.snap_manageState).not.to.have.been.called;
       });
     });
   });
