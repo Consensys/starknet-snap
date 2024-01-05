@@ -11,10 +11,11 @@ import {
   getBip44EntropyStub,
   account1,
   account2,
-  account3
+  account3,
+  sendTransactionResp
 } from '../constants.test';
 import { SnapState } from '../../src/types/snapState';
-import { Calldata, num } from 'starknet';
+import { Calldata, Provider, num, TransactionStatus } from 'starknet';
 import { hexToString } from '../../src/utils/formatterUtils';
 
 chai.use(sinonChai);
@@ -495,4 +496,28 @@ describe('Test function: getCorrectContractAddress', function () {
       });
     });
   });
+});
+
+describe('Test function: waitForTransaction', function () {
+  let waitForTransactionStub: sinon.SinonStub;
+
+  beforeEach(function () {
+    waitForTransactionStub = sandbox.stub().resolves(sendTransactionResp)
+    const provider = {
+      waitForTransaction: waitForTransactionStub
+    } as unknown as Provider
+    sandbox.stub(utils, 'getProvider').returns(provider)
+  })
+
+  afterEach(function () {
+    sandbox.restore();
+  });
+
+  it(`should execute waitForTransaction correctly`, async function () {
+    utils.waitForTransaction(STARKNET_TESTNET_NETWORK, sendTransactionResp.transaction_hash);
+
+    expect(waitForTransactionStub).to.be.calledOnceWith(sendTransactionResp.transaction_hash, {
+      successStates: [TransactionStatus.ACCEPTED_ON_L2]
+    })
+  })
 });

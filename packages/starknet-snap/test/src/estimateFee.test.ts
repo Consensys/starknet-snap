@@ -5,7 +5,7 @@ import { WalletMock } from '../wallet.mock.test';
 import * as utils from '../../src/utils/starknetUtils';
 import { estimateFee } from '../../src/estimateFee';
 import { SnapState } from '../../src/types/snapState';
-import { ACCOUNT_CLASS_HASH_V1, STARKNET_TESTNET_NETWORK } from '../../src/utils/constants';
+import { ACCOUNT_CLASS_HASH, STARKNET_TESTNET_NETWORK } from '../../src/utils/constants';
 import { getAddressKeyDeriver } from '../../src/utils/keyPair';
 import {
   account2,
@@ -183,7 +183,7 @@ describe('Test function: estimateFee', function () {
             {
               type: TransactionType.DEPLOY_ACCOUNT,
               payload: {
-                classHash: ACCOUNT_CLASS_HASH_V1,
+                classHash: ACCOUNT_CLASS_HASH,
                 contractAddress: Cairo1Account1.address,
                 constructorCalldata: callData,
                 addressSalt: publicKey,

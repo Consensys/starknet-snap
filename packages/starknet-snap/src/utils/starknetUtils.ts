@@ -33,6 +33,7 @@ import {
   DeclareSignerDetails,
   DeployAccountSignerDetails,
   CairoVersion,
+  TransactionStatus
 } from 'starknet';
 import type { Hex } from '@noble/curves/abstract/utils';
 import { Network, SnapState, Transaction, TransactionType } from '../types/snapState';
@@ -40,8 +41,8 @@ import {
   PROXY_CONTRACT_HASH,
   TRANSFER_SELECTOR_HEX,
   MIN_ACC_CONTRACT_VERSION,
-  ACCOUNT_CLASS_HASH_V0,
-  ACCOUNT_CLASS_HASH_V1,
+  ACCOUNT_CLASS_HASH_LEGACY,
+  ACCOUNT_CLASS_HASH,
   CAIRO_VERSION,
   CAIRO_VERSION_LEGACY,
 } from './constants';
@@ -138,9 +139,10 @@ export const executeTxn = async (
   txnInvocation: Call | Call[],
   abis?: Abi[],
   invocationsDetails?: InvocationsDetails,
+  cairoVersion?: CairoVersion,
 ): Promise<InvokeFunctionResponse> => {
   const provider = getProvider(network);
-  const account = new Account(provider, senderAddress, privateKey, CAIRO_VERSION);
+  const account = new Account(provider, senderAddress, privateKey, cairoVersion ?? CAIRO_VERSION);
   return account.execute(txnInvocation, abis, invocationsDetails);
 };
 
@@ -155,7 +157,7 @@ export const deployAccount = async (
   const provider = getProvider(network);
   const account = new Account(provider, contractAddress, privateKey, CAIRO_VERSION);
   const deployAccountPayload = {
-    classHash: ACCOUNT_CLASS_HASH_V1,
+    classHash: ACCOUNT_CLASS_HASH,
     contractAddress: contractAddress,
     constructorCalldata: contractCallData,
     addressSalt,
@@ -173,7 +175,7 @@ export const estimateAccountDeployFee = async (
   const provider = getProvider(network);
   const account = new Account(provider, contractAddress, privateKey, CAIRO_VERSION);
   const deployAccountPayload = {
-    classHash: ACCOUNT_CLASS_HASH_V1,
+    classHash: ACCOUNT_CLASS_HASH,
     contractAddress: contractAddress,
     constructorCalldata: contractCallData,
     addressSalt,
@@ -441,7 +443,7 @@ export const getAccContractAddressAndCallData = (publicKey) => {
     guardian: '0',
   });
 
-  let address = hash.calculateContractAddressFromHash(publicKey, ACCOUNT_CLASS_HASH_V1, callData, 0);
+  let address = hash.calculateContractAddressFromHash(publicKey, ACCOUNT_CLASS_HASH, callData, 0);
 
   if (address.length < 66) {
     address = address.replace('0x', '0x' + '0'.repeat(66 - address.length));
@@ -460,7 +462,7 @@ export const getAccContractAddressAndCallData = (publicKey) => {
  */
 export const getAccContractAddressAndCallDataLegacy = (publicKey) => {
   const callData = CallData.compile({
-    implementation: ACCOUNT_CLASS_HASH_V0,
+    implementation: ACCOUNT_CLASS_HASH_LEGACY,
     selector: hash.getSelectorFromName('initialize'),
     calldata: CallData.compile({ signer: publicKey, guardian: '0' }),
   });
@@ -727,3 +729,10 @@ export const signMessage = async (
   const signatures = await signer.signMessage(typedDataMessage, signerUserAddress);
   return stark.signatureToDecimalArray(signatures);
 };
+
+export const waitForTransaction = async (network: Network, transactionHash: num.BigNumberish) => {
+  const provider = getProvider(network);
+  return provider.waitForTransaction(transactionHash, {
+    successStates: [TransactionStatus.ACCEPTED_ON_L2]
+  });
+}
