@@ -5,6 +5,7 @@ import {
   STARKNET_MAINNET_EXPLORER,
   STARKNET_TESTNET_EXPLORER,
   TIMEOUT_DURATION,
+  MIN_ACC_CONTRACT_VERSION,
 } from './constants';
 import { Erc20Token, Erc20TokenBalance } from 'types';
 import { constants } from 'starknet';
@@ -119,4 +120,52 @@ export const fetchWithTimeout = async (resource: string, options = { timeout: TI
   });
   clearTimeout(id);
   return response;
+};
+
+export const isGTEMinVersion = (version: string) => {
+  const versionArr = version.split('.');
+  return Number(versionArr[1]) >= MIN_ACC_CONTRACT_VERSION[1];
+};
+
+export const hexToString = (hex: string): string => {
+  let str = '';
+  for (let i = 0; i < hex.length; i += 2) {
+    const hexValue = hex.substr(i, 2);
+    const decimalValue = parseInt(hexValue, 16);
+    str += String.fromCharCode(decimalValue);
+  }
+  return str;
+};
+
+export const wait = (delay: number) => {
+  return new Promise((res) => {
+    setTimeout(res, delay);
+  });
+};
+
+export const retry = async (
+  fn: () => Promise<boolean>,
+  options?: { delay?: number; maxAttempts?: number; onFailedAttempt?: CallableFunction },
+): Promise<boolean> => {
+  let retry = options?.maxAttempts ?? 10;
+  while (retry > 0) {
+    try {
+      // read contract to check if upgrade is required
+      const result = await fn();
+      if (result) {
+        return result;
+      }
+    } catch (e) {
+      if (options?.onFailedAttempt && typeof options?.onFailedAttempt === 'function') {
+        options.onFailedAttempt(e);
+      } else {
+        //eslint-disable-next-line no-console
+        console.log(`error while processing retry: ${e}`);
+      }
+    } finally {
+      await wait(options?.delay ?? 1000);
+      retry -= 1;
+    }
+  }
+  return false;
 };
