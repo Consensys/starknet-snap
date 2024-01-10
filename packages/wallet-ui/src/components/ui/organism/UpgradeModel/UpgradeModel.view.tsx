@@ -58,14 +58,16 @@ export const UpgradeModelView = ({ address }: Props) => {
           setStage(Stage.FAIL);
         });
     }
-  }, [txnHash]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [txnHash, address, chainId]);
 
   useEffect(() => {
     if (stage === Stage.SUCCESS) {
       toastr.success(`Account upgraded successfully`);
       dispatch(setUpgradeModalVisible(false));
     }
-  }, [stage]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stage, dispatch]);
 
   const renderComponent = () => {
     switch (stage) {

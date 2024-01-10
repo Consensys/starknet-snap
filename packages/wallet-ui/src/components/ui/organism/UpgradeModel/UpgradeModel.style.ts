@@ -1,6 +1,5 @@
 import styled from 'styled-components';
 import starknetSrc from 'assets/images/starknet-logo.svg';
-import foxIconSrc from 'assets/images/metamask-fox-icon.svg';
 import { Button } from 'components/ui/atom/Button';
 
 export const Wrapper = styled.div`
