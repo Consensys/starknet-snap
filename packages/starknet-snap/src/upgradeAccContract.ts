@@ -1,8 +1,14 @@
 import { toJson } from './utils/serializer';
 import { num, constants, CallData } from 'starknet';
 import { Transaction, TransactionStatus, VoyagerTransactionType } from './types/snapState';
-import { estimateFee } from './estimateFee';
-import { getKeysFromAddress, validateAndParseAddress, isUpgradeRequired, waitForTransaction, executeTxn, isAccountDeployed } from './utils/starknetUtils';
+import {
+  getKeysFromAddress,
+  validateAndParseAddress,
+  isUpgradeRequired,
+  executeTxn,
+  isAccountDeployed,
+  estimateFee,
+} from './utils/starknetUtils';
 import { getNetworkFromChainId, upsertTransaction, getSendTxnText } from './utils/snapUtils';
 import { ApiParams, UpgradeTransactionRequestParams } from './types/snapApi';
 import { ACCOUNT_CLASS_HASH, CAIRO_VERSION_LEGACY } from './utils/constants';
@@ -28,21 +34,15 @@ export async function upgradeAccContract(params: ApiParams) {
 
     const network = getNetworkFromChainId(state, chainId);
 
-    if (!await isAccountDeployed(network, contractAddress)) {
+    if (!(await isAccountDeployed(network, contractAddress))) {
       throw new Error('Contract has not deployed');
     }
 
-    if (!await isUpgradeRequired(network, contractAddress)) {
+    if (!(await isUpgradeRequired(network, contractAddress))) {
       throw new Error('Upgrade is not required');
     }
 
     const { privateKey } = await getKeysFromAddress(keyDeriver, network, state, contractAddress);
-
-    let maxFee = requestParamsObj.maxFee ? num.toBigInt(requestParamsObj.maxFee) : constants.ZERO;
-    if (maxFee === constants.ZERO) {
-      const { suggestedMaxFee } = await estimateFee(params);
-      maxFee = num.toBigInt(suggestedMaxFee);
-    }
 
     const method = 'upgrade';
 
@@ -57,16 +57,14 @@ export async function upgradeAccContract(params: ApiParams) {
       calldata,
     };
 
-    const dialogComponents = getSendTxnText(
-      state,
-      contractAddress,
-      method,
-      calldata,
-      contractAddress,
-      maxFee,
-      network,
-    );
-  
+    let maxFee = requestParamsObj.maxFee ? num.toBigInt(requestParamsObj.maxFee) : constants.ZERO;
+    if (maxFee === constants.ZERO) {
+      const estFeeResp = await estimateFee(network, contractAddress, privateKey, txnInvocation, CAIRO_VERSION_LEGACY);
+      maxFee = num.toBigInt(estFeeResp.suggestedMaxFee.toString(10) ?? '0');
+    }
+
+    const dialogComponents = getSendTxnText(state, contractAddress, method, calldata, contractAddress, maxFee, network);
+
     const response = await wallet.request({
       method: 'snap_dialog',
       params: {
@@ -79,12 +77,20 @@ export async function upgradeAccContract(params: ApiParams) {
 
     logger.log(`sendTransaction:\ntxnInvocation: ${toJson(txnInvocation)}\nmaxFee: ${maxFee.toString()}}`);
 
-    const txnResp =  await executeTxn(network, contractAddress, privateKey, txnInvocation, undefined, {
-      maxFee,
-    }, CAIRO_VERSION_LEGACY);
+    const txnResp = await executeTxn(
+      network,
+      contractAddress,
+      privateKey,
+      txnInvocation,
+      undefined,
+      {
+        maxFee,
+      },
+      CAIRO_VERSION_LEGACY,
+    );
 
     logger.log(`sendTransaction:\ntxnResp: ${toJson(txnResp)}`);
-    
+
     if (!txnResp?.transaction_hash) {
       throw new Error(`Transaction hash is not found`);
     }
@@ -106,9 +112,7 @@ export async function upgradeAccContract(params: ApiParams) {
     };
 
     await upsertTransaction(txn, wallet, saveMutex);
-    
-    await waitForTransaction(network, txnResp.transaction_hash)
-   
+
     return txnResp;
   } catch (err) {
     logger.error(`Problem found: ${err}`);
