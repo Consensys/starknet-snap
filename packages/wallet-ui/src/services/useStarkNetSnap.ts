@@ -622,7 +622,7 @@ export const useStarkNetSnap = () => {
     const executeFn = async () => {
       txStatus = await getTransactionStatus(transactionHash, chainId);
       console.log({ txStatus });
-      if (!('executionStatus' in txStatus) || !('finalityStatus' in txStatus)) {
+      if (!txStatus || !('executionStatus' in txStatus) || !('finalityStatus' in txStatus)) {
         return false;
       }
 
@@ -659,7 +659,7 @@ export const useStarkNetSnap = () => {
         // read contract to check if upgrade is required
         const resp = await readContract(accountAddress, 'getVersion');
         if (!resp || !resp[0]) {
-          throw new Error('invalid response');
+          return false;
         }
 
         if (!isGTEMinVersion(hexToString(resp[0]))) {
@@ -672,9 +672,7 @@ export const useStarkNetSnap = () => {
       };
 
       result = await retry(executeFn, {
-        onFailedAttempt: (e: any) => {
-          throw e;
-        },
+        maxAttempts: 20,
       });
     } catch (e: any) {
       //eslint-disable-next-line no-console

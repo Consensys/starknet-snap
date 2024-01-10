@@ -21,6 +21,8 @@ export const getTxnName = (transaction: Transaction): string => {
   if (transaction.txnType.toLowerCase() === VoyagerTransactionType.INVOKE) {
     if (transaction.contractFuncName.toLowerCase() === 'transfer') {
       return 'Send';
+    } else if (transaction.contractFuncName.toLowerCase() === 'upgrade') {
+      return 'Upgrade';
     }
   } else if (transaction.txnType.toLowerCase() === VoyagerTransactionType.DEPLOY) {
     return 'Deploy';
@@ -92,7 +94,10 @@ export const getTxnValues = (transaction: Transaction, decimals: number = 18, to
   switch (txnName) {
     case 'Send':
     case 'Receive':
-      txnValue = ethers.utils.formatUnits(transaction.contractCallData[1].toString(), decimals);
+      txnValue = ethers.utils.formatUnits(
+        transaction.contractCallData[transaction.contractCallData.length - 2].toString(),
+        decimals,
+      );
       txnUsdValue = (parseFloat(txnValue) * toUsdRate).toFixed(2);
       break;
     default:

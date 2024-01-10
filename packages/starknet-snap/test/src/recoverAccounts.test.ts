@@ -70,13 +70,11 @@ describe('Test function: recoverAccounts', function () {
           .onCall(i)
           .resolves({ address: mainnetAccAddresses[i], signerPubKey: mainnetPublicKeys[i], upgradeRequired: false });
       } else {
-        getCorrectContractAddressStub
-          .onCall(i)
-          .resolves({
-            address: mainnetAccAddresses[i],
-            signerPubKey: num.toHex(constants.ZERO),
-            upgradeRequired: false,
-          });
+        getCorrectContractAddressStub.onCall(i).resolves({
+          address: mainnetAccAddresses[i],
+          signerPubKey: num.toHex(constants.ZERO),
+          upgradeRequired: false,
+        });
       }
     }
 
@@ -115,13 +113,11 @@ describe('Test function: recoverAccounts', function () {
           .onCall(i)
           .resolves({ address: testnetAccAddresses[i], signerPubKey: testnetPublicKeys[i], upgradeRequired: false });
       } else {
-        getCorrectContractAddressStub
-          .onCall(i)
-          .resolves({
-            address: testnetAccAddresses[i],
-            signerPubKey: num.toHex(constants.ZERO),
-            upgradeRequired: false,
-          });
+        getCorrectContractAddressStub.onCall(i).resolves({
+          address: testnetAccAddresses[i],
+          signerPubKey: num.toHex(constants.ZERO),
+          upgradeRequired: false,
+        });
       }
     }
 
@@ -191,13 +187,11 @@ describe('Test function: recoverAccounts', function () {
           .onCall(i)
           .resolves({ address: mainnetAccAddresses[i], signerPubKey: mainnetPublicKeys[i], upgradeRequired: false });
       } else {
-        getCorrectContractAddressStub
-          .onCall(i)
-          .resolves({
-            address: mainnetAccAddresses[i],
-            signerPubKey: num.toHex(constants.ZERO),
-            upgradeRequired: false,
-          });
+        getCorrectContractAddressStub.onCall(i).resolves({
+          address: mainnetAccAddresses[i],
+          signerPubKey: num.toHex(constants.ZERO),
+          upgradeRequired: false,
+        });
       }
     }
 

@@ -72,7 +72,7 @@ function App() {
         <PopIn isOpen={infoModalVisible} showClose={false}>
           <ConnectInfoModal address={address} />
         </PopIn>
-        <PopIn isOpen={upgradeModalVisible} showClose={false}>
+        <PopIn isOpen={!minVersionModalVisible && upgradeModalVisible} showClose={false}>
           <UpgradeModel address={address} />
         </PopIn>
         <Home address={address} />

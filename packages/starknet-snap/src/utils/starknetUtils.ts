@@ -340,6 +340,8 @@ export const getMassagedTransactions = async (
   const bigIntTransferSelectorHex = num.toBigInt(TRANSFER_SELECTOR_HEX);
   let massagedTxns = await Promise.all(
     txns.map(async (txn) => {
+      logger.log(`getMassagedTransactions: txn:\n${toJson(txn)}`);
+
       let txnResp: GetTransactionResponse;
       let statusResp;
       try {
@@ -357,7 +359,8 @@ export const getMassagedTransactions = async (
         chainId: network.chainId,
         senderAddress: txnResp.sender_address || txnResp.contract_address || txn.contract_address || '',
         contractAddress: txnResp.calldata?.[1] || txnResp.contract_address || txn.contract_address || '',
-        contractFuncName: num.toBigInt(txnResp.calldata?.[2] || '') === bigIntTransferSelectorHex ? 'transfer' : '',
+        contractFuncName:
+          num.toBigInt(txnResp.calldata?.[2] || '') === bigIntTransferSelectorHex ? 'transfer' : txn.operations ?? '',
         contractCallData: txnResp.calldata || [],
         timestamp: txn.timestamp,
         status: '', //DEPRECATION
@@ -379,6 +382,7 @@ export const getMassagedTransactions = async (
     massagedTxns = massagedTxns.filter(
       (massagedTxn) =>
         num.toBigInt(massagedTxn.contractAddress) === bigIntContractAddress ||
+        massagedTxn.contractFuncName === 'upgrade' ||
         deployTxns.find((deployTxn) => deployTxn.hash === massagedTxn.txnHash),
     );
   }

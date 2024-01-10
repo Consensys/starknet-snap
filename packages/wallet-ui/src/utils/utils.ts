@@ -148,6 +148,8 @@ export const retry = async (
   options?: { delay?: number; maxAttempts?: number; onFailedAttempt?: CallableFunction },
 ): Promise<boolean> => {
   let retry = options?.maxAttempts ?? 10;
+  const delay = options?.delay ?? 1000;
+
   while (retry > 0) {
     try {
       // read contract to check if upgrade is required
@@ -163,7 +165,7 @@ export const retry = async (
         console.log(`error while processing retry: ${e}`);
       }
     } finally {
-      await wait(options?.delay ?? 1000);
+      await wait(delay);
       retry -= 1;
     }
   }
