@@ -12,14 +12,42 @@ import {
   account1,
   account2,
   account3,
-  sendTransactionResp
 } from '../constants.test';
 import { SnapState } from '../../src/types/snapState';
-import { Calldata, Provider, num, TransactionStatus } from 'starknet';
+import { Calldata, num, Account, Provider } from 'starknet';
 import { hexToString } from '../../src/utils/formatterUtils';
 
 chai.use(sinonChai);
 const sandbox = sinon.createSandbox();
+
+describe('Test function: getAccountInstance', function () {
+  const provider = {} as Provider;
+
+  beforeEach(function () {
+    sandbox.stub(utils, 'getProvider').returns(provider);
+  });
+
+  afterEach(function () {
+    sandbox.restore();
+  });
+
+  it('should return account instance with default cairo version', async function () {
+    const result = await utils.getAccountInstance(STARKNET_TESTNET_NETWORK, account1.address, account1.publicKey);
+    expect(result).to.be.instanceOf(Account);
+    expect(result.cairoVersion).to.equal(CAIRO_VERSION);
+  });
+
+  it('should return account instance with provided cairo version', async function () {
+    const result = await utils.getAccountInstance(
+      STARKNET_TESTNET_NETWORK,
+      account1.address,
+      account1.publicKey,
+      CAIRO_VERSION_LEGACY,
+    );
+    expect(result).to.be.instanceOf(Account);
+    expect(result.cairoVersion).to.equal(CAIRO_VERSION_LEGACY);
+  });
+});
 
 describe('Test function: findAddressIndex', function () {
   const state: SnapState = {
@@ -34,36 +62,38 @@ describe('Test function: findAddressIndex', function () {
       privateKey: 'pk',
       publicKey: 'pubkey',
       addressIndex: 1,
-      derivationPath: `m / bip32:1' / bip32:1' / bip32:1' / bip32:1'`
-    })
+      derivationPath: `m / bip32:1' / bip32:1' / bip32:1' / bip32:1'`,
+    });
     sandbox.stub(utils, 'getPermutationAddresses').returns({
-      address: account1.address, addressLegacy: account2.address})
-  })
+      address: account1.address,
+      addressLegacy: account2.address,
+    });
+  });
 
   afterEach(function () {
     sandbox.restore();
   });
 
   it('should find address index', async function () {
-    const result = await utils.findAddressIndex(STARKNET_TESTNET_NETWORK.chainId, account1.address, 'div', state, 1)
+    const result = await utils.findAddressIndex(STARKNET_TESTNET_NETWORK.chainId, account1.address, 'div', state, 1);
     expect(result).to.be.contains({
       index: 0,
       cairoVersion: 1,
-    })
+    });
   });
 
   it('should find address index address match account legacy', async function () {
-    const result = await utils.findAddressIndex(STARKNET_TESTNET_NETWORK.chainId, account2.address, 'div', state, 1)
+    const result = await utils.findAddressIndex(STARKNET_TESTNET_NETWORK.chainId, account2.address, 'div', state, 1);
     expect(result).to.be.contains({
       index: 0,
       cairoVersion: 0,
-    })
+    });
   });
 
   it('should throw error if address not found', async function () {
     let result = null;
     try {
-      result = await utils.findAddressIndex(STARKNET_TESTNET_NETWORK.chainId, account3.address, 'div', state, 1)
+      result = await utils.findAddressIndex(STARKNET_TESTNET_NETWORK.chainId, account3.address, 'div', state, 1);
     } catch (err) {
       result = err;
     } finally {
@@ -185,8 +215,12 @@ describe('Test function: getPermutationAddresses', function () {
   const PK = 'PK';
 
   beforeEach(function () {
-    getAccContractAddressAndCallDataStub = sandbox.stub(utils, 'getAccContractAddressAndCallData').returns({address: account1.address, callData: [] as Calldata});
-    getAccContractAddressAndCallDataLegacy = sandbox.stub(utils, 'getAccContractAddressAndCallDataLegacy').returns({address: account2.address, callData: [] as Calldata});
+    getAccContractAddressAndCallDataStub = sandbox
+      .stub(utils, 'getAccContractAddressAndCallData')
+      .returns({ address: account1.address, callData: [] as Calldata });
+    getAccContractAddressAndCallDataLegacy = sandbox
+      .stub(utils, 'getAccContractAddressAndCallDataLegacy')
+      .returns({ address: account2.address, callData: [] as Calldata });
   });
 
   afterEach(function () {
@@ -313,21 +347,21 @@ describe('Test function: isGTEMinVersion', function () {
   const cairoVersionLegacyHex = '302e322e30a';
 
   it(`should return true when version greater than or equal to min version`, function () {
-    expect(utils.isGTEMinVersion(hexToString(cairoVersionHex))).to.be.eq(true)
-  })
+    expect(utils.isGTEMinVersion(hexToString(cairoVersionHex))).to.be.eq(true);
+  });
 
   it(`should return false when version smaller than min version`, function () {
-    expect(utils.isGTEMinVersion(hexToString(cairoVersionLegacyHex))).to.be.eq(false)
-  })
-})
+    expect(utils.isGTEMinVersion(hexToString(cairoVersionLegacyHex))).to.be.eq(false);
+  });
+});
 
 describe('Test function: getContractOwner', function () {
   let getOwnerStub: sinon.SinonStub;
   let getSignerStub: sinon.SinonStub;
 
   beforeEach(function () {
-    getOwnerStub = sandbox.stub(utils, 'getOwner')
-    getSignerStub = sandbox.stub(utils, 'getSigner')
+    getOwnerStub = sandbox.stub(utils, 'getOwner');
+    getSignerStub = sandbox.stub(utils, 'getSigner');
   });
 
   afterEach(function () {
@@ -335,19 +369,19 @@ describe('Test function: getContractOwner', function () {
   });
 
   it(`should call getOwner when cairo version is ${CAIRO_VERSION}`, async function () {
-    await utils.getContractOwner(account1.address, STARKNET_TESTNET_NETWORK, CAIRO_VERSION)
+    await utils.getContractOwner(account1.address, STARKNET_TESTNET_NETWORK, CAIRO_VERSION);
 
-    expect(getOwnerStub).to.have.been.callCount(1)
-    expect(getSignerStub).to.have.been.callCount(0)
-  })
+    expect(getOwnerStub).to.have.been.callCount(1);
+    expect(getSignerStub).to.have.been.callCount(0);
+  });
 
   it(`should call getSigner when cairo version is ${CAIRO_VERSION_LEGACY}`, async function () {
-    await utils.getContractOwner(account1.address, STARKNET_TESTNET_NETWORK, CAIRO_VERSION_LEGACY)
+    await utils.getContractOwner(account1.address, STARKNET_TESTNET_NETWORK, CAIRO_VERSION_LEGACY);
 
-    expect(getOwnerStub).to.have.been.callCount(0)
-    expect(getSignerStub).to.have.been.callCount(1)
-  })
-})
+    expect(getOwnerStub).to.have.been.callCount(0);
+    expect(getSignerStub).to.have.been.callCount(1);
+  });
+});
 
 describe('Test function: getCorrectContractAddress', function () {
   const walletStub = new WalletMock();
@@ -364,10 +398,10 @@ describe('Test function: getCorrectContractAddress', function () {
   beforeEach(function () {
     getAccContractAddressAndCallDataStub = sandbox
       .stub(utils, 'getAccContractAddressAndCallData')
-      .returns(({ address: account1.address, callData: [] as Calldata }));
+      .returns({ address: account1.address, callData: [] as Calldata });
     getAccContractAddressAndCallDataLegacyStub = sandbox
       .stub(utils, 'getAccContractAddressAndCallDataLegacy')
-      .returns(({ address: account2.address, callData: [] as Calldata }));
+      .returns({ address: account2.address, callData: [] as Calldata });
   });
 
   afterEach(function () {
@@ -404,9 +438,12 @@ describe('Test function: getCorrectContractAddress', function () {
   });
 
   it('should throw error when getSigner is throwing unknown error', async function () {
-    sandbox.stub(utils, 'getVersion')
-      .withArgs(account1.address, STARKNET_TESTNET_NETWORK).rejects(new Error('Contract not found'))
-      .withArgs(account2.address, STARKNET_TESTNET_NETWORK).resolves(cairoVersionLegacyHex);
+    sandbox
+      .stub(utils, 'getVersion')
+      .withArgs(account1.address, STARKNET_TESTNET_NETWORK)
+      .rejects(new Error('Contract not found'))
+      .withArgs(account2.address, STARKNET_TESTNET_NETWORK)
+      .resolves(cairoVersionLegacyHex);
 
     getSignerStub = sandbox.stub(utils, 'getSigner').rejects(new Error('network error for getSigner'));
 
@@ -442,9 +479,12 @@ describe('Test function: getCorrectContractAddress', function () {
     describe(`when when is Cairo${CAIRO_VERSION_LEGACY} has deployed`, function () {
       describe(`when when is Cairo${CAIRO_VERSION_LEGACY} has upgraded`, function () {
         it(`should return Cairo${CAIRO_VERSION_LEGACY} address with upgrade = false`, async function () {
-          sandbox.stub(utils, 'getVersion')
-            .withArgs(account1.address, STARKNET_TESTNET_NETWORK).rejects(new Error('Contract not found'))
-            .withArgs(account2.address, STARKNET_TESTNET_NETWORK).resolves(cairoVersionHex);
+          sandbox
+            .stub(utils, 'getVersion')
+            .withArgs(account1.address, STARKNET_TESTNET_NETWORK)
+            .rejects(new Error('Contract not found'))
+            .withArgs(account2.address, STARKNET_TESTNET_NETWORK)
+            .resolves(cairoVersionHex);
 
           getSignerStub = sandbox.stub(utils, 'getSigner').resolves(PK);
           getOwnerStub = sandbox.stub(utils, 'getOwner').resolves(PK);
@@ -461,9 +501,12 @@ describe('Test function: getCorrectContractAddress', function () {
 
       describe(`when when is Cairo${CAIRO_VERSION_LEGACY} has not upgraded`, function () {
         it(`should return Cairo${CAIRO_VERSION_LEGACY} address with upgrade = true`, async function () {
-          sandbox.stub(utils, 'getVersion')
-            .withArgs(account1.address, STARKNET_TESTNET_NETWORK).rejects(new Error('Contract not found'))
-            .withArgs(account2.address, STARKNET_TESTNET_NETWORK).resolves(cairoVersionLegacyHex);
+          sandbox
+            .stub(utils, 'getVersion')
+            .withArgs(account1.address, STARKNET_TESTNET_NETWORK)
+            .rejects(new Error('Contract not found'))
+            .withArgs(account2.address, STARKNET_TESTNET_NETWORK)
+            .resolves(cairoVersionLegacyHex);
 
           getSignerStub = sandbox.stub(utils, 'getSigner').resolves(PK);
           getOwnerStub = sandbox.stub(utils, 'getOwner').resolves(PK);
@@ -496,28 +539,4 @@ describe('Test function: getCorrectContractAddress', function () {
       });
     });
   });
-});
-
-describe('Test function: waitForTransaction', function () {
-  let waitForTransactionStub: sinon.SinonStub;
-
-  beforeEach(function () {
-    waitForTransactionStub = sandbox.stub().resolves(sendTransactionResp)
-    const provider = {
-      waitForTransaction: waitForTransactionStub
-    } as unknown as Provider
-    sandbox.stub(utils, 'getProvider').returns(provider)
-  })
-
-  afterEach(function () {
-    sandbox.restore();
-  });
-
-  it(`should execute waitForTransaction correctly`, async function () {
-    utils.waitForTransaction(STARKNET_TESTNET_NETWORK, sendTransactionResp.transaction_hash);
-
-    expect(waitForTransactionStub).to.be.calledOnceWith(sendTransactionResp.transaction_hash, {
-      successStates: [TransactionStatus.ACCEPTED_ON_L2]
-    })
-  })
 });

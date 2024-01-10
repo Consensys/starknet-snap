@@ -57,8 +57,8 @@ describe('Test function: estimateFees', function () {
         },
       ],
       invocationsDetails: {
-        nonce: '1'
-      }
+        nonce: '1',
+      },
     };
     const expectedResult = feeResult.map((fee) => ({
       overall_fee: fee.overall_fee.toString(10) || '0',

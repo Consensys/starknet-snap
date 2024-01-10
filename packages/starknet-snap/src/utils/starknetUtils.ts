@@ -33,7 +33,6 @@ import {
   DeclareSignerDetails,
   DeployAccountSignerDetails,
   CairoVersion,
-  TransactionStatus
 } from 'starknet';
 import type { Hex } from '@noble/curves/abstract/utils';
 import { Network, SnapState, Transaction, TransactionType } from '../types/snapState';
@@ -78,6 +77,16 @@ export const getProvider = (network: Network, forceSequencer = false): Provider 
   return new Provider(providerParam);
 };
 
+export const getAccountInstance = (
+  network: Network,
+  userAddress: string,
+  privateKey: string | Uint8Array,
+  cairoVersion?: CairoVersion,
+): Account => {
+  const provider = getProvider(network);
+  return new Account(provider, userAddress, privateKey, cairoVersion ?? CAIRO_VERSION);
+};
+
 export const callContract = async (
   network: Network,
   contractAddress: string,
@@ -101,10 +110,12 @@ export const declareContract = async (
   privateKey: string | Uint8Array,
   contractPayload: DeclareContractPayload,
   transactionsDetail?: InvocationsDetails,
+  cairoVersion?: CairoVersion,
 ): Promise<DeclareContractResponse> => {
-  const provider = getProvider(network);
-  const account = new Account(provider, senderAddress, privateKey);
-  return account.declare(contractPayload, transactionsDetail);
+  return getAccountInstance(network, senderAddress, privateKey, cairoVersion).declare(
+    contractPayload,
+    transactionsDetail,
+  );
 };
 
 export const estimateFee = async (
@@ -112,10 +123,11 @@ export const estimateFee = async (
   senderAddress: string,
   privateKey: string | Uint8Array,
   txnInvocation: Call | Call[],
+  cairoVersion?: CairoVersion,
 ): Promise<EstimateFee> => {
-  const provider = getProvider(network);
-  const account = new Account(provider, senderAddress, privateKey, CAIRO_VERSION);
-  return account.estimateInvokeFee(txnInvocation, { blockIdentifier: 'latest' });
+  return getAccountInstance(network, senderAddress, privateKey, cairoVersion).estimateInvokeFee(txnInvocation, {
+    blockIdentifier: 'latest',
+  });
 };
 
 export const estimateFeeBulk = async (
@@ -124,12 +136,12 @@ export const estimateFeeBulk = async (
   privateKey: string | Uint8Array,
   txnInvocation: Invocations,
   invocationsDetails: EstimateFeeDetails = { blockIdentifier: 'latest' },
+  cairoVersion?: CairoVersion,
 ): Promise<EstimateFee[]> => {
-  // ensure always calling the sequencer endpoint since the rpc endpoint and
-  // starknet.js are not supported yet.
-  const provider = getProvider(network);
-  const account = new Account(provider, senderAddress, privateKey, CAIRO_VERSION);
-  return account.estimateFeeBulk(txnInvocation, invocationsDetails);
+  return getAccountInstance(network, senderAddress, privateKey, cairoVersion).estimateFeeBulk(
+    txnInvocation,
+    invocationsDetails,
+  );
 };
 
 export const executeTxn = async (
@@ -141,9 +153,11 @@ export const executeTxn = async (
   invocationsDetails?: InvocationsDetails,
   cairoVersion?: CairoVersion,
 ): Promise<InvokeFunctionResponse> => {
-  const provider = getProvider(network);
-  const account = new Account(provider, senderAddress, privateKey, cairoVersion ?? CAIRO_VERSION);
-  return account.execute(txnInvocation, abis, invocationsDetails);
+  return getAccountInstance(network, senderAddress, privateKey, cairoVersion).execute(
+    txnInvocation,
+    abis,
+    invocationsDetails,
+  );
 };
 
 export const deployAccount = async (
@@ -153,16 +167,17 @@ export const deployAccount = async (
   addressSalt: num.BigNumberish,
   privateKey: string | Uint8Array,
   maxFee: num.BigNumberish,
+  cairoVersion?: CairoVersion,
 ): Promise<DeployContractResponse> => {
-  const provider = getProvider(network);
-  const account = new Account(provider, contractAddress, privateKey, CAIRO_VERSION);
   const deployAccountPayload = {
     classHash: ACCOUNT_CLASS_HASH,
     contractAddress: contractAddress,
     constructorCalldata: contractCallData,
     addressSalt,
   };
-  return account.deployAccount(deployAccountPayload, { maxFee });
+  return getAccountInstance(network, contractAddress, privateKey, cairoVersion).deployAccount(deployAccountPayload, {
+    maxFee,
+  });
 };
 
 export const estimateAccountDeployFee = async (
@@ -171,16 +186,17 @@ export const estimateAccountDeployFee = async (
   contractCallData: RawCalldata,
   addressSalt: num.BigNumberish,
   privateKey: string | Uint8Array,
+  cairoVersion?: CairoVersion,
 ): Promise<EstimateFee> => {
-  const provider = getProvider(network);
-  const account = new Account(provider, contractAddress, privateKey, CAIRO_VERSION);
   const deployAccountPayload = {
     classHash: ACCOUNT_CLASS_HASH,
     contractAddress: contractAddress,
     constructorCalldata: contractCallData,
     addressSalt,
   };
-  return account.estimateAccountDeployFee(deployAccountPayload);
+  return getAccountInstance(network, contractAddress, privateKey, cairoVersion).estimateAccountDeployFee(
+    deployAccountPayload,
+  );
 };
 
 export const getSigner = async (userAccAddress: string, network: Network): Promise<string> => {
@@ -198,7 +214,11 @@ export const getOwner = async (userAccAddress: string, network: Network): Promis
   return resp.result[0];
 };
 
-export const getContractOwner = async (userAccAddress: string, network: Network, version: CairoVersion): Promise<string> => {
+export const getContractOwner = async (
+  userAccAddress: string,
+  network: Network,
+  version: CairoVersion,
+): Promise<string> => {
   return version === '0' ? getSigner(userAccAddress, network) : getOwner(userAccAddress, network);
 };
 
@@ -599,15 +619,15 @@ export const findAddressIndex = async (
  * @param  pk - Public key.
  * @returns - address and addressLegacy.
  */
-export const getPermutationAddresses = (pk:string) => {
+export const getPermutationAddresses = (pk: string) => {
   const { address } = getAccContractAddressAndCallData(pk);
   const { address: addressLegacy } = getAccContractAddressAndCallDataLegacy(pk);
 
   return {
     address,
-    addressLegacy
-  }
-}
+    addressLegacy,
+  };
+};
 
 /**
  * Check address needed upgrade by using getVersion and compare with MIN_ACC_CONTRACT_VERSION
@@ -650,8 +670,8 @@ export const isGTEMinVersion = (version: string) => {
  * @returns - address and address's public key.
  */
 export const getCorrectContractAddress = async (network: Network, publicKey: string) => {
-  const {address: contractAddress, addressLegacy: contractAddressLegacy} = getPermutationAddresses(publicKey)
-  
+  const { address: contractAddress, addressLegacy: contractAddressLegacy } = getPermutationAddresses(publicKey);
+
   logger.log(
     `getContractAddressByKey: contractAddress = ${contractAddress}\ncontractAddressLegacy = ${contractAddressLegacy}\npublicKey = ${publicKey}`,
   );
@@ -667,14 +687,20 @@ export const getCorrectContractAddress = async (network: Network, publicKey: str
     if (!e.message.includes('Contract not found')) {
       throw e;
     }
-  
-    logger.log(`getContractAddressByKey: cairo ${CAIRO_VERSION} contract cant found, try cairo ${CAIRO_VERSION_LEGACY}`);
+
+    logger.log(
+      `getContractAddressByKey: cairo ${CAIRO_VERSION} contract cant found, try cairo ${CAIRO_VERSION_LEGACY}`,
+    );
 
     try {
       const version = await getVersion(contractAddressLegacy, network);
       upgradeRequired = isGTEMinVersion(hexToString(version)) ? false : true;
-      pk = await getContractOwner(contractAddressLegacy, network, upgradeRequired ? CAIRO_VERSION_LEGACY : CAIRO_VERSION);
-      address = contractAddressLegacy
+      pk = await getContractOwner(
+        contractAddressLegacy,
+        network,
+        upgradeRequired ? CAIRO_VERSION_LEGACY : CAIRO_VERSION,
+      );
+      address = contractAddressLegacy;
     } catch (e) {
       if (!e.message.includes('Contract not found')) {
         throw e;
@@ -729,10 +755,3 @@ export const signMessage = async (
   const signatures = await signer.signMessage(typedDataMessage, signerUserAddress);
   return stark.signatureToDecimalArray(signatures);
 };
-
-export const waitForTransaction = async (network: Network, transactionHash: num.BigNumberish) => {
-  const provider = getProvider(network);
-  return provider.waitForTransaction(transactionHash, {
-    successStates: [TransactionStatus.ACCEPTED_ON_L2]
-  });
-}

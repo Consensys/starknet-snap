@@ -158,7 +158,7 @@ describe('Test function: signMessage', function () {
         };
         sandbox.stub(utils, 'isUpgradeRequired').resolves(false);
       });
-  
+
       it('should sign a message from an user account correctly', async function () {
         const result = await signMessage(apiParams);
         expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledOnce;

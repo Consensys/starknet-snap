@@ -63,7 +63,7 @@ describe('Test function: recoverAccounts', function () {
     const maxMissed = 3;
     const validPublicKeys = 2;
     const getCorrectContractAddressStub = sandbox.stub(utils, 'getCorrectContractAddress');
-  
+
     for (let i = 0; i < maxScanned; i++) {
       if (i < validPublicKeys) {
         getCorrectContractAddressStub
@@ -72,7 +72,11 @@ describe('Test function: recoverAccounts', function () {
       } else {
         getCorrectContractAddressStub
           .onCall(i)
-          .resolves({ address: mainnetAccAddresses[i], signerPubKey: num.toHex(constants.ZERO), upgradeRequired: false });
+          .resolves({
+            address: mainnetAccAddresses[i],
+            signerPubKey: num.toHex(constants.ZERO),
+            upgradeRequired: false,
+          });
       }
     }
 
@@ -104,7 +108,7 @@ describe('Test function: recoverAccounts', function () {
     const maxMissed = 3;
     const validPublicKeys = 2;
     const getCorrectContractAddressStub = sandbox.stub(utils, 'getCorrectContractAddress');
-  
+
     for (let i = 0; i < maxScanned; i++) {
       if (i < validPublicKeys) {
         getCorrectContractAddressStub
@@ -113,7 +117,11 @@ describe('Test function: recoverAccounts', function () {
       } else {
         getCorrectContractAddressStub
           .onCall(i)
-          .resolves({ address: testnetAccAddresses[i], signerPubKey: num.toHex(constants.ZERO), upgradeRequired: false });
+          .resolves({
+            address: testnetAccAddresses[i],
+            signerPubKey: num.toHex(constants.ZERO),
+            upgradeRequired: false,
+          });
       }
     }
 
@@ -185,7 +193,11 @@ describe('Test function: recoverAccounts', function () {
       } else {
         getCorrectContractAddressStub
           .onCall(i)
-          .resolves({ address: mainnetAccAddresses[i], signerPubKey: num.toHex(constants.ZERO), upgradeRequired: false });
+          .resolves({
+            address: mainnetAccAddresses[i],
+            signerPubKey: num.toHex(constants.ZERO),
+            upgradeRequired: false,
+          });
       }
     }
 
