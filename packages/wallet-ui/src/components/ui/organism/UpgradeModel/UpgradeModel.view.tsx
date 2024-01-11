@@ -74,20 +74,26 @@ export const UpgradeModelView = ({ address }: Props) => {
       case Stage.INIT:
         return (
           <>
-            <DescriptionCentered>some text to explain what is happening</DescriptionCentered>
+            <DescriptionCentered>A new version of the smart contract <br />is necessary to proceed with the Snap.<br/><br/>
+New enhancements will come with <br/>this version.<br/><br/>
+Click on the "Upgrade" button to install it.<br/>
+Thank you!
+          </DescriptionCentered>
             <UpgradeButton onClick={onUpgrade}>Upgrade</UpgradeButton>
           </>
         );
       case Stage.WAITING_FOR_TXN:
-        return <DescriptionCentered>Waiting for transaction to be complete</DescriptionCentered>;
+        return <DescriptionCentered>Waiting for transaction to be complete.</DescriptionCentered>;
       case Stage.SUCCESS:
-        return <DescriptionCentered>Account upgraded successfully</DescriptionCentered>;
+        return <DescriptionCentered>Account upgraded successfully.</DescriptionCentered>;
       default:
         return (
           <DescriptionCentered>
             Transaction Hash: <br />{' '}
-            <Txnlink onClick={() => openExplorerTab(txnHash, 'tx', chainId)}>{shortenAddress(txnHash)} </Txnlink> <br />
-            some text to explain the look up for account upgrade has attempted too many times, please come back later
+            <Txnlink onClick={() => openExplorerTab(txnHash, 'tx', chainId)}>{shortenAddress(txnHash)} </Txnlink><br />
+            Unfortunately, you reached the maximum number of upgrade tentatives allowed.<br /><br />
+Please try again in a couple of hours.<br /><br />
+Thank you for your comprehension.
           </DescriptionCentered>
         );
     }

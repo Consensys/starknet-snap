@@ -22,7 +22,7 @@ export const getTxnName = (transaction: Transaction): string => {
     if (transaction.contractFuncName.toLowerCase() === 'transfer') {
       return 'Send';
     } else if (transaction.contractFuncName.toLowerCase() === 'upgrade') {
-      return 'Upgrade';
+      return 'Upgrade Account';
     }
   } else if (transaction.txnType.toLowerCase() === VoyagerTransactionType.DEPLOY) {
     return 'Deploy';

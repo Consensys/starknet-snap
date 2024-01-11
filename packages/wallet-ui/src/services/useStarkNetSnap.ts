@@ -621,7 +621,7 @@ export const useStarkNetSnap = () => {
 
     const executeFn = async () => {
       txStatus = await getTransactionStatus(transactionHash, chainId);
-      console.log({ txStatus });
+
       if (!txStatus || !('executionStatus' in txStatus) || !('finalityStatus' in txStatus)) {
         return false;
       }
