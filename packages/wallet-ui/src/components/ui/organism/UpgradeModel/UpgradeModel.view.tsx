@@ -74,11 +74,19 @@ export const UpgradeModelView = ({ address }: Props) => {
       case Stage.INIT:
         return (
           <>
-            <DescriptionCentered>A new version of the smart contract <br />is necessary to proceed with the Snap.<br/><br/>
-New enhancements will come with <br/>this version.<br/><br/>
-Click on the "Upgrade" button to install it.<br/>
-Thank you!
-          </DescriptionCentered>
+            <DescriptionCentered>
+              A new version of the smart contract <br />
+              is necessary to proceed with the Snap.
+              <br />
+              <br />
+              New enhancements will come with <br />
+              this version.
+              <br />
+              <br />
+              Click on the "Upgrade" button to install it.
+              <br />
+              Thank you!
+            </DescriptionCentered>
             <UpgradeButton onClick={onUpgrade}>Upgrade</UpgradeButton>
           </>
         );
@@ -90,10 +98,15 @@ Thank you!
         return (
           <DescriptionCentered>
             Transaction Hash: <br />{' '}
-            <Txnlink onClick={() => openExplorerTab(txnHash, 'tx', chainId)}>{shortenAddress(txnHash)} </Txnlink><br />
-            Unfortunately, you reached the maximum number of upgrade tentatives allowed.<br /><br />
-Please try again in a couple of hours.<br /><br />
-Thank you for your comprehension.
+            <Txnlink onClick={() => openExplorerTab(txnHash, 'tx', chainId)}>{shortenAddress(txnHash)} </Txnlink>
+            <br />
+            Unfortunately, you reached the maximum number of upgrade tentatives allowed.
+            <br />
+            <br />
+            Please try again in a couple of hours.
+            <br />
+            <br />
+            Thank you for your comprehension.
           </DescriptionCentered>
         );
     }
