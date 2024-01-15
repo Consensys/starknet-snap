@@ -20,6 +20,7 @@ import { recoverAccounts } from '../../src/recoverAccounts';
 import { constants, num } from 'starknet';
 import { Mutex } from 'async-mutex';
 import { ApiParams, RecoverAccountsRequestParams } from '../../src/types/snapApi';
+import { AccountKeyring } from '../../src/services/account';
 
 chai.use(sinonChai);
 const sandbox = sinon.createSandbox();
@@ -58,25 +59,29 @@ describe('Test function: recoverAccounts', function () {
     };
   });
 
-  it('should recover accounts in mainnet correctly', async function () {
+  it('should recover accounts correctly', async function () {
     const maxScanned = 5;
     const maxMissed = 3;
     const validPublicKeys = 2;
-    const getCorrectContractAddressStub = sandbox.stub(utils, 'getCorrectContractAddress');
+    const keyringStub = sandbox.stub(AccountKeyring.prototype, 'addAccounts');
 
+    const expectedResult = [];
     for (let i = 0; i < maxScanned; i++) {
       if (i < validPublicKeys) {
-        getCorrectContractAddressStub
-          .onCall(i)
-          .resolves({ address: mainnetAccAddresses[i], signerPubKey: mainnetPublicKeys[i], upgradeRequired: false });
+        expectedResult.push({
+          address: mainnetAccAddresses[i],
+          signerPubKey: mainnetPublicKeys[i],
+          upgradeRequired: false,
+        });
       } else {
-        getCorrectContractAddressStub.onCall(i).resolves({
+        expectedResult.push({
           address: mainnetAccAddresses[i],
           signerPubKey: num.toHex(constants.ZERO),
           upgradeRequired: false,
         });
       }
     }
+    keyringStub.resolves(expectedResult);
 
     const requestObject: RecoverAccountsRequestParams = {
       startScanIndex: 0,
@@ -88,112 +93,17 @@ describe('Test function: recoverAccounts', function () {
 
     const result = await recoverAccounts(apiParams);
     const expectedCalledTimes = validPublicKeys + maxMissed;
-
-    expect(walletStub.rpcStubs.snap_manageState.callCount).to.be.eq(expectedCalledTimes * 2);
     expect(result.length).to.be.eq(expectedCalledTimes);
-    expect(state.accContracts.map((acc) => acc.address)).to.be.eql(mainnetAccAddresses.slice(0, expectedCalledTimes));
-    expect(state.accContracts.map((acc) => acc.addressSalt)).to.be.eql(mainnetPublicKeys.slice(0, expectedCalledTimes));
-    expect(
-      state.accContracts
-        .filter((acc) => acc.publicKey && acc.publicKey !== num.toHex(constants.ZERO))
-        .map((acc) => acc.publicKey),
-    ).to.be.eql(mainnetPublicKeys.slice(0, validPublicKeys));
-    expect(state.accContracts.length).to.be.eq(expectedCalledTimes);
-  });
-
-  it('should recover accounts in SN_GOERLI correctly', async function () {
-    const maxScanned = 5;
-    const maxMissed = 3;
-    const validPublicKeys = 2;
-    const getCorrectContractAddressStub = sandbox.stub(utils, 'getCorrectContractAddress');
-
-    for (let i = 0; i < maxScanned; i++) {
-      if (i < validPublicKeys) {
-        getCorrectContractAddressStub
-          .onCall(i)
-          .resolves({ address: testnetAccAddresses[i], signerPubKey: testnetPublicKeys[i], upgradeRequired: false });
-      } else {
-        getCorrectContractAddressStub.onCall(i).resolves({
-          address: testnetAccAddresses[i],
-          signerPubKey: num.toHex(constants.ZERO),
-          upgradeRequired: false,
-        });
-      }
-    }
-
-    const requestObject: RecoverAccountsRequestParams = {
-      startScanIndex: 0,
-      maxScanned,
-      maxMissed,
-    };
-
-    apiParams.requestParams = requestObject;
-    const result = await recoverAccounts(apiParams);
-    const expectedCalledTimes = validPublicKeys + maxMissed;
-
-    expect(walletStub.rpcStubs.snap_manageState.callCount).to.be.eq(expectedCalledTimes * 2);
-    expect(result.length).to.be.eq(expectedCalledTimes);
-    expect(state.accContracts.map((acc) => acc.address)).to.be.eql(testnetAccAddresses.slice(0, expectedCalledTimes));
-    expect(state.accContracts.map((acc) => acc.addressSalt)).to.be.eql(testnetPublicKeys.slice(0, expectedCalledTimes));
-    expect(
-      state.accContracts
-        .filter((acc) => acc.publicKey && acc.publicKey !== num.toHex(constants.ZERO))
-        .map((acc) => acc.publicKey),
-    ).to.be.eql(testnetPublicKeys.slice(0, validPublicKeys));
-    expect(state.accContracts.length).to.be.eq(expectedCalledTimes);
-  });
-
-  it('should throw error if getCorrectContractAddress throw error', async function () {
-    const maxScanned = 5;
-    const maxMissed = 3;
-    const getCorrectContractAddressStub = sandbox.stub(utils, 'getCorrectContractAddress');
-    getCorrectContractAddressStub.callsFake(async () => {
-      throw new Error('network error');
+    result.forEach((acc, index) => {
+      expect(acc).to.be.contains(expectedResult[index]);
     });
-    const isUpgradeRequiredStub = sandbox.stub(utils, 'isUpgradeRequired');
-    const requestObject: RecoverAccountsRequestParams = {
-      startScanIndex: 0,
-      maxScanned,
-      maxMissed,
-      chainId: STARKNET_MAINNET_NETWORK.chainId,
-    };
-    apiParams.requestParams = requestObject;
-
-    let result = null;
-
-    try {
-      await recoverAccounts(apiParams);
-    } catch (e) {
-      result = e;
-    } finally {
-      expect(getCorrectContractAddressStub.callCount).to.be.eq(1);
-      expect(isUpgradeRequiredStub.callCount).to.be.eq(0);
-      expect(walletStub.rpcStubs.snap_manageState.callCount).to.be.eq(0);
-      expect(result).to.be.an('Error');
-      expect(result.message).to.be.eq('network error');
-    }
   });
 
-  it('should throw error if upsertAccount failed', async function () {
-    sandbox.stub(snapUtils, 'upsertAccount').throws(new Error());
+  it('should throw error if recover accounts failed', async function () {
     const maxScanned = 5;
     const maxMissed = 3;
-    const validPublicKeys = 2;
-    const getCorrectContractAddressStub = sandbox.stub(utils, 'getCorrectContractAddress');
-
-    for (let i = 0; i < maxScanned; i++) {
-      if (i < validPublicKeys) {
-        getCorrectContractAddressStub
-          .onCall(i)
-          .resolves({ address: mainnetAccAddresses[i], signerPubKey: mainnetPublicKeys[i], upgradeRequired: false });
-      } else {
-        getCorrectContractAddressStub.onCall(i).resolves({
-          address: mainnetAccAddresses[i],
-          signerPubKey: num.toHex(constants.ZERO),
-          upgradeRequired: false,
-        });
-      }
-    }
+    const keyringStub = sandbox.stub(AccountKeyring.prototype, 'addAccounts');
+    keyringStub.throws(new Error('some error'));
 
     const requestObject: RecoverAccountsRequestParams = {
       startScanIndex: 0,

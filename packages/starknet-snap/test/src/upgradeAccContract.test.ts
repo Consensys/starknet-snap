@@ -12,8 +12,10 @@ import { account1, estimateFeeResp, getBip44EntropyStub, sendTransactionResp } f
 import { getAddressKeyDeriver } from '../../src/utils/keyPair';
 import { Mutex } from 'async-mutex';
 import { ApiParams, UpgradeTransactionRequestParams } from '../../src/types/snapApi';
-import { CAIRO_VERSION_LEGACY, ACCOUNT_CLASS_HASH } from '../../src/utils/constants';
 import { CallData, num } from 'starknet';
+import { AccountKeyring } from '../../src/services/account';
+import { CairoOneContract, CairoZeroContract } from '../../src/services/accountContract';
+import { NodeProvider } from '../../src/services/node';
 
 chai.use(sinonChai);
 chai.use(chaiAsPromised);
@@ -85,7 +87,15 @@ describe('Test function: upgradeAccContract', function () {
     });
 
     it('should show error when account is not deployed', async function () {
-      sandbox.stub(utils, 'isAccountDeployed').resolves(false);
+      const address = (apiParams.requestParams as UpgradeTransactionRequestParams).contractAddress;
+
+      const keyringStub = sandbox.stub(AccountKeyring.prototype, 'getAccountContractByAddress');
+
+      sandbox.stub(CairoZeroContract.prototype, 'isDeployed').resolves(false);
+      sandbox.stub(CairoZeroContract.prototype, 'isUpgraded').resolves(false);
+
+      const accountInstance = new CairoZeroContract(address, 'pub', 'pk', {} as NodeProvider);
+      keyringStub.resolves(accountInstance);
 
       let result;
       try {
@@ -99,8 +109,15 @@ describe('Test function: upgradeAccContract', function () {
     });
 
     it('should show error when account is not required to upgrade', async function () {
-      sandbox.stub(utils, 'isAccountDeployed').resolves(true);
-      sandbox.stub(utils, 'isUpgradeRequired').resolves(false);
+      const address = (apiParams.requestParams as UpgradeTransactionRequestParams).contractAddress;
+
+      const keyringStub = sandbox.stub(AccountKeyring.prototype, 'getAccountContractByAddress');
+
+      sandbox.stub(CairoZeroContract.prototype, 'isDeployed').resolves(true);
+      sandbox.stub(CairoZeroContract.prototype, 'isUpgraded').resolves(true);
+
+      const accountInstance = new CairoZeroContract(address, 'pub', 'pk', {} as NodeProvider);
+      keyringStub.resolves(accountInstance);
 
       let result;
       try {
@@ -120,27 +137,26 @@ describe('Test function: upgradeAccContract', function () {
     let estimateFeeStub: sinon.SinonStub;
 
     beforeEach(async function () {
-      sandbox.stub(utils, 'isAccountDeployed').resolves(true);
-      sandbox.stub(utils, 'isUpgradeRequired').resolves(true);
-      sandbox.stub(utils, 'getKeysFromAddress').resolves({
-        privateKey: 'pk',
-        publicKey: account1.publicKey,
-        addressIndex: account1.addressIndex,
-        derivationPath: `m / bip32:1' / bip32:1' / bip32:1' / bip32:1'`,
-      });
+      const address = (apiParams.requestParams as UpgradeTransactionRequestParams).contractAddress;
+      const accountInstance = new CairoZeroContract(address, 'pub', 'pk', {} as NodeProvider);
+
       upsertTransactionStub = sandbox.stub(snapUtils, 'upsertTransaction');
       executeTxnStub = sandbox.stub(utils, 'executeTxn');
       estimateFeeStub = sandbox.stub(utils, 'estimateFee');
+      sandbox.stub(CairoZeroContract.prototype, 'isDeployed').resolves(true);
+      sandbox.stub(CairoZeroContract.prototype, 'isUpgraded').resolves(false);
+      sandbox.stub(AccountKeyring.prototype, 'getAccountContractByAddress').resolves(accountInstance);
     });
 
     it('should use provided max fee to execute txn when max fee provided', async function () {
       (apiParams.requestParams as UpgradeTransactionRequestParams).maxFee = '10000';
+      const address = (apiParams.requestParams as UpgradeTransactionRequestParams).contractAddress;
+
       walletStub.rpcStubs.snap_dialog.resolves(true);
       executeTxnStub.resolves(sendTransactionResp);
 
-      const address = (apiParams.requestParams as UpgradeTransactionRequestParams).contractAddress;
       const calldata = CallData.compile({
-        implementation: ACCOUNT_CLASS_HASH,
+        implementation: CairoOneContract.ClassHash,
         calldata: [0],
       });
 
@@ -162,7 +178,7 @@ describe('Test function: upgradeAccContract', function () {
         {
           maxFee: num.toBigInt(10000),
         },
-        CAIRO_VERSION_LEGACY,
+        CairoZeroContract.CairoVersion,
       );
       expect(result).to.be.equal(sendTransactionResp);
     });
@@ -174,7 +190,7 @@ describe('Test function: upgradeAccContract', function () {
 
       const address = (apiParams.requestParams as UpgradeTransactionRequestParams).contractAddress;
       const calldata = CallData.compile({
-        implementation: ACCOUNT_CLASS_HASH,
+        implementation: CairoOneContract.ClassHash,
         calldata: [0],
       });
 
@@ -196,7 +212,7 @@ describe('Test function: upgradeAccContract', function () {
         {
           maxFee: num.toBigInt(estimateFeeResp.suggestedMaxFee),
         },
-        CAIRO_VERSION_LEGACY,
+        CairoZeroContract.CairoVersion,
       );
       expect(result).to.be.equal(sendTransactionResp);
     });
@@ -257,9 +273,10 @@ describe('Test function: upgradeAccContract', function () {
       executeTxnStub.resolves(sendTransactionResp);
       estimateFeeStub.resolves(estimateFeeResp);
       walletStub.rpcStubs.snap_dialog.resolves(true);
+
       const address = (apiParams.requestParams as UpgradeTransactionRequestParams).contractAddress;
       const calldata = CallData.compile({
-        implementation: ACCOUNT_CLASS_HASH,
+        implementation: CairoOneContract.ClassHash,
         calldata: [0],
       });
       const txn = {

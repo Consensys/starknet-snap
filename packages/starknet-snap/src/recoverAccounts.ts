@@ -1,14 +1,16 @@
 import { toJson } from './utils/serializer';
-import { num } from 'starknet';
-import { getKeysFromAddressIndex, getCorrectContractAddress } from './utils/starknetUtils';
-import { getNetworkFromChainId, getValidNumber, upsertAccount } from './utils/snapUtils';
+import { getNetworkFromChainId, getValidNumber } from './utils/snapUtils';
 import { AccContract } from './types/snapState';
 import { ApiParams, RecoverAccountsRequestParams } from './types/snapApi';
 import { logger } from './utils/logger';
+import { AccountContractService, CairoOneContract, CairoZeroContract } from './services/accountContract';
+import { AccountSnapStateService } from './services/account/snapState';
+import { AccountKeyring } from './services/account';
+import { NodeProvider } from './services/node';
 
 export async function recoverAccounts(params: ApiParams) {
   try {
-    const { state, wallet, saveMutex, keyDeriver, requestParams } = params;
+    const { state, wallet, keyDeriver, requestParams } = params;
     const requestParamsObj = requestParams as RecoverAccountsRequestParams;
 
     const startIndex = getValidNumber(requestParamsObj.startScanIndex, 0, 0);
@@ -18,54 +20,11 @@ export async function recoverAccounts(params: ApiParams) {
 
     logger.log(`recoverAccounts:\nstartIndex: ${startIndex}, maxScanned: ${maxScanned}, maxMissed: ${maxMissed}`);
 
-    let i = startIndex,
-      j = 0;
-    const scannedAccounts: AccContract[] = [];
-
-    while (i < startIndex + maxScanned && j < maxMissed) {
-      const { publicKey, addressIndex, derivationPath } = await getKeysFromAddressIndex(
-        keyDeriver,
-        network.chainId,
-        state,
-        i,
-      );
-      const {
-        address: contractAddress,
-        signerPubKey: signerPublicKey,
-        upgradeRequired,
-      } = await getCorrectContractAddress(network, publicKey);
-      logger.log(
-        `recoverAccounts: index ${i}:\ncontractAddress = ${contractAddress}\npublicKey = ${publicKey}\nisUpgradeRequired = ${upgradeRequired}`,
-      );
-
-      if (signerPublicKey) {
-        logger.log(`recoverAccounts: index ${i}:\ncontractAddress = ${contractAddress}\n`);
-        if (num.toBigInt(signerPublicKey) === num.toBigInt(publicKey)) {
-          logger.log(`recoverAccounts: index ${i} matched\npublicKey: ${publicKey}`);
-        }
-        j = 0;
-      } else {
-        j++;
-      }
-
-      const userAccount: AccContract = {
-        addressSalt: publicKey,
-        publicKey: signerPublicKey,
-        address: contractAddress,
-        addressIndex,
-        derivationPath,
-        deployTxnHash: '',
-        chainId: network.chainId,
-        upgradeRequired: upgradeRequired,
-      };
-
-      logger.log(`recoverAccounts: index ${i}\nuserAccount: ${toJson(userAccount)}`);
-
-      await upsertAccount(userAccount, wallet, saveMutex);
-
-      scannedAccounts.push(userAccount);
-      i++;
-    }
+    const provider = new NodeProvider(network);
+    const snapStateService = new AccountSnapStateService(wallet, network);
+    const contractService = new AccountContractService([CairoOneContract, CairoZeroContract], provider);
+    const keyring = new AccountKeyring(keyDeriver, contractService, snapStateService);
+    const scannedAccounts: AccContract[] = await keyring.addAccounts(startIndex, startIndex + maxScanned);
 
     logger.log(`recoverAccounts:\nscannedAccounts: ${toJson(scannedAccounts, 2)}`);
 

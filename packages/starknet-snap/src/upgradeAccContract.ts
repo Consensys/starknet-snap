@@ -1,20 +1,16 @@
 import { toJson } from './utils/serializer';
 import { num, constants, CallData } from 'starknet';
 import { Transaction, TransactionStatus, VoyagerTransactionType } from './types/snapState';
-import {
-  getKeysFromAddress,
-  validateAndParseAddress,
-  isUpgradeRequired,
-  executeTxn,
-  isAccountDeployed,
-  estimateFee,
-} from './utils/starknetUtils';
+import { validateAndParseAddress, executeTxn, estimateFee } from './utils/starknetUtils';
 import { getNetworkFromChainId, upsertTransaction, getSendTxnText } from './utils/snapUtils';
 import { ApiParams, UpgradeTransactionRequestParams } from './types/snapApi';
-import { ACCOUNT_CLASS_HASH, CAIRO_VERSION_LEGACY } from './utils/constants';
 import { DialogType } from '@metamask/rpc-methods';
 import { heading, panel } from '@metamask/snaps-ui';
 import { logger } from './utils/logger';
+import { AccountContractService, CairoOneContract, CairoZeroContract } from './services/accountContract';
+import { AccountSnapStateService } from './services/account/snapState';
+import { AccountKeyring } from './services/account';
+import { NodeProvider } from './services/node';
 
 export async function upgradeAccContract(params: ApiParams) {
   try {
@@ -34,20 +30,26 @@ export async function upgradeAccContract(params: ApiParams) {
 
     const network = getNetworkFromChainId(state, chainId);
 
-    if (!(await isAccountDeployed(network, contractAddress))) {
+    const provider = new NodeProvider(network);
+    const snapStateService = new AccountSnapStateService(wallet, network);
+    const contractService = new AccountContractService([CairoOneContract, CairoZeroContract], provider);
+    const keyring = new AccountKeyring(keyDeriver, contractService, snapStateService);
+    const account = await keyring.getAccountContractByAddress(contractAddress);
+
+    if (!(await account.isDeployed())) {
       throw new Error('Contract has not deployed');
     }
 
-    if (!(await isUpgradeRequired(network, contractAddress))) {
+    if (await contractService.isContractUpgraded(account)) {
       throw new Error('Upgrade is not required');
     }
 
-    const { privateKey } = await getKeysFromAddress(keyDeriver, network, state, contractAddress);
+    const privateKey = account.prvKey;
 
     const method = 'upgrade';
 
     const calldata = CallData.compile({
-      implementation: ACCOUNT_CLASS_HASH,
+      implementation: CairoOneContract.ClassHash,
       calldata: [0],
     });
 
@@ -59,7 +61,7 @@ export async function upgradeAccContract(params: ApiParams) {
 
     let maxFee = requestParamsObj.maxFee ? num.toBigInt(requestParamsObj.maxFee) : constants.ZERO;
     if (maxFee === constants.ZERO) {
-      const estFeeResp = await estimateFee(network, contractAddress, privateKey, txnInvocation, CAIRO_VERSION_LEGACY);
+      const estFeeResp = await estimateFee(network, contractAddress, privateKey, txnInvocation, account.cairoVersion);
       maxFee = num.toBigInt(estFeeResp.suggestedMaxFee.toString(10) ?? '0');
     }
 
@@ -83,10 +85,8 @@ export async function upgradeAccContract(params: ApiParams) {
       privateKey,
       txnInvocation,
       undefined,
-      {
-        maxFee,
-      },
-      CAIRO_VERSION_LEGACY,
+      { maxFee },
+      account.cairoVersion,
     );
 
     logger.log(`sendTransaction:\ntxnResp: ${toJson(txnResp)}`);
