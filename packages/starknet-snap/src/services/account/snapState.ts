@@ -56,9 +56,6 @@ export class AccountSnapStateService extends BaseSnapStateService {
         storedAccount.deployTxnHash = userAccount.deployTxnHash || storedAccount.deployTxnHash;
         storedAccount.upgradeRequired = userAccount.upgradeRequired;
       }
-      if (!state.accDetails) {
-        state.accDetails = {};
-      }
 
       await this.saveState(state);
     } catch (error) {
