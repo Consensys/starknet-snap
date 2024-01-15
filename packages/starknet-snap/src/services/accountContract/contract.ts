@@ -59,7 +59,7 @@ export class AccountContractService {
     return accountContracts;
   }
 
-  async isContractUpgraded(contract: AccountContract, reflesh: boolean = false): Promise<boolean> {
+  async isContractUpgraded(contract: AccountContract, reflesh = false): Promise<boolean> {
     return await contract.isUpgraded(3, reflesh);
   }
 

@@ -12,13 +12,13 @@ export class AccountKeyring {
   accountContractService: AccountContractService;
   network: Network;
   perPage: number;
-  curPage: number = 0;
+  curPage = 0;
 
   constructor(
     keyDeriver: BIP44AddressKeyDeriver,
     accountContractService: AccountContractService,
     accountSnapStateService: AccountSnapStateService,
-    accountPerPage: number = 10,
+    accountPerPage = 10,
   ) {
     this.keyDeriver = keyDeriver;
     this.accountContractService = accountContractService;
@@ -42,7 +42,7 @@ export class AccountKeyring {
   }
 
   async addAccounts(from: number, to: number): Promise<AccContract[]> {
-    let accounts = [];
+    const accounts = [];
     for (let i = from; i < to; i++) {
       const account = await this.unlock(i);
 
@@ -101,7 +101,7 @@ export class AccountKeyring {
     return await this.addAccounts(from, to);
   }
   // TODO: move to accountContractController
-  async getAccountContractByAddress(address: string, reflesh: boolean = false): Promise<AccountContract> {
+  async getAccountContractByAddress(address: string, reflesh = false): Promise<AccountContract> {
     const acc = await this.accountSnapStateService.getAccount(address, this.network.chainId);
     let contract: AccountContract;
     if (acc) {
@@ -122,7 +122,7 @@ export class AccountKeyring {
     return contract;
   }
 
-  async #scanAccountContract(address: string, maxScan: number = 20): Promise<AccountContract | null> {
+  async #scanAccountContract(address: string, maxScan = 20): Promise<AccountContract | null> {
     for (let i = 0; i < maxScan; i++) {
       const contract = await this.#findAccountContractByIndex(address, i);
       if (contract != null) {

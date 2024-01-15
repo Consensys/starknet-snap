@@ -46,7 +46,9 @@ export class CairoOneContract
   }
 
   async upgrade(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     invocationsDetails: InvocationsDetails,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     upgradedTo: AccountContractStatic,
   ): Promise<InvokeFunctionResponse> {
     throw new Error('Not implemented');

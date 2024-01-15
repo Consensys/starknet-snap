@@ -2,14 +2,10 @@ import chai, { expect } from 'chai';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import { WalletMock } from '../wallet.mock.test';
-import * as utils from '../../src/utils/starknetUtils';
-import * as snapUtils from '../../src/utils/snapUtils';
 import { SnapState } from '../../src/types/snapState';
 import { STARKNET_MAINNET_NETWORK, STARKNET_TESTNET_NETWORK } from '../../src/utils/constants';
 import {
   createAccountProxyTxn,
-  testnetAccAddresses,
-  testnetPublicKeys,
   mainnetPublicKeys,
   mainnetAccAddresses,
   invalidNetwork as INVALID_NETWORK,

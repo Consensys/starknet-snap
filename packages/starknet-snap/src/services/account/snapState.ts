@@ -6,6 +6,7 @@ import { Network, AccContract } from '../../types/snapState';
 export class AccountSnapStateService extends BaseSnapStateService {
   network: Network;
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   constructor(snap: any, network: Network) {
     super(snap);
     this.network = network;

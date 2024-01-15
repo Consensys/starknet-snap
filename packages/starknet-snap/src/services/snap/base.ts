@@ -4,8 +4,10 @@ import { Mutex } from 'async-mutex';
 export class BaseSnapStateService {
   state: SnapState;
   lock: Mutex;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   snap: any;
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   constructor(snap: any, state?: SnapState) {
     this.state = state;
     this.snap = snap;

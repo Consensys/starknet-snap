@@ -58,7 +58,7 @@ export abstract class AccountContractBase {
     throw new Error('Not implemented');
   }
 
-  async isDeployed(reflesh: boolean = false): Promise<boolean> {
+  async isDeployed(reflesh = false): Promise<boolean> {
     if (reflesh || this.deployed === undefined) {
       try {
         await this.getVersion();
@@ -73,7 +73,7 @@ export abstract class AccountContractBase {
     return this.deployed;
   }
 
-  async isUpgraded(minVersion, reflesh: boolean = false): Promise<boolean> {
+  async isUpgraded(minVersion, reflesh = false): Promise<boolean> {
     if (reflesh || this.upgraded === undefined) {
       const hexResp = await this.getVersion();
       const versionArr = hexToString(hexResp).split('.');
@@ -83,6 +83,7 @@ export abstract class AccountContractBase {
   }
 
   static FromAccountContract(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     this: new (...args: any[]) => AccountContract,
     accountContract: AccountContract,
   ): AccountContract {

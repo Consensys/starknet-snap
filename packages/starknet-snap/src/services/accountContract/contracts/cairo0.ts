@@ -2,18 +2,11 @@ import { CairoVersion, Calldata, hash, CallData, InvocationsDetails, InvokeFunct
 
 import { NodeProvider } from '../../node';
 
-import { AccountContract, AccountContractBase, AccountContractStatic } from './base';
-import { ACCOUNT_CLASS_HASH_LEGACY, PROXY_CONTRACT_HASH, ACCOUNT_CLASS_HASH } from '../../../utils/constants';
+import { AccountContractBase, AccountContractStatic } from './base';
+import { ACCOUNT_CLASS_HASH_LEGACY, PROXY_CONTRACT_HASH } from '../../../utils/constants';
 import { StaticImplements } from '../../../types/static';
 import { padAddress } from '../../../utils/formatterUtils';
-import {
-  getKeysFromAddress,
-  validateAndParseAddress,
-  isUpgradeRequired,
-  executeTxn,
-  isAccountDeployed,
-  estimateFee,
-} from '../../../utils/starknetUtils';
+import { executeTxn } from '../../../utils/starknetUtils';
 
 export class CairoZeroContract
   extends AccountContractBase

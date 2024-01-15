@@ -1,12 +1,7 @@
 import { RawCalldata } from 'starknet';
 
-export interface AccountDetails {
-  account?: object;
-}
-
 export interface SnapState {
   accContracts: AccContract[];
-  accDetails?: Record<string, AccountDetails>;
   erc20Tokens: Erc20Token[];
   networks: Network[];
   transactions: Transaction[];

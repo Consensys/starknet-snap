@@ -1,10 +1,4 @@
-import {
-  Provider,
-  RawCalldata,
-  CallContractResponse,
-  ProviderOptions,
-  validateAndParseAddress as _validateAndParseAddress,
-} from 'starknet';
+import { Provider, RawCalldata, CallContractResponse, ProviderOptions } from 'starknet';
 
 import { Network } from '../../types/snapState';
 
