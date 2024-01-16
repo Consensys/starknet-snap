@@ -3,7 +3,7 @@ import { BIP44AddressKeyDeriver } from '@metamask/key-tree';
 
 import { grindKey } from '../../utils/keyPair';
 import { Network, AccContract } from '../../types/snapState';
-import { AccountContractService, type AccountContract } from '../accountContract';
+import { AccountContractService, type AccountContract } from '../account-contract';
 import { AccountSnapStateService } from './snapState';
 
 export class AccountKeyring {
@@ -27,12 +27,8 @@ export class AccountKeyring {
     this.perPage = accountPerPage;
   }
 
-  async getDeriverByIndex(index: number) {
-    return await this.keyDeriver(index);
-  }
-
   async getSeedByIndex(index: number): Promise<string> {
-    const deriver = await this.getDeriverByIndex(index);
+    const deriver = await this.keyDeriver(index);
     return grindKey(deriver.privateKey);
   }
 
@@ -42,10 +38,10 @@ export class AccountKeyring {
   }
 
   async addAccounts(from: number, to: number): Promise<AccContract[]> {
-    const accounts = [];
-    for (let i = from; i < to; i++) {
-      const account = await this.unlock(i);
+    const idxs = Array.from({ length: to - from }, (_, i) => i + from);
 
+    const accounts = await Promise.all(idxs.map(async (idx) => { 
+      const account = await this.unlock(idx)
       let chainPubKey = '';
       let upgradeRequired = false;
 
@@ -58,17 +54,17 @@ export class AccountKeyring {
         addressSalt: account.pubKey,
         publicKey: chainPubKey,
         address: account.address,
-        addressIndex: i,
+        addressIndex: idx,
         derivationPath: this.keyDeriver.path,
         deployTxnHash: '',
         chainId: this.network.chainId,
         upgradeRequired: upgradeRequired,
       };
 
-      await this.accountSnapStateService.save(userAccount);
-      accounts.push(userAccount);
-    }
+      return userAccount
+    })).then((result) => result.sort((a, b) => a.addressIndex - b.addressIndex))
 
+    await this.accountSnapStateService.saveMany(accounts, this.network.chainId)
     return accounts;
   }
 
@@ -100,7 +96,10 @@ export class AccountKeyring {
 
     return await this.addAccounts(from, to);
   }
-  // TODO: move to accountContractController
+
+  // TODO: 
+  // Add address+chainid to index mapping in snapState
+  // Add index+chainid to contract mapping in snapState
   async getAccountContractByAddress(address: string, reflesh = false): Promise<AccountContract> {
     const acc = await this.accountSnapStateService.getAccount(address, this.network.chainId);
     let contract: AccountContract;

@@ -14,7 +14,7 @@ import { Mutex } from 'async-mutex';
 import { ApiParams, UpgradeTransactionRequestParams } from '../../src/types/snapApi';
 import { CallData, num } from 'starknet';
 import { AccountKeyring } from '../../src/services/account';
-import { CairoOneContract, CairoZeroContract } from '../../src/services/accountContract';
+import { CairoOneContract, CairoZeroContract } from '../../src/services/account-contract';
 import { NodeProvider } from '../../src/services/node';
 
 chai.use(sinonChai);

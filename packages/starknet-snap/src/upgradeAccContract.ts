@@ -7,7 +7,7 @@ import { ApiParams, UpgradeTransactionRequestParams } from './types/snapApi';
 import { DialogType } from '@metamask/rpc-methods';
 import { heading, panel } from '@metamask/snaps-ui';
 import { logger } from './utils/logger';
-import { AccountContractService, CairoOneContract, CairoZeroContract } from './services/accountContract';
+import { AccountContractService, CairoOneContract, CairoZeroContract } from './services/account-contract';
 import { AccountSnapStateService } from './services/account/snapState';
 import { AccountKeyring } from './services/account';
 import { NodeProvider } from './services/node';

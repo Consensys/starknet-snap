@@ -36,9 +36,7 @@ export class AccountSnapStateService extends BaseSnapStateService {
   }
 
   async save(userAccount: AccContract): Promise<void> {
-    const release = await this.lock.acquire();
-
-    try {
+    return this.lock.runExclusive(async () => {
       const storedAccount = await this.getAccount(userAccount.address, userAccount.chainId);
 
       const state = await this.getState();
@@ -58,11 +56,34 @@ export class AccountSnapStateService extends BaseSnapStateService {
       }
 
       await this.saveState(state);
-    } catch (error) {
-      throw error;
-    } finally {
-      release();
-    }
+    })
+  }
+
+  async saveMany(userAccounts: Array<AccContract>, chainId:string): Promise<void> {
+    return this.lock.runExclusive(async () => {
+      const state = await this.getState();
+      const accounts = await this.getAccounts(chainId);
+      const accountMap = new Map(accounts.map((acc) => [acc.address, acc]));
+      if (!state.accContracts) {
+        state.accContracts = [];
+      }
+
+      for (var i = 0; i< userAccounts.length; i++) {
+        const userAccount = userAccounts[i];
+        const storedAccount = accountMap.get(userAccount.address)
+        if (!storedAccount) {
+          state.accContracts.push(userAccount);
+          accountMap.set(userAccount.address, userAccount);
+        } else {
+          storedAccount.addressSalt = userAccount.addressSalt;
+          storedAccount.addressIndex = userAccount.addressIndex;
+          storedAccount.derivationPath = userAccount.derivationPath;
+          storedAccount.publicKey = userAccount.publicKey;
+          storedAccount.deployTxnHash = userAccount.deployTxnHash || storedAccount.deployTxnHash;
+          storedAccount.upgradeRequired = userAccount.upgradeRequired;
+        }
+      }
+    })
   }
 
   #isSameChainId(chainId1: string, chainId2: string) {

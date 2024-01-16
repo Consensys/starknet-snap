@@ -24,25 +24,17 @@ export class AccountContractService {
         defaultContract = _accountContract;
       }
 
-      try {
-        if (!(await _accountContract.isDeployed())) {
-          continue;
-        }
-
-        if (await this.isContractUpgraded(_accountContract)) {
-          console.log('not upgrade required');
-          // if contract upgraded, use the latest contract interface
-          accountContract = this.#accountContracts[0].FromAccountContract(_accountContract);
-          break;
-        } else {
-          console.log('upgrade required');
-          // if contract not upgraded but deployed, use the legacy contract interface
-          accountContract = _accountContract;
-        }
-      } catch (err) {
-        console.log('contract error');
-        // contract error will fall into catch
+      if (!(await _accountContract.isDeployed())) {
         continue;
+      }
+
+      if (await this.isContractUpgraded(_accountContract)) {
+        // if contract upgraded, use the latest contract interface
+        accountContract = this.#accountContracts[0].FromAccountContract(_accountContract);
+        break;
+      } else {
+        // if contract not upgraded but deployed, use the legacy contract interface
+        accountContract = _accountContract;
       }
     }
     // always use default latest contract interface if no contract deployed

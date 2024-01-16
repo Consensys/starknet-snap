@@ -69,6 +69,8 @@ export abstract class AccountContractBase {
         }
         this.deployed = false;
       }
+    } else {
+      console.log("cached")
     }
     return this.deployed;
   }

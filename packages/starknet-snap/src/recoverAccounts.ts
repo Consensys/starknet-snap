@@ -3,7 +3,7 @@ import { getNetworkFromChainId, getValidNumber } from './utils/snapUtils';
 import { AccContract } from './types/snapState';
 import { ApiParams, RecoverAccountsRequestParams } from './types/snapApi';
 import { logger } from './utils/logger';
-import { AccountContractService, CairoOneContract, CairoZeroContract } from './services/accountContract';
+import { AccountContractService, CairoOneContract, CairoZeroContract } from './services/account-contract';
 import { AccountSnapStateService } from './services/account/snapState';
 import { AccountKeyring } from './services/account';
 import { NodeProvider } from './services/node';
