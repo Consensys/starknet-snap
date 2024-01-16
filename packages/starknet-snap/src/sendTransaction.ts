@@ -3,7 +3,7 @@ import { num, constants } from 'starknet';
 import { validateAndParseAddress } from '../src/utils/starknetUtils';
 import { estimateFee } from './estimateFee';
 import { Transaction, TransactionStatus, VoyagerTransactionType } from './types/snapState';
-import { getNetworkFromChainId, getSigningTxnText, upsertTransaction } from './utils/snapUtils';
+import { getNetworkFromChainId, getSendTxnText, upsertTransaction } from './utils/snapUtils';
 import { getKeysFromAddress, getCallDataArray, executeTxn, isAccountDeployed } from './utils/starknetUtils';
 import { ApiParams, SendTransactionRequestParams } from './types/snapApi';
 import { createAccount } from './createAccount';
@@ -51,7 +51,7 @@ export async function sendTransaction(params: ApiParams) {
       maxFee = num.toBigInt(suggestedMaxFee);
     }
 
-    const signingTxnComponents = getSigningTxnText(
+    const signingTxnComponents = getSendTxnText(
       state,
       contractAddress,
       contractFuncName,
@@ -97,14 +97,10 @@ export async function sendTransaction(params: ApiParams) {
 
     //In case this is the first transaction we assign a nonce of 1 to make sure it does after the deploy transaction
     const nonceSendTransaction = accountDeployed ? undefined : 1;
-    const txnResp = await executeTxn(
-      network,
-      senderAddress,
-      senderPrivateKey,
-      txnInvocation,
+    const txnResp = await executeTxn(network, senderAddress, senderPrivateKey, txnInvocation, undefined, {
       maxFee,
-      nonceSendTransaction,
-    );
+      nonce: nonceSendTransaction,
+    });
 
     logger.log(`sendTransaction:\ntxnResp: ${toJson(txnResp)}`);
 

@@ -5,7 +5,11 @@ import { WalletMock } from '../wallet.mock.test';
 import * as utils from '../../src/utils/starknetUtils';
 import * as snapUtils from '../../src/utils/snapUtils';
 import { SnapState } from '../../src/types/snapState';
-import { STARKNET_MAINNET_NETWORK, STARKNET_TESTNET_NETWORK } from '../../src/utils/constants';
+import {
+  STARKNET_MAINNET_NETWORK,
+  STARKNET_TESTNET_NETWORK,
+  STARKNET_SEPOLIA_TESTNET_NETWORK,
+} from '../../src/utils/constants';
 import {
   createAccountProxyTxn,
   testnetAccAddresses,
@@ -30,7 +34,7 @@ describe('Test function: recoverAccounts', function () {
   const state: SnapState = {
     accContracts: [],
     erc20Tokens: [],
-    networks: [STARKNET_TESTNET_NETWORK, STARKNET_MAINNET_NETWORK, INVALID_NETWORK],
+    networks: [STARKNET_TESTNET_NETWORK, STARKNET_MAINNET_NETWORK, STARKNET_SEPOLIA_TESTNET_NETWORK, INVALID_NETWORK],
     transactions: [],
   };
   const apiParams: ApiParams = {
@@ -177,27 +181,5 @@ describe('Test function: recoverAccounts', function () {
     } finally {
       expect(result).to.be.an('Error');
     }
-  });
-
-  it('should show confirmation box with failure msg if network accountClassHash is missing', async function () {
-    const maxScanned = 5;
-    const maxMissed = 3;
-    const validPublicKeys = 2;
-    const getSignerStub = sandbox.stub(utils, 'getSigner');
-    for (let i = 0; i < validPublicKeys; i++) {
-      getSignerStub.onCall(i).resolves(testnetPublicKeys[i]);
-    }
-    getSignerStub.throws(new Error());
-
-    const requestObject: RecoverAccountsRequestParams = {
-      startScanIndex: 0,
-      maxScanned,
-      maxMissed,
-      chainId: INVALID_NETWORK.chainId,
-    };
-    apiParams.requestParams = requestObject;
-    const result = await recoverAccounts(apiParams);
-    expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledOnce;
-    expect(result).eql(null);
   });
 });

@@ -2,6 +2,7 @@ import { toJson } from './utils/serializer';
 import { getAddressKeyDeriver } from './utils/keyPair';
 import { createAccount } from './createAccount';
 import { signMessage } from './signMessage';
+import { signTransaction } from './signTransaction';
 import { getErc20TokenBalance } from './getErc20TokenBalance';
 import { getTransactionStatus } from './getTransactionStatus';
 import { sendTransaction } from './sendTransaction';
@@ -15,11 +16,14 @@ import { SnapState } from './types/snapState';
 import { extractPrivateKey } from './extractPrivateKey';
 import { extractPublicKey } from './extractPublicKey';
 import { addNetwork } from './addNetwork';
+import { switchNetwork } from './switchNetwork';
+import { getCurrentNetwork } from './getCurrentNetwork';
 import {
   PRELOADED_TOKENS,
   STARKNET_INTEGRATION_NETWORK,
   STARKNET_MAINNET_NETWORK,
   STARKNET_TESTNET_NETWORK,
+  STARKNET_SEPOLIA_TESTNET_NETWORK,
 } from './utils/constants';
 import { upsertErc20Token, upsertNetwork } from './utils/snapUtils';
 import { getStoredNetworks } from './getStoredNetworks';
@@ -30,6 +34,11 @@ import { Mutex } from 'async-mutex';
 import { OnRpcRequestHandler } from '@metamask/snaps-types';
 import { ApiParams, ApiRequestParams } from './types/snapApi';
 import { estimateAccDeployFee } from './estimateAccountDeployFee';
+import { executeTxn } from './executeTxn';
+import { estimateFees } from './estimateFees';
+import { declareContract } from './declareContract';
+import { signDeclareTransaction } from './signDeclareTransaction';
+import { signDeployAccountTransaction } from './signDeployAccountTransaction';
 import { logger } from './utils/logger';
 
 declare const snap;
@@ -79,6 +88,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ origin, request }) => 
     await upsertNetwork(STARKNET_INTEGRATION_NETWORK, snap, saveMutex, state);
   } else {
     await upsertNetwork(STARKNET_TESTNET_NETWORK, snap, saveMutex, state);
+    await upsertNetwork(STARKNET_SEPOLIA_TESTNET_NETWORK, snap, saveMutex, state);
   }
   for (const token of PRELOADED_TOKENS) {
     await upsertErc20Token(token, snap, saveMutex, state);
@@ -112,6 +122,18 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ origin, request }) => 
     case 'starkNet_signMessage':
       apiParams.keyDeriver = await getAddressKeyDeriver(snap);
       return signMessage(apiParams);
+
+    case 'starkNet_signTransaction':
+      apiParams.keyDeriver = await getAddressKeyDeriver(snap);
+      return signTransaction(apiParams);
+
+    case 'starkNet_signDeclareTransaction':
+      apiParams.keyDeriver = await getAddressKeyDeriver(snap);
+      return signDeclareTransaction(apiParams);
+
+    case 'starkNet_signDeployAccountTransaction':
+      apiParams.keyDeriver = await getAddressKeyDeriver(snap);
+      return signDeployAccountTransaction(apiParams);
 
     case 'starkNet_verifySignedMessage':
       apiParams.keyDeriver = await getAddressKeyDeriver(snap);
@@ -147,6 +169,12 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ origin, request }) => 
     case 'starkNet_addNetwork':
       return addNetwork(apiParams);
 
+    case 'starkNet_switchNetwork':
+      return switchNetwork(apiParams);
+
+    case 'starkNet_getCurrentNetwork':
+      return getCurrentNetwork(apiParams);
+
     case 'starkNet_getStoredNetworks':
       return getStoredNetworks(apiParams);
 
@@ -159,6 +187,18 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ origin, request }) => 
     case 'starkNet_recoverAccounts':
       apiParams.keyDeriver = await getAddressKeyDeriver(snap);
       return recoverAccounts(apiParams);
+
+    case 'starkNet_executeTxn':
+      apiParams.keyDeriver = await getAddressKeyDeriver(snap);
+      return executeTxn(apiParams);
+
+    case 'starkNet_estimateFees':
+      apiParams.keyDeriver = await getAddressKeyDeriver(snap);
+      return estimateFees(apiParams);
+
+    case 'starkNet_declareContract':
+      apiParams.keyDeriver = await getAddressKeyDeriver(snap);
+      return declareContract(apiParams);
 
     default:
       throw new Error('Method not found.');

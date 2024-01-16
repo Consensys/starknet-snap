@@ -87,9 +87,10 @@ export const walletSlice = createSlice({
     clearAccounts: (state) => {
       state.accounts = [];
     },
-    resetWallet: () => {
+    resetWallet: (state) => {
       return {
         ...initialState,
+        provider: state.provider,
         forceReconnect: true,
       };
     },

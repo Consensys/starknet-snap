@@ -13,6 +13,7 @@ import {
   getValidNumber,
   upsertAccount,
   upsertTransaction,
+  addDialogTxt,
 } from './utils/snapUtils';
 import { AccContract, VoyagerTransactionType, Transaction, TransactionStatus } from './types/snapState';
 import { ApiParams, CreateAccountRequestParams } from './types/snapApi';
@@ -37,10 +38,7 @@ export async function createAccount(params: ApiParams, silentMode = false) {
       addressIndex: addressIndexInUsed,
       derivationPath,
     } = await getKeysFromAddressIndex(keyDeriver, network.chainId, state, addressIndex);
-    const { address: contractAddress, callData: contractCallData } = getAccContractAddressAndCallData(
-      network.accountClassHash,
-      publicKey,
-    );
+    const { address: contractAddress, callData: contractCallData } = getAccContractAddressAndCallData(publicKey);
     logger.log(
       `createAccount:\ncontractAddress = ${contractAddress}\npublicKey = ${publicKey}\naddressIndex = ${addressIndexInUsed}`,
     );
@@ -52,6 +50,11 @@ export async function createAccount(params: ApiParams, silentMode = false) {
 
     if (deploy) {
       if (!silentMode) {
+        const components = [];
+        addDialogTxt(components, 'Address', contractAddress);
+        addDialogTxt(components, 'Public Key', publicKey);
+        addDialogTxt(components, 'Address Index', addressIndex.toString());
+
         const response = await wallet.request({
           method: 'snap_dialog',
           params: {
@@ -59,9 +62,7 @@ export async function createAccount(params: ApiParams, silentMode = false) {
             content: panel([
               heading('Do you want to sign this deploy account transaction ?'),
               text(`It will be signed with address: ${contractAddress}`),
-              text(
-                `Account Info:\n\nAddress: ${contractAddress}\n\nPublic Key: ${publicKey}\n\nAddress Index: ${addressIndex}`,
-              ),
+              ...components,
             ]),
           },
         });

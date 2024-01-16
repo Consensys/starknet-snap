@@ -1,6 +1,6 @@
 {
   "name": "@consensys/starknet-snap",
-  "version": "2.2.0",
+  "version": "2.4.0",
   "license": "(Apache-2.0 OR MIT)",
   "main": "src/index.ts",
   "repository": {
@@ -17,6 +17,7 @@
     "watch:snap": "mm-snap watch",
     "prettier": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "lint": "eslint . --max-warnings 0 -f json -o eslint-report.json",
+    "lint:fix": "eslint '**/*.{js,ts,tsx}' --fix",
     "test": "yarn run test:unit && yarn run cover:report",
     "test:unit": "nyc --check-coverage --statements 80 --branches 80 --functions 80 --lines 80 mocha --colors -r ts-node/register \"test/**/*.test.ts\"",
     "cover:report": "nyc report --reporter=lcov --reporter=text"

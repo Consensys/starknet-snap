@@ -9,7 +9,11 @@ import {
   ExecutionStatus,
   FinailityStatus,
 } from '../src/types/snapState';
-import { STARKNET_MAINNET_NETWORK, STARKNET_TESTNET_NETWORK } from '../src/utils/constants';
+import {
+  STARKNET_MAINNET_NETWORK,
+  STARKNET_TESTNET_NETWORK,
+  STARKNET_SEPOLIA_TESTNET_NETWORK,
+} from '../src/utils/constants';
 
 export const invalidNetwork: Network = {
   name: 'Network with emot',
@@ -89,6 +93,19 @@ export const signature1 =
 export const signature2 =
   '304402200510bd78f928984364253c04201185ab6ccc386278c8fe1aeda0deab7a476e3f02200442916a82f917f520071da038d6dc3eb4446824ce26893355ad4c4a9343729c';
 
+export const signature4SignMessage = [
+  '784041227270069705374122994163964526105670242785431143890307285886848872447',
+  '2211270729821731368290303126976610283184761443640531855459727543936510195980',
+];
+export const signature4SignMessageWithUnfoundAddress = [
+  '2291141487445389914420608491513144291926464341525100982346025850159785012799',
+  '1926866925376139342818732291555402078512683709189543755386120411261784257180',
+];
+
+export const signature3 = [
+  '607985888254383597713678062496326274484078117880260232069103402822721981909',
+  '2165861203006010568296813740808310355035386348183576985427784501900302491063',
+];
 // Derived from seed phrase: "dog simple gown ankle release anger local pulp rose river approve miracle"
 export const bip44Entropy: JsonBIP44CoinTypeNode = {
   depth: 2,
@@ -154,6 +171,20 @@ export const getTxnStatusAcceptL2Resp = {
 
 export const createAccountProxyTxn: Transaction = {
   chainId: STARKNET_TESTNET_NETWORK.chainId,
+  contractAddress: createAccountProxyResp.contract_address,
+  contractCallData: [],
+  contractFuncName: '',
+  senderAddress: createAccountProxyResp.contract_address,
+  timestamp: 1653559059,
+  txnHash: createAccountProxyResp.transaction_hash,
+  txnType: VoyagerTransactionType.DEPLOY,
+  failureReason: '',
+  status: '',
+  eventIds: [],
+};
+
+export const createAccountProxyTxnOnSepolia: Transaction = {
+  chainId: STARKNET_SEPOLIA_TESTNET_NETWORK.chainId,
   contractAddress: createAccountProxyResp.contract_address,
   contractCallData: [],
   contractFuncName: '',
@@ -284,6 +315,20 @@ export const txn4: Transaction = {
 
 export const txn5: Transaction = {
   chainId: STARKNET_TESTNET_NETWORK.chainId,
+  contractAddress: '0x07394cbe418daa16e42b87ba67372d4ab4a5df0b05c6e554d158458ce245bc10',
+  contractCallData: ['0x0256d8f49882cc9366037415f48fa9fd2b5b7344ded7573ebfcef7c90e3e6b75', '2000000000000000000', '0'],
+  contractFuncName: 'transfer',
+  senderAddress: '0x05a98ec74a40383cf99896bfea2ec5e6aad16c7eed50025a5f569d585ebb13a2',
+  timestamp: 1653569160,
+  txnHash: '0x75ff16a2fd6b489d2e17673addba34af372907b0b23ff9068a23afa49c61999',
+  txnType: VoyagerTransactionType.INVOKE,
+  failureReason: '',
+  status: 'PENDING',
+  eventIds: [],
+};
+
+export const mainnetTxn1: Transaction = {
+  chainId: STARKNET_MAINNET_NETWORK.chainId,
   contractAddress: '0x07394cbe418daa16e42b87ba67372d4ab4a5df0b05c6e554d158458ce245bc10',
   contractCallData: ['0x0256d8f49882cc9366037415f48fa9fd2b5b7344ded7573ebfcef7c90e3e6b75', '2000000000000000000', '0'],
   contractFuncName: 'transfer',

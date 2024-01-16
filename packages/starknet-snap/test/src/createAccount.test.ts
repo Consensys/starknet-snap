@@ -6,7 +6,11 @@ import * as utils from '../../src/utils/starknetUtils';
 import * as snapUtils from '../../src/utils/snapUtils';
 import { createAccount } from '../../src/createAccount';
 import { SnapState } from '../../src/types/snapState';
-import { STARKNET_MAINNET_NETWORK, STARKNET_TESTNET_NETWORK } from '../../src/utils/constants';
+import {
+  STARKNET_MAINNET_NETWORK,
+  STARKNET_TESTNET_NETWORK,
+  STARKNET_SEPOLIA_TESTNET_NETWORK,
+} from '../../src/utils/constants';
 import {
   createAccountProxyTxn,
   createAccountProxyResp,
@@ -34,7 +38,7 @@ describe('Test function: createAccount', function () {
   const state: SnapState = {
     accContracts: [],
     erc20Tokens: [],
-    networks: [STARKNET_MAINNET_NETWORK, STARKNET_TESTNET_NETWORK],
+    networks: [STARKNET_MAINNET_NETWORK, STARKNET_TESTNET_NETWORK, STARKNET_SEPOLIA_TESTNET_NETWORK],
     transactions: [],
   };
   const apiParams: ApiParams = {
@@ -70,10 +74,7 @@ describe('Test function: createAccount', function () {
       state,
       -1,
     );
-    const { address: contractAddress } = utils.getAccContractAddressAndCallData(
-      STARKNET_MAINNET_NETWORK.accountClassHash,
-      publicKey,
-    );
+    const { address: contractAddress } = utils.getAccContractAddressAndCallData(publicKey);
     expect(walletStub.rpcStubs.snap_manageState).to.have.been.callCount(0);
     expect(result.address).to.be.eq(contractAddress);
     expect(state.accContracts.length).to.be.eq(0);
@@ -279,6 +280,7 @@ describe('Test function: createAccount', function () {
     sandbox.stub(utils, 'deployAccount').callsFake(async () => {
       return createAccountFailedProxyResp;
     });
+    sandbox.stub(utils, 'callContract').resolves(getBalanceResp);
     sandbox.stub(utils, 'getSigner').throws(new Error());
     sandbox.stub(utils, 'estimateAccountDeployFee').callsFake(async () => {
       return estimateDeployFeeResp;
@@ -298,6 +300,7 @@ describe('Test function: createAccount', function () {
     sandbox.stub(utils, 'deployAccount').callsFake(async () => {
       return createAccountProxyResp;
     });
+    sandbox.stub(utils, 'callContract').resolves(getBalanceResp);
     sandbox.stub(utils, 'getSigner').throws(new Error());
     sandbox.stub(utils, 'estimateAccountDeployFee').callsFake(async () => {
       return estimateDeployFeeResp;
