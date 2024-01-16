@@ -25,7 +25,7 @@ export function grindKey(keySeed: string, keyValueLimit = ec.ec.n): string {
   );
   const maxAllowedVal = sha256EcMaxDigest.sub(sha256EcMaxDigest.mod(keyValueLimit));
 
-  // Make sure the produced key is devided by the Stark EC order,
+  // Make sure the produced key is derived by the Stark EC order,
   // and falls within the range [0, maxAllowedVal).
   let i = 0;
   let key;
