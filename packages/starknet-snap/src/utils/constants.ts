@@ -14,13 +14,14 @@ export const MAXIMUM_TOKEN_SYMBOL_LENGTH = 16;
 export const TRANSFER_SELECTOR_HEX = '0x83afd3f4caedc6eebf44246fe54e38c95e3179a5ec9ea81740eca5b482d12e';
 
 export const ACCOUNT_CLASS_HASH_LEGACY = '0x033434ad846cdd5f23eb73ff09fe6fddd568284a0fb7d1be20ee482f044dabe2'; // from argent-x repo
-export const ACCOUNT_CLASS_HASH = '0x1a736d6ed154502257f02b1ccdf4d9d1089f80811cd6acad48e6b6a9d1f2003'; // from argent-x repo
+export const ACCOUNT_CLASS_HASH = '0x29927c8af6bccf3f6fda035981e765a7bdbf18a2dc0d630494f8758aa908e2b'; // from argent-x repo
+
 
 export const STARKNET_MAINNET_NETWORK: Network = {
   name: 'Starknet Mainnet',
   chainId: constants.StarknetChainId.SN_MAIN,
   baseUrl: 'https://alpha-mainnet.starknet.io',
-  nodeUrl: 'https://starknet-mainnet.infura.io/v3/60c7253fb48147658095fe0460ac9ee9',
+  nodeUrl: 'https://starknet-mainnet.g.alchemy.com/v2/IVeUA1jlGCuSO_3nthL2xr8hovMEOXWX',
   voyagerUrl: 'https://voyager.online',
   accountClassHash: '',
 };
@@ -29,7 +30,7 @@ export const STARKNET_TESTNET_NETWORK: Network = {
   name: 'Goerli Testnet',
   chainId: constants.StarknetChainId.SN_GOERLI,
   baseUrl: 'https://alpha4.starknet.io',
-  nodeUrl: 'https://starknet-goerli.infura.io/v3/60c7253fb48147658095fe0460ac9ee9',
+  nodeUrl: 'https://starknet-goerli.g.alchemy.com/v2/1Bw_6sofLIpDzAROgFM1KXIISP2jUAVO',
   voyagerUrl: 'https://goerli.voyager.online',
   accountClassHash: '',
 };
