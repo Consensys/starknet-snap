@@ -3,7 +3,7 @@ import { getNetworkFromChainId, getTxnSnapTxt } from './utils/snapUtils';
 import { getKeysFromAddress, executeTxn as executeTxnUtil } from './utils/starknetUtils';
 import { ApiParams, ExecuteTxnRequestParams } from './types/snapApi';
 import { DialogType } from '@metamask/rpc-methods';
-import { heading, panel } from '@metamask/snaps-ui';
+import { heading, panel } from '@metamask/snaps-sdk';
 import { logger } from './utils/logger';
 
 export async function executeTxn(params: ApiParams) {

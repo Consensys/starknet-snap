@@ -31,7 +31,6 @@ import { getStoredTransactions } from './getStoredTransactions';
 import { getTransactions } from './getTransactions';
 import { recoverAccounts } from './recoverAccounts';
 import { Mutex } from 'async-mutex';
-import { OnRpcRequestHandler } from '@metamask/snaps-types';
 import { ApiParams, ApiRequestParams } from './types/snapApi';
 import { estimateAccDeployFee } from './estimateAccountDeployFee';
 import { executeTxn } from './executeTxn';
@@ -40,6 +39,10 @@ import { declareContract } from './declareContract';
 import { signDeclareTransaction } from './signDeclareTransaction';
 import { signDeployAccountTransaction } from './signDeployAccountTransaction';
 import { logger } from './utils/logger';
+
+import type { OnRpcRequestHandler, OnHomePageHandler, OnInstallHandler, OnUpdateHandler } from '@metamask/snaps-sdk';
+import { InternalError, copyable, panel, text } from '@metamask/snaps-sdk';
+import { ethers } from 'ethers';
 
 declare const snap;
 const saveMutex = new Mutex();
@@ -203,4 +206,81 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ origin, request }) => 
     default:
       throw new Error('Method not found.');
   }
+};
+
+export const onInstall: OnInstallHandler = async () => {
+  const component = panel([
+    text(
+      `You can see your Starknet Account and its balance on the snap's **HomePage**.`,
+    ),
+  ]);
+
+  await snap.request({
+    method: 'snap_dialog',
+    params: {
+      type: 'alert',
+      content: component,
+    },
+  });
+};
+
+export const onUpdate: OnUpdateHandler = async () => {
+  const component = panel([
+    text('Features released with this update:'),
+    text(
+      '**HomePage** : You can now see your Account and its balance on the new HomePage.',
+    ),
+  ]);
+
+  await snap.request({
+    method: 'snap_dialog',
+    params: {
+      type: 'alert',
+      content: component,
+    },
+  });
+};
+
+export const onHomePage: OnHomePageHandler = async () => {
+  const panelItems = [];
+  try {
+    const state: SnapState = await snap.request({
+      method: 'snap_manageState',
+      params: {
+        operation: 'get',
+      },
+    });
+
+    if (state && state.accContracts.length > 0) {
+      const userAddress = state.accContracts[0].address;
+      const chainId = state.accContracts[0].chainId;
+      const network = state.networks.find(n => n.chainId == chainId);
+      panelItems.push(text(`Your Starknet Account on ${network.name}:`));
+      panelItems.push(copyable(`${userAddress}`));
+
+      const ercToken = state.erc20Tokens.find(t => t.symbol == "ETH" && t.chainId == chainId);
+      if (ercToken) {
+        const params: any = {
+          state,
+          requestParams: {
+            tokenAddress: ercToken.address,
+            userAddress: userAddress,
+          }
+        };
+        const balance = await getErc20TokenBalance(params)
+        const displayBalance = ethers.utils.formatUnits(ethers.BigNumber.from(balance), ercToken.decimals);
+        panelItems.push(text(`Your current ETH Balance is : **${displayBalance} ETH**`));
+      }
+    } else {
+      panelItems.push(text(`Your Starknet Account is not yet created.`));
+      panelItems.push(text(`Initiate a transaction to create your Starknet Account.`));
+    }
+  }
+  catch (err) {
+    throw new InternalError(err);
+  }
+
+  return {
+    content: panel(panelItems),
+  };
 };

@@ -10,7 +10,7 @@ import {
   DeployAccountSignerDetails,
 } from 'starknet';
 import { validateAndParseAddress } from './starknetUtils';
-import { Component, text, copyable } from '@metamask/snaps-ui';
+import { Component, text, copyable } from '@metamask/snaps-sdk';
 import {
   Network,
   Erc20Token,

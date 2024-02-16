@@ -26,11 +26,9 @@
   "author": "",
   "devDependencies": {
     "@lavamoat/allow-scripts": "^2.0.3",
-    "@metamask/key-tree": "^7.0.0",
-    "@metamask/rpc-methods": "^0.32.2",
-    "@metamask/snaps-cli": "^0.32.2",
-    "@metamask/snaps-types": "^0.32.2",
-    "@metamask/snaps-ui": "^0.32.2",
+    "@metamask/key-tree": "9.0.0",
+    "@metamask/rpc-methods": "3.0.0",
+    "@metamask/snaps-cli": "5.0.0",
     "@types/chai": "^4.3.1",
     "@types/chai-as-promised": "^7.1.5",
     "@types/sinon": "^10.0.11",
@@ -52,6 +50,7 @@
     "typescript": "^4.6.3"
   },
   "dependencies": {
+    "@metamask/snaps-sdk": "^2.0.0",
     "async-mutex": "^0.3.2",
     "ethereum-unit-converter": "^0.0.17",
     "ethers": "^5.5.1",
