@@ -115,19 +115,17 @@ export const USDT_TESTNET: Erc20Token = {
   chainId: STARKNET_TESTNET_NETWORK.chainId,
 };
 
-//TODO: change with the correct address
 export const STRK_MAINNET: Erc20Token = {
-  address: '0xab945f3e462cf31797ac47c2c5d03bf93a7c8d6a',
-  name: 'Stark',
+  address: '0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d',
+  name: 'Starknet Token',
   symbol: 'STRK',
   decimals: 18,
   chainId: STARKNET_MAINNET_NETWORK.chainId,
 };
 
-//TODO: change with the correct address
 export const STRK_TESTNET: Erc20Token = {
-  address: '0xab945f3e462cf31797ac47c2c5d03bf93a7c8d6a',
-  name: 'Stark',
+  address: '0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d',
+  name: 'Starknet Token',
   symbol: 'STRK',
   decimals: 18,
   chainId: STARKNET_TESTNET_NETWORK.chainId,
