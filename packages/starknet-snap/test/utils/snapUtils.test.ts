@@ -1,4 +1,4 @@
-import chai, { expect } from 'chai';
+import { expect } from 'chai';
 import { dappUrl } from '../../src/utils/snapUtils';
 
 describe("Snap Utils", () => {
@@ -15,7 +15,7 @@ describe("Snap Utils", () => {
     });
 
     it("should return the PROD URL if invalid envt detected", () => {
-        let envt = "abc123";
+        const envt = "abc123";
         expect(dappUrl(envt)).to.be.equal("https://snaps.consensys.io/starknet");
     });
 

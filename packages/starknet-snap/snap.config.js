@@ -1,4 +1,4 @@
-const envify = require("envify/custom");
+import envify from "envify/custom";
 
 module.exports = {
   cliOptions: {
