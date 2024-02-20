@@ -680,3 +680,15 @@ export function toMap<k, v, z>(arr: Array<v>, key: string, keyConverter?: (v: z)
     return map;
   }, new Map<k, v>());
 }
+
+export function dappUrl(envt: string) {
+  const url = (() => {
+    switch (envt) {
+      case "dev": return "https://dev.snaps.consensys.io/starknet";
+      case "staging": return "https://staging.snaps.consensys.io/starknet";
+      case "prod": return "https://snaps.consensys.io/starknet";
+      default: return "https://snaps.consensys.io/starknet";
+    }
+  })();
+  return url;
+}

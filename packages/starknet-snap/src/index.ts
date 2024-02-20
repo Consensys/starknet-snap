@@ -25,7 +25,7 @@ import {
   STARKNET_TESTNET_NETWORK,
   STARKNET_SEPOLIA_TESTNET_NETWORK,
 } from './utils/constants';
-import { upsertErc20Token, upsertNetwork } from './utils/snapUtils';
+import { dappUrl, upsertErc20Token, upsertNetwork } from './utils/snapUtils';
 import { getStoredNetworks } from './getStoredNetworks';
 import { getStoredTransactions } from './getStoredTransactions';
 import { getTransactions } from './getTransactions';
@@ -211,9 +211,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ origin, request }) => 
 export const onInstall: OnInstallHandler = async () => {
   const component = panel([
     text("Your MetaMask wallet is now compatible with Starknet!"),
-    text("To manage your Starknet account and send and receive funds, visit the [companion dapp for Starknet](https://snaps.consensys.io/starknet)."), 
-    /* THIS URL SHOULD NOT BE HARDCODED */
-    /* A util should be added to determine the URL based on the environment */
+    text(`To manage your Starknet account and send and receive funds, visit the [companion dapp for Starknet](${dappUrl(process.env.SNAP_ENV)}).`),
   ]);
 
   await snap.request({
@@ -259,8 +257,8 @@ export const onHomePage: OnHomePageHandler = async () => {
       const userAddress = state.accContracts[0].address;
       const chainId = state.accContracts[0].chainId;
       const network = state.networks.find(n => n.chainId == chainId);
-      panelItems.push(row("Address",address(`${userAddress}`))); 
-      panelItems.push(row("Network",text(`${network.name}`))); 
+      panelItems.push(row("Address", address(`${userAddress}`)));
+      panelItems.push(row("Network", text(`${network.name}`)));
 
       const ercToken = state.erc20Tokens.find(t => t.symbol == "ETH" && t.chainId == chainId);
       if (ercToken) {
@@ -273,15 +271,14 @@ export const onHomePage: OnHomePageHandler = async () => {
         };
         const balance = await getErc20TokenBalance(params)
         const displayBalance = ethers.utils.formatUnits(ethers.BigNumber.from(balance), ercToken.decimals);
-        panelItems.push(row("Balance",text(`${displayBalance} ETH`))); 
+        panelItems.push(row("Balance", text(`${displayBalance} ETH`)));
       }
 
-      panelItems.push(divider()); 
-      panelItems.push(text("Visit the [companion dapp for Starknet](https://snaps.consensys.io/starknet) to manage your account.")); 
+      panelItems.push(divider());
+      panelItems.push(text(`Visit the [companion dapp for Starknet](${dappUrl(process.env.SNAP_ENV)}) to manage your account.`));
     } else {
       panelItems.push(text(`**Your Starknet account is not yet deployed.**`));
-      panelItems.push(text(`Initiate a transaction to create your Starknet account. Visit the [companion dapp for Starknet](https://snaps.consensys.io/starknet) to get started.`));
-      /* AGAIN, THIS URL SHOULD NOT BE HARDCODED */
+      panelItems.push(text(`Initiate a transaction to create your Starknet account. Visit the [companion dapp for Starknet](${dappUrl(process.env.SNAP_ENV)}) to get started.`));
     }
   }
   catch (err) {
