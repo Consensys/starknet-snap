@@ -47,7 +47,7 @@ export const SideBarView = ({ address }: Props) => {
         setListOverflow(false);
       }
     }
-  }, [wallet.erc20TokenBalances]);
+  }, [wallet.erc20TokenBalances, chainId]);
 
   return (
     <Wrapper>
