@@ -32,7 +32,6 @@ jobs:
           path: ${{ steps.yarn-cache-dir.outputs.YARN_CACHE_DIR }}
           key: yarn-cache-${{ runner.os }}-${{ steps.yarn-version.outputs.YARN_VERSION }}-${{ hashFiles('yarn.lock') }}
       - run: yarn install --no-immutable
-      - run: yarn setup
       - run: yarn npm audit
       - run: yarn clean
       - run: yarn build

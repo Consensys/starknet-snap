@@ -25,7 +25,7 @@ The Starknet snap allows developers to **deploy Starknet accounts, make transact
 
 ```bash
 nvm use
-yarn setup
+yarn install
 ```
 
 ## Running
