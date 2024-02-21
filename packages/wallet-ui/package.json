@@ -70,7 +70,7 @@
     "terser": "^5.14.2"
   },
   "scripts": {
-    "setup": "yarn install --frozen-lockfile && yarn allow-scripts",
+    "setup": "yarn install && yarn allow-scripts",
     "start:all": "yarn clean && yarn install && yarn build && yarn start",
     "start": "react-scripts start",
     "build": "react-scripts build",
