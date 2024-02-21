@@ -125,3 +125,15 @@ export const fetchWithTimeout = async (resource: string, options = { timeout: TI
   clearTimeout(id);
   return response;
 };
+
+export const shortenDomain = (domain: string, maxLength = 18) => {
+  if (!domain) return '';
+  const ellipsis = '...';
+
+  if (domain.length <= maxLength) {
+    return domain;
+  }
+
+  const shortenedPartLength = maxLength - ellipsis.length;
+  return `${domain.substring(0, shortenedPartLength)}${ellipsis}`;
+};

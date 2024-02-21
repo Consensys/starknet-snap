@@ -1167,6 +1167,40 @@
         }
       },
       "errors": []
+    },
+    {
+      "name": "starkNet_getStarkName",
+      "summary": "Get Stark name from a Starknet account address",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "userAddress",
+          "summary": "Address of the account contract",
+          "description": "Address of the account contract",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/ADDRESS"
+          }
+        },
+        {
+          "name": "chainId",
+          "summary": "Id of the target Starknet network",
+          "description": "Id of the target Starknet network (default to Starknet Goerli Testnet)",
+          "required": false,
+          "schema": {
+            "$ref": "#/components/schemas/CHAIN_ID"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "summary": "Stark name of the given account address",
+        "description": "Stark name of the given account address",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "errors": []
     }
   ],
   "components": {
@@ -1289,12 +1323,7 @@
         "properties": {
           "type": {
             "type": "string",
-            "enum": [
-              "DECLARE",
-              "DEPLOY",
-              "DEPLOY_ACCOUNT",
-              "INVOKE_FUNCTION"
-            ]
+            "enum": ["DECLARE", "DEPLOY", "DEPLOY_ACCOUNT", "INVOKE_FUNCTION"]
           },
           "payload": {
             "$ref": "#/components/schemas/INVOCATION_PAYLOAD"
@@ -1380,30 +1409,17 @@
       },
       "TXN_STATUS": {
         "type": "string",
-        "enum": [
-          "UNKNOWN",
-          "RECEIVED",
-          "PENDING",
-          "ACCEPTED_ON_L2",
-          "ACCEPTED_ON_L1",
-          "REJECTED"
-        ],
+        "enum": ["UNKNOWN", "RECEIVED", "PENDING", "ACCEPTED_ON_L2", "ACCEPTED_ON_L1", "REJECTED"],
         "description": "The status of the transaction. May be unknown in case node is not aware of it"
       },
       "VOYAGER_TXN_TYPE": {
         "type": "string",
-        "enum": [
-          "invoke",
-          "deploy"
-        ],
+        "enum": ["invoke", "deploy"],
         "description": "The txn type of the transaction from Voyager. May not be a full list here and subject to change"
       },
       "VOYAGER_TXN_STATUS": {
         "type": "string",
-        "enum": [
-          "Accepted on L2",
-          "Accepted on L1"
-        ],
+        "enum": ["Accepted on L2", "Accepted on L1"],
         "description": "The status of the transaction. May be unknown in case node is not aware of it"
       },
       "TYPED_DATA_SIGNATURE": {
