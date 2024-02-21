@@ -3,7 +3,7 @@ import { CairoVersion, Calldata, hash, CallData, InvocationsDetails, InvokeFunct
 import { NodeProvider } from '../../node';
 
 import { AccountContractBase, AccountContractStatic } from './base';
-import { ACCOUNT_CLASS_HASH_LEGACY, PROXY_CONTRACT_HASH } from '../../../utils/constants';
+import { ACCOUNT_CLASS_HASH_LEGACY, PROXY_CONTRACT_HASH, ACCOUNT_GUARDIAN } from '../../../utils/constants';
 import { StaticImplements } from '../../../types/static';
 import { padAddress } from '../../../utils/formatterUtils';
 import { executeTxn } from '../../../utils/starknetUtils';
@@ -16,8 +16,8 @@ export class CairoZeroContract
   static ProxyClassHash: string = PROXY_CONTRACT_HASH;
   static CairoVersion = '0' as CairoVersion;
 
-  constructor(address: string, pubKey: string, priKey: string, provider?: NodeProvider) {
-    super(address, pubKey, priKey, provider, CairoZeroContract.CairoVersion);
+  constructor(address: string, pubKey: string, prvKey: string, provider?: NodeProvider) {
+    super(address, pubKey, prvKey, provider, CairoZeroContract.CairoVersion);
   }
 
   static GenerateAddressByPubKey(pubKey: string): string {
@@ -34,7 +34,7 @@ export class CairoZeroContract
     return CallData.compile({
       implementation: CairoZeroContract.ClassHash,
       selector: hash.getSelectorFromName('initialize'),
-      calldata: CallData.compile({ signer: pubKey, guardian: '0' }),
+      calldata: CallData.compile({ signer: pubKey, guardian: ACCOUNT_GUARDIAN }),
     });
   }
 

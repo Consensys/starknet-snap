@@ -100,7 +100,7 @@ export class AccountKeyring {
   // TODO: 
   // Add address+chainid to index mapping in snapState
   // Add index+chainid to contract mapping in snapState
-  async getAccountContractByAddress(address: string, reflesh = false): Promise<AccountContract> {
+  async getAccountContractByAddress(address: string, refresh = false): Promise<AccountContract> {
     const acc = await this.accountSnapStateService.getAccount(address, this.network.chainId);
     let contract: AccountContract;
     if (acc) {
@@ -113,8 +113,8 @@ export class AccountKeyring {
       throw new Error(`Account with address ${address} not found`);
     }
 
-    if (await contract.isDeployed(reflesh)) {
-      if (await this.accountContractService.isContractUpgraded(contract, reflesh)) {
+    if (await contract.isDeployed(refresh)) {
+      if (await this.accountContractService.isContractUpgraded(contract, refresh)) {
         return this.accountContractService.toLatestContract(contract);
       }
     }

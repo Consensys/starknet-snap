@@ -51,8 +51,8 @@ export class AccountContractService {
     return accountContracts;
   }
 
-  async isContractUpgraded(contract: AccountContract, reflesh = false): Promise<boolean> {
-    return await contract.isUpgraded(3, reflesh);
+  async isContractUpgraded(contract: AccountContract, refresh = false): Promise<boolean> {
+    return await contract.isUpgraded(3, refresh);
   }
 
   toLatestContract(contract: AccountContract): AccountContract {

@@ -1,9 +1,8 @@
 import { CairoVersion, Calldata, hash, CallData, InvocationsDetails, InvokeFunctionResponse } from 'starknet';
 
 import { NodeProvider } from '../../node';
-
 import { AccountContractBase, AccountContractStatic } from './base';
-import { ACCOUNT_CLASS_HASH } from '../../../utils/constants';
+import { ACCOUNT_CLASS_HASH, ACCOUNT_GUARDIAN } from '../../../utils/constants';
 import { StaticImplements } from '../../../types/static';
 import { padAddress } from '../../../utils/formatterUtils';
 
@@ -14,8 +13,8 @@ export class CairoOneContract
   static ClassHash: string = ACCOUNT_CLASS_HASH;
   static CairoVersion = '1' as CairoVersion;
 
-  constructor(address: string, pubKey: string, priKey: string, provider?: NodeProvider) {
-    super(address, pubKey, priKey, provider, CairoOneContract.CairoVersion);
+  constructor(address: string, pubKey: string, prvKey: string, provider?: NodeProvider) {
+    super(address, pubKey, prvKey, provider, CairoOneContract.CairoVersion);
   }
 
   static GenerateAddressByPubKey(pubKey: string): string {
@@ -31,7 +30,7 @@ export class CairoOneContract
   static GetCallData(pubKey: string): Calldata {
     return CallData.compile({
       signer: pubKey,
-      guardian: '0',
+      guardian: ACCOUNT_GUARDIAN,
     });
   }
 

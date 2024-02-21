@@ -68,7 +68,7 @@ export class AccountSnapStateService extends BaseSnapStateService {
         state.accContracts = [];
       }
 
-      for (var i = 0; i< userAccounts.length; i++) {
+      for (let i = 0; i< userAccounts.length; i++) {
         const userAccount = userAccounts[i];
         const storedAccount = accountMap.get(userAccount.address)
         if (!storedAccount) {

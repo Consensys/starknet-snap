@@ -14,8 +14,8 @@ export interface AccountContract {
   provider: NodeProvider;
   cairoVersion: CairoVersion;
 
-  isDeployed(reflesh?: boolean): Promise<boolean>;
-  isUpgraded(minVersion, reflesh?: boolean): Promise<boolean>;
+  isDeployed(refresh?: boolean): Promise<boolean>;
+  isUpgraded(minVersion, refresh?: boolean): Promise<boolean>;
   getChainPubKey(): Promise<string>;
   getVersion(): Promise<string>;
   upgrade(invocationsDetails: InvocationsDetails, upgradedTo: AccountContractStatic): Promise<InvokeFunctionResponse>;
@@ -58,8 +58,8 @@ export abstract class AccountContractBase {
     throw new Error('Not implemented');
   }
 
-  async isDeployed(reflesh = false): Promise<boolean> {
-    if (reflesh || this.deployed === undefined) {
+  async isDeployed(refresh = false): Promise<boolean> {
+    if (refresh || this.deployed === undefined) {
       try {
         await this.getVersion();
         this.deployed = true;
@@ -69,14 +69,12 @@ export abstract class AccountContractBase {
         }
         this.deployed = false;
       }
-    } else {
-      console.log("cached")
     }
     return this.deployed;
   }
 
-  async isUpgraded(minVersion, reflesh = false): Promise<boolean> {
-    if (reflesh || this.upgraded === undefined) {
+  async isUpgraded(minVersion, refresh = false): Promise<boolean> {
+    if (refresh || this.upgraded === undefined) {
       const hexResp = await this.getVersion();
       const versionArr = hexToString(hexResp).split('.');
       this.upgraded = Number(versionArr[1]) >= minVersion;
