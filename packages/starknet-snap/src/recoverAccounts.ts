@@ -29,16 +29,17 @@ export async function recoverAccounts(params: ApiParams) {
         state,
         i,
       );
-      const { address: contractAddress, signerPubKey: signerPublicKey, upgradeRequired } = await getCorrectContractAddress(
-        network,
-        publicKey,
+      const {
+        address: contractAddress,
+        signerPubKey: signerPublicKey,
+        upgradeRequired,
+      } = await getCorrectContractAddress(network, publicKey);
+      logger.log(
+        `recoverAccounts: index ${i}:\ncontractAddress = ${contractAddress}\npublicKey = ${publicKey}\nisUpgradeRequired = ${upgradeRequired}`,
       );
-      logger.log(`recoverAccounts: index ${i}:\ncontractAddress = ${contractAddress}\npublicKey = ${publicKey}\nisUpgradeRequired = ${upgradeRequired}`);
 
       if (signerPublicKey) {
-        logger.log(
-          `recoverAccounts: index ${i}:\ncontractAddress = ${contractAddress}\n`,
-        );
+        logger.log(`recoverAccounts: index ${i}:\ncontractAddress = ${contractAddress}\n`);
         if (num.toBigInt(signerPublicKey) === num.toBigInt(publicKey)) {
           logger.log(`recoverAccounts: index ${i} matched\npublicKey: ${publicKey}`);
         }

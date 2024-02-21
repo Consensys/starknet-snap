@@ -38,6 +38,7 @@ import { estimateFees } from './estimateFees';
 import { declareContract } from './declareContract';
 import { signDeclareTransaction } from './signDeclareTransaction';
 import { signDeployAccountTransaction } from './signDeployAccountTransaction';
+import { upgradeAccContract } from './upgradeAccContract';
 import { logger } from './utils/logger';
 
 declare const snap;
@@ -197,6 +198,10 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ origin, request }) => 
     case 'starkNet_declareContract':
       apiParams.keyDeriver = await getAddressKeyDeriver(snap);
       return declareContract(apiParams);
+
+    case 'starkNet_upgradeAccContract':
+      apiParams.keyDeriver = await getAddressKeyDeriver(snap);
+      return upgradeAccContract(apiParams);
 
     default:
       throw new Error('Method not found.');
