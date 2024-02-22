@@ -50,7 +50,7 @@ export const SideBarView = ({ address }: Props) => {
         setListOverflow(false);
       }
     }
-  }, [wallet.erc20TokenBalances, chainId]);
+  }, [wallet.erc20TokenBalances]);
 
   useEffect(() => {
     if (address) {
@@ -62,7 +62,7 @@ export const SideBarView = ({ address }: Props) => {
           setStarkName(undefined);
         });
     }
-  }, [address]);
+  }, [address, chainId, getStarkName]);
 
   return (
     <Wrapper>
