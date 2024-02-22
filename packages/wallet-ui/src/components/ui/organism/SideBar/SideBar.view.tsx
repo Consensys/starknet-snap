@@ -62,7 +62,8 @@ export const SideBarView = ({ address }: Props) => {
           setStarkName(undefined);
         });
     }
-  }, [address, chainId, getStarkName]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [address, chainId]);
 
   return (
     <Wrapper>
