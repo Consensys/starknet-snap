@@ -1,6 +1,12 @@
 import { constants } from 'starknet';
 import { Erc20Token, Network } from '../types/snapState';
 
+interface IDappConfig {
+  dev: string;
+  staging: string;
+  prod: string;
+}
+
 export const VOYAGER_API_TXN_URL_SUFFIX = '/api/txn';
 export const VOYAGER_API_TXNS_URL_SUFFIX = '/api/txns';
 
@@ -199,3 +205,9 @@ export const PRELOADED_NETWORKS = [
 ];
 
 export const PROXY_CONTRACT_HASH = '0x25ec026985a3bf9d0cc1fe17326b245dfdc3ff89b8fde106542a3ea56c5a918'; // from argent-x repo
+
+export const DAPP: IDappConfig = {
+  dev: 'https://dev.snaps.consensys.io/starknet',
+  staging: 'https://staging.snaps.consensys.io/starknet',
+  prod: 'https://snaps.consensys.io/starknet',
+};

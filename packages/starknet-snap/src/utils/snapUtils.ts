@@ -21,6 +21,7 @@ import {
   TransactionStatus,
 } from '../types/snapState';
 import {
+  DAPP,
   MAXIMUM_NETWORK_NAME_LENGTH,
   MAXIMUM_TOKEN_NAME_LENGTH,
   MAXIMUM_TOKEN_SYMBOL_LENGTH,
@@ -684,10 +685,14 @@ export function toMap<k, v, z>(arr: Array<v>, key: string, keyConverter?: (v: z)
 export function dappUrl(envt: string) {
   const url = (() => {
     switch (envt) {
-      case "dev": return "https://dev.snaps.consensys.io/starknet";
-      case "staging": return "https://staging.snaps.consensys.io/starknet";
-      case "prod": return "https://snaps.consensys.io/starknet";
-      default: return "https://snaps.consensys.io/starknet";
+      case 'dev':
+        return DAPP.dev;
+      case 'staging':
+        return DAPP.staging;
+      case 'prod':
+        return DAPP.prod;
+      default:
+        return DAPP.prod;
     }
   })();
   return url;
