@@ -266,6 +266,7 @@ export const onHomePage: OnHomePageHandler = async () => {
 
       const ercToken = state.erc20Tokens.find(t => t.symbol == "ETH" && t.chainId == chainId);
       if (ercToken) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const params: any = {
           state,
           requestParams: {
