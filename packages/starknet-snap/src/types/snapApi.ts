@@ -206,3 +206,7 @@ export interface SignDeclareTransactionRequestParams extends Autherizeable, Sign
 export interface SwitchNetworkRequestParams extends Autherizeable, BaseRequestParams {
   chainId: string;
 }
+
+export interface GetStarkNameRequestParam extends BaseRequestParams {
+  userAddress: string;
+}
