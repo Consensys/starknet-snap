@@ -61,7 +61,7 @@ export const account4: AccContract = {
 };
 
 export const Cairo1Account1: AccContract = {
-  address: '0x043e3d703b005b8367a9783fb680713349c519202aa01e9beb170bdf710ae20b',
+  address: '0x0404d766fd6db2c23177e5ea289af99e81e5c4a7badae588950ad0f8572c49b9',
   addressSalt: '0x019e59f349e1aa813ab4556c5836d0472e5e1ae82d1e5c3b3e8aabfeb290befd',
   addressIndex: 1,
   derivationPath: "m / bip32:44' / bip32:9004' / bip32:0' / bip32:0",
@@ -100,8 +100,8 @@ export const signature2 =
   '30440220052956ac852275b6004c4e8042450f6dce83059f068029b037cc47338c80d062022002bc0e712f03e341bb3532fc356b779d84fcb4dbfe8ed34de2db66e121971d92';
 
 export const signature4Cairo1SignMessage = [
-  '2941323345698930086258187297320132789256148405011604592758945785805412997864',
-  '1024747634926675542679366527128384456926978174336360356924884281219915547518',
+  '2334603173889607172621639019166048758876763440301330097513705152117706117218',
+  '1236892621218974511001789530309582149943950152899985052022949903736308702610',
 ];
 export const signature4SignMessage = [
   '784041227270069705374122994163964526105670242785431143890307285886848872447',
@@ -381,20 +381,20 @@ export const estimateDeployFeeResp4 = {
 export const estimateFeeResp = {
   overall_fee: num.toBigInt('0x0dc3e44d89e6'),
   suggestedMaxFee: num.toBigInt('0x14a5d6744ed9'),
-};
+}
 
 export const estimateFeeResp2 = {
   overall_fee: num.toBigInt('0x0dc3e44d89e6'),
   suggestedMaxFee: num.toBigInt('0x14a5d6744ed9'),
 };
 
-export const unfoundUserAddress = '0x07bb462e1cf8f2eead6a86464fecac1fad84b66da8078fe39d24bdf7c8504070';
+export const unfoundUserAddress = '0x0404d766fd6db2c23177e5ea289af99e81e5c4a7badae588950ad0f8572c49b9';
 export const unfoundUserPrivateKey = '0x38d36fc25592257d913d143d37e12533dba9f6721db6fa954ed513b0dc3d68b';
 export const unfoundUserPublicKey = '0x4b36a2b0a1e9d2af3416914798de776e37d9e0ab9a50d2dec30485dca64bb8';
 export const foundUserPrivateKey = '0x3cddbb7f3694ce84bd9598820834015d979d78e63474a5b00e59b41b0563f4e';
 
 export const testnetPublicKeys = [
-  '0x154c7b20442ee954f50831702ca844ec185ad484c21719575d351583deec90b',
+  '0x4b36a2b0a1e9d2af3416914798de776e37d9e0ab9a50d2dec30485dca64bb8',
   '0x19e59f349e1aa813ab4556c5836d0472e5e1ae82d1e5c3b3e8aabfeb290befd',
   '0x4b36a2b0a1e9d2af3416914798de776e37d9e0ab9a50d2dec30485dca64bb8',
   '0x6de8036537a36bcdfaf0954f71fd7bb11f3f1a9e5778ac5e988e5f8f56aade4',
@@ -420,7 +420,7 @@ export const testnetAccAddresses = [
 ];
 
 export const mainnetPublicKeys = [
-  '0x154c7b20442ee954f50831702ca844ec185ad484c21719575d351583deec90b',
+  '0x4b36a2b0a1e9d2af3416914798de776e37d9e0ab9a50d2dec30485dca64bb8',
   '0x19e59f349e1aa813ab4556c5836d0472e5e1ae82d1e5c3b3e8aabfeb290befd',
   '0x4b36a2b0a1e9d2af3416914798de776e37d9e0ab9a50d2dec30485dca64bb8',
   '0x6de8036537a36bcdfaf0954f71fd7bb11f3f1a9e5778ac5e988e5f8f56aade4',
