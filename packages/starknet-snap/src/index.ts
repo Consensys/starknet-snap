@@ -23,6 +23,7 @@ import {
   STARKNET_INTEGRATION_NETWORK,
   STARKNET_MAINNET_NETWORK,
   STARKNET_TESTNET_NETWORK,
+  STARKNET_SEPOLIA_TESTNET_NETWORK,
 } from './utils/constants';
 import { upsertErc20Token, upsertNetwork } from './utils/snapUtils';
 import { getStoredNetworks } from './getStoredNetworks';
@@ -40,6 +41,7 @@ import { signDeclareTransaction } from './signDeclareTransaction';
 import { signDeployAccountTransaction } from './signDeployAccountTransaction';
 import { upgradeAccContract } from './upgradeAccContract';
 import { logger } from './utils/logger';
+import { getStarkName } from './getStarkName';
 
 declare const snap;
 const saveMutex = new Mutex();
@@ -88,6 +90,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ origin, request }) => 
     await upsertNetwork(STARKNET_INTEGRATION_NETWORK, snap, saveMutex, state);
   } else {
     await upsertNetwork(STARKNET_TESTNET_NETWORK, snap, saveMutex, state);
+    await upsertNetwork(STARKNET_SEPOLIA_TESTNET_NETWORK, snap, saveMutex, state);
   }
   for (const token of PRELOADED_TOKENS) {
     await upsertErc20Token(token, snap, saveMutex, state);
@@ -202,6 +205,9 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ origin, request }) => 
     case 'starkNet_upgradeAccContract':
       apiParams.keyDeriver = await getAddressKeyDeriver(snap);
       return upgradeAccContract(apiParams);
+
+    case 'starkNet_getStarkName':
+      return getStarkName(apiParams);
 
     default:
       throw new Error('Method not found.');

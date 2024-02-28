@@ -21,12 +21,12 @@ import { Transaction } from 'types';
 import { ethers } from 'ethers';
 import { getAssetPriceUSD } from './coinGecko';
 import semver from 'semver/preload';
+import { setActiveNetwork } from 'slices/networkSlice';
 
 export const useStarkNetSnap = () => {
   const dispatch = useAppDispatch();
   const { loader } = useAppSelector((state) => state.UI);
   const { transactions, erc20TokenBalances, provider } = useAppSelector((state) => state.wallet);
-  const { activeNetwork } = useAppSelector((state) => state.networks);
   const snapId = process.env.REACT_APP_SNAP_ID ? process.env.REACT_APP_SNAP_ID : 'local:http://localhost:8081/';
   const snapVersion = process.env.REACT_APP_SNAP_VERSION ? process.env.REACT_APP_SNAP_VERSION : '*';
   const minSnapVersion = process.env.REACT_APP_MIN_SNAP_VERSION ? process.env.REACT_APP_MIN_SNAP_VERSION : '2.0.1';
@@ -204,7 +204,10 @@ export const useStarkNetSnap = () => {
       if (nets.length === 0) {
         return;
       }
-      const chainId = nets[activeNetwork].chainId;
+      const net = await getCurrentNetwork();
+      const idx = nets.findIndex((e) => e.chainId === net.chainId);
+      dispatch(setActiveNetwork(idx));
+      const chainId = net.chainId;
       await getWalletData(chainId, nets);
     } catch (err: any) {
       if (err.code && err.code === 4100) {
@@ -685,6 +688,70 @@ export const useStarkNetSnap = () => {
     return result;
   };
 
+  const switchNetwork = async (chainId: string) => {
+    dispatch(enableLoadingWithMessage('Switching Network...'));
+    try {
+      const result = await provider.request({
+        method: 'wallet_invokeSnap',
+        params: {
+          snapId,
+          request: {
+            method: 'starkNet_switchNetwork',
+            params: {
+              ...defaultParam,
+              chainId,
+            },
+          },
+        },
+      });
+      dispatch(disableLoading());
+      return result;
+    } catch (err) {
+      dispatch(disableLoading());
+      return false;
+    }
+  };
+
+  const getCurrentNetwork = async () => {
+    try {
+      return await provider.request({
+        method: 'wallet_invokeSnap',
+        params: {
+          snapId,
+          request: {
+            method: 'starkNet_getCurrentNetwork',
+            params: {
+              ...defaultParam,
+            },
+          },
+        },
+      });
+    } catch (err) {
+      throw err;
+    }
+  };
+
+  const getStarkName = async (userAddress: string, chainId: string) => {
+    try {
+      return await provider.request({
+        method: 'wallet_invokeSnap',
+        params: {
+          snapId,
+          request: {
+            method: 'starkNet_getStarkName',
+            params: {
+              ...defaultParam,
+              userAddress,
+              chainId,
+            },
+          },
+        },
+      });
+    } catch (err) {
+      throw err;
+    }
+  };
+
   return {
     connectToSnap,
     getNetworks,
@@ -709,6 +776,9 @@ export const useStarkNetSnap = () => {
     getWalletData,
     refreshTokensUSDPrice,
     readContract,
+    switchNetwork,
+    getCurrentNetwork,
+    getStarkName,
     satisfiesVersion: oldVersionDetected,
   };
 };

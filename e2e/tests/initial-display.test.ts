@@ -58,7 +58,7 @@ test.describe('Starknet dapp should be able to initilize account and have correc
     await applicationPage.waitForLodingPage();
     await applicationPage.checkUserIsconnected();
 
-    // Check user is directed to infomation page when click about this snap link
+    // Check user is directed to information page when click about this snap link
     await applicationPage.clickAboutThisSnapLink()
     const [infoPage] = await Promise.all([browserContext.waitForEvent('page')]);
     expect(infoPage.url()).toContain('/metamask-integrates-starkware-into');

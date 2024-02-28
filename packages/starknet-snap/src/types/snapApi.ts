@@ -75,7 +75,7 @@ export interface ExtractPublicKeyRequestParams extends BaseRequestParams {
   userAddress: string;
 }
 
-export interface SignMessageRequestParams extends SignRequestParams, BaseRequestParams {
+export interface SignMessageRequestParams extends Autherizeable, SignRequestParams, BaseRequestParams {
   typedDataMessage: typedData.TypedData;
 }
 
@@ -186,25 +186,32 @@ export interface RpcV4GetTransactionReceiptResponse {
   finality_status?: string;
 }
 
-export interface SignRequestParams {
-  signerAddress: string;
+export interface Autherizeable {
   enableAutherize?: boolean;
 }
 
-export interface SignTransactionRequestParams extends SignRequestParams, BaseRequestParams {
+export interface SignRequestParams {
+  signerAddress: string;
+}
+
+export interface SignTransactionRequestParams extends Autherizeable, SignRequestParams, BaseRequestParams {
   transactions: Call[];
   transactionsDetail: InvocationsSignerDetails;
   abis?: Abi[];
 }
 
-export interface SignDeployAccountTransactionRequestParams extends SignRequestParams, BaseRequestParams {
+export interface SignDeployAccountTransactionRequestParams extends Autherizeable, SignRequestParams, BaseRequestParams {
   transaction: DeployAccountSignerDetails;
 }
 
-export interface SignDeclareTransactionRequestParams extends SignRequestParams, BaseRequestParams {
+export interface SignDeclareTransactionRequestParams extends Autherizeable, SignRequestParams, BaseRequestParams {
   transaction: DeclareSignerDetails;
 }
 
-export interface SwitchNetworkRequestParams extends BaseRequestParams {
+export interface SwitchNetworkRequestParams extends Autherizeable, BaseRequestParams {
   chainId: string;
+}
+
+export interface GetStarkNameRequestParam extends BaseRequestParams {
+  userAddress: string;
 }

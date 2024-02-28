@@ -19,6 +19,7 @@ import { Menu } from '@headlessui/react';
 import { theme } from 'theme/default';
 import { Radio, Skeleton } from '@mui/material';
 import { useAppDispatch, useAppSelector } from 'hooks/redux';
+import { useStarkNetSnap } from 'services';
 import { setWalletConnection, setForceReconnect, resetWallet, clearAccounts } from 'slices/walletSlice';
 import { resetNetwork, setActiveNetwork } from 'slices/networkSlice';
 
@@ -27,12 +28,16 @@ interface IProps extends HTMLAttributes<HTMLElement> {
 }
 
 export const MenuView = ({ connected, ...otherProps }: IProps) => {
+  const { switchNetwork } = useStarkNetSnap();
   const networks = useAppSelector((state) => state.networks);
   const dispatch = useAppDispatch();
 
-  const changeNetwork = (network: number) => {
-    dispatch(clearAccounts());
-    dispatch(setActiveNetwork(network));
+  const changeNetwork = async (network: number, chainId: string) => {
+    const result = await switchNetwork(chainId);
+    if (result) {
+      dispatch(clearAccounts());
+      dispatch(setActiveNetwork(network));
+    }
   };
   /*
     There is no way to disconnect the snap from a dapp it must be done from MetaMask.
@@ -80,7 +85,7 @@ export const MenuView = ({ connected, ...otherProps }: IProps) => {
             <MenuSection>
               {networks.items.map((network, index) => (
                 <Menu.Item key={network.chainId + '_' + index}>
-                  <NetworkMenuItem onClick={() => changeNetwork(index)}>
+                  <NetworkMenuItem onClick={() => changeNetwork(index, network.chainId)}>
                     <Radio
                       checked={Number(networks.activeNetwork) === index}
                       name="radio-buttons"

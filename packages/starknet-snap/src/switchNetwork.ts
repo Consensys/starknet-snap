@@ -15,14 +15,16 @@ export async function switchNetwork(params: ApiParams) {
     }
     const components = getNetworkTxt(network);
 
-    const response = await wallet.request({
-      method: 'snap_dialog',
-      params: {
-        type: DialogType.Confirmation,
-        content: panel([heading('Do you want to switch to this network?'), ...components]),
-      },
-    });
-    if (!response) return false;
+    if (requestParamsObj.enableAutherize === true) {
+      const response = await wallet.request({
+        method: 'snap_dialog',
+        params: {
+          type: DialogType.Confirmation,
+          content: panel([heading('Do you want to switch to this network?'), ...components]),
+        },
+      });
+      if (!response) return false;
+    }
 
     logger.log(`switchNetwork: network:\n${toJson(network, 2)}`);
     await setCurrentNetwork(network, wallet, saveMutex, state);
