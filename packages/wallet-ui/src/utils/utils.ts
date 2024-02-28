@@ -175,7 +175,7 @@ export const retry = async (
     }
   }
   return false;
-}
+};
 
 export const shortenDomain = (domain: string, maxLength = 18) => {
   if (!domain) return '';
