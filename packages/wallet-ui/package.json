@@ -1,6 +1,6 @@
 {
   "name": "wallet-ui",
-  "version": "1.18.0",
+  "version": "1.19.0",
   "private": true,
   "license": "(Apache-2.0 OR MIT)",
   "homepage": "/starknet",
@@ -70,7 +70,7 @@
     "terser": "^5.14.2"
   },
   "scripts": {
-    "setup": "yarn install --frozen-lockfile && yarn allow-scripts",
+    "setup": "yarn install --immutable && yarn allow-scripts",
     "start:all": "yarn clean && yarn install && yarn build && yarn start",
     "start": "react-scripts start",
     "build": "react-scripts build",

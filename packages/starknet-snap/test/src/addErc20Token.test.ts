@@ -5,7 +5,11 @@ import { WalletMock } from '../wallet.mock.test';
 import { addErc20Token } from '../../src/addErc20Token';
 import { SnapState } from '../../src/types/snapState';
 import * as snapUtils from '../../src/utils/snapUtils';
-import { DEFAULT_DECIMAL_PLACES, STARKNET_TESTNET_NETWORK } from '../../src/utils/constants';
+import {
+  DEFAULT_DECIMAL_PLACES,
+  STARKNET_TESTNET_NETWORK,
+  STARKNET_SEPOLIA_TESTNET_NETWORK,
+} from '../../src/utils/constants';
 import { Mutex } from 'async-mutex';
 import { AddErc20TokenRequestParams, ApiParams } from '../../src/types/snapApi';
 
@@ -17,7 +21,7 @@ describe('Test function: addErc20Token', function () {
   const state: SnapState = {
     accContracts: [],
     erc20Tokens: [],
-    networks: [STARKNET_TESTNET_NETWORK],
+    networks: [STARKNET_TESTNET_NETWORK, STARKNET_SEPOLIA_TESTNET_NETWORK],
     transactions: [],
   };
   const apiParams: ApiParams = {
