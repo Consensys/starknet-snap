@@ -641,6 +641,34 @@ export const useStarkNetSnap = () => {
     return txStatus;
   };
 
+  const switchNetwork = async (chainId: string) => {
+    dispatch(enableLoadingWithMessage('Switching Network...'));
+    try {
+      const result = await provider.request({
+        method: 'wallet_invokeSnap',
+        params: {
+          snapId,
+          request: {
+            method: 'starkNet_switchNetwork',
+            params: {
+              ...defaultParam,
+              chainId,
+            },
+          },
+        },
+      });
+      dispatch(disableLoading());
+      return result;
+    } catch (err) {
+      dispatch(disableLoading());
+      return false;
+    };
+
+    await retry(executeFn);
+
+    return txStatus;
+  };
+
   const waitForAccountUpdate = async (transactionHash: string, accountAddress: string, chainId: string) => {
     dispatch(enableLoadingWithMessage('Waiting for transaction finalize...'));
     const toastr = new Toastr();
@@ -685,6 +713,27 @@ export const useStarkNetSnap = () => {
     return result;
   };
 
+  const getStarkName = async (userAddress: string, chainId: string) => {
+    try {
+      return await provider.request({
+        method: 'wallet_invokeSnap',
+        params: {
+          snapId,
+          request: {
+            method: 'starkNet_getStarkName',
+            params: {
+              ...defaultParam,
+              userAddress,
+              chainId,
+            },
+          },
+        },
+      });
+    } catch (err) {
+      throw err;
+    }
+  };
+
   return {
     connectToSnap,
     getNetworks,
@@ -709,6 +758,9 @@ export const useStarkNetSnap = () => {
     getWalletData,
     refreshTokensUSDPrice,
     readContract,
+    switchNetwork,
+    getCurrentNetwork,
+    getStarkName,
     satisfiesVersion: oldVersionDetected,
   };
 };

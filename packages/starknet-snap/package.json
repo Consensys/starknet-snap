@@ -8,7 +8,7 @@
     "url": "https://github.com/ConsenSys/starknet-snap.git"
   },
   "scripts": {
-    "setup": "yarn install --frozen-lockfile && yarn allow-scripts",
+    "setup": "yarn install --immutable && yarn allow-scripts",
     "build:clean": "yarn clean && yarn build",
     "build": "mm-snap build",
     "serve": "mm-snap serve",

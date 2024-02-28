@@ -40,6 +40,7 @@ import { signDeclareTransaction } from './signDeclareTransaction';
 import { signDeployAccountTransaction } from './signDeployAccountTransaction';
 import { upgradeAccContract } from './upgradeAccContract';
 import { logger } from './utils/logger';
+import { getStarkName } from './getStarkName';
 
 declare const snap;
 const saveMutex = new Mutex();
@@ -202,6 +203,9 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ origin, request }) => 
     case 'starkNet_upgradeAccContract':
       apiParams.keyDeriver = await getAddressKeyDeriver(snap);
       return upgradeAccContract(apiParams);
+
+    case 'starkNet_getStarkName':
+      return getStarkName(apiParams);
 
     default:
       throw new Error('Method not found.');

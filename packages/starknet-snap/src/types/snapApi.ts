@@ -208,3 +208,7 @@ export interface SignDeclareTransactionRequestParams extends SignRequestParams, 
 export interface SwitchNetworkRequestParams extends BaseRequestParams {
   chainId: string;
 }
+
+export interface GetStarkNameRequestParam extends BaseRequestParams {
+  userAddress: string;
+}

@@ -171,3 +171,15 @@ export const retry = async (
   }
   return false;
 };
+
+export const shortenDomain = (domain: string, maxLength = 18) => {
+  if (!domain) return '';
+  const ellipsis = '...';
+
+  if (domain.length <= maxLength) {
+    return domain;
+  }
+
+  const shortenedPartLength = maxLength - ellipsis.length;
+  return `${domain.substring(0, shortenedPartLength)}${ellipsis}`;
+};
