@@ -62,7 +62,7 @@ export const SideBarView = ({ address }: Props) => {
           setStarkName(undefined);
         });
     }
-  }, [address]);
+  }, [address, chainId, getStarkName]);
 
   return (
     <Wrapper>
