@@ -1,4 +1,4 @@
-import { setInfoModalVisible, setMinVersionModalVisible } from 'slices/modalSlice';
+import { setInfoModalVisible, setMinVersionModalVisible, setUpgradeModalVisible } from 'slices/modalSlice';
 import { setNetworks } from 'slices/networkSlice';
 import { useAppDispatch, useAppSelector } from 'hooks/redux';
 import {
@@ -11,7 +11,7 @@ import {
   setForceReconnect,
 } from '../slices/walletSlice';
 import Toastr from 'toastr2';
-import { addMissingPropertiesToToken } from '../utils/utils';
+import { addMissingPropertiesToToken, hexToString, retry, isGTEMinVersion } from '../utils/utils';
 import { setWalletConnection } from '../slices/walletSlice';
 import { Network, VoyagerTransactionType } from '../types';
 import { Account } from '../types';
@@ -31,6 +31,9 @@ export const useStarkNetSnap = () => {
   const snapVersion = process.env.REACT_APP_SNAP_VERSION ? process.env.REACT_APP_SNAP_VERSION : '*';
   const minSnapVersion = process.env.REACT_APP_MIN_SNAP_VERSION ? process.env.REACT_APP_MIN_SNAP_VERSION : '2.0.1';
   const debugLevel = process.env.REACT_APP_DEBUG_LEVEL !== undefined ? process.env.REACT_APP_DEBUG_LEVEL : 'all';
+  const START_SCAN_INDEX = 0;
+  const MAX_SCANNED = 1;
+  const MAX_MISSED = 1;
 
   const defaultParam = {
     debugLevel,
@@ -114,10 +117,12 @@ export const useStarkNetSnap = () => {
     return tokens;
   };
 
-  const recoverAccounts = async (chainId: string) => {
-    const START_SCAN_INDEX = 0;
-    const MAX_SCANNED = 1;
-    const MAX_MISSED = 1;
+  const recoverAccounts = async (
+    chainId: string,
+    start: number = START_SCAN_INDEX,
+    maxScan: number = MAX_SCANNED,
+    maxMiss: number = MAX_MISSED,
+  ) => {
     const scannedAccounts = (await provider.request({
       method: 'wallet_invokeSnap',
       params: {
@@ -126,9 +131,9 @@ export const useStarkNetSnap = () => {
           method: 'starkNet_recoverAccounts',
           params: {
             ...defaultParam,
-            startScanIndex: START_SCAN_INDEX,
-            maxScanned: MAX_SCANNED,
-            maxMissed: MAX_MISSED,
+            startScanIndex: start,
+            maxScanned: maxScan,
+            maxMissed: maxMiss,
             chainId,
           },
         },
@@ -163,7 +168,7 @@ export const useStarkNetSnap = () => {
           method: 'starkNet_createAccount',
           params: {
             ...defaultParam,
-            addressIndex: 0,
+            addressIndex: START_SCAN_INDEX,
             chainId,
             deploy: false,
           },
@@ -229,9 +234,14 @@ export const useStarkNetSnap = () => {
     }
     const tokens = await getTokens(chainId);
     let acc: Account[] | Account = await recoverAccounts(chainId);
+    let upgradeRequired = false;
+
     if (!acc || acc.length === 0 || !acc[0].publicKey) {
       acc = await addAccount(chainId);
+    } else {
+      upgradeRequired = (Array.isArray(acc) ? acc[0].upgradeRequired : (acc as Account).upgradeRequired) ?? false;
     }
+
     const tokenBalances = await Promise.all(
       tokens.map(async (token) => {
         const accountAddr = Array.isArray(acc) ? acc[0].address : acc.address;
@@ -259,6 +269,7 @@ export const useStarkNetSnap = () => {
     if (!Array.isArray(acc)) {
       dispatch(setInfoModalVisible(true));
     }
+    dispatch(setUpgradeModalVisible(upgradeRequired));
     dispatch(disableLoading());
   };
 
@@ -357,6 +368,80 @@ export const useStarkNetSnap = () => {
       throw err;
     }
   }
+
+  const getTransactionStatus = async (transactionHash: string, chainId: string) => {
+    try {
+      const response = await provider.request({
+        method: 'wallet_invokeSnap',
+        params: {
+          snapId,
+          request: {
+            method: 'starkNet_getTransactionStatus',
+            params: {
+              ...defaultParam,
+              transactionHash,
+              chainId,
+            },
+          },
+        },
+      });
+      return response;
+    } catch (err) {
+      //eslint-disable-next-line no-console
+      console.error(err);
+    }
+  };
+
+  const readContract = async (contractAddress: string, contractFuncName: string) => {
+    try {
+      const response = await provider.request({
+        method: 'wallet_invokeSnap',
+        params: {
+          snapId,
+          request: {
+            method: 'starkNet_getValue',
+            params: {
+              ...defaultParam,
+              contractAddress,
+              contractFuncName,
+            },
+          },
+        },
+      });
+      return response;
+    } catch (err) {
+      //eslint-disable-next-line no-console
+      console.error(err);
+    }
+  };
+
+  const upgradeAccount = async (contractAddress: string, maxFee: string, chainId: string) => {
+    dispatch(enableLoadingWithMessage('Upgrading account...'));
+    try {
+      const response = await provider.request({
+        method: 'wallet_invokeSnap',
+        params: {
+          snapId,
+          request: {
+            method: 'starkNet_upgradeAccContract',
+            params: {
+              ...defaultParam,
+              contractAddress,
+              maxFee,
+              chainId,
+            },
+          },
+        },
+      });
+      dispatch(disableLoading());
+      return response;
+    } catch (err) {
+      dispatch(disableLoading());
+      //eslint-disable-next-line no-console
+      console.error(err);
+      throw err;
+    }
+  };
 
   const getTransactions = async (
     senderAddress: string,
@@ -532,6 +617,77 @@ export const useStarkNetSnap = () => {
     }
   };
 
+  const waitForTransaction = async (transactionHash: string, chainId: string) => {
+    let txStatus;
+    const successStates = ['ACCEPTED_ON_L2', 'ACCEPTED_ON_L1'];
+    const errorStates = ['REJECTED', 'NOT_RECEIVED'];
+
+    const executeFn = async () => {
+      txStatus = await getTransactionStatus(transactionHash, chainId);
+
+      if (!txStatus || !('executionStatus' in txStatus) || !('finalityStatus' in txStatus)) {
+        return false;
+      }
+
+      if (txStatus.finalityStatus && successStates.includes(txStatus.finalityStatus)) {
+        return true;
+      } else if (txStatus.executionStatus && errorStates.includes(txStatus.executionStatus)) {
+        const message = txStatus.executionStatus;
+        throw new Error(message);
+      }
+
+      return false;
+    };
+
+    await retry(executeFn);
+
+    return txStatus;
+  };
+
+  const waitForAccountUpdate = async (transactionHash: string, accountAddress: string, chainId: string) => {
+    dispatch(enableLoadingWithMessage('Waiting for transaction finalize...'));
+    const toastr = new Toastr();
+    let result = false;
+
+    try {
+      // read transaction to check if the txn is ready
+      await waitForTransaction(transactionHash, chainId);
+    } catch (e) {
+      //eslint-disable-next-line no-console
+      console.log(`error while wait for transaction: ${e}`);
+    }
+
+    try {
+      const executeFn = async (): Promise<boolean> => {
+        // read contract to check if upgrade is required
+        const resp = await readContract(accountAddress, 'getVersion');
+        if (!resp || !resp[0]) {
+          return false;
+        }
+
+        if (!isGTEMinVersion(hexToString(resp[0]))) {
+          return false;
+        }
+
+        // recover accounts to update snap state
+        await recoverAccounts(chainId);
+        return true;
+      };
+
+      result = await retry(executeFn, {
+        maxAttempts: 20,
+      });
+    } catch (e: any) {
+      //eslint-disable-next-line no-console
+      console.log(`error while processing waitForAccountUpdate: ${e}`);
+      toastr.error('Snap is unable to verify the contract upgrade process');
+    }
+
+    dispatch(disableLoading());
+
+    return result;
+  };
+
   const switchNetwork = async (chainId: string) => {
     dispatch(enableLoadingWithMessage('Switching Network...'));
     try {
@@ -605,7 +761,12 @@ export const useStarkNetSnap = () => {
     getPrivateKeyFromAddress,
     estimateFees,
     sendTransaction,
+    upgradeAccount,
     getTransactions,
+    getTransactionStatus,
+    recoverAccounts,
+    waitForTransaction,
+    waitForAccountUpdate,
     updateTokenBalance,
     getTokenBalance,
     addErc20Token,
@@ -614,6 +775,7 @@ export const useStarkNetSnap = () => {
     initSnap,
     getWalletData,
     refreshTokensUSDPrice,
+    readContract,
     switchNetwork,
     getCurrentNetwork,
     getStarkName,

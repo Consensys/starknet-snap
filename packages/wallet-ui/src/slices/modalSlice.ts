@@ -3,11 +3,13 @@ import { createSlice } from '@reduxjs/toolkit';
 export interface modalState {
   infoModalVisible: boolean;
   minVersionModalVisible: boolean;
+  upgradeModalVisible: boolean;
 }
 
 const initialState: modalState = {
   infoModalVisible: false,
   minVersionModalVisible: false,
+  upgradeModalVisible: false,
 };
 
 export const modalSlice = createSlice({
@@ -18,12 +20,15 @@ export const modalSlice = createSlice({
     setInfoModalVisible: (state, { payload }) => {
       state.infoModalVisible = payload;
     },
+    setUpgradeModalVisible: (state, { payload }) => {
+      state.upgradeModalVisible = payload;
+    },
     setMinVersionModalVisible: (state, { payload }) => {
       state.minVersionModalVisible = payload;
     },
   },
 });
 
-export const { setInfoModalVisible, setMinVersionModalVisible } = modalSlice.actions;
+export const { setInfoModalVisible, setMinVersionModalVisible, setUpgradeModalVisible } = modalSlice.actions;
 
 export default modalSlice.reducer;
