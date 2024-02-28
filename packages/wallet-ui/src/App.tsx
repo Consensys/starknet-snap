@@ -18,7 +18,6 @@ import 'toastr2/dist/toastr.min.css';
 import { NoMetamaskModal } from 'components/ui/organism/NoMetamaskModal';
 import { MinVersionModal } from './components/ui/organism/MinVersionModal';
 import { useHasMetamask } from 'hooks/useHasMetamask';
-import { DUMMY_ADDRESS } from 'utils/constants';
 
 library.add(fas, far);
 
@@ -31,7 +30,7 @@ function App() {
   const { accounts } = useAppSelector((state) => state.wallet);
   const { hasMetamask } = useHasMetamask();
 
-  const address = accounts?.length > 0 ? (accounts[0] as unknown as string) : DUMMY_ADDRESS;
+  const address = accounts?.length > 0 ? (accounts[0] as unknown as string) : '0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx';
 
   useEffect(() => {
     if (!provider) {
