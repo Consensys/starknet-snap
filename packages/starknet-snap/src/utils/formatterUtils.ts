@@ -7,3 +7,10 @@ export const hexToString = (hex) => {
   }
   return str;
 };
+
+export const padAddress = (address: string) => {
+  if (address.length < 66) {
+    address = address.replace('0x', '0x' + '0'.repeat(66 - address.length));
+  }
+  return address;
+};
