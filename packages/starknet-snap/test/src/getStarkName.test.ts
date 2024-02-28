@@ -34,20 +34,20 @@ describe('Test function: getStarkName', function () {
 
   it('should retrieve the stark name successfully', async function () {
     sandbox.stub(utils, 'getStarkNameUtil').callsFake(async () => {
-      return "testName.stark";
+      return 'testName.stark';
     });
     const requestObject: GetStarkNameRequestParam = {
-        userAddress: '0x01c744953f1d671673f46a9179a58a7e58d9299499b1e076cdb908e7abffe69f',
+      userAddress: '0x01c744953f1d671673f46a9179a58a7e58d9299499b1e076cdb908e7abffe69f',
     };
     apiParams.requestParams = requestObject;
     const result = await getStarkName(apiParams);
-    expect(result).to.be.eq("testName.stark");
+    expect(result).to.be.eq('testName.stark');
   });
 
-    it('should throw error if getStarkNameUtil failed', async function () {
+  it('should throw error if getStarkNameUtil failed', async function () {
     sandbox.stub(utils, 'getStarkNameUtil').throws(new Error());
     const requestObject: GetStarkNameRequestParam = {
-        userAddress: '0x01c744953f1d671673f46a9179a58a7e58d9299499b1e076cdb908e7abffe69f',
+      userAddress: '0x01c744953f1d671673f46a9179a58a7e58d9299499b1e076cdb908e7abffe69f',
     };
     apiParams.requestParams = requestObject;
 
@@ -61,7 +61,7 @@ describe('Test function: getStarkName', function () {
     }
   });
 
-  it('should throw error if the user address is empty', async function() {
+  it('should throw error if the user address is empty', async function () {
     const requestObject: GetStarkNameRequestParam = {
       userAddress: '',
     };
@@ -77,7 +77,7 @@ describe('Test function: getStarkName', function () {
     }
   });
 
-  it('should throw error if the user address is invalid', async function() {
+  it('should throw error if the user address is invalid', async function () {
     const requestObject: GetStarkNameRequestParam = {
       userAddress: '0x123456',
     };
