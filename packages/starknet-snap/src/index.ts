@@ -25,7 +25,7 @@ import {
   STARKNET_TESTNET_NETWORK,
   STARKNET_SEPOLIA_TESTNET_NETWORK,
 } from './utils/constants';
-import { dappUrl, upsertErc20Token, upsertNetwork } from './utils/snapUtils';
+import { dappUrl, getNetworkFromChainId, isSameChainId, upsertErc20Token, upsertNetwork } from './utils/snapUtils';
 import { getStoredNetworks } from './getStoredNetworks';
 import { getStoredTransactions } from './getStoredTransactions';
 import { getTransactions } from './getTransactions';
@@ -260,11 +260,11 @@ export const onHomePage: OnHomePageHandler = async () => {
     if (state && state.accContracts.length > 0) {
       const userAddress = state.accContracts[0].address;
       const chainId = state.accContracts[0].chainId;
-      const network = state.networks.find(n => n.chainId == chainId);
+      const network = getNetworkFromChainId(state, chainId);
       panelItems.push(row("Address", address(`${userAddress}`)));
       panelItems.push(row("Network", text(`${network.name}`)));
 
-      const ercToken = state.erc20Tokens.find(t => t.symbol == "ETH" && t.chainId == chainId);
+      const ercToken = state.erc20Tokens.find(t => t.symbol.toLowerCase() == "eth" && isSameChainId(t.chainId, chainId));
       if (ercToken) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const params: any = {
@@ -282,7 +282,7 @@ export const onHomePage: OnHomePageHandler = async () => {
       panelItems.push(divider());
       panelItems.push(text(`Visit the [companion dapp for Starknet](${dappUrl(process.env.SNAP_ENV)}) to manage your account.`));
     } else {
-      panelItems.push(text(`**Your Starknet account is not yet deployed.**`));
+      panelItems.push(text(`**Your Starknet account is not yet deployed or recovered.**`));
       panelItems.push(text(`Initiate a transaction to create your Starknet account. Visit the [companion dapp for Starknet](${dappUrl(process.env.SNAP_ENV)}) to get started.`));
     }
   }

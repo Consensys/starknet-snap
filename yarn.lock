@@ -3161,8 +3161,8 @@ __metadata:
   linkType: hard
 
 "@consensys/starknet-snap@file:../starknet-snap::locator=wallet-ui%40workspace%3Apackages%2Fwallet-ui":
-  version: 2.4.1
-  resolution: "@consensys/starknet-snap@file:../starknet-snap#../starknet-snap::hash=02f1eb&locator=wallet-ui%40workspace%3Apackages%2Fwallet-ui"
+  version: 2.4.0
+  resolution: "@consensys/starknet-snap@file:../starknet-snap#../starknet-snap::hash=1d2c54&locator=wallet-ui%40workspace%3Apackages%2Fwallet-ui"
   dependencies:
     "@metamask/snaps-sdk": ^2.0.0
     async-mutex: ^0.3.2
@@ -3170,7 +3170,7 @@ __metadata:
     ethers: ^5.5.1
     starknet: ^5.14.0
     starknet_v4.22.0: "npm:starknet@4.22.0"
-  checksum: 5c85d32a028b8e980999dc65f5260b159eccc87df2c4f270ac564d3d584337c38f56b8e5b64b51f0fe4fd0b54de4d7e067359fb31a369b35161c3e9796cc9ddd
+  checksum: 9d9f7f8314005425f31e6fda2124ca91cdcf1415c73e24bedf8b72a6fed050949dacc549766d4f672b6dc2e66df34f35a4a9c10fa93c11080e759f92d4970889
   languageName: node
   linkType: hard
 
@@ -13644,13 +13644,6 @@ __metadata:
   version: 10.0.0
   resolution: "dotenv@npm:10.0.0"
   checksum: f412c5fe8c24fbe313d302d2500e247ba8a1946492db405a4de4d30dd0eb186a88a43f13c958c5a7de303938949c4231c56994f97d05c4bc1f22478d631b4005
-  languageName: node
-  linkType: hard
-
-"dotenv@npm:^16.4.5":
-  version: 16.4.5
-  resolution: "dotenv@npm:16.4.5"
-  checksum: 301a12c3d44fd49888b74eb9ccf9f07a1f5df43f489e7fcb89647a2edcd84c42d6bc349dc8df099cd18f07c35c7b04685c1a4f3e6a6a9e6b30f8d48c15b7f49c
   languageName: node
   linkType: hard
 
@@ -24958,7 +24951,6 @@ __metadata:
   dependencies:
     "@commitlint/cli": ^17.0.3
     "@commitlint/config-conventional": ^17.0.3
-    dotenv: ^16.4.5
     husky: ^8.0.0
   languageName: unknown
   linkType: soft

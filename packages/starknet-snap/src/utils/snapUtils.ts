@@ -683,17 +683,14 @@ export function toMap<k, v, z>(arr: Array<v>, key: string, keyConverter?: (v: z)
 }
 
 export function dappUrl(envt: string) {
-  const url = (() => {
-    switch (envt) {
-      case 'dev':
-        return DAPP.dev;
-      case 'staging':
-        return DAPP.staging;
-      case 'prod':
-        return DAPP.prod;
-      default:
-        return DAPP.prod;
-    }
-  })();
-  return url;
+  switch (envt.toLowerCase()) {
+    case 'dev':
+      return DAPP.dev;
+    case 'staging':
+      return DAPP.staging;
+    case 'prod':
+      return DAPP.prod;
+    default:
+      return DAPP.prod;
+  }
 }
