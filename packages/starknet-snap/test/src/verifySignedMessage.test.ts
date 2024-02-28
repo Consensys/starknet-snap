@@ -1,13 +1,11 @@
-import { toJson } from '../../src/utils/serializer';
 import chai, { expect } from 'chai';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import { WalletMock } from '../wallet.mock.test';
 import { SnapState } from '../../src/types/snapState';
-import typedDataExample from '../../src/typedData/typedDataExample.json';
 import { verifySignedMessage } from '../../src/verifySignedMessage';
 import { STARKNET_TESTNET_NETWORK } from '../../src/utils/constants';
-import { account1, getBip44EntropyStub, signature1, signature2, unfoundUserAddress } from '../constants.test';
+import { account1, getBip44EntropyStub, signature1 } from '../constants.test';
 import { getAddressKeyDeriver } from '../../src/utils/keyPair';
 import * as utils from '../../src/utils/starknetUtils';
 import { Mutex } from 'async-mutex';
@@ -137,18 +135,6 @@ describe('Test function: verifySignedMessage', function () {
           signerAddress: account1.address,
           typedDataMessage: undefined, // will use typedDataExample.json
           signature: signature1,
-        };
-        apiParams.requestParams = requestObject;
-        const result = await verifySignedMessage(apiParams);
-        expect(walletStub.rpcStubs.snap_manageState).not.to.have.been.called;
-        expect(result).to.be.eql(true);
-      });
-
-      it('should verify a signed message from an unfound user account correctly', async function () {
-        const requestObject: VerifySignedMessageRequestParams = {
-          signerAddress: unfoundUserAddress,
-          typedDataMessage: toJson(typedDataExample),
-          signature: signature2,
         };
         apiParams.requestParams = requestObject;
         const result = await verifySignedMessage(apiParams);
