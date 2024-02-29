@@ -22,8 +22,8 @@ import {
 import { openExplorerTab } from 'utils/utils';
 import { useAppSelector } from 'hooks/redux';
 import { AddTokenModal } from '../AddTokenModal';
-import { useStarkNetSnap } from 'services';
-import { DUMMY_ADDRESS } from 'utils/constants';
+// import { useStarkNetSnap } from 'services';
+// import { DUMMY_ADDRESS } from 'utils/constants';
 
 interface Props {
   address: string;
@@ -37,8 +37,8 @@ export const SideBarView = ({ address }: Props) => {
   const [accountDetailsOpen, setAccountDetailsOpen] = useState(false);
   const wallet = useAppSelector((state) => state.wallet);
   const [addTokenOpen, setAddTokenOpen] = useState(false);
-  const { getStarkName } = useStarkNetSnap();
-  const [starkName, setStarkName] = useState<string | undefined>(undefined);
+  // const { getStarkName } = useStarkNetSnap();
+  // const [starkName, setStarkName] = useState<string | undefined>(undefined);
 
   const ref = useRef<HTMLDivElement>();
 
@@ -53,17 +53,17 @@ export const SideBarView = ({ address }: Props) => {
     }
   }, [wallet.erc20TokenBalances]);
 
-  useEffect(() => {
-    if (address && address !== DUMMY_ADDRESS) {
-      getStarkName(address, chainId)
-        .then((name) => {
-          setStarkName(name);
-        })
-        .catch(() => {
-          setStarkName(undefined);
-        });
-    }
-  }, [address, chainId, getStarkName]);
+  // useEffect(() => {
+  //   if (address && address !== DUMMY_ADDRESS) {
+  //     getStarkName(address, chainId)
+  //       .then((name) => {
+  //         setStarkName(name);
+  //       })
+  //       .catch(() => {
+  //         setStarkName(undefined);
+  //       });
+  //   }
+  // }, [address, chainId, getStarkName]);
 
   return (
     <Wrapper>
@@ -98,7 +98,7 @@ export const SideBarView = ({ address }: Props) => {
       <AccountLabel>My account</AccountLabel>
       <RowDiv>
         <InfoIcon onClick={() => setInfoModalOpen(true)}>i</InfoIcon>
-        <AccountAddress address={address} starkName={starkName} />
+        <AccountAddress address={address} />
       </RowDiv>
       <DivList ref={ref as any}>
         <AssetsList />
