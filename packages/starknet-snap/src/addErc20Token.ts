@@ -10,7 +10,7 @@ import {
 } from './utils/snapUtils';
 import { DEFAULT_DECIMAL_PLACES } from './utils/constants';
 import { DialogType } from '@metamask/rpc-methods';
-import { heading, panel } from '@metamask/snaps-ui';
+import { heading, panel } from '@metamask/snaps-sdk';
 import { logger } from './utils/logger';
 
 export async function addErc20Token(params: ApiParams) {

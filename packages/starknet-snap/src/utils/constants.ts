@@ -15,6 +15,18 @@ export const TRANSFER_SELECTOR_HEX = '0x83afd3f4caedc6eebf44246fe54e38c95e3179a5
 
 export const ACCOUNT_CLASS_HASH_V0 = '0x033434ad846cdd5f23eb73ff09fe6fddd568284a0fb7d1be20ee482f044dabe2'; // from argent-x repo
 
+interface IDappConfig {
+  dev: string;
+  staging: string;
+  prod: string;
+}
+
+export const DAPP: IDappConfig = {
+  dev: 'https://dev.snaps.consensys.io/starknet',
+  staging: 'https://staging.snaps.consensys.io/starknet',
+  prod: 'https://snaps.consensys.io/starknet',
+};
+
 export const STARKNET_MAINNET_NETWORK: Network = {
   name: 'Starknet Mainnet',
   chainId: constants.StarknetChainId.SN_MAIN,

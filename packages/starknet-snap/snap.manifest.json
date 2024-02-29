@@ -7,7 +7,7 @@
     "url": "https://github.com/ConsenSys/starknet-snap.git"
   },
   "source": {
-    "shasum": "d88FLOvd7RKjJlzRixIQMpxnYGdnSyMuNaGYJbcIy3Q=",
+    "shasum": "6m3ivBun7q8YIlIJvmdVDcaySe6elzqTXDFz+e0wv4Q=",
     "location": {
       "npm": {
         "filePath": "dist/bundle.js",
@@ -29,7 +29,9 @@
     "endowment:rpc": {
       "snaps": false,
       "dapps": true
-    }
+    },
+    "endowment:lifecycle-hooks": {},
+    "endowment:page-home": {}
   },
   "manifestVersion": "0.1"
 }
