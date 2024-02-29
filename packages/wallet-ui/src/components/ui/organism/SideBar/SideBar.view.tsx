@@ -23,6 +23,7 @@ import { openExplorerTab } from 'utils/utils';
 import { useAppSelector } from 'hooks/redux';
 import { AddTokenModal } from '../AddTokenModal';
 import { useStarkNetSnap } from 'services';
+import { DUMMY_ADDRESS } from 'utils/constants';
 
 interface Props {
   address: string;
@@ -53,7 +54,7 @@ export const SideBarView = ({ address }: Props) => {
   }, [wallet.erc20TokenBalances]);
 
   useEffect(() => {
-    if (address) {
+    if (address && address !== DUMMY_ADDRESS) {
       getStarkName(address, chainId)
         .then((name) => {
           setStarkName(name);
