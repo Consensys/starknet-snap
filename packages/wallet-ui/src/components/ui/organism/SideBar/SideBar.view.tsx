@@ -54,7 +54,7 @@ export const SideBarView = ({ address }: Props) => {
   }, [wallet.erc20TokenBalances]);
 
   useEffect(() => {
-    if (address && address != DUMMY_ADDRESS) {
+    if (address && address !== DUMMY_ADDRESS) {
       getStarkName(address, chainId)
         .then((name) => {
           setStarkName(name);
