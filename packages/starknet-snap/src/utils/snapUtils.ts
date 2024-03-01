@@ -683,6 +683,10 @@ export function toMap<k, v, z>(arr: Array<v>, key: string, keyConverter?: (v: z)
 }
 
 export function dappUrl(envt: string) {
+  if (!envt) {
+    return DAPP.prod;
+  }
+
   switch (envt.toLowerCase()) {
     case 'dev':
       return DAPP.dev;

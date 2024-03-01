@@ -5,7 +5,6 @@ import { ApiParams, GetErc20TokenBalanceRequestParams } from './types/snapApi';
 import { getNetworkFromChainId } from './utils/snapUtils';
 import { callContract } from './utils/starknetUtils';
 import { logger } from './utils/logger';
-import { InternalError } from '@metamask/snaps-sdk';
 
 export async function getErc20TokenBalance(params: ApiParams) {
   try {
@@ -43,6 +42,6 @@ export async function getErc20TokenBalance(params: ApiParams) {
     return resp.result[0];
   } catch (err) {
     logger.error(`Problem found: ${err}`);
-    throw new InternalError(err);
+    throw err;
   }
 }

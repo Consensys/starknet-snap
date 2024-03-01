@@ -17,4 +17,8 @@ describe('Snap Utils', () => {
     const envt = 'abc123';
     expect(dappUrl(envt)).to.be.equal('https://snaps.consensys.io/starknet');
   });
+
+  it('should return the PROD URL if envt is undefined', () => {
+    expect(dappUrl(undefined)).to.be.equal('https://snaps.consensys.io/starknet');
+  });
 });
