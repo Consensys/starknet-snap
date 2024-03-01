@@ -42,7 +42,7 @@ import { logger } from './utils/logger';
 import { getStarkName } from './getStarkName';
 
 import type { OnRpcRequestHandler, OnHomePageHandler, OnInstallHandler, OnUpdateHandler } from '@metamask/snaps-sdk';
-import { InternalError, panel, row, address, divider, text } from '@metamask/snaps-sdk';
+import { SnapError, panel, row, address, divider, text } from '@metamask/snaps-sdk';
 import { ethers } from 'ethers';
 
 declare const snap;
@@ -212,7 +212,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ origin, request }) => 
         throw new Error('Method not found.');
     }
   } catch (err) {
-    throw new InternalError(err);
+    throw new SnapError(err);
   }
 };
 
