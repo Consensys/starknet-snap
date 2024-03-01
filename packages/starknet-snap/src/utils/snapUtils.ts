@@ -682,7 +682,6 @@ export function toMap<k, v, z>(arr: Array<v>, key: string, keyConverter?: (v: z)
   }, new Map<k, v>());
 }
 
-
 export function dappUrl(envt: string) {
   switch (envt.toLowerCase()) {
     case 'dev':

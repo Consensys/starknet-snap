@@ -67,7 +67,8 @@
     "allowScripts": {
       "@lavamoat/preinstall-always-fail": false,
       "@metamask/rpc-methods>@metamask/permission-controller>@metamask/controller-utils>ethereumjs-util>ethereum-cryptography>keccak": true,
-      "@metamask/rpc-methods>@metamask/permission-controller>@metamask/controller-utils>ethereumjs-util>ethereum-cryptography>secp256k1": true
+      "@metamask/rpc-methods>@metamask/permission-controller>@metamask/controller-utils>ethereumjs-util>ethereum-cryptography>secp256k1": true,
+      "ts-node>@swc/core": false
     }
   },
   "nyc": {

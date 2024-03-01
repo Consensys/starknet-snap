@@ -114,113 +114,116 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ origin, request }) => 
         return createAccount(apiParams);
 
       case 'starkNet_getStoredUserAccounts':
-        return getStoredUserAccounts(apiParams);
+        return await getStoredUserAccounts(apiParams);
 
       case 'starkNet_extractPrivateKey':
         apiParams.keyDeriver = await getAddressKeyDeriver(snap);
-        return extractPrivateKey(apiParams);
+        return await extractPrivateKey(apiParams);
 
       case 'starkNet_extractPublicKey':
         apiParams.keyDeriver = await getAddressKeyDeriver(snap);
-        return extractPublicKey(apiParams);
+        return await extractPublicKey(apiParams);
 
       case 'starkNet_signMessage':
         apiParams.keyDeriver = await getAddressKeyDeriver(snap);
-        return signMessage(apiParams);
+        return await signMessage(apiParams);
 
       case 'starkNet_signTransaction':
         apiParams.keyDeriver = await getAddressKeyDeriver(snap);
-        return signTransaction(apiParams);
+        return await signTransaction(apiParams);
 
       case 'starkNet_signDeclareTransaction':
         apiParams.keyDeriver = await getAddressKeyDeriver(snap);
-        return signDeclareTransaction(apiParams);
+        return await signDeclareTransaction(apiParams);
 
       case 'starkNet_signDeployAccountTransaction':
         apiParams.keyDeriver = await getAddressKeyDeriver(snap);
-        return signDeployAccountTransaction(apiParams);
+        return await signDeployAccountTransaction(apiParams);
 
       case 'starkNet_verifySignedMessage':
         apiParams.keyDeriver = await getAddressKeyDeriver(snap);
-        return verifySignedMessage(apiParams);
+        return await verifySignedMessage(apiParams);
 
       case 'starkNet_getErc20TokenBalance':
-        return getErc20TokenBalance(apiParams);
+        return await getErc20TokenBalance(apiParams);
 
       case 'starkNet_getTransactionStatus':
-        return getTransactionStatus(apiParams);
+        return await getTransactionStatus(apiParams);
 
       case 'starkNet_sendTransaction':
         apiParams.keyDeriver = await getAddressKeyDeriver(snap);
-        return sendTransaction(apiParams);
+        return await sendTransaction(apiParams);
 
       case 'starkNet_getValue':
-        return getValue(apiParams);
+        return await getValue(apiParams);
 
       case 'starkNet_estimateFee':
         apiParams.keyDeriver = await getAddressKeyDeriver(snap);
-        return estimateFee(apiParams);
+        return await estimateFee(apiParams);
 
       case 'starkNet_estimateAccountDeployFee':
         apiParams.keyDeriver = await getAddressKeyDeriver(snap);
-        return estimateAccDeployFee(apiParams);
+        return await estimateAccDeployFee(apiParams);
 
       case 'starkNet_addErc20Token':
-        return addErc20Token(apiParams);
+        return await addErc20Token(apiParams);
 
       case 'starkNet_getStoredErc20Tokens':
-        return getStoredErc20Tokens(apiParams);
+        return await getStoredErc20Tokens(apiParams);
 
       case 'starkNet_addNetwork':
-        return addNetwork(apiParams);
+        return await addNetwork(apiParams);
 
       case 'starkNet_switchNetwork':
-        return switchNetwork(apiParams);
+        return await switchNetwork(apiParams);
 
       case 'starkNet_getCurrentNetwork':
-        return getCurrentNetwork(apiParams);
+        return await getCurrentNetwork(apiParams);
 
       case 'starkNet_getStoredNetworks':
-        return getStoredNetworks(apiParams);
+        return await getStoredNetworks(apiParams);
 
       case 'starkNet_getStoredTransactions':
-        return getStoredTransactions(apiParams);
+        return await getStoredTransactions(apiParams);
 
       case 'starkNet_getTransactions':
-        return getTransactions(apiParams);
+        return await getTransactions(apiParams);
 
       case 'starkNet_recoverAccounts':
         apiParams.keyDeriver = await getAddressKeyDeriver(snap);
-        return recoverAccounts(apiParams);
+        return await recoverAccounts(apiParams);
 
       case 'starkNet_executeTxn':
         apiParams.keyDeriver = await getAddressKeyDeriver(snap);
-        return executeTxn(apiParams);
+        return await executeTxn(apiParams);
 
       case 'starkNet_estimateFees':
         apiParams.keyDeriver = await getAddressKeyDeriver(snap);
-        return estimateFees(apiParams);
+        return await estimateFees(apiParams);
 
       case 'starkNet_declareContract':
         apiParams.keyDeriver = await getAddressKeyDeriver(snap);
-        return declareContract(apiParams);
+        return await declareContract(apiParams);
 
       case 'starkNet_getStarkName':
-        return getStarkName(apiParams);
+        return await getStarkName(apiParams);
 
       default:
         throw new Error('Method not found.');
     }
-  }
-  catch (err) {
+  } catch (err) {
     throw new InternalError(err);
   }
 };
 
 export const onInstall: OnInstallHandler = async () => {
   const component = panel([
-    text("Your MetaMask wallet is now compatible with Starknet!"),
-    text(`To manage your Starknet account and send and receive funds, visit the [companion dapp for Starknet](${dappUrl(process.env.SNAP_ENV)}).`),
+    text('Your MetaMask wallet is now compatible with Starknet!'),
+    text(
+      `To manage your Starknet account and send and receive funds, visit the [companion dapp for Starknet](${dappUrl(
+        process.env.SNAP_ENV,
+      )}).`,
+    ),
   ]);
 
   await snap.request({
@@ -234,12 +237,10 @@ export const onInstall: OnInstallHandler = async () => {
 
 export const onUpdate: OnUpdateHandler = async () => {
   const component = panel([
-    text("Features released with this update:"),
+    text('Features released with this update:'),
+    text('**Home Page**: You can now see your account and balance on the Snap homepage.'),
     text(
-      "**Home Page**: You can now see your account and balance on the Snap homepage.",
-    ),
-    text(
-      "To get to the Starknet Snap homepage, from the MetaMask menu, click **Snaps**, then click on the Starknet Snap."
+      'To get to the Starknet Snap homepage, from the MetaMask menu, click **Snaps**, then click on the Starknet Snap.',
     ),
   ]);
 
@@ -266,10 +267,12 @@ export const onHomePage: OnHomePageHandler = async () => {
       const userAddress = state.accContracts[0].address;
       const chainId = state.accContracts[0].chainId;
       const network = getNetworkFromChainId(state, chainId);
-      panelItems.push(row("Address", address(`${userAddress}`)));
-      panelItems.push(row("Network", text(`${network.name}`)));
+      panelItems.push(row('Address', address(`${userAddress}`)));
+      panelItems.push(row('Network', text(`${network.name}`)));
 
-      const ercToken = state.erc20Tokens.find(t => t.symbol.toLowerCase() == "eth" && isSameChainId(t.chainId, chainId));
+      const ercToken = state.erc20Tokens.find(
+        (t) => t.symbol.toLowerCase() == 'eth' && isSameChainId(t.chainId, chainId),
+      );
       if (ercToken) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const params: any = {
@@ -277,25 +280,32 @@ export const onHomePage: OnHomePageHandler = async () => {
           requestParams: {
             tokenAddress: ercToken.address,
             userAddress: userAddress,
-          }
+          },
         };
-        const balance = await getErc20TokenBalance(params)
+        const balance = await getErc20TokenBalance(params);
         const displayBalance = ethers.utils.formatUnits(ethers.BigNumber.from(balance), ercToken.decimals);
-        panelItems.push(row("Balance", text(`${displayBalance} ETH`)));
+        panelItems.push(row('Balance', text(`${displayBalance} ETH`)));
       }
 
       panelItems.push(divider());
-      panelItems.push(text(`Visit the [companion dapp for Starknet](${dappUrl(process.env.SNAP_ENV)}) to manage your account.`));
+      panelItems.push(
+        text(`Visit the [companion dapp for Starknet](${dappUrl(process.env.SNAP_ENV)}) to manage your account.`),
+      );
     } else {
       panelItems.push(text(`**Your Starknet account is not yet deployed or recovered.**`));
-      panelItems.push(text(`Initiate a transaction to create your Starknet account. Visit the [companion dapp for Starknet](${dappUrl(process.env.SNAP_ENV)}) to get started.`));
+      panelItems.push(
+        text(
+          `Initiate a transaction to create your Starknet account. Visit the [companion dapp for Starknet](${dappUrl(
+            process.env.SNAP_ENV,
+          )}) to get started.`,
+        ),
+      );
     }
-  }
-  catch (err) {
+
+    return {
+      content: panel(panelItems),
+    };
+  } catch (err) {
     throw new InternalError(err);
   }
-
-  return {
-    content: panel(panelItems),
-  };
 };
