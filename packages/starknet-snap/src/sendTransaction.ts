@@ -8,7 +8,7 @@ import { getKeysFromAddress, getCallDataArray, executeTxn, isAccountDeployed } f
 import { ApiParams, SendTransactionRequestParams } from './types/snapApi';
 import { createAccount } from './createAccount';
 import { DialogType } from '@metamask/rpc-methods';
-import { heading, panel } from '@metamask/snaps-ui';
+import { heading, panel } from '@metamask/snaps-sdk';
 import { logger } from './utils/logger';
 
 export async function sendTransaction(params: ApiParams) {

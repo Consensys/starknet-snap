@@ -3,7 +3,7 @@ import { ApiParams, DeclareContractRequestParams } from './types/snapApi';
 import { getNetworkFromChainId, getDeclareSnapTxt } from './utils/snapUtils';
 import { getKeysFromAddress, declareContract as declareContractUtil } from './utils/starknetUtils';
 import { DialogType } from '@metamask/rpc-methods';
-import { heading, panel } from '@metamask/snaps-ui';
+import { heading, panel } from '@metamask/snaps-sdk';
 import { logger } from './utils/logger';
 
 export async function declareContract(params: ApiParams) {

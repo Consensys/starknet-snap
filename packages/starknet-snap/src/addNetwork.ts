@@ -4,7 +4,7 @@ import { validateAddNetworkParams, upsertNetwork, getNetworkTxt } from './utils/
 import { logger } from './utils/logger';
 import { Network } from './types/snapState';
 import { DialogType } from '@metamask/rpc-methods';
-import { panel, heading } from '@metamask/snaps-ui';
+import { panel, heading } from '@metamask/snaps-sdk';
 
 export async function addNetwork(params: ApiParams) {
   try {

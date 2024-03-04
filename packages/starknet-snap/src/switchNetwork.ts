@@ -2,7 +2,7 @@ import { toJson } from './utils/serializer';
 import { ApiParams, SwitchNetworkRequestParams } from './types/snapApi';
 import { getNetwork, setCurrentNetwork, getNetworkTxt } from './utils/snapUtils';
 import { DialogType } from '@metamask/rpc-methods';
-import { panel, heading } from '@metamask/snaps-ui';
+import { panel, heading } from '@metamask/snaps-sdk';
 import { logger } from './utils/logger';
 
 export async function switchNetwork(params: ApiParams) {

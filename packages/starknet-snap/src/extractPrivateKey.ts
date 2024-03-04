@@ -4,7 +4,7 @@ import { ApiParams, ExtractPrivateKeyRequestParams } from './types/snapApi';
 import { getNetworkFromChainId } from './utils/snapUtils';
 import { getKeysFromAddress } from './utils/starknetUtils';
 import { DialogType } from '@metamask/rpc-methods';
-import { copyable, panel, text } from '@metamask/snaps-ui';
+import { copyable, panel, text } from '@metamask/snaps-sdk';
 import { logger } from './utils/logger';
 
 export async function extractPrivateKey(params: ApiParams) {

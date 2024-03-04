@@ -4,7 +4,7 @@ import { ApiParams, SignTransactionRequestParams } from './types/snapApi';
 import { getKeysFromAddress, signTransactions } from './utils/starknetUtils';
 import { getNetworkFromChainId, getSignTxnTxt } from './utils/snapUtils';
 import { DialogType } from '@metamask/rpc-methods';
-import { heading, panel } from '@metamask/snaps-ui';
+import { heading, panel } from '@metamask/snaps-sdk';
 import { logger } from '../src/utils/logger';
 
 export async function signTransaction(params: ApiParams): Promise<Signature | boolean> {

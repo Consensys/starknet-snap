@@ -10,7 +10,7 @@ import {
   DeployAccountSignerDetails,
 } from 'starknet';
 import { validateAndParseAddress } from './starknetUtils';
-import { Component, text, copyable } from '@metamask/snaps-ui';
+import { Component, text, copyable } from '@metamask/snaps-sdk';
 import {
   Network,
   Erc20Token,
@@ -21,6 +21,7 @@ import {
   TransactionStatus,
 } from '../types/snapState';
 import {
+  DAPP,
   MAXIMUM_NETWORK_NAME_LENGTH,
   MAXIMUM_TOKEN_NAME_LENGTH,
   MAXIMUM_TOKEN_SYMBOL_LENGTH,
@@ -679,4 +680,21 @@ export function toMap<k, v, z>(arr: Array<v>, key: string, keyConverter?: (v: z)
     map.set(keyConverter && typeof keyConverter === 'function' ? keyConverter(obj[key] as z) : obj[key], obj);
     return map;
   }, new Map<k, v>());
+}
+
+export function dappUrl(envt: string) {
+  if (!envt) {
+    return DAPP.prod;
+  }
+
+  switch (envt.toLowerCase()) {
+    case 'dev':
+      return DAPP.dev;
+    case 'staging':
+      return DAPP.staging;
+    case 'prod':
+      return DAPP.prod;
+    default:
+      return DAPP.prod;
+  }
 }
