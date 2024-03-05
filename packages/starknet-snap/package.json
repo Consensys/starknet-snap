@@ -10,8 +10,8 @@
   "scripts": {
     "setup": "yarn install --immutable && yarn allow-scripts",
     "build:clean": "yarn clean && yarn build",
-    "build": "cross-env SNAP_ENV=prod mm-snap build",
-    "serve": "cross-env SNAP_ENV=prod mm-snap serve",
+    "build": "mm-snap build",
+    "serve": "mm-snap serve",
     "clean": "rimraf js && rimraf dist",
     "watch": "yarn build && concurrently --kill-others --names SNAP,SERVE -c bgMagenta.bold,bgGreen.bold \"yarn run watch:snap\" \"yarn run serve\"",
     "watch:snap": "cross-env SNAP_ENV=prod mm-snap watch",

@@ -24,7 +24,7 @@ jobs:
           HASH=$(git rev-parse --short HEAD)
           DATE=$(date +%Y%m%d)
           npm --prefix ./packages/starknet-snap version --new-version ${VERSION}-dev-${HASH}-${DATE} --no-git-tag-version
-          yarn workspace @consensys/starknet-snap build
+          SNAP_ENV=dev yarn workspace @consensys/starknet-snap build
 
       - uses: actions/setup-node@v3
         with:
