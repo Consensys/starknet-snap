@@ -3,6 +3,21 @@
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
 
+## [1.20.0](https://github.com/Consensys/starknet-snap/compare/wallet-ui-v1.19.0...wallet-ui-v1.20.0) (2024-03-05)
+
+
+### Features
+
+* display Stark name in Sidebar ([#184](https://github.com/Consensys/starknet-snap/issues/184)) ([60f37da](https://github.com/Consensys/starknet-snap/commit/60f37da767504382a4a93a5ce944e6119bd6e304))
+* New Apis for Snap ([#207](https://github.com/Consensys/starknet-snap/issues/207)) ([675647d](https://github.com/Consensys/starknet-snap/commit/675647d9d77ba512f87a6a1d8291941bb5c31038))
+
+
+### Bug Fixes
+
+* get starknet name issue ([#205](https://github.com/Consensys/starknet-snap/issues/205)) ([b4a800b](https://github.com/Consensys/starknet-snap/commit/b4a800bdcefbd9a9ef1ed20bc452ba54433c78a7))
+* lint & style ([#201](https://github.com/Consensys/starknet-snap/issues/201)) ([4436ec1](https://github.com/Consensys/starknet-snap/commit/4436ec1656659d44ca66b7f7e91111095ad5f194))
+* remove get starknet name ([#206](https://github.com/Consensys/starknet-snap/issues/206)) ([5861156](https://github.com/Consensys/starknet-snap/commit/58611569ca1785a393b3a7fbdfc4cf5f256de9af))
+
 ## [1.19.0](https://github.com/Consensys/starknet-snap/compare/wallet-ui-v1.18.0...wallet-ui-v1.19.0) (2023-12-19)
 
 
