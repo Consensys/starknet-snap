@@ -130,24 +130,24 @@ export const WBTC_TESTNET: Erc20Token = {
 
 export const STRK_MAINNET: Erc20Token = {
   address: '0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d',
-  name: 'Stark',
-  symbol: 'Starknet Token',
+  name: 'Starknet Token',
+  symbol: 'STRK',
   decimals: 18,
   chainId: STARKNET_MAINNET_NETWORK.chainId,
 };
 
 export const STRK_TESTNET: Erc20Token = {
   address: '0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d',
-  name: 'Stark',
-  symbol: 'Starknet Token',
+  name: 'Starknet Token',
+  symbol: 'STRK',
   decimals: 18,
   chainId: STARKNET_TESTNET_NETWORK.chainId,
 };
 
 export const STRK_SEPOLIA_TESTNET: Erc20Token = {
   address: '0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d',
-  name: 'Stark',
-  symbol: 'Starknet Token',
+  name: 'Starknet Token',
+  symbol: 'STRK',
   decimals: 18,
   chainId: SN_SEPOLIA.chainId,
 };
