@@ -12,7 +12,7 @@ import { addErc20Token } from './addErc20Token';
 import { getStoredErc20Tokens } from './getStoredErc20Tokens';
 import { estimateFee } from './estimateFee';
 import { getStoredUserAccounts } from './getStoredUserAccounts';
-import { SnapState } from './types/snapState';
+import { AccContract, SnapState } from './types/snapState';
 import { extractPrivateKey } from './extractPrivateKey';
 import { extractPublicKey } from './extractPublicKey';
 import { addNetwork } from './addNetwork';
@@ -263,9 +263,16 @@ export const onHomePage: OnHomePageHandler = async () => {
       },
     });
 
-    if (state && state.accContracts.length > 0) {
-      const userAddress = state.accContracts[0].address;
-      const chainId = state.accContracts[0].chainId;
+    let accContract: AccContract;
+    if (state.currentNetwork) {
+      accContract = state.accContracts.find(n => n.chainId == state.currentNetwork.chainId);
+    } else {
+      accContract = state.accContracts[0];
+    }
+
+    if (accContract) {
+      const userAddress = accContract.address;
+      const chainId = accContract.chainId;
       const network = getNetworkFromChainId(state, chainId);
       panelItems.push(row('Address', address(`${userAddress}`)));
       panelItems.push(row('Network', text(`${network.name}`)));
@@ -301,7 +308,6 @@ export const onHomePage: OnHomePageHandler = async () => {
         ),
       );
     }
-
     return {
       content: panel(panelItems),
     };
