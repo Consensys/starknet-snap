@@ -1,6 +1,13 @@
 # Changelog
 
 
+## [2.5.2](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v2.5.1...starknet-snap-v2.5.2) (2024-03-07)
+
+
+### Bug Fixes
+
+* get correct balance on snap homepage ([#214](https://github.com/Consensys/starknet-snap/issues/214)) ([781406e](https://github.com/Consensys/starknet-snap/commit/781406e691a47be8305643841fb6974376a89115))
+
 ## [2.5.1](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v2.5.0...starknet-snap-v2.5.1) (2024-03-07)
 
 
