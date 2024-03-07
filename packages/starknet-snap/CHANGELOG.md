@@ -1,6 +1,13 @@
 # Changelog
 
 
+## [2.5.1](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v2.5.0...starknet-snap-v2.5.1) (2024-03-07)
+
+
+### Bug Fixes
+
+* update starknet token name and symbol ([#210](https://github.com/Consensys/starknet-snap/issues/210)) ([4869b87](https://github.com/Consensys/starknet-snap/commit/4869b8706ac77709f2effbf9793922bd25e4b80e))
+
 ## [2.5.0](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v2.4.0...starknet-snap-v2.5.0) (2024-03-05)
 
 
