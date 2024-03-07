@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
 
+## [1.20.0](https://github.com/Consensys/starknet-snap/compare/wallet-ui-v1.19.0...wallet-ui-v1.20.0) (2024-03-05)
+
+
+### Features
+
+* display Stark name in Sidebar ([#184](https://github.com/Consensys/starknet-snap/issues/184)) ([60f37da](https://github.com/Consensys/starknet-snap/commit/60f37da767504382a4a93a5ce944e6119bd6e304))
+
 ## [1.19.0](https://github.com/Consensys/starknet-snap/compare/wallet-ui-v1.18.0...wallet-ui-v1.19.0) (2023-12-19)
 
 
