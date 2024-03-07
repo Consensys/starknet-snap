@@ -265,7 +265,7 @@ export const onHomePage: OnHomePageHandler = async () => {
 
     let accContract: AccContract;
     if (state.currentNetwork) {
-      accContract = state.accContracts.find(n => n.chainId == state.currentNetwork.chainId);
+      accContract = state.accContracts.find((n) => n.chainId == state.currentNetwork.chainId);
     } else {
       accContract = state.accContracts[0];
     }
@@ -287,6 +287,7 @@ export const onHomePage: OnHomePageHandler = async () => {
           requestParams: {
             tokenAddress: ercToken.address,
             userAddress: userAddress,
+            chainId: network.chainId,
           },
         };
         const balance = await getErc20TokenBalance(params);
