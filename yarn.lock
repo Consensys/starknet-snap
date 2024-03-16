@@ -3154,8 +3154,8 @@ __metadata:
   linkType: hard
 
 "@consensys/starknet-snap@file:../starknet-snap::locator=wallet-ui%40workspace%3Apackages%2Fwallet-ui":
-  version: 2.5.1
-  resolution: "@consensys/starknet-snap@file:../starknet-snap#../starknet-snap::hash=195ab3&locator=wallet-ui%40workspace%3Apackages%2Fwallet-ui"
+  version: 2.5.2
+  resolution: "@consensys/starknet-snap@file:../starknet-snap#../starknet-snap::hash=180251&locator=wallet-ui%40workspace%3Apackages%2Fwallet-ui"
   dependencies:
     "@metamask/snaps-sdk": 3.0.1
     async-mutex: ^0.3.2
@@ -3163,7 +3163,7 @@ __metadata:
     ethers: ^5.5.1
     starknet: ^5.14.0
     starknet_v4.22.0: "npm:starknet@4.22.0"
-  checksum: dc8a3354e0ec4863c9ff6d2841abeb0ea841f69519202d1c1b904308024a7ff76f3d44a1cfa91d043739ce807aa7b8513d06baf7cb357475450d653a39f89efd
+  checksum: 983f842b9dba2bec7cfcd8907f9dd8d420befc61e045b7138f1786f1662ff6c4f3279b8db49193cf2ae39dff0b9173a5475d1b072f918fda72d54d9d05d4bfd5
   languageName: node
   linkType: hard
 
@@ -14986,12 +14986,12 @@ __metadata:
   linkType: hard
 
 "follow-redirects@npm:^1.0.0":
-  version: 1.15.4
-  resolution: "follow-redirects@npm:1.15.4"
+  version: 1.15.6
+  resolution: "follow-redirects@npm:1.15.6"
   peerDependenciesMeta:
     debug:
       optional: true
-  checksum: e178d1deff8b23d5d24ec3f7a94cde6e47d74d0dc649c35fc9857041267c12ec5d44650a0c5597ef83056ada9ea6ca0c30e7c4f97dbf07d035086be9e6a5b7b6
+  checksum: a62c378dfc8c00f60b9c80cab158ba54e99ba0239a5dd7c81245e5a5b39d10f0c35e249c3379eae719ff0285fff88c365dd446fab19dee771f1d76252df1bbf5
   languageName: node
   linkType: hard
 
