@@ -27,7 +27,7 @@ import {
   MAXIMUM_TOKEN_SYMBOL_LENGTH,
   PRELOADED_NETWORKS,
   PRELOADED_TOKENS,
-  STARKNET_TESTNET_NETWORK,
+  STARKNET_SEPOLIA_TESTNET_NETWORK,
   VOYAGER_API_TXNS_URL_SUFFIX,
   VOYAGER_API_TXN_URL_SUFFIX,
 } from './constants';
@@ -430,6 +430,35 @@ export async function upsertNetwork(network: Network, wallet, mutex: Mutex, stat
   });
 }
 
+export async function removeNetwork(network: Network, wallet, mutex: Mutex, state: SnapState = undefined) {
+  return mutex.runExclusive(async () => {
+    if (!state) {
+      state = await wallet.request({
+        method: 'snap_manageState',
+        params: {
+          operation: 'get',
+        },
+      });
+    }
+
+    if (state.currentNetwork && isSameChainId(state.currentNetwork.chainId, network.chainId)) {
+      state.currentNetwork = undefined; // fallback to default network
+    }
+
+    const storedNetwork = getNetwork(state, network.chainId);
+    if (storedNetwork) {
+      state.networks = state.networks.filter((net) => !isSameChainId(net.chainId, network.chainId));
+      await wallet.request({
+        method: 'snap_manageState',
+        params: {
+          operation: 'update',
+          newState: state,
+        },
+      });
+    }
+  });
+}
+
 export function getErc20Token(state: SnapState, tokenAddress: string, chainId: string) {
   const bigIntTokenAddress = num.toBigInt(tokenAddress);
   return state.erc20Tokens?.find(
@@ -485,7 +514,7 @@ export async function upsertErc20Token(erc20Token: Erc20Token, wallet, mutex: Mu
 }
 
 export function getNetworkFromChainId(state: SnapState, targerChainId: string | undefined) {
-  const chainId = targerChainId || STARKNET_TESTNET_NETWORK.chainId;
+  const chainId = targerChainId || STARKNET_SEPOLIA_TESTNET_NETWORK.chainId;
   const network = getNetwork(state, chainId);
   if (!network) {
     throw new Error(`can't find the network in snap state with chainId: ${chainId}`);
@@ -649,7 +678,7 @@ export async function removeAcceptedTransaction(
 }
 
 export function getCurrentNetwork(state: SnapState) {
-  return state.currentNetwork || STARKNET_TESTNET_NETWORK;
+  return state.currentNetwork || STARKNET_SEPOLIA_TESTNET_NETWORK;
 }
 
 export async function setCurrentNetwork(network: Network, wallet, mutex: Mutex, state: SnapState = undefined) {

@@ -5,7 +5,7 @@ import { WalletMock } from '../wallet.mock.test';
 import * as utils from '../../src/utils/starknetUtils';
 import { estimateAccDeployFee } from '../../src/estimateAccountDeployFee';
 import { SnapState } from '../../src/types/snapState';
-import { STARKNET_TESTNET_NETWORK } from '../../src/utils/constants';
+import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../../src/utils/constants';
 import { getAddressKeyDeriver } from '../../src/utils/keyPair';
 import { estimateDeployFeeResp3, estimateDeployFeeResp4, getBip44EntropyStub } from '../constants.test';
 import { Mutex } from 'async-mutex';
@@ -20,11 +20,11 @@ describe('Test function: estimateAccountDeployFee', function () {
   const state: SnapState = {
     accContracts: [],
     erc20Tokens: [],
-    networks: [STARKNET_TESTNET_NETWORK],
+    networks: [STARKNET_SEPOLIA_TESTNET_NETWORK],
     transactions: [],
   };
   const requestObject: EstimateAccountDeployFeeRequestParams = {
-    chainId: STARKNET_TESTNET_NETWORK.chainId,
+    chainId: STARKNET_SEPOLIA_TESTNET_NETWORK.chainId,
   };
   const apiParams: ApiParams = {
     state,
@@ -57,7 +57,7 @@ describe('Test function: estimateAccountDeployFee', function () {
       return estimateDeployFeeResp4;
     });
     apiParams.requestParams = {
-      chainId: STARKNET_TESTNET_NETWORK.chainId,
+      chainId: STARKNET_SEPOLIA_TESTNET_NETWORK.chainId,
       addressIndex: 2,
     };
     const result = await estimateAccDeployFee(apiParams);

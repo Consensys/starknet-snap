@@ -8,7 +8,7 @@ import * as snapUtils from '../../src/utils/snapUtils';
 import { SnapState } from '../../src/types/snapState';
 import { sendTransaction } from '../../src/sendTransaction';
 
-import { STARKNET_TESTNET_NETWORK } from '../../src/utils/constants';
+import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../../src/utils/constants';
 import {
   account1,
   createAccountProxyResp,
@@ -36,7 +36,7 @@ describe('Test function: sendTransaction', function () {
   const state: SnapState = {
     accContracts: [account1],
     erc20Tokens: [token2, token3],
-    networks: [STARKNET_TESTNET_NETWORK],
+    networks: [STARKNET_SEPOLIA_TESTNET_NETWORK],
     transactions: [],
   };
   const apiParams: ApiParams = {
@@ -255,7 +255,7 @@ describe('Test function: sendTransaction', function () {
           },
           {
             type: 'copyable',
-            value: 'Goerli Testnet (deprecated soon)',
+            value: 'Sepolia Testnet',
           },
         ],
       },
