@@ -263,11 +263,14 @@ export const onHomePage: OnHomePageHandler = async () => {
       },
     });
 
+    // Account may not exist if the recover account process has not executed.
     let accContract: AccContract;
-    if (state.currentNetwork) {
-      accContract = state.accContracts.find((n) => n.chainId == state.currentNetwork.chainId);
-    } else {
-      accContract = state.accContracts[0];
+    if (state) {
+      if (state.currentNetwork) {
+        accContract = state.accContracts.find((n) => n.chainId == state.currentNetwork.chainId);
+      } else if (state.accContracts && state.accContracts.length > 0) {
+        accContract = state.accContracts[0];
+      }
     }
 
     if (accContract) {
