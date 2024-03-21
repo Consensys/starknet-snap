@@ -3164,7 +3164,7 @@ __metadata:
     ethers: ^5.5.1
     starknet: 6.6.0
     starknet_v4.22.0: "npm:starknet@4.22.0"
-  checksum: 686f271891d12a0451646fc712f2353ec0495f2397b12c25eede5264e186c9ab7bcebf011df3789d9c14b144a0685bbefa3eff8ab6b90bb17763c5434e6af8ef
+  checksum: dc8a3354e0ec4863c9ff6d2841abeb0ea841f69519202d1c1b904308024a7ff76f3d44a1cfa91d043739ce807aa7b8513d06baf7cb357475450d653a39f89efd
   languageName: node
   linkType: hard
 
@@ -15082,12 +15082,12 @@ __metadata:
   linkType: hard
 
 "follow-redirects@npm:^1.0.0":
-  version: 1.15.4
-  resolution: "follow-redirects@npm:1.15.4"
+  version: 1.15.6
+  resolution: "follow-redirects@npm:1.15.6"
   peerDependenciesMeta:
     debug:
       optional: true
-  checksum: e178d1deff8b23d5d24ec3f7a94cde6e47d74d0dc649c35fc9857041267c12ec5d44650a0c5597ef83056ada9ea6ca0c30e7c4f97dbf07d035086be9e6a5b7b6
+  checksum: a62c378dfc8c00f60b9c80cab158ba54e99ba0239a5dd7c81245e5a5b39d10f0c35e249c3379eae719ff0285fff88c365dd446fab19dee771f1d76252df1bbf5
   languageName: node
   linkType: hard
 
