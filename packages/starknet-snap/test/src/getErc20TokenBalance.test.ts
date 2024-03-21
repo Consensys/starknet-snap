@@ -34,7 +34,7 @@ describe('Test function: getErc20TokenBalance', function () {
 
   it('should get the ERC-20 token balance correctly', async function () {
     sandbox.stub(utils, 'callContract').callsFake(async () => {
-      return { result: ['0x64a'] }; //1610 in decimal
+      return ['0x64a']; //1610 in decimal
     });
     const requestObject: GetErc20TokenBalanceRequestParams = {
       tokenAddress: '0x07394cbe418daa16e42b87ba67372d4ab4a5df0b05c6e554d158458ce245bc10',
@@ -65,7 +65,7 @@ describe('Test function: getErc20TokenBalance', function () {
 
   it('should throw error if userAddress is empty', async function () {
     sandbox.stub(utils, 'callContract').callsFake(async () => {
-      return { result: ['0x64a'] }; //1610 in decimal
+      return ['0x64a']; //1610 in decimal
     });
     const requestObject: GetErc20TokenBalanceRequestParams = {
       tokenAddress: '0x07394cbe418daa16e42b87ba67372d4ab4a5df0b05c6e554d158458ce245bc10',
@@ -85,7 +85,7 @@ describe('Test function: getErc20TokenBalance', function () {
 
   it('should throw error if tokenAddress is empty', async function () {
     sandbox.stub(utils, 'callContract').callsFake(async () => {
-      return { result: ['0x64a'] }; //1610 in decimal
+      return ['0x64a']; //1610 in decimal
     });
     const requestObject: GetErc20TokenBalanceRequestParams = {
       tokenAddress: '',
@@ -105,7 +105,7 @@ describe('Test function: getErc20TokenBalance', function () {
 
   it('should throw error if userAddress is invalid', async function () {
     sandbox.stub(utils, 'callContract').callsFake(async () => {
-      return { result: ['0x64a'] }; //1610 in decimal
+      return ['0x64a']; //1610 in decimal
     });
     const requestObject: GetErc20TokenBalanceRequestParams = {
       tokenAddress: '0x07394cbe418daa16e42b87ba67372d4ab4a5df0b05c6e554d158458ce245bc10',
@@ -125,7 +125,7 @@ describe('Test function: getErc20TokenBalance', function () {
 
   it('should throw error if tokenAddress is invalid', async function () {
     sandbox.stub(utils, 'callContract').callsFake(async () => {
-      return { result: ['0x64a'] }; //1610 in decimal
+      return ['0x64a']; //1610 in decimal
     });
     const requestObject: GetErc20TokenBalanceRequestParams = {
       tokenAddress: 'wrongAddress',
