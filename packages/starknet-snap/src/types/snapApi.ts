@@ -102,6 +102,11 @@ export interface SendTransactionRequestParams extends BaseRequestParams {
   maxFee?: string;
 }
 
+export interface UpgradeTransactionRequestParams extends BaseRequestParams {
+  contractAddress: string;
+  maxFee?: string;
+}
+
 export interface GetValueRequestParams extends BaseRequestParams {
   contractAddress: string;
   contractFuncName: string;

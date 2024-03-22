@@ -36,12 +36,12 @@ describe('Test function: signDeclareTransaction', function () {
   };
 
   const requestObject: SignDeclareTransactionRequestParams = {
-    chainId: STARKNET_MAINNET_NETWORK.chainId,
+    chainId: STARKNET_TESTNET_NETWORK.chainId,
     signerAddress: account1.address,
     transaction: {
       classHash: '0x025ec026985a3bf9d0cc1fe17326b245dfdc3ff89b8fde106542a3ea56c5a918',
       senderAddress: account1.address,
-      chainId: constants.StarknetChainId.SN_MAIN,
+      chainId: constants.StarknetChainId.SN_GOERLI,
       nonce: '0x1',
       version: '0x0',
       maxFee: 100,

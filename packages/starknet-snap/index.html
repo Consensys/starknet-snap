@@ -359,6 +359,15 @@
         <input type="submit" id="estimateFees" value="Estimate Fees" />
       </fieldset>
     </form>
+    <form id="upgrade">
+      <fieldset>
+        <legend>Upgrade Cairo Version from 0 to 1</legend>
+        <label for="upgrade_contractAddress">Contract Address</label>
+        <input type="text" id="upgrade_contractAddress" name="upgrade_contractAddress" /><br />
+        <input type="submit" id="upgrade" value="Upgrade" />
+      </fieldset>
+    </form>
+    
   </body>
 
   <script type="module">
@@ -478,6 +487,10 @@
       {
         id: 'estimateFees',
         method: estimateFees,
+      },
+      {
+        id: 'upgrade',
+        method: upgrade,
       },
     ];
 
@@ -876,6 +889,16 @@
       });
     }
 
+    async function upgrade(e) {
+      e.preventDefault(); // to prevent default form behavior
+
+      const contractAddress = document.getElementById('upgrade_contractAddress').value;
+
+      await callSnap('starkNet_upgradeAccContract', {
+        contractAddress
+      });
+    }
+
     async function callSnap(method, params) {
       try {
         const chainId = document.getElementById('targetChainId').value;
@@ -901,5 +924,8 @@
         alert(`${method} problem happened: ${err.message || err}`);
       }
     }
+
   </script>
+
+  
 </html>

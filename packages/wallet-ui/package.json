@@ -26,7 +26,7 @@
     "react-qr-code": "^2.0.7",
     "react-redux": "^8.0.1",
     "redux-persist": "^6.0.0",
-    "semver": "^7.3.7",
+    "semver": "^7.5.2",
     "starknet": "^4.22.0",
     "styled-components": "^5.3.5",
     "toastr2": "^3.0.0-alpha.18",

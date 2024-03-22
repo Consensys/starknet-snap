@@ -1,5 +1,5 @@
 import { toJson } from './utils/serializer';
-import { signMessage as signMessageUtil, getKeysFromAddress } from './utils/starknetUtils';
+import { signMessage as signMessageUtil, getKeysFromAddress, isUpgradeRequired } from './utils/starknetUtils';
 import { getNetworkFromChainId, addDialogTxt } from './utils/snapUtils';
 import { ApiParams, SignMessageRequestParams } from './types/snapApi';
 import { validateAndParseAddress } from '../src/utils/starknetUtils';
@@ -11,24 +11,25 @@ export async function signMessage(params: ApiParams) {
   try {
     const { state, wallet, keyDeriver, requestParams } = params;
     const requestParamsObj = requestParams as SignMessageRequestParams;
-
-    if (!requestParamsObj.signerAddress) {
-      throw new Error(
-        `The given signer address need to be non-empty string, got: ${toJson(requestParamsObj.signerAddress)}`,
-      );
-    }
-
-    try {
-      validateAndParseAddress(requestParamsObj.signerAddress);
-    } catch (err) {
-      throw new Error(`The given signer address is invalid: ${requestParamsObj.signerAddress}`);
-    }
-
     const signerAddress = requestParamsObj.signerAddress;
     const typedDataMessage = requestParamsObj.typedDataMessage;
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
 
     logger.log(`signMessage:\nsignerAddress: ${signerAddress}\ntypedDataMessage: ${toJson(typedDataMessage)}`);
+
+    if (!signerAddress) {
+      throw new Error(`The given signer address need to be non-empty string, got: ${toJson(signerAddress)}`);
+    }
+
+    try {
+      validateAndParseAddress(signerAddress);
+    } catch (err) {
+      throw new Error(`The given signer address is invalid: ${signerAddress}`);
+    }
+
+    if (await isUpgradeRequired(network, signerAddress)) {
+      throw new Error('Upgrade required');
+    }
 
     const components = [];
     addDialogTxt(components, 'Message', toJson(typedDataMessage));

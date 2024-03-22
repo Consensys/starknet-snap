@@ -370,6 +370,7 @@ export async function upsertAccount(userAccount: AccContract, wallet, mutex: Mut
       storedAccount.derivationPath = userAccount.derivationPath;
       storedAccount.publicKey = userAccount.publicKey;
       storedAccount.deployTxnHash = userAccount.deployTxnHash || storedAccount.deployTxnHash;
+      storedAccount.upgradeRequired = userAccount.upgradeRequired;
     }
 
     await wallet.request({

@@ -368,6 +368,49 @@
       "errors": []
     },
     {
+      "name": "starkNet_upgradeAccContract",
+      "summary": "Upgrade Account Contract",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "contractAddress",
+          "summary": "Address of the target contract",
+          "description": "Address of the target contract",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/ADDRESS"
+          }
+        },
+        {
+          "name": "maxFee",
+          "summary": "Maximum gas fee allowed from the sender",
+          "description": "Maximum gas fee allowed from the sender (if not given, the max fee will be automatically calculated)",
+          "required": false,
+          "schema": {
+            "$ref": "#/components/schemas/NUM_AS_HEX"
+          }
+        },
+        {
+          "name": "chainId",
+          "summary": "Id of the target Starknet network",
+          "description": "Id of the target Starknet network (default to Starknet Goerli Testnet)",
+          "required": false,
+          "schema": {
+            "$ref": "#/components/schemas/CHAIN_ID"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "summary": "Response from Starknet’s \"gateway/call_contract\" endpoint",
+        "description": "Response from Starknet’s \"gateway/call_contract\" endpoint",
+        "schema": {
+          "$ref": "#/components/schemas/SEND_TRANSACTION_RESULT"
+        }
+      },
+      "errors": []
+    },
+    {
       "name": "starkNet_getTransactionStatus",
       "summary": "Gets the status of a transaction",
       "paramStructure": "by-name",

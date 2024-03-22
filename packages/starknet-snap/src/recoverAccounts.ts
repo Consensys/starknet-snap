@@ -1,6 +1,6 @@
 import { toJson } from './utils/serializer';
 import { num } from 'starknet';
-import { getSigner, getKeysFromAddressIndex, getAccContractAddressAndCallData } from './utils/starknetUtils';
+import { getKeysFromAddressIndex, getCorrectContractAddress } from './utils/starknetUtils';
 import { getNetworkFromChainId, getValidNumber, upsertAccount } from './utils/snapUtils';
 import { AccContract } from './types/snapState';
 import { ApiParams, RecoverAccountsRequestParams } from './types/snapApi';
@@ -29,20 +29,17 @@ export async function recoverAccounts(params: ApiParams) {
         state,
         i,
       );
-      const { address: contractAddress } = getAccContractAddressAndCallData(publicKey);
-      logger.log(`recoverAccounts: index ${i}:\ncontractAddress = ${contractAddress}\npublicKey = ${publicKey}`);
-
-      let signerPublicKey = '';
-
-      try {
-        signerPublicKey = await getSigner(contractAddress, network);
-        logger.log(`recoverAccounts: index ${i}\nsignerPublicKey: ${signerPublicKey}`);
-      } catch (err) {
-        logger.log(`recoverAccounts: index ${i}\nerr in get signer: ${toJson(err)}`);
-        signerPublicKey = '';
-      }
+      const {
+        address: contractAddress,
+        signerPubKey: signerPublicKey,
+        upgradeRequired,
+      } = await getCorrectContractAddress(network, publicKey);
+      logger.log(
+        `recoverAccounts: index ${i}:\ncontractAddress = ${contractAddress}\npublicKey = ${publicKey}\nisUpgradeRequired = ${upgradeRequired}`,
+      );
 
       if (signerPublicKey) {
+        logger.log(`recoverAccounts: index ${i}:\ncontractAddress = ${contractAddress}\n`);
         if (num.toBigInt(signerPublicKey) === num.toBigInt(publicKey)) {
           logger.log(`recoverAccounts: index ${i} matched\npublicKey: ${publicKey}`);
         }
@@ -59,6 +56,7 @@ export async function recoverAccounts(params: ApiParams) {
         derivationPath,
         deployTxnHash: '',
         chainId: network.chainId,
+        upgradeRequired: upgradeRequired,
       };
 
       logger.log(`recoverAccounts: index ${i}\nuserAccount: ${toJson(userAccount)}`);

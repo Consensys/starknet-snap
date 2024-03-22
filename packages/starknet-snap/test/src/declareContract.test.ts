@@ -22,7 +22,7 @@ describe('Test function: declareContract', function () {
   this.timeout(10000);
   const walletStub = new WalletMock();
   const state: SnapState = {
-    accContracts: [],
+    accContracts: [account1],
     erc20Tokens: [],
     networks: [STARKNET_MAINNET_NETWORK, STARKNET_TESTNET_NETWORK, STARKNET_SEPOLIA_TESTNET_NETWORK],
     transactions: [],
@@ -35,7 +35,7 @@ describe('Test function: declareContract', function () {
   };
 
   const requestObject: DeclareContractRequestParams = {
-    chainId: STARKNET_MAINNET_NETWORK.chainId,
+    chainId: STARKNET_TESTNET_NETWORK.chainId,
     senderAddress: account1.address,
     contractPayload: {
       contract: 'TestContract',
@@ -67,7 +67,7 @@ describe('Test function: declareContract', function () {
     const result = await declareContract(apiParams);
     const { privateKey } = await utils.getKeysFromAddress(
       apiParams.keyDeriver,
-      STARKNET_MAINNET_NETWORK,
+      STARKNET_TESTNET_NETWORK,
       state,
       account1.address,
     );
@@ -78,7 +78,7 @@ describe('Test function: declareContract', function () {
     });
     expect(declareContractStub).to.have.been.calledOnce;
     expect(declareContractStub).to.have.been.calledWith(
-      STARKNET_MAINNET_NETWORK,
+      STARKNET_TESTNET_NETWORK,
       account1.address,
       privateKey,
       { contract: 'TestContract' },
@@ -90,7 +90,7 @@ describe('Test function: declareContract', function () {
     const declareContractStub = sandbox.stub(utils, 'declareContract').rejects('error');
     const { privateKey } = await utils.getKeysFromAddress(
       apiParams.keyDeriver,
-      STARKNET_MAINNET_NETWORK,
+      STARKNET_TESTNET_NETWORK,
       state,
       account1.address,
     );
@@ -103,7 +103,7 @@ describe('Test function: declareContract', function () {
       expect(result).to.be.an('Error');
       expect(declareContractStub).to.have.been.calledOnce;
       expect(declareContractStub).to.have.been.calledWith(
-        STARKNET_MAINNET_NETWORK,
+        STARKNET_TESTNET_NETWORK,
         account1.address,
         privateKey,
         { contract: 'TestContract' },

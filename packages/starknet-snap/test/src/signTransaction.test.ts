@@ -36,7 +36,7 @@ describe('Test function: signMessage', function () {
   };
 
   const requestObject: SignTransactionRequestParams = {
-    chainId: STARKNET_MAINNET_NETWORK.chainId,
+    chainId: STARKNET_TESTNET_NETWORK.chainId,
     signerAddress: account1.address,
     transactions: [
       {
