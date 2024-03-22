@@ -13,7 +13,7 @@ import { getNetworkFromChainId, upsertTransaction, getSendTxnText } from './util
 import { ApiParams, UpgradeTransactionRequestParams } from './types/snapApi';
 import { ACCOUNT_CLASS_HASH, CAIRO_VERSION_LEGACY } from './utils/constants';
 import { DialogType } from '@metamask/rpc-methods';
-import { heading, panel } from '@metamask/snaps-ui';
+import { heading, panel } from '@metamask/snaps-sdk';
 import { logger } from './utils/logger';
 
 export async function upgradeAccContract(params: ApiParams) {
