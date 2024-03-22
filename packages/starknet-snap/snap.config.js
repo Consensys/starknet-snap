@@ -4,7 +4,7 @@ dotenv.config();
 module.exports = {
     bundler: "webpack",
     environment: {
-        SNAP_ENV: process.env.SNAP_ENV,
+        SNAP_ENV: process.env.SNAP_ENV ?? "prod",
     },
     input: "./src/index.ts",
     server: {
