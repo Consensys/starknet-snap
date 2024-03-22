@@ -16,6 +16,18 @@ export const TRANSFER_SELECTOR_HEX = '0x83afd3f4caedc6eebf44246fe54e38c95e3179a5
 export const ACCOUNT_CLASS_HASH_LEGACY = '0x033434ad846cdd5f23eb73ff09fe6fddd568284a0fb7d1be20ee482f044dabe2'; // from argent-x repo
 export const ACCOUNT_CLASS_HASH = '0x29927c8af6bccf3f6fda035981e765a7bdbf18a2dc0d630494f8758aa908e2b'; // from argent-x repo
 
+interface IDappConfig {
+  dev: string;
+  staging: string;
+  prod: string;
+}
+
+export const DAPP: IDappConfig = {
+  dev: 'https://dev.snaps.consensys.io/starknet',
+  staging: 'https://staging.snaps.consensys.io/starknet',
+  prod: 'https://snaps.consensys.io/starknet',
+};
+
 export const STARKNET_MAINNET_NETWORK: Network = {
   name: 'Starknet Mainnet',
   chainId: constants.StarknetChainId.SN_MAIN,
@@ -117,6 +129,30 @@ export const WBTC_TESTNET: Erc20Token = {
   chainId: STARKNET_TESTNET_NETWORK.chainId,
 };
 
+export const STRK_MAINNET: Erc20Token = {
+  address: '0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d',
+  name: 'Starknet Token',
+  symbol: 'STRK',
+  decimals: 18,
+  chainId: STARKNET_MAINNET_NETWORK.chainId,
+};
+
+export const STRK_TESTNET: Erc20Token = {
+  address: '0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d',
+  name: 'Starknet Token',
+  symbol: 'STRK',
+  decimals: 18,
+  chainId: STARKNET_TESTNET_NETWORK.chainId,
+};
+
+export const STRK_SEPOLIA_TESTNET: Erc20Token = {
+  address: '0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d',
+  name: 'Starknet Token',
+  symbol: 'STRK',
+  decimals: 18,
+  chainId: SN_SEPOLIA.chainId,
+};
+
 export const USDC_MAINNET: Erc20Token = {
   address: '0x053c91253bc9682c04929ca02ed00b3e423f6710d2ee7e0d5ebb06f3ecf368a8',
   name: 'USD Coin',
@@ -191,7 +227,11 @@ export const PRELOADED_TOKENS = [
   USDT_MAINNET,
   USDT_TESTNET,
   USDT_SEPOLIA_TESTNET,
+  STRK_MAINNET,
+  STRK_TESTNET,
+  STRK_SEPOLIA_TESTNET,
 ];
+
 export const PRELOADED_NETWORKS = [
   STARKNET_MAINNET_NETWORK,
   STARKNET_TESTNET_NETWORK,

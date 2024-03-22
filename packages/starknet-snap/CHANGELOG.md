@@ -1,6 +1,30 @@
 # Changelog
 
 
+## [2.5.2](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v2.5.1...starknet-snap-v2.5.2) (2024-03-07)
+
+
+### Bug Fixes
+
+* get correct balance on snap homepage ([#214](https://github.com/Consensys/starknet-snap/issues/214)) ([781406e](https://github.com/Consensys/starknet-snap/commit/781406e691a47be8305643841fb6974376a89115))
+
+## [2.5.1](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v2.5.0...starknet-snap-v2.5.1) (2024-03-07)
+
+
+### Bug Fixes
+
+* update starknet token name and symbol ([#210](https://github.com/Consensys/starknet-snap/issues/210)) ([4869b87](https://github.com/Consensys/starknet-snap/commit/4869b8706ac77709f2effbf9793922bd25e4b80e))
+
+## [2.5.0](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v2.4.0...starknet-snap-v2.5.0) (2024-03-05)
+
+
+### Features
+
+* add strk token ([#204](https://github.com/Consensys/starknet-snap/issues/204)) ([86f3a82](https://github.com/Consensys/starknet-snap/commit/86f3a82dce3389be3690a34e62e87ea655af7380))
+* display Stark name in Sidebar ([#184](https://github.com/Consensys/starknet-snap/issues/184)) ([60f37da](https://github.com/Consensys/starknet-snap/commit/60f37da767504382a4a93a5ce944e6119bd6e304))
+* implement snap homepage screen ([#207](https://github.com/Consensys/starknet-snap/issues/207)) ([675647d](https://github.com/Consensys/starknet-snap/commit/675647d9d77ba512f87a6a1d8291941bb5c31038))
+
+
 ## [2.4.0](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v2.3.0...starknet-snap-v2.4.0) (2023-12-19)
 
 

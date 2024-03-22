@@ -72,3 +72,4 @@ export const TOKEN_BALANCE_REFRESH_FREQUENCY = 60000;
 export const TIMEOUT_DURATION = 10000;
 
 export const MIN_ACC_CONTRACT_VERSION = [0, 3, 0];
+export const DUMMY_ADDRESS = '0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx';

@@ -1,6 +1,6 @@
 {
   "name": "wallet-ui",
-  "version": "1.19.0",
+  "version": "1.20.0",
   "private": true,
   "license": "(Apache-2.0 OR MIT)",
   "homepage": "/starknet",
@@ -115,7 +115,8 @@
       "@storybook/react>@storybook/core-common>webpack>watchpack>watchpack-chokidar2>chokidar>fsevents": true,
       "@storybook/react>core-js": true,
       "react-scripts>@pmmmwh/react-refresh-webpack-plugin>core-js-pure": true,
-      "styled-components": true
+      "styled-components": true,
+      "react-scripts>tailwindcss>postcss-load-config>ts-node>@swc/core": false
     }
   }
 }
