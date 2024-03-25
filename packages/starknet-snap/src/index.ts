@@ -247,11 +247,8 @@ export const onInstall: OnInstallHandler = async () => {
 
 export const onUpdate: OnUpdateHandler = async () => {
   const component = panel([
-    text('Features released with this update!:'),
-    text('**Home Page**: You can now see your account and balance on the Snap homepage.'),
-    text(
-      'To get to the Starknet Snap homepage, from the MetaMask menu, click **Snaps**, then click on the Starknet Snap.',
-    ),
+    text('Features released with this update:'),
+    text('- Deprecation of the Starknet Goerli Testnet'),
   ]);
 
   await snap.request({
