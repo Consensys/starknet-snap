@@ -1,19 +1,18 @@
 import { toJson } from './utils/serializer';
-import { Invocations, TransactionType } from 'starknet';
+import { Invocations, TransactionType, constants } from 'starknet';
 import { validateAndParseAddress } from '../src/utils/starknetUtils';
 import { ApiParams, EstimateFeeRequestParams } from './types/snapApi';
 import { getNetworkFromChainId } from './utils/snapUtils';
 import {
   getKeysFromAddress,
   getCallDataArray,
-  estimateFee as estimateFeeUtil,
   getAccContractAddressAndCallData,
   estimateFeeBulk,
   addFeesFromAllTransactions,
   isAccountDeployed,
 } from './utils/starknetUtils';
 
-import { PROXY_CONTRACT_HASH } from './utils/constants';
+import { PRICE_UNIT, PROXY_CONTRACT_HASH } from './utils/constants';
 import { logger } from './utils/logger';
 
 export async function estimateFee(params: ApiParams) {
@@ -40,6 +39,9 @@ export async function estimateFee(params: ApiParams) {
       throw new Error(`The given sender address is invalid: ${requestParamsObj.senderAddress}`);
     }
 
+    const priceUnit = requestParamsObj.priceUnit ?? PRICE_UNIT.WEI;
+    const txVersion =
+      priceUnit === PRICE_UNIT.FRI ? constants.TRANSACTION_VERSION.V3 : constants.TRANSACTION_VERSION.V1;
     const contractAddress = requestParamsObj.contractAddress;
     const contractFuncName = requestParamsObj.contractFuncName;
     const contractCallData = getCallDataArray(requestParamsObj.contractCallData);
@@ -62,12 +64,9 @@ export async function estimateFee(params: ApiParams) {
 
     //Estimate deploy account fee if the signer has not been deployed yet
     const accountDeployed = await isAccountDeployed(network, publicKey);
-    let bulkTransactions: Invocations = [
-      {
-        type: TransactionType.INVOKE,
-        payload: txnInvocation,
-      },
-    ];
+
+    const transactions: Invocations = [];
+
     if (!accountDeployed) {
       const { callData } = getAccContractAddressAndCallData(publicKey);
       const deployAccountpayload = {
@@ -77,39 +76,30 @@ export async function estimateFee(params: ApiParams) {
         addressSalt: publicKey,
       };
 
-      bulkTransactions = [
-        {
-          type: TransactionType.DEPLOY_ACCOUNT,
-          payload: deployAccountpayload,
-        },
-        {
-          type: TransactionType.INVOKE,
-          payload: txnInvocation,
-        },
-      ];
+      transactions.push({
+        type: TransactionType.DEPLOY_ACCOUNT,
+        payload: deployAccountpayload,
+      });
     }
 
-    let estimateFeeResp;
+    transactions.push({
+      type: TransactionType.INVOKE,
+      payload: txnInvocation,
+    });
 
-    if (accountDeployed) {
-      // This condition branch will be removed later when starknet.js
-      // supports estimateFeeBulk in rpc mode
-      estimateFeeResp = await estimateFeeUtil(network, senderAddress, senderPrivateKey, txnInvocation);
-      logger.log(`estimateFee:\nestimateFeeUtil estimateFeeResp: ${toJson(estimateFeeResp)}`);
-    } else {
-      const estimateBulkFeeResp = await estimateFeeBulk(network, senderAddress, senderPrivateKey, bulkTransactions);
-      logger.log(`estimateFee:\nestimateFeeBulk estimateBulkFeeResp: ${toJson(estimateBulkFeeResp)}`);
-      estimateFeeResp = addFeesFromAllTransactions(estimateBulkFeeResp);
-    }
+    const estimateBulkFeeResp = await estimateFeeBulk(network, senderAddress, senderPrivateKey, transactions, {
+      version: txVersion,
+    });
+    logger.log(`estimateFee:\nestimateFeeBulk estimateBulkFeeResp: ${toJson(estimateBulkFeeResp)}`);
+
+    const estimateFeeResp = addFeesFromAllTransactions(estimateBulkFeeResp);
 
     logger.log(`estimateFee:\nestimateFeeResp: ${toJson(estimateFeeResp)}`);
 
     const resp = {
       suggestedMaxFee: estimateFeeResp.suggestedMaxFee.toString(10),
       overallFee: estimateFeeResp.overall_fee.toString(10),
-      gasConsumed: estimateFeeResp.gas_consumed?.toString(10) ?? '0',
-      gasPrice: estimateFeeResp.gas_price?.toString(10) ?? '0',
-      unit: 'wei',
+      unit: priceUnit.toLowerCase(),
       includeDeploy: !accountDeployed,
     };
     logger.log(`estimateFee:\nresp: ${toJson(resp)}`);

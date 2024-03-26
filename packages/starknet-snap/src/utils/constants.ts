@@ -15,6 +15,11 @@ export const TRANSFER_SELECTOR_HEX = '0x83afd3f4caedc6eebf44246fe54e38c95e3179a5
 
 export const ACCOUNT_CLASS_HASH_V0 = '0x033434ad846cdd5f23eb73ff09fe6fddd568284a0fb7d1be20ee482f044dabe2'; // from argent-x repo
 
+export enum PRICE_UNIT {
+  WEI = 'WEI',
+  FRI = 'FRI',
+}
+
 interface IDappConfig {
   dev: string;
   staging: string;
@@ -40,7 +45,7 @@ export const STARKNET_TESTNET_NETWORK: Network = {
   name: 'Goerli Testnet (deprecated soon)',
   chainId: constants.StarknetChainId.SN_GOERLI,
   baseUrl: 'https://alpha4.starknet.io',
-  nodeUrl: 'https://starknet-goerli.infura.io/v3/60c7253fb48147658095fe0460ac9ee9',
+  nodeUrl: 'https://starknet-goerli.g.alchemy.com/starknet/version/rpc/v0_7/1Bw_6sofLIpDzAROgFM1KXIISP2jUAVO',
   voyagerUrl: 'https://goerli.voyager.online',
   accountClassHash: '', // from argent-x repo
 };

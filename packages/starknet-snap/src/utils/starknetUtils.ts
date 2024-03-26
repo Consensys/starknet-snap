@@ -82,7 +82,7 @@ export const declareContract = async (
   invocationsDetails?: UniversalDetails,
 ): Promise<DeclareContractResponse> => {
   const provider = getProvider(network);
-  const account = new Account(provider, senderAddress, privateKey, '0');
+  const account = new Account(provider, senderAddress, privateKey, '1');
   return account.declare(contractPayload, { ...invocationsDetails, skipValidate: false, blockIdentifier: 'latest' });
 };
 
@@ -94,7 +94,7 @@ export const estimateFee = async (
   invocationsDetails?: UniversalDetails,
 ): Promise<EstimateFee> => {
   const provider = getProvider(network);
-  const account = new Account(provider, senderAddress, privateKey, '0');
+  const account = new Account(provider, senderAddress, privateKey, '1');
   return account.estimateInvokeFee(txnInvocation, {
     ...invocationsDetails,
     skipValidate: false,
@@ -110,7 +110,7 @@ export const estimateFeeBulk = async (
   invocationsDetails?: UniversalDetails,
 ): Promise<EstimateFee[]> => {
   const provider = getProvider(network);
-  const account = new Account(provider, senderAddress, privateKey, '0');
+  const account = new Account(provider, senderAddress, privateKey, '1');
   return account.estimateFeeBulk(txnInvocation, {
     ...invocationsDetails,
     skipValidate: false,
@@ -144,7 +144,7 @@ export const deployAccount = async (
   invocationsDetails?: UniversalDetails,
 ): Promise<DeployContractResponse> => {
   const provider = getProvider(network);
-  const account = new Account(provider, contractAddress, privateKey, '0');
+  const account = new Account(provider, contractAddress, privateKey, '1');
   const deployAccountPayload = {
     classHash: PROXY_CONTRACT_HASH,
     contractAddress: contractAddress,
@@ -167,7 +167,7 @@ export const estimateAccountDeployFee = async (
   invocationsDetails?: UniversalDetails,
 ): Promise<EstimateFee> => {
   const provider = getProvider(network);
-  const account = new Account(provider, contractAddress, privateKey, '0');
+  const account = new Account(provider, contractAddress, privateKey, '1');
   const deployAccountPayload = {
     classHash: PROXY_CONTRACT_HASH,
     contractAddress: contractAddress,
@@ -182,7 +182,7 @@ export const estimateAccountDeployFee = async (
 };
 
 export const getSigner = async (userAccAddress: string, network: Network): Promise<string> => {
-  const resp = await callContract(network, userAccAddress, 'getSigner');
+  const resp = await callContract(network, userAccAddress, 'get_owner');
   return resp[0];
 };
 
@@ -501,7 +501,7 @@ export const isAccountDeployed = async (network: Network, publicKey: string) => 
   return accountDeployed;
 };
 
-export const addFeesFromAllTransactions = (fees: EstimateFee[]): Partial<EstimateFee> => {
+export const addFeesFromAllTransactions = (fees: EstimateFee[]) => {
   let overall_fee_bn = num.toBigInt(0);
   let suggestedMaxFee_bn = num.toBigInt(0);
 
