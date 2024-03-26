@@ -25,7 +25,7 @@ jobs:
       - name: Use Node.js 16.x
         uses: actions/setup-node@v2
         with:
-          node-version: 16.x
+          node-version: 20.x
           registry-url: 'https://registry.npmjs.org'
       - name: Get Yarn cache directory
         run: echo "::set-output name=YARN_CACHE_DIR::$(yarn cache dir)"
@@ -48,7 +48,7 @@ jobs:
           REACT_APP_SNAP_VERSION=${VERSION}-staging yarn workspace wallet-ui build
           
           npm --prefix ./packages/starknet-snap version --new-version ${VERSION}-staging --no-git-tag-version
-          yarn workspace @consensys/starknet-snap build
+          SNAP_ENV=staging yarn workspace @consensys/starknet-snap build
           
           npm publish ./packages/starknet-snap  --tag staging --access public 2>&1 > /dev/null || :
           aws s3 sync ./packages/wallet-ui/build s3://staging.snaps.consensys.io/starknet
@@ -62,7 +62,7 @@ jobs:
           REACT_APP_SNAP_VERSION=${VERSION} REACT_APP_DEBUG_LEVEL=off yarn workspace wallet-ui build
 
           npm --prefix ./packages/starknet-snap version --new-version ${VERSION} --no-git-tag-version --allow-same-version
-          yarn workspace @consensys/starknet-snap build
+          SNAP_ENV=prod yarn workspace @consensys/starknet-snap build
           
           npm publish ./packages/starknet-snap --tag latest --access public 2>&1 > /dev/null || :
           aws s3 sync ./packages/wallet-ui/build s3://snaps.consensys.io/starknet

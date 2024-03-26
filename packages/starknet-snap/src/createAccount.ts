@@ -20,7 +20,7 @@ import { ApiParams, CreateAccountRequestParams } from './types/snapApi';
 import { EstimateFee, num } from 'starknet';
 import { ethers } from 'ethers';
 import { DialogType } from '@metamask/rpc-methods';
-import { heading, panel, text } from '@metamask/snaps-ui';
+import { heading, panel, text } from '@metamask/snaps-sdk';
 import { logger } from './utils/logger';
 
 export async function createAccount(params: ApiParams, silentMode = false) {

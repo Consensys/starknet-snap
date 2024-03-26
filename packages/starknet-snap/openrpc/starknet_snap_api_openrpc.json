@@ -1,7 +1,7 @@
 {
   "openrpc": "1.0.0-rc1",
   "info": {
-    "version": "2.3.0",
+    "version": "2.5.2",
     "title": "Starknet MetaMask Snap API",
     "license": {}
   },
@@ -1164,6 +1164,40 @@
         "description": "Sign Transaction result consist of list of string",
         "schema": {
           "type": "array"
+        }
+      },
+      "errors": []
+    },
+    {
+      "name": "starkNet_getStarkName",
+      "summary": "Get Stark name from a Starknet account address",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "userAddress",
+          "summary": "Address of the account contract",
+          "description": "Address of the account contract",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/ADDRESS"
+          }
+        },
+        {
+          "name": "chainId",
+          "summary": "Id of the target Starknet network",
+          "description": "Id of the target Starknet network (default to Starknet Goerli Testnet)",
+          "required": false,
+          "schema": {
+            "$ref": "#/components/schemas/CHAIN_ID"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "summary": "Stark name of the given account address",
+        "description": "Stark name of the given account address",
+        "schema": {
+          "type": "string"
         }
       },
       "errors": []

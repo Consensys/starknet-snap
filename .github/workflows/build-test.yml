@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-20.04
     strategy:
       matrix:
-        node-version: [16.x]
+        node-version: [20.x]
     steps:
       - uses: actions/checkout@v2
       - name: Use Node.js ${{ matrix.node-version }}
@@ -39,14 +39,14 @@ jobs:
       - run: yarn lint
       - run: yarn test
       - name: SonarCloud Scan Starknet-Snap
-        uses: SonarSource/sonarcloud-github-action@v1.9.1
+        uses: SonarSource/sonarcloud-github-action@v2.1.1
         with:
           projectBaseDir: packages/starknet-snap/
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_STARKNET_SNAP }}
       - name: SonarCloud Scan Wallet-UI
-        uses: SonarSource/sonarcloud-github-action@v1.9.1
+        uses: SonarSource/sonarcloud-github-action@v2.1.1
         with:
           projectBaseDir: packages/wallet-ui/
         env:

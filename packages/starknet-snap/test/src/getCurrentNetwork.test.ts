@@ -3,7 +3,11 @@ import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import { WalletMock } from '../wallet.mock.test';
 import { SnapState } from '../../src/types/snapState';
-import { STARKNET_MAINNET_NETWORK, STARKNET_TESTNET_NETWORK } from '../../src/utils/constants';
+import {
+  STARKNET_MAINNET_NETWORK,
+  STARKNET_TESTNET_NETWORK,
+  STARKNET_SEPOLIA_TESTNET_NETWORK,
+} from '../../src/utils/constants';
 import { getCurrentNetwork } from '../../src/getCurrentNetwork';
 import { Mutex } from 'async-mutex';
 import { ApiParams } from '../../src/types/snapApi';
@@ -16,7 +20,7 @@ describe('Test function: getStoredNetworks', function () {
   const state: SnapState = {
     accContracts: [],
     erc20Tokens: [],
-    networks: [STARKNET_TESTNET_NETWORK, STARKNET_MAINNET_NETWORK],
+    networks: [STARKNET_TESTNET_NETWORK, STARKNET_MAINNET_NETWORK, STARKNET_SEPOLIA_TESTNET_NETWORK],
     transactions: [],
     currentNetwork: STARKNET_MAINNET_NETWORK,
   };
