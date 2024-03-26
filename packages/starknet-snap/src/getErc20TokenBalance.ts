@@ -39,7 +39,7 @@ export async function getErc20TokenBalance(params: ApiParams) {
 
     logger.log(`getErc20Balance:\nresp: ${toJson(resp)}`);
 
-    return resp.result[0];
+    return resp[0];
   } catch (err) {
     logger.error(`Problem found: ${err}`);
     throw err;

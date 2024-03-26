@@ -1,16 +1,14 @@
-import envify from "envify/custom";
+import * as dotenv from "dotenv";
+dotenv.config();
 
 module.exports = {
-  cliOptions: {
-    dist: 'dist',
-    outfileName: 'bundle.js',
-    src: './src/index.ts',
-  },
-  bundlerCustomizer: (bundler) => {
-    bundler.transform(
-      envify({
-        SNAP_ENV: process.env.SNAP_ENV,
-      }),
-    );
-  },
+    bundler: "webpack",
+    environment: {
+        SNAP_ENV: process.env.SNAP_ENV ?? "prod",
+    },
+    input: "./src/index.ts",
+    server: {
+        port: 8081,
+    },
+    polyfills: true
 };

@@ -13,6 +13,7 @@ import {
   DeclareSignerDetails,
   typedData,
 } from 'starknet';
+import { PRICE_UNIT } from '../utils/constants';
 
 export interface ApiParams {
   state: SnapState;
@@ -113,6 +114,7 @@ export interface EstimateFeeRequestParams extends BaseRequestParams {
   contractFuncName: string;
   contractCallData?: string;
   senderAddress: string;
+  priceUnit?: PRICE_UNIT;
 }
 
 export interface EstimateAccountDeployFeeRequestParams extends BaseRequestParams {

@@ -1,5 +1,5 @@
 import { JsonBIP44CoinTypeNode } from '@metamask/key-tree';
-import { constants, num } from 'starknet';
+import { EstimateFee, GetTransactionResponse, constants, num } from 'starknet';
 import {
   AccContract,
   Erc20Token,
@@ -341,45 +341,43 @@ export const mainnetTxn1: Transaction = {
   eventIds: [],
 };
 
-export const getBalanceResp = {
-  result: ['0x0', '0x0'],
-};
+export const getBalanceResp = ['0x0', '0x0'];
 
 export const estimateDeployFeeResp = {
   overall_fee: num.toBigInt('0x0'),
   gas_consumed: num.toBigInt('0x0'),
   suggestedMaxFee: num.toBigInt('0x0'),
   gas_price: num.toBigInt('0x0'),
-};
+} as EstimateFee;
 
 export const estimateDeployFeeResp2 = {
   overall_fee: num.toBigInt('0xaff3f0a7'),
   gas_consumed: num.toBigInt('0x18e1'),
   suggestedMaxFee: num.toBigInt('0x0107ede8fa'),
   gas_price: num.toBigInt('0x071287'),
-};
+} as EstimateFee;
 
 export const estimateDeployFeeResp3 = {
   overall_fee: num.toBigInt('0x1160f77b2edd'),
   gas_consumed: num.toBigInt('0x18e1'),
   suggestedMaxFee: num.toBigInt('0x1a117338c64b'),
   gas_price: num.toBigInt('0xb2d3297d'),
-};
+} as EstimateFee;
 
 export const estimateDeployFeeResp4 = {
   overall_fee: num.toBigInt('0x1160f77b2edd'),
   suggestedMaxFee: num.toBigInt('0x1a117338c64b'),
-};
+} as EstimateFee;
 
 export const estimateFeeResp = {
   overall_fee: num.toBigInt('0x0dc3e44d89e6'),
   suggestedMaxFee: num.toBigInt('0x14a5d6744ed9'),
-};
+} as EstimateFee;
 
 export const estimateFeeResp2 = {
   overall_fee: num.toBigInt('0x0dc3e44d89e6'),
   suggestedMaxFee: num.toBigInt('0x14a5d6744ed9'),
-};
+} as EstimateFee;
 
 export const unfoundUserAddress = '0x018dfa1955a0154524203f81c5668d6a78c708375ee8908dcb55a49c6ec87190';
 export const unfoundUserPrivateKey = '0x610d87a5c02459f8643f9ad6a9bc70597d1a8a0ab4d645346b7eadc5266ad4d';
@@ -654,7 +652,7 @@ export const getTxnFromSequencerResp1 = {
   ],
   transaction_hash: '0x1366c2f9f46b1a86ba0c28b5a08fa0aa3750c4d1cbe06e97e72bd46ae2ac1f9',
   version: '0x0',
-};
+} as unknown as GetTransactionResponse;
 
 export const getTxnFromSequencerResp2 = {
   status: 'ACCEPTED_ON_L1',
@@ -680,7 +678,7 @@ export const getTxnFromSequencerResp2 = {
   contract_address: '0x5a98ec74a40383cf99896bfea2ec5e6aad16c7eed50025a5f569d585ebb13a2',
   transaction_hash: '0x6beceb86579dc78749bdaaf441501edc21e218e020236e2ebea1b6a96d0bac7',
   version: '0x0',
-};
+} as unknown as GetTransactionResponse;
 
 export const expectedMassagedTxn4: Transaction = {
   chainId: '0x534e5f474f45524c49',
