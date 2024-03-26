@@ -15,8 +15,8 @@
     "clean": "rimraf dist",
     "setup": "yarn install --frozen-lockfile",
     "build": "tsc --project tsconfig.build.json",
-    "build:jsonp": "yarn build && webpack --config webpack.config.jsonp.js",
-    "build:fed": "rimraf webpack && webpack --config webpack.config.js",
+    "build:jsonp": "webpack --config webpack.config.jsonp.js",
+    "build:fed": " webpack --config webpack.config.js",
     "prettier": "prettier --write \"src/**/*.ts\"",
     "lint": "eslint 'src/*.{js,ts,tsx}' --max-warnings 0 -f json -o eslint-report.json",
     "lint:fix": "eslint '**/*.{js,ts,tsx}' --fix"

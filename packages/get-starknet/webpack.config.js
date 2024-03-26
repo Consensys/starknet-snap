@@ -5,9 +5,9 @@ module.exports = {
   mode: 'production',  
   entry: './src/index.ts',  
   output: {  
-    path: path.resolve(__dirname, './webpack'),
+    path: path.resolve(__dirname, './dist/webpack'),
     filename: 'index.js',  
-    publicPath: 'https://mmsnap-get-starknet.s3.eu-west-2.amazonaws.com/', 
+    publicPath: 'https://s3.eu-central-1.amazonaws.com/dev.snaps.consensys.io/get-starknet/', 
     library: {  
       type: 'commonjs2',  
     },  
