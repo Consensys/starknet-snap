@@ -135,11 +135,11 @@ export class MetaMaskSnapWallet implements IStarknetWindowObject {
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   on<E extends WalletEvents>() {
-    return;
+    throw new Error('Method not supported');
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   off<E extends WalletEvents>() {
-    return;
+    throw new Error('Method not supported');
   }
 }
