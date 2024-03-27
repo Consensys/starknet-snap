@@ -4,8 +4,6 @@ import sinonChai from 'sinon-chai';
 import { getAddressKey, getAddressKeyDeriver, grindKey } from '../../src/utils/keyPair';
 import { bip44Entropy } from '../constants.test';
 import { WalletMock } from '../wallet.mock.test';
-// import { getAccContractAddressAndCallData, getKeysFromAddressIndex } from '../../src/utils/starknetUtils';
-// import { STARKNET_TESTNET_NETWORK } from '../../src/utils/constants';
 
 chai.use(sinonChai);
 
@@ -21,18 +19,6 @@ describe('Test function: getAddressKey', function () {
   afterEach(function () {
     walletStub.reset();
   });
-
-  // it('should get the first 10 addresses and derived keys from the BIP-44 entropy', async function () {
-  //   const deriveStarkNetAddress = await getBIP44AddressKeyDeriver(bip44Entropy);
-  //   for (let i = 0; i < 10; i++) {
-  //     const result = await getKeysFromAddressIndex(deriveStarkNetAddress, '', null, i);
-  //     const { address } = getAccContractAddressAndCallData(
-  //       STARKNET_TESTNET_NETWORK.accountClassHash,
-  //       result.publicKey,
-  //     );
-  //     console.log(`result ${i}:\npublicKey: ${result.publicKey}\nprivateKey: ${result.privateKey}\naddress: ${address}`);
-  //   }
-  // });
 
   it('should get the ground address key from the BIP-44 entropy correctly', async function () {
     const deriveStarkNetAddress = await getBIP44AddressKeyDeriver(bip44Entropy);

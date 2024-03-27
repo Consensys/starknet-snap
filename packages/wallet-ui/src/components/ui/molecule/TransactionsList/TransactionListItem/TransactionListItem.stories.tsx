@@ -10,7 +10,7 @@ export default {
 const transaction: Transaction = {
   txnHash: '0x1321951d3102d45abd6dd9ac556b6a86190c78b1026279a8d44cb18c0008eb6',
   txnType: 'invoke',
-  chainId: '0x534e5f474f45524c49',
+  chainId: '0x534e5f5345504f4c4941',
   senderAddress: '0x05ccc9fc2d7ce9e2b0f2cee1a4b898570bb4d03ba23ad6f72f0db971bd04552c',
   contractAddress: '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
   contractFuncName: 'transfer',
