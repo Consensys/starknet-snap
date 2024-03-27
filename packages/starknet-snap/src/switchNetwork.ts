@@ -15,7 +15,7 @@ export async function switchNetwork(params: ApiParams) {
     }
     const components = getNetworkTxt(network);
 
-    if (requestParamsObj.enableAutherize === true) {
+    if (requestParamsObj.enableAuthorize === true) {
       const response = await wallet.request({
         method: 'snap_dialog',
         params: {

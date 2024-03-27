@@ -58,7 +58,7 @@ describe('Test function: signMessage', function () {
       version: '0x0',
       maxFee: 100,
     },
-    enableAutherize: true,
+    enableAuthorize: true,
   };
 
   beforeEach(async function () {
@@ -105,21 +105,21 @@ describe('Test function: signMessage', function () {
     expect(result).to.be.eql(false);
   });
 
-  it('should skip dialog if enableAutherize is false', async function () {
+  it('should skip dialog if enableAuthorize is false', async function () {
     const paramsObject = apiParams.requestParams as SignTransactionRequestParams;
-    paramsObject.enableAutherize = false;
+    paramsObject.enableAuthorize = false;
     const result = await signTransaction(apiParams);
     expect(walletStub.rpcStubs.snap_dialog).to.have.been.callCount(0);
     expect(result).to.be.eql(signature3);
-    paramsObject.enableAutherize = true;
+    paramsObject.enableAuthorize = true;
   });
 
-  it('should skip dialog if enableAutherize is omit', async function () {
+  it('should skip dialog if enableAuthorize is omit', async function () {
     const paramsObject = apiParams.requestParams as SignTransactionRequestParams;
-    paramsObject.enableAutherize = undefined;
+    paramsObject.enableAuthorize = undefined;
     const result = await signTransaction(apiParams);
     expect(walletStub.rpcStubs.snap_dialog).to.have.been.callCount(0);
     expect(result).to.be.eql(signature3);
-    paramsObject.enableAutherize = true;
+    paramsObject.enableAuthorize = true;
   });
 });

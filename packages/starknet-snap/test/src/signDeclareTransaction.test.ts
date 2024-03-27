@@ -46,7 +46,7 @@ describe('Test function: signDeclareTransaction', function () {
       version: '0x0',
       maxFee: 100,
     },
-    enableAutherize: true,
+    enableAuthorize: true,
   };
 
   beforeEach(async function () {
@@ -94,23 +94,23 @@ describe('Test function: signDeclareTransaction', function () {
     expect(result).to.be.eql(false);
   });
 
-  it('should skip dialog if enableAutherize is false', async function () {
+  it('should skip dialog if enableAuthorize is false', async function () {
     sandbox.stub(utils, 'signDeclareTransaction').resolves(signature3);
     const paramsObject = apiParams.requestParams as SignDeclareTransactionRequestParams;
-    paramsObject.enableAutherize = false;
+    paramsObject.enableAuthorize = false;
     const result = await signDeclareTransaction(apiParams);
     expect(walletStub.rpcStubs.snap_dialog).to.have.been.callCount(0);
     expect(result).to.be.eql(signature3);
-    paramsObject.enableAutherize = true;
+    paramsObject.enableAuthorize = true;
   });
 
-  it('should skip dialog if enableAutherize is omit', async function () {
+  it('should skip dialog if enableAuthorize is omit', async function () {
     sandbox.stub(utils, 'signDeclareTransaction').resolves(signature3);
     const paramsObject = apiParams.requestParams as SignDeclareTransactionRequestParams;
-    paramsObject.enableAutherize = undefined;
+    paramsObject.enableAuthorize = undefined;
     const result = await signDeclareTransaction(apiParams);
     expect(walletStub.rpcStubs.snap_dialog).to.have.been.callCount(0);
     expect(result).to.be.eql(signature3);
-    paramsObject.enableAutherize = true;
+    paramsObject.enableAuthorize = true;
   });
 });
