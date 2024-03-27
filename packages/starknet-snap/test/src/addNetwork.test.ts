@@ -4,11 +4,7 @@ import sinonChai from 'sinon-chai';
 import { WalletMock } from '../wallet.mock.test';
 import { SnapState } from '../../src/types/snapState';
 import * as snapUtils from '../../src/utils/snapUtils';
-import {
-  STARKNET_MAINNET_NETWORK,
-  STARKNET_TESTNET_NETWORK,
-  STARKNET_SEPOLIA_TESTNET_NETWORK,
-} from '../../src/utils/constants';
+import { STARKNET_MAINNET_NETWORK, STARKNET_SEPOLIA_TESTNET_NETWORK } from '../../src/utils/constants';
 import { addNetwork } from '../../src/addNetwork';
 import { Mutex } from 'async-mutex';
 import { AddNetworkRequestParams, ApiParams } from '../../src/types/snapApi';
@@ -21,7 +17,7 @@ describe('Test function: addNetwork', function () {
   const state: SnapState = {
     accContracts: [],
     erc20Tokens: [],
-    networks: [STARKNET_TESTNET_NETWORK, STARKNET_MAINNET_NETWORK, STARKNET_SEPOLIA_TESTNET_NETWORK],
+    networks: [STARKNET_MAINNET_NETWORK, STARKNET_SEPOLIA_TESTNET_NETWORK],
     transactions: [],
   };
   const apiParams: ApiParams = {
@@ -46,53 +42,53 @@ describe('Test function: addNetwork', function () {
 
   it('should add the network correctly', async function () {
     const requestObject: AddNetworkRequestParams = {
-      networkName: 'Starknet Unit SN_GOERLI',
+      networkName: 'Starknet Unit SN_SEPOLIA',
       networkChainId: '0x534e5f474f777',
-      networkBaseUrl: 'https://alpha-unit-SN_GOERLI.starknet.io',
-      networkNodeUrl: 'https://alpha-unit-SN_GOERLI.starknet.io',
+      networkBaseUrl: 'https://alpha-unit-SN_SEPOLIA.starknet.io',
+      networkNodeUrl: 'https://alpha-unit-SN_SEPOLIA.starknet.io',
     };
     apiParams.requestParams = requestObject;
     const result = await addNetwork(apiParams);
     expect(result).to.be.eql(true);
     expect(stateStub).to.be.calledOnce;
-    expect(state.networks.length).to.be.eql(4);
+    expect(state.networks.length).to.be.eql(3);
   });
 
   it('should update the network correctly', async function () {
     const requestObject: AddNetworkRequestParams = {
-      networkName: 'Starknet Unit SN_GOERLI 2',
+      networkName: 'Starknet Unit SN_SEPOLIA 2',
       networkChainId: '0x534e5f474f777',
-      networkBaseUrl: 'https://alpha-unit-SN_GOERLI-2.starknet.io',
-      networkNodeUrl: 'https://alpha-unit-SN_GOERLI.starknet.io',
+      networkBaseUrl: 'https://alpha-unit-SN_SEPOLIA-2.starknet.io',
+      networkNodeUrl: 'https://alpha-unit-SN_SEPOLIA.starknet.io',
     };
     apiParams.requestParams = requestObject;
     const result = await addNetwork(apiParams);
     expect(result).to.be.eql(true);
     expect(stateStub).to.be.calledOnce;
-    expect(state.networks.length).to.be.eql(4);
+    expect(state.networks.length).to.be.eql(3);
   });
 
   it('should not update snap state with the duplicated network', async function () {
     const requestObject: AddNetworkRequestParams = {
-      networkName: 'Starknet Unit SN_GOERLI 2',
+      networkName: 'Starknet Unit SN_SEPOLIA 2',
       networkChainId: '0x534e5f474f777',
-      networkBaseUrl: 'https://alpha-unit-SN_GOERLI-2.starknet.io',
-      networkNodeUrl: 'https://alpha-unit-SN_GOERLI.starknet.io',
+      networkBaseUrl: 'https://alpha-unit-SN_SEPOLIA-2.starknet.io',
+      networkNodeUrl: 'https://alpha-unit-SN_SEPOLIA.starknet.io',
     };
     apiParams.requestParams = requestObject;
     const result = await addNetwork(apiParams);
     expect(result).to.be.eql(true);
     expect(stateStub).to.be.callCount(0);
-    expect(state.networks.length).to.be.eql(4);
+    expect(state.networks.length).to.be.eql(3);
   });
 
   it('should throw an error if upsertNetwork failed', async function () {
     sandbox.stub(snapUtils, 'upsertNetwork').throws(new Error());
     const requestObject: AddNetworkRequestParams = {
-      networkName: 'Starknet Unit SN_GOERLI 2',
+      networkName: 'Starknet Unit SN_SEPOLIA 2',
       networkChainId: '0x534e5f474f777',
-      networkBaseUrl: 'https://alpha-unit-SN_GOERLI-2.starknet.io',
-      networkNodeUrl: 'https://alpha-unit-SN_GOERLI.starknet.io',
+      networkBaseUrl: 'https://alpha-unit-SN_SEPOLIA-2.starknet.io',
+      networkNodeUrl: 'https://alpha-unit-SN_SEPOLIA.starknet.io',
     };
     apiParams.requestParams = requestObject;
     let result;
@@ -109,7 +105,7 @@ describe('Test function: addNetwork', function () {
     const requestObject: AddNetworkRequestParams = {
       networkName: undefined,
       networkChainId: '0x534e5f474f777',
-      networkBaseUrl: 'https://alpha-unit-SN_GOERLI-2.starknet.io',
+      networkBaseUrl: 'https://alpha-unit-SN_SEPOLIA-2.starknet.io',
       networkNodeUrl: '',
     };
     apiParams.requestParams = requestObject;
@@ -125,9 +121,9 @@ describe('Test function: addNetwork', function () {
 
   it('should throw an error if the network chain id is undefined', async function () {
     const requestObject: AddNetworkRequestParams = {
-      networkName: 'Starknet Unit SN_GOERLI 2',
+      networkName: 'Starknet Unit SN_SEPOLIA 2',
       networkChainId: undefined,
-      networkBaseUrl: 'https://alpha-unit-SN_GOERLI-2.starknet.io',
+      networkBaseUrl: 'https://alpha-unit-SN_SEPOLIA-2.starknet.io',
       networkNodeUrl: '',
     };
     apiParams.requestParams = requestObject;
@@ -143,7 +139,7 @@ describe('Test function: addNetwork', function () {
 
   it('should throw an error if both the network base url and node url are empty string', async function () {
     const requestObject: AddNetworkRequestParams = {
-      networkName: 'Starknet Unit SN_GOERLI 2',
+      networkName: 'Starknet Unit SN_SEPOLIA 2',
       networkChainId: '0x534e5f474f777',
       networkBaseUrl: '',
       networkNodeUrl: '',
@@ -161,9 +157,9 @@ describe('Test function: addNetwork', function () {
 
   it('should throw an error if the network name is not in ASCII chars', async function () {
     const requestObject: AddNetworkRequestParams = {
-      networkName: 'аррӏе SN_GOERLI',
+      networkName: 'аррӏе SN_SEPOLIA',
       networkChainId: '0x534e5f474f777',
-      networkBaseUrl: 'https://alpha-unit-SN_GOERLI-2.starknet.io',
+      networkBaseUrl: 'https://alpha-unit-SN_SEPOLIA-2.starknet.io',
       networkNodeUrl: '',
     };
     apiParams.requestParams = requestObject;
@@ -179,9 +175,9 @@ describe('Test function: addNetwork', function () {
 
   it('should throw an error if the network name is longer than 64 chars', async function () {
     const requestObject: AddNetworkRequestParams = {
-      networkName: 'Starknet Unit SN_GOERLI xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+      networkName: 'Starknet Unit SN_SEPOLIA xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
       networkChainId: '0x534e5f474f777',
-      networkBaseUrl: 'https://alpha-unit-SN_GOERLI-2.starknet.io',
+      networkBaseUrl: 'https://alpha-unit-SN_SEPOLIA-2.starknet.io',
       networkNodeUrl: '',
     };
     apiParams.requestParams = requestObject;
@@ -199,7 +195,7 @@ describe('Test function: addNetwork', function () {
     const requestObject: AddNetworkRequestParams = {
       networkName: '        ',
       networkChainId: '0x534e5f474f777',
-      networkBaseUrl: 'https://alpha-unit-SN_GOERLI-2.starknet.io',
+      networkBaseUrl: 'https://alpha-unit-SN_SEPOLIA-2.starknet.io',
       networkNodeUrl: '',
     };
     apiParams.requestParams = requestObject;
@@ -215,9 +211,9 @@ describe('Test function: addNetwork', function () {
 
   it('should throw an error if the network chainId is not in hex string', async function () {
     const requestObject: AddNetworkRequestParams = {
-      networkName: 'Starknet Unit SN_GOERLI',
+      networkName: 'Starknet Unit SN_SEPOLIA',
       networkChainId: '534e5f474f777',
-      networkBaseUrl: 'https://alpha-unit-SN_GOERLI-2.starknet.io',
+      networkBaseUrl: 'https://alpha-unit-SN_SEPOLIA-2.starknet.io',
       networkNodeUrl: '',
     };
     apiParams.requestParams = requestObject;
@@ -233,9 +229,9 @@ describe('Test function: addNetwork', function () {
 
   it('should throw an error if the network base URL is not valid', async function () {
     const requestObject: AddNetworkRequestParams = {
-      networkName: 'Starknet Unit SN_GOERLI',
+      networkName: 'Starknet Unit SN_SEPOLIA',
       networkChainId: '0x534e5f474f777',
-      networkBaseUrl: 'wss://alpha-unit-SN_GOERLI-2.starknet.io',
+      networkBaseUrl: 'wss://alpha-unit-SN_SEPOLIA-2.starknet.io',
       networkNodeUrl: '',
     };
     apiParams.requestParams = requestObject;
@@ -251,10 +247,10 @@ describe('Test function: addNetwork', function () {
 
   it('should throw an error if the network node URL is not valid', async function () {
     const requestObject: AddNetworkRequestParams = {
-      networkName: 'Starknet Unit SN_GOERLI',
+      networkName: 'Starknet Unit SN_SEPOLIA',
       networkChainId: '0x534e5f474f777',
       networkBaseUrl: '',
-      networkNodeUrl: 'wss://alpha-unit-SN_GOERLI-2.starknet.io',
+      networkNodeUrl: 'wss://alpha-unit-SN_SEPOLIA-2.starknet.io',
     };
     apiParams.requestParams = requestObject;
     let result;
@@ -269,10 +265,10 @@ describe('Test function: addNetwork', function () {
 
   it('should throw an error if the network Voyager URL is not valid', async function () {
     const requestObject: AddNetworkRequestParams = {
-      networkName: 'Starknet Unit SN_GOERLI',
+      networkName: 'Starknet Unit SN_SEPOLIA',
       networkChainId: '0x534e5f474f777',
       networkBaseUrl: '',
-      networkNodeUrl: 'http://alpha-unit-SN_GOERLI-2.starknet.io',
+      networkNodeUrl: 'http://alpha-unit-SN_SEPOLIA-2.starknet.io',
       networkVoyagerUrl: 'wss://test.com',
     };
     apiParams.requestParams = requestObject;
@@ -288,9 +284,9 @@ describe('Test function: addNetwork', function () {
 
   it('should throw an error if the network chainId is one of the preloaded network chainId', async function () {
     const requestObject: AddNetworkRequestParams = {
-      networkName: 'Starknet Unit SN_GOERLI',
-      networkChainId: '0x534e5f474f45524c49',
-      networkBaseUrl: 'http://alpha-unit-SN_GOERLI-2.starknet.io',
+      networkName: 'Starknet Unit SN_SEPOLIA',
+      networkChainId: '0x534e5f5345504f4c4941',
+      networkBaseUrl: 'http://alpha-unit-SN_SEPOLIA-2.starknet.io',
       networkNodeUrl: '',
     };
     apiParams.requestParams = requestObject;
@@ -306,10 +302,10 @@ describe('Test function: addNetwork', function () {
 
   it('should throw an error if the network name is one of the preloaded network name', async function () {
     const requestObject: AddNetworkRequestParams = {
-      networkName: STARKNET_TESTNET_NETWORK.name,
-      networkChainId: STARKNET_TESTNET_NETWORK.chainId,
-      networkBaseUrl: STARKNET_TESTNET_NETWORK.baseUrl,
-      networkNodeUrl: STARKNET_TESTNET_NETWORK.nodeUrl,
+      networkName: STARKNET_SEPOLIA_TESTNET_NETWORK.name,
+      networkChainId: STARKNET_SEPOLIA_TESTNET_NETWORK.chainId,
+      networkBaseUrl: STARKNET_SEPOLIA_TESTNET_NETWORK.baseUrl,
+      networkNodeUrl: STARKNET_SEPOLIA_TESTNET_NETWORK.nodeUrl,
     };
     apiParams.requestParams = requestObject;
     let result;
