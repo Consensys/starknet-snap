@@ -4,7 +4,6 @@ import {
   type WatchAssetParameters,
   type AddDeclareTransactionParameters,
   type AddInvokeTransactionParameters,
-  type AddDeployAccountTransactionParameters,
   type AddInvokeTransactionResult,
   type TypedData,
   type Permission,
@@ -156,20 +155,6 @@ export class StarknetAddInvokeTransaction
     } catch (e) {
       throw e;
     }
-  }
-}
-
-export class StarknetAddDeployAccountTransaction
-  extends BaseRPCHandler
-  implements StaticImplements<StaticRPCHandler, typeof StarknetAddDeployAccountTransaction>
-{
-  async handleRequest(param: AddDeployAccountTransactionParameters): Promise<AddInvokeTransactionResult> {
-    if (!this.installed) {
-      throw new Error('Wallet not authorized');
-    }
-    console.log(param);
-    // const account = await this.getAccount();
-    return null as AddInvokeTransactionResult;
   }
 }
 

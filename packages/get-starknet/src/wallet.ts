@@ -13,6 +13,8 @@ import {
   StarknetAddInvokeTransaction,
   StarknetSignTypedData,
   StarknetSupportedSpecs,
+  StarknetAddDeclareTransaction,
+  StarknetAddDeployAccountTransaction,
 } from './rpc';
 
 export class MetaMaskSnapWallet implements StarknetWindowObject {
@@ -35,6 +37,7 @@ export class MetaMaskSnapWallet implements StarknetWindowObject {
   }
 
   async request<T extends RpcMessage>(call: Omit<T, 'result'>): Promise<T['result']> {
+    // starknet_addDeployAccountTransaction is not supported
     const rpcHandlers: Record<string, StaticRPCHandler> = {
       wallet_switchStarknetChain: WalletSwitchStarknetChain,
       wallet_getPermissions: WalletGetPermissions,
@@ -43,6 +46,7 @@ export class MetaMaskSnapWallet implements StarknetWindowObject {
       wallet_addStarknetChain: WalletAddStarknetChain,
       wallet_requestChainId: WalletRequestChainId,
       starknet_addInvokeTransaction: StarknetAddInvokeTransaction,
+      starknet_addDeclareTransaction: StarknetAddDeclareTransaction,
       starknet_signTypedData: StarknetSignTypedData,
       starknet_supportedSpecs: StarknetSupportedSpecs,
     };
@@ -51,7 +55,7 @@ export class MetaMaskSnapWallet implements StarknetWindowObject {
       return await rpcHandlers[call.type].GetInstance(this.snap, this.state).execute(call.params);
     }
 
-    throw new Error('Method not supported');
+    throw new Error(`Method ${call.type} not supported`);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
