@@ -55,6 +55,10 @@ export class MetaMaskSnapWallet implements IStarknetWindowObject {
 
     if (call.type === 'wallet_addStarknetChain') {
       const params = call.params as AddStarknetChainParameters;
+      const currentNetwork = await this.#getNetwork();
+      if (currentNetwork?.chainId === params.chainId) {
+        return true as unknown as T['result'];
+      }
       const result = await this.snap.addStarknetChain(
         params.chainName,
         params.chainId,
