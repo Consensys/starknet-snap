@@ -19,7 +19,7 @@ export async function signTransaction(params: ApiParams): Promise<Signature | bo
 
     const snapComponents = getSignTxnTxt(signerAddress, network, requestParamsObj.transactions);
 
-    if (requestParamsObj.enableAutherize === true) {
+    if (requestParamsObj.enableAuthorize === true) {
       const response = await wallet.request({
         method: 'snap_dialog',
         params: {

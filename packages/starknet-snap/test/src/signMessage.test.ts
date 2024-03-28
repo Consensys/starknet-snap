@@ -43,7 +43,7 @@ describe('Test function: signMessage', function () {
     chainId: STARKNET_SEPOLIA_TESTNET_NETWORK.chainId,
     signerAddress: account1.address,
     typedDataMessage: typedDataExample,
-    enableAutherize: true,
+    enableAuthorize: true,
   };
 
   beforeEach(async function () {
@@ -157,21 +157,21 @@ describe('Test function: signMessage', function () {
     }
   });
 
-  it('should skip dialog if enableAutherize is false', async function () {
+  it('should skip dialog if enableAuthorize is false', async function () {
     const paramsObject = apiParams.requestParams as SignMessageRequestParams;
-    paramsObject.enableAutherize = false;
+    paramsObject.enableAuthorize = false;
     const result = await signMessage(apiParams);
     expect(walletStub.rpcStubs.snap_dialog).to.have.been.callCount(0);
     expect(result).to.be.eql(signature4SignMessage);
-    paramsObject.enableAutherize = true;
+    paramsObject.enableAuthorize = true;
   });
 
-  it('should skip dialog if enableAutherize is omit', async function () {
+  it('should skip dialog if enableAuthorize is omit', async function () {
     const paramsObject = apiParams.requestParams as SignMessageRequestParams;
-    paramsObject.enableAutherize = undefined;
+    paramsObject.enableAuthorize = undefined;
     const result = await signMessage(apiParams);
     expect(walletStub.rpcStubs.snap_dialog).to.have.been.callCount(0);
     expect(result).to.be.eql(signature4SignMessage);
-    paramsObject.enableAutherize = true;
+    paramsObject.enableAuthorize = true;
   });
 });
