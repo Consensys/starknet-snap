@@ -14,8 +14,6 @@
         }
       ]
     },
-    "packages/wallet-ui": {},
-    "packages/get-starknet": {}
-  }
+    "packages/wallet-ui": {}
   }
 }
