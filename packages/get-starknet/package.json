@@ -36,6 +36,7 @@
     "chai-as-promised": "^7.1.1",
     "depcheck": "^1.4.7",
     "eslint": "^8.13.0",
+    "get-starknet-core": "next",
     "html-webpack-plugin": "5.6.0",
     "prettier": "^2.6.2",
     "rimraf": "^3.0.2",
