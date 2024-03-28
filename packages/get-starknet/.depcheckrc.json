@@ -1,0 +1,3 @@
+{
+  "ignores": ["@types/*", "prettier-plugin-packagejson", "rimraf", "ts-node", "typedoc"]
+}
