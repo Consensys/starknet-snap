@@ -7,7 +7,7 @@ import { SnapState } from '../../src/types/snapState';
 import { signMessage } from '../../src/signMessage';
 import typedDataExample from '../../src/typedData/typedDataExample.json';
 import { ArraySignatureType } from 'starknet';
-import { STARKNET_TESTNET_NETWORK } from '../../src/utils/constants';
+import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../../src/utils/constants';
 import {
   account1,
   getBip44EntropyStub,
@@ -29,7 +29,7 @@ describe('Test function: signMessage', function () {
   const state: SnapState = {
     accContracts: [account1],
     erc20Tokens: [],
-    networks: [STARKNET_TESTNET_NETWORK],
+    networks: [STARKNET_SEPOLIA_TESTNET_NETWORK],
     transactions: [],
   };
   const apiParams: ApiParams = {
@@ -40,7 +40,7 @@ describe('Test function: signMessage', function () {
   };
 
   const requestObject: SignMessageRequestParams = {
-    chainId: STARKNET_TESTNET_NETWORK.chainId,
+    chainId: STARKNET_SEPOLIA_TESTNET_NETWORK.chainId,
     signerAddress: account1.address,
     typedDataMessage: typedDataExample,
     enableAutherize: true,

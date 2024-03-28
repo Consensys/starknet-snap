@@ -22,10 +22,17 @@ import {
   PRELOADED_TOKENS,
   STARKNET_INTEGRATION_NETWORK,
   STARKNET_MAINNET_NETWORK,
-  STARKNET_TESTNET_NETWORK,
   STARKNET_SEPOLIA_TESTNET_NETWORK,
+  STARKNET_TESTNET_NETWORK,
 } from './utils/constants';
-import { dappUrl, getNetworkFromChainId, isSameChainId, upsertErc20Token, upsertNetwork } from './utils/snapUtils';
+import {
+  dappUrl,
+  getNetworkFromChainId,
+  isSameChainId,
+  upsertErc20Token,
+  upsertNetwork,
+  removeNetwork,
+} from './utils/snapUtils';
 import { getStoredNetworks } from './getStoredNetworks';
 import { getStoredTransactions } from './getStoredTransactions';
 import { getTransactions } from './getTransactions';
@@ -92,9 +99,12 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ origin, request }) => 
     if (isDev) {
       await upsertNetwork(STARKNET_INTEGRATION_NETWORK, snap, saveMutex, state);
     } else {
-      await upsertNetwork(STARKNET_TESTNET_NETWORK, snap, saveMutex, state);
       await upsertNetwork(STARKNET_SEPOLIA_TESTNET_NETWORK, snap, saveMutex, state);
     }
+
+    // remove the testnet network (migration)
+    await removeNetwork(STARKNET_TESTNET_NETWORK, snap, saveMutex, state);
+
     for (const token of PRELOADED_TOKENS) {
       await upsertErc20Token(token, snap, saveMutex, state);
     }
@@ -238,10 +248,7 @@ export const onInstall: OnInstallHandler = async () => {
 export const onUpdate: OnUpdateHandler = async () => {
   const component = panel([
     text('Features released with this update:'),
-    text('**Home Page**: You can now see your account and balance on the Snap homepage.'),
-    text(
-      'To get to the Starknet Snap homepage, from the MetaMask menu, click **Snaps**, then click on the Starknet Snap.',
-    ),
+    text('- Deprecation of the Starknet Goerli Testnet'),
   ]);
 
   await snap.request({
@@ -263,11 +270,14 @@ export const onHomePage: OnHomePageHandler = async () => {
       },
     });
 
+    // Account may not exist if the recover account process has not executed.
     let accContract: AccContract;
-    if (state.currentNetwork) {
-      accContract = state.accContracts.find((n) => n.chainId == state.currentNetwork.chainId);
-    } else {
-      accContract = state.accContracts[0];
+    if (state) {
+      if (state.currentNetwork) {
+        accContract = state.accContracts.find((n) => n.chainId == state.currentNetwork.chainId);
+      } else if (state.accContracts && state.accContracts.length > 0) {
+        accContract = state.accContracts[0];
+      }
     }
 
     if (accContract) {

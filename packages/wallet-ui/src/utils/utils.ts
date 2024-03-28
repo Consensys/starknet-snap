@@ -3,7 +3,6 @@ import { ethers } from 'ethers';
 import {
   DECIMALS_DISPLAYED_MAX_LENGTH,
   STARKNET_MAINNET_EXPLORER,
-  STARKNET_TESTNET_EXPLORER,
   STARKNET_SEPOLIA_TESTNET_EXPLORER,
   SEPOLIA_CHAINID,
   TIMEOUT_DURATION,
@@ -16,18 +15,11 @@ export const shortenAddress = (address: string, num = 3) => {
   return !!address && `${address.substring(0, num + 2)}...${address.substring(address.length - num - 1)}`;
 };
 
-export const openExplorerTab = (
-  address: string,
-  type = 'contract',
-  chainId = constants.StarknetChainId.TESTNET as string,
-) => {
-  let explorerUrl = STARKNET_TESTNET_EXPLORER;
+export const openExplorerTab = (address: string, type = 'contract', chainId = SEPOLIA_CHAINID) => {
+  let explorerUrl = STARKNET_SEPOLIA_TESTNET_EXPLORER;
   switch (chainId) {
     case constants.StarknetChainId.MAINNET:
       explorerUrl = STARKNET_MAINNET_EXPLORER;
-      break;
-    case constants.StarknetChainId.TESTNET:
-      explorerUrl = STARKNET_TESTNET_EXPLORER;
       break;
     case SEPOLIA_CHAINID:
       explorerUrl = STARKNET_SEPOLIA_TESTNET_EXPLORER;

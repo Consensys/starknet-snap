@@ -5,7 +5,7 @@ import { WalletMock } from '../wallet.mock.test';
 import * as utils from '../../src/utils/starknetUtils';
 import * as snapUtils from '../../src/utils/snapUtils';
 import { SnapState } from '../../src/types/snapState';
-import { STARKNET_TESTNET_NETWORK, STARKNET_MAINNET_NETWORK } from '../../src/utils/constants';
+import { STARKNET_SEPOLIA_TESTNET_NETWORK, STARKNET_MAINNET_NETWORK } from '../../src/utils/constants';
 import {
   createAccountProxyTxn,
   expectedMassagedTxn4,
@@ -38,7 +38,7 @@ describe('Test function: getTransactions', function () {
   const state: SnapState = {
     accContracts: [],
     erc20Tokens: [],
-    networks: [STARKNET_TESTNET_NETWORK, STARKNET_MAINNET_NETWORK],
+    networks: [STARKNET_SEPOLIA_TESTNET_NETWORK, STARKNET_MAINNET_NETWORK],
     transactions: [
       { ...unsettedTransactionInMassagedTxn },
       { ...txn1 },
@@ -221,7 +221,7 @@ describe('Test function: getTransactions.updateStatus', function () {
   });
 
   it('should update status correctly', async function () {
-    await updateStatus(txns[0], STARKNET_TESTNET_NETWORK);
+    await updateStatus(txns[0], STARKNET_SEPOLIA_TESTNET_NETWORK);
     expect(getTransactionStatusStub.callCount).to.be.eq(1);
     expect(txns[0].finalityStatus).to.be.eq(getTxnStatusAcceptL2Resp.finalityStatus);
     expect(txns[0].executionStatus).to.be.eq(getTxnStatusAcceptL2Resp.executionStatus);
@@ -234,7 +234,7 @@ describe('Test function: getTransactions.updateStatus', function () {
       getTransactionStatusStub = sandbox.stub(utils, 'getTransactionStatus').throws(new Error());
     });
     it('should not throw error', async function () {
-      await updateStatus(txns[0], STARKNET_TESTNET_NETWORK);
+      await updateStatus(txns[0], STARKNET_SEPOLIA_TESTNET_NETWORK);
       expect(txns[0].finalityStatus).to.be.eq(unsettedTransactionInMassagedTxn.finalityStatus);
       expect(txns[0].executionStatus).to.be.eq(unsettedTransactionInMassagedTxn.executionStatus);
       expect(txns[0].status).to.be.eq(unsettedTransactionInMassagedTxn.status);
