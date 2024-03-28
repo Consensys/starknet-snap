@@ -1,8 +1,3 @@
-import {
-  type AddStarknetChainParameters,
-  type SwitchStarknetChainParameter,
-  type WatchAssetParameters,
-} from 'get-starknet-core';
 import { AccContract, MetaMaskProvider, Network, RequestSnapResponse } from './type';
 import {
   Abi,
@@ -218,81 +213,56 @@ export class MetaMaskSnap {
     })) as Array<AccContract>;
   }
 
-  async switchNetwork(params: SwitchStarknetChainParameter): Promise<{ result: boolean }> {
-    try {
-      // Use the provided chainId to switch the network
-      const response = (await this.#provider.request({
-        method: 'wallet_invokeSnap',
-        params: {
-          snapId: this.#snapId,
-          request: {
-            method: 'starkNet_switchNetwork',
-            params: {
-              chainId: params.chainId,
-              enableAutherize: true,
-            },
+  async switchNetwork(chainId: string): Promise<boolean> {
+    return (await this.#provider.request({
+      method: 'wallet_invokeSnap',
+      params: {
+        snapId: this.#snapId,
+        request: {
+          method: 'starkNet_switchNetwork',
+          params: {
+            chainId,
+            enableAutherize: true,
           },
         },
-      })) as boolean;
-
-      return { result: response };
-    } catch (error) {
-      console.error('Error switching Starknet chain:', error);
-      return { result: false };
-    }
+      },
+    })) as boolean;
   }
 
-  async addStarknetChain(params: AddStarknetChainParameters): Promise<{ result: boolean }> {
-    try {
-      const response = (await this.#provider.request({
-        method: 'wallet_invokeSnap',
-        params: {
-          snapId: this.#snapId,
-          request: {
-            method: 'starkNet_addNetwork',
-            params: {
-              networkName: params.chainName,
-              networkChainId: params.chainId,
-              networkBaseUrl: params.baseUrl,
-              networkNodeUrl: params.rpcUrls,
-              networkVoyagerUrl: params.blockExplorerUrls ? params.blockExplorerUrls[0] : '',
-            },
+  async addStarknetChain(chainName: string, chainId: string, rpcUrl: string, explorerUrl: string): Promise<boolean> {
+    return (await this.#provider.request({
+      method: 'wallet_invokeSnap',
+      params: {
+        snapId: this.#snapId,
+        request: {
+          method: 'starkNet_addNetwork',
+          params: {
+            networkName: chainName,
+            networkChainId: chainId,
+            networkNodeUrl: rpcUrl,
+            networkVoyagerUrl: explorerUrl,
           },
         },
-      })) as boolean;
-
-      return { result: response };
-    } catch (error) {
-      console.error('Error adding Starknet chain:', error);
-      return { result: false };
-    }
+      },
+    })) as boolean;
   }
 
-  async watchAsset(params: WatchAssetParameters): Promise<{ result: boolean }> {
-    try {
-      const response = await this.#provider.request({
-        method: 'wallet_invokeSnap',
-        params: {
-          snapId: this.#snapId,
-          request: {
-            method: 'starkNet_addErc20Token',
-            params: {
-              tokenAddress: params.options.address,
-              tokenName: params.options.name,
-              tokenSymbol: params.options.symbol,
-              tokenDecimals: params.options.decimals,
-            },
+  async watchAsset(address: string, name: string, symbol: string, decimals: number): Promise<boolean> {
+    return this.#provider.request({
+      method: 'wallet_invokeSnap',
+      params: {
+        snapId: this.#snapId,
+        request: {
+          method: 'starkNet_addErc20Token',
+          params: {
+            tokenAddress: address,
+            tokenName: name,
+            tokenSymbol: symbol,
+            tokenDecimals: decimals,
           },
         },
-      });
-      if (response === false) {
-        return { result: false };
-      }
-      return { result: true };
-    } catch (error) {
-      console.error('Error watching asset:', error);
-      return { result: false };
-    }
+      },
+    }) as unknown as boolean;
   }
 
   async getCurrentNetwork(): Promise<Network> {
@@ -351,7 +321,7 @@ export class MetaMaskSnap {
     }
   }
 
-  async installIfNot() {
+  async installIfNot(): Promise<boolean> {
     const response = (await this.#provider.request({
       method: 'wallet_requestSnaps',
       params: {
@@ -359,8 +329,9 @@ export class MetaMaskSnap {
       },
     })) as RequestSnapResponse;
     if (!response || !response[this.#snapId]?.enabled) {
-      throw new Error(`Snap ${this.#snapId} has not installed`);
+      return false;
     }
+    return true;
   }
 
   async isInstalled() {

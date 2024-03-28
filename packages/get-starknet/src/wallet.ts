@@ -45,33 +45,33 @@ export class MetaMaskSnapWallet implements IStarknetWindowObject {
 
   async request<T extends RpcMessage>(call: Omit<T, 'result'>): Promise<T['result']> {
     if (call.type === 'wallet_switchStarknetChain') {
-      const params = call as {
-        type: 'wallet_switchStarknetChain';
-        params: SwitchStarknetChainParameter;
-      };
-
-      const result = (await this.snap.switchNetwork(params.params)) ?? { result: false };
-      if (result.result === true) {
+      const params = call.params as SwitchStarknetChainParameter;
+      const result = await this.snap.switchNetwork(params.chainId);
+      if (result === true) {
         await this.enable();
       }
       return result as unknown as T['result'];
     }
 
     if (call.type === 'wallet_addStarknetChain') {
-      const params = call as {
-        type: 'wallet_addStarknetChain';
-        params: AddStarknetChainParameters;
-      };
-      const result = (await this.snap.addStarknetChain(params.params)) ?? { result: false };
+      const params = call.params as AddStarknetChainParameters;
+      const result = await this.snap.addStarknetChain(
+        params.chainName,
+        params.chainId,
+        params.rpcUrls ? params.rpcUrls[0] : '',
+        params.blockExplorerUrls ? params.blockExplorerUrls[0] : '',
+      );
       return result as unknown as T['result'];
     }
 
     if (call.type === 'wallet_watchAsset') {
-      const params = call as {
-        type: 'wallet_watchAsset';
-        params: WatchAssetParameters;
-      };
-      const result = (await this.snap.watchAsset(params.params)) ?? { result: false };
+      const params = call.params as WatchAssetParameters;
+      const result = (await this.snap.watchAsset(
+        params.options.address,
+        params.options.name,
+        params.options.symbol,
+        params.options.decimals,
+      )) ?? { result: false };
       return result as unknown as T['result'];
     }
 
