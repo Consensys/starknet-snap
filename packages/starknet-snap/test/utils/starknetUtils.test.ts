@@ -3,7 +3,7 @@ import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import { WalletMock } from '../wallet.mock.test';
 import * as utils from '../../src/utils/starknetUtils';
-import { STARKNET_TESTNET_NETWORK } from '../../src/utils/constants';
+import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../../src/utils/constants';
 import { getAddressKeyDeriver } from '../../src/utils/keyPair';
 import {
   getTxnFromVoyagerResp1,
@@ -32,7 +32,7 @@ describe('Test function: callContract', function () {
       return { result: ['0x795d62a9896b221af17bedd8cceb8d963ac6864857d7476e2f8c03ba0c5df9'] };
     });
 
-    const result = await utils.getSigner(userAddress, STARKNET_TESTNET_NETWORK);
+    const result = await utils.getSigner(userAddress, STARKNET_SEPOLIA_TESTNET_NETWORK);
     expect(result).to.be.eq('0x795d62a9896b221af17bedd8cceb8d963ac6864857d7476e2f8c03ba0c5df9');
   });
 
@@ -41,7 +41,7 @@ describe('Test function: callContract', function () {
       return getTxnsFromVoyagerResp;
     });
 
-    const result = await utils.getTransactionsFromVoyager(userAddress, 10, 1, STARKNET_TESTNET_NETWORK);
+    const result = await utils.getTransactionsFromVoyager(userAddress, 10, 1, STARKNET_SEPOLIA_TESTNET_NETWORK);
     expect(result).to.be.eql(getTxnsFromVoyagerResp);
   });
 
@@ -50,7 +50,7 @@ describe('Test function: callContract', function () {
       return getTxnFromVoyagerResp1;
     });
 
-    const result = await utils.getTransactionFromVoyager(userAddress, STARKNET_TESTNET_NETWORK);
+    const result = await utils.getTransactionFromVoyager(userAddress, STARKNET_SEPOLIA_TESTNET_NETWORK);
     expect(result).to.be.eql(getTxnFromVoyagerResp1);
   });
 });
@@ -63,7 +63,7 @@ describe('Test function: getKeysFromAddress', function () {
   const state: SnapState = {
     accContracts: [],
     erc20Tokens: [],
-    networks: [STARKNET_TESTNET_NETWORK],
+    networks: [STARKNET_SEPOLIA_TESTNET_NETWORK],
     transactions: [],
   };
 
@@ -89,14 +89,20 @@ describe('Test function: getKeysFromAddress', function () {
   });
 
   it('should return address keys correctly', async function () {
-    const result = await utils.getKeysFromAddress(keyDeriver, STARKNET_TESTNET_NETWORK, state, account1.address, 5);
+    const result = await utils.getKeysFromAddress(
+      keyDeriver,
+      STARKNET_SEPOLIA_TESTNET_NETWORK,
+      state,
+      account1.address,
+      5,
+    );
     expect(result).to.be.eq(getKeysFromAddressIndexResult);
   });
 
   it('should throw error when address keys not found', async function () {
     let result = null;
     try {
-      result = await utils.getKeysFromAddress(keyDeriver, STARKNET_TESTNET_NETWORK, state, account2.address, 5);
+      result = await utils.getKeysFromAddress(keyDeriver, STARKNET_SEPOLIA_TESTNET_NETWORK, state, account2.address, 5);
     } catch (err) {
       result = err;
     } finally {

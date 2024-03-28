@@ -4,7 +4,7 @@ import sinonChai from 'sinon-chai';
 import { WalletMock } from '../wallet.mock.test';
 import { SnapState } from '../../src/types/snapState';
 import { getStoredErc20Tokens } from '../../src/getStoredErc20Tokens';
-import { STARKNET_TESTNET_NETWORK } from '../../src/utils/constants';
+import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../../src/utils/constants';
 import { token1, token2 } from '../constants.test';
 import * as snapUtils from '../../src/utils/snapUtils';
 import { Mutex } from 'async-mutex';
@@ -18,7 +18,7 @@ describe('Test function: getStoredErc20Tokens', function () {
   const state: SnapState = {
     accContracts: [],
     erc20Tokens: [token1, token2],
-    networks: [STARKNET_TESTNET_NETWORK],
+    networks: [STARKNET_SEPOLIA_TESTNET_NETWORK],
     transactions: [],
   };
   const apiParams: ApiParams = {

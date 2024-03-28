@@ -5,7 +5,7 @@ import { WalletMock } from '../wallet.mock.test';
 import * as utils from '../../src/utils/starknetUtils';
 import { estimateFee } from '../../src/estimateFee';
 import { SnapState } from '../../src/types/snapState';
-import { STARKNET_TESTNET_NETWORK } from '../../src/utils/constants';
+import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../../src/utils/constants';
 import { getAddressKeyDeriver } from '../../src/utils/keyPair';
 import {
   account2,
@@ -27,7 +27,7 @@ describe('Test function: estimateFee', function () {
   const state: SnapState = {
     accContracts: [account2],
     erc20Tokens: [],
-    networks: [STARKNET_TESTNET_NETWORK],
+    networks: [STARKNET_SEPOLIA_TESTNET_NETWORK],
     transactions: [],
   };
   const requestObject: EstimateFeeRequestParams = {
