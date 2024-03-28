@@ -12,10 +12,11 @@ import {
   type AddDeclareTransactionResult,
 } from 'get-starknet-core';
 
-import { type CompiledContract, type Call } from 'starknet';
+import { type CompiledContract, type Call, CallData, hash } from 'starknet';
 
 import { StaticImplements } from './types';
 import { BaseRPCHandler, StaticRPCHandler } from './base';
+import { ACCOUNT_CLASS_HASH, PROXY_CONTRACT_HASH } from './constants';
 
 export class WalletSwitchStarknetChain
   extends BaseRPCHandler
@@ -127,11 +128,18 @@ export class WalletDeploymentData
     }
 
     const account = await this.getAccount();
+    const callData = CallData.compile({
+      implementation: ACCOUNT_CLASS_HASH,
+      selector: hash.getSelectorFromName('initialize'),
+      // Starknet SNAP is using public key as addressSalt
+      calldata: CallData.compile({ signer: account.addressSalt, guardian: '0' }),
+    });
+
     return {
       address: account.address,
-      class_hash: '',
+      class_hash: PROXY_CONTRACT_HASH,
       salt: account.addressSalt,
-      calldata: [],
+      calldata: callData,
       version: 0,
     };
   }

@@ -13,7 +13,7 @@ module.exports = {
     library: {  
       type: 'commonjs2',  
     },  
-  },  
+  },
   resolve: {  
     extensions: ['.ts', '.tsx', '.js'],  
   },  
@@ -25,7 +25,7 @@ module.exports = {
         exclude: /node_modules/,  
       },  
     ],  
-  },  
+  },
   plugins: [  
     new ModuleFederationPlugin({  
       name: 'MetaMaskStarknetSnapWallet',  

@@ -14,7 +14,7 @@ import {
   StarknetSignTypedData,
   StarknetSupportedSpecs,
   StarknetAddDeclareTransaction,
-  StarknetAddDeployAccountTransaction,
+  WalletDeploymentData,
 } from './rpc';
 
 export class MetaMaskSnapWallet implements StarknetWindowObject {
@@ -45,6 +45,7 @@ export class MetaMaskSnapWallet implements StarknetWindowObject {
       wallet_watchAsset: WalletWatchAsset,
       wallet_addStarknetChain: WalletAddStarknetChain,
       wallet_requestChainId: WalletRequestChainId,
+      wallet_deploymentData: WalletDeploymentData,
       starknet_addInvokeTransaction: StarknetAddInvokeTransaction,
       starknet_addDeclareTransaction: StarknetAddDeclareTransaction,
       starknet_signTypedData: StarknetSignTypedData,
