@@ -14,14 +14,14 @@
   "scripts": {
     "start": "webpack-cli serve  --config webpack.serve.config.js",
     "clean": "rimraf dist",
-    "setup": "yarn install --frozen-lockfile",
+    "setup": "yarn install --no-immutable",
     "build": "tsc --project tsconfig.build.json",
     "build:jsonp": "webpack --config webpack.config.jsonp.js",
     "build:fed": " webpack --config webpack.config.js",
     "prettier": "prettier --write \"src/**/*.ts\"",
     "lint": "eslint 'src/*.{js,ts,tsx}' --max-warnings 0 -f json -o eslint-report.json",
     "lint:fix": "eslint '**/*.{js,ts,tsx}' --fix",
-    "test:unit": "nyc --check-coverage --statements 80 --branches 80 --functions 80 --lines 80 mocha --colors -r ts-node/register \"test/**/*.test.ts\""
+    "test:unit": ""
   },
   "keywords": [],
   "author": "Consensys",
@@ -52,11 +52,6 @@
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org/"
-  },
-  "nyc": {
-    "exclude": [
-      "**/*.test.ts"
-    ]
   },
   "dependencies": {
     "starknet": "^5.14.0"

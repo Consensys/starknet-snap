@@ -1,32 +1,24 @@
-name: Publish get-starknet Dev to NPM
+name: Deploy get-starknet package to s3
 on:
   push:
     branches:
       - main
-      - 'releases/**'
     paths:
       - "packages/get-starknet/**"
+      
 permissions:
   contents: write
 jobs:
   publish-get-starknet-to-npm:
     runs-on: ubuntu-latest
     steps:
-
       - uses: actions/checkout@v3
       - run: |
           yarn install --no-immutable
           yarn workspace @consensys/get-starknet setup
-          VERSION=$(node -p "require('./packages/get-starknet/package.json').version")
-          HASH=$(git rev-parse --short HEAD)
-          DATE=$(date +%Y%m%d%H%M%S)
-          npm --prefix ./packages/get-starknet version --new-version ${VERSION}-dev-${HASH}-${DATE} --no-git-tag-version
-          yarn workspace @consensys/get-starknet build
+          yarn workspace @consensys/get-starknet build:fed
 
-      - uses: actions/setup-node@v3
-        with:
-          node-version: '16.x'
-          registry-url: 'https://registry.npmjs.org'
-      - run: npm publish ./packages/get-starknet --tag dev --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Deploy to Dev
+        run: | 
+          aws s3 sync ./packages/get-starknet/dist/webpack s3://dev.snaps.consensys.io/get-starknet
+          aws s3 sync ./packages/get-starknet/dist/jsonp s3://dev.snaps.consensys.io/get-starknet
