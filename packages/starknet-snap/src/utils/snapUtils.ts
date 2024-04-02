@@ -8,6 +8,7 @@ import {
   DeclareSignerDetails,
   Call,
   DeployAccountSignerDetails,
+  constants,
 } from 'starknet';
 import { validateAndParseAddress } from './starknetUtils';
 import { Component, text, copyable } from '@metamask/snaps-sdk';
@@ -527,12 +528,22 @@ export function getChainIdHex(network: Network) {
   return `0x${num.toBigInt(network.chainId).toString(16)}`;
 }
 
+export function getVoyagerUrl(chainId: string) {
+  switch (chainId) {
+    case STARKNET_SEPOLIA_TESTNET_NETWORK.chainId:
+      return `https://eer9th3mo4.execute-api.eu-central-1.amazonaws.com`;
+    default:
+    case constants.StarknetChainId.SN_MAIN:
+      return `https://6l5ewsb9z2.execute-api.eu-central-1.amazonaws.com`;
+  }
+}
+
 export function getTransactionFromVoyagerUrl(network: Network) {
-  return `${network.voyagerUrl}${VOYAGER_API_TXN_URL_SUFFIX}`;
+  return `${getVoyagerUrl(network.chainId)}${VOYAGER_API_TXN_URL_SUFFIX}`;
 }
 
 export function getTransactionsFromVoyagerUrl(network: Network) {
-  return `${network.voyagerUrl}${VOYAGER_API_TXNS_URL_SUFFIX}`;
+  return `${getVoyagerUrl(network.chainId)}${VOYAGER_API_TXNS_URL_SUFFIX}`;
 }
 
 export function getTransaction(state: SnapState, txnHash: string, chainId: string) {
