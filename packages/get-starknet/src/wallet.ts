@@ -10,10 +10,10 @@ import {
   WalletWatchAsset,
   WalletAddStarknetChain,
   WalletRequestChainId,
-  StarknetAddInvokeTransaction,
-  StarknetSignTypedData,
-  StarknetSupportedSpecs,
-  StarknetAddDeclareTransaction,
+  WalletAddInvokeTransaction,
+  WalletSignTypedData,
+  WalletSupportedSpecs,
+  WalletAddDeclareTransaction,
   WalletDeploymentData,
 } from './rpc';
 
@@ -37,7 +37,6 @@ export class MetaMaskSnapWallet implements StarknetWindowObject {
   }
 
   async request<T extends RpcMessage>(call: Omit<T, 'result'>): Promise<T['result']> {
-    // starknet_addDeployAccountTransaction is not supported
     const rpcHandlers: Record<string, StaticRPCHandler> = {
       wallet_switchStarknetChain: WalletSwitchStarknetChain,
       wallet_getPermissions: WalletGetPermissions,
@@ -46,10 +45,10 @@ export class MetaMaskSnapWallet implements StarknetWindowObject {
       wallet_addStarknetChain: WalletAddStarknetChain,
       wallet_requestChainId: WalletRequestChainId,
       wallet_deploymentData: WalletDeploymentData,
-      starknet_addInvokeTransaction: StarknetAddInvokeTransaction,
-      starknet_addDeclareTransaction: StarknetAddDeclareTransaction,
-      starknet_signTypedData: StarknetSignTypedData,
-      starknet_supportedSpecs: StarknetSupportedSpecs,
+      wallet_addInvokeTransaction: WalletAddInvokeTransaction,
+      wallet_addDeclareTransaction: WalletAddDeclareTransaction,
+      wallet_signTypedData: WalletSignTypedData,
+      wallet_supportedSpecs: WalletSupportedSpecs,
     };
 
     if (rpcHandlers[call.type]) {

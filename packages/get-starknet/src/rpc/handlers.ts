@@ -145,9 +145,9 @@ export class WalletDeploymentData
   }
 }
 
-export class StarknetAddInvokeTransaction
+export class WalletAddInvokeTransaction
   extends BaseRPCHandler
-  implements StaticImplements<StaticRPCHandler, typeof StarknetAddInvokeTransaction>
+  implements StaticImplements<StaticRPCHandler, typeof WalletAddInvokeTransaction>
 {
   async handleRequest(param: AddInvokeTransactionParameters): Promise<AddInvokeTransactionResult> {
     if (!this.installed) {
@@ -166,9 +166,9 @@ export class StarknetAddInvokeTransaction
   }
 }
 
-export class StarknetAddDeclareTransaction
+export class WalletAddDeclareTransaction
   extends BaseRPCHandler
-  implements StaticImplements<StaticRPCHandler, typeof StarknetAddDeclareTransaction>
+  implements StaticImplements<StaticRPCHandler, typeof WalletAddDeclareTransaction>
 {
   async handleRequest(param: AddDeclareTransactionParameters): Promise<AddDeclareTransactionResult> {
     if (!this.installed) {
@@ -190,9 +190,9 @@ export class StarknetAddDeclareTransaction
   }
 }
 
-export class StarknetSignTypedData
+export class WalletSignTypedData
   extends BaseRPCHandler
-  implements StaticImplements<StaticRPCHandler, typeof StarknetSignTypedData>
+  implements StaticImplements<StaticRPCHandler, typeof WalletSignTypedData>
 {
   async handleRequest(param: TypedData): Promise<string[]> {
     if (!this.installed) {
@@ -211,9 +211,9 @@ export class StarknetSignTypedData
   }
 }
 
-export class StarknetSupportedSpecs
+export class WalletSupportedSpecs
   extends BaseRPCHandler
-  implements StaticImplements<StaticRPCHandler, typeof StarknetSignTypedData>
+  implements StaticImplements<StaticRPCHandler, typeof WalletSupportedSpecs>
 {
   async handleRequest(): Promise<string[]> {
     return ['0.4', '0.5'];
