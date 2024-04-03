@@ -530,8 +530,8 @@ export function getVoyagerUrl(chainId: string) {
   switch (chainId) {
     case STARKNET_SEPOLIA_TESTNET_NETWORK.chainId:
       return `https://sepolia-api.voyager.online/beta`;
-    default:
     case constants.StarknetChainId.SN_MAIN:
+    default:
       return `https://api.voyager.online/beta`;
   }
 }
