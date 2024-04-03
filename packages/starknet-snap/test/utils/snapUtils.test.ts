@@ -7,6 +7,7 @@ import {
   getVoyagerUrl,
   getTransactionFromVoyagerUrl,
   getTransactionsFromVoyagerUrl,
+  getVoyagerCredentials,
 } from '../../src/utils/snapUtils';
 import { WalletMock } from '../wallet.mock.test';
 import { Network, SnapState } from '../../src/types/snapState';
@@ -97,20 +98,16 @@ describe('removeNetwork', () => {
 
 describe('getVoyagerUrl', () => {
   it('returns Mainnet URL if chain id is Mainnet', () => {
-    expect(getVoyagerUrl(constants.StarknetChainId.SN_MAIN)).to.be.equal(
-      'https://6l5ewsb9z2.execute-api.eu-central-1.amazonaws.com',
-    );
+    expect(getVoyagerUrl(constants.StarknetChainId.SN_MAIN)).to.be.equal('https://api.voyager.online/beta');
   });
 
   it('returns Mainnet URL if chain id is not either Mainnet or Sepolia', () => {
-    expect(getVoyagerUrl('0x534e5f474f45524c49')).to.be.equal(
-      'https://6l5ewsb9z2.execute-api.eu-central-1.amazonaws.com',
-    );
+    expect(getVoyagerUrl('0x534e5f474f45524c49')).to.be.equal('https://api.voyager.online/beta');
   });
 
   it('returns Sepolia URL if chain id is Sepolia', () => {
     expect(getVoyagerUrl(STARKNET_SEPOLIA_TESTNET_NETWORK.chainId)).to.be.equal(
-      'https://eer9th3mo4.execute-api.eu-central-1.amazonaws.com',
+      'https://sepolia-api.voyager.online/beta',
     );
   });
 });
@@ -118,7 +115,7 @@ describe('getVoyagerUrl', () => {
 describe('getTransactionFromVoyagerUrl', () => {
   it('returns correct URL', () => {
     expect(getTransactionFromVoyagerUrl({ chainId: constants.StarknetChainId.SN_MAIN } as Network)).to.be.equal(
-      'https://6l5ewsb9z2.execute-api.eu-central-1.amazonaws.com/api/txn',
+      'https://api.voyager.online/beta/txn',
     );
   });
 });
@@ -126,7 +123,13 @@ describe('getTransactionFromVoyagerUrl', () => {
 describe('getTransactionsFromVoyagerUrl', () => {
   it('returns correct URL', () => {
     expect(getTransactionsFromVoyagerUrl({ chainId: constants.StarknetChainId.SN_MAIN } as Network)).to.be.equal(
-      'https://6l5ewsb9z2.execute-api.eu-central-1.amazonaws.com/api/txns',
+      'https://api.voyager.online/beta/txns',
     );
+  });
+});
+
+describe('getVoyagerCredentials', () => {
+  it('returns correct credentials', () => {
+    expect(getVoyagerCredentials()).to.have.key('X-API-Key');
   });
 });

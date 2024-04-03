@@ -29,8 +29,6 @@ import {
   PRELOADED_NETWORKS,
   PRELOADED_TOKENS,
   STARKNET_SEPOLIA_TESTNET_NETWORK,
-  VOYAGER_API_TXNS_URL_SUFFIX,
-  VOYAGER_API_TXN_URL_SUFFIX,
 } from './constants';
 import convert from 'ethereum-unit-converter';
 import { AddErc20TokenRequestParams, AddNetworkRequestParams } from '../types/snapApi';
@@ -531,19 +529,25 @@ export function getChainIdHex(network: Network) {
 export function getVoyagerUrl(chainId: string) {
   switch (chainId) {
     case STARKNET_SEPOLIA_TESTNET_NETWORK.chainId:
-      return `https://eer9th3mo4.execute-api.eu-central-1.amazonaws.com`;
+      return `https://sepolia-api.voyager.online/beta`;
     default:
     case constants.StarknetChainId.SN_MAIN:
-      return `https://6l5ewsb9z2.execute-api.eu-central-1.amazonaws.com`;
+      return `https://api.voyager.online/beta`;
   }
 }
 
+export function getVoyagerCredentials(): Record<string, string> {
+  return {
+    'X-API-Key': process.env.VOYAGER_API_KEY,
+  };
+}
+
 export function getTransactionFromVoyagerUrl(network: Network) {
-  return `${getVoyagerUrl(network.chainId)}${VOYAGER_API_TXN_URL_SUFFIX}`;
+  return `${getVoyagerUrl(network.chainId)}/txn`;
 }
 
 export function getTransactionsFromVoyagerUrl(network: Network) {
-  return `${getVoyagerUrl(network.chainId)}${VOYAGER_API_TXNS_URL_SUFFIX}`;
+  return `${getVoyagerUrl(network.chainId)}/txns`;
 }
 
 export function getTransaction(state: SnapState, txnHash: string, chainId: string) {
