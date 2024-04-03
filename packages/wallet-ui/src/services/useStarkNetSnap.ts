@@ -383,7 +383,7 @@ export const useStarkNetSnap = () => {
               senderAddress,
               contractAddress,
               pageSize,
-              txnsInLastNumOfDays: 1000,
+              txnsInLastNumOfDays,
               onlyFromState,
               withDeployTxn: true,
               chainId,
