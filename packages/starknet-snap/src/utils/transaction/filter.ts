@@ -26,7 +26,7 @@ export class SenderAddressFilter implements ITransactionFilter {
     this.senderAddress = senderAddress;
   }
   apply(txn: Transaction): boolean {
-    if (this.senderAddress) return num.toBigInt(txn.senderAddress) === this.senderAddress;
+    if (this.senderAddress) return txn.senderAddress && num.toBigInt(txn.senderAddress) === this.senderAddress;
 
     return true;
   }
@@ -41,7 +41,7 @@ export class ContractAddressFilter implements ITransactionFilter {
     this.contractAddress = contractAddress;
   }
   apply(txn: Transaction): boolean {
-    if (this.contractAddress) return num.toBigInt(txn.contractAddress) === this.contractAddress;
+    if (this.contractAddress) return txn.contractAddress && num.toBigInt(txn.contractAddress) === this.contractAddress;
 
     return true;
   }
