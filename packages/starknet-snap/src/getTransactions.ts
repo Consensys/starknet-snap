@@ -7,6 +7,10 @@ import { DEFAULT_GET_TXNS_LAST_NUM_OF_DAYS, DEFAULT_GET_TXNS_PAGE_SIZE } from '.
 import * as snapUtils from './utils/snapUtils';
 import * as utils from './utils/starknetUtils';
 import { logger } from './utils/logger';
+import { Factory } from './modules/starknet';
+import { TransactionRepository, TransactionService } from './modules/transaction';
+import { Chain, Config } from './modules/config';
+
 
 export async function getTransactions(params: ApiParams) {
   try {
@@ -37,6 +41,17 @@ export async function getTransactions(params: ApiParams) {
     const onlyFromState = !!requestParamsObj.onlyFromState;
     const withDeployTxn = !!requestParamsObj.withDeployTxn;
     const network = snapUtils.getNetworkFromChainId(state, requestParamsObj.chainId);
+
+    const service = new TransactionService(
+      Factory.CreateStarkNetTransactionMgr(Config.transaction[Chain.Starknet], {
+        chainId: network.chainId,
+        pageSize,
+      }),
+      new TransactionRepository(saveMutex)
+    )
+    
+    return service.list(senderAddress, network.chainId, contractAddress, minTimeStamp);
+
 
     let massagedTxns: Transaction[] = [];
     if (!onlyFromState) {
