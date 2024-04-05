@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
 
+## [1.21.0](https://github.com/Consensys/starknet-snap/compare/wallet-ui-v1.20.0...wallet-ui-v1.21.0) (2024-04-05)
+
+
+### Features
+
+* deprecate goerli network ([#217](https://github.com/Consensys/starknet-snap/issues/217)) ([168484d](https://github.com/Consensys/starknet-snap/commit/168484d5c1f1303f03a0db7f286a8e98ed50eb6a))
+
 ## [1.20.0](https://github.com/Consensys/starknet-snap/compare/wallet-ui-v1.19.0...wallet-ui-v1.20.0) (2024-03-05)
 
 
