@@ -273,7 +273,11 @@ export const onHomePage: OnHomePageHandler = async () => {
     // Account may not exist if the recover account process has not executed.
     let accContract: AccContract;
     if (state) {
-      const chainId = state.currentNetwork ? state.currentNetwork.chainId : STARKNET_SEPOLIA_TESTNET_NETWORK.chainId;
+      let chainId = STARKNET_SEPOLIA_TESTNET_NETWORK.chainId;
+
+      if (state.currentNetwork && state.currentNetwork.chainId !== STARKNET_TESTNET_NETWORK.chainId) {
+        chainId = state.currentNetwork.chainId;
+      }
 
       if (state.accContracts && state.accContracts.length > 0) {
         accContract = state.accContracts.find((n) => isSameChainId(n.chainId, chainId));
