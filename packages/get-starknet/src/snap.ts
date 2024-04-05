@@ -126,7 +126,7 @@ export class MetaMaskSnap {
     })) as InvokeFunctionResponse;
   }
 
-  async signMessage(typedDataMessage: TypedData, enableAutherize: boolean, signerAddress: string): Promise<Signature> {
+  async signMessage(typedDataMessage: TypedData, enableAuthorize: boolean, signerAddress: string): Promise<Signature> {
     return (await this.#provider.request({
       method: 'wallet_invokeSnap',
       params: {
@@ -136,7 +136,7 @@ export class MetaMaskSnap {
           params: {
             signerAddress,
             typedDataMessage,
-            enableAutherize: enableAutherize,
+            enableAuthorize: enableAuthorize,
             ...(await this.#getSnapParams()),
           },
         },
@@ -222,7 +222,7 @@ export class MetaMaskSnap {
           method: 'starkNet_switchNetwork',
           params: {
             chainId,
-            enableAutherize: true,
+            enableAuthorize: true,
           },
         },
       },
