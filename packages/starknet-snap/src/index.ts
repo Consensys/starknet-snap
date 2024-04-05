@@ -248,7 +248,7 @@ export const onInstall: OnInstallHandler = async () => {
 export const onUpdate: OnUpdateHandler = async () => {
   const component = panel([
     text('Features released with this update:'),
-    text('- Deprecation of the Starknet Goerli Testnet'),
+    text('Deprecation of the Starknet Goerli Testnet'),
   ]);
 
   await snap.request({
@@ -273,10 +273,14 @@ export const onHomePage: OnHomePageHandler = async () => {
     // Account may not exist if the recover account process has not executed.
     let accContract: AccContract;
     if (state) {
-      if (state.currentNetwork) {
-        accContract = state.accContracts.find((n) => n.chainId == state.currentNetwork.chainId);
-      } else if (state.accContracts && state.accContracts.length > 0) {
-        accContract = state.accContracts[0];
+      let chainId = STARKNET_SEPOLIA_TESTNET_NETWORK.chainId;
+
+      if (state.currentNetwork && state.currentNetwork.chainId !== STARKNET_TESTNET_NETWORK.chainId) {
+        chainId = state.currentNetwork.chainId;
+      }
+
+      if (state.accContracts && state.accContracts.length > 0) {
+        accContract = state.accContracts.find((n) => isSameChainId(n.chainId, chainId));
       }
     }
 
@@ -288,7 +292,7 @@ export const onHomePage: OnHomePageHandler = async () => {
       panelItems.push(row('Network', text(`${network.name}`)));
 
       const ercToken = state.erc20Tokens.find(
-        (t) => t.symbol.toLowerCase() == 'eth' && isSameChainId(t.chainId, chainId),
+        (t) => t.symbol.toLowerCase() === 'eth' && isSameChainId(t.chainId, chainId),
       );
       if (ercToken) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
