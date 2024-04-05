@@ -1,6 +1,13 @@
 # Changelog
 
 
+## [2.6.1](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v2.6.0...starknet-snap-v2.6.1) (2024-04-05)
+
+
+### Bug Fixes
+
+* snap homepage ui error due to goerli network deprecated ([#230](https://github.com/Consensys/starknet-snap/issues/230)) ([16ba5e9](https://github.com/Consensys/starknet-snap/commit/16ba5e9a94e7639670a138279db1ee8c22bc70a6))
+
 ## [2.6.0](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v2.5.2...starknet-snap-v2.6.0) (2024-04-05)
 
 
