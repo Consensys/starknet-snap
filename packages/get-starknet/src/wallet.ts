@@ -29,7 +29,7 @@ export class MetaMaskSnapWallet implements IStarknetWindowObject {
   private static readonly cairoVersion = '0';
   private static readonly SNAPI_ID = 'npm:@consensys/starknet-snap';
 
-  constructor(metamaskProvider: MetaMaskProvider, snapVersion = '2.3.0-staging') {
+  constructor(metamaskProvider: MetaMaskProvider, snapVersion = '*') {
     this.id = 'metamask';
     this.name = 'Metamask';
     this.version = 'v1.0.0';
@@ -75,7 +75,7 @@ export class MetaMaskSnapWallet implements IStarknetWindowObject {
         params.options.name,
         params.options.symbol,
         params.options.decimals,
-      )) ?? { result: false };
+      )) ?? false;
       return result as unknown as T['result'];
     }
 
