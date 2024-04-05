@@ -8,6 +8,7 @@ import {
   DeclareSignerDetails,
   Call,
   DeployAccountSignerDetails,
+  constants,
 } from 'starknet';
 import { validateAndParseAddress } from './starknetUtils';
 import { Component, text, copyable } from '@metamask/snaps-sdk';
@@ -28,8 +29,6 @@ import {
   PRELOADED_NETWORKS,
   PRELOADED_TOKENS,
   STARKNET_SEPOLIA_TESTNET_NETWORK,
-  VOYAGER_API_TXNS_URL_SUFFIX,
-  VOYAGER_API_TXN_URL_SUFFIX,
 } from './constants';
 import convert from 'ethereum-unit-converter';
 import { AddErc20TokenRequestParams, AddNetworkRequestParams } from '../types/snapApi';
@@ -527,12 +526,28 @@ export function getChainIdHex(network: Network) {
   return `0x${num.toBigInt(network.chainId).toString(16)}`;
 }
 
+export function getVoyagerUrl(chainId: string) {
+  switch (chainId) {
+    case STARKNET_SEPOLIA_TESTNET_NETWORK.chainId:
+      return `https://sepolia-api.voyager.online/beta`;
+    case constants.StarknetChainId.SN_MAIN:
+    default:
+      return `https://api.voyager.online/beta`;
+  }
+}
+
+export function getVoyagerCredentials(): Record<string, string> {
+  return {
+    'X-API-Key': process.env.VOYAGER_API_KEY,
+  };
+}
+
 export function getTransactionFromVoyagerUrl(network: Network) {
-  return `${network.voyagerUrl}${VOYAGER_API_TXN_URL_SUFFIX}`;
+  return `${getVoyagerUrl(network.chainId)}/txn`;
 }
 
 export function getTransactionsFromVoyagerUrl(network: Network) {
-  return `${network.voyagerUrl}${VOYAGER_API_TXNS_URL_SUFFIX}`;
+  return `${getVoyagerUrl(network.chainId)}/txns`;
 }
 
 export function getTransaction(state: SnapState, txnHash: string, chainId: string) {
