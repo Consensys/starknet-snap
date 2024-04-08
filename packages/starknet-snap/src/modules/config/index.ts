@@ -5,6 +5,7 @@ export enum Chain {
 export enum DataClient {
   Voyager = 'Voyager',
   StarkScan = 'StarkScan',
+  Infura = 'Infura',
 }
 
 export type NetworkConfig = {

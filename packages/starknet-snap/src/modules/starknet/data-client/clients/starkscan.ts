@@ -1,6 +1,6 @@
 import { constants } from 'starknet';
 
-import { AbstractDataClient } from './base';
+import { BaseRestfulDataClient } from './base';
 import { DataClientError } from '../exceptions';
 import { IReadDataClient } from '../types';
 import { Transaction } from '../../../../types/snapState';
@@ -67,7 +67,7 @@ export enum EnumOrderBy {
   Desc = 'desc',
 }
 
-export class StarkScanClient extends AbstractDataClient implements IReadDataClient {
+export class StarkScanClient extends BaseRestfulDataClient implements IReadDataClient {
   constructor(protected options: StarkScanClientOptions) {
     super();
   }

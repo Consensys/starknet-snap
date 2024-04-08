@@ -1,7 +1,7 @@
 import { Transaction } from '../../../../types/snapState';
 import { TransactionType } from 'starknet';
 
-export abstract class AbstractDataClient {
+export abstract class BaseRestfulDataClient {
   lastScan: {
     lastPage: string | number | null;
     data: Transaction[];

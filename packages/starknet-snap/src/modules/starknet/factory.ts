@@ -1,9 +1,7 @@
 import { StarknetTransactionManager } from './transaction';
-import { StarknetTransactionConfig } from '../config';
+import { DataClient, StarknetTransactionConfig } from '../config';
 import { ITransactionMgr } from '../transaction/types';
-import { Lock } from '../transaction/lock';
 import { DataClientFactory } from './data-client/factory';
-import { StarknetTransactionStateManager } from './transaction/state';
 
 export type StarknetTransactionMgrBuilderConfig = {
   chainId: string;
@@ -15,6 +13,15 @@ export class Factory {
     builderConfig: StarknetTransactionMgrBuilderConfig,
   ): ITransactionMgr {
     const readClient = DataClientFactory.CreateReadClient(config.dataClient, builderConfig.chainId);
-    return new StarknetTransactionManager(readClient);
+    const rpcClient = DataClientFactory.CreateReadClient(
+      {
+        read: {
+          type: DataClient.Infura,
+          options: {},
+        },
+      },
+      builderConfig.chainId,
+    );
+    return new StarknetTransactionManager(readClient, rpcClient);
   }
 }

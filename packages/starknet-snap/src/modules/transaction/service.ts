@@ -7,7 +7,7 @@ export class TransactionService {
 
   async list(address: string, chainId: string, tokenAddress?: string, minTimestamp?: number): Promise<Transaction[]> {
     try {
-     return this.txnMgr.list(address, chainId, tokenAddress, minTimestamp);
+      return this.txnMgr.list(address, chainId, tokenAddress, minTimestamp);
     } catch (e) {
       logger.info(`[TransactionService.list] Error: ${e}`);
       throw new Error(e);

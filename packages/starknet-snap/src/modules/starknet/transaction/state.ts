@@ -15,16 +15,15 @@ import { TransactionType } from 'starknet';
 import { Lock } from '../../transaction';
 
 export class StarknetTransactionStateManager extends SnapStateManager<SnapState> implements ITransactionStateMgr {
-
   constructor() {
     super(Lock.Acquire());
   }
-  
+
   protected getTransactionKey(txn: Transaction): string {
     return `${txn.txnHash.toLowerCase()}-${txn.chainId.toLowerCase()}`;
   }
 
-  async getDeployAccountTxn(address:string, chainId:string): Promise<Transaction> {
+  async getDeployAccountTxn(address: string, chainId: string): Promise<Transaction> {
     const state = await this.get();
 
     const result = TransactionHelper.FilterTransactions(
@@ -33,7 +32,7 @@ export class StarknetTransactionStateManager extends SnapStateManager<SnapState>
         new ContractAddressFilter(address),
         new ChainIdFilter(chainId),
         new TxnTypeFilter(TransactionType.DEPLOY_ACCOUNT),
-      ]
+      ],
     );
 
     return result.length > 0 ? result[0] : null;
@@ -67,7 +66,7 @@ export class StarknetTransactionStateManager extends SnapStateManager<SnapState>
   }
 
   async remove(txns: Transaction[]): Promise<void> {
-    return this.update(async (state:SnapState) => {
+    return this.update(async (state: SnapState) => {
       if (!state.transactionIndex) {
         state.transactionIndex = [];
       }
@@ -89,7 +88,7 @@ export class StarknetTransactionStateManager extends SnapStateManager<SnapState>
   }
 
   async save(txn: Transaction): Promise<void> {
-    return this.update(async (state:SnapState) => {
+    return this.update(async (state: SnapState) => {
       if (!state.transactionIndex) {
         state.transactionIndex = [];
       }
@@ -108,7 +107,7 @@ export class StarknetTransactionStateManager extends SnapStateManager<SnapState>
   }
 
   async saveMany(txns: Transaction[]): Promise<void> {
-    return this.update(async (state:SnapState) => {
+    return this.update(async (state: SnapState) => {
       if (!state.transactionIndex) {
         state.transactionIndex = [];
       }
@@ -127,6 +126,6 @@ export class StarknetTransactionStateManager extends SnapStateManager<SnapState>
 
         state.transactionDetails[key] = txn;
       }
-    })
+    });
   }
 }

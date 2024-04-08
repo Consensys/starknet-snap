@@ -1,6 +1,5 @@
 import { Transaction } from '../../types/snapState';
 
-
 export interface ITransactionRepo {
   list(address?: string, chainId?: string, tokenAddress?: string, minTimestamp?: number): Promise<Transaction[]>;
   findAccountDeployTransaction(chainId: string): Promise<Transaction>;

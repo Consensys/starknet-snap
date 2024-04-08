@@ -2,7 +2,7 @@ import { Transaction } from '../../../../types/snapState';
 import { DataClientError } from '../exceptions';
 import { IReadDataClient } from '../types';
 import { constants } from 'starknet';
-import { AbstractDataClient } from './base';
+import { BaseRestfulDataClient } from './base';
 import { logger } from '../../../../utils/logger';
 
 export type VoyagerClientOptions = {
@@ -125,7 +125,7 @@ export type GetVoyagerTxnResponse = {
   revert_error: string | null;
 };
 
-export class VoyagerClient extends AbstractDataClient implements IReadDataClient {
+export class VoyagerClient extends BaseRestfulDataClient implements IReadDataClient {
   constructor(protected options: VoyagerClientOptions) {
     super();
   }
@@ -214,7 +214,6 @@ export class VoyagerClient extends AbstractDataClient implements IReadDataClient
     const { items } = await this.getRawTxns(address, 10, this.lastScan.lastPage as unknown as number);
     return items.map((item) => this.format(item));
   }
-
 
   async getTxn(hash: string): Promise<Transaction> {
     return null;
