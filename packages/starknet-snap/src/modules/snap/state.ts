@@ -1,5 +1,6 @@
 import { Mutex } from 'async-mutex';
 import { SnapHelper } from './helpers';
+import { logger } from '../../utils/logger';
 
 export abstract class SnapStateManager<S> {
   constructor(protected lock?: Mutex) {
@@ -17,10 +18,15 @@ export abstract class SnapStateManager<S> {
   }
 
   async update(update: (state: S) => void): Promise<void> {
-    return this.lock.runExclusive(async () => {
-      const state = await this.get();
-      update(state);
-      await this.set(state);
-    });
+    try {
+      return this.lock.runExclusive(async () => {
+        const state = await this.get();
+        update(state);
+        await this.set(state);
+      });
+    } catch (e) {
+      logger.error(`[SnapStateManager.update] Error: ${e}`);
+      throw e;
+    }
   }
 }
