@@ -27,6 +27,7 @@ export class StarknetTransactionStateManager extends SnapStateManager<SnapState>
     const state = await this.get();
 
     const result = TransactionHelper.FilterTransactions(
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       Object.entries(state.transactionDetails).map(([_, v]) => v),
       [
         new ContractAddressFilter(address),
@@ -60,6 +61,7 @@ export class StarknetTransactionStateManager extends SnapStateManager<SnapState>
     }
 
     return TransactionHelper.FilterTransactions(
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       Object.entries(state.transactionDetails).map(([_, v]) => v),
       filters,
     );

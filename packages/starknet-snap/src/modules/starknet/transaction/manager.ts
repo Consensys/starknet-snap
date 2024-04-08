@@ -1,12 +1,11 @@
 import { TransactionStatus } from 'starknet';
 
 import { Transaction } from '../../../types/snapState';
-import { ChainIdFilter, ContractAddressFilter, StatusFilter, TimestampFilter } from '../../../utils/transaction/filter';
+import { ContractAddressFilter, StatusFilter, TimestampFilter } from '../../../utils/transaction/filter';
 import { ITransactionMgr } from '../../transaction/types';
 import { logger } from '../../../utils/logger';
 import { AsyncHelper } from '../../async';
 import { IReadDataClient } from '../data-client';
-import { TransactionServiceException } from './exceptions';
 import { TransactionHelper } from './helpers';
 import { ITransactionStateMgr } from './types';
 import { StarknetTransactionStateManager } from './state';
@@ -30,19 +29,17 @@ export class StarknetTransactionManager implements ITransactionMgr {
       if (!txns || txns.length === 0) {
         logger.info(`[StarknetTransactionManager.getTxns] no txns found in local state, fetching from data client`);
 
-        const dataClientResult = await this.getTxnsFromDataClient(address);
-
-        txns = dataClientResult.txns;
-        deployAccountTxn = dataClientResult.deployAccountTxn;
+        txns = await this.restfulDataClient.getTxns(address);
+        deployAccountTxn = await this.restfulDataClient.getDeployAccountTxn(address);
 
         await this.txnStateMgr.saveMany(txns.concat(deployAccountTxn));
 
         fetchStatus = false;
       } else {
-        logger.info(`[StarknetTransactionManager.getTxns] ${txns.length} txns found in local state`);
-
         deployAccountTxn = await this.txnStateMgr.getDeployAccountTxn(address, chainId);
       }
+
+      logger.info(`[StarknetTransactionManager.getTxns] ${txns.length} txns found`);
 
       logger.info(
         `[StarknetTransactionManager.getTxns] filter txns on contractAddress = ${tokenAddress}, chainId = ${chainId}, timestamp >= ${minTimestamp}`,
@@ -50,7 +47,6 @@ export class StarknetTransactionManager implements ITransactionMgr {
 
       const result = TransactionHelper.FilterTransactions(txns, [
         new ContractAddressFilter(tokenAddress),
-        new ChainIdFilter(chainId),
         // not handle client local time issue
         new TimestampFilter(minTimestamp),
       ]);
@@ -71,6 +67,8 @@ export class StarknetTransactionManager implements ITransactionMgr {
     } catch (e) {
       logger.error(`[StarknetTransactionManager.getTxns] Error: ${e}`);
       return [];
+    } finally {
+      logger.info(`[TransactionService.getTxns] end`);
     }
   }
 
@@ -81,29 +79,9 @@ export class StarknetTransactionManager implements ITransactionMgr {
     } catch (e) {
       logger.error(`[StarknetTransactionManager.getTxn] Error: ${e}`);
       throw e;
+    } finally {
+      logger.info(`[TransactionService.getTxn] end`);
     }
-  }
-
-  protected async getTxnsFromDataClient(address: string): Promise<{
-    txns: Transaction[];
-    deployAccountTxn: Transaction;
-  }> {
-    logger.info(`[StarknetTransactionManager.getTxnsFromDataClient] start`);
-
-    const txns = await this.restfulDataClient.getTxns(address);
-
-    const deployAccountTxn = await this.restfulDataClient.getDeployAccountTxn(address);
-
-    logger.info(
-      `[StarknetTransactionManager.getTxnsFromDataClient] txns: ${txns.length} found,  deployTxn: ${
-        deployAccountTxn ? 1 : 0
-      } found`,
-    );
-
-    return {
-      txns,
-      deployAccountTxn,
-    };
   }
 
   protected async fetchStatus(txns: Transaction[]): Promise<void> {
@@ -121,6 +99,8 @@ export class StarknetTransactionManager implements ITransactionMgr {
     await AsyncHelper.ProcessBatch<Transaction>(txnsNeededStatus, async (txn) => {
       await this.assignStatus(txn);
     });
+
+    logger.info(`[TransactionService.assignStatus] end`);
   }
 
   protected async assignStatus(txn: Transaction): Promise<void> {
@@ -135,6 +115,8 @@ export class StarknetTransactionManager implements ITransactionMgr {
     } catch (e) {
       // not throw exception
       logger.error(`[TransactionService.assignStatus] Error: ${e}`);
+    } finally {
+      logger.info(`[TransactionService.assignStatus] end`);
     }
   }
 }

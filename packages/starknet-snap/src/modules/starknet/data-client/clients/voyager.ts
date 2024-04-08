@@ -3,10 +3,10 @@ import { DataClientError } from '../exceptions';
 import { IReadDataClient } from '../types';
 import { constants } from 'starknet';
 import { BaseRestfulDataClient } from './base';
-import { logger } from '../../../../utils/logger';
 
 export type VoyagerClientOptions = {
   chainId: string;
+  apiKey: string;
   pageSize: number;
   timeLimit: number;
 };
@@ -40,107 +40,24 @@ export type GetVoyagerTxnsResponse = {
   lastPage: number;
 };
 
-export type GetVoyagerTxnResponse = {
-  header: {
-    blockId: string;
-    blockNumber: number;
-    hash: string;
-    index: number;
-    l1VerificationHash: string | null;
-    type: string;
-    contract_address: string;
-    sender_address: string;
-    timestamp: number;
-    signature: string[];
-    class_hash: string | null;
-    execution_status: string;
-    status: string;
-    finality_status: string;
-    classAlias: string | null;
-    senderAlias: string | null;
-    contractAlias: string | null;
-  };
-  contractAddressSalt: string | null;
-  maxFee: string;
-  actualFee: string;
-  gasConsumed: string;
-  nonce: string;
-  version: string;
-  receipt: {
-    events: {
-      blockNumber: number;
-      fromAddress: string;
-      blockHash: string;
-      timestamp: number;
-      selector: string;
-      name: string;
-      nestedName: string;
-      nestedEventNames: string[];
-      id: string;
-      contractAlias: string | null;
-    }[];
-    messages: number;
-    tokensTransferred: {
-      from: string;
-      to: string;
-      amount: string;
-      function: string;
-      tokenId: string;
-      tokenAddress: string;
-      symbol: string;
-      decimals: number;
-      usd: string;
-      fromAlias: string | null;
-      toAlias: string | null;
-      index: string;
-      tokenName: string;
-    }[];
-    feeTransferred: {
-      from: string;
-      to: string;
-      amount: string;
-      function: string;
-      tokenId: string;
-      tokenAddress: string;
-      symbol: string;
-      decimals: number;
-      usd: string;
-      fromAlias: string | null;
-      toAlias: string | null;
-      index: string;
-      tokenName: string;
-    }[];
-  };
-  executionResources: {
-    steps: number;
-    data_availability: {
-      l1_gas: number;
-      l1_data_gas: number;
-    };
-    ecdsa_builtin_applications: number;
-    pedersen_builtin_applications: number;
-    range_check_builtin_applications: number;
-  };
-  statusTimeRemaining: number | null;
-  revert_error: string | null;
-};
-
 export class VoyagerClient extends BaseRestfulDataClient implements IReadDataClient {
   constructor(protected options: VoyagerClientOptions) {
     super();
   }
 
   get baseUrl() {
-    try {
-      switch (this.options.chainId) {
-        case constants.StarknetChainId.SN_MAIN:
-          return 'https://voyager.online/api';
-        default:
-          return 'https://eer9th3mo4.execute-api.eu-central-1.amazonaws.com/api';
-      }
-    } catch (e) {
-      console.log('baseUrl error', e.message);
+    switch (this.options.chainId) {
+      case constants.StarknetChainId.SN_MAIN:
+        return 'https://api.voyager.online/beta';
+      default:
+        return 'https://sepolia-api.voyager.online/beta';
     }
+  }
+
+  protected getCredentialHeader(): Record<string, string> {
+    return {
+      'X-API-Key': this.options.apiKey,
+    };
   }
 
   get timeLimit() {
@@ -149,28 +66,18 @@ export class VoyagerClient extends BaseRestfulDataClient implements IReadDataCli
 
   protected async getRawTxns(address: string, pageSize: number, pageNum: number): Promise<GetVoyagerTxnsResponse> {
     try {
-      logger.info(`[VoyagerClient] getRawTxns start`);
       // "ps" only effective on value: 10, 25, 50 as what's currently available in Voyager page
       const response = await fetch(`${this.baseUrl}/txns?to=${address}&ps=${pageSize}&p=${pageNum}`, {
         method: 'GET',
-        mode: 'cors',
+        headers: this.getCredentialHeader(),
       });
-      logger.info(`[VoyagerClient] getRawTxns status ${response.ok}`);
+
+      if (!response.ok) {
+        throw new DataClientError(`[VoyagerClient.getRawTxns] response status: ${response.status}`);
+      }
+
       const result = await response.json();
       return result as GetVoyagerTxnsResponse;
-    } catch (e) {
-      logger.info(`[VoyagerClient] getRawTxns error ${e.message}`);
-      throw new DataClientError(e);
-    }
-  }
-
-  protected async getRawTxn(txnHash: string): Promise<GetVoyagerTxnResponse> {
-    try {
-      const response = await fetch(`${this.baseUrl}/txn/${txnHash}`, {
-        method: 'GET',
-        mode: 'cors',
-      });
-      return (await response.json()) as GetVoyagerTxnResponse;
     } catch (e) {
       throw new DataClientError(e);
     }
@@ -178,9 +85,8 @@ export class VoyagerClient extends BaseRestfulDataClient implements IReadDataCli
 
   async getTxns(address: string): Promise<Transaction[]> {
     try {
-      logger.info(`[VoyagerClient] getTxns start`);
-      let txns: Transaction[] = [];
-      let remainTxns: Transaction[] = [];
+      const txns: Transaction[] = [];
+      const remainTxns: Transaction[] = [];
 
       let i = 1;
       let maxPage = i;
@@ -205,7 +111,6 @@ export class VoyagerClient extends BaseRestfulDataClient implements IReadDataCli
 
       return txns;
     } catch (e) {
-      logger.info(`[VoyagerClient] getTxns error: ${e.message}`);
       throw new DataClientError(e);
     }
   }
@@ -215,6 +120,7 @@ export class VoyagerClient extends BaseRestfulDataClient implements IReadDataCli
     return items.map((item) => this.format(item));
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async getTxn(hash: string): Promise<Transaction> {
     return null;
   }

@@ -2,7 +2,7 @@ import { Transaction } from '../../../types/snapState';
 import { ITransactionFilter } from '../../../utils/transaction/filter';
 
 export class TransactionHelper {
-  static Merge(txns1: Transaction[], txns2: Transaction[], deepMerge: boolean = false): [Transaction[], Transaction[]] {
+  static Merge(txns1: Transaction[], txns2: Transaction[], deepMerge = false): [Transaction[], Transaction[]] {
     const seen = new Map<string, number>();
     const txns = [];
     const overlaps = [];

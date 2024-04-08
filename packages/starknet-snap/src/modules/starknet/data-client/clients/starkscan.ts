@@ -4,10 +4,10 @@ import { BaseRestfulDataClient } from './base';
 import { DataClientError } from '../exceptions';
 import { IReadDataClient } from '../types';
 import { Transaction } from '../../../../types/snapState';
-import { logger } from '../../../../utils/logger';
 
 export type StarkScanClientOptions = {
   chainId: string;
+  apiKey: string;
   pageSize: number;
   timeLimit: number;
 };
@@ -73,15 +73,11 @@ export class StarkScanClient extends BaseRestfulDataClient implements IReadDataC
   }
 
   get baseUrl() {
-    try {
-      switch (this.options.chainId) {
-        case constants.StarknetChainId.SN_MAIN:
-          return 'https://api.starkscan.co/api/v0';
-        default:
-          return 'https://api-sepolia.starkscan.co/api/v0';
-      }
-    } catch (e) {
-      console.log('baseUrl error', e.message);
+    switch (this.options.chainId) {
+      case constants.StarknetChainId.SN_MAIN:
+        return 'https://api.starkscan.co/api/v0';
+      default:
+        return 'https://api-sepolia.starkscan.co/api/v0';
     }
   }
 
@@ -91,7 +87,7 @@ export class StarkScanClient extends BaseRestfulDataClient implements IReadDataC
 
   protected getCredentialHeader(): Record<string, string> {
     return {
-      'x-api-key': 'TaBXFzTRNg4iS6CfCHOBV26wIaGpI7Ai5SouisaV',
+      'x-api-key': this.options.apiKey,
     };
   }
 
@@ -102,37 +98,37 @@ export class StarkScanClient extends BaseRestfulDataClient implements IReadDataC
     nextUrl: string = null,
   ): Promise<GetStarkScanTxnsResponse> {
     try {
-      logger.info(`[StarkScanClient.getRawTxns] start`);
-      let url =
+      const url =
         nextUrl === null
           ? `${this.baseUrl}/transactions?contract_address=${address}&limit=${pageSize}&order_by=${orderBy}`
           : nextUrl;
 
-      logger.info(`[StarkScanClient.getRawTxns] fetching url: ${url}`);
       const response = await fetch(url, {
         method: 'GET',
         headers: this.getCredentialHeader(),
       });
-      logger.info(`[StarkScanClient.getRawTxns] response status: ${response.ok}`);
+
+      if (!response.ok) {
+        throw new DataClientError(`[StarkScanClient.getRawTxns] response status: ${response.status}`);
+      }
+
       return (await response.json()) as GetStarkScanTxnsResponse;
     } catch (e) {
-      logger.info(`[StarkScanClient.getRawTxns] error: ${e.message}`);
       throw new DataClientError(e);
     }
   }
 
   async getTxns(address: string): Promise<Transaction[]> {
     try {
-      logger.info(`[StarkScanClient.getTxns] start`);
-      let txns: Transaction[] = [];
-      let remainTxns: Transaction[] = [];
+      const txns: Transaction[] = [];
+      const remainTxns: Transaction[] = [];
       let nextUrl = null;
       let process = true;
       while (process) {
         const { data, next_url } = await this.getRawTxns(address, this.options.pageSize, EnumOrderBy.Desc, nextUrl);
         nextUrl = next_url;
         process = nextUrl !== null;
-        logger.info(`[StarkScanClient.getTxns] ${data.length} transactions fetched from data client`);
+
         for (const item of data) {
           if (!this.timeLimit || item.timestamp * 1000 >= this.timeLimit) {
             txns.push(this.format(item));
@@ -142,13 +138,14 @@ export class StarkScanClient extends BaseRestfulDataClient implements IReadDataC
           }
         }
       }
+
       this.lastScan = {
         lastPage: nextUrl,
         data: txns.concat(remainTxns),
       };
+
       return txns;
     } catch (e) {
-      logger.info(`[StarkScanClient.getTxns] ${e.message}`);
       throw new DataClientError(e);
     }
   }
@@ -158,6 +155,7 @@ export class StarkScanClient extends BaseRestfulDataClient implements IReadDataC
     return data.map((item) => this.format(item));
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async getTxn(hash: string): Promise<Transaction> {
     return null;
   }

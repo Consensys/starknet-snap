@@ -1,5 +1,5 @@
 import { StarknetTransactionManager } from './transaction';
-import { DataClient, StarknetTransactionConfig } from '../config';
+import { Config } from '../config';
 import { ITransactionMgr } from '../transaction/types';
 import { DataClientFactory } from './data-client/factory';
 
@@ -8,20 +8,11 @@ export type StarknetTransactionMgrBuilderConfig = {
 };
 
 export class Factory {
-  static CreateStarkNetTransactionMgr(
-    config: StarknetTransactionConfig,
-    builderConfig: StarknetTransactionMgrBuilderConfig,
-  ): ITransactionMgr {
-    const readClient = DataClientFactory.CreateReadClient(config.dataClient, builderConfig.chainId);
-    const rpcClient = DataClientFactory.CreateReadClient(
-      {
-        read: {
-          type: DataClient.Infura,
-          options: {},
-        },
-      },
-      builderConfig.chainId,
-    );
+  static CreateStarknetTransactionMgr(builderConfig: StarknetTransactionMgrBuilderConfig): ITransactionMgr {
+    const config = Config.transaction[Config.network];
+
+    const readClient = DataClientFactory.CreateRestfulReadClient(config.dataClient, builderConfig.chainId);
+    const rpcClient = DataClientFactory.CreateRPCReadClient(config.dataClient, builderConfig.chainId);
     return new StarknetTransactionManager(readClient, rpcClient);
   }
 }
