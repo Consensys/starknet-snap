@@ -1,40 +1,34 @@
-import { Transaction, } from '../../../../types/snapState';
+import { Transaction } from '../../../../types/snapState';
 import { TransactionType } from 'starknet';
 
 export abstract class AbstractDataClient {
-  
   lastScan: {
     lastPage: string | number | null;
     data: Transaction[];
-  }
+  };
 
   constructor() {
     this.lastScan = {
-        lastPage: null,
-        data: []
-    }
+      lastPage: null,
+      data: [],
+    };
   }
 
-  protected abstract _getDeployTxns<T>(address: string): Promise<T[]>;
-  protected abstract format<T>(txn: T): Transaction;
+  protected abstract _getLastPageTxns(address: string): Promise<Transaction[]>;
 
-  async getDeployTxns(
-    address: string,
-    ): Promise<Transaction[]> {
-        const filter = new Set([TransactionType.DEPLOY.toLowerCase(), TransactionType.DEPLOY_ACCOUNT.toLowerCase()]);
+  async getDeployAccountTxn(address: string): Promise<Transaction> {
+    const filter = new Set([TransactionType.DEPLOY_ACCOUNT.toLowerCase()]);
+    let txns = this.lastScan.data;
+    if (this.lastScan.lastPage) {
+      txns = await this._getLastPageTxns(address);
+    }
 
-        if (!this.lastScan.lastPage) {
-            return this.lastScan.data.filter(txn => filter.has(txn.txnType.toLowerCase()));
-        }
-
-        let txns: Transaction[] = [];
-        const items = await this._getDeployTxns(address);
-        for (const item of items) {
-            const txn = this.format(item)
-            if (filter.has(txn.txnType.toLowerCase())) {
-                txns.push(txn);
-            }
-        }
-        return txns
+    // first deployed txn
+    for (const txn of txns.sort((a, b) => a.timestamp - b.timestamp)) {
+      if (filter.has(txn.txnType.toLowerCase())) {
+        return txn;
+      }
+    }
+    return null;
   }
 }

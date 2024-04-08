@@ -61,8 +61,9 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ origin, request }) => 
     const isDev = !!requestParams?.isDev;
     const debugLevel = requestParams?.debugLevel;
 
-    logger.init(debugLevel);
-    console.log(`debugLevel: ${logger.getLogLevel()}`);
+    logger.logLevel = debugLevel;
+
+    console.log(`debugLevel: ${logger.logLevel}`);
     // Switch statement for methods not requiring state to speed things up a bit
     logger.log(origin, request);
     if (request.method === 'ping') {

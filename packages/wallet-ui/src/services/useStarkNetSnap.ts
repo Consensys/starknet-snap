@@ -11,9 +11,10 @@ import {
   setForceReconnect,
 } from '../slices/walletSlice';
 import Toastr from 'toastr2';
+import { TransactionType } from 'starknet';
 import { addMissingPropertiesToToken } from '../utils/utils';
 import { setWalletConnection } from '../slices/walletSlice';
-import { Network, VoyagerTransactionType } from '../types';
+import { Network } from '../types';
 import { Account } from '../types';
 import { Erc20TokenBalance, Erc20Token } from '../types';
 import { disableLoading, enableLoadingWithMessage } from '../slices/UISlice';
@@ -410,8 +411,7 @@ export const useStarkNetSnap = () => {
       //Set the deploy transaction
       const deployTransaction = storedTxns.find(
         (txn: Transaction) =>
-          txn.txnType.toLowerCase() === VoyagerTransactionType.DEPLOY ||
-          txn.txnType.toLowerCase() === VoyagerTransactionType.DEPLOY_ACCOUNT,
+          txn.txnType.toLowerCase() === TransactionType.DEPLOY_ACCOUNT.toLowerCase(),
       );
       dispatch(setTransactionDeploy(deployTransaction));
 

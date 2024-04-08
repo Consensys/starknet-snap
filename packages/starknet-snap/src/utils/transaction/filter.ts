@@ -20,7 +20,7 @@ export class TimestampFilter implements ITransactionFilter {
 export class SenderAddressFilter implements ITransactionFilter {
   senderAddress: bigint | undefined;
   constructor(senderAddress: string | bigint | undefined) {
-    if (typeof senderAddress === 'string') {  
+    if (typeof senderAddress === 'string') {
       senderAddress = num.toBigInt(senderAddress);
     }
     this.senderAddress = senderAddress;
@@ -35,7 +35,7 @@ export class SenderAddressFilter implements ITransactionFilter {
 export class ContractAddressFilter implements ITransactionFilter {
   contractAddress: bigint | undefined;
   constructor(contractAddress: string | bigint | undefined) {
-    if (typeof contractAddress === 'string') {  
+    if (typeof contractAddress === 'string') {
       contractAddress = num.toBigInt(contractAddress);
     }
     this.contractAddress = contractAddress;

@@ -22,7 +22,6 @@ export interface ILogger {
   info: loggingFn;
   trace: loggingFn;
   init: (level: string) => void;
-  getLogLevel: () => LogLevel;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function, @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
@@ -30,30 +29,40 @@ export const emptyLog: loggingFn = (message?: any, ...optionalParams: any[]) => 
   return;
 };
 
-class Logger implements ILogger {
-  readonly log: loggingFn;
-  readonly warn: loggingFn;
-  readonly error: loggingFn;
-  readonly debug: loggingFn;
-  readonly info: loggingFn;
-  readonly trace: loggingFn;
+export class Logger implements ILogger {
+  log: loggingFn;
+  warn: loggingFn;
+  error: loggingFn;
+  debug: loggingFn;
+  info: loggingFn;
+  trace: loggingFn;
 
-  private _logLevel: LogLevel = LogLevel.OFF;
+  private _logLevel: LogLevel;
 
   constructor() {
-    this.init(LogLevel.OFF.toString());
+    this._logLevel = LogLevel.ALL;
+    this.init();
   }
 
-  private setLogLevel = function (level: string): void {
-    if (level && Object.values(LogLevel).includes(level.toUpperCase())) {
-      this._logLevel = LogLevel[level.toUpperCase()];
-    } else {
-      this._logLevel = LogLevel.OFF;
-    }
-  };
+  set logLevel(level: string) {
+    const lv = level.toUpperCase();
+    this._logLevel = LogLevel.OFF;
 
-  public init = function (level: string): void {
-    this.setLogLevel(level);
+    Object.entries(LogLevel).forEach(([key]) => {
+      if (key === lv) {
+        this._logLevel = LogLevel[key];
+        return;
+      }
+    });
+
+    this.init();
+  }
+
+  get logLevel(): string {
+    return this._logLevel.toString();
+  }
+
+  init(): void {
     this.error = console.error.bind(console);
     this.warn = console.warn.bind(console);
     this.info = console.info.bind(console);
@@ -79,11 +88,7 @@ class Logger implements ILogger {
     if (this._logLevel < LogLevel.ALL) {
       this.log = emptyLog;
     }
-  };
-
-  public getLogLevel = function (): LogLevel {
-    return this._logLevel;
-  };
+  }
 }
 
 export const logger = new Logger();

@@ -1,10 +1,10 @@
 export enum Chain {
-  Starknet = "Starknet",
+  Starknet = 'Starknet',
 }
 
 export enum DataClient {
-  Voyager = "Voyager",
-  StarkScan = "StarkScan",
+  Voyager = 'Voyager',
+  StarkScan = 'StarkScan',
 }
 
 export type NetworkConfig = {
@@ -14,10 +14,18 @@ export type NetworkConfig = {
 export type DataClientConfig = {
   read: {
     type: DataClient;
+    options: DataClientOptions;
   };
   write?: {
     type: DataClient;
   };
+};
+
+export type DataClientOptions = {};
+
+export type StarknetDataClientOptions = DataClientOptions & {
+  pageSize: number;
+  timeLimitInDay: number;
 };
 
 export type TransactionConfig = {
@@ -25,9 +33,12 @@ export type TransactionConfig = {
 };
 
 export type StarknetTransactionConfig = {
-  dataClient: DataClientConfig;
+  dataClient: DataClientConfig & {
+    read: {
+      options: StarknetDataClientOptions;
+    };
+  };
 };
-
 
 export type SnapConfig = {
   transaction: TransactionConfig;
@@ -39,7 +50,11 @@ export const Config: SnapConfig = {
       dataClient: {
         read: {
           type: DataClient.StarkScan,
-        }
+          options: {
+            pageSize: 100,
+            timeLimitInDay: 100,
+          },
+        },
       },
     },
   },

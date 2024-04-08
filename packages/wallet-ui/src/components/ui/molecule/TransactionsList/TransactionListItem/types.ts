@@ -1,5 +1,6 @@
 import { IconProp } from '@fortawesome/fontawesome-svg-core';
-import { Transaction, TransactionStatus, VoyagerTransactionType } from 'types';
+import { Transaction } from 'types';
+import { TransactionType, TransactionStatus } from 'starknet';
 import { shortenAddress } from 'utils/utils';
 import { ethers } from 'ethers';
 
@@ -18,13 +19,14 @@ export const getIcon = (transactionName: string): IconProp => {
 };
 
 export const getTxnName = (transaction: Transaction): string => {
-  if (transaction.txnType.toLowerCase() === VoyagerTransactionType.INVOKE) {
+  console.log(transaction)
+  if (transaction.txnType.toLowerCase() === TransactionType.INVOKE.toLowerCase()) {
     if (transaction.contractFuncName.toLowerCase() === 'transfer') {
       return 'Send';
     }
-  } else if (transaction.txnType.toLowerCase() === VoyagerTransactionType.DEPLOY) {
+  } else if (transaction.txnType.toLowerCase() === TransactionType.DEPLOY.toLowerCase()) {
     return 'Deploy';
-  } else if (transaction.txnType.toLowerCase() === VoyagerTransactionType.DEPLOY_ACCOUNT) {
+  } else if (transaction.txnType.toLowerCase() === TransactionType.DEPLOY_ACCOUNT.toLowerCase()) {
     return 'Deploy Account';
   }
   return 'Unknown';

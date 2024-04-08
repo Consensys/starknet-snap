@@ -1,43 +1,44 @@
-import { Transaction, } from '../../../../types/snapState';
+import { Transaction } from '../../../../types/snapState';
 import { DataClientError } from '../exceptions';
 import { IReadDataClient } from '../types';
-import {  constants } from 'starknet';
+import { constants } from 'starknet';
 import { AbstractDataClient } from './base';
 import { logger } from '../../../../utils/logger';
 
 export type VoyagerClientOptions = {
-    chainId: string;
-    pageSize: number; 
-}
+  chainId: string;
+  pageSize: number;
+  timeLimit: number;
+};
 
 export type VoyagerTxn = {
-    blockId: string;
-    blockNumber: number;
-    l1VerificationHash: string;
-    hash: string;
-    index: number;
-    type: string;
-    class_hash: string;
-    calldata?: string[];
-    sender_address: string;
-    contract_address: string;
-    timestamp: number;
-    actual_fee: string;
-    execution_status: string;
-    revert_error: string;
-    domain: string;
-    status: string;
-    finality_status: string;
-    operations?: string;
-    classAlias: string;
-    contractAlias: string;
-    senderAlias: string;
-}
+  blockId: string;
+  blockNumber: number;
+  l1VerificationHash: string;
+  hash: string;
+  index: number;
+  type: string;
+  class_hash: string;
+  calldata?: string[];
+  sender_address: string;
+  contract_address: string;
+  timestamp: number;
+  actual_fee: string;
+  execution_status: string;
+  revert_error: string;
+  domain: string;
+  status: string;
+  finality_status: string;
+  operations?: string;
+  classAlias: string;
+  contractAlias: string;
+  senderAlias: string;
+};
 
 export type GetVoyagerTxnsResponse = {
-    items: VoyagerTxn[];
-    lastPage: number;
-}
+  items: VoyagerTxn[];
+  lastPage: number;
+};
 
 export type GetVoyagerTxnResponse = {
   header: {
@@ -122,9 +123,12 @@ export type GetVoyagerTxnResponse = {
   };
   statusTimeRemaining: number | null;
   revert_error: string | null;
-}
+};
 
-export class VoyagerClient extends AbstractDataClient implements IReadDataClient  {
+export class VoyagerClient extends AbstractDataClient implements IReadDataClient {
+  constructor(protected options: VoyagerClientOptions) {
+    super();
+  }
 
   get baseUrl() {
     try {
@@ -135,96 +139,88 @@ export class VoyagerClient extends AbstractDataClient implements IReadDataClient
           return 'https://eer9th3mo4.execute-api.eu-central-1.amazonaws.com/api';
       }
     } catch (e) {
-      console.log("baseUrl error", e.message) 
+      console.log('baseUrl error', e.message);
     }
   }
 
-  constructor(protected options: VoyagerClientOptions) {
-    super();
+  get timeLimit() {
+    return Date.now() - this.options.timeLimit;
   }
 
-  protected async getRawTxns(address: string,
-    pageSize: number,
-    pageNum: number
-    ): Promise<GetVoyagerTxnsResponse> {
+  protected async getRawTxns(address: string, pageSize: number, pageNum: number): Promise<GetVoyagerTxnsResponse> {
     try {
-        logger.info(`[VoyagerClient] getRawTxns start`)
-        // "ps" only effective on value: 10, 25, 50 as what's currently available in Voyager page
-        const response = await fetch(`${this.baseUrl}/txns?to=${address}&ps=${pageSize}&p=${pageNum}`, {
-            method: "GET",
-            mode: "cors",
-        });
-        logger.info(`[VoyagerClient] getRawTxns status ${response.ok}`)
-        const result = await response.json()
-        return result as GetVoyagerTxnsResponse;
+      logger.info(`[VoyagerClient] getRawTxns start`);
+      // "ps" only effective on value: 10, 25, 50 as what's currently available in Voyager page
+      const response = await fetch(`${this.baseUrl}/txns?to=${address}&ps=${pageSize}&p=${pageNum}`, {
+        method: 'GET',
+        mode: 'cors',
+      });
+      logger.info(`[VoyagerClient] getRawTxns status ${response.ok}`);
+      const result = await response.json();
+      return result as GetVoyagerTxnsResponse;
     } catch (e) {
-      logger.info(`[VoyagerClient] getRawTxns error ${e.message}`)
+      logger.info(`[VoyagerClient] getRawTxns error ${e.message}`);
       throw new DataClientError(e);
     }
   }
 
-  protected async getRawTxn(txnHash:string
-    ): Promise<GetVoyagerTxnResponse> {
+  protected async getRawTxn(txnHash: string): Promise<GetVoyagerTxnResponse> {
     try {
-        const response = await fetch(`${this.baseUrl}/txn/${txnHash}`, {
-            method: "GET",
-            mode: "cors",
-        });
-        return await response.json() as GetVoyagerTxnResponse;
+      const response = await fetch(`${this.baseUrl}/txn/${txnHash}`, {
+        method: 'GET',
+        mode: 'cors',
+      });
+      return (await response.json()) as GetVoyagerTxnResponse;
     } catch (e) {
       throw new DataClientError(e);
     }
   }
 
-  async getTxns(address: string,
-    startFrom: number
-    ): Promise<Transaction[]> {
+  async getTxns(address: string): Promise<Transaction[]> {
     try {
-        logger.info(`[VoyagerClient] getTxns start`)
-        let txns:Transaction[] = [];
-        let remainTxns:Transaction[] = [];
+      logger.info(`[VoyagerClient] getTxns start`);
+      let txns: Transaction[] = [];
+      let remainTxns: Transaction[] = [];
 
-        let i = 1;
-        let maxPage = i;
-        let process = true
-        while (i <= maxPage && process)
-        {
-          const { items, lastPage } = await this.getRawTxns(address, this.options.pageSize, i);
-          for (const item of items) {
-              if (item.timestamp * 1000 >= startFrom) {
-                  txns.push(this.format(item));
-              } else {
-                  remainTxns.push(this.format(item));
-                  process = false
-              }
+      let i = 1;
+      let maxPage = i;
+      let process = true;
+      while (i <= maxPage && process) {
+        const { items, lastPage } = await this.getRawTxns(address, this.options.pageSize, i);
+        for (const item of items) {
+          if (item.timestamp * 1000 >= this.timeLimit) {
+            txns.push(this.format(item));
+          } else {
+            remainTxns.push(this.format(item));
+            process = false;
           }
-          maxPage = lastPage;
-          i += 1
         }
-        this.lastScan = {
-            lastPage:  i === maxPage ? null : maxPage,
-            data: txns.concat(remainTxns)
-        }
-        
-        return txns;
+        maxPage = lastPage;
+        i += 1;
+      }
+      this.lastScan = {
+        lastPage: i === maxPage ? null : maxPage,
+        data: txns.concat(remainTxns),
+      };
+
+      return txns;
     } catch (e) {
       logger.info(`[VoyagerClient] getTxns error: ${e.message}`);
       throw new DataClientError(e);
     }
   }
-  
-  protected async _getDeployTxns<T>(
-    address: string,
-    ): Promise<T[]> {
+
+  protected async _getLastPageTxns(address: string): Promise<Transaction[]> {
     const { items } = await this.getRawTxns(address, 10, this.lastScan.lastPage as unknown as number);
-    return items as T[] ;
-  }
-  
-  async getTxn(hash: string): Promise<Transaction> {
-    return null
+    return items.map((item) => this.format(item));
   }
 
-  protected format<T>(txn: T & VoyagerTxn) : Transaction {
+
+  async getTxn(hash: string): Promise<Transaction> {
+    return null;
+  }
+
+  protected format<T>(txn: T & VoyagerTxn): Transaction {
     return {
       txnHash: txn.hash,
       txnType: txn.type,
@@ -237,8 +233,7 @@ export class VoyagerClient extends AbstractDataClient implements IReadDataClient
       finalityStatus: txn.finality_status,
       executionStatus: txn.execution_status,
       failureReason: txn.revert_error,
-      eventIds: []
-    }
-  } 
-
+      eventIds: [],
+    };
+  }
 }

@@ -1,24 +1,12 @@
-import {
-  BIP44AddressKeyDeriver,
-  getBIP44AddressKeyDeriver,
-} from "@metamask/key-tree";
-import {
-  DialogResult,
-  Json,
-  heading,
-  panel,
-  text,
-  divider,
-} from "@metamask/snaps-sdk";
+import { BIP44AddressKeyDeriver, getBIP44AddressKeyDeriver } from '@metamask/key-tree';
+import { DialogResult, Json, heading, panel, text, divider } from '@metamask/snaps-sdk';
 
 export class SnapHelper {
-  static wallet = snap
+  static wallet;
 
-  static async getBip44Deriver(
-    coinType: number
-  ): Promise<BIP44AddressKeyDeriver> {
+  static async getBip44Deriver(coinType: number): Promise<BIP44AddressKeyDeriver> {
     const bip44Node = await SnapHelper.wallet.request({
-      method: "snap_getBip44Entropy",
+      method: 'snap_getBip44Entropy',
       params: {
         coinType: coinType,
       },
@@ -26,42 +14,35 @@ export class SnapHelper {
     return getBIP44AddressKeyDeriver(bip44Node);
   }
 
-  static async ConfirmDialog(
-    header: string,
-    subHeader: string,
-    content: Json
-  ): Promise<DialogResult> {
+  static async ConfirmDialog(header: string, subHeader: string, content: Json): Promise<DialogResult> {
     return SnapHelper.wallet.request({
-      method: "snap_dialog",
+      method: 'snap_dialog',
       params: {
-        type: "confirmation",
+        type: 'confirmation',
         content: panel([
           heading(header),
           text(subHeader),
           divider(),
-          ...Object.entries(content).map(([key, value]) =>
-            text(`**${key}**:\n ${value}`)
-          ),
+          ...Object.entries(content).map(([key, value]) => text(`**${key}**:\n ${value}`)),
         ]),
       },
     });
   }
 
-  static async getStateData<T>() : Promise<T> {
-
-    return await SnapHelper.wallet.request({
-      method: "snap_manageState",
+  static async getStateData<T>(): Promise<T> {
+    return (await SnapHelper.wallet.request({
+      method: 'snap_manageState',
       params: {
-        operation: "get",
+        operation: 'get',
       },
-    }) as unknown as T;
+    })) as unknown as T;
   }
 
   static async setStateData<T>(data: T) {
     await SnapHelper.wallet.request({
-      method: "snap_manageState",
+      method: 'snap_manageState',
       params: {
-        operation: "update",
+        operation: 'update',
         newState: data as Record<string, Json>,
       },
     });

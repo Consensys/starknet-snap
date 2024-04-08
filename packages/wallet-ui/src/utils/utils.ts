@@ -18,7 +18,7 @@ export const shortenAddress = (address: string, num = 3) => {
 export const openExplorerTab = (address: string, type = 'contract', chainId = SEPOLIA_CHAINID) => {
   let explorerUrl = STARKNET_SEPOLIA_TESTNET_EXPLORER;
   switch (chainId) {
-    case constants.StarknetChainId.MAINNET:
+    case constants.StarknetChainId.SN_MAIN:
       explorerUrl = STARKNET_MAINNET_EXPLORER;
       break;
     case SEPOLIA_CHAINID:

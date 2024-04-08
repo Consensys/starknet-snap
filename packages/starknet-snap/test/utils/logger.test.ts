@@ -26,8 +26,7 @@ describe('Test function: logger', function () {
     for (const key in logFnSpy) {
       spy[key] = logFnSpy[key]();
     }
-
-    logutils.logger.init('all');
+    logutils.logger.logLevel = 'all';
 
     for (const key in logFnSpy) {
       logutils.logger[key]('log');
@@ -42,7 +41,8 @@ describe('Test function: logger', function () {
     }
     const _emptySpy = spyempty();
 
-    logutils.logger.init('off');
+    logutils.logger.logLevel = 'off';
+
     for (const key in logFnSpy) {
       logutils.logger[key]('log');
       expect(spy[key]).to.have.been.callCount(0);
@@ -57,7 +57,8 @@ describe('Test function: logger', function () {
     }
     const _emptySpy = spyempty();
 
-    logutils.logger.init('info');
+    logutils.logger.logLevel = 'info';
+
     for (const key in logFnSpy) {
       logutils.logger[key](`log: ${key}`);
     }
