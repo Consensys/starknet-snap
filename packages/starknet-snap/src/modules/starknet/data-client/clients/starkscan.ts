@@ -89,7 +89,7 @@ export class StarkScanClient extends BaseRestfulDataClient implements IReadDataC
 
   protected getCredentialHeader(): Record<string, string> {
     return {
-      'x-api-key': this.options.apiKey ?? 'TaBXFzTRNg4iS6CfCHOBV26wIaGpI7Ai5SouisaV',
+      'x-api-key': this.options.apiKey,
     };
   }
 

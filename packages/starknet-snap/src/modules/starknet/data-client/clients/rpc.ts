@@ -30,7 +30,7 @@ export class RpcDataClient implements IReadDataClient {
   }
 
   get apiKey(): string {
-    return this.options.apiKey ?? '60c7253fb48147658095fe0460ac9ee9';
+    return this.options.apiKey;
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
