@@ -1,7 +1,7 @@
-import { StarknetTransactionManager } from './transaction';
 import { Config } from '../config';
 import { ITransactionMgr } from '../transaction/types';
 import { DataClientFactory } from './data-client/factory';
+import { StarknetTransactionManager } from './transaction';
 
 export type StarknetTransactionMgrBuilderConfig = {
   chainId: string;

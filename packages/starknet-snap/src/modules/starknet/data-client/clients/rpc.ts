@@ -1,7 +1,7 @@
 import { Provider, constants } from 'starknet';
 
-import { IReadDataClient } from '../types';
 import { Transaction } from '../../../../types/snapState';
+import { IReadDataClient } from '../types';
 import { DataClientError } from '../exceptions';
 
 export type RpcClientOptions = {

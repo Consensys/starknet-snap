@@ -1,8 +1,9 @@
 import { Transaction } from '../../types/snapState';
+import { TransactionServiceException } from './exceptions';
 import { ITransactionMgr } from './types';
 
 export class TransactionService {
-  constructor(public txnMgr: ITransactionMgr) {}
+  constructor(protected txnMgr: ITransactionMgr) {}
 
   async getTxns(
     address: string,
@@ -10,6 +11,10 @@ export class TransactionService {
     tokenAddress?: string,
     minTimestamp?: number,
   ): Promise<Transaction[]> {
-    return this.txnMgr.getTxns(address, chainId, tokenAddress, minTimestamp);
+    try {
+      return this.txnMgr.getTxns(address, chainId, tokenAddress, minTimestamp);
+    } catch (e) {
+      throw new TransactionServiceException(e);
+    }
   }
 }

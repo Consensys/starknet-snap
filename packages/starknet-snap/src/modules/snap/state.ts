@@ -1,6 +1,7 @@
 import { Mutex } from 'async-mutex';
-import { SnapHelper } from './helpers';
+
 import { logger } from '../../utils/logger';
+import { SnapHelper } from './helpers';
 import { Lock } from './lock';
 
 export abstract class SnapStateManager<S> {

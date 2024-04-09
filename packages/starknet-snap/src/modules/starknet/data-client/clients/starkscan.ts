@@ -1,9 +1,11 @@
 import { constants } from 'starknet';
 
-import { BaseRestfulDataClient } from './base';
+import { Transaction } from '../../../../types/snapState';
 import { DataClientError } from '../exceptions';
 import { IReadDataClient } from '../types';
-import { Transaction } from '../../../../types/snapState';
+import { BaseRestfulDataClient } from './base';
+
+export class StarkscanError extends DataClientError {}
 
 export type StarkScanClientOptions = {
   chainId: string;
@@ -114,6 +116,9 @@ export class StarkScanClient extends BaseRestfulDataClient implements IReadDataC
 
       return (await response.json()) as GetStarkScanTxnsResponse;
     } catch (e) {
+      if (e instanceof DataClientError) {
+        throw e;
+      }
       throw new DataClientError(e);
     }
   }
@@ -146,6 +151,9 @@ export class StarkScanClient extends BaseRestfulDataClient implements IReadDataC
 
       return txns;
     } catch (e) {
+      if (e instanceof DataClientError) {
+        throw e;
+      }
       throw new DataClientError(e);
     }
   }

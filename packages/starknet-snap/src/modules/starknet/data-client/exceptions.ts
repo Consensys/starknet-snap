@@ -1,6 +1,7 @@
-export class DataClientError extends Error {
+import { CustomError } from '../../exception';
+
+export class DataClientError extends CustomError {
   constructor(msg: string) {
     super(msg);
-    Object.setPrototypeOf(this, DataClientError.prototype);
   }
 }

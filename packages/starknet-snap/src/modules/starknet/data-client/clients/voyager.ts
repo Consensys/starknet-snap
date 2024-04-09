@@ -1,7 +1,8 @@
+import { constants } from 'starknet';
+
 import { Transaction } from '../../../../types/snapState';
 import { DataClientError } from '../exceptions';
 import { IReadDataClient } from '../types';
-import { constants } from 'starknet';
 import { BaseRestfulDataClient } from './base';
 
 export type VoyagerClientOptions = {
@@ -70,6 +71,9 @@ export class VoyagerClient extends BaseRestfulDataClient implements IReadDataCli
       const result = await response.json();
       return result as GetVoyagerTxnsResponse;
     } catch (e) {
+      if (e instanceof DataClientError) {
+        throw e;
+      }
       throw new DataClientError(e);
     }
   }
@@ -102,6 +106,9 @@ export class VoyagerClient extends BaseRestfulDataClient implements IReadDataCli
 
       return txns;
     } catch (e) {
+      if (e instanceof DataClientError) {
+        throw e;
+      }
       throw new DataClientError(e);
     }
   }

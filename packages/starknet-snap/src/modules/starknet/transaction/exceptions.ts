@@ -1,6 +1,13 @@
-export class TransactionServiceException extends Error {
+import { CustomError } from '../../exception';
+
+export class TransactionMgrException extends CustomError {
   constructor(msg: string) {
     super(msg);
-    Object.setPrototypeOf(this, TransactionServiceException.prototype);
+  }
+}
+
+export class TransactionStateException extends CustomError {
+  constructor(msg: string) {
+    super(msg);
   }
 }
