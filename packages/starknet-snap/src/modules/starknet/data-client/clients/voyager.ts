@@ -12,27 +12,18 @@ export type VoyagerClientOptions = {
 };
 
 export type VoyagerTxn = {
-  blockId: string;
   blockNumber: number;
   l1VerificationHash: string;
   hash: string;
   index: number;
   type: string;
-  class_hash: string;
-  calldata?: string[];
-  sender_address: string;
-  contract_address: string;
+  classHash: string;
+  contractAddress: string;
   timestamp: number;
-  actual_fee: string;
-  execution_status: string;
-  revert_error: string;
-  domain: string;
+  actualFee: string;
   status: string;
-  finality_status: string;
-  operations?: string;
   classAlias: string;
   contractAlias: string;
-  senderAlias: string;
 };
 
 export type GetVoyagerTxnsResponse = {
@@ -130,14 +121,14 @@ export class VoyagerClient extends BaseRestfulDataClient implements IReadDataCli
       txnHash: txn.hash,
       txnType: txn.type,
       chainId: this.options.chainId,
-      senderAddress: txn.sender_address,
-      contractAddress: txn?.calldata[1] ?? txn.contract_address,
-      contractFuncName: txn.operations || '',
-      contractCallData: txn?.calldata ?? [],
+      senderAddress: '',
+      contractAddress: txn.contractAddress,
+      contractFuncName: '',
+      contractCallData: [],
       timestamp: txn.timestamp,
-      finalityStatus: txn.finality_status,
-      executionStatus: txn.execution_status,
-      failureReason: txn.revert_error,
+      finalityStatus: '',
+      executionStatus: '',
+      failureReason: '',
       eventIds: [],
     };
   }

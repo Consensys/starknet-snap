@@ -2,7 +2,7 @@ import { BIP44AddressKeyDeriver, getBIP44AddressKeyDeriver } from '@metamask/key
 import { DialogResult, Json, heading, panel, text, divider } from '@metamask/snaps-sdk';
 
 export class SnapHelper {
-  static wallet;
+  static wallet = snap;
 
   static async getBip44Deriver(coinType: number): Promise<BIP44AddressKeyDeriver> {
     const bip44Node = await SnapHelper.wallet.request({
@@ -29,7 +29,7 @@ export class SnapHelper {
     });
   }
 
-  static async getStateData<T>(): Promise<T> {
+  static async GetStateData<T>(): Promise<T> {
     return (await SnapHelper.wallet.request({
       method: 'snap_manageState',
       params: {
@@ -38,7 +38,7 @@ export class SnapHelper {
     })) as unknown as T;
   }
 
-  static async setStateData<T>(data: T) {
+  static async SetStateData<T>(data: T) {
     await SnapHelper.wallet.request({
       method: 'snap_manageState',
       params: {

@@ -17,106 +17,89 @@ export class StarknetTransactionManager implements ITransactionMgr {
     this.txnStateMgr = new StarknetTransactionStateManager();
   }
 
-  async getTxns(address: string, chainId: string, tokenAddress: string, minTimestamp?: number): Promise<Transaction[]> {
-    try {
-      logger.info(`[StarknetTransactionManager.getTxns] start`);
-
-      let txns: Transaction[] = await this.txnStateMgr.list(address, chainId);
-
-      let deployAccountTxn: Transaction;
-      let fetchStatus = true;
-
-      if (!txns || txns.length === 0) {
-        logger.info(`[StarknetTransactionManager.getTxns] no txns found in local state, fetching from data client`);
-
-        txns = await this.restfulDataClient.getTxns(address);
-        deployAccountTxn = await this.restfulDataClient.getDeployAccountTxn(address);
-
-        await this.txnStateMgr.saveMany(txns.concat(deployAccountTxn));
-
-        fetchStatus = false;
-      } else {
-        deployAccountTxn = await this.txnStateMgr.getDeployAccountTxn(address, chainId);
-      }
-
-      logger.info(`[StarknetTransactionManager.getTxns] ${txns.length} txns found`);
-
-      logger.info(
-        `[StarknetTransactionManager.getTxns] filter txns on contractAddress = ${tokenAddress}, chainId = ${chainId}, timestamp >= ${minTimestamp}`,
-      );
-
-      const result = TransactionHelper.FilterTransactions(txns, [
-        new ContractAddressFilter(tokenAddress),
-        // not handle client local time issue
-        new TimestampFilter(minTimestamp),
-      ]);
-
-      logger.info(`[StarknetTransactionManager.getTxns] filtered txns: ${result.length} found`);
-
-      const mergedTxns = TransactionHelper.Merge(result, [deployAccountTxn])[0];
-
-      logger.info(
-        `[StarknetTransactionManager.getTxns] merge filtered txns with deploy txn: ${mergedTxns.length} found`,
-      );
-
-      if (fetchStatus) {
-        await this.fetchStatus(mergedTxns);
-      }
-
-      return mergedTxns.sort((a, b) => b.timestamp - a.timestamp);
-    } catch (e) {
-      logger.error(`[StarknetTransactionManager.getTxns] Error: ${e}`);
-      return [];
-    } finally {
-      logger.info(`[TransactionService.getTxns] end`);
-    }
-  }
-
   async getTxn(hash: string): Promise<Transaction> {
-    logger.info(`[StarknetTransactionManager.getTxn] start`);
     try {
       return this.rpcDataClient.getTxn(hash);
     } catch (e) {
       logger.error(`[StarknetTransactionManager.getTxn] Error: ${e}`);
       throw e;
-    } finally {
-      logger.info(`[TransactionService.getTxn] end`);
     }
   }
 
-  protected async fetchStatus(txns: Transaction[]): Promise<void> {
-    logger.info(`[StarknetTransactionManager.fetchStatus] start`);
+  async getTxns(address: string, chainId: string, tokenAddress: string, minTimestamp?: number): Promise<Transaction[]> {
+    try {
+      let txns = await this.txnStateMgr.list(address, chainId);
+      let deployAccountTxn = await this.txnStateMgr.getDeployAccountTxn(address, chainId);
+      logger.info(`[StarknetTransactionManager.getTxns] ${txns.length} transactions found from state`);
 
-    const txnsNeededStatus = TransactionHelper.FilterTransactions(txns, [
+      const hasTxnsFromState = deployAccountTxn || (txns && txns.length > 0);
+
+      if (!hasTxnsFromState) {
+        txns = await this.restfulDataClient.getTxns(address);
+        deployAccountTxn = await this.restfulDataClient.getDeployAccountTxn(address);
+        logger.info(`[StarknetTransactionManager.getTxns] ${txns.length} transactions found from chain`);
+
+        await this.txnStateMgr.saveMany(txns);
+      }
+
+      txns = this.filterAndMergeTxns(txns, deployAccountTxn, tokenAddress, minTimestamp);
+      logger.info(`[StarknetTransactionManager.getTxns] ${txns.length} transactions found after filtered and merged`);
+
+      if (hasTxnsFromState) {
+        const txnsNeededStatus = this.filterTxnsNeedUpdate(txns);
+        logger.info(`[StarknetTransactionManager.getTxns] ${txnsNeededStatus.length} transactions need status update`);
+
+        await this.fetchStatus(txnsNeededStatus);
+        await this.txnStateMgr.saveMany(txnsNeededStatus);
+      }
+
+      return txns.sort((a, b) => b.timestamp - a.timestamp);
+    } catch (e) {
+      logger.error(`[StarknetTransactionManager.getTxns] Error: ${e}`);
+      return [];
+    }
+  }
+
+  protected filterAndMergeTxns(
+    txns: Transaction[],
+    deployAccountTxn: Transaction,
+    tokenAddress: string,
+    minTimestamp: number,
+  ): Transaction[] {
+    const result = TransactionHelper.FilterTransactions(txns, [
+      new ContractAddressFilter(tokenAddress),
+      // timestamp filter may not accuary if client clock is not sync
+      new TimestampFilter(minTimestamp),
+    ]);
+
+    return TransactionHelper.Merge(result, [deployAccountTxn])[0];
+  }
+
+  protected filterTxnsNeedUpdate(txns: Transaction[]): Transaction[] {
+    return TransactionHelper.FilterTransactions(txns, [
       new StatusFilter(
         [TransactionStatus.RECEIVED, TransactionStatus.ACCEPTED_ON_L2, TransactionStatus.NOT_RECEIVED],
         [],
       ),
     ]);
+  }
 
-    logger.info(`[StarknetTransactionManager.fetchStatus] ${txnsNeededStatus.length} transactions need status update`);
-
-    await AsyncHelper.ProcessBatch<Transaction>(txnsNeededStatus, async (txn) => {
+  protected async fetchStatus(txns: Transaction[]): Promise<void> {
+    await AsyncHelper.ProcessBatch<Transaction>(txns, async (txn) => {
       await this.assignStatus(txn);
     });
-
-    logger.info(`[TransactionService.assignStatus] end`);
   }
 
   protected async assignStatus(txn: Transaction): Promise<void> {
-    logger.info(`[TransactionService.assignStatus] start`);
     try {
       const txnWithDetail = await this.getTxn(txn.txnHash);
-      if (!txnWithDetail) {
-        return;
+      if (txnWithDetail) {
+        txn.finalityStatus = txnWithDetail?.finalityStatus;
+        txn.executionStatus = txnWithDetail?.executionStatus;
       }
-      txn.finalityStatus = txnWithDetail?.finalityStatus;
-      txn.executionStatus = txnWithDetail?.executionStatus;
     } catch (e) {
       // not throw exception
-      logger.error(`[TransactionService.assignStatus] Error: ${e}`);
-    } finally {
-      logger.info(`[TransactionService.assignStatus] end`);
+      logger.error(`[StarknetTransactionManager.assignStatus] Error: ${e}`);
     }
   }
 }

@@ -1,23 +1,23 @@
 import { Mutex } from 'async-mutex';
 import { SnapHelper } from './helpers';
 import { logger } from '../../utils/logger';
+import { Lock } from './lock';
 
 export abstract class SnapStateManager<S> {
-  constructor(protected lock?: Mutex) {
-    if (!this.lock) {
-      this.lock = new Mutex();
-    }
+  private readonly lock: Mutex;
+  constructor(createLock = false) {
+    this.lock = Lock.Acquire(createLock);
   }
 
-  async get(): Promise<S> {
-    return SnapHelper.getStateData<S>();
+  protected async get(): Promise<S> {
+    return SnapHelper.GetStateData<S>();
   }
 
-  async set(state: S): Promise<void> {
-    return SnapHelper.setStateData<S>(state);
+  protected async set(state: S): Promise<void> {
+    return SnapHelper.SetStateData<S>(state);
   }
 
-  async update(update: (state: S) => void): Promise<void> {
+  protected async update(update: (state: S) => void): Promise<void> {
     try {
       return this.lock.runExclusive(async () => {
         const state = await this.get();

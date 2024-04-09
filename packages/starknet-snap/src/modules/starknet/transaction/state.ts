@@ -1,4 +1,4 @@
-import { SnapStateManager } from '../../snap/state';
+import { TransactionType } from 'starknet';
 
 import { ITransactionStateMgr } from './types';
 import { SnapState, Transaction } from '../../../types/snapState';
@@ -11,12 +11,20 @@ import {
   TxnTypeFilter,
 } from '../../../utils/transaction/filter';
 import { TransactionHelper } from './helpers';
-import { TransactionType } from 'starknet';
-import { Lock } from '../../transaction';
+import { SnapStateManager } from '../../snap';
 
 export class StarknetTransactionStateManager extends SnapStateManager<SnapState> implements ITransactionStateMgr {
-  constructor() {
-    super(Lock.Acquire());
+  protected override async get(): Promise<SnapState> {
+    return super.get().then((state) => {
+      if (!state.transactionIndex) {
+        state.transactionIndex = [];
+      }
+
+      if (!state.transactionDetails) {
+        state.transactionDetails = {};
+      }
+      return state;
+    });
   }
 
   protected getTransactionKey(txn: Transaction): string {
@@ -27,8 +35,7 @@ export class StarknetTransactionStateManager extends SnapStateManager<SnapState>
     const state = await this.get();
 
     const result = TransactionHelper.FilterTransactions(
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      Object.entries(state.transactionDetails).map(([_, v]) => v),
+      state.transactionIndex.map((v) => state.transactionDetails[v]),
       [
         new ContractAddressFilter(address),
         new ChainIdFilter(chainId),
@@ -41,10 +48,6 @@ export class StarknetTransactionStateManager extends SnapStateManager<SnapState>
 
   async list(address?: string, chainId?: string, tokenAddress?: string, minTimestamp?: number): Promise<Transaction[]> {
     const state = await this.get();
-
-    if (!state.transactionIndex || !state.transactionDetails) {
-      return [];
-    }
 
     const filters: ITransactionFilter[] = [];
     if (address) {
@@ -61,47 +64,31 @@ export class StarknetTransactionStateManager extends SnapStateManager<SnapState>
     }
 
     return TransactionHelper.FilterTransactions(
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      Object.entries(state.transactionDetails).map(([_, v]) => v),
+      state.transactionIndex.map((v) => state.transactionDetails[v]),
       filters,
     );
   }
 
   async remove(txns: Transaction[]): Promise<void> {
     return this.update(async (state: SnapState) => {
-      if (!state.transactionIndex) {
-        state.transactionIndex = [];
-      }
-
-      if (!state.transactionDetails) {
-        state.transactionDetails = {};
-      }
-
       const removeIds = new Set<string>();
 
       for (let i = 0; i < txns.length; i++) {
         const txn = txns[i];
         const key = this.getTransactionKey(txn);
         delete state.transactionDetails[key];
-        removeIds.add(txn.txnHash);
+        removeIds.add(key);
       }
-      state.transactionIndex = state.transactionIndex.filter((txnHash) => !removeIds.has(txnHash));
+      state.transactionIndex = state.transactionIndex.filter((id) => !removeIds.has(id));
     });
   }
 
   async save(txn: Transaction): Promise<void> {
     return this.update(async (state: SnapState) => {
-      if (!state.transactionIndex) {
-        state.transactionIndex = [];
-      }
-
-      if (!state.transactionDetails) {
-        state.transactionDetails = {};
-      }
       const key = this.getTransactionKey(txn);
 
       if (!state.transactionDetails.hasOwnProperty(key)) {
-        state.transactionIndex.push(txn.txnHash);
+        state.transactionIndex.push(key);
       }
 
       state.transactionDetails[key] = txn;
@@ -110,20 +97,12 @@ export class StarknetTransactionStateManager extends SnapStateManager<SnapState>
 
   async saveMany(txns: Transaction[]): Promise<void> {
     return this.update(async (state: SnapState) => {
-      if (!state.transactionIndex) {
-        state.transactionIndex = [];
-      }
-
-      if (!state.transactionDetails) {
-        state.transactionDetails = {};
-      }
-
       for (let i = 0; i < txns.length; i++) {
         const txn = txns[i];
         const key = this.getTransactionKey(txn);
 
         if (!state.transactionDetails.hasOwnProperty(key)) {
-          state.transactionIndex.push(txn.txnHash);
+          state.transactionIndex.push(key);
         }
 
         state.transactionDetails[key] = txn;
