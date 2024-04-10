@@ -10,6 +10,7 @@ module.exports = {
     bundler.transform(
       envify({
         SNAP_ENV: process.env.SNAP_ENV,
+        VOYAGER_API_KEY: process.env.VOYAGER_API_KEY,
       }),
     );
   },

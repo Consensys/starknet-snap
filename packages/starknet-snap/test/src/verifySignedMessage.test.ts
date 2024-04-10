@@ -4,8 +4,8 @@ import sinonChai from 'sinon-chai';
 import { WalletMock } from '../wallet.mock.test';
 import { SnapState } from '../../src/types/snapState';
 import { verifySignedMessage } from '../../src/verifySignedMessage';
-import { STARKNET_TESTNET_NETWORK } from '../../src/utils/constants';
-import { account1, getBip44EntropyStub, signature1 } from '../constants.test';
+import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../../src/utils/constants';
+import { account1, getBip44EntropyStub, signature1, signature2, unfoundUserAddress } from '../constants.test';
 import { getAddressKeyDeriver } from '../../src/utils/keyPair';
 import * as utils from '../../src/utils/starknetUtils';
 import { Mutex } from 'async-mutex';
@@ -20,7 +20,7 @@ describe('Test function: verifySignedMessage', function () {
   const state: SnapState = {
     accContracts: [account1],
     erc20Tokens: [],
-    networks: [STARKNET_TESTNET_NETWORK],
+    networks: [STARKNET_SEPOLIA_TESTNET_NETWORK],
     transactions: [],
   };
 
@@ -100,7 +100,7 @@ describe('Test function: verifySignedMessage', function () {
         } catch (err) {
           result = err;
         } finally {
-          expect(isUpgradeRequiredStub).to.have.been.calledOnceWith(STARKNET_TESTNET_NETWORK, account1.address);
+          expect(isUpgradeRequiredStub).to.have.been.calledOnceWith(STARKNET_SEPOLIA_TESTNET_NETWORK, account1.address);
           expect(result).to.be.an('Error');
         }
       });
@@ -119,7 +119,7 @@ describe('Test function: verifySignedMessage', function () {
         } catch (err) {
           result = err;
         } finally {
-          expect(isUpgradeRequiredStub).to.have.been.calledOnceWith(STARKNET_TESTNET_NETWORK, account1.address);
+          expect(isUpgradeRequiredStub).to.have.been.calledOnceWith(STARKNET_SEPOLIA_TESTNET_NETWORK, account1.address);
           expect(result).to.be.an('Error');
         }
       });

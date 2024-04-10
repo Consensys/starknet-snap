@@ -8,7 +8,7 @@ import * as snapUtils from '../../src/utils/snapUtils';
 import { SnapState } from '../../src/types/snapState';
 import { sendTransaction } from '../../src/sendTransaction';
 import * as estimateFeeSnap from '../../src/estimateFee';
-import { STARKNET_TESTNET_NETWORK } from '../../src/utils/constants';
+import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../../src/utils/constants';
 import {
   account1,
   createAccountProxyResp,
@@ -37,7 +37,7 @@ describe('Test function: sendTransaction', function () {
   const state: SnapState = {
     accContracts: [],
     erc20Tokens: [token2, token3],
-    networks: [STARKNET_TESTNET_NETWORK],
+    networks: [STARKNET_SEPOLIA_TESTNET_NETWORK],
     transactions: [],
   };
   const apiParams: ApiParams = {
@@ -52,7 +52,7 @@ describe('Test function: sendTransaction', function () {
     contractFuncName: 'transfer',
     contractCallData: '0x0256d8f49882cc9366037415f48fa9fd2b5b7344ded7573ebfcef7c90e3e6b75,100000000000000000000,0',
     senderAddress: account1.address,
-    chainId: STARKNET_TESTNET_NETWORK.chainId,
+    chainId: STARKNET_SEPOLIA_TESTNET_NETWORK.chainId,
   };
 
   beforeEach(async function () {
@@ -181,7 +181,7 @@ describe('Test function: sendTransaction', function () {
         } catch (err) {
           result = err;
         } finally {
-          expect(isUpgradeRequiredStub).to.have.been.calledOnceWith(STARKNET_TESTNET_NETWORK, account1.address);
+          expect(isUpgradeRequiredStub).to.have.been.calledOnceWith(STARKNET_SEPOLIA_TESTNET_NETWORK, account1.address);
           expect(result).to.be.an('Error');
         }
       });
@@ -200,7 +200,7 @@ describe('Test function: sendTransaction', function () {
         } catch (err) {
           result = err;
         } finally {
-          expect(isUpgradeRequiredStub).to.have.been.calledOnceWith(STARKNET_TESTNET_NETWORK, account1.address);
+          expect(isUpgradeRequiredStub).to.have.been.calledOnceWith(STARKNET_SEPOLIA_TESTNET_NETWORK, account1.address);
           expect(result).to.be.an('Error');
         }
       });
@@ -309,6 +309,9 @@ describe('Test function: sendTransaction', function () {
 
         it('should use heading, text and copyable component', async function () {
           executeTxnResp = sendTransactionFailedResp;
+          sandbox.stub(utils, 'getSigner').callsFake(async () => {
+            return account1.publicKey;
+          });
           const requestObject: SendTransactionRequestParams = {
             contractAddress: account1.address,
             contractFuncName: 'get_signer',
@@ -361,7 +364,7 @@ describe('Test function: sendTransaction', function () {
                 },
                 {
                   type: 'copyable',
-                  value: 'Goerli Testnet (deprecated soon)',
+                  value: 'Sepolia Testnet',
                 },
               ],
             },

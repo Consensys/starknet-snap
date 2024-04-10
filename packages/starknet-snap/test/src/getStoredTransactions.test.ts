@@ -3,11 +3,7 @@ import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import { WalletMock } from '../wallet.mock.test';
 import { SnapState, VoyagerTransactionType } from '../../src/types/snapState';
-import {
-  STARKNET_TESTNET_NETWORK,
-  STARKNET_MAINNET_NETWORK,
-  STARKNET_SEPOLIA_TESTNET_NETWORK,
-} from '../../src/utils/constants';
+import { STARKNET_MAINNET_NETWORK, STARKNET_SEPOLIA_TESTNET_NETWORK } from '../../src/utils/constants';
 import { getStoredTransactions } from '../../src/getStoredTransactions';
 import { createAccountProxyTxn, initAccountTxn, invalidNetwork, txn1, txn2, txn3 } from '../constants.test';
 import * as snapUtils from '../../src/utils/snapUtils';
@@ -22,7 +18,7 @@ describe('Test function: getStoredTransactions', function () {
   const state: SnapState = {
     accContracts: [],
     erc20Tokens: [],
-    networks: [STARKNET_TESTNET_NETWORK, STARKNET_MAINNET_NETWORK, STARKNET_SEPOLIA_TESTNET_NETWORK, invalidNetwork],
+    networks: [STARKNET_MAINNET_NETWORK, STARKNET_SEPOLIA_TESTNET_NETWORK, invalidNetwork],
     transactions: [txn1, txn2, txn3, createAccountProxyTxn, initAccountTxn],
   };
   const apiParams: ApiParams = {
@@ -41,7 +37,7 @@ describe('Test function: getStoredTransactions', function () {
     sandbox.restore();
   });
 
-  it('should get the stored transactions of SN_GOERLI correctly', async function () {
+  it('should get the stored transactions of SN_SEPOLIA correctly', async function () {
     const requestObject: GetStoredTransactionsRequestParams = {};
     apiParams.requestParams = requestObject;
     const result = await getStoredTransactions(apiParams);
@@ -124,9 +120,9 @@ describe('Test function: getStoredTransactions', function () {
     expect(result).to.be.eql([txn1]);
   });
 
-  it('should not get any stored transactions of SN_GOERLI of an unfound sender address correctly', async function () {
+  it('should not get any stored transactions of SN_SEPOLIA of an unfound sender address correctly', async function () {
     const requestObject: GetStoredTransactionsRequestParams = {
-      chainId: STARKNET_TESTNET_NETWORK.chainId,
+      chainId: STARKNET_SEPOLIA_TESTNET_NETWORK.chainId,
       contractAddress: '0x07394cbe418daa16e42b87ba67372d4ab4a5df0b05c6e554d158458ce245bc10',
       senderAddress: '0x7ec3edbb88ce9d4d1ed62ccee34cf46a405bd15be0409ac9a23ffc1f36e190c',
       txnsInLastNumOfDays: 2,
@@ -137,9 +133,9 @@ describe('Test function: getStoredTransactions', function () {
     expect(result.length).to.be.eq(0);
   });
 
-  it('should get the stored DEPLOY transactions of SN_GOERLI correctly', async function () {
+  it('should get the stored DEPLOY transactions of SN_SEPOLIA correctly', async function () {
     const requestObject: GetStoredTransactionsRequestParams = {
-      chainId: STARKNET_TESTNET_NETWORK.chainId,
+      chainId: STARKNET_SEPOLIA_TESTNET_NETWORK.chainId,
       txnType: VoyagerTransactionType.DEPLOY,
     };
     apiParams.requestParams = requestObject;
@@ -149,9 +145,9 @@ describe('Test function: getStoredTransactions', function () {
     expect(result).to.be.eql([createAccountProxyTxn]);
   });
 
-  it('should get the stored INVOKE transactions of SN_GOERLI correctly', async function () {
+  it('should get the stored INVOKE transactions of SN_SEPOLIA correctly', async function () {
     const requestObject: GetStoredTransactionsRequestParams = {
-      chainId: STARKNET_TESTNET_NETWORK.chainId,
+      chainId: STARKNET_SEPOLIA_TESTNET_NETWORK.chainId,
       txnType: VoyagerTransactionType.INVOKE,
     };
     apiParams.requestParams = requestObject;
@@ -164,7 +160,7 @@ describe('Test function: getStoredTransactions', function () {
   it('should throw error if getTransactions failed', async function () {
     sandbox.stub(snapUtils, 'getTransactions').throws(new Error());
     const requestObject: GetStoredTransactionsRequestParams = {
-      chainId: STARKNET_TESTNET_NETWORK.chainId,
+      chainId: STARKNET_SEPOLIA_TESTNET_NETWORK.chainId,
       txnType: VoyagerTransactionType.INVOKE,
     };
     apiParams.requestParams = requestObject;

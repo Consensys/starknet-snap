@@ -5,7 +5,7 @@ import { WalletMock } from '../wallet.mock.test';
 import { SnapState } from '../../src/types/snapState';
 import { signMessage } from '../../src/signMessage';
 import typedDataExample from '../../src/typedData/typedDataExample.json';
-import { STARKNET_TESTNET_NETWORK } from '../../src/utils/constants';
+import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../../src/utils/constants';
 import {
   account1,
   Cairo1Account1,
@@ -28,7 +28,7 @@ describe('Test function: signMessage', function () {
   const state: SnapState = {
     accContracts: [],
     erc20Tokens: [],
-    networks: [STARKNET_TESTNET_NETWORK],
+    networks: [STARKNET_SEPOLIA_TESTNET_NETWORK],
     transactions: [],
   };
   const apiParams: ApiParams = {
@@ -39,10 +39,10 @@ describe('Test function: signMessage', function () {
   };
 
   const requestObject: SignMessageRequestParams = {
-    chainId: STARKNET_TESTNET_NETWORK.chainId,
+    chainId: STARKNET_SEPOLIA_TESTNET_NETWORK.chainId,
     signerAddress: account1.address,
     typedDataMessage: typedDataExample,
-    enableAutherize: true,
+    enableAuthorize: true,
   };
 
   beforeEach(async function () {
@@ -101,19 +101,19 @@ describe('Test function: signMessage', function () {
       apiParams.requestParams = Object.assign({}, requestObject);
     });
 
-    it('skip dialog if enableAutherize is false or omit', async function () {
+    it('skip dialog if enableAuthorize is false or omit', async function () {
       sandbox.stub(utils, 'isUpgradeRequired').resolves(false);
       const paramsObject = apiParams.requestParams as SignMessageRequestParams;
 
-      paramsObject.enableAutherize = false;
+      paramsObject.enableAuthorize = false;
       await signMessage(apiParams);
       expect(walletStub.rpcStubs.snap_dialog).to.have.been.callCount(0);
 
-      paramsObject.enableAutherize = undefined;
+      paramsObject.enableAuthorize = undefined;
       await signMessage(apiParams);
       expect(walletStub.rpcStubs.snap_dialog).to.have.been.callCount(0);
 
-      paramsObject.enableAutherize = true;
+      paramsObject.enableAuthorize = true;
     });
 
     describe('when require upgrade checking fail', function () {
@@ -125,7 +125,7 @@ describe('Test function: signMessage', function () {
         } catch (err) {
           result = err;
         } finally {
-          expect(isUpgradeRequiredStub).to.have.been.calledOnceWith(STARKNET_TESTNET_NETWORK, account1.address);
+          expect(isUpgradeRequiredStub).to.have.been.calledOnceWith(STARKNET_SEPOLIA_TESTNET_NETWORK, account1.address);
           expect(result).to.be.an('Error');
         }
       });
@@ -144,7 +144,7 @@ describe('Test function: signMessage', function () {
         } catch (err) {
           result = err;
         } finally {
-          expect(isUpgradeRequiredStub).to.have.been.calledOnceWith(STARKNET_TESTNET_NETWORK, account1.address);
+          expect(isUpgradeRequiredStub).to.have.been.calledOnceWith(STARKNET_SEPOLIA_TESTNET_NETWORK, account1.address);
           expect(result).to.be.an('Error');
         }
       });
@@ -195,6 +195,57 @@ describe('Test function: signMessage', function () {
         expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledOnce;
         expect(walletStub.rpcStubs.snap_manageState).not.to.have.been.called;
         expect(result).to.be.eql(false);
+      });
+
+      it('should throw an error if the signerAddress is undefined', async function () {
+        const requestObject: SignMessageRequestParams = {
+          signerAddress: undefined,
+          typedDataMessage: typedDataExample,
+        };
+        apiParams.requestParams = requestObject;
+        let result;
+        try {
+          result = await signMessage(apiParams);
+        } catch (err) {
+          result = err;
+        } finally {
+          expect(result).to.be.an('Error');
+        }
+      });
+
+      it('should throw an error if the signerAddress is an invalid address', async function () {
+        const invalidAddress = 'wrongAddress';
+        const requestObject: SignMessageRequestParams = {
+          signerAddress: invalidAddress,
+          typedDataMessage: typedDataExample,
+        };
+        apiParams.requestParams = requestObject;
+        let result;
+        try {
+          result = await signMessage(apiParams);
+        } catch (err) {
+          result = err;
+        } finally {
+          expect(result).to.be.an('Error');
+        }
+      });
+
+      it('should skip dialog if enableAuthorize is false', async function () {
+        const paramsObject = apiParams.requestParams as SignMessageRequestParams;
+        paramsObject.enableAuthorize = false;
+        const result = await signMessage(apiParams);
+        expect(walletStub.rpcStubs.snap_dialog).to.have.been.callCount(0);
+        expect(result).to.be.eql(signature4Cairo1SignMessage);
+        paramsObject.enableAuthorize = true;
+      });
+
+      it('should skip dialog if enableAuthorize is omit', async function () {
+        const paramsObject = apiParams.requestParams as SignMessageRequestParams;
+        paramsObject.enableAuthorize = undefined;
+        const result = await signMessage(apiParams);
+        expect(walletStub.rpcStubs.snap_dialog).to.have.been.callCount(0);
+        expect(result).to.be.eql(signature4Cairo1SignMessage);
+        paramsObject.enableAuthorize = true;
       });
     });
   });

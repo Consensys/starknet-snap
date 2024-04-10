@@ -5,11 +5,7 @@ import { WalletMock } from '../wallet.mock.test';
 import * as utils from '../../src/utils/starknetUtils';
 import * as snapUtils from '../../src/utils/snapUtils';
 import { SnapState } from '../../src/types/snapState';
-import {
-  STARKNET_MAINNET_NETWORK,
-  STARKNET_TESTNET_NETWORK,
-  STARKNET_SEPOLIA_TESTNET_NETWORK,
-} from '../../src/utils/constants';
+import { STARKNET_MAINNET_NETWORK, STARKNET_SEPOLIA_TESTNET_NETWORK } from '../../src/utils/constants';
 import {
   createAccountProxyTxn,
   testnetAccAddresses,
@@ -34,7 +30,7 @@ describe('Test function: recoverAccounts', function () {
   let state: SnapState = {
     accContracts: [],
     erc20Tokens: [],
-    networks: [STARKNET_TESTNET_NETWORK, STARKNET_MAINNET_NETWORK, STARKNET_SEPOLIA_TESTNET_NETWORK, INVALID_NETWORK],
+    networks: [STARKNET_MAINNET_NETWORK, STARKNET_SEPOLIA_TESTNET_NETWORK, INVALID_NETWORK],
     transactions: [],
   };
   const apiParams: ApiParams = {
@@ -57,7 +53,7 @@ describe('Test function: recoverAccounts', function () {
     state = {
       accContracts: [],
       erc20Tokens: [],
-      networks: [STARKNET_TESTNET_NETWORK, STARKNET_MAINNET_NETWORK, INVALID_NETWORK],
+      networks: [STARKNET_SEPOLIA_TESTNET_NETWORK, STARKNET_MAINNET_NETWORK, INVALID_NETWORK],
       transactions: [],
     };
   });
@@ -105,7 +101,8 @@ describe('Test function: recoverAccounts', function () {
     expect(state.accContracts.length).to.be.eq(expectedCalledTimes);
   });
 
-  it('should recover accounts in SN_GOERLI correctly', async function () {
+  it('should recover accounts in SN_SEPOLIA correctly', async function () {
+    state.accContracts = [];
     const maxScanned = 5;
     const maxMissed = 3;
     const validPublicKeys = 2;

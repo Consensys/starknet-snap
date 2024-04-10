@@ -1,5 +1,5 @@
 import { JsonBIP44CoinTypeNode } from '@metamask/key-tree';
-import { constants, num } from 'starknet';
+import { num } from 'starknet';
 import {
   AccContract,
   Erc20Token,
@@ -9,11 +9,7 @@ import {
   ExecutionStatus,
   FinailityStatus,
 } from '../src/types/snapState';
-import {
-  STARKNET_MAINNET_NETWORK,
-  STARKNET_TESTNET_NETWORK,
-  STARKNET_SEPOLIA_TESTNET_NETWORK,
-} from '../src/utils/constants';
+import { STARKNET_MAINNET_NETWORK, STARKNET_SEPOLIA_TESTNET_NETWORK } from '../src/utils/constants';
 
 export const invalidNetwork: Network = {
   name: 'Network with emot',
@@ -31,7 +27,7 @@ export const account1: AccContract = {
   derivationPath: "m / bip32:44' / bip32:9004' / bip32:0' / bip32:0",
   deployTxnHash: '0x5da2d94a324bc56f80cf1fb985c22c85769db434ed403ae71774a07103d229b',
   publicKey: '0x0154c7b20442ee954f50831702ca844ec185ad484c21719575d351583deec90b',
-  chainId: constants.StarknetChainId.SN_GOERLI,
+  chainId: STARKNET_SEPOLIA_TESTNET_NETWORK.chainId,
 };
 
 export const account2: AccContract = {
@@ -41,7 +37,7 @@ export const account2: AccContract = {
   derivationPath: "m / bip32:44' / bip32:9004' / bip32:0' / bip32:0",
   deployTxnHash: '0x5bc00132b8f2fc0f673dc232594b26727e712b204a2716f9dc28a8c5f607b5e',
   publicKey: '0x019e59f349e1aa813ab4556c5836d0472e5e1ae82d1e5c3b3e8aabfeb290befd',
-  chainId: constants.StarknetChainId.SN_GOERLI,
+  chainId: STARKNET_SEPOLIA_TESTNET_NETWORK.chainId,
 };
 
 export const account3: AccContract = {
@@ -51,7 +47,7 @@ export const account3: AccContract = {
   derivationPath: "m / bip32:44' / bip32:9004' / bip32:0' / bip32:0",
   deployTxnHash: '',
   publicKey: '0x0797efd8e3971dfca4f928485860896201320ce2997ca4789d9343204219599d',
-  chainId: constants.StarknetChainId.SN_GOERLI,
+  chainId: STARKNET_SEPOLIA_TESTNET_NETWORK.chainId,
 };
 
 export const account4: AccContract = {
@@ -61,7 +57,7 @@ export const account4: AccContract = {
   derivationPath: "m / bip32:44' / bip32:9004' / bip32:0' / bip32:0",
   deployTxnHash: '0x3b690b4c9dd639881a46f6a344ee90254562175ed7a7f5a028f69b8c32ccb47',
   publicKey: '',
-  chainId: constants.StarknetChainId.SN_GOERLI,
+  chainId: STARKNET_SEPOLIA_TESTNET_NETWORK.chainId,
 };
 
 export const Cairo1Account1: AccContract = {
@@ -79,7 +75,7 @@ export const token1: Erc20Token = {
   name: 'Starknet ERC-20 sample',
   symbol: 'SNET',
   decimals: 18,
-  chainId: constants.StarknetChainId.SN_GOERLI,
+  chainId: STARKNET_SEPOLIA_TESTNET_NETWORK.chainId,
 };
 
 export const token2: Erc20Token = {
@@ -87,7 +83,7 @@ export const token2: Erc20Token = {
   name: 'ArgentX Test Token',
   symbol: 'TT',
   decimals: 18,
-  chainId: constants.StarknetChainId.SN_GOERLI,
+  chainId: STARKNET_SEPOLIA_TESTNET_NETWORK.chainId,
 };
 
 export const token3: Erc20Token = {
@@ -95,7 +91,7 @@ export const token3: Erc20Token = {
   name: 'Test Token with 10 decimal places',
   symbol: 'TT',
   decimals: 10,
-  chainId: constants.StarknetChainId.SN_GOERLI,
+  chainId: STARKNET_SEPOLIA_TESTNET_NETWORK.chainId,
 };
 
 export const signature1 =
@@ -184,7 +180,7 @@ export const getTxnStatusAcceptL2Resp = {
 };
 
 export const createAccountProxyTxn: Transaction = {
-  chainId: STARKNET_TESTNET_NETWORK.chainId,
+  chainId: STARKNET_SEPOLIA_TESTNET_NETWORK.chainId,
   contractAddress: createAccountProxyResp.contract_address,
   contractCallData: [],
   contractFuncName: '',
@@ -212,7 +208,7 @@ export const createAccountProxyTxnOnSepolia: Transaction = {
 };
 
 export const initAccountTxn: Transaction = {
-  chainId: STARKNET_TESTNET_NETWORK.chainId,
+  chainId: STARKNET_SEPOLIA_TESTNET_NETWORK.chainId,
   contractAddress: account1.address,
   contractCallData: [], //[account1.publicKey, num.toHex(constants.ZERO)],
   contractFuncName: '', //'initialize',
@@ -226,7 +222,7 @@ export const initAccountTxn: Transaction = {
 };
 
 export const RejectedTxn: Transaction = {
-  chainId: STARKNET_TESTNET_NETWORK.chainId,
+  chainId: STARKNET_SEPOLIA_TESTNET_NETWORK.chainId,
   contractAddress: account1.address,
   contractCallData: [], //[account1.publicKey, num.toHex(constants.ZERO)],
   contractFuncName: '', //'initialize',
@@ -240,7 +236,7 @@ export const RejectedTxn: Transaction = {
 };
 
 export const RejectedTxn2: Transaction = {
-  chainId: STARKNET_TESTNET_NETWORK.chainId,
+  chainId: STARKNET_SEPOLIA_TESTNET_NETWORK.chainId,
   contractAddress: account1.address,
   contractCallData: [], //[account1.publicKey, num.toHex(constants.ZERO)],
   contractFuncName: '', //'initialize',
@@ -256,7 +252,7 @@ export const RejectedTxn2: Transaction = {
 };
 
 export const unsettedTransactionInMassagedTxn: Transaction = {
-  chainId: STARKNET_TESTNET_NETWORK.chainId,
+  chainId: STARKNET_SEPOLIA_TESTNET_NETWORK.chainId,
   contractAddress: '0x7394cbe418daa16e42b87ba67372d4ab4a5df0b05c6e554d158458ce245bc10',
   contractCallData: [
     '0x1',
@@ -311,7 +307,7 @@ export const txn2: Transaction = {
 };
 
 export const txn3: Transaction = {
-  chainId: STARKNET_TESTNET_NETWORK.chainId,
+  chainId: STARKNET_SEPOLIA_TESTNET_NETWORK.chainId,
   contractAddress: '0x07394cbe418daa16e42b87ba67372d4ab4a5df0b05c6e554d158458ce245bc10',
   contractCallData: ['0x0256d8f49882cc9366037415f48fa9fd2b5b7344ded7573ebfcef7c90e3e6b75', '1000000000000000000', '0'],
   contractFuncName: 'transfer',
@@ -325,7 +321,7 @@ export const txn3: Transaction = {
 };
 
 export const txn4: Transaction = {
-  chainId: STARKNET_TESTNET_NETWORK.chainId,
+  chainId: STARKNET_SEPOLIA_TESTNET_NETWORK.chainId,
   contractAddress: '0x07394cbe418daa16e42b87ba67372d4ab4a5df0b05c6e554d158458ce245bc10',
   contractCallData: ['0x0256d8f49882cc9366037415f48fa9fd2b5b7344ded7573ebfcef7c90e3e6b75', '2000000000000000000', '0'],
   contractFuncName: 'transfer',
@@ -339,7 +335,7 @@ export const txn4: Transaction = {
 };
 
 export const txn5: Transaction = {
-  chainId: STARKNET_TESTNET_NETWORK.chainId,
+  chainId: STARKNET_SEPOLIA_TESTNET_NETWORK.chainId,
   contractAddress: '0x07394cbe418daa16e42b87ba67372d4ab4a5df0b05c6e554d158458ce245bc10',
   contractCallData: ['0x0256d8f49882cc9366037415f48fa9fd2b5b7344ded7573ebfcef7c90e3e6b75', '2000000000000000000', '0'],
   contractFuncName: 'transfer',
@@ -708,7 +704,7 @@ export const getTxnFromSequencerResp2 = {
 };
 
 export const expectedMassagedTxn4: Transaction = {
-  chainId: '0x534e5f474f45524c49',
+  chainId: '0x534e5f5345504f4c4941',
   contractAddress: '0x07394cbe418daa16e42b87ba67372d4ab4a5df0b05c6e554d158458ce245bc10',
   contractCallData: ['0x0256d8f49882cc9366037415f48fa9fd2b5b7344ded7573ebfcef7c90e3e6b75', '2000000000000000000', '0'],
   contractFuncName: 'transfer',
@@ -724,7 +720,7 @@ export const expectedMassagedTxn4: Transaction = {
 };
 
 export const expectedMassagedTxn5: Transaction = {
-  chainId: '0x534e5f474f45524c49',
+  chainId: '0x534e5f5345504f4c4941',
   contractAddress: '0x07394cbe418daa16e42b87ba67372d4ab4a5df0b05c6e554d158458ce245bc10',
   contractCallData: ['0x0256d8f49882cc9366037415f48fa9fd2b5b7344ded7573ebfcef7c90e3e6b75', '2000000000000000000', '0'],
   contractFuncName: 'transfer',
@@ -743,7 +739,7 @@ export const expectedMassagedTxns: Transaction[] = [
   {
     txnHash: '0x1366c2f9f46b1a86ba0c28b5a08fa0aa3750c4d1cbe06e97e72bd46ae2ac1f9',
     txnType: 'invoke',
-    chainId: '0x534e5f474f45524c49',
+    chainId: '0x534e5f5345504f4c4941',
     senderAddress: '0x5a98ec74a40383cf99896bfea2ec5e6aad16c7eed50025a5f569d585ebb13a2',
     contractAddress: '0x7394cbe418daa16e42b87ba67372d4ab4a5df0b05c6e554d158458ce245bc10',
     contractFuncName: 'transfer',
@@ -769,7 +765,7 @@ export const expectedMassagedTxns: Transaction[] = [
   {
     txnHash: '0x6beceb86579dc78749bdaaf441501edc21e218e020236e2ebea1b6a96d0bac7',
     txnType: 'deploy',
-    chainId: '0x534e5f474f45524c49',
+    chainId: '0x534e5f5345504f4c4941',
     senderAddress: '0x5a98ec74a40383cf99896bfea2ec5e6aad16c7eed50025a5f569d585ebb13a2',
     contractAddress: '0x5a98ec74a40383cf99896bfea2ec5e6aad16c7eed50025a5f569d585ebb13a2',
     contractFuncName: '',

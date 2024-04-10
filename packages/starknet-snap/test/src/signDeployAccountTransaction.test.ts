@@ -4,11 +4,7 @@ import sinonChai from 'sinon-chai';
 import { WalletMock } from '../wallet.mock.test';
 import { signDeployAccountTransaction } from '../../src/signDeployAccountTransaction';
 import { SnapState } from '../../src/types/snapState';
-import {
-  STARKNET_MAINNET_NETWORK,
-  STARKNET_TESTNET_NETWORK,
-  STARKNET_SEPOLIA_TESTNET_NETWORK,
-} from '../../src/utils/constants';
+import { STARKNET_MAINNET_NETWORK, STARKNET_SEPOLIA_TESTNET_NETWORK } from '../../src/utils/constants';
 import { createAccountProxyTxn, getBip44EntropyStub, account1, signature3 } from '../constants.test';
 import { getAddressKeyDeriver } from '../../src/utils/keyPair';
 import { Mutex } from 'async-mutex';
@@ -25,7 +21,7 @@ describe('Test function: signDeployAccountTransaction', function () {
   const state: SnapState = {
     accContracts: [],
     erc20Tokens: [],
-    networks: [STARKNET_MAINNET_NETWORK, STARKNET_TESTNET_NETWORK, STARKNET_SEPOLIA_TESTNET_NETWORK],
+    networks: [STARKNET_MAINNET_NETWORK, STARKNET_SEPOLIA_TESTNET_NETWORK],
     transactions: [],
   };
   const apiParams: ApiParams = {
@@ -48,7 +44,7 @@ describe('Test function: signDeployAccountTransaction', function () {
       version: '0x0',
       maxFee: 100,
     },
-    enableAutherize: true,
+    enableAuthorize: true,
   };
 
   beforeEach(async function () {
@@ -96,23 +92,23 @@ describe('Test function: signDeployAccountTransaction', function () {
     expect(result).to.be.eql(false);
   });
 
-  it('should skip dialog if enableAutherize is false', async function () {
+  it('should skip dialog if enableAuthorize is false', async function () {
     sandbox.stub(utils, 'signDeployAccountTransaction').resolves(signature3);
     const paramsObject = apiParams.requestParams as SignDeployAccountTransactionRequestParams;
-    paramsObject.enableAutherize = false;
+    paramsObject.enableAuthorize = false;
     const result = await signDeployAccountTransaction(apiParams);
     expect(walletStub.rpcStubs.snap_dialog).to.have.been.callCount(0);
     expect(result).to.be.eql(signature3);
-    paramsObject.enableAutherize = true;
+    paramsObject.enableAuthorize = true;
   });
 
-  it('should skip dialog if enableAutherize is omit', async function () {
+  it('should skip dialog if enableAuthorize is omit', async function () {
     sandbox.stub(utils, 'signDeployAccountTransaction').resolves(signature3);
     const paramsObject = apiParams.requestParams as SignDeployAccountTransactionRequestParams;
-    paramsObject.enableAutherize = undefined;
+    paramsObject.enableAuthorize = undefined;
     const result = await signDeployAccountTransaction(apiParams);
     expect(walletStub.rpcStubs.snap_dialog).to.have.been.callCount(0);
     expect(result).to.be.eql(signature3);
-    paramsObject.enableAutherize = true;
+    paramsObject.enableAuthorize = true;
   });
 });

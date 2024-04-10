@@ -19,7 +19,7 @@ export async function signDeclareTransaction(params: ApiParams): Promise<Signatu
 
     const snapComponents = getSignTxnTxt(signerAddress, network, requestParamsObj.transaction);
 
-    if (requestParamsObj.enableAutherize === true) {
+    if (requestParamsObj.enableAuthorize === true) {
       const response = await wallet.request({
         method: 'snap_dialog',
         params: {

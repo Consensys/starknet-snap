@@ -6,11 +6,7 @@ import * as utils from '../../src/utils/starknetUtils';
 import * as snapUtils from '../../src/utils/snapUtils';
 import { createAccount } from '../../src/createAccount';
 import { SnapState } from '../../src/types/snapState';
-import {
-  STARKNET_MAINNET_NETWORK,
-  STARKNET_TESTNET_NETWORK,
-  STARKNET_SEPOLIA_TESTNET_NETWORK,
-} from '../../src/utils/constants';
+import { STARKNET_MAINNET_NETWORK, STARKNET_SEPOLIA_TESTNET_NETWORK } from '../../src/utils/constants';
 import {
   createAccountProxyTxn,
   createAccountProxyResp,
@@ -37,7 +33,7 @@ describe('Test function: createAccount', function () {
   let state: SnapState = {
     accContracts: [],
     erc20Tokens: [],
-    networks: [STARKNET_MAINNET_NETWORK, STARKNET_TESTNET_NETWORK, STARKNET_SEPOLIA_TESTNET_NETWORK],
+    networks: [STARKNET_MAINNET_NETWORK, STARKNET_SEPOLIA_TESTNET_NETWORK],
     transactions: [],
   };
   const apiParams: ApiParams = {
@@ -61,7 +57,7 @@ describe('Test function: createAccount', function () {
     state = {
       accContracts: [],
       erc20Tokens: [],
-      networks: [STARKNET_MAINNET_NETWORK, STARKNET_TESTNET_NETWORK],
+      networks: [STARKNET_MAINNET_NETWORK, STARKNET_SEPOLIA_TESTNET_NETWORK],
       transactions: [],
     };
   });
@@ -157,7 +153,7 @@ describe('Test function: createAccount', function () {
     expect(state.transactions.length).to.be.eq(2);
   });
 
-  it('should create and store an user account with proxy in state correctly in SN_GOERLI in silent mode', async function () {
+  it('should create and store an user account with proxy in state correctly in SN_SEPOLIA in silent mode', async function () {
     sandbox.stub(utils, 'deployAccount').callsFake(async () => {
       return createAccountProxyResp;
     });
@@ -173,7 +169,7 @@ describe('Test function: createAccount', function () {
     const result = await createAccount(apiParams, true);
     const { publicKey: expectedPublicKey } = await utils.getKeysFromAddress(
       apiParams.keyDeriver,
-      STARKNET_TESTNET_NETWORK,
+      STARKNET_SEPOLIA_TESTNET_NETWORK,
       state,
       createAccountProxyResp.contract_address,
     );
@@ -188,7 +184,7 @@ describe('Test function: createAccount', function () {
     expect(state.transactions.length).to.be.eq(1);
   });
 
-  it('should not create any user account with proxy in state in SN_GOERLI if not in silentMode and user rejected', async function () {
+  it('should not create any user account with proxy in state in SN_SEPOLIA if not in silentMode and user rejected', async function () {
     sandbox.stub(utils, 'getAccContractAddressAndCallData').callsFake(() => {
       return {
         address: account1.address,
@@ -206,7 +202,7 @@ describe('Test function: createAccount', function () {
     expect(state.transactions.length).to.be.eq(0);
   });
 
-  it('should not create any user account with proxy in state in SN_GOERLI if account already deployed', async function () {
+  it('should not create any user account with proxy in state in SN_SEPOLIA if account already deployed', async function () {
     sandbox.stub(utils, 'deployAccount').callsFake(async () => {
       return createAccountProxyResp;
     });
@@ -227,7 +223,7 @@ describe('Test function: createAccount', function () {
     expect(state.transactions.length).to.be.eq(1);
   });
 
-  it('should not create any user account with proxy in state in SN_GOERLI if account does not have enough ETH balance', async function () {
+  it('should not create any user account with proxy in state in SN_SEPOLIA if account does not have enough ETH balance', async function () {
     sandbox.stub(utils, 'deployAccount').callsFake(async () => {
       return createAccountProxyResp;
     });
@@ -248,7 +244,7 @@ describe('Test function: createAccount', function () {
     expect(state.transactions.length).to.be.eq(1);
   });
 
-  it('should not create any user account with proxy in state in SN_GOERLI if account does not have enough ETH balance for suggestedMaxFee > 0.000001 ETH', async function () {
+  it('should not create any user account with proxy in state in SN_SEPOLIA if account does not have enough ETH balance for suggestedMaxFee > 0.000001 ETH', async function () {
     sandbox.stub(utils, 'deployAccount').callsFake(async () => {
       return createAccountProxyResp;
     });
@@ -269,7 +265,7 @@ describe('Test function: createAccount', function () {
     expect(state.transactions.length).to.be.eq(1);
   });
 
-  it('should not create any user account with proxy in state in SN_GOERLI if get account ETH balance throws error', async function () {
+  it('should not create any user account with proxy in state in SN_SEPOLIA if get account ETH balance throws error', async function () {
     sandbox.stub(utils, 'deployAccount').callsFake(async () => {
       return createAccountProxyResp;
     });
@@ -288,7 +284,7 @@ describe('Test function: createAccount', function () {
     expect(state.transactions.length).to.be.eq(1);
   });
 
-  it('should skip upsert account and transaction if deployTxn response code has no transaction_hash in SN_GOERLI', async function () {
+  it('should skip upsert account and transaction if deployTxn response code has no transaction_hash in SN_SEPOLIA', async function () {
     sandbox.stub(utils, 'deployAccount').callsFake(async () => {
       return createAccountFailedProxyResp;
     });

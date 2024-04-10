@@ -5,7 +5,7 @@ import { WalletMock } from '../wallet.mock.test';
 import * as utils from '../../src/utils/starknetUtils';
 import { estimateFee } from '../../src/estimateFee';
 import { SnapState } from '../../src/types/snapState';
-import { ACCOUNT_CLASS_HASH, STARKNET_TESTNET_NETWORK } from '../../src/utils/constants';
+import { ACCOUNT_CLASS_HASH, STARKNET_SEPOLIA_TESTNET_NETWORK } from '../../src/utils/constants';
 import { getAddressKeyDeriver } from '../../src/utils/keyPair';
 import {
   account2,
@@ -28,7 +28,7 @@ describe('Test function: estimateFee', function () {
   const state: SnapState = {
     accContracts: [],
     erc20Tokens: [],
-    networks: [STARKNET_TESTNET_NETWORK],
+    networks: [STARKNET_SEPOLIA_TESTNET_NETWORK],
     transactions: [],
   };
   const requestObject: EstimateFeeRequestParams = {
@@ -124,7 +124,7 @@ describe('Test function: estimateFee', function () {
         } catch (err) {
           result = err;
         } finally {
-          expect(isUpgradeRequiredStub).to.have.been.calledOnceWith(STARKNET_TESTNET_NETWORK, account2.address);
+          expect(isUpgradeRequiredStub).to.have.been.calledOnceWith(STARKNET_SEPOLIA_TESTNET_NETWORK, account2.address);
           expect(result).to.be.an('Error');
         }
       });
@@ -172,7 +172,7 @@ describe('Test function: estimateFee', function () {
 
           const { privateKey, publicKey } = await utils.getKeysFromAddress(
             apiParams.keyDeriver,
-            STARKNET_TESTNET_NETWORK,
+            STARKNET_SEPOLIA_TESTNET_NETWORK,
             state,
             Cairo1Account1.address,
           );
@@ -203,7 +203,7 @@ describe('Test function: estimateFee', function () {
           expect(estimateFeeStub).callCount(0);
           expect(estimateFeeBulkStub).callCount(1);
           expect(estimateFeeBulkStub).to.be.calledWith(
-            STARKNET_TESTNET_NETWORK,
+            STARKNET_SEPOLIA_TESTNET_NETWORK,
             Cairo1Account1.address,
             privateKey,
             expectedBulkTransaction,

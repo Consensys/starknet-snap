@@ -46,7 +46,13 @@ import {
   CAIRO_VERSION_LEGACY,
 } from './constants';
 import { getAddressKey } from './keyPair';
-import { getAccount, getAccounts, getTransactionFromVoyagerUrl, getTransactionsFromVoyagerUrl } from './snapUtils';
+import {
+  getAccount,
+  getAccounts,
+  getTransactionFromVoyagerUrl,
+  getTransactionsFromVoyagerUrl,
+  getVoyagerCredentials,
+} from './snapUtils';
 import { logger } from './logger';
 import { RpcV4GetTransactionReceiptResponse } from '../types/snapApi';
 import { hexToString } from './formatterUtils';
@@ -252,12 +258,15 @@ export const getTransactionsFromVoyager = async (
     toQueryStr = `to=${num.toHex(num.toBigInt(toAddress))}&`;
   }
   // "ps" only effective on value: 10, 25, 50 as what's currently available in Voyager page
-  return getData(`${getTransactionsFromVoyagerUrl(network)}?${toQueryStr}ps=${pageSize}&p=${pageNum}`);
+  return getData(
+    `${getTransactionsFromVoyagerUrl(network)}?${toQueryStr}ps=${pageSize}&p=${pageNum}`,
+    getVoyagerCredentials(),
+  );
 };
 
 export const getTransactionFromVoyager = async (transactionHash: num.BigNumberish, network: Network) => {
   const txHashHex = num.toHex(num.toBigInt(transactionHash));
-  return getData(`${getTransactionFromVoyagerUrl(network)}/${txHashHex}`);
+  return getData(`${getTransactionFromVoyagerUrl(network)}/${txHashHex}`, getVoyagerCredentials());
 };
 
 const getTransactionsFromVoyagerHelper = async (
@@ -390,11 +399,12 @@ export const getMassagedTransactions = async (
   return massagedTxns;
 };
 
-export const getData = async (url = '') => {
+export const getData = async (url = '', headers: Record<string, string> = {}) => {
   // Default options are marked with *
   const response = await fetch(url, {
     method: 'GET', // *GET, POST, PUT, DELETE, etc.
     redirect: 'follow', // manual, *follow, error
+    headers: headers,
   });
   return response.json(); // parses JSON response into native JavaScript objects
 };

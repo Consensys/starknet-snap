@@ -5,7 +5,7 @@ import { WalletMock } from '../wallet.mock.test';
 import * as utils from '../../src/utils/starknetUtils';
 import { getErc20TokenBalance } from '../../src/getErc20TokenBalance';
 import { SnapState } from '../../src/types/snapState';
-import { STARKNET_TESTNET_NETWORK } from '../../src/utils/constants';
+import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../../src/utils/constants';
 import { Mutex } from 'async-mutex';
 import { ApiParams, GetErc20TokenBalanceRequestParams } from '../../src/types/snapApi';
 
@@ -17,7 +17,7 @@ describe('Test function: getErc20TokenBalance', function () {
   const state: SnapState = {
     accContracts: [],
     erc20Tokens: [],
-    networks: [STARKNET_TESTNET_NETWORK],
+    networks: [STARKNET_SEPOLIA_TESTNET_NETWORK],
     transactions: [],
   };
   const apiParams: ApiParams = {

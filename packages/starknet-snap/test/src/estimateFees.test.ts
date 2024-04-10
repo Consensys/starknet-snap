@@ -4,7 +4,7 @@ import sinonChai from 'sinon-chai';
 import { WalletMock } from '../wallet.mock.test';
 import { SnapState } from '../../src/types/snapState';
 import { estimateFees } from '../../src/estimateFees';
-import { STARKNET_TESTNET_NETWORK } from '../../src/utils/constants';
+import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../../src/utils/constants';
 import { account2, estimateDeployFeeResp2, estimateDeployFeeResp3, getBip44EntropyStub } from '../constants.test';
 import { getAddressKeyDeriver } from '../../src/utils/keyPair';
 import * as utils from '../../src/utils/starknetUtils';
@@ -20,7 +20,7 @@ describe('Test function: estimateFees', function () {
   const state: SnapState = {
     accContracts: [account2],
     erc20Tokens: [],
-    networks: [STARKNET_TESTNET_NETWORK],
+    networks: [STARKNET_SEPOLIA_TESTNET_NETWORK],
     transactions: [],
   };
   const apiParams: ApiParams = {
@@ -45,7 +45,7 @@ describe('Test function: estimateFees', function () {
     sandbox.stub(utils, 'estimateFeeBulk').resolves(feeResult);
     apiParams.requestParams = {
       senderAddress: account2.address,
-      chainId: STARKNET_TESTNET_NETWORK.chainId,
+      chainId: STARKNET_SEPOLIA_TESTNET_NETWORK.chainId,
       invocations: [
         {
           type: TransactionType.INVOKE,
@@ -76,7 +76,7 @@ describe('Test function: estimateFees', function () {
     sandbox.stub(utils, 'estimateFeeBulk').throws(new Error());
     apiParams.requestParams = {
       senderAddress: account2.address,
-      chainId: STARKNET_TESTNET_NETWORK.chainId,
+      chainId: STARKNET_SEPOLIA_TESTNET_NETWORK.chainId,
       invocations: [
         {
           type: TransactionType.INVOKE,
