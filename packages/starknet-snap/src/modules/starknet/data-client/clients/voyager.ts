@@ -104,7 +104,7 @@ export class VoyagerClient extends BaseRestfulDataClient implements IReadDataCli
       }
 
       this.lastScan = {
-        lastPage: i >= maxPage ? null : maxPage,
+        lastPage: i > maxPage ? null : maxPage,
         data: lastScanTxns,
       };
 
