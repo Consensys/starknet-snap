@@ -1,5 +1,5 @@
 import { JsonBIP44CoinTypeNode } from '@metamask/key-tree';
-import { num } from 'starknet';
+import { num, constants } from 'starknet';
 import {
   AccContract,
   Erc20Token,

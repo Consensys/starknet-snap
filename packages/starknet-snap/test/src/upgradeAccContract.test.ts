@@ -7,7 +7,7 @@ import * as utils from '../../src/utils/starknetUtils';
 import * as snapUtils from '../../src/utils/snapUtils';
 import { SnapState, VoyagerTransactionType, TransactionStatus } from '../../src/types/snapState';
 import { upgradeAccContract } from '../../src/upgradeAccContract';
-import { STARKNET_TESTNET_NETWORK } from '../../src/utils/constants';
+import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../../src/utils/constants';
 import { account1, estimateFeeResp, getBip44EntropyStub, sendTransactionResp } from '../constants.test';
 import { getAddressKeyDeriver } from '../../src/utils/keyPair';
 import { Mutex } from 'async-mutex';
@@ -28,7 +28,7 @@ describe('Test function: upgradeAccContract', function () {
   beforeEach(async function () {
     const requestObject = {
       contractAddress: account1.address,
-      chainId: STARKNET_TESTNET_NETWORK.chainId,
+      chainId: STARKNET_SEPOLIA_TESTNET_NETWORK.chainId,
     };
 
     walletStub = new WalletMock();
@@ -37,7 +37,7 @@ describe('Test function: upgradeAccContract', function () {
     state = {
       accContracts: [account1],
       erc20Tokens: [],
-      networks: [STARKNET_TESTNET_NETWORK],
+      networks: [STARKNET_SEPOLIA_TESTNET_NETWORK],
       transactions: [],
     };
 
@@ -154,7 +154,7 @@ describe('Test function: upgradeAccContract', function () {
 
       expect(executeTxnStub).to.calledOnce;
       expect(executeTxnStub).to.calledWith(
-        STARKNET_TESTNET_NETWORK,
+        STARKNET_SEPOLIA_TESTNET_NETWORK,
         address,
         'pk',
         txnInvocation,
@@ -188,7 +188,7 @@ describe('Test function: upgradeAccContract', function () {
 
       expect(executeTxnStub).to.calledOnce;
       expect(executeTxnStub).to.calledWith(
-        STARKNET_TESTNET_NETWORK,
+        STARKNET_SEPOLIA_TESTNET_NETWORK,
         address,
         'pk',
         txnInvocation,
@@ -265,7 +265,7 @@ describe('Test function: upgradeAccContract', function () {
       const txn = {
         txnHash: sendTransactionResp.transaction_hash,
         txnType: VoyagerTransactionType.INVOKE,
-        chainId: STARKNET_TESTNET_NETWORK.chainId,
+        chainId: STARKNET_SEPOLIA_TESTNET_NETWORK.chainId,
         senderAddress: address,
         contractAddress: address,
         contractFuncName: 'upgrade',

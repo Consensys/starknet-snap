@@ -32,7 +32,7 @@ describe('Test function: signDeclareTransaction', function () {
   };
 
   const requestObject: SignDeclareTransactionRequestParams = {
-    chainId: STARKNET_TESTNET_NETWORK.chainId,
+    chainId: STARKNET_SEPOLIA_TESTNET_NETWORK.chainId,
     signerAddress: account1.address,
     transaction: {
       classHash: '0x025ec026985a3bf9d0cc1fe17326b245dfdc3ff89b8fde106542a3ea56c5a918',

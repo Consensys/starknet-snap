@@ -95,7 +95,7 @@ describe('Test function: extractPublicKey', function () {
         } catch (err) {
           result = err;
         } finally {
-          expect(isUpgradeRequiredStub).to.have.been.calledOnceWith(STARKNET_TESTNET_NETWORK, account1.address);
+          expect(isUpgradeRequiredStub).to.have.been.calledOnceWith(STARKNET_SEPOLIA_TESTNET_NETWORK, account1.address);
           expect(result).to.be.an('Error');
         }
       });
@@ -114,7 +114,7 @@ describe('Test function: extractPublicKey', function () {
         } catch (err) {
           result = err;
         } finally {
-          expect(isUpgradeRequiredStub).to.have.been.calledOnceWith(STARKNET_TESTNET_NETWORK, account1.address);
+          expect(isUpgradeRequiredStub).to.have.been.calledOnceWith(STARKNET_SEPOLIA_TESTNET_NETWORK, account1.address);
           expect(result).to.be.an('Error');
         }
       });
