@@ -1,12 +1,12 @@
 import { CustomError } from '../../exception';
 
-export class TransactionMgrException extends CustomError {
+export class TransactionMgrError extends CustomError {
   constructor(msg: string) {
     super(msg);
   }
 }
 
-export class TransactionStateException extends CustomError {
+export class TransactionStateError extends CustomError {
   constructor(msg: string) {
     super(msg);
   }
