@@ -9,7 +9,7 @@ import { IReadDataClient } from '../data-client';
 import { TransactionHelper } from './helpers';
 import { ITransactionStateMgr } from './types';
 import { StarknetTransactionStateManager } from './state';
-import { TransactionMgrException } from './exceptions';
+import { TransactionMgrError } from './exceptions';
 
 export class StarknetTransactionManager implements ITransactionMgr {
   private readonly txnStateMgr: ITransactionStateMgr;
@@ -20,9 +20,10 @@ export class StarknetTransactionManager implements ITransactionMgr {
 
   async getTxn(hash: string): Promise<Transaction> {
     try {
-      return this.rpcDataClient.getTxn(hash);
+      const result = await this.rpcDataClient.getTxn(hash);
+      return result;
     } catch (e) {
-      throw new TransactionMgrException(e);
+      throw new TransactionMgrError(e);
     }
   }
 
@@ -55,7 +56,7 @@ export class StarknetTransactionManager implements ITransactionMgr {
 
       return txns.sort((a, b) => b.timestamp - a.timestamp);
     } catch (e) {
-      throw new TransactionMgrException(e);
+      throw new TransactionMgrError(e);
     }
   }
 

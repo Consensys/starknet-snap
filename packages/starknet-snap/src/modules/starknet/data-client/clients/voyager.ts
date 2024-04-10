@@ -56,7 +56,7 @@ export class VoyagerClient extends BaseRestfulDataClient implements IReadDataCli
     return Date.now() - this.options.timeLimit;
   }
 
-  protected async getRawTxns(address: string, pageSize: number, pageNum: number): Promise<GetVoyagerTxnsResponse> {
+  async getRawTxns(address: string, pageSize: number, pageNum: number): Promise<GetVoyagerTxnsResponse> {
     try {
       // "ps" only effective on value: 10, 25, 50 as what's currently available in Voyager page
       const response = await fetch(`${this.baseUrl}/txns?to=${address}&ps=${pageSize}&p=${pageNum}`, {
@@ -81,27 +81,31 @@ export class VoyagerClient extends BaseRestfulDataClient implements IReadDataCli
   async getTxns(address: string): Promise<Transaction[]> {
     try {
       const txns: Transaction[] = [];
-      const remainTxns: Transaction[] = [];
-
+      let lastScanTxns: Transaction[] = [];
       let i = 1;
       let maxPage = i;
       let process = true;
+
       while (i <= maxPage && process) {
+        const _lastScanTxns: Transaction[] = [];
         const { items, lastPage } = await this.getRawTxns(address, this.options.pageSize, i);
         for (const item of items) {
+          const formattedTxn = this.format(item);
           if (item.timestamp * 1000 >= this.timeLimit) {
-            txns.push(this.format(item));
+            txns.push(formattedTxn);
           } else {
-            remainTxns.push(this.format(item));
             process = false;
           }
+          _lastScanTxns.push(formattedTxn);
         }
+        lastScanTxns = _lastScanTxns;
         maxPage = lastPage;
         i += 1;
       }
+
       this.lastScan = {
-        lastPage: i === maxPage ? null : maxPage,
-        data: txns.concat(remainTxns),
+        lastPage: i >= maxPage ? null : maxPage,
+        data: lastScanTxns,
       };
 
       return txns;
@@ -120,7 +124,7 @@ export class VoyagerClient extends BaseRestfulDataClient implements IReadDataCli
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async getTxn(hash: string): Promise<Transaction> {
-    return null;
+    throw new DataClientError('Method not implemented.');
   }
 
   protected format<T>(txn: T & VoyagerTxn): Transaction {

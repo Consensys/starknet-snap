@@ -126,27 +126,31 @@ export class StarkScanClient extends BaseRestfulDataClient implements IReadDataC
   async getTxns(address: string): Promise<Transaction[]> {
     try {
       const txns: Transaction[] = [];
-      const remainTxns: Transaction[] = [];
+      let lastScanTxns: Transaction[] = [];
       let nextUrl = null;
       let process = true;
       while (process) {
         const { data, next_url } = await this.getRawTxns(address, this.options.pageSize, EnumOrderBy.Desc, nextUrl);
+
         nextUrl = next_url;
         process = nextUrl !== null;
+        const _lastScanTxns: Transaction[] = [];
 
         for (const item of data) {
-          if (!this.timeLimit || item.timestamp * 1000 >= this.timeLimit) {
-            txns.push(this.format(item));
+          const formattedTxn = this.format(item);
+          if (item.timestamp * 1000 >= this.timeLimit) {
+            txns.push(formattedTxn);
           } else {
-            remainTxns.push(this.format(item));
             process = false;
           }
+          _lastScanTxns.push(formattedTxn);
         }
+        lastScanTxns = _lastScanTxns;
       }
 
       this.lastScan = {
         lastPage: nextUrl,
-        data: txns.concat(remainTxns),
+        data: lastScanTxns,
       };
 
       return txns;
@@ -165,7 +169,7 @@ export class StarkScanClient extends BaseRestfulDataClient implements IReadDataC
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async getTxn(hash: string): Promise<Transaction> {
-    return null;
+    throw new DataClientError('Method not implemented.');
   }
 
   protected format<T>(txn: T & StarkScanTxn): Transaction {
@@ -186,16 +190,13 @@ export class StarkScanClient extends BaseRestfulDataClient implements IReadDataC
   }
 
   protected extractContractAddress(txn: StarkScanTxn): string {
-    if (txn) {
-      if (txn.account_calls && txn.account_calls.length > 0) {
-        return txn.account_calls[0].contract_address;
-      }
-
-      if (txn.contract_address) {
-        return txn.contract_address;
-      }
+    if (txn.account_calls && txn.account_calls.length > 0) {
+      return txn.account_calls[0].contract_address;
     }
 
+    if (txn.contract_address) {
+      return txn.contract_address;
+    }
     return '';
   }
 

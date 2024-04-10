@@ -5,6 +5,8 @@ export interface SnapState {
   erc20Tokens: Erc20Token[];
   networks: Network[];
   transactions: Transaction[];
+  transactionIndex?: string[];
+  transactionDetails?: Record<string, Transaction>;
   currentNetwork?: Network;
 }
 

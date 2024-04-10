@@ -3,15 +3,19 @@ import { TransactionType } from 'starknet';
 import { Transaction } from '../../../../types/snapState';
 import { DataClientError } from '../exceptions';
 
+export enum LastPageType {
+  Empty = 'Empty',
+}
+
 export abstract class BaseRestfulDataClient {
   lastScan: {
-    lastPage: string | number | null;
+    lastPage: string | LastPageType | number | null;
     data: Transaction[];
   };
 
   constructor() {
     this.lastScan = {
-      lastPage: null,
+      lastPage: LastPageType.Empty,
       data: [],
     };
   }
@@ -22,7 +26,7 @@ export abstract class BaseRestfulDataClient {
     try {
       const filter = new Set([TransactionType.DEPLOY_ACCOUNT.toLowerCase()]);
       let txns = this.lastScan.data;
-      if (this.lastScan.lastPage) {
+      if (this.lastScan.lastPage || this.lastScan.lastPage === LastPageType.Empty) {
         txns = await this._getLastPageTxns(address);
       }
 

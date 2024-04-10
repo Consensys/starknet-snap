@@ -4,7 +4,7 @@ import { DialogResult, Json, heading, panel, text, divider, type SnapsProvider }
 declare const snap: SnapsProvider;
 
 export class SnapHelper {
-  static wallet:SnapsProvider = snap;
+  static wallet: SnapsProvider = snap;
 
   static async getBip44Deriver(coinType: number): Promise<BIP44AddressKeyDeriver> {
     const bip44Node = await SnapHelper.wallet.request({

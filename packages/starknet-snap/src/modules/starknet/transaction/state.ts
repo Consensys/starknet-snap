@@ -12,7 +12,7 @@ import {
 import { SnapStateManager } from '../../snap';
 import { TransactionHelper } from './helpers';
 import { ITransactionStateMgr } from './types';
-import { TransactionStateException } from './exceptions';
+import { TransactionStateError } from './exceptions';
 
 export class StarknetTransactionStateManager extends SnapStateManager<SnapState> implements ITransactionStateMgr {
   protected migrateTxnsToTxnDetails(state: SnapState) {
@@ -60,7 +60,7 @@ export class StarknetTransactionStateManager extends SnapStateManager<SnapState>
 
       return result.length > 0 ? result[0] : null;
     } catch (e) {
-      throw new TransactionStateException(e);
+      throw new TransactionStateError(e);
     }
   }
 
@@ -86,13 +86,13 @@ export class StarknetTransactionStateManager extends SnapStateManager<SnapState>
         filters,
       );
     } catch (e) {
-      throw new TransactionStateException(e);
+      throw new TransactionStateError(e);
     }
   }
 
   async remove(txns: Transaction[]): Promise<void> {
     try {
-      return this.update(async (state: SnapState) => {
+      await this.update(async (state: SnapState) => {
         const removeIds = new Set<string>();
 
         for (let i = 0; i < txns.length; i++) {
@@ -104,13 +104,13 @@ export class StarknetTransactionStateManager extends SnapStateManager<SnapState>
         state.transactionIndex = state.transactionIndex.filter((id) => !removeIds.has(id));
       });
     } catch (e) {
-      throw new TransactionStateException(e);
+      throw new TransactionStateError(e);
     }
   }
 
   async save(txn: Transaction): Promise<void> {
     try {
-      return this.update(async (state: SnapState) => {
+      await this.update(async (state: SnapState) => {
         const key = this.getTransactionKey(txn);
 
         if (!state.transactionDetails.hasOwnProperty(key)) {
@@ -120,13 +120,13 @@ export class StarknetTransactionStateManager extends SnapStateManager<SnapState>
         state.transactionDetails[key] = txn;
       });
     } catch (e) {
-      throw new TransactionStateException(e);
+      throw new TransactionStateError(e);
     }
   }
 
   async saveMany(txns: Transaction[]): Promise<void> {
     try {
-      return this.update(async (state: SnapState) => {
+      await this.update(async (state: SnapState) => {
         for (let i = 0; i < txns.length; i++) {
           const txn = txns[i];
           const key = this.getTransactionKey(txn);
@@ -139,7 +139,7 @@ export class StarknetTransactionStateManager extends SnapStateManager<SnapState>
         }
       });
     } catch (e) {
-      throw new TransactionStateException(e);
+      throw new TransactionStateError(e);
     }
   }
 }
