@@ -5,7 +5,7 @@ import { WalletMock } from '../wallet.mock.test';
 import { SnapState } from '../../src/types/snapState';
 import { verifySignedMessage } from '../../src/verifySignedMessage';
 import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../../src/utils/constants';
-import { account1, getBip44EntropyStub, signature1, signature2, unfoundUserAddress } from '../constants.test';
+import { account1, getBip44EntropyStub, signature1 } from '../constants.test';
 import { getAddressKeyDeriver } from '../../src/utils/keyPair';
 import * as utils from '../../src/utils/starknetUtils';
 import { Mutex } from 'async-mutex';

@@ -32,7 +32,11 @@ describe('Test function: getAccountInstance', function () {
   });
 
   it('should return account instance with default cairo version', async function () {
-    const result = await utils.getAccountInstance(STARKNET_SEPOLIA_TESTNET_NETWORK, account1.address, account1.publicKey);
+    const result = await utils.getAccountInstance(
+      STARKNET_SEPOLIA_TESTNET_NETWORK,
+      account1.address,
+      account1.publicKey,
+    );
     expect(result).to.be.instanceOf(Account);
     expect(result.cairoVersion).to.equal(CAIRO_VERSION);
   });
@@ -75,7 +79,13 @@ describe('Test function: findAddressIndex', function () {
   });
 
   it('should find address index', async function () {
-    const result = await utils.findAddressIndex(STARKNET_SEPOLIA_TESTNET_NETWORK.chainId, account1.address, 'div', state, 1);
+    const result = await utils.findAddressIndex(
+      STARKNET_SEPOLIA_TESTNET_NETWORK.chainId,
+      account1.address,
+      'div',
+      state,
+      1,
+    );
     expect(result).to.be.contains({
       index: 0,
       cairoVersion: 1,
@@ -83,7 +93,13 @@ describe('Test function: findAddressIndex', function () {
   });
 
   it('should find address index address match account legacy', async function () {
-    const result = await utils.findAddressIndex(STARKNET_SEPOLIA_TESTNET_NETWORK.chainId, account2.address, 'div', state, 1);
+    const result = await utils.findAddressIndex(
+      STARKNET_SEPOLIA_TESTNET_NETWORK.chainId,
+      account2.address,
+      'div',
+      state,
+      1,
+    );
     expect(result).to.be.contains({
       index: 0,
       cairoVersion: 0,
@@ -93,7 +109,13 @@ describe('Test function: findAddressIndex', function () {
   it('should throw error if address not found', async function () {
     let result = null;
     try {
-      result = await utils.findAddressIndex(STARKNET_SEPOLIA_TESTNET_NETWORK.chainId, account3.address, 'div', state, 1);
+      result = await utils.findAddressIndex(
+        STARKNET_SEPOLIA_TESTNET_NETWORK.chainId,
+        account3.address,
+        'div',
+        state,
+        1,
+      );
     } catch (err) {
       result = err;
     } finally {
@@ -259,7 +281,11 @@ describe('Test function: getVersion', function () {
   it('should trigger callContract correct', async function () {
     const result = await utils.getVersion(account1.address, STARKNET_SEPOLIA_TESTNET_NETWORK);
     expect(result).to.be.eq(expected);
-    expect(callContractStub).to.have.been.calledOnceWith(STARKNET_SEPOLIA_TESTNET_NETWORK, account1.address, 'getVersion');
+    expect(callContractStub).to.have.been.calledOnceWith(
+      STARKNET_SEPOLIA_TESTNET_NETWORK,
+      account1.address,
+      'getVersion',
+    );
   });
 });
 
@@ -278,7 +304,11 @@ describe('Test function: getOwner', function () {
   it('should trigger callContract correct', async function () {
     const result = await utils.getOwner(account1.address, STARKNET_SEPOLIA_TESTNET_NETWORK);
     expect(result).to.be.eq(expected);
-    expect(callContractStub).to.have.been.calledOnceWith(STARKNET_SEPOLIA_TESTNET_NETWORK, account1.address, 'get_owner');
+    expect(callContractStub).to.have.been.calledOnceWith(
+      STARKNET_SEPOLIA_TESTNET_NETWORK,
+      account1.address,
+      'get_owner',
+    );
   });
 });
 
@@ -297,9 +327,12 @@ describe('Test function: getBalance', function () {
   it('should trigger callContract correct', async function () {
     const result = await utils.getBalance(account1.address, account1.address, STARKNET_SEPOLIA_TESTNET_NETWORK);
     expect(result).to.be.eq(expected);
-    expect(callContractStub).to.have.been.calledOnceWith(STARKNET_SEPOLIA_TESTNET_NETWORK, account1.address, 'balanceOf', [
-      num.toBigInt(account1.address).toString(10),
-    ]);
+    expect(callContractStub).to.have.been.calledOnceWith(
+      STARKNET_SEPOLIA_TESTNET_NETWORK,
+      account1.address,
+      'balanceOf',
+      [num.toBigInt(account1.address).toString(10)],
+    );
   });
 });
 
