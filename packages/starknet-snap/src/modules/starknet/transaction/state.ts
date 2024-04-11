@@ -37,6 +37,7 @@ export class StarknetTransactionStateManager extends SnapStateManager<SnapState>
       if (state.transactions && state.transactions.length > 0 && state.transactionIndex.length === 0) {
         this.migrateTxnsToTxnDetails(state);
       }
+
       return state;
     });
   }
@@ -64,16 +65,11 @@ export class StarknetTransactionStateManager extends SnapStateManager<SnapState>
     }
   }
 
-  async list(address?: string, chainId?: string, tokenAddress?: string, minTimestamp?: number): Promise<Transaction[]> {
+  async list(address: string, chainId: string, tokenAddress?: string, minTimestamp?: number): Promise<Transaction[]> {
     try {
       const state = await this.get();
-      const filters: ITransactionFilter[] = [];
-      if (address) {
-        filters.push(new SenderAddressFilter(address));
-      }
-      if (chainId) {
-        filters.push(new ChainIdFilter(chainId));
-      }
+      const filters: ITransactionFilter[] = [new SenderAddressFilter(address), new ChainIdFilter(chainId)];
+
       if (tokenAddress) {
         filters.push(new ContractAddressFilter(tokenAddress));
       }
