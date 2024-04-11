@@ -1,6 +1,27 @@
 # Changelog
 
 
+## [2.6.1](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v2.6.0...starknet-snap-v2.6.1) (2024-04-05)
+
+
+### Bug Fixes
+
+* snap homepage ui error due to goerli network deprecated ([#230](https://github.com/Consensys/starknet-snap/issues/230)) ([16ba5e9](https://github.com/Consensys/starknet-snap/commit/16ba5e9a94e7639670a138279db1ee8c22bc70a6))
+
+## [2.6.0](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v2.5.2...starknet-snap-v2.6.0) (2024-04-05)
+
+
+### Features
+
+* deprecate goerli network ([#217](https://github.com/Consensys/starknet-snap/issues/217)) ([168484d](https://github.com/Consensys/starknet-snap/commit/168484d5c1f1303f03a0db7f286a8e98ed50eb6a))
+
+
+### Bug Fixes
+
+* sf 606 fix voyager cors with official provider ([#229](https://github.com/Consensys/starknet-snap/issues/229)) ([44ff4f1](https://github.com/Consensys/starknet-snap/commit/44ff4f131163c59972bf06a6f49d3bf3621da301))
+* snap homepage error when state omit ([#218](https://github.com/Consensys/starknet-snap/issues/218)) ([41de2ea](https://github.com/Consensys/starknet-snap/commit/41de2ea8e2c5d703f1e2780b888b865290630591))
+* typo of Autherize ([#224](https://github.com/Consensys/starknet-snap/issues/224)) ([cc635ea](https://github.com/Consensys/starknet-snap/commit/cc635ea05347f044311ee2ab14332bf3300c8924))
+
 ## [2.5.2](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v2.5.1...starknet-snap-v2.5.2) (2024-03-07)
 
 

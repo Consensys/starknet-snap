@@ -7,7 +7,7 @@ import { SnapState } from '../../src/types/snapState';
 import { signMessage } from '../../src/signMessage';
 import typedDataExample from '../../src/typedData/typedDataExample.json';
 import { ArraySignatureType } from 'starknet';
-import { STARKNET_TESTNET_NETWORK } from '../../src/utils/constants';
+import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../../src/utils/constants';
 import {
   account1,
   getBip44EntropyStub,
@@ -29,7 +29,7 @@ describe('Test function: signMessage', function () {
   const state: SnapState = {
     accContracts: [account1],
     erc20Tokens: [],
-    networks: [STARKNET_TESTNET_NETWORK],
+    networks: [STARKNET_SEPOLIA_TESTNET_NETWORK],
     transactions: [],
   };
   const apiParams: ApiParams = {
@@ -40,10 +40,10 @@ describe('Test function: signMessage', function () {
   };
 
   const requestObject: SignMessageRequestParams = {
-    chainId: STARKNET_TESTNET_NETWORK.chainId,
+    chainId: STARKNET_SEPOLIA_TESTNET_NETWORK.chainId,
     signerAddress: account1.address,
     typedDataMessage: typedDataExample,
-    enableAutherize: true,
+    enableAuthorize: true,
   };
 
   beforeEach(async function () {
@@ -157,21 +157,21 @@ describe('Test function: signMessage', function () {
     }
   });
 
-  it('should skip dialog if enableAutherize is false', async function () {
+  it('should skip dialog if enableAuthorize is false', async function () {
     const paramsObject = apiParams.requestParams as SignMessageRequestParams;
-    paramsObject.enableAutherize = false;
+    paramsObject.enableAuthorize = false;
     const result = await signMessage(apiParams);
     expect(walletStub.rpcStubs.snap_dialog).to.have.been.callCount(0);
     expect(result).to.be.eql(signature4SignMessage);
-    paramsObject.enableAutherize = true;
+    paramsObject.enableAuthorize = true;
   });
 
-  it('should skip dialog if enableAutherize is omit', async function () {
+  it('should skip dialog if enableAuthorize is omit', async function () {
     const paramsObject = apiParams.requestParams as SignMessageRequestParams;
-    paramsObject.enableAutherize = undefined;
+    paramsObject.enableAuthorize = undefined;
     const result = await signMessage(apiParams);
     expect(walletStub.rpcStubs.snap_dialog).to.have.been.callCount(0);
     expect(result).to.be.eql(signature4SignMessage);
-    paramsObject.enableAutherize = true;
+    paramsObject.enableAuthorize = true;
   });
 });

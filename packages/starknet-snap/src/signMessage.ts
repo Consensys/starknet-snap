@@ -34,7 +34,7 @@ export async function signMessage(params: ApiParams) {
     addDialogTxt(components, 'Message', toJson(typedDataMessage));
     addDialogTxt(components, 'Signer Address', signerAddress);
 
-    if (requestParamsObj.enableAutherize === true) {
+    if (requestParamsObj.enableAuthorize === true) {
       const response = await wallet.request({
         method: 'snap_dialog',
         params: {

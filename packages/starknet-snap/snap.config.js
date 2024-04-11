@@ -5,6 +5,7 @@ module.exports = {
     bundler: "webpack",
     environment: {
         SNAP_ENV: process.env.SNAP_ENV ?? "prod",
+        VOYAGER_API_KEY: process.env.VOYAGER_API_KEY,
     },
     input: "./src/index.ts",
     server: {
