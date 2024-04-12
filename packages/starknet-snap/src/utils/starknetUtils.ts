@@ -317,7 +317,7 @@ export const getMassagedTransactions = async (
       } catch (err) {
         logger.error(`getMassagedTransactions: error received from getTransaction: ${err}`);
       }
-      
+
       const massagedTxn: Transaction = {
         txnHash: txnResp.transaction_hash || txn.hash,
         txnType: txn.type?.toLowerCase(),
@@ -536,7 +536,7 @@ export const validateAndParseAddress = (address: num.BigNumberish, length = 63) 
 export const signTransactions = async (
   privateKey: string,
   transactions: Call[],
-  transactionsDetail: InvocationsSignerDetails
+  transactionsDetail: InvocationsSignerDetails,
 ): Promise<Signature> => {
   const signer = new Signer(privateKey);
   const signatures = await signer.signTransaction(transactions, transactionsDetail);
@@ -569,7 +569,5 @@ export const signMessage = async (privateKey: string, typedDataMessage: TypedDat
 
 export const getStarkNameUtil = async (network: Network, userAddress: string) => {
   const provider = getProvider(network);
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  return provider.getStarkName(userAddress);
+  return Account.getStarkName(provider, userAddress);
 };
