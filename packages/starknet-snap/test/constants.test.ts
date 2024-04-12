@@ -1,5 +1,5 @@
 import { JsonBIP44CoinTypeNode } from '@metamask/key-tree';
-import { EstimateFee, GetTransactionResponse,  num } from 'starknet';
+import { EstimateFee, GetTransactionResponse, num } from 'starknet';
 import {
   AccContract,
   Erc20Token,

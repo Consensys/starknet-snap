@@ -34,8 +34,7 @@ export async function signTransaction(params: ApiParams): Promise<Signature | bo
     const signatures = await signTransactions(
       privateKey,
       requestParamsObj.transactions,
-      requestParamsObj.transactionsDetail,
-      requestParamsObj.abis,
+      requestParamsObj.transactionsDetail
     );
 
     return signatures;

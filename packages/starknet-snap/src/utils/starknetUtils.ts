@@ -5,6 +5,7 @@ import {
   json,
   hash,
   num,
+  TypedData,
   typedData,
   constants,
   encode,
@@ -58,9 +59,7 @@ export const getProvider = (network: Network): ProviderInterface => {
   providerParam = {
     nodeUrl: network.nodeUrl,
   };
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  return new Provider(providerParam) as unknown as ProviderInterface;
+  return new Provider(providerParam);
 };
 
 export const callContract = async (
@@ -318,7 +317,7 @@ export const getMassagedTransactions = async (
       } catch (err) {
         logger.error(`getMassagedTransactions: error received from getTransaction: ${err}`);
       }
-
+      
       const massagedTxn: Transaction = {
         txnHash: txnResp.transaction_hash || txn.hash,
         txnType: txn.type?.toLowerCase(),
@@ -395,7 +394,7 @@ export function getFullPublicKeyPairFromPrivateKey(privateKey: string) {
 
 export const getTypedDataMessageSignature = (
   privateKey: string,
-  typedDataMessage: typedData.TypedData,
+  typedDataMessage: TypedData,
   signerUserAddress: string,
 ) => {
   const msgHash = typedData.getMessageHash(typedDataMessage, signerUserAddress);
@@ -408,7 +407,7 @@ export const getSignatureBySignatureString = (signatureStr: string) => {
 
 export const verifyTypedDataMessageSignature = (
   fullPublicKey: string,
-  typedDataMessage: typedData.TypedData,
+  typedDataMessage: TypedData,
   signerUserAddress: num.BigNumberish,
   signatureStr: string,
 ) => {
@@ -537,13 +536,10 @@ export const validateAndParseAddress = (address: num.BigNumberish, length = 63) 
 export const signTransactions = async (
   privateKey: string,
   transactions: Call[],
-  transactionsDetail: InvocationsSignerDetails,
-  abis: Abi[],
+  transactionsDetail: InvocationsSignerDetails
 ): Promise<Signature> => {
   const signer = new Signer(privateKey);
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  const signatures = await signer.signTransaction(transactions, transactionsDetail, abis);
+  const signatures = await signer.signTransaction(transactions, transactionsDetail);
   return stark.signatureToDecimalArray(signatures);
 };
 
@@ -565,11 +561,7 @@ export const signDeclareTransaction = async (
   return stark.signatureToDecimalArray(signatures);
 };
 
-export const signMessage = async (
-  privateKey: string,
-  typedDataMessage: typedData.TypedData,
-  signerUserAddress: string,
-) => {
+export const signMessage = async (privateKey: string, typedDataMessage: TypedData, signerUserAddress: string) => {
   const signer = new Signer(privateKey);
   const signatures = await signer.signMessage(typedDataMessage, signerUserAddress);
   return stark.signatureToDecimalArray(signatures);

@@ -3154,17 +3154,17 @@ __metadata:
   linkType: hard
 
 "@consensys/starknet-snap@file:../starknet-snap::locator=wallet-ui%40workspace%3Apackages%2Fwallet-ui":
-  version: 2.5.2
-  resolution: "@consensys/starknet-snap@file:../starknet-snap#../starknet-snap::hash=8a6ae2&locator=wallet-ui%40workspace%3Apackages%2Fwallet-ui"
+  version: 2.6.1
+  resolution: "@consensys/starknet-snap@file:../starknet-snap#../starknet-snap::hash=33b3e4&locator=wallet-ui%40workspace%3Apackages%2Fwallet-ui"
   dependencies:
     "@metamask/snaps-sdk": 3.0.1
     async-mutex: ^0.3.2
     dotenv: ^16.4.5
     ethereum-unit-converter: ^0.0.17
     ethers: ^5.5.1
-    starknet: 6.6.6
+    starknet: 6.7.0
     starknet_v4.22.0: "npm:starknet@4.22.0"
-  checksum: fa3dc727767684fad1788e3fec62d5b3b4e7ba2ac333360303cfceac46186f71cfb6b87d2fce866cda27f9b36e3977ff0405e73fa389d567d5ee38671a99377c
+  checksum: c19932a7c1a7887e2183ed8702394a595f24c1b193bbc109bd06b75b14479ad34655a060ebd5bb84dd8392b6fcbeff8cb39e1e1e70f37a4f059a3f8437a68b70
   languageName: node
   linkType: hard
 
@@ -3199,7 +3199,7 @@ __metadata:
     sinon: ^13.0.2
     sinon-chai: ^3.7.0
     standard-version: ^9.5.0
-    starknet: 6.6.6
+    starknet: 6.7.0
     starknet_v4.22.0: "npm:starknet@4.22.0"
     ts-node: ^10.8.1
     typescript: ^4.6.3
@@ -5482,6 +5482,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@noble/curves@npm:~1.4.0":
+  version: 1.4.0
+  resolution: "@noble/curves@npm:1.4.0"
+  dependencies:
+    "@noble/hashes": 1.4.0
+  checksum: 0014ff561d16e98da4a57e2310a4015e4bdab3b1e1eafcd18d3f9b955c29c3501452ca5d702fddf8ca92d570bbeadfbe53fe16ebbd81a319c414f739154bb26b
+  languageName: node
+  linkType: hard
+
 "@noble/ed25519@npm:^1.6.0":
   version: 1.7.3
   resolution: "@noble/ed25519@npm:1.7.3"
@@ -5500,6 +5509,13 @@ __metadata:
   version: 1.3.3
   resolution: "@noble/hashes@npm:1.3.3"
   checksum: 8a6496d1c0c64797339bc694ad06cdfaa0f9e56cd0c3f68ae3666cfb153a791a55deb0af9c653c7ed2db64d537aa3e3054629740d2f2338bb1dcb7ab60cd205b
+  languageName: node
+  linkType: hard
+
+"@noble/hashes@npm:1.4.0":
+  version: 1.4.0
+  resolution: "@noble/hashes@npm:1.4.0"
+  checksum: 8ba816ae26c90764b8c42493eea383716396096c5f7ba6bea559993194f49d80a73c081f315f4c367e51bd2d5891700bcdfa816b421d24ab45b41cb03e4f3342
   languageName: node
   linkType: hard
 
@@ -9024,9 +9040,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"abi-wan-kanabi@npm:^2.2.1":
-  version: 2.2.1
-  resolution: "abi-wan-kanabi@npm:2.2.1"
+"abi-wan-kanabi@npm:^2.2.2":
+  version: 2.2.2
+  resolution: "abi-wan-kanabi@npm:2.2.2"
   dependencies:
     ansicolors: ^0.3.2
     cardinal: ^2.1.1
@@ -9034,7 +9050,7 @@ __metadata:
     yargs: ^17.7.2
   bin:
     generate: dist/generate.js
-  checksum: 1567dd8c962a735d79f546b463bbce063fe202f823112bc8713ac14213e814417cbdc25cdd95299889aae5664ed44febf843833924e754a992e705053084fda0
+  checksum: 4cf69171887c243a4b5857653f791f3b2042eba93a7326fe03120355cb9f0e29944b91650f96ad739bffad7d8ec9d88c71eeb0debe57df3cd905a1b7c9c2c4a8
   languageName: node
   linkType: hard
 
@@ -24691,21 +24707,29 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"starknet@npm:6.6.6":
-  version: 6.6.6
-  resolution: "starknet@npm:6.6.6"
+"starknet-types@npm:^0.0.4":
+  version: 0.0.4
+  resolution: "starknet-types@npm:0.0.4"
+  checksum: a83d306830696ea875b8b07541db47e515a4ddb7bfce0cf5555cce12c8ce0e697b984762720c7f27761dc4114b4e5d3f81006e82fc45e52b052afe8fc86240fa
+  languageName: node
+  linkType: hard
+
+"starknet@npm:6.7.0":
+  version: 6.7.0
+  resolution: "starknet@npm:6.7.0"
   dependencies:
-    "@noble/curves": ~1.3.0
+    "@noble/curves": ~1.4.0
     "@scure/base": ~1.1.3
     "@scure/starknet": ~1.0.0
-    abi-wan-kanabi: ^2.2.1
+    abi-wan-kanabi: ^2.2.2
     fetch-cookie: ^3.0.0
     isomorphic-fetch: ^3.0.0
     lossless-json: ^4.0.1
     pako: ^2.0.4
+    starknet-types: ^0.0.4
     ts-mixer: ^6.0.3
     url-join: ^4.0.1
-  checksum: b1a2ddab6f393be61c65bb5d426ddd631be6958f30671ba71aaeea237af1a1c5163941c9149e20f5701975855bccf0ab184f2a21ceee7ad5a4b974a46b7ffc1c
+  checksum: 3c4abda7bab3008c8f98728c4b23a47a2dc97b876c6a33a824da77907b63611fde2df22298aa4c512e3c81e3fe005dd7e288969f18b00299e6eae450a147769d
   languageName: node
   linkType: hard
 
