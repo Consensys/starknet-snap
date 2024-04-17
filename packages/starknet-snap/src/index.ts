@@ -49,7 +49,7 @@ import { logger } from './utils/logger';
 import { getStarkName } from './getStarkName';
 
 import type { OnRpcRequestHandler, OnHomePageHandler, OnInstallHandler, OnUpdateHandler } from '@metamask/snaps-sdk';
-import { InternalError, panel, row, divider, text, copyable } from '@metamask/snaps-sdk';
+import { InternalError, panel, row, divider, text } from '@metamask/snaps-sdk';
 import { ethers } from 'ethers';
 
 declare const snap;
