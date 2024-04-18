@@ -49,7 +49,7 @@ import { logger } from './utils/logger';
 import { getStarkName } from './getStarkName';
 
 import type { OnRpcRequestHandler, OnHomePageHandler, OnInstallHandler, OnUpdateHandler } from '@metamask/snaps-sdk';
-import { InternalError, panel, row, divider, text } from '@metamask/snaps-sdk';
+import { InternalError, panel, row, divider, text, copyable } from '@metamask/snaps-sdk';
 import { ethers } from 'ethers';
 
 declare const snap;
@@ -288,7 +288,8 @@ export const onHomePage: OnHomePageHandler = async () => {
       const userAddress = accContract.address;
       const chainId = accContract.chainId;
       const network = getNetworkFromChainId(state, chainId);
-      panelItems.push(row('Address', text(`${userAddress}`)));
+      panelItems.push(text('Address'));
+      panelItems.push(copyable(`${userAddress}`));
       panelItems.push(row('Network', text(`${network.name}`)));
 
       const ercToken = state.erc20Tokens.find(
