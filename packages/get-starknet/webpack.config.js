@@ -9,7 +9,7 @@ module.exports = {
   output: {  
     path: path.resolve(__dirname, './dist/webpack'),
     filename: 'index.js',  
-    publicPath: 'https://s3.eu-central-1.amazonaws.com/dev.snaps.consensys.io/get-starknet/', 
+    publicPath: 'https://get-starknet.s3.eu-central-1.amazonaws.com/v1/', 
     library: {  
       type: 'commonjs2',  
     },  

@@ -70,12 +70,13 @@ export class MetaMaskSnapWallet implements IStarknetWindowObject {
 
     if (call.type === 'wallet_watchAsset') {
       const params = call.params as WatchAssetParameters;
-      const result = (await this.snap.watchAsset(
-        params.options.address,
-        params.options.name,
-        params.options.symbol,
-        params.options.decimals,
-      )) ?? false;
+      const result =
+        (await this.snap.watchAsset(
+          params.options.address,
+          params.options.name,
+          params.options.symbol,
+          params.options.decimals,
+        )) ?? false;
       return result as unknown as T['result'];
     }
 
