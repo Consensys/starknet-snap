@@ -1,5 +1,6 @@
 import { expect } from 'chai';
 import { Mutex } from 'async-mutex';
+import { constants } from 'starknet';
 
 import {
   dappUrl,
@@ -8,6 +9,7 @@ import {
   getTransactionFromVoyagerUrl,
   getTransactionsFromVoyagerUrl,
   getVoyagerCredentials,
+  getRPCUrl,
 } from '../../src/utils/snapUtils';
 import { WalletMock } from '../wallet.mock.test';
 import { Network, SnapState } from '../../src/types/snapState';
@@ -16,7 +18,6 @@ import {
   STARKNET_TESTNET_NETWORK,
   STARKNET_MAINNET_NETWORK,
 } from '../../src/utils/constants';
-import { constants } from 'starknet';
 
 describe('Snap Utils', () => {
   it('should return the proper dapp URL based on the environment', () => {
@@ -131,5 +132,21 @@ describe('getTransactionsFromVoyagerUrl', () => {
 describe('getVoyagerCredentials', () => {
   it('returns correct credentials', () => {
     expect(getVoyagerCredentials()).to.have.key('X-API-Key');
+  });
+});
+
+describe('getRPCUrl', () => {
+  it('returns Mainnet RPC URL if chain id is Mainnet', () => {
+    expect(getRPCUrl(constants.StarknetChainId.SN_MAIN)).to.be.equal('https://starknet.g.alchemy.com/starknet/version/rpc/v0_7/');
+  });
+
+  it('returns Sepolia RPC URL if chain id is not either Mainnet or Sepolia', () => {
+    expect(getRPCUrl('0x534e5f474f45524c49')).to.be.equal('https://starknet-sepolia.g.alchemy.com/starknet/version/rpc/v0_7/');
+  });
+
+  it('returns Sepolia RPC URL if chain id is Sepolia', () => {
+    expect(getRPCUrl(STARKNET_SEPOLIA_TESTNET_NETWORK.chainId)).to.be.equal(
+      'https://starknet-sepolia.g.alchemy.com/starknet/version/rpc/v0_7/',
+    );
   });
 });
