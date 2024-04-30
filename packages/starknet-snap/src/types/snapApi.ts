@@ -192,7 +192,6 @@ export interface SignRequestParams {
 export interface SignTransactionRequestParams extends Authorizable, SignRequestParams, BaseRequestParams {
   transactions: Call[];
   transactionsDetail: InvocationsSignerDetails;
-  abis?: Abi[];
 }
 
 export interface SignDeployAccountTransactionRequestParams extends Authorizable, SignRequestParams, BaseRequestParams {

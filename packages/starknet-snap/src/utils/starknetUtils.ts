@@ -5,6 +5,7 @@ import {
   json,
   hash,
   num,
+  TypedData,
   typedData,
   constants,
   encode,
@@ -21,19 +22,18 @@ import {
   GetTransactionResponse,
   Invocations,
   validateAndParseAddress as _validateAndParseAddress,
-  EstimateFeeDetails,
   DeclareContractPayload,
   DeclareContractResponse,
-  InvocationsDetails,
   Signer,
   Signature,
   stark,
-  InvocationsSignerDetails,
   Abi,
+  UniversalDetails,
   DeclareSignerDetails,
   DeployAccountSignerDetails,
+  InvocationsSignerDetails,
+  ProviderInterface,
 } from 'starknet';
-import type { Hex } from '@noble/curves/abstract/utils';
 import { Network, SnapState, Transaction, TransactionType } from '../types/snapState';
 import { ACCOUNT_CLASS_HASH_V0, PROXY_CONTRACT_HASH, TRANSFER_SELECTOR_HEX } from './constants';
 import { getAddressKey } from './keyPair';
@@ -54,22 +54,11 @@ export const getCallDataArray = (callDataStr: string): string[] => {
     .filter((x) => x.length > 0);
 };
 
-export const getProvider = (network: Network, forceSequencer = false): Provider => {
+export const getProvider = (network: Network): ProviderInterface => {
   let providerParam: ProviderOptions = {};
-  // same precedence as defined in starknet.js Provider class constructor
-  if (network.nodeUrl && !forceSequencer) {
-    providerParam = {
-      rpc: {
-        nodeUrl: network.nodeUrl,
-      },
-    };
-  } else if (network.baseUrl) {
-    providerParam = {
-      sequencer: {
-        baseUrl: network.baseUrl,
-      },
-    };
-  }
+  providerParam = {
+    nodeUrl: network.nodeUrl,
+  };
   return new Provider(providerParam);
 };
 
@@ -95,11 +84,11 @@ export const declareContract = async (
   senderAddress: string,
   privateKey: string | Uint8Array,
   contractPayload: DeclareContractPayload,
-  transactionsDetail?: InvocationsDetails,
+  invocationsDetails?: UniversalDetails,
 ): Promise<DeclareContractResponse> => {
   const provider = getProvider(network);
-  const account = new Account(provider, senderAddress, privateKey);
-  return account.declare(contractPayload, transactionsDetail);
+  const account = new Account(provider, senderAddress, privateKey, '0');
+  return account.declare(contractPayload, { ...invocationsDetails, skipValidate: false, blockIdentifier: 'latest' });
 };
 
 export const estimateFee = async (
@@ -107,10 +96,15 @@ export const estimateFee = async (
   senderAddress: string,
   privateKey: string | Uint8Array,
   txnInvocation: Call | Call[],
+  invocationsDetails?: UniversalDetails,
 ): Promise<EstimateFee> => {
   const provider = getProvider(network);
-  const account = new Account(provider, senderAddress, privateKey);
-  return account.estimateInvokeFee(txnInvocation, { blockIdentifier: 'latest' });
+  const account = new Account(provider, senderAddress, privateKey, '0');
+  return account.estimateInvokeFee(txnInvocation, {
+    ...invocationsDetails,
+    skipValidate: false,
+    blockIdentifier: 'latest',
+  });
 };
 
 export const estimateFeeBulk = async (
@@ -118,13 +112,15 @@ export const estimateFeeBulk = async (
   senderAddress: string,
   privateKey: string | Uint8Array,
   txnInvocation: Invocations,
-  invocationsDetails: EstimateFeeDetails = { blockIdentifier: 'latest' },
+  invocationsDetails?: UniversalDetails,
 ): Promise<EstimateFee[]> => {
-  // ensure always calling the sequencer endpoint since the rpc endpoint and
-  // starknet.js are not supported yet.
   const provider = getProvider(network);
-  const account = new Account(provider, senderAddress, privateKey);
-  return account.estimateFeeBulk(txnInvocation, invocationsDetails);
+  const account = new Account(provider, senderAddress, privateKey, '0');
+  return account.estimateFeeBulk(txnInvocation, {
+    ...invocationsDetails,
+    skipValidate: false,
+    blockIdentifier: 'latest',
+  });
 };
 
 export const executeTxn = async (
@@ -133,11 +129,15 @@ export const executeTxn = async (
   privateKey: string | Uint8Array,
   txnInvocation: Call | Call[],
   abis?: Abi[],
-  invocationsDetails?: InvocationsDetails,
+  invocationsDetails?: UniversalDetails,
 ): Promise<InvokeFunctionResponse> => {
   const provider = getProvider(network);
-  const account = new Account(provider, senderAddress, privateKey);
-  return account.execute(txnInvocation, abis, invocationsDetails);
+  const account = new Account(provider, senderAddress, privateKey, '0');
+  return account.execute(txnInvocation, abis, {
+    ...invocationsDetails,
+    skipValidate: false,
+    blockIdentifier: 'latest',
+  });
 };
 
 export const deployAccount = async (
@@ -146,17 +146,21 @@ export const deployAccount = async (
   contractCallData: RawCalldata,
   addressSalt: num.BigNumberish,
   privateKey: string | Uint8Array,
-  maxFee: num.BigNumberish,
+  invocationsDetails?: UniversalDetails,
 ): Promise<DeployContractResponse> => {
   const provider = getProvider(network);
-  const account = new Account(provider, contractAddress, privateKey);
+  const account = new Account(provider, contractAddress, privateKey, '0');
   const deployAccountPayload = {
     classHash: PROXY_CONTRACT_HASH,
     contractAddress: contractAddress,
     constructorCalldata: contractCallData,
     addressSalt,
   };
-  return account.deployAccount(deployAccountPayload, { maxFee });
+  return account.deployAccount(deployAccountPayload, {
+    ...invocationsDetails,
+    skipValidate: false,
+    blockIdentifier: 'latest',
+  });
 };
 
 export const estimateAccountDeployFee = async (
@@ -165,21 +169,26 @@ export const estimateAccountDeployFee = async (
   contractCallData: RawCalldata,
   addressSalt: num.BigNumberish,
   privateKey: string | Uint8Array,
+  invocationsDetails?: UniversalDetails,
 ): Promise<EstimateFee> => {
   const provider = getProvider(network);
-  const account = new Account(provider, contractAddress, privateKey);
+  const account = new Account(provider, contractAddress, privateKey, '0');
   const deployAccountPayload = {
     classHash: PROXY_CONTRACT_HASH,
     contractAddress: contractAddress,
     constructorCalldata: contractCallData,
     addressSalt,
   };
-  return account.estimateAccountDeployFee(deployAccountPayload);
+  return account.estimateAccountDeployFee(deployAccountPayload, {
+    ...invocationsDetails,
+    skipValidate: false,
+    blockIdentifier: 'latest',
+  });
 };
 
 export const getSigner = async (userAccAddress: string, network: Network): Promise<string> => {
   const resp = await callContract(network, userAccAddress, 'getSigner');
-  return resp.result[0];
+  return resp[0];
 };
 
 export const getTransactionStatus = async (transactionHash: num.BigNumberish, network: Network) => {
@@ -313,9 +322,17 @@ export const getMassagedTransactions = async (
         txnHash: txnResp.transaction_hash || txn.hash,
         txnType: txn.type?.toLowerCase(),
         chainId: network.chainId,
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         senderAddress: txnResp.sender_address || txnResp.contract_address || txn.contract_address || '',
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         contractAddress: txnResp.calldata?.[1] || txnResp.contract_address || txn.contract_address || '',
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         contractFuncName: num.toBigInt(txnResp.calldata?.[2] || '') === bigIntTransferSelectorHex ? 'transfer' : '',
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         contractCallData: txnResp.calldata?.slice(6, txnResp.calldata?.length - 1) || [],
         timestamp: txn.timestamp,
         status: '', //DEPRECATION
@@ -371,28 +388,28 @@ export const postData = async (url = '', data = {}) => {
   return response.json(); // parses JSON response into native JavaScript objects
 };
 
-export function getFullPublicKeyPairFromPrivateKey(privateKey: Hex) {
+export function getFullPublicKeyPairFromPrivateKey(privateKey: string) {
   return encode.addHexPrefix(encode.buf2hex(ec.starkCurve.getPublicKey(privateKey, false)));
 }
 
 export const getTypedDataMessageSignature = (
-  privateKey: Hex,
-  typedDataMessage: typedData.TypedData,
+  privateKey: string,
+  typedDataMessage: TypedData,
   signerUserAddress: string,
 ) => {
   const msgHash = typedData.getMessageHash(typedDataMessage, signerUserAddress);
   return ec.starkCurve.sign(msgHash, privateKey);
 };
 
-export const getSignatureBySignatureString = (signatureStr: Hex) => {
+export const getSignatureBySignatureString = (signatureStr: string) => {
   return ec.starkCurve.Signature.fromDER(signatureStr);
 };
 
 export const verifyTypedDataMessageSignature = (
-  fullPublicKey: Hex,
-  typedDataMessage: typedData.TypedData,
+  fullPublicKey: string,
+  typedDataMessage: TypedData,
   signerUserAddress: num.BigNumberish,
-  signatureStr: Hex,
+  signatureStr: string,
 ) => {
   const signature = getSignatureBySignatureString(signatureStr);
   const msgHash = typedData.getMessageHash(typedDataMessage, signerUserAddress);
@@ -493,7 +510,7 @@ export const isAccountDeployed = async (network: Network, publicKey: string) => 
   return accountDeployed;
 };
 
-export const addFeesFromAllTransactions = (fees: EstimateFee[]): EstimateFee => {
+export const addFeesFromAllTransactions = (fees: EstimateFee[]): Partial<EstimateFee> => {
   let overall_fee_bn = num.toBigInt(0);
   let suggestedMaxFee_bn = num.toBigInt(0);
 
@@ -520,10 +537,9 @@ export const signTransactions = async (
   privateKey: string,
   transactions: Call[],
   transactionsDetail: InvocationsSignerDetails,
-  abis: Abi[],
 ): Promise<Signature> => {
   const signer = new Signer(privateKey);
-  const signatures = await signer.signTransaction(transactions, transactionsDetail, abis);
+  const signatures = await signer.signTransaction(transactions, transactionsDetail);
   return stark.signatureToDecimalArray(signatures);
 };
 
@@ -545,11 +561,7 @@ export const signDeclareTransaction = async (
   return stark.signatureToDecimalArray(signatures);
 };
 
-export const signMessage = async (
-  privateKey: Hex,
-  typedDataMessage: typedData.TypedData,
-  signerUserAddress: string,
-) => {
+export const signMessage = async (privateKey: string, typedDataMessage: TypedData, signerUserAddress: string) => {
   const signer = new Signer(privateKey);
   const signatures = await signer.signMessage(typedDataMessage, signerUserAddress);
   return stark.signatureToDecimalArray(signatures);
@@ -557,5 +569,5 @@ export const signMessage = async (
 
 export const getStarkNameUtil = async (network: Network, userAddress: string) => {
   const provider = getProvider(network);
-  return provider.getStarkName(userAddress);
+  return Account.getStarkName(provider, userAddress);
 };

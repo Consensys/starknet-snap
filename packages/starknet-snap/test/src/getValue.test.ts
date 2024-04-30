@@ -34,7 +34,7 @@ describe('Test function: getValue', function () {
 
   it('should call the contract correctly', async function () {
     sandbox.stub(utils, 'callContract').callsFake(async () => {
-      return { result: ['1'] };
+      return ['1'];
     });
     const requestObject: GetValueRequestParams = {
       contractAddress: '0x07394cbe418daa16e42b87ba67372d4ab4a5df0b05c6e554d158458ce245bc10',

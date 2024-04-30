@@ -37,7 +37,7 @@ export async function getValue(params: ApiParams) {
 
     logger.log(`getValue:\nresp: ${toJson(resp)}`);
 
-    return resp.result;
+    return resp;
   } catch (err) {
     logger.error(`Problem found: ${err}`);
     throw err;
