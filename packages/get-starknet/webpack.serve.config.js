@@ -4,7 +4,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const path = require('path');
 
 module.exports = {
-  entry: './index',
+  entry: './test-fed',
   mode: 'development',
   target: 'web',
   devServer: {
