@@ -2,19 +2,23 @@
   "name": "@consensys/starknet-snap",
   "version": "2.6.1",
   "license": "(Apache-2.0 OR MIT)",
-  "main": "src/index.ts",
   "repository": {
     "type": "git",
     "url": "https://github.com/ConsenSys/starknet-snap.git"
   },
+  "main": "./dist/bundle.js",
+  "files": [
+    "dist/",
+    "images/",
+    "snap.manifest.json"
+  ],
   "scripts": {
     "setup": "yarn install --immutable && yarn allow-scripts",
     "build:clean": "yarn clean && yarn build",
     "build": "mm-snap build",
     "serve": "mm-snap serve",
     "clean": "rimraf js && rimraf dist",
-    "watch": "yarn build && concurrently --kill-others --names SNAP,SERVE -c bgMagenta.bold,bgGreen.bold \"yarn run watch:snap\" \"yarn run serve\"",
-    "watch:snap": "cross-env SNAP_ENV=prod mm-snap watch",
+    "watch": "mm-snap watch",
     "prettier": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "lint": "eslint . --max-warnings 0 -f json -o eslint-report.json",
     "lint:fix": "eslint '**/*.{js,ts,tsx}' --fix",
