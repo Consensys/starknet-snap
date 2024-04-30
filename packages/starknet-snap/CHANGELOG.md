@@ -1,6 +1,13 @@
 # Changelog
 
 
+## [2.6.2](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v2.6.1...starknet-snap-v2.6.2) (2024-04-18)
+
+
+### Bug Fixes
+
+* address field error ([#234](https://github.com/Consensys/starknet-snap/issues/234)) ([1aa523c](https://github.com/Consensys/starknet-snap/commit/1aa523c8123ccd016953314c9c63520602959651))
+
 ## [2.6.1](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v2.6.0...starknet-snap-v2.6.1) (2024-04-05)
 
 
