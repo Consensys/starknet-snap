@@ -137,7 +137,7 @@ describe('getVoyagerCredentials', () => {
 
 describe('getRPCUrl', () => {
   it('returns Mainnet RPC URL if chain id is Mainnet', () => {
-    expect(getRPCUrl(constants.StarknetChainId.SN_MAIN)).to.be.equal('https://starknet.g.alchemy.com/starknet/version/rpc/v0_7/');
+    expect(getRPCUrl(constants.StarknetChainId.SN_MAIN)).to.be.equal('https://starknet-mainnet.g.alchemy.com/starknet/version/rpc/v0_7/');
   });
 
   it('returns Sepolia RPC URL if chain id is not either Mainnet or Sepolia', () => {

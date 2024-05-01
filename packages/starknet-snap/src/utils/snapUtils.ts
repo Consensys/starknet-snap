@@ -529,7 +529,7 @@ export function getChainIdHex(network: Network) {
 export function getRPCUrl(chainId: string) {
   switch (chainId) {
     case constants.StarknetChainId.SN_MAIN:
-      return `https://starknet.g.alchemy.com/starknet/version/rpc/v0_7/${getRPCCredentials()}`;
+      return `https://starknet-mainnet.g.alchemy.com/starknet/version/rpc/v0_7/${getRPCCredentials()}`;
     default:
     case STARKNET_SEPOLIA_TESTNET_NETWORK.chainId:
       return `https://starknet-sepolia.g.alchemy.com/starknet/version/rpc/v0_7/${getRPCCredentials()}`;
