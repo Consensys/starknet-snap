@@ -3164,7 +3164,7 @@ __metadata:
     ethers: ^5.5.1
     starknet: 6.7.0
     starknet_v4.22.0: "npm:starknet@4.22.0"
-  checksum: c19932a7c1a7887e2183ed8702394a595f24c1b193bbc109bd06b75b14479ad34655a060ebd5bb84dd8392b6fcbeff8cb39e1e1e70f37a4f059a3f8437a68b70
+  checksum: 983f842b9dba2bec7cfcd8907f9dd8d420befc61e045b7138f1786f1662ff6c4f3279b8db49193cf2ae39dff0b9173a5475d1b072f918fda72d54d9d05d4bfd5
   languageName: node
   linkType: hard
 

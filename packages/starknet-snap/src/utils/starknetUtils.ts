@@ -40,6 +40,7 @@ import { getAddressKey } from './keyPair';
 import {
   getAccount,
   getAccounts,
+  getRPCUrl,
   getTransactionFromVoyagerUrl,
   getTransactionsFromVoyagerUrl,
   getVoyagerCredentials,
@@ -57,7 +58,7 @@ export const getCallDataArray = (callDataStr: string): string[] => {
 export const getProvider = (network: Network): ProviderInterface => {
   let providerParam: ProviderOptions = {};
   providerParam = {
-    nodeUrl: network.nodeUrl,
+    nodeUrl: getRPCUrl(network.chainId),
   };
   return new Provider(providerParam);
 };
