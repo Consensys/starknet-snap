@@ -9,7 +9,7 @@ import { createAccountProxyTxn, getBip44EntropyStub, account1, signature3 } from
 import { getAddressKeyDeriver } from '../../src/utils/keyPair';
 import { Mutex } from 'async-mutex';
 import { ApiParams, SignDeployAccountTransactionRequestParams } from '../../src/types/snapApi';
-import { constants } from 'starknet';
+import { DeployAccountSignerDetails, constants } from 'starknet';
 import * as utils from '../../src/utils/starknetUtils';
 
 chai.use(sinonChai);
@@ -31,19 +31,21 @@ describe('Test function: signDeployAccountTransaction', function () {
     saveMutex: new Mutex(),
   };
 
+  const declareNDeployPayload = {
+    classHash: '0x025ec026985a3bf9d0cc1fe17326b245dfdc3ff89b8fde106542a3ea56c5a918',
+    contractAddress: account1.address,
+    constructorCalldata: [],
+    addressSalt: '0x025ec026985a3bf9d0cc1fe17326b245dfdc3ff89b8fde106542a3ea56c5a918',
+    chainId: constants.StarknetChainId.SN_MAIN,
+    nonce: '0x1',
+    version: '0x0',
+    maxFee: 100,
+  } as unknown as DeployAccountSignerDetails;
+
   const requestObject: SignDeployAccountTransactionRequestParams = {
     chainId: STARKNET_MAINNET_NETWORK.chainId,
     signerAddress: account1.address,
-    transaction: {
-      classHash: '0x025ec026985a3bf9d0cc1fe17326b245dfdc3ff89b8fde106542a3ea56c5a918',
-      contractAddress: account1.address,
-      constructorCalldata: [],
-      addressSalt: '0x025ec026985a3bf9d0cc1fe17326b245dfdc3ff89b8fde106542a3ea56c5a918',
-      chainId: constants.StarknetChainId.SN_MAIN,
-      nonce: '0x1',
-      version: '0x0',
-      maxFee: 100,
-    },
+    transaction: declareNDeployPayload,
     enableAuthorize: true,
   };
 

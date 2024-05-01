@@ -98,7 +98,7 @@ export async function createAccount(params: ApiParams, silentMode = false) {
             privateKey,
           );
           logger.log(`createAccount:\nestimateDeployFee: ${toJson(estimateDeployFee)}`);
-          if (Number(getBalanceResp.result[0]) < Number(estimateDeployFee.suggestedMaxFee)) {
+          if (Number(getBalanceResp[0]) < Number(estimateDeployFee.suggestedMaxFee)) {
             const gasFeeStr = ethers.utils.formatUnits(estimateDeployFee.suggestedMaxFee.toString(10), 18);
             const gasFeeFloat = parseFloat(gasFeeStr).toFixed(6); // 6 decimal places for ether
             const gasFeeInEther = Number(gasFeeFloat) === 0 ? '0.000001' : gasFeeFloat;
@@ -110,14 +110,9 @@ export async function createAccount(params: ApiParams, silentMode = false) {
         }
       }
 
-      const deployResp = await deployAccount(
-        network,
-        contractAddress,
-        contractCallData,
-        publicKey,
-        privateKey,
-        estimateDeployFee?.suggestedMaxFee,
-      );
+      const deployResp = await deployAccount(network, contractAddress, contractCallData, publicKey, privateKey, {
+        maxFee: estimateDeployFee?.suggestedMaxFee,
+      });
 
       if (deployResp.contract_address && deployResp.transaction_hash) {
         const userAccount: AccContract = {
