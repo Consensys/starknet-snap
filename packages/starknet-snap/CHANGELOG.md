@@ -1,6 +1,16 @@
 # Changelog
 
 
+## [2.7.0](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v2.6.2...starknet-snap-v2.7.0) (2024-05-01)
+
+
+### Features
+
+* add get starknet package ([#186](https://github.com/Consensys/starknet-snap/issues/186)) ([c44c00d](https://github.com/Consensys/starknet-snap/commit/c44c00d3340191d4b276579556c613308c32cc1d))
+* bump starknetjs to 6.7.0 ([#219](https://github.com/Consensys/starknet-snap/issues/219)) ([a07c3f1](https://github.com/Consensys/starknet-snap/commit/a07c3f1b852389d2369320fbcf9258ff73860b69))
+* sf 612 add alchemy provider ([#236](https://github.com/Consensys/starknet-snap/issues/236)) ([499f59d](https://github.com/Consensys/starknet-snap/commit/499f59dc05da5850f9b71d446267dcb62e079748))
+* sf 613 add cicd support for alchemy ([#237](https://github.com/Consensys/starknet-snap/issues/237)) ([033fdc6](https://github.com/Consensys/starknet-snap/commit/033fdc625c8a2c7eee91a17c4e175a6b78626c7a))
+
 ## [2.6.2](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v2.6.1...starknet-snap-v2.6.2) (2024-04-18)
 
 
