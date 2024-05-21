@@ -45,7 +45,7 @@ export class MetaMaskSnap {
     signerAddress: string,
     transactions: Call[],
     transactionsDetail: InvocationsSignerDetails,
-    abis?: Abi[] | undefined,
+    abis?: Abi[],
   ): Promise<Signature> {
     return (await this.#provider.request({
       method: 'wallet_invokeSnap',
@@ -53,13 +53,13 @@ export class MetaMaskSnap {
         snapId: this.#snapId,
         request: {
           method: 'starkNet_signTransaction',
-          params: {
+          params: this.removeUndefined({
             signerAddress,
             transactions,
             transactionsDetail,
             abis: abis,
             ...(await this.#getSnapParams()),
-          },
+          }),
         },
       },
     })) as Signature;
@@ -75,11 +75,11 @@ export class MetaMaskSnap {
         snapId: this.#snapId,
         request: {
           method: 'starkNet_signDeployAccountTransaction',
-          params: {
+          params: this.removeUndefined({
             signerAddress,
             transaction,
             ...(await this.#getSnapParams()),
-          },
+          }),
         },
       },
     })) as Signature;
@@ -92,11 +92,11 @@ export class MetaMaskSnap {
         snapId: this.#snapId,
         request: {
           method: 'starkNet_signDeclareTransaction',
-          params: {
+          params: this.removeUndefined({
             signerAddress,
             transaction,
             ...(await this.#getSnapParams()),
-          },
+          }),
         },
       },
     })) as Signature;
@@ -105,7 +105,7 @@ export class MetaMaskSnap {
   async execute(
     senderAddress: string,
     txnInvocation: AllowArray<Call>,
-    abis?: Abi[] | undefined,
+    abis?: Abi[],
     invocationsDetails?: InvocationsDetails,
   ): Promise<InvokeFunctionResponse> {
     return (await this.#provider.request({
@@ -114,13 +114,13 @@ export class MetaMaskSnap {
         snapId: this.#snapId,
         request: {
           method: 'starkNet_executeTxn',
-          params: {
+          params: this.removeUndefined({
             senderAddress,
             txnInvocation,
-            abis,
             invocationsDetails,
+            abis,
             ...(await this.#getSnapParams()),
-          },
+          })
         },
       },
     })) as InvokeFunctionResponse;
@@ -133,12 +133,12 @@ export class MetaMaskSnap {
         snapId: this.#snapId,
         request: {
           method: 'starkNet_signMessage',
-          params: {
+          params: this.removeUndefined({
             signerAddress,
             typedDataMessage,
             enableAuthorize: enableAuthorize,
             ...(await this.#getSnapParams()),
-          },
+          }),
         },
       },
     })) as Signature;
@@ -155,12 +155,12 @@ export class MetaMaskSnap {
         snapId: this.#snapId,
         request: {
           method: 'starkNet_declareContract',
-          params: {
+          params: this.removeUndefined({
             senderAddress,
             contractPayload,
             invocationsDetails,
             ...(await this.#getSnapParams()),
-          },
+          })
         },
       },
     })) as DeclareContractResponse;
@@ -236,12 +236,12 @@ export class MetaMaskSnap {
         snapId: this.#snapId,
         request: {
           method: 'starkNet_addNetwork',
-          params: {
+          params: this.removeUndefined({
             networkName: chainName,
             networkChainId: chainId,
             networkNodeUrl: rpcUrl,
             networkVoyagerUrl: explorerUrl,
-          },
+          }),
         },
       },
     })) as boolean;
@@ -254,12 +254,12 @@ export class MetaMaskSnap {
         snapId: this.#snapId,
         request: {
           method: 'starkNet_addErc20Token',
-          params: {
+          params: this.removeUndefined({
             tokenAddress: address,
             tokenName: name,
             tokenSymbol: symbol,
             tokenDecimals: decimals,
-          },
+          }),
         },
       },
     }) as unknown as boolean;
@@ -349,5 +349,9 @@ export class MetaMaskSnap {
     } catch (err) {
       return false;
     }
+  }
+
+  removeUndefined(obj: Record<string, unknown>) {
+    return Object.fromEntries(Object.entries(obj).filter(([_, v]) => v !== undefined));
   }
 }
