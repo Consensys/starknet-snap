@@ -120,7 +120,7 @@ export class MetaMaskSnap {
             invocationsDetails,
             abis,
             ...(await this.#getSnapParams()),
-          })
+          }),
         },
       },
     })) as InvokeFunctionResponse;
@@ -160,7 +160,7 @@ export class MetaMaskSnap {
             contractPayload,
             invocationsDetails,
             ...(await this.#getSnapParams()),
-          })
+          }),
         },
       },
     })) as DeclareContractResponse;
@@ -352,6 +352,7 @@ export class MetaMaskSnap {
   }
 
   removeUndefined(obj: Record<string, unknown>) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     return Object.fromEntries(Object.entries(obj).filter(([_, v]) => v !== undefined));
   }
 }
