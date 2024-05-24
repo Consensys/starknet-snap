@@ -18,7 +18,7 @@
     "build": "tsc --project tsconfig.build.json",
     "build:jsonp": "webpack --config webpack.config.jsonp.js",
     "build:fed": "webpack --config webpack.config.prod.js",
-    "serve:fed": "webpack-cli serve --config webpack.config.dev.js",
+    "serve:fed": "webpack --config webpack.config.prod.js --env PUBLIC_PATH=http://localhost:8082 && webpack-cli serve --config webpack.config.dev.js",
     "prettier": "prettier --write \"src/**/*.ts\"",
     "lint": "eslint 'src/*.{js,ts,tsx}' --max-warnings 0 -f json -o eslint-report.json",
     "lint:fix": "eslint '**/*.{js,ts,tsx}' --fix",

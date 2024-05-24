@@ -5,10 +5,10 @@ const common = require('./webpack.common.js');
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { ModuleFederationPlugin } = require('webpack').container;
 
-module.exports = merge(common, {
+module.exports = (env) => merge(common, {
   mode: 'production',
   output: {
-    publicPath: 'https://snaps.consensys.io/starknet/get-starknet/v1/', 
+    publicPath: env.PUBLIC_PATH || 'https://snaps.consensys.io/starknet/get-starknet/v1/', 
   },
   plugins: [
     new ModuleFederationPlugin({
