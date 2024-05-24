@@ -10,7 +10,7 @@ module.exports = merge(common, {
     publicPath: 'http://localhost:8082/', // Adjust the development publicPath as needed
   },
   devServer: {
-    static: path.join(__dirname, 'dist'),
+    static: path.join(__dirname, 'dist/webpack'),
     compress: true,
     port: 8082,
   },
