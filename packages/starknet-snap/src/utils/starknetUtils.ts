@@ -35,7 +35,7 @@ import {
   ProviderInterface,
 } from 'starknet';
 import { Network, SnapState, Transaction, TransactionType } from '../types/snapState';
-import { ACCOUNT_CLASS_HASH_V0, PROXY_CONTRACT_HASH, TRANSFER_SELECTOR_HEX } from './constants';
+import { ACCOUNT_CLASS_HASH, PROXY_CONTRACT_HASH, TRANSFER_SELECTOR_HEX, MIN_ACC_CONTRACT_VERSION } from './constants';
 import { getAddressKey } from './keyPair';
 import {
   getAccount,
@@ -100,7 +100,7 @@ export const estimateFee = async (
   invocationsDetails?: UniversalDetails,
 ): Promise<EstimateFee> => {
   const provider = getProvider(network);
-  const account = new Account(provider, senderAddress, privateKey, '0');
+  const account = new Account(provider, senderAddress, privateKey, '1');
   return account.estimateInvokeFee(txnInvocation, {
     ...invocationsDetails,
     skipValidate: false,
@@ -116,7 +116,7 @@ export const estimateFeeBulk = async (
   invocationsDetails?: UniversalDetails,
 ): Promise<EstimateFee[]> => {
   const provider = getProvider(network);
-  const account = new Account(provider, senderAddress, privateKey, '0');
+  const account = new Account(provider, senderAddress, privateKey, '1');
   return account.estimateFeeBulk(txnInvocation, {
     ...invocationsDetails,
     skipValidate: false,
@@ -133,7 +133,7 @@ export const executeTxn = async (
   invocationsDetails?: UniversalDetails,
 ): Promise<InvokeFunctionResponse> => {
   const provider = getProvider(network);
-  const account = new Account(provider, senderAddress, privateKey, '0');
+  const account = new Account(provider, senderAddress, privateKey, '1');
   return account.execute(txnInvocation, abis, {
     ...invocationsDetails,
     skipValidate: false,
@@ -150,9 +150,9 @@ export const deployAccount = async (
   invocationsDetails?: UniversalDetails,
 ): Promise<DeployContractResponse> => {
   const provider = getProvider(network);
-  const account = new Account(provider, contractAddress, privateKey, '0');
+  const account = new Account(provider, contractAddress, privateKey, '1');
   const deployAccountPayload = {
-    classHash: PROXY_CONTRACT_HASH,
+    classHash: ACCOUNT_CLASS_HASH,
     contractAddress: contractAddress,
     constructorCalldata: contractCallData,
     addressSalt,
@@ -173,9 +173,9 @@ export const estimateAccountDeployFee = async (
   invocationsDetails?: UniversalDetails,
 ): Promise<EstimateFee> => {
   const provider = getProvider(network);
-  const account = new Account(provider, contractAddress, privateKey, '0');
+  const account = new Account(provider, contractAddress, privateKey, '1');
   const deployAccountPayload = {
-    classHash: PROXY_CONTRACT_HASH,
+    classHash: ACCOUNT_CLASS_HASH,
     contractAddress: contractAddress,
     constructorCalldata: contractCallData,
     addressSalt,
@@ -189,6 +189,21 @@ export const estimateAccountDeployFee = async (
 
 export const getSigner = async (userAccAddress: string, network: Network): Promise<string> => {
   const resp = await callContract(network, userAccAddress, 'getSigner');
+  return resp[0];
+};
+
+export const getVersion = async (userAccAddress: string, network: Network): Promise<string> => {
+  const resp = await callContract(network, userAccAddress, 'getVersion');
+  return resp[0];
+};
+
+export const getOwner = async (userAccAddress: string, network: Network): Promise<string> => {
+  const resp = await callContract(network, userAccAddress, 'get_owner');
+  return resp[0];
+};
+
+export const getBalance = async (address: string, tokenAddress: string, network: Network) => {
+  const resp = await callContract(network, tokenAddress, 'balanceOf', [num.toBigInt(address).toString(10)]);
   return resp[0];
 };
 
@@ -334,7 +349,7 @@ export const getMassagedTransactions = async (
         contractFuncName: num.toBigInt(txnResp.calldata?.[2] || '') === bigIntTransferSelectorHex ? 'transfer' : '',
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        contractCallData: txnResp.calldata?.slice(6, txnResp.calldata?.length - 1) || [],
+        contractCallData: txnResp.calldata?.slice(6, txnResp.calldata?.length - 1) || [], // TODO check. was contractCallData: txnResp.calldata || [], on 9fe75f1
         timestamp: txn.timestamp,
         status: '', //DEPRECATION
         finalityStatus: statusResp.finalityStatus || '',
@@ -428,9 +443,31 @@ export const getNextAddressIndex = (chainId: string, state: SnapState, derivatio
   return uninitializedAccount?.addressIndex ?? accounts.length;
 };
 
-export const getAccContractAddressAndCallData = (publicKey) => {
+export const getAccContractAddressAndCallData = (accountClassHash: string, publicKey) => {
+  const constructorCallData = {
+    signer: publicKey,
+    guardian: '0',
+  };
+
+  let address = hash.calculateContractAddressFromHash(
+    constructorCallData.signer,
+    accountClassHash,
+    constructorCallData,
+    0,
+  );
+
+  if (address.length < 66) {
+    address = address.replace('0x', '0x' + '0'.repeat(66 - address.length));
+  }
+  return {
+    address,
+    callData: CallData.compile(constructorCallData),
+  };
+};
+
+export const getAccContractAddressAndCallDataCairo0 = (accountClassHash: string, publicKey) => {
   const callData = CallData.compile({
-    implementation: ACCOUNT_CLASS_HASH_V0,
+    implementation: accountClassHash,
     selector: hash.getSelectorFromName('initialize'),
     calldata: CallData.compile({ signer: publicKey, guardian: '0' }),
   });
@@ -460,7 +497,7 @@ export const getKeysFromAddress = async (
     const bigIntAddress = num.toBigInt(address);
     for (let i = 0; i < maxScan; i++) {
       const { publicKey } = await getKeysFromAddressIndex(keyDeriver, network.chainId, state, i);
-      const { address: calculatedAddress } = getAccContractAddressAndCallData(publicKey);
+      const { address: calculatedAddress } = getAccContractAddressAndCallData(network.accountClassHash, publicKey);
       if (num.toBigInt(calculatedAddress) === bigIntAddress) {
         addressIndex = i;
         logger.log(`getNextAddressIndex:\nFound address in scan: ${addressIndex} ${address}`);
@@ -499,15 +536,36 @@ export const getKeysFromAddressIndex = async (
   };
 };
 
+export const isAccountDeployedCairo0 = async (network: Network, publicKey: string) => {
+  const { address } = getAccContractAddressAndCallDataCairo0(network.accountClassHash, publicKey);
+  return isAccountAddressDeployed(network, address, 0);
+};
+
 export const isAccountDeployed = async (network: Network, publicKey: string) => {
+  const { address } = getAccContractAddressAndCallData(network.accountClassHash, publicKey);
+  return isAccountAddressDeployed(network, address, 1);
+};
+
+export const isAccountAddressDeployed = async (network: Network, address: string, cairoVersion = 1) => {
   let accountDeployed = true;
   try {
-    const { address: signerContractAddress } = getAccContractAddressAndCallData(publicKey);
-    await getSigner(signerContractAddress, network);
+    switch (cairoVersion) {
+      case 0:
+        await getSigner(address, network);
+        break;
+      case 1:
+        await getOwner(address, network);
+        break;
+      default:
+        throw new Error(`Not supported cairo version ${cairoVersion}`);
+    }
   } catch (err) {
+    if (!err.message.includes('Contract not found')) {
+      throw err;
+    }
     accountDeployed = false;
   }
-  logger.log(`isAccountDeployed: ${accountDeployed}`);
+
   return accountDeployed;
 };
 
@@ -571,4 +629,56 @@ export const signMessage = async (privateKey: string, typedDataMessage: TypedDat
 export const getStarkNameUtil = async (network: Network, userAddress: string) => {
   const provider = getProvider(network);
   return Account.getStarkName(provider, userAddress);
+};
+
+export const isUpgradeRequired = async (network: Network, cairo0address: string) => {
+  try {
+    logger.log(`isUpgradeRequired: cairo0address = ${cairo0address}`);
+    const version = await getVersion(cairo0address, network);
+    const versionArr = version.split('.');
+    return Number(versionArr[1]) < MIN_ACC_CONTRACT_VERSION[1];
+  } catch (err) {
+    if (!err.message.includes('Contract not found')) {
+      throw err;
+    }
+    return false;
+  }
+};
+
+export const getCorrectContractAddress = async (network: Network, publicKey: string) => {
+  const { address: contractAddress } = getAccContractAddressAndCallData(network.accountClassHash, publicKey);
+  const { address: contractAddressCairo0 } = getAccContractAddressAndCallDataCairo0(
+    network.accountClassHashV0,
+    publicKey,
+  );
+  let pk = '';
+  logger.log(
+    `getContractAddressByKey: contractAddressCairo1 = ${contractAddress}\ncontractAddressCairo0 = ${contractAddressCairo0}\npublicKey = ${publicKey}`,
+  );
+  try {
+    pk = await getOwner(contractAddress, network);
+    logger.log(`getContractAddressByKey: cairo 1 contract found`);
+  } catch (err) {
+    if (!err.message.includes('Contract not found')) {
+      throw err;
+    }
+    logger.log(`getContractAddressByKey: cairo 1 contract not found`);
+    try {
+      pk = await getSigner(contractAddressCairo0, network);
+      logger.log(`getContractAddressByKey: cairo 0 contract found`);
+      return {
+        address: contractAddressCairo0,
+        signerPubKey: pk,
+      };
+    } catch (err) {
+      if (!err.message.includes('Contract not found')) {
+        throw err;
+      }
+      logger.log(`getContractAddressByKey: cairo 0 contract not found`);
+    }
+  }
+  return {
+    address: contractAddress,
+    signerPubKey: pk,
+  };
 };

@@ -16,6 +16,7 @@ export interface AccContract {
   derivationPath: string;
   deployTxnHash: string; // in hex
   chainId: string; // in hex
+  upgradeRequired?: boolean;
 }
 
 export interface Erc20Token {
@@ -33,6 +34,7 @@ export interface Network {
   nodeUrl: string;
   voyagerUrl: string;
   accountClassHash: string; // in hex
+  accountClassHashV0?: string; // in hex
   useOldAccounts?: boolean;
 }
 

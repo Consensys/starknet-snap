@@ -55,7 +55,7 @@ describe('Test function: estimateFee', function () {
   });
 
   it('should estimate the fee correctly', async function () {
-    sandbox.stub(utils, 'getSigner').callsFake(async () => {
+    sandbox.stub(utils, 'getOwner').callsFake(async () => {
       return account2.publicKey;
     });
     sandbox.stub(utils, 'estimateFee').callsFake(async () => {
@@ -71,7 +71,7 @@ describe('Test function: estimateFee', function () {
   });
 
   it('should estimate the fee including deploy txn correctly', async function () {
-    sandbox.stub(utils, 'getSigner').throws(new Error());
+    sandbox.stub(utils, 'isAccountDeployed').resolves(false);
     sandbox.stub(utils, 'estimateFeeBulk').callsFake(async () => {
       return [estimateDeployFeeResp4, estimateFeeResp];
     });
@@ -81,7 +81,7 @@ describe('Test function: estimateFee', function () {
   });
 
   it('should estimate the fee without gas consumed and gas price correctly', async function () {
-    sandbox.stub(utils, 'getSigner').callsFake(async () => {
+    sandbox.stub(utils, 'getOwner').callsFake(async () => {
       return account2.publicKey;
     });
     sandbox.stub(utils, 'estimateFee').callsFake(async () => {
@@ -97,7 +97,7 @@ describe('Test function: estimateFee', function () {
   });
 
   it('should throw error if estimateFee failed', async function () {
-    sandbox.stub(utils, 'getSigner').callsFake(async () => {
+    sandbox.stub(utils, 'getOwner').callsFake(async () => {
       return account2.publicKey;
     });
     sandbox.stub(utils, 'estimateFee').throws(new Error());
@@ -114,7 +114,7 @@ describe('Test function: estimateFee', function () {
   });
 
   it('should throw an error if the function name is undefined', async function () {
-    sandbox.stub(utils, 'getSigner').callsFake(async () => {
+    sandbox.stub(utils, 'getOwner').callsFake(async () => {
       return account2.publicKey;
     });
     apiParams.requestParams = {
@@ -134,7 +134,7 @@ describe('Test function: estimateFee', function () {
   });
 
   it('should throw an error if the contract address is invalid', async function () {
-    sandbox.stub(utils, 'getSigner').callsFake(async () => {
+    sandbox.stub(utils, 'getOwner').callsFake(async () => {
       return account2.publicKey;
     });
     apiParams.requestParams = {
@@ -154,7 +154,7 @@ describe('Test function: estimateFee', function () {
   });
 
   it('should throw an error if the sender address is invalid', async function () {
-    sandbox.stub(utils, 'getSigner').callsFake(async () => {
+    sandbox.stub(utils, 'getOwner').callsFake(async () => {
       return account2.publicKey;
     });
     apiParams.requestParams = {

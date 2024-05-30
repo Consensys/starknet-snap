@@ -14,6 +14,7 @@ export const MAXIMUM_TOKEN_SYMBOL_LENGTH = 16;
 export const TRANSFER_SELECTOR_HEX = '0x83afd3f4caedc6eebf44246fe54e38c95e3179a5ec9ea81740eca5b482d12e';
 
 export const ACCOUNT_CLASS_HASH_V0 = '0x033434ad846cdd5f23eb73ff09fe6fddd568284a0fb7d1be20ee482f044dabe2'; // from argent-x repo
+export const ACCOUNT_CLASS_HASH = '0x1a736d6ed154502257f02b1ccdf4d9d1089f80811cd6acad48e6b6a9d1f2003';
 
 interface IDappConfig {
   dev: string;
@@ -33,13 +34,14 @@ export const STARKNET_MAINNET_NETWORK: Network = {
   baseUrl: 'https://alpha-mainnet.starknet.io',
   nodeUrl: 'https://starknet-mainnet.infura.io/v3/60c7253fb48147658095fe0460ac9ee9',
   voyagerUrl: 'https://voyager.online',
-  accountClassHash: '', // from argent-x repo
+  accountClassHashV0: ACCOUNT_CLASS_HASH_V0, // from argent-x repo
+  accountClassHash: ACCOUNT_CLASS_HASH
 };
 
 // Keep this constants for unit test
 export const STARKNET_TESTNET_NETWORK: Network = {
-  name: 'Goerli Testnet (deprecated)',
-  chainId: '0x534e5f474f45524c49',
+  name: 'Goerli Testnet',
+  chainId: constants.StarknetChainId.SN_GOERLI,
   baseUrl: '',
   nodeUrl: '',
   voyagerUrl: '',
@@ -70,7 +72,8 @@ export const STARKNET_INTEGRATION_NETWORK: Network = {
   baseUrl: 'https://external.integration.starknet.io',
   nodeUrl: '',
   voyagerUrl: '',
-  accountClassHash: '', // from argent-x repo
+  accountClassHashV0: ACCOUNT_CLASS_HASH_V0, // from argent-x repo
+  accountClassHash: ACCOUNT_CLASS_HASH
 };
 
 export const ETHER_MAINNET: Erc20Token = {
@@ -178,4 +181,6 @@ export const PRELOADED_NETWORKS = [
   STARKNET_INTEGRATION_NETWORK,
 ];
 
-export const PROXY_CONTRACT_HASH = '0x25ec026985a3bf9d0cc1fe17326b245dfdc3ff89b8fde106542a3ea56c5a918'; // from argent-x repo
+export const PROXY_CONTRACT_HASH = '0x25ec026985a3bf9d0cc1fe17326b245dfdc3ff89b8fde106542a3ea56c5a918'; // for cairo 0 proxy contract
+
+export const MIN_ACC_CONTRACT_VERSION = [0, 3, 0];
