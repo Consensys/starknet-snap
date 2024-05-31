@@ -61,13 +61,13 @@ describe('Test function: declareContract', function () {
       class_hash: 'class_hash',
     });
     const result = await declareContract(apiParams);
+    console.log("TEST")
     const { privateKey } = await utils.getKeysFromAddress(
       apiParams.keyDeriver,
       STARKNET_MAINNET_NETWORK,
       state,
       account1.address,
     );
-
     expect(result).to.eql({
       transaction_hash: 'transaction_hash',
       class_hash: 'class_hash',

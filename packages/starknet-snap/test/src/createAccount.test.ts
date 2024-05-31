@@ -6,7 +6,7 @@ import * as utils from '../../src/utils/starknetUtils';
 import * as snapUtils from '../../src/utils/snapUtils';
 import { createAccount } from '../../src/createAccount';
 import { SnapState } from '../../src/types/snapState';
-import { STARKNET_MAINNET_NETWORK, STARKNET_SEPOLIA_TESTNET_NETWORK } from '../../src/utils/constants';
+import { STARKNET_MAINNET_NETWORK, STARKNET_SEPOLIA_TESTNET_NETWORK, ACCOUNT_CLASS_HASH } from '../../src/utils/constants';
 import {
   createAccountProxyTxn,
   createAccountProxyResp,
@@ -57,7 +57,7 @@ describe('Test function: createAccount', function () {
     state = {
       accContracts: [],
       erc20Tokens: [],
-      networks: [STARKNET_MAINNET_NETWORK, STARKNET_TESTNET_NETWORK],
+      networks: [STARKNET_MAINNET_NETWORK, STARKNET_SEPOLIA_TESTNET_NETWORK],
       transactions: [],
     };
   });
@@ -75,7 +75,7 @@ describe('Test function: createAccount', function () {
       state,
       -1,
     );
-    const { address: contractAddress } = utils.getAccContractAddressAndCallData(publicKey);
+    const { address: contractAddress } = utils.getAccContractAddressAndCallData(ACCOUNT_CLASS_HASH, publicKey);
     expect(walletStub.rpcStubs.snap_manageState).to.have.been.callCount(0);
     expect(result.address).to.be.eq(contractAddress);
     expect(state.accContracts.length).to.be.eq(0);

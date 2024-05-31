@@ -8,6 +8,7 @@ import {
   getAccContractAddressAndCallData,
 } from './utils/starknetUtils';
 import { logger } from './utils/logger';
+import { ACCOUNT_CLASS_HASH } from './utils/constants';
 
 export async function estimateAccDeployFee(params: ApiParams) {
   try {
@@ -22,7 +23,7 @@ export async function estimateAccDeployFee(params: ApiParams) {
       addressIndex: addressIndexInUsed,
       privateKey,
     } = await getKeysFromAddressIndex(keyDeriver, network.chainId, state, addressIndex);
-    const { address: contractAddress, callData: contractCallData } = getAccContractAddressAndCallData(publicKey);
+    const { address: contractAddress, callData: contractCallData } = getAccContractAddressAndCallData(ACCOUNT_CLASS_HASH, publicKey);
     logger.log(
       `estimateAccountDeployFee:\ncontractAddress = ${contractAddress}\npublicKey = ${publicKey}\naddressIndex = ${addressIndexInUsed}`,
     );

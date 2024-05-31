@@ -14,6 +14,7 @@ import {
 } from './utils/starknetUtils';
 
 import { logger } from './utils/logger';
+import { ACCOUNT_CLASS_HASH } from './utils/constants';
 
 export async function estimateFee(params: ApiParams) {
   try {
@@ -68,7 +69,7 @@ export async function estimateFee(params: ApiParams) {
       },
     ];
     if (!accountDeployed) {
-      const { callData } = getAccContractAddressAndCallData(publicKey);
+      const { callData } = getAccContractAddressAndCallData(ACCOUNT_CLASS_HASH, publicKey);
       const deployAccountpayload = {
         classHash: network.accountClassHash,
         contractAddress: senderAddress,

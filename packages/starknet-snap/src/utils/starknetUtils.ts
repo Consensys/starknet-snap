@@ -88,7 +88,7 @@ export const declareContract = async (
   invocationsDetails?: UniversalDetails,
 ): Promise<DeclareContractResponse> => {
   const provider = getProvider(network);
-  const account = new Account(provider, senderAddress, privateKey, '0');
+  const account = new Account(provider, senderAddress, privateKey, '1');
   return account.declare(contractPayload, { ...invocationsDetails, skipValidate: false, blockIdentifier: 'latest' });
 };
 
@@ -443,7 +443,7 @@ export const getNextAddressIndex = (chainId: string, state: SnapState, derivatio
   return uninitializedAccount?.addressIndex ?? accounts.length;
 };
 
-export const getAccContractAddressAndCallData = (accountClassHash: string, publicKey) => {
+export const getAccContractAddressAndCallData = (accountClassHash: string, publicKey: string) => {
   const constructorCallData = {
     signer: publicKey,
     guardian: '0',
@@ -489,7 +489,10 @@ export const getKeysFromAddress = async (
   maxScan = 20,
 ) => {
   let addressIndex;
+  console.log(network)
+  console.log(state)
   const acc = getAccount(state, address, network.chainId);
+  console.log(acc)
   if (acc) {
     addressIndex = acc.addressIndex;
     logger.log(`getNextAddressIndex:\nFound address in state: ${addressIndex} ${address}`);
