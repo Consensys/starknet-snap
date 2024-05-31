@@ -63,7 +63,8 @@ export const STARKNET_SEPOLIA_TESTNET_NETWORK: Network = {
   baseUrl: SN_SEPOLIA.baseUrl,
   nodeUrl: SN_SEPOLIA.nodeUrl,
   voyagerUrl: SN_SEPOLIA.voyagerUrl,
-  accountClassHash: '', // from argent-x repo
+  accountClassHashV0: ACCOUNT_CLASS_HASH_V0, // from argent-x repo
+  accountClassHash: ACCOUNT_CLASS_HASH
 };
 
 export const STARKNET_INTEGRATION_NETWORK: Network = {

@@ -349,7 +349,7 @@ export const getMassagedTransactions = async (
         contractFuncName: num.toBigInt(txnResp.calldata?.[2] || '') === bigIntTransferSelectorHex ? 'transfer' : '',
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        contractCallData: txnResp.calldata?.slice(6, txnResp.calldata?.length - 1) || [], // TODO check. was contractCallData: txnResp.calldata || [], on 9fe75f1
+        contractCallData: txnResp.calldata?.slice(6, txnResp.calldata?.length - 1) || [],
         timestamp: txn.timestamp,
         status: '', //DEPRECATION
         finalityStatus: statusResp.finalityStatus || '',
@@ -489,10 +489,7 @@ export const getKeysFromAddress = async (
   maxScan = 20,
 ) => {
   let addressIndex;
-  console.log(network)
-  console.log(state)
   const acc = getAccount(state, address, network.chainId);
-  console.log(acc)
   if (acc) {
     addressIndex = acc.addressIndex;
     logger.log(`getNextAddressIndex:\nFound address in state: ${addressIndex} ${address}`);
@@ -500,7 +497,7 @@ export const getKeysFromAddress = async (
     const bigIntAddress = num.toBigInt(address);
     for (let i = 0; i < maxScan; i++) {
       const { publicKey } = await getKeysFromAddressIndex(keyDeriver, network.chainId, state, i);
-      const { address: calculatedAddress } = getAccContractAddressAndCallData(network.accountClassHash, publicKey);
+      const { address: calculatedAddress } = getAccContractAddressAndCallDataCairo0(network.accountClassHashV0, publicKey);
       if (num.toBigInt(calculatedAddress) === bigIntAddress) {
         addressIndex = i;
         logger.log(`getNextAddressIndex:\nFound address in scan: ${addressIndex} ${address}`);

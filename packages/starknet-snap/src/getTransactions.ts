@@ -118,7 +118,6 @@ export async function getTransactions(params: ApiParams) {
       await Promise.allSettled(updateStatusPromises);
       logger.log(`getTransactions\nstoredUnsettledTxns after updated status:\n${toJson(storedUnsettledTxns)}`);
     }
-
     // Update the transactions in state in a single call
     await snapUtils.upsertTransactions(storedUnsettledTxns, wallet, saveMutex);
 
@@ -128,7 +127,6 @@ export async function getTransactions(params: ApiParams) {
     // Sort in timestamp descending order
     massagedTxns = massagedTxns.sort((a: Transaction, b: Transaction) => b.timestamp - a.timestamp);
     logger.log(`getTransactions\nmassagedTxns:\n${toJson(massagedTxns)}`);
-
     return massagedTxns;
   } catch (err) {
     logger.error(`Problem found: ${err}`);

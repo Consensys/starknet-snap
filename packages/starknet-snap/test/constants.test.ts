@@ -18,7 +18,7 @@ export const invalidNetwork: Network = {
   nodeUrl: '',
   voyagerUrl: '',
   accountClassHash: '',
-  accountClassHashV0: '',
+  accountClassHashV0: ''
 };
 
 export const account1: AccContract = {
@@ -88,7 +88,8 @@ export const token3: Erc20Token = {
 export const signature1 =
   '3044022001bbc0696d02f85696608c9029973d7d5cf714be2a8188424578c40016262fff022004e388edeb3ceb1fd023b165c9a91cc39b97d58f77beb53b6b90ee9261d9f90c';
 export const signature2 =
-  '30440220052956ac852275b6004c4e8042450f6dce83059f068029b037cc47338c80d062022002bc0e712f03e341bb3532fc356b779d84fcb4dbfe8ed34de2db66e121971d92';
+  '304402200510bd78f928984364253c04201185ab6ccc386278c8fe1aeda0deab7a476e3f02200442916a82f917f520071da038d6dc3eb4446824ce26893355ad4c4a9343729c';
+  // '30440220052956ac852275b6004c4e8042450f6dce83059f068029b037cc47338c80d062022002bc0e712f03e341bb3532fc356b779d84fcb4dbfe8ed34de2db66e121971d92';
 
 export const signature4SignMessage = [
   '784041227270069705374122994163964526105670242785431143890307285886848872447',
@@ -241,18 +242,7 @@ export const RejectedTxn2: Transaction = {
 export const unsettedTransactionInMassagedTxn: Transaction = {
   chainId: STARKNET_SEPOLIA_TESTNET_NETWORK.chainId,
   contractAddress: '0x7394cbe418daa16e42b87ba67372d4ab4a5df0b05c6e554d158458ce245bc10',
-  contractCallData: [
-    '0x1',
-    '0x7394cbe418daa16e42b87ba67372d4ab4a5df0b05c6e554d158458ce245bc10',
-    '0x83afd3f4caedc6eebf44246fe54e38c95e3179a5ec9ea81740eca5b482d12e',
-    '0x0',
-    '0x3',
-    '0x3',
-    '0x14361d05e560796ad3152e083b609f5205f3bd76039327326746ba7f769a666',
-    '0xde0b6b3a7640000',
-    '0x0',
-    '0x1',
-  ],
+  contractCallData: ['0x14361d05e560796ad3152e083b609f5205f3bd76039327326746ba7f769a666', '0xde0b6b3a7640000', '0x0'],
   contractFuncName: 'transfer',
   senderAddress: '0x5a98ec74a40383cf99896bfea2ec5e6aad16c7eed50025a5f569d585ebb13a2',
   timestamp: 1655109666,
@@ -728,18 +718,7 @@ export const expectedMassagedTxns: Transaction[] = [
     senderAddress: '0x5a98ec74a40383cf99896bfea2ec5e6aad16c7eed50025a5f569d585ebb13a2',
     contractAddress: '0x7394cbe418daa16e42b87ba67372d4ab4a5df0b05c6e554d158458ce245bc10',
     contractFuncName: 'transfer',
-    contractCallData: [
-      '0x1',
-      '0x7394cbe418daa16e42b87ba67372d4ab4a5df0b05c6e554d158458ce245bc10',
-      '0x83afd3f4caedc6eebf44246fe54e38c95e3179a5ec9ea81740eca5b482d12e',
-      '0x0',
-      '0x3',
-      '0x3',
-      '0x14361d05e560796ad3152e083b609f5205f3bd76039327326746ba7f769a666',
-      '0xde0b6b3a7640000',
-      '0x0',
-      '0x1',
-    ],
+    contractCallData: ['0x14361d05e560796ad3152e083b609f5205f3bd76039327326746ba7f769a666', '0xde0b6b3a7640000', '0x0'],
     timestamp: 1655109666,
     status: '',
     finalityStatus: 'ACCEPTED_ON_L1',
