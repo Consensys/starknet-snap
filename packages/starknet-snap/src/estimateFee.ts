@@ -12,7 +12,6 @@ import {
   addFeesFromAllTransactions,
   isAccountDeployed,
   isUpgradeRequired,
-  getCorrectContractAddress,
 } from './utils/starknetUtils';
 import { ACCOUNT_CLASS_HASH } from './utils/constants';
 import { logger } from './utils/logger';
