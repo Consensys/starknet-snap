@@ -133,7 +133,7 @@ export const estimateFeeBulk = async (
   senderAddress: string,
   privateKey: string | Uint8Array,
   txnInvocation: Invocations,
-  invocationsDetails: UniversalDetails,
+  invocationsDetails?: UniversalDetails,
   cairoVersion?: CairoVersion,
 ): Promise<EstimateFee[]> => {
   return getAccountInstance(network, senderAddress, privateKey, cairoVersion).estimateFeeBulk(
@@ -172,7 +172,6 @@ export const deployAccount = async (
   contractCallData: RawCalldata,
   addressSalt: num.BigNumberish,
   privateKey: string | Uint8Array,
-  maxFee: num.BigNumberish,
   cairoVersion?: CairoVersion,
   invocationsDetails?: UniversalDetails,
 ): Promise<DeployContractResponse> => {
@@ -186,7 +185,6 @@ export const deployAccount = async (
     ...invocationsDetails,
     skipValidate: false,
     blockIdentifier: 'latest',
-    maxFee,
   });
 };
 

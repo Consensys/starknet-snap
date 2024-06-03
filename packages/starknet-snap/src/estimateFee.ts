@@ -12,6 +12,7 @@ import {
   addFeesFromAllTransactions,
   isAccountDeployed,
   isUpgradeRequired,
+  getCorrectContractAddress,
 } from './utils/starknetUtils';
 import { ACCOUNT_CLASS_HASH } from './utils/constants';
 import { logger } from './utils/logger';
@@ -98,7 +99,10 @@ export async function estimateFee(params: ApiParams) {
     if (accountDeployed) {
       // This condition branch will be removed later when starknet.js
       // supports estimateFeeBulk in rpc mode
-      estimateFeeResp = await estimateFeeUtil(network, senderAddress, senderPrivateKey, txnInvocation);
+      // We should check here what is the CairoVersion to get the correct fees calculation
+      const { ...upgradeRequired } = getCorrectContractAddress(network, publicKey);
+      const cairoVersion = upgradeRequired ? '0' : '1';
+      estimateFeeResp = await estimateFeeUtil(network, senderAddress, senderPrivateKey, txnInvocation, cairoVersion);
       logger.log(`estimateFee:\nestimateFeeUtil estimateFeeResp: ${toJson(estimateFeeResp)}`);
     } else {
       const estimateBulkFeeResp = await estimateFeeBulk(network, senderAddress, senderPrivateKey, bulkTransactions);
