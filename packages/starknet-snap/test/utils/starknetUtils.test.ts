@@ -271,7 +271,7 @@ describe('Test function: getVersion', function () {
   const expected = '0.3.0';
 
   beforeEach(function () {
-    callContractStub = sandbox.stub(utils, 'callContract').callsFake(async () => ({ result: [expected] }));
+    callContractStub = sandbox.stub(utils, 'callContract').callsFake(async () => ([expected]));
   });
 
   afterEach(function () {
@@ -294,7 +294,7 @@ describe('Test function: getOwner', function () {
   const expected = 'pk';
 
   beforeEach(function () {
-    callContractStub = sandbox.stub(utils, 'callContract').callsFake(async () => ({ result: [expected] }));
+    callContractStub = sandbox.stub(utils, 'callContract').callsFake(async () => ([expected]));
   });
 
   afterEach(function () {
@@ -317,7 +317,7 @@ describe('Test function: getBalance', function () {
   const expected = 'pk';
 
   beforeEach(function () {
-    callContractStub = sandbox.stub(utils, 'callContract').callsFake(async () => ({ result: [expected] }));
+    callContractStub = sandbox.stub(utils, 'callContract').callsFake(async () => ([expected]));
   });
 
   afterEach(function () {
