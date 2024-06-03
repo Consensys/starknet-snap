@@ -385,7 +385,7 @@ export const getMassagedTransactions = async (
         contractFuncName: num.toBigInt(txnResp.calldata?.[2] || '') === bigIntTransferSelectorHex ? 'transfer' : txn.operations ?? '',
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        contractCallData: txnResp.calldata?.slice(6, txnResp.calldata?.length - 1) || [],
+        contractCallData: txnResp.calldata || [],
         timestamp: txn.timestamp,
         status: '', //DEPRECATION
         finalityStatus: statusResp.finalityStatus || '',
