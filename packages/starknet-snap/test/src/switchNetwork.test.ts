@@ -54,7 +54,7 @@ describe('Test function: switchNetwork', function () {
     expect(state.currentNetwork).to.be.eql(STARKNET_MAINNET_NETWORK);
   });
 
-  it('should skip autherize when enableAuthorize is false or omit', async function () {
+  it('should skip authorize when enableAuthorize is false or omit', async function () {
     const requestObject: SwitchNetworkRequestParams = {
       chainId: STARKNET_MAINNET_NETWORK.chainId,
     };

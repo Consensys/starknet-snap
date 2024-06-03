@@ -15,7 +15,6 @@ jobs:
   publish-dev-to-npm:
     runs-on: ubuntu-latest
     steps:
-
       - uses: actions/checkout@v3
       - run: |
           yarn install --no-immutable
@@ -24,7 +23,11 @@ jobs:
           HASH=$(git rev-parse --short HEAD)
           DATE=$(date +%Y%m%d)
           npm --prefix ./packages/starknet-snap version --new-version ${VERSION}-dev-${HASH}-${DATE} --no-git-tag-version
-          SNAP_ENV=dev VOYAGER_API_KEY=${{ secrets.VOYAGER_API_KEY }} yarn workspace @consensys/starknet-snap build
+          yarn workspace @consensys/starknet-snap build
+        env:
+          SNAP_ENV: dev
+          VOYAGER_API_KEY: ${{ secrets.VOYAGER_API_KEY }}
+          ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
 
       - uses: actions/setup-node@v3
         with:

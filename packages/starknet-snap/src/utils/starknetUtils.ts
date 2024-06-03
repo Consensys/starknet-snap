@@ -5,6 +5,7 @@ import {
   json,
   hash,
   num,
+  TypedData,
   typedData,
   constants,
   encode,
@@ -21,20 +22,19 @@ import {
   GetTransactionResponse,
   Invocations,
   validateAndParseAddress as _validateAndParseAddress,
-  EstimateFeeDetails,
   DeclareContractPayload,
   DeclareContractResponse,
-  InvocationsDetails,
   Signer,
   Signature,
   stark,
-  InvocationsSignerDetails,
   Abi,
+  UniversalDetails,
   DeclareSignerDetails,
   DeployAccountSignerDetails,
   CairoVersion,
+  InvocationsSignerDetails,
+  ProviderInterface,
 } from 'starknet';
-import type { Hex } from '@noble/curves/abstract/utils';
 import { Network, SnapState, Transaction, TransactionType } from '../types/snapState';
 import {
   PROXY_CONTRACT_HASH,
@@ -49,6 +49,7 @@ import { getAddressKey } from './keyPair';
 import {
   getAccount,
   getAccounts,
+  getRPCUrl,
   getTransactionFromVoyagerUrl,
   getTransactionsFromVoyagerUrl,
   getVoyagerCredentials,
@@ -64,22 +65,11 @@ export const getCallDataArray = (callDataStr: string): string[] => {
     .filter((x) => x.length > 0);
 };
 
-export const getProvider = (network: Network, forceSequencer = false): Provider => {
+export const getProvider = (network: Network): ProviderInterface => {
   let providerParam: ProviderOptions = {};
-  // same precedence as defined in starknet.js Provider class constructor
-  if (network.nodeUrl && !forceSequencer) {
-    providerParam = {
-      rpc: {
-        nodeUrl: network.nodeUrl,
-      },
-    };
-  } else if (network.baseUrl) {
-    providerParam = {
-      sequencer: {
-        baseUrl: network.baseUrl,
-      },
-    };
-  }
+  providerParam = {
+    nodeUrl: getRPCUrl(network.chainId),
+  };
   return new Provider(providerParam);
 };
 
@@ -115,12 +105,11 @@ export const declareContract = async (
   senderAddress: string,
   privateKey: string | Uint8Array,
   contractPayload: DeclareContractPayload,
-  transactionsDetail?: InvocationsDetails,
+  invocationsDetails?: UniversalDetails,
   cairoVersion?: CairoVersion,
 ): Promise<DeclareContractResponse> => {
   return getAccountInstance(network, senderAddress, privateKey, cairoVersion).declare(
-    contractPayload,
-    transactionsDetail,
+    contractPayload, { ...invocationsDetails, skipValidate: false, blockIdentifier: 'latest' }
   );
 };
 
@@ -130,8 +119,11 @@ export const estimateFee = async (
   privateKey: string | Uint8Array,
   txnInvocation: Call | Call[],
   cairoVersion?: CairoVersion,
+  invocationsDetails?: UniversalDetails,
 ): Promise<EstimateFee> => {
   return getAccountInstance(network, senderAddress, privateKey, cairoVersion).estimateInvokeFee(txnInvocation, {
+    ...invocationsDetails,
+    skipValidate: false,
     blockIdentifier: 'latest',
   });
 };
@@ -141,12 +133,16 @@ export const estimateFeeBulk = async (
   senderAddress: string,
   privateKey: string | Uint8Array,
   txnInvocation: Invocations,
-  invocationsDetails: EstimateFeeDetails = { blockIdentifier: 'latest' },
+  invocationsDetails: UniversalDetails,
   cairoVersion?: CairoVersion,
 ): Promise<EstimateFee[]> => {
   return getAccountInstance(network, senderAddress, privateKey, cairoVersion).estimateFeeBulk(
     txnInvocation,
-    invocationsDetails,
+    {
+      ...invocationsDetails,
+      skipValidate: false,
+      blockIdentifier: 'latest',
+    },
   );
 };
 
@@ -156,13 +152,17 @@ export const executeTxn = async (
   privateKey: string | Uint8Array,
   txnInvocation: Call | Call[],
   abis?: Abi[],
-  invocationsDetails?: InvocationsDetails,
+  invocationsDetails?: UniversalDetails,
   cairoVersion?: CairoVersion,
 ): Promise<InvokeFunctionResponse> => {
   return getAccountInstance(network, senderAddress, privateKey, cairoVersion).execute(
     txnInvocation,
     abis,
-    invocationsDetails,
+    {
+      ...invocationsDetails,
+      skipValidate: false,
+      blockIdentifier: 'latest',
+    },
   );
 };
 
@@ -174,6 +174,7 @@ export const deployAccount = async (
   privateKey: string | Uint8Array,
   maxFee: num.BigNumberish,
   cairoVersion?: CairoVersion,
+  invocationsDetails?: UniversalDetails,
 ): Promise<DeployContractResponse> => {
   const deployAccountPayload = {
     classHash: ACCOUNT_CLASS_HASH,
@@ -182,6 +183,9 @@ export const deployAccount = async (
     addressSalt,
   };
   return getAccountInstance(network, contractAddress, privateKey, cairoVersion).deployAccount(deployAccountPayload, {
+    ...invocationsDetails,
+    skipValidate: false,
+    blockIdentifier: 'latest',
     maxFee,
   });
 };
@@ -193,6 +197,7 @@ export const estimateAccountDeployFee = async (
   addressSalt: num.BigNumberish,
   privateKey: string | Uint8Array,
   cairoVersion?: CairoVersion,
+  invocationsDetails?: UniversalDetails,
 ): Promise<EstimateFee> => {
   const deployAccountPayload = {
     classHash: ACCOUNT_CLASS_HASH,
@@ -202,22 +207,27 @@ export const estimateAccountDeployFee = async (
   };
   return getAccountInstance(network, contractAddress, privateKey, cairoVersion).estimateAccountDeployFee(
     deployAccountPayload,
+    {
+      ...invocationsDetails,
+      skipValidate: false,
+      blockIdentifier: 'latest',
+    }
   );
 };
 
 export const getSigner = async (userAccAddress: string, network: Network): Promise<string> => {
   const resp = await callContract(network, userAccAddress, 'getSigner');
-  return resp.result[0];
+  return resp[0];
 };
 
 export const getVersion = async (userAccAddress: string, network: Network): Promise<string> => {
   const resp = await callContract(network, userAccAddress, 'getVersion');
-  return resp.result[0];
+  return resp[0];
 };
 
 export const getOwner = async (userAccAddress: string, network: Network): Promise<string> => {
   const resp = await callContract(network, userAccAddress, 'get_owner');
-  return resp.result[0];
+  return resp[0];
 };
 
 export const getContractOwner = async (
@@ -230,7 +240,7 @@ export const getContractOwner = async (
 
 export const getBalance = async (address: string, tokenAddress: string, network: Network) => {
   const resp = await callContract(network, tokenAddress, 'balanceOf', [num.toBigInt(address).toString(10)]);
-  return resp.result[0];
+  return resp[0];
 };
 
 export const getTransactionStatus = async (transactionHash: num.BigNumberish, network: Network) => {
@@ -366,11 +376,18 @@ export const getMassagedTransactions = async (
         txnHash: txnResp.transaction_hash || txn.hash,
         txnType: txn.type?.toLowerCase(),
         chainId: network.chainId,
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         senderAddress: txnResp.sender_address || txnResp.contract_address || txn.contract_address || '',
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         contractAddress: txnResp.calldata?.[1] || txnResp.contract_address || txn.contract_address || '',
-        contractFuncName:
-          num.toBigInt(txnResp.calldata?.[2] || '') === bigIntTransferSelectorHex ? 'transfer' : txn.operations ?? '',
-        contractCallData: txnResp.calldata || [],
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        contractFuncName: num.toBigInt(txnResp.calldata?.[2] || '') === bigIntTransferSelectorHex ? 'transfer' : txn.operations ?? '',
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        contractCallData: txnResp.calldata?.slice(6, txnResp.calldata?.length - 1) || [],
         timestamp: txn.timestamp,
         status: '', //DEPRECATION
         finalityStatus: statusResp.finalityStatus || '',
@@ -426,28 +443,28 @@ export const postData = async (url = '', data = {}) => {
   return response.json(); // parses JSON response into native JavaScript objects
 };
 
-export function getFullPublicKeyPairFromPrivateKey(privateKey: Hex) {
+export function getFullPublicKeyPairFromPrivateKey(privateKey: string) {
   return encode.addHexPrefix(encode.buf2hex(ec.starkCurve.getPublicKey(privateKey, false)));
 }
 
 export const getTypedDataMessageSignature = (
-  privateKey: Hex,
-  typedDataMessage: typedData.TypedData,
+  privateKey: string,
+  typedDataMessage: TypedData,
   signerUserAddress: string,
 ) => {
   const msgHash = typedData.getMessageHash(typedDataMessage, signerUserAddress);
   return ec.starkCurve.sign(msgHash, privateKey);
 };
 
-export const getSignatureBySignatureString = (signatureStr: Hex) => {
+export const getSignatureBySignatureString = (signatureStr: string) => {
   return ec.starkCurve.Signature.fromDER(signatureStr);
 };
 
 export const verifyTypedDataMessageSignature = (
-  fullPublicKey: Hex,
-  typedDataMessage: typedData.TypedData,
+  fullPublicKey: string,
+  typedDataMessage: TypedData,
   signerUserAddress: num.BigNumberish,
-  signatureStr: Hex,
+  signatureStr: string,
 ) => {
   const signature = getSignatureBySignatureString(signatureStr);
   const msgHash = typedData.getMessageHash(typedDataMessage, signerUserAddress);
@@ -571,7 +588,7 @@ export const isAccountDeployed = async (network: Network, address: string) => {
   }
 };
 
-export const addFeesFromAllTransactions = (fees: EstimateFee[]): EstimateFee => {
+export const addFeesFromAllTransactions = (fees: EstimateFee[]): Partial<EstimateFee> => {
   let overall_fee_bn = num.toBigInt(0);
   let suggestedMaxFee_bn = num.toBigInt(0);
 
@@ -735,10 +752,9 @@ export const signTransactions = async (
   privateKey: string,
   transactions: Call[],
   transactionsDetail: InvocationsSignerDetails,
-  abis: Abi[],
 ): Promise<Signature> => {
   const signer = new Signer(privateKey);
-  const signatures = await signer.signTransaction(transactions, transactionsDetail, abis);
+  const signatures = await signer.signTransaction(transactions, transactionsDetail);
   return stark.signatureToDecimalArray(signatures);
 };
 
@@ -760,11 +776,7 @@ export const signDeclareTransaction = async (
   return stark.signatureToDecimalArray(signatures);
 };
 
-export const signMessage = async (
-  privateKey: Hex,
-  typedDataMessage: typedData.TypedData,
-  signerUserAddress: string,
-) => {
+export const signMessage = async (privateKey: string, typedDataMessage: TypedData, signerUserAddress: string) => {
   const signer = new Signer(privateKey);
   const signatures = await signer.signMessage(typedDataMessage, signerUserAddress);
   return stark.signatureToDecimalArray(signatures);
@@ -772,5 +784,5 @@ export const signMessage = async (
 
 export const getStarkNameUtil = async (network: Network, userAddress: string) => {
   const provider = getProvider(network);
-  return provider.getStarkName(userAddress);
+  return Account.getStarkName(provider, userAddress);
 };
