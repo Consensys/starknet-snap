@@ -11,7 +11,7 @@ import {
   constants,
 } from 'starknet';
 import { validateAndParseAddress } from './starknetUtils';
-import { Component, text, copyable } from '@metamask/snaps-sdk';
+import { Component, text, copyable, panel, heading } from '@metamask/snaps-sdk';
 import {
   Network,
   Erc20Token,
@@ -42,6 +42,7 @@ import {
   ChainIdFilter,
 } from './transaction/filter';
 import { logger } from './logger';
+import { DialogType } from '@metamask/rpc-methods';
 
 function hasOnlyAsciiChars(str: string) {
   return /^[ -~]+$/.test(str);
@@ -756,4 +757,19 @@ export function dappUrl(envt: string) {
     default:
       return DAPP.prod;
   }
+}
+
+export async function showUpgradeRequestModal(wallet){
+  await wallet.request({
+    method: 'snap_dialog',
+    params: {
+      type: DialogType.Alert,
+      content: panel([
+        heading('Account Upgrade Required'),
+        text(`Please upgrade your account to the latest version of the smart contract. \nVisit the [companion dapp for Starknet](${dappUrl(
+          process.env.SNAP_ENV,
+        )} and click “Upgrade” to install. Thank you!`),
+      ]),
+    },
+  });
 }

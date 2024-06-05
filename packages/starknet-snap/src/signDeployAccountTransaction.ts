@@ -4,8 +4,9 @@ import { ApiParams, SignDeployAccountTransactionRequestParams } from './types/sn
 import {
   getKeysFromAddress,
   signDeployAccountTransaction as signDeployAccountTransactionUtil,
+  isUpgradeRequired
 } from './utils/starknetUtils';
-import { getNetworkFromChainId, getSignTxnTxt } from './utils/snapUtils';
+import { getNetworkFromChainId, getSignTxnTxt, showUpgradeRequestModal } from './utils/snapUtils';
 import { DialogType } from '@metamask/rpc-methods';
 import { heading, panel } from '@metamask/snaps-sdk';
 import { logger } from '../src/utils/logger';
@@ -17,6 +18,11 @@ export async function signDeployAccountTransaction(params: ApiParams): Promise<S
     const signerAddress = requestParamsObj.signerAddress;
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
     const { privateKey } = await getKeysFromAddress(keyDeriver, network, state, signerAddress);
+
+    if(isUpgradeRequired(network, signerAddress)){
+      showUpgradeRequestModal(wallet);
+      return false;
+    }
 
     logger.log(`signDeployAccountTransaction params: ${toJson(requestParamsObj.transaction, 2)}}`);
 

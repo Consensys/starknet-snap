@@ -1,8 +1,8 @@
 import { toJson } from './utils/serializer';
 import { Signature } from 'starknet';
 import { ApiParams, SignTransactionRequestParams } from './types/snapApi';
-import { getKeysFromAddress, signTransactions } from './utils/starknetUtils';
-import { getNetworkFromChainId, getSignTxnTxt } from './utils/snapUtils';
+import { getKeysFromAddress, signTransactions, isUpgradeRequired } from './utils/starknetUtils';
+import { getNetworkFromChainId, getSignTxnTxt, showUpgradeRequestModal } from './utils/snapUtils';
 import { DialogType } from '@metamask/rpc-methods';
 import { heading, panel } from '@metamask/snaps-sdk';
 import { logger } from '../src/utils/logger';
@@ -14,6 +14,11 @@ export async function signTransaction(params: ApiParams): Promise<Signature | bo
     const signerAddress = requestParamsObj.signerAddress;
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
     const { privateKey } = await getKeysFromAddress(keyDeriver, network, state, signerAddress);
+
+    if(isUpgradeRequired(network, signerAddress)){
+      showUpgradeRequestModal(wallet);
+      return false;
+    }
 
     logger.log(`signTransaction params: ${toJson(requestParamsObj.transactions, 2)}}`);
 

@@ -1,6 +1,6 @@
 import { toJson } from './utils/serializer';
-import { getNetworkFromChainId, getTxnSnapTxt } from './utils/snapUtils';
-import { getKeysFromAddress, executeTxn as executeTxnUtil } from './utils/starknetUtils';
+import { getNetworkFromChainId, getTxnSnapTxt, showUpgradeRequestModal } from './utils/snapUtils';
+import { getKeysFromAddress, executeTxn as executeTxnUtil, isUpgradeRequired } from './utils/starknetUtils';
 import { ApiParams, ExecuteTxnRequestParams } from './types/snapApi';
 import { DialogType } from '@metamask/rpc-methods';
 import { heading, panel } from '@metamask/snaps-sdk';
@@ -16,6 +16,11 @@ export async function executeTxn(params: ApiParams) {
     const senderAddress = requestParamsObj.senderAddress;
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
     const { privateKey: senderPrivateKey } = await getKeysFromAddress(keyDeriver, network, state, senderAddress);
+
+    if(isUpgradeRequired(network, senderAddress)){
+      showUpgradeRequestModal(wallet);
+      return false;
+    }
 
     const snapComponents = getTxnSnapTxt(
       senderAddress,
