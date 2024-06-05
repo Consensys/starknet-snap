@@ -12,6 +12,7 @@ export const MAXIMUM_TOKEN_NAME_LENGTH = 64;
 export const MAXIMUM_TOKEN_SYMBOL_LENGTH = 16;
 
 export const TRANSFER_SELECTOR_HEX = '0x83afd3f4caedc6eebf44246fe54e38c95e3179a5ec9ea81740eca5b482d12e';
+export const UPGRADE_SELECTOR_HEX = '0xf2f7c15cbe06c8d94597cd91fd7f3369eae842359235712def5584f8d270cd';
 
 export const ACCOUNT_CLASS_HASH_LEGACY = '0x033434ad846cdd5f23eb73ff09fe6fddd568284a0fb7d1be20ee482f044dabe2'; // from argent-x repo
 export const ACCOUNT_CLASS_HASH = '0x29927c8af6bccf3f6fda035981e765a7bdbf18a2dc0d630494f8758aa908e2b'; // from argent-x repo

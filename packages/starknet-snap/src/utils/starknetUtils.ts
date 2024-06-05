@@ -39,6 +39,7 @@ import { Network, SnapState, Transaction, TransactionType } from '../types/snapS
 import {
   PROXY_CONTRACT_HASH,
   TRANSFER_SELECTOR_HEX,
+  UPGRADE_SELECTOR_HEX,
   MIN_ACC_CONTRACT_VERSION,
   ACCOUNT_CLASS_HASH_LEGACY,
   ACCOUNT_CLASS_HASH,
@@ -355,6 +356,7 @@ export const getMassagedTransactions = async (
   );
 
   const bigIntTransferSelectorHex = num.toBigInt(TRANSFER_SELECTOR_HEX);
+  const bigIntUpgradeSelectorHex = num.toBigInt(UPGRADE_SELECTOR_HEX);
   let massagedTxns = await Promise.all(
     txns.map(async (txn) => {
       logger.log(`getMassagedTransactions: txn:\n${toJson(txn)}`);
@@ -382,7 +384,7 @@ export const getMassagedTransactions = async (
         contractAddress: txnResp.calldata?.[1] || txnResp.contract_address || txn.contract_address || '',
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        contractFuncName: num.toBigInt(txnResp.calldata?.[2] || '') === bigIntTransferSelectorHex ? 'transfer' : txn.operations ?? '',
+        contractFuncName: num.toBigInt(txnResp.calldata?.[2] || '') === bigIntTransferSelectorHex ? 'transfer' : num.toBigInt(txnResp.calldata?.[2] || '') === bigIntUpgradeSelectorHex ? 'upgrade' : txn.operations ?? '',
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         contractCallData: txnResp.calldata || [],
@@ -404,25 +406,10 @@ export const getMassagedTransactions = async (
   if (contractAddress) {
     const bigIntContractAddress = num.toBigInt(contractAddress);
     massagedTxns = massagedTxns.filter(
-      (massagedTxn) => {
-        const massagedTxnBigIntAddress = num.toBigInt(massagedTxn.contractAddress);
-        // Log details about the massaged transaction being evaluated
-        logger.log(`Evaluating massagedTxn: ${JSON.stringify(massagedTxn)}`);  // Stringify for structured logging
-        // Condition 1: Contract address match (converted to BigInt)
-        logger.log(`  - Contract address match check: ${massagedTxnBigIntAddress === bigIntContractAddress}`);
-        // Condition 2: 'upgrade' function name match
-        logger.log(`  - Upgrade function name check: ${massagedTxn.contractFuncName === '' && massagedTxn.contractCallData[6] === ACCOUNT_CLASS_HASH && massagedTxn.contractCallData[1] === massagedTxn.senderAddress}`);
-        if(massagedTxn.contractFuncName === '' && massagedTxn.contractCallData[6] === ACCOUNT_CLASS_HASH && massagedTxn.contractCallData[1] === massagedTxn.senderAddress){
-          massagedTxn.contractFuncName = 'upgrade';
-        }
-        // Condition 3: Matching deploy transaction hash
-        const matchingDeployTxn = deployTxns.find((deployTxn) => deployTxn.hash === massagedTxn.txnHash);
-        logger.log(`  - Matching deploy transaction hash check: ${!!matchingDeployTxn}`); // Log existence of a match
-        // Return the filtering logic based on the conditions
-        return massagedTxnBigIntAddress === bigIntContractAddress ||
-               massagedTxn.contractFuncName === 'upgrade' ||
-               !!matchingDeployTxn;
-      }
+      (massagedTxn) =>
+        num.toBigInt(massagedTxn.contractAddress) === bigIntContractAddress ||
+        massagedTxn.contractFuncName === 'upgrade' ||
+        deployTxns.find((deployTxn) => deployTxn.hash === massagedTxn.txnHash),
     );
   }
 
