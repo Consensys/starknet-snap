@@ -1,7 +1,8 @@
 import { toJson } from './utils/serializer';
 import { getNetworkFromChainId, getTxnSnapTxt } from './utils/snapUtils';
-import { getKeysFromAddress, executeTxn as executeTxnUtil } from './utils/starknetUtils';
+import { getKeysFromAddress, executeTxn as executeTxnUtil, isAccountDeployed } from './utils/starknetUtils';
 import { ApiParams, ExecuteTxnRequestParams } from './types/snapApi';
+import { createAccount } from './createAccount';
 import { DialogType } from '@metamask/rpc-methods';
 import { heading, panel } from '@metamask/snaps-sdk';
 import { logger } from './utils/logger';
@@ -15,7 +16,11 @@ export async function executeTxn(params: ApiParams) {
 
     const senderAddress = requestParamsObj.senderAddress;
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
-    const { privateKey: senderPrivateKey } = await getKeysFromAddress(keyDeriver, network, state, senderAddress);
+    const { 
+      privateKey: senderPrivateKey,
+      publicKey,
+      addressIndex,
+    } = await getKeysFromAddress(keyDeriver, network, state, senderAddress);
 
     const snapComponents = getTxnSnapTxt(
       senderAddress,
@@ -32,16 +37,35 @@ export async function executeTxn(params: ApiParams) {
         content: panel([heading('Do you want to sign this transaction(s)?'), ...snapComponents]),
       },
     });
-
     if (!response) return false;
+    const accountDeployed = await isAccountDeployed(network, publicKey);
+    if (!accountDeployed) {
+      const createAccountApiParams = {
+        state,
+        wallet: params.wallet,
+        saveMutex: params.saveMutex,
+        keyDeriver,
+        requestParams: {
+          addressIndex,
+          deploy: true,
+          chainId: requestParamsObj.chainId,
+        },
+      };
+      await createAccount(createAccountApiParams, true);
+    }
 
+    //In case this is the first transaction we assign a nonce of 1 to make sure it does after the deploy transaction
+    const nonceSendTransaction = accountDeployed ? undefined : 1;
     return await executeTxnUtil(
       network,
       senderAddress,
       senderPrivateKey,
       requestParamsObj.txnInvocation,
       requestParamsObj.abis,
-      requestParamsObj.invocationsDetails,
+      {
+        ...requestParamsObj.invocationsDetails,
+        nonce: nonceSendTransaction
+      },
     );
   } catch (err) {
     logger.error(`Problem found: ${err}`);
