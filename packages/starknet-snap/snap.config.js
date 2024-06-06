@@ -1,17 +1,16 @@
-import envify from "envify/custom";
+import * as dotenv from "dotenv";
+dotenv.config();
 
 module.exports = {
-  cliOptions: {
-    dist: 'dist',
-    outfileName: 'bundle.js',
-    src: './src/index.ts',
-  },
-  bundlerCustomizer: (bundler) => {
-    bundler.transform(
-      envify({
-        SNAP_ENV: process.env.SNAP_ENV,
-        VOYAGER_API_KEY: process.env.VOYAGER_API_KEY,
-      }),
-    );
-  },
+    bundler: "webpack",
+    environment: {
+        SNAP_ENV: process.env.SNAP_ENV ?? "prod",
+        VOYAGER_API_KEY: process.env.VOYAGER_API_KEY ?? "",
+        ALCHEMY_API_KEY: process.env.ALCHEMY_API_KEY ?? "",
+    },
+    input: "./src/index.ts",
+    server: {
+        port: 8081,
+    },
+    polyfills: true
 };

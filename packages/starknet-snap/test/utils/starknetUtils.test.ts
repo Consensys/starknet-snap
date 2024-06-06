@@ -136,7 +136,7 @@ describe('Test function: callContract', function () {
 
   it('should get the signer of an user account correctly', async function () {
     sandbox.stub(utils, 'callContract').callsFake(async () => {
-      return { result: ['0x795d62a9896b221af17bedd8cceb8d963ac6864857d7476e2f8c03ba0c5df9'] };
+      return ['0x795d62a9896b221af17bedd8cceb8d963ac6864857d7476e2f8c03ba0c5df9'];
     });
 
     const result = await utils.getSigner(userAddress, STARKNET_SEPOLIA_TESTNET_NETWORK);
@@ -271,7 +271,7 @@ describe('Test function: getVersion', function () {
   const expected = '0.3.0';
 
   beforeEach(function () {
-    callContractStub = sandbox.stub(utils, 'callContract').callsFake(async () => ({ result: [expected] }));
+    callContractStub = sandbox.stub(utils, 'callContract').callsFake(async () => ([expected]));
   });
 
   afterEach(function () {
@@ -294,7 +294,7 @@ describe('Test function: getOwner', function () {
   const expected = 'pk';
 
   beforeEach(function () {
-    callContractStub = sandbox.stub(utils, 'callContract').callsFake(async () => ({ result: [expected] }));
+    callContractStub = sandbox.stub(utils, 'callContract').callsFake(async () => ([expected]));
   });
 
   afterEach(function () {
@@ -317,7 +317,7 @@ describe('Test function: getBalance', function () {
   const expected = 'pk';
 
   beforeEach(function () {
-    callContractStub = sandbox.stub(utils, 'callContract').callsFake(async () => ({ result: [expected] }));
+    callContractStub = sandbox.stub(utils, 'callContract').callsFake(async () => ([expected]));
   });
 
   afterEach(function () {

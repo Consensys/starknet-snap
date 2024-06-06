@@ -35,7 +35,6 @@ export async function signTransaction(params: ApiParams): Promise<Signature | bo
       privateKey,
       requestParamsObj.transactions,
       requestParamsObj.transactionsDetail,
-      requestParamsObj.abis,
     );
 
     return signatures;

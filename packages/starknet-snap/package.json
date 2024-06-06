@@ -1,25 +1,30 @@
 {
   "name": "@consensys/starknet-snap",
-  "version": "2.6.1",
+  "version": "2.7.0",
   "license": "(Apache-2.0 OR MIT)",
-  "main": "src/index.ts",
   "repository": {
     "type": "git",
     "url": "https://github.com/ConsenSys/starknet-snap.git"
   },
+  "main": "./dist/bundle.js",
+  "files": [
+    "dist/",
+    "images/",
+    "snap.manifest.json"
+  ],
   "scripts": {
     "setup": "yarn install --immutable && yarn allow-scripts",
     "build:clean": "yarn clean && yarn build",
     "build": "mm-snap build",
     "serve": "mm-snap serve",
     "clean": "rimraf js && rimraf dist",
-    "watch": "yarn build && concurrently --kill-others --names SNAP,SERVE -c bgMagenta.bold,bgGreen.bold \"yarn run watch:snap\" \"yarn run serve\"",
-    "watch:snap": "cross-env SNAP_ENV=prod mm-snap watch",
+    "watch": "mm-snap watch",
     "prettier": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "lint": "eslint . --max-warnings 0 -f json -o eslint-report.json",
     "lint:fix": "eslint '**/*.{js,ts,tsx}' --fix",
     "test": "yarn run test:unit && yarn run cover:report",
     "test:unit": "nyc --check-coverage --statements 80 --branches 80 --functions 80 --lines 80 mocha --colors -r ts-node/register \"test/**/*.test.ts\"",
+    "test:unit:one": "nyc --check-coverage --statements 80 --branches 80 --functions 80 --lines 80 mocha --colors -r ts-node/register",
     "cover:report": "nyc report --reporter=lcov --reporter=text"
   },
   "keywords": [],
@@ -39,7 +44,6 @@
     "chai-as-promised": "^7.1.1",
     "concurrently": "^7.1.0",
     "cross-env": "^7.0.3",
-    "envify": "^4.1.0",
     "eslint": "^8.13.0",
     "mocha": "^9.2.2",
     "nyc": "^15.1.0",
@@ -54,9 +58,10 @@
   "dependencies": {
     "@metamask/snaps-sdk": "3.0.1",
     "async-mutex": "^0.3.2",
+    "dotenv": "^16.4.5",
     "ethereum-unit-converter": "^0.0.17",
     "ethers": "^5.5.1",
-    "starknet": "^5.14.0",
+    "starknet": "6.7.0",
     "starknet_v4.22.0": "npm:starknet@4.22.0"
   },
   "publishConfig": {

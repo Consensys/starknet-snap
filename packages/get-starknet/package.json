@@ -1,0 +1,60 @@
+{
+  "name": "@consensys/get-starknet",
+  "version": "1.0.0",
+  "license": "(Apache-2.0 OR MIT)",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "/dist"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ConsenSys/starknet-snap.git"
+  },
+  "scripts": {
+    "start": "webpack-cli serve  --config webpack.serve.config.js",
+    "clean": "rimraf dist",
+    "setup": "yarn install --no-immutable",
+    "build": "tsc --project tsconfig.build.json",
+    "build:jsonp": "webpack --config webpack.config.jsonp.js",
+    "build:fed": "webpack --config webpack.config.prod.js",
+    "serve:fed": "webpack --config webpack.config.prod.js --env PUBLIC_PATH=http://localhost:8082 && webpack-cli serve --config webpack.config.dev.js",
+    "prettier": "prettier --write \"src/**/*.ts\"",
+    "lint": "eslint 'src/*.{js,ts,tsx}' --max-warnings 0 -f json -o eslint-report.json",
+    "lint:fix": "eslint '**/*.{js,ts,tsx}' --fix",
+    "test:unit": ""
+  },
+  "keywords": [],
+  "author": "Consensys",
+  "devDependencies": {
+    "@types/chai": "^4.3.1",
+    "@types/chai-as-promised": "^7.1.5",
+    "@types/sinon": "^10.0.11",
+    "@types/sinon-chai": "^3.2.8",
+    "@typescript-eslint/eslint-plugin": "^5.20.0",
+    "@typescript-eslint/parser": "^5.20.0",
+    "chai": "^4.3.6",
+    "chai-as-promised": "^7.1.1",
+    "depcheck": "^1.4.7",
+    "eslint": "^8.13.0",
+    "get-starknet-core": "^3.2.0",
+    "html-webpack-plugin": "5.6.0",
+    "prettier": "^2.6.2",
+    "rimraf": "^3.0.2",
+    "serve": "14.2.1",
+    "sinon": "^13.0.2",
+    "sinon-chai": "^3.7.0",
+    "ts-loader": "^9.5.1",
+    "typescript": "^4.6.3",
+    "webpack": "^5.91.0",
+    "webpack-cli": "^5.1.4",
+    "webpack-dev-server": "^5.0.4"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "dependencies": {
+    "starknet": "^5.14.0"
+  }
+}
