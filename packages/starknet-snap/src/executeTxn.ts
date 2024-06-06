@@ -18,10 +18,11 @@ export async function executeTxn(params: ApiParams) {
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
     const { 
       privateKey: senderPrivateKey,
+      publicKey,
       addressIndex,
     } = await getKeysFromAddress(keyDeriver, network, state, senderAddress);
 
-    const accountDeployed = await isAccountDeployed(network, senderAddress);
+    const accountDeployed = await isAccountDeployed(network, publicKey);
     if (!accountDeployed) {
       const response = await wallet.request({
         method: 'snap_dialog',
