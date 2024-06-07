@@ -237,6 +237,23 @@ describe('Test function: validateAndParseAddress', function () {
   });
 });
 
+describe('Test function: waitForTransaction', function () {
+  const walletStub = new WalletMock();
+  const userAddress = '0x27f204588cadd08a7914f6a9808b34de0cbfc4cb53aa053663e7fd3a34dbc26';
+
+  afterEach(function () {
+    walletStub.reset();
+    sandbox.restore();
+  });
+
+  it('pass parameter to waitForTransaction correctly', async function () {
+    const stub = sandbox.stub(utils, 'waitForTransaction');
+    stub.resolves({} as unknown as GetTransactionReceiptResponse);
+    await utils.waitForTransaction(STARKNET_SEPOLIA_TESTNET_NETWORK, userAddress, 'pk', 'txHash');
+    expect(stub).to.have.been.calledWith(STARKNET_SEPOLIA_TESTNET_NETWORK, userAddress, 'pk', 'txHash');
+  });
+});
+
 describe('Test function: getPermutationAddresses', function () {
   let getAccContractAddressAndCallDataStub: sinon.SinonStub;
   let getAccContractAddressAndCallDataLegacy: sinon.SinonStub;

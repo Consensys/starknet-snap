@@ -26,6 +26,7 @@ import {
 import { getAddressKeyDeriver } from '../../src/utils/keyPair';
 import { Mutex } from 'async-mutex';
 import { ApiParams, SendTransactionRequestParams } from '../../src/types/snapApi';
+import { GetTransactionReceiptResponse } from 'starknet';
 
 chai.use(sinonChai);
 chai.use(chaiAsPromised);
@@ -58,6 +59,19 @@ describe('Test function: sendTransaction', function () {
   beforeEach(async function () {
     walletStub.rpcStubs.snap_getBip44Entropy.callsFake(getBip44EntropyStub);
     apiParams.keyDeriver = await getAddressKeyDeriver(walletStub);
+    sandbox.stub(utils, 'estimateFeeBulk').callsFake(async () => {
+      return [estimateFeeResp];
+    });
+    sandbox.stub(utils, 'estimateFee').callsFake(async () => {
+      return estimateFeeResp;
+    });
+    executeTxnResp = sendTransactionResp;
+    sandbox.stub(utils, 'executeTxn').callsFake(async () => {
+      return executeTxnResp;
+    });
+    walletStub.rpcStubs.snap_dialog.resolves(true);
+    walletStub.rpcStubs.snap_manageState.resolves(state);
+    sandbox.stub(utils, 'waitForTransaction').resolves({} as unknown as GetTransactionReceiptResponse);
   });
 
   afterEach(function () {

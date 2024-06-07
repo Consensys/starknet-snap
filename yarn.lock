@@ -3246,7 +3246,7 @@ __metadata:
 
 "@consensys/starknet-snap@file:../starknet-snap::locator=wallet-ui%40workspace%3Apackages%2Fwallet-ui":
   version: 2.7.0
-  resolution: "@consensys/starknet-snap@file:../starknet-snap#../starknet-snap::hash=660e3f&locator=wallet-ui%40workspace%3Apackages%2Fwallet-ui"
+  resolution: "@consensys/starknet-snap@file:../starknet-snap#../starknet-snap::hash=099522&locator=wallet-ui%40workspace%3Apackages%2Fwallet-ui"
   dependencies:
     "@metamask/snaps-sdk": 3.0.1
     async-mutex: ^0.3.2
