@@ -33,6 +33,8 @@ import {
   DeployAccountSignerDetails,
   InvocationsSignerDetails,
   ProviderInterface,
+  CairoVersion,
+  GetTransactionReceiptResponse,
 } from 'starknet';
 import { Network, SnapState, Transaction, TransactionType } from '../types/snapState';
 import { ACCOUNT_CLASS_HASH_V0, PROXY_CONTRACT_HASH, TRANSFER_SELECTOR_HEX } from './constants';
@@ -106,6 +108,18 @@ export const estimateFee = async (
     skipValidate: false,
     blockIdentifier: 'latest',
   });
+};
+
+export const waitForTransaction = async (
+  network: Network,
+  senderAddress: string,
+  privateKey: string | Uint8Array,
+  txnHash: num.BigNumberish,
+  cairoVersion?: CairoVersion,
+): Promise<GetTransactionReceiptResponse> => {
+  const provider = getProvider(network);
+  const account = new Account(provider, senderAddress, privateKey, cairoVersion ?? '0');
+  return account.waitForTransaction(txnHash);
 };
 
 export const estimateFeeBulk = async (
