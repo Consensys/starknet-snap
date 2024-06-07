@@ -23,6 +23,7 @@ export async function executeTxn(params: ApiParams) {
     } = await getKeysFromAddress(keyDeriver, network, state, senderAddress);
 
     const accountDeployed = await isAccountDeployed(network, publicKey);
+    let accountDeployedFirst = false;
     if (!accountDeployed) {
       const response = await wallet.request({
         method: 'snap_dialog',
@@ -46,7 +47,8 @@ export async function executeTxn(params: ApiParams) {
           chainId: requestParamsObj.chainId,
         },
       };
-      await createAccount(createAccountApiParams, true);
+      await createAccount(createAccountApiParams, true, true);
+      accountDeployedFirst = true;
     }
 
     const snapComponents = getTxnSnapTxt(
@@ -66,17 +68,17 @@ export async function executeTxn(params: ApiParams) {
     });
     if (!response) return false;
     //In case this is the first transaction we assign a nonce of 1 to make sure it does after the deploy transaction
-    const nonceSendTransaction = accountDeployed ? undefined : 1;
+    const invocationsDetails = accountDeployedFirst ? {
+      ...requestParamsObj.invocationsDetails,
+      nonce: 1
+    } : requestParamsObj.invocationsDetails;
     return await executeTxnUtil(
       network,
       senderAddress,
       senderPrivateKey,
       requestParamsObj.txnInvocation,
       requestParamsObj.abis,
-      {
-        ...requestParamsObj.invocationsDetails,
-        nonce: nonceSendTransaction
-      },
+      invocationsDetails,
     );
   } catch (err) {
     logger.error(`Problem found: ${err}`);
