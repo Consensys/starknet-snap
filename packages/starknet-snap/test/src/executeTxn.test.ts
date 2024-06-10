@@ -6,10 +6,11 @@ import * as utils from '../../src/utils/starknetUtils';
 import { executeTxn } from '../../src/executeTxn';
 import { SnapState } from '../../src/types/snapState';
 import { STARKNET_MAINNET_NETWORK, STARKNET_SEPOLIA_TESTNET_NETWORK } from '../../src/utils/constants';
-import { createAccountProxyTxn, getBip44EntropyStub, account1 } from '../constants.test';
+import { createAccountProxyTxn, createAccountProxyResp, estimateDeployFeeResp, getBip44EntropyStub, account1, estimateFeeResp, sendTransactionResp } from '../constants.test';
 import { getAddressKeyDeriver } from '../../src/utils/keyPair';
 import { Mutex } from 'async-mutex';
 import { ApiParams, ExecuteTxnRequestParams } from '../../src/types/snapApi';
+import { GetTransactionReceiptResponse } from 'starknet';
 
 chai.use(sinonChai);
 const sandbox = sinon.createSandbox();
@@ -18,7 +19,7 @@ describe('Test function: executeTxn', function () {
   this.timeout(10000);
   const walletStub = new WalletMock();
   const state: SnapState = {
-    accContracts: [],
+    accContracts: [account1],
     erc20Tokens: [],
     networks: [STARKNET_MAINNET_NETWORK, STARKNET_SEPOLIA_TESTNET_NETWORK],
     transactions: [],
@@ -47,9 +48,28 @@ describe('Test function: executeTxn', function () {
     walletStub.rpcStubs.snap_getBip44Entropy.callsFake(getBip44EntropyStub);
     apiParams.keyDeriver = await getAddressKeyDeriver(walletStub);
     apiParams.requestParams = requestObject;
+    sandbox.stub(utils, 'estimateFeeBulk').callsFake(async () => {
+      return [estimateFeeResp];
+    });
+    sandbox.stub(utils, 'estimateFee').callsFake(async () => {
+      return estimateFeeResp;
+    });
+    sandbox.stub(utils, 'isAccountDeployed').callsFake(async () => {
+      return false;
+    });
+    sandbox.stub(utils, 'deployAccount').callsFake(async () => {
+      return createAccountProxyResp;
+    });
+    sandbox.stub(utils, 'estimateAccountDeployFee').callsFake(async () => {
+      return estimateDeployFeeResp;
+    });
+    sandbox.stub(utils, 'getSigner').callsFake(async () => {
+      return account1.publicKey;
+    });
     sandbox.useFakeTimers(createAccountProxyTxn.timestamp);
     walletStub.rpcStubs.snap_dialog.resolves(true);
     walletStub.rpcStubs.snap_manageState.resolves(state);
+    sandbox.stub(utils, 'waitForTransaction').resolves({} as unknown as GetTransactionReceiptResponse);
   });
 
   afterEach(function () {
@@ -84,7 +104,7 @@ describe('Test function: executeTxn', function () {
         contractAddress: createAccountProxyTxn.contractAddress,
       },
       undefined,
-      { maxFee: 100 },
+      { maxFee: 100, nonce: 1 },
     );
   });
 
@@ -140,7 +160,7 @@ describe('Test function: executeTxn', function () {
         },
       ],
       undefined,
-      { maxFee: 100 },
+      { maxFee: 100, nonce: 1 },
     );
   });
 
@@ -170,7 +190,7 @@ describe('Test function: executeTxn', function () {
           contractAddress: createAccountProxyTxn.contractAddress,
         },
         undefined,
-        { maxFee: 100 },
+        { maxFee: 100, nonce: 1 },
       );
     }
   });
@@ -180,6 +200,7 @@ describe('Test function: executeTxn', function () {
     const stub = sandbox.stub(utils, 'executeTxn').resolves({
       transaction_hash: 'transaction_hash',
     });
+  
     const result = await executeTxn(apiParams);
     expect(result).to.equal(false);
     expect(stub).to.have.been.not.called;
