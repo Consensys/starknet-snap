@@ -31,7 +31,6 @@ import {
   UniversalDetails,
   DeclareSignerDetails,
   DeployAccountSignerDetails,
-  CairoVersion,
   InvocationsSignerDetails,
   ProviderInterface,
   CairoVersion,

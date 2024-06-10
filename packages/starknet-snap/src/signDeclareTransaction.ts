@@ -15,7 +15,7 @@ export async function signDeclareTransaction(params: ApiParams): Promise<Signatu
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
     const { privateKey } = await getKeysFromAddress(keyDeriver, network, state, signerAddress);
 
-    if(isUpgradeRequired(network, signerAddress)){
+    if(await isUpgradeRequired(network, signerAddress)){
       showUpgradeRequestModal(wallet);
       return false;
     }

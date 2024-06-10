@@ -14,7 +14,7 @@ export async function signMessage(params: ApiParams) {
     const typedDataMessage = requestParamsObj.typedDataMessage;
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
 
-    if(isUpgradeRequired(network, signerAddress)){
+    if(await isUpgradeRequired(network, signerAddress)){
       showUpgradeRequestModal(wallet);
       return false;
     }

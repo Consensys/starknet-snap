@@ -2,6 +2,7 @@ import { toJson } from './utils/serializer';
 import { ApiParams, DeclareContractRequestParams } from './types/snapApi';
 import { getNetworkFromChainId, getDeclareSnapTxt, showUpgradeRequestModal } from './utils/snapUtils';
 import { getKeysFromAddress, declareContract as declareContractUtil, isUpgradeRequired } from './utils/starknetUtils';
+import * as utils from './utils/starknetUtils';
 import { DialogType } from '@metamask/rpc-methods';
 import { heading, panel } from '@metamask/snaps-sdk';
 import { logger } from './utils/logger';
@@ -17,11 +18,10 @@ export async function declareContract(params: ApiParams) {
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
     const { privateKey } = await getKeysFromAddress(keyDeriver, network, state, senderAddress);
     
-    if(isUpgradeRequired(network, senderAddress)){
+    if(await isUpgradeRequired(network, senderAddress)){
       showUpgradeRequestModal(wallet);
       return false;
     }
-
     const snapComponents = getDeclareSnapTxt(
       senderAddress,
       network,
@@ -36,10 +36,9 @@ export async function declareContract(params: ApiParams) {
         content: panel([heading('Do you want to sign this transaction?'), ...snapComponents]),
       },
     });
-
+    
     if (!response) return false;
-
-    return await declareContractUtil(
+    return await utils.declareContract(
       network,
       senderAddress,
       privateKey,
