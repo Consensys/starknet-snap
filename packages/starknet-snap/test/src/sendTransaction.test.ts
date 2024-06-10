@@ -26,6 +26,7 @@ import {
 import { getAddressKeyDeriver } from '../../src/utils/keyPair';
 import { Mutex } from 'async-mutex';
 import { ApiParams, SendTransactionRequestParams } from '../../src/types/snapApi';
+import { GetTransactionReceiptResponse } from 'starknet';
 
 chai.use(sinonChai);
 chai.use(chaiAsPromised);
@@ -55,9 +56,22 @@ describe('Test function: sendTransaction', function () {
     chainId: STARKNET_SEPOLIA_TESTNET_NETWORK.chainId,
   };
 
+  let executeTxnResp;
+  let executeTxnStub: sinon.SinonStub;
   beforeEach(async function () {
     walletStub.rpcStubs.snap_getBip44Entropy.callsFake(getBip44EntropyStub);
     apiParams.keyDeriver = await getAddressKeyDeriver(walletStub);
+    sandbox.stub(utils, 'estimateFeeBulk').callsFake(async () => {
+      return [estimateFeeResp];
+    });
+    sandbox.stub(utils, 'estimateFee').callsFake(async () => {
+      return estimateFeeResp;
+    });
+    executeTxnResp = sendTransactionResp;
+    executeTxnStub = sandbox.stub(utils, 'executeTxn').resolves(executeTxnResp);
+    walletStub.rpcStubs.snap_dialog.resolves(true);
+    walletStub.rpcStubs.snap_manageState.resolves(state);
+    sandbox.stub(utils, 'waitForTransaction').resolves({} as unknown as GetTransactionReceiptResponse);
   });
 
   afterEach(function () {
@@ -207,8 +221,6 @@ describe('Test function: sendTransaction', function () {
     });
 
     describe('when account do not require upgrade', function () {
-      let executeTxnResp;
-      let executeTxnStub: sinon.SinonStub;
       beforeEach(async function () {
         apiParams.requestParams = {
           ...apiParams.requestParams,
@@ -223,8 +235,6 @@ describe('Test function: sendTransaction', function () {
           unit: 'wei',
           includeDeploy: true,
         });
-        executeTxnResp = sendTransactionResp;
-        executeTxnStub = sandbox.stub(utils, 'executeTxn').resolves(executeTxnResp);
         walletStub.rpcStubs.snap_manageState.resolves(state);
         walletStub.rpcStubs.snap_dialog.resolves(true);
       });

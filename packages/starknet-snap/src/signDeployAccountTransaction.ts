@@ -19,7 +19,7 @@ export async function signDeployAccountTransaction(params: ApiParams): Promise<S
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
     const { privateKey } = await getKeysFromAddress(keyDeriver, network, state, signerAddress);
 
-    if(isUpgradeRequired(network, signerAddress)){
+    if(await isUpgradeRequired(network, signerAddress)){
       showUpgradeRequestModal(wallet);
       return false;
     }

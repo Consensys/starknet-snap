@@ -104,7 +104,7 @@ export async function sendTransaction(params: ApiParams) {
           chainId: requestParamsObj.chainId,
         },
       };
-      await createAccount(createAccountApiParams, true);
+      await createAccount(createAccountApiParams, true, true);
     }
 
     //In case this is the first transaction we assign a nonce of 1 to make sure it does after the deploy transaction
