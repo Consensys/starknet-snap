@@ -56,6 +56,8 @@ describe('Test function: sendTransaction', function () {
     chainId: STARKNET_SEPOLIA_TESTNET_NETWORK.chainId,
   };
 
+  let executeTxnResp;
+  let executeTxnStub: sinon.SinonStub;
   beforeEach(async function () {
     walletStub.rpcStubs.snap_getBip44Entropy.callsFake(getBip44EntropyStub);
     apiParams.keyDeriver = await getAddressKeyDeriver(walletStub);
@@ -66,9 +68,7 @@ describe('Test function: sendTransaction', function () {
       return estimateFeeResp;
     });
     executeTxnResp = sendTransactionResp;
-    sandbox.stub(utils, 'executeTxn').callsFake(async () => {
-      return executeTxnResp;
-    });
+    executeTxnStub = sandbox.stub(utils, 'executeTxn').resolves(executeTxnResp);
     walletStub.rpcStubs.snap_dialog.resolves(true);
     walletStub.rpcStubs.snap_manageState.resolves(state);
     sandbox.stub(utils, 'waitForTransaction').resolves({} as unknown as GetTransactionReceiptResponse);
@@ -221,8 +221,6 @@ describe('Test function: sendTransaction', function () {
     });
 
     describe('when account do not require upgrade', function () {
-      let executeTxnResp;
-      let executeTxnStub: sinon.SinonStub;
       beforeEach(async function () {
         apiParams.requestParams = {
           ...apiParams.requestParams,
@@ -237,8 +235,6 @@ describe('Test function: sendTransaction', function () {
           unit: 'wei',
           includeDeploy: true,
         });
-        executeTxnResp = sendTransactionResp;
-        executeTxnStub = sandbox.stub(utils, 'executeTxn').resolves(executeTxnResp);
         walletStub.rpcStubs.snap_manageState.resolves(state);
         walletStub.rpcStubs.snap_dialog.resolves(true);
       });

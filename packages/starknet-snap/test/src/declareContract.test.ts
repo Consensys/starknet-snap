@@ -56,11 +56,13 @@ describe('Test function: declareContract', function () {
   });
 
   it('should declareContract correctly', async function () {
+    const isUpgradeRequiredStub = sandbox.stub(utils, 'isUpgradeRequired').resolves(false);
     const declareContractStub = sandbox.stub(utils, 'declareContract').resolves({
       transaction_hash: 'transaction_hash',
       class_hash: 'class_hash',
     });
     const result = await declareContract(apiParams);
+    expect(isUpgradeRequiredStub).to.have.been.calledOnce;
     const { privateKey } = await utils.getKeysFromAddress(
       apiParams.keyDeriver,
       STARKNET_SEPOLIA_TESTNET_NETWORK,
@@ -83,6 +85,7 @@ describe('Test function: declareContract', function () {
   });
 
   it('should throw error if declareContract fail', async function () {
+    const isUpgradeRequiredStub = sandbox.stub(utils, 'isUpgradeRequired').resolves(false);
     const declareContractStub = sandbox.stub(utils, 'declareContract').rejects('error');
     const { privateKey } = await utils.getKeysFromAddress(
       apiParams.keyDeriver,
@@ -96,6 +99,7 @@ describe('Test function: declareContract', function () {
     } catch (e) {
       result = e;
     } finally {
+      expect(isUpgradeRequiredStub).to.have.been.calledOnce;
       expect(result).to.be.an('Error');
       expect(declareContractStub).to.have.been.calledOnce;
       expect(declareContractStub).to.have.been.calledWith(
@@ -109,12 +113,14 @@ describe('Test function: declareContract', function () {
   });
 
   it('should return false if user rejected to sign the transaction', async function () {
+    const isUpgradeRequiredStub = sandbox.stub(utils, 'isUpgradeRequired').resolves(false);
     walletStub.rpcStubs.snap_dialog.resolves(false);
     const declareContractStub = sandbox.stub(utils, 'declareContract').resolves({
       transaction_hash: 'transaction_hash',
       class_hash: 'class_hash',
     });
     const result = await declareContract(apiParams);
+    expect(isUpgradeRequiredStub).to.have.been.calledOnce;
     expect(result).to.equal(false);
     expect(declareContractStub).to.have.been.not.called;
   });

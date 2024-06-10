@@ -14,7 +14,7 @@ import {
   account3,
 } from '../constants.test';
 import { SnapState } from '../../src/types/snapState';
-import { Calldata, num, Account, Provider } from 'starknet';
+import { Calldata, num, Account, Provider, GetTransactionReceiptResponse } from 'starknet';
 import { hexToString } from '../../src/utils/formatterUtils';
 
 chai.use(sinonChai);

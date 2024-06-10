@@ -58,107 +58,27 @@ describe('Test function: executeTxn', function () {
     apiParams.requestParams = requestObject;
   });
 
-  it('should executeTxn correctly', async function () {
-    const stub = sandbox.stub(utils, 'executeTxn').resolves({
-      transaction_hash: 'transaction_hash',
+  describe('when account is deployed and does not require update', function () {
+    beforeEach(async function () {
+      sandbox.stub(utils, 'getCorrectContractAddress').resolves({address: "", signerPubKey: "", upgradeRequired: false});
+      sandbox.stub(utils, 'isAccountDeployed').resolves(true);
     });
-    const result = await executeTxn(apiParams);
-    const { privateKey } = await utils.getKeysFromAddress(
-      apiParams.keyDeriver,
-      STARKNET_MAINNET_NETWORK,
-      state,
-      account1.address,
-    );
-
-    expect(result).to.eql({
-      transaction_hash: 'transaction_hash',
-    });
-    expect(stub).to.have.been.calledOnce;
-    expect(stub).to.have.been.calledWith(
-      STARKNET_MAINNET_NETWORK,
-      account1.address,
-      privateKey,
-      {
-        entrypoint: 'transfer',
-        calldata: ['0', '0', '0'],
-        contractAddress: createAccountProxyTxn.contractAddress,
-      },
-      undefined,
-      { maxFee: 100 },
-    );
-  });
-
-  it('should executeTxn multiple', async function () {
-    const stub = sandbox.stub(utils, 'executeTxn').resolves({
-      transaction_hash: 'transaction_hash',
-    });
-    apiParams.requestParams = {
-      chainId: STARKNET_MAINNET_NETWORK.chainId,
-      senderAddress: account1.address,
-      txnInvocation: [
-        {
-          entrypoint: 'transfer',
-          calldata: ['0', '0', '0'],
-          contractAddress: createAccountProxyTxn.contractAddress,
-        },
-        {
-          entrypoint: 'transfer2',
-          calldata: ['0', '0', '0'],
-          contractAddress: createAccountProxyTxn.contractAddress,
-        },
-      ],
-      invocationsDetails: {
-        maxFee: 100,
-      },
-    };
-    const result = await executeTxn(apiParams);
-    const { privateKey } = await utils.getKeysFromAddress(
-      apiParams.keyDeriver,
-      STARKNET_MAINNET_NETWORK,
-      state,
-      account1.address,
-    );
-
-    expect(result).to.eql({
-      transaction_hash: 'transaction_hash',
-    });
-    expect(stub).to.have.been.calledOnce;
-    expect(stub).to.have.been.calledWith(
-      STARKNET_MAINNET_NETWORK,
-      account1.address,
-      privateKey,
-      [
-        {
-          entrypoint: 'transfer',
-          calldata: ['0', '0', '0'],
-          contractAddress: createAccountProxyTxn.contractAddress,
-        },
-        {
-          entrypoint: 'transfer2',
-          calldata: ['0', '0', '0'],
-          contractAddress: createAccountProxyTxn.contractAddress,
-        },
-      ],
-      undefined,
-      { maxFee: 100 },
-    );
-  });
-
-  it('should throw error if executeTxn fail', async function () {
-    const stub = sandbox.stub(utils, 'executeTxn').rejects('error');
-    const { privateKey } = await utils.getKeysFromAddress(
-      apiParams.keyDeriver,
-      STARKNET_MAINNET_NETWORK,
-      state,
-      account1.address,
-    );
-    let result;
-    try {
-      await executeTxn(apiParams);
-    } catch (e) {
-      result = e;
-    } finally {
-      expect(result).to.be.an('Error');
+    
+    it('should executeTxn correctly', async function () {
+      const stub = sandbox.stub(utils, 'executeTxn').resolves({
+        transaction_hash: 'transaction_hash',
+      });
+      const result = await executeTxn(apiParams);
+      const { privateKey } = await utils.getKeysFromAddress(
+        apiParams.keyDeriver,
+        STARKNET_MAINNET_NETWORK,
+        state,
+        account1.address,
+      );
+  
+      expect(result).to.eql({
+        transaction_hash: 'transaction_hash',
+      });
       expect(stub).to.have.been.calledOnce;
       expect(stub).to.have.been.calledWith(
         STARKNET_MAINNET_NETWORK,
@@ -172,16 +92,103 @@ describe('Test function: executeTxn', function () {
         undefined,
         { maxFee: 100 },
       );
-    }
-  });
-
-  it('should return false if user rejected to sign the transaction', async function () {
-    walletStub.rpcStubs.snap_dialog.resolves(false);
-    const stub = sandbox.stub(utils, 'executeTxn').resolves({
-      transaction_hash: 'transaction_hash',
     });
-    const result = await executeTxn(apiParams);
-    expect(result).to.equal(false);
-    expect(stub).to.have.been.not.called;
-  });
+  
+    it('should executeTxn multiple', async function () {
+      const stub = sandbox.stub(utils, 'executeTxn').resolves({
+        transaction_hash: 'transaction_hash',
+      });
+      apiParams.requestParams = {
+        chainId: STARKNET_MAINNET_NETWORK.chainId,
+        senderAddress: account1.address,
+        txnInvocation: [
+          {
+            entrypoint: 'transfer',
+            calldata: ['0', '0', '0'],
+            contractAddress: createAccountProxyTxn.contractAddress,
+          },
+          {
+            entrypoint: 'transfer2',
+            calldata: ['0', '0', '0'],
+            contractAddress: createAccountProxyTxn.contractAddress,
+          },
+        ],
+        invocationsDetails: {
+          maxFee: 100,
+        },
+      };
+      const result = await executeTxn(apiParams);
+      const { privateKey } = await utils.getKeysFromAddress(
+        apiParams.keyDeriver,
+        STARKNET_MAINNET_NETWORK,
+        state,
+        account1.address,
+      );
+  
+      expect(result).to.eql({
+        transaction_hash: 'transaction_hash',
+      });
+      expect(stub).to.have.been.calledOnce;
+      expect(stub).to.have.been.calledWith(
+        STARKNET_MAINNET_NETWORK,
+        account1.address,
+        privateKey,
+        [
+          {
+            entrypoint: 'transfer',
+            calldata: ['0', '0', '0'],
+            contractAddress: createAccountProxyTxn.contractAddress,
+          },
+          {
+            entrypoint: 'transfer2',
+            calldata: ['0', '0', '0'],
+            contractAddress: createAccountProxyTxn.contractAddress,
+          },
+        ],
+        undefined,
+        { maxFee: 100 },
+      );
+    });
+  
+    it('should throw error if executeTxn fail', async function () {
+      const stub = sandbox.stub(utils, 'executeTxn').rejects('error');
+      const { privateKey } = await utils.getKeysFromAddress(
+        apiParams.keyDeriver,
+        STARKNET_MAINNET_NETWORK,
+        state,
+        account1.address,
+      );
+      let result;
+      try {
+        await executeTxn(apiParams);
+      } catch (e) {
+        result = e;
+      } finally {
+        expect(result).to.be.an('Error');
+        expect(stub).to.have.been.calledOnce;
+        expect(stub).to.have.been.calledWith(
+          STARKNET_MAINNET_NETWORK,
+          account1.address,
+          privateKey,
+          {
+            entrypoint: 'transfer',
+            calldata: ['0', '0', '0'],
+            contractAddress: createAccountProxyTxn.contractAddress,
+          },
+          undefined,
+          { maxFee: 100 },
+        );
+      }
+    });
+  
+    it('should return false if user rejected to sign the transaction', async function () {
+      walletStub.rpcStubs.snap_dialog.resolves(false);
+      const stub = sandbox.stub(utils, 'executeTxn').resolves({
+        transaction_hash: 'transaction_hash',
+      });
+      const result = await executeTxn(apiParams);
+      expect(result).to.equal(false);
+      expect(stub).to.have.been.not.called;
+    });
+  })
 });

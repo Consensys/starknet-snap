@@ -54,6 +54,7 @@ describe('Test function: signDeclareTransaction', function () {
     sandbox.useFakeTimers(createAccountProxyTxn.timestamp);
     walletStub.rpcStubs.snap_dialog.resolves(true);
     walletStub.rpcStubs.snap_manageState.resolves(state);
+    sandbox.stub(utils, 'isUpgradeRequired').resolves(false);
   });
 
   afterEach(function () {
