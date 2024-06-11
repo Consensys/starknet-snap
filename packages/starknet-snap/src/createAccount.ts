@@ -24,6 +24,13 @@ import { DialogType } from '@metamask/rpc-methods';
 import { heading, panel, text } from '@metamask/snaps-sdk';
 import { logger } from './utils/logger';
 
+/**
+ * Create an starknet account.
+ *
+ * @template Params - The ApiParams of the request.
+ * @param silentMode - The flag to disable the confirmation dialog from snap.
+ * @param waitMode - The flag to enable an determination by doing an recursive fetch to check if the deploy account status is on L2 or not. The wait mode is only useful when it compose with other txn together, it can make sure the deploy txn execute complete, avoiding the latter txn failed.
+ */
 export async function createAccount(params: ApiParams, silentMode = false, waitMode = false) {
   try {
     const { state, wallet, saveMutex, keyDeriver, requestParams } = params;
