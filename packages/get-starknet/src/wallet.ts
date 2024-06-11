@@ -27,7 +27,7 @@ export class MetaMaskSnapWallet implements IStarknetWindowObject {
   metamaskProvider: MetaMaskProvider;
 
   private static readonly cairoVersion = '0';
-  private static readonly SNAPI_ID = 'npm:@consensys/starknet-snap';
+  private static readonly SNAPI_ID =  process.env.SNAP_ID;
 
   constructor(metamaskProvider: MetaMaskProvider, snapVersion = '*') {
     this.id = 'metamask';
