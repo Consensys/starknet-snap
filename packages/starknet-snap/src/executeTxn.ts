@@ -16,7 +16,7 @@ export async function executeTxn(params: ApiParams) {
 
     const senderAddress = requestParamsObj.senderAddress;
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
-    const { 
+    const {
       privateKey: senderPrivateKey,
       publicKey,
       addressIndex,
@@ -68,10 +68,12 @@ export async function executeTxn(params: ApiParams) {
     });
     if (!response) return false;
     //In case this is the first transaction we assign a nonce of 1 to make sure it does after the deploy transaction
-    const invocationsDetails = accountDeployedFirst ? {
-      ...requestParamsObj.invocationsDetails,
-      nonce: 1
-    } : requestParamsObj.invocationsDetails;
+    const invocationsDetails = accountDeployedFirst
+      ? {
+          ...requestParamsObj.invocationsDetails,
+          nonce: 1,
+        }
+      : requestParamsObj.invocationsDetails;
     return await executeTxnUtil(
       network,
       senderAddress,

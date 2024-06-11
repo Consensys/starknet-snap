@@ -6,7 +6,15 @@ import * as utils from '../../src/utils/starknetUtils';
 import { executeTxn } from '../../src/executeTxn';
 import { SnapState } from '../../src/types/snapState';
 import { STARKNET_MAINNET_NETWORK, STARKNET_SEPOLIA_TESTNET_NETWORK } from '../../src/utils/constants';
-import { createAccountProxyTxn, createAccountProxyResp, estimateDeployFeeResp, getBip44EntropyStub, account1, estimateFeeResp, sendTransactionResp } from '../constants.test';
+import {
+  createAccountProxyTxn,
+  createAccountProxyResp,
+  estimateDeployFeeResp,
+  getBip44EntropyStub,
+  account1,
+  estimateFeeResp,
+  sendTransactionResp,
+} from '../constants.test';
 import { getAddressKeyDeriver } from '../../src/utils/keyPair';
 import { Mutex } from 'async-mutex';
 import { ApiParams, ExecuteTxnRequestParams } from '../../src/types/snapApi';
@@ -200,7 +208,7 @@ describe('Test function: executeTxn', function () {
     const stub = sandbox.stub(utils, 'executeTxn').resolves({
       transaction_hash: 'transaction_hash',
     });
-  
+
     const result = await executeTxn(apiParams);
     expect(result).to.equal(false);
     expect(stub).to.have.been.not.called;
