@@ -13,7 +13,6 @@ import {
   getBip44EntropyStub,
   account1,
   estimateFeeResp,
-  sendTransactionResp,
 } from '../constants.test';
 import { getAddressKeyDeriver } from '../../src/utils/keyPair';
 import { Mutex } from 'async-mutex';
