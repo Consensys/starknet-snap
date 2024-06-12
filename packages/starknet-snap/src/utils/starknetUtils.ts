@@ -388,12 +388,15 @@ export const getMassagedTransactions = async (
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         contractAddress: txnResp.calldata?.[1] || txnResp.contract_address || txn.contract_address || '',
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
+
         contractFuncName:
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
           num.toBigInt(txnResp.calldata?.[2] || '') === bigIntTransferSelectorHex
             ? 'transfer'
-            : num.toBigInt(txnResp.calldata?.[2] || '') === bigIntUpgradeSelectorHex
+            : // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            num.toBigInt(txnResp.calldata?.[2] || '') === bigIntUpgradeSelectorHex
             ? 'upgrade'
             : txn.operations ?? '',
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
