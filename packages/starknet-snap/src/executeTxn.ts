@@ -1,18 +1,29 @@
 import { toJson } from './utils/serializer';
-import { getNetworkFromChainId, getTxnSnapTxt } from './utils/snapUtils';
+import { CallDetails } from 'starknet';
+import { getNetworkFromChainId, getTxnSnapTxt, addDialogTxt } from './utils/snapUtils';
 import { getKeysFromAddress, executeTxn as executeTxnUtil, isAccountDeployed } from './utils/starknetUtils';
-import { ApiParams, ExecuteTxnRequestParams } from './types/snapApi';
+import { ApiParams, EstimateFeeRequestParams, ExecuteTxnRequestParams } from './types/snapApi';
 import { createAccount } from './createAccount';
 import { DialogType } from '@metamask/rpc-methods';
-import { heading, panel, text } from '@metamask/snaps-sdk';
+import { heading, panel, text, divider } from '@metamask/snaps-sdk';
 import { logger } from './utils/logger';
+import { estimateFee } from './estimateFee';
 
 export async function executeTxn(params: ApiParams) {
   try {
     const { state, keyDeriver, requestParams, wallet } = params;
     const requestParamsObj = requestParams as ExecuteTxnRequestParams;
+    const requestParamsObjEstimateFee = requestParams as EstimateFeeRequestParams;
 
-    logger.log(`executeTxn params: ${toJson(requestParamsObj, 2)}}`);
+    requestParamsObjEstimateFee.senderAddress = requestParamsObj.senderAddress;
+    requestParamsObjEstimateFee.contractAddress = (requestParamsObj.txnInvocation as CallDetails).contractAddress;
+    requestParamsObjEstimateFee.contractFuncName = (requestParamsObj.txnInvocation as CallDetails).entrypoint;
+    requestParamsObjEstimateFee.contractCallData = (
+      (requestParamsObj.txnInvocation as CallDetails).calldata as String[]
+    ).join(',');
+
+    logger.log(`executeTxn params: ${toJson(requestParamsObj, 2)}`);
+    const estimateFeeResp = await estimateFee({ ...params, ...requestParamsObjEstimateFee });
 
     const senderAddress = requestParamsObj.senderAddress;
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
@@ -21,22 +32,19 @@ export async function executeTxn(params: ApiParams) {
       publicKey,
       addressIndex,
     } = await getKeysFromAddress(keyDeriver, network, state, senderAddress);
-
     const accountDeployed = await isAccountDeployed(network, publicKey);
-    let accountDeployedFirst = false;
+    const maxFee = estimateFeeResp.suggestedMaxFee.toString(10);
+
+    let snapComponents = [];
+    let createAccountApiParams: ApiParams;
     if (!accountDeployed) {
-      const response = await wallet.request({
-        method: 'snap_dialog',
-        params: {
-          type: DialogType.Confirmation,
-          content: panel([
-            heading('Account Deployment Required'),
-            text(`We need to deploy your account together with your first transaction.`),
-          ]),
-        },
-      });
-      if (!response) return false;
-      const createAccountApiParams = {
+      snapComponents.push(heading(`The account will be deployed`));
+      const components = [];
+      addDialogTxt(snapComponents, 'Address', senderAddress);
+      addDialogTxt(snapComponents, 'Public Key', publicKey);
+      addDialogTxt(snapComponents, 'Address Index', addressIndex.toString());
+      snapComponents.push(divider());
+      createAccountApiParams = {
         state,
         wallet: params.wallet,
         saveMutex: params.saveMutex,
@@ -46,17 +54,17 @@ export async function executeTxn(params: ApiParams) {
           deploy: true,
           chainId: requestParamsObj.chainId,
         },
-      };
-      await createAccount(createAccountApiParams, true, true);
-      accountDeployedFirst = true;
+      } as ApiParams;
     }
 
-    const snapComponents = getTxnSnapTxt(
-      senderAddress,
-      network,
-      requestParamsObj.txnInvocation,
-      requestParamsObj.abis,
-      requestParamsObj.invocationsDetails,
+    snapComponents = snapComponents.concat(
+      getTxnSnapTxt(
+        senderAddress,
+        network,
+        requestParamsObj.txnInvocation,
+        requestParamsObj.abis,
+        requestParamsObj.invocationsDetails,
+      ),
     );
 
     const response = await wallet.request({
@@ -67,20 +75,19 @@ export async function executeTxn(params: ApiParams) {
       },
     });
     if (!response) return false;
-    //In case this is the first transaction we assign a nonce of 1 to make sure it does after the deploy transaction
-    const invocationsDetails = accountDeployedFirst
-      ? {
-          ...requestParamsObj.invocationsDetails,
-          nonce: 1,
-        }
-      : requestParamsObj.invocationsDetails;
+
+    if (!accountDeployed) {
+      await createAccount(createAccountApiParams, true, false);
+    }
+    const nonceSendTransaction = accountDeployed ? undefined : 1;
+
     return await executeTxnUtil(
       network,
       senderAddress,
       senderPrivateKey,
       requestParamsObj.txnInvocation,
       requestParamsObj.abis,
-      invocationsDetails,
+      { maxFee, nonce: nonceSendTransaction },
     );
   } catch (err) {
     logger.error(`Problem found: ${err}`);
