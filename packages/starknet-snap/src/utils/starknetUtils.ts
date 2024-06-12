@@ -34,6 +34,7 @@ import {
   CairoVersion,
   InvocationsSignerDetails,
   ProviderInterface,
+  GetTransactionReceiptResponse,
 } from 'starknet';
 import { Network, SnapState, Transaction, TransactionType } from '../types/snapState';
 import {
@@ -101,6 +102,16 @@ export const callContract = async (
   );
 };
 
+export const waitForTransaction = async (
+  network: Network,
+  senderAddress: string,
+  privateKey: string | Uint8Array,
+  txnHash: num.BigNumberish,
+  cairoVersion?: CairoVersion,
+): Promise<GetTransactionReceiptResponse> => {
+  return getAccountInstance(network, senderAddress, privateKey, cairoVersion).waitForTransaction(txnHash);
+};
+
 export const declareContract = async (
   network: Network,
   senderAddress: string,
@@ -109,9 +120,11 @@ export const declareContract = async (
   invocationsDetails?: UniversalDetails,
   cairoVersion?: CairoVersion,
 ): Promise<DeclareContractResponse> => {
-  return getAccountInstance(network, senderAddress, privateKey, cairoVersion).declare(
-    contractPayload, { ...invocationsDetails, skipValidate: false, blockIdentifier: 'latest' }
-  );
+  return getAccountInstance(network, senderAddress, privateKey, cairoVersion).declare(contractPayload, {
+    ...invocationsDetails,
+    skipValidate: false,
+    blockIdentifier: 'latest',
+  });
 };
 
 export const estimateFee = async (
@@ -137,14 +150,11 @@ export const estimateFeeBulk = async (
   invocationsDetails?: UniversalDetails,
   cairoVersion?: CairoVersion,
 ): Promise<EstimateFee[]> => {
-  return getAccountInstance(network, senderAddress, privateKey, cairoVersion).estimateFeeBulk(
-    txnInvocation,
-    {
-      ...invocationsDetails,
-      skipValidate: false,
-      blockIdentifier: 'latest',
-    },
-  );
+  return getAccountInstance(network, senderAddress, privateKey, cairoVersion).estimateFeeBulk(txnInvocation, {
+    ...invocationsDetails,
+    skipValidate: false,
+    blockIdentifier: 'latest',
+  });
 };
 
 export const executeTxn = async (
@@ -156,15 +166,11 @@ export const executeTxn = async (
   invocationsDetails?: UniversalDetails,
   cairoVersion?: CairoVersion,
 ): Promise<InvokeFunctionResponse> => {
-  return getAccountInstance(network, senderAddress, privateKey, cairoVersion).execute(
-    txnInvocation,
-    abis,
-    {
-      ...invocationsDetails,
-      skipValidate: false,
-      blockIdentifier: 'latest',
-    },
-  );
+  return getAccountInstance(network, senderAddress, privateKey, cairoVersion).execute(txnInvocation, abis, {
+    ...invocationsDetails,
+    skipValidate: false,
+    blockIdentifier: 'latest',
+  });
 };
 
 export const deployAccount = async (
@@ -210,7 +216,7 @@ export const estimateAccountDeployFee = async (
       ...invocationsDetails,
       skipValidate: false,
       blockIdentifier: 'latest',
-    }
+    },
   );
 };
 
@@ -384,7 +390,12 @@ export const getMassagedTransactions = async (
         contractAddress: txnResp.calldata?.[1] || txnResp.contract_address || txn.contract_address || '',
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        contractFuncName: num.toBigInt(txnResp.calldata?.[2] || '') === bigIntTransferSelectorHex ? 'transfer' : num.toBigInt(txnResp.calldata?.[2] || '') === bigIntUpgradeSelectorHex ? 'upgrade' : txn.operations ?? '',
+        contractFuncName:
+          num.toBigInt(txnResp.calldata?.[2] || '') === bigIntTransferSelectorHex
+            ? 'transfer'
+            : num.toBigInt(txnResp.calldata?.[2] || '') === bigIntUpgradeSelectorHex
+            ? 'upgrade'
+            : txn.operations ?? '',
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         contractCallData: txnResp.calldata || [],

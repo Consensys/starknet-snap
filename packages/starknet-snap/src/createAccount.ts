@@ -108,9 +108,17 @@ export async function createAccount(params: ApiParams, silentMode = false, waitM
         }
       }
 
-      const deployResp = await deployAccount(network, contractAddress, contractCallData, publicKey, privateKey, undefined, {
-        maxFee: estimateDeployFee?.suggestedMaxFee,
-      });
+      const deployResp = await deployAccount(
+        network,
+        contractAddress,
+        contractCallData,
+        publicKey,
+        privateKey,
+        undefined,
+        {
+          maxFee: estimateDeployFee?.suggestedMaxFee,
+        },
+      );
 
       if (deployResp.contract_address && deployResp.transaction_hash) {
         const userAccount: AccContract = {

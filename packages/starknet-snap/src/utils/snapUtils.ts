@@ -538,7 +538,7 @@ export function getRPCUrl(chainId: string) {
 }
 
 export function getRPCCredentials(): string {
-  return process.env.ALCHEMY_API_KEY ?? ''
+  return process.env.ALCHEMY_API_KEY ?? '';
 }
 
 export function getVoyagerUrl(chainId: string) {

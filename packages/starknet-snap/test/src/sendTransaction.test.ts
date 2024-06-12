@@ -59,7 +59,6 @@ describe('Test function: sendTransaction', function () {
   beforeEach(async function () {
     walletStub.rpcStubs.snap_getBip44Entropy.callsFake(getBip44EntropyStub);
     apiParams.keyDeriver = await getAddressKeyDeriver(walletStub);
-    //sandbox.stub(utils, 'waitForTransaction').resolves({} as unknown as GetTransactionReceiptResponse);
   });
 
   afterEach(function () {
@@ -229,6 +228,7 @@ describe('Test function: sendTransaction', function () {
         executeTxnStub = sandbox.stub(utils, 'executeTxn').resolves(executeTxnResp);
         walletStub.rpcStubs.snap_manageState.resolves(state);
         walletStub.rpcStubs.snap_dialog.resolves(true);
+        sandbox.stub(utils, 'waitForTransaction').resolves({} as unknown as GetTransactionReceiptResponse);
       });
 
       describe('when account is deployed', function () {
