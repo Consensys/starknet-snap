@@ -111,7 +111,7 @@ describe('Test function: executeTxn', function () {
         contractAddress: createAccountProxyTxn.contractAddress,
       },
       undefined,
-      { maxFee: 100, nonce: 1 },
+      { maxFee: '22702500105945', nonce: 1 },
     );
   });
 
@@ -167,7 +167,7 @@ describe('Test function: executeTxn', function () {
         },
       ],
       undefined,
-      { maxFee: 100, nonce: 1 },
+      { maxFee: '22702500105945', nonce: 1 },
     );
   });
 
@@ -197,7 +197,7 @@ describe('Test function: executeTxn', function () {
           contractAddress: createAccountProxyTxn.contractAddress,
         },
         undefined,
-        { maxFee: 100, nonce: 1 },
+        { maxFee: '22702500105945', nonce: 1 },
       );
     }
   });

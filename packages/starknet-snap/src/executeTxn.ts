@@ -15,12 +15,16 @@ export async function executeTxn(params: ApiParams) {
     const requestParamsObj = requestParams as ExecuteTxnRequestParams;
     const requestParamsObjEstimateFee = requestParams as EstimateFeeRequestParams;
 
+    const txnInvocation = (
+      (requestParamsObj.txnInvocation as CallDetails).calldata
+        ? requestParamsObj.txnInvocation
+        : requestParamsObj.txnInvocation[0]
+    ) as CallDetails;
+
     requestParamsObjEstimateFee.senderAddress = requestParamsObj.senderAddress;
-    requestParamsObjEstimateFee.contractAddress = (requestParamsObj.txnInvocation as CallDetails).contractAddress;
-    requestParamsObjEstimateFee.contractFuncName = (requestParamsObj.txnInvocation as CallDetails).entrypoint;
-    requestParamsObjEstimateFee.contractCallData = (
-      (requestParamsObj.txnInvocation as CallDetails).calldata as String[]
-    ).join(',');
+    requestParamsObjEstimateFee.contractAddress = txnInvocation.contractAddress;
+    requestParamsObjEstimateFee.contractFuncName = txnInvocation.entrypoint;
+    requestParamsObjEstimateFee.contractCallData = (txnInvocation.calldata as String[]).join(',');
 
     logger.log(`executeTxn params: ${toJson(requestParamsObj, 2)}`);
     const estimateFeeResp = await estimateFee({ ...params, ...requestParamsObjEstimateFee });
