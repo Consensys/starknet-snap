@@ -80,7 +80,7 @@ export async function executeTxn(params: ApiParams) {
     if (!response) return false;
 
     if (!accountDeployed) {
-      await createAccount(createAccountApiParams, true, false);
+      await createAccount(createAccountApiParams, true, true);
     }
     const nonceSendTransaction = accountDeployed ? undefined : 1;
 
