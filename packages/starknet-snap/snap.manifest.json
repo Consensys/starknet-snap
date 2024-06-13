@@ -27,7 +27,7 @@
     ],
     "snap_manageState": {},
     "endowment:rpc": {
-      "snaps": true,
+      "snaps": false,
       "dapps": true
     },
     "endowment:lifecycle-hooks": {},
