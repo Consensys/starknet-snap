@@ -3248,7 +3248,7 @@ __metadata:
 
 "@consensys/starknet-snap@file:../starknet-snap::locator=wallet-ui%40workspace%3Apackages%2Fwallet-ui":
   version: 2.7.0
-  resolution: "@consensys/starknet-snap@file:../starknet-snap#../starknet-snap::hash=9bd857&locator=wallet-ui%40workspace%3Apackages%2Fwallet-ui"
+  resolution: "@consensys/starknet-snap@file:../starknet-snap#../starknet-snap::hash=6d8d1a&locator=wallet-ui%40workspace%3Apackages%2Fwallet-ui"
   dependencies:
     "@metamask/snaps-sdk": 3.0.1
     async-mutex: ^0.3.2
@@ -3257,7 +3257,7 @@ __metadata:
     ethers: ^5.5.1
     starknet: 6.7.0
     starknet_v4.22.0: "npm:starknet@4.22.0"
-  checksum: 67dd2a879a94ef48d63cb715bf3a194e3c5a7c8edb08501c578a70e38aaba58e0441fa076f8516c7288055ace5129855a5f7af5fc534ff6fa13e0476d5093583
+  checksum: 31b742bf003c4ad0eb99801d5264e58ea178cd0e550aeb35896d88af5271e57acf9c989b75c1c9f160da3a038bc82a23f112f5ffa845602a118db9da0b228669
   languageName: node
   linkType: hard
 
