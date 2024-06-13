@@ -1,34 +1,24 @@
-import { toJson } from './utils/serializer';
-import { CallDetails } from 'starknet';
+import { Invocations, TransactionType } from 'starknet';
 import { getNetworkFromChainId, getTxnSnapTxt, addDialogTxt } from './utils/snapUtils';
-import { getKeysFromAddress, executeTxn as executeTxnUtil, isAccountDeployed } from './utils/starknetUtils';
-import { ApiParams, EstimateFeeRequestParams, ExecuteTxnRequestParams } from './types/snapApi';
+import {
+  getKeysFromAddress,
+  executeTxn as executeTxnUtil,
+  isAccountDeployed,
+  estimateFeeBulk,
+  getAccContractAddressAndCallData,
+  addFeesFromAllTransactions,
+} from './utils/starknetUtils';
+import { ApiParams, ExecuteTxnRequestParams } from './types/snapApi';
 import { createAccount } from './createAccount';
 import { DialogType } from '@metamask/rpc-methods';
 import { heading, panel, divider } from '@metamask/snaps-sdk';
 import { logger } from './utils/logger';
-import { estimateFee } from './estimateFee';
+import { PROXY_CONTRACT_HASH } from './utils/constants';
 
 export async function executeTxn(params: ApiParams) {
   try {
     const { state, keyDeriver, requestParams, wallet } = params;
     const requestParamsObj = requestParams as ExecuteTxnRequestParams;
-    const requestParamsObjEstimateFee = requestParams as EstimateFeeRequestParams;
-
-    const txnInvocation = (
-      (requestParamsObj.txnInvocation as CallDetails).calldata
-        ? requestParamsObj.txnInvocation
-        : requestParamsObj.txnInvocation[0]
-    ) as CallDetails;
-
-    requestParamsObjEstimateFee.senderAddress = requestParamsObj.senderAddress;
-    requestParamsObjEstimateFee.contractAddress = txnInvocation.contractAddress;
-    requestParamsObjEstimateFee.contractFuncName = txnInvocation.entrypoint;
-    requestParamsObjEstimateFee.contractCallData = (txnInvocation.calldata as string[]).join(',');
-
-    logger.log(`executeTxn params: ${toJson(requestParamsObj, 2)}`);
-    const estimateFeeResp = await estimateFee({ ...params, ...requestParamsObjEstimateFee });
-
     const senderAddress = requestParamsObj.senderAddress;
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
     const {
@@ -36,8 +26,41 @@ export async function executeTxn(params: ApiParams) {
       publicKey,
       addressIndex,
     } = await getKeysFromAddress(keyDeriver, network, state, senderAddress);
+
+    const txnInvocationArray = Array.isArray(requestParamsObj.txnInvocation)
+      ? requestParamsObj.txnInvocation
+      : [requestParamsObj.txnInvocation];
+    const bulkTransactions: Invocations = txnInvocationArray.map((ele) => ({
+      type: TransactionType.INVOKE,
+      payload: ele,
+    }));
     const accountDeployed = await isAccountDeployed(network, publicKey);
+    if (!accountDeployed) {
+      const { callData } = getAccContractAddressAndCallData(publicKey);
+      const deployAccountpayload = {
+        classHash: PROXY_CONTRACT_HASH,
+        contractAddress: senderAddress,
+        constructorCalldata: callData,
+        addressSalt: publicKey,
+      };
+
+      bulkTransactions.unshift({
+        type: TransactionType.DEPLOY_ACCOUNT,
+        payload: deployAccountpayload,
+      });
+    }
+
+    const fees = await estimateFeeBulk(
+      network,
+      senderAddress,
+      senderPrivateKey,
+      bulkTransactions,
+      requestParamsObj.invocationsDetails ? requestParamsObj.invocationsDetails : undefined,
+    );
+    const estimateFeeResp = addFeesFromAllTransactions(fees);
+
     const maxFee = estimateFeeResp.suggestedMaxFee.toString(10);
+    console.log('MaxFee', maxFee);
 
     let snapComponents = [];
     let createAccountApiParams: ApiParams;
