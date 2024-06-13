@@ -60,7 +60,7 @@ export async function executeTxn(params: ApiParams) {
     const estimateFeeResp = addFeesFromAllTransactions(fees);
 
     const maxFee = estimateFeeResp.suggestedMaxFee.toString(10);
-    console.log('MaxFee', maxFee);
+    logger.log(`MaxFee: ${maxFee}`);
 
     let snapComponents = [];
     let createAccountApiParams: ApiParams;
