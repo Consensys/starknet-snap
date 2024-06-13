@@ -5,7 +5,7 @@ import { getKeysFromAddress, executeTxn as executeTxnUtil, isAccountDeployed } f
 import { ApiParams, EstimateFeeRequestParams, ExecuteTxnRequestParams } from './types/snapApi';
 import { createAccount } from './createAccount';
 import { DialogType } from '@metamask/rpc-methods';
-import { heading, panel, text, divider } from '@metamask/snaps-sdk';
+import { heading, panel, divider } from '@metamask/snaps-sdk';
 import { logger } from './utils/logger';
 import { estimateFee } from './estimateFee';
 
@@ -24,7 +24,7 @@ export async function executeTxn(params: ApiParams) {
     requestParamsObjEstimateFee.senderAddress = requestParamsObj.senderAddress;
     requestParamsObjEstimateFee.contractAddress = txnInvocation.contractAddress;
     requestParamsObjEstimateFee.contractFuncName = txnInvocation.entrypoint;
-    requestParamsObjEstimateFee.contractCallData = (txnInvocation.calldata as String[]).join(',');
+    requestParamsObjEstimateFee.contractCallData = (txnInvocation.calldata as string[]).join(',');
 
     logger.log(`executeTxn params: ${toJson(requestParamsObj, 2)}`);
     const estimateFeeResp = await estimateFee({ ...params, ...requestParamsObjEstimateFee });
@@ -43,7 +43,6 @@ export async function executeTxn(params: ApiParams) {
     let createAccountApiParams: ApiParams;
     if (!accountDeployed) {
       snapComponents.push(heading(`The account will be deployed`));
-      const components = [];
       addDialogTxt(snapComponents, 'Address', senderAddress);
       addDialogTxt(snapComponents, 'Public Key', publicKey);
       addDialogTxt(snapComponents, 'Address Index', addressIndex.toString());
