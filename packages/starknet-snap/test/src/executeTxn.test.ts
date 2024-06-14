@@ -61,9 +61,6 @@ describe('Test function: executeTxn', function () {
     sandbox.stub(utils, 'estimateFee').callsFake(async () => {
       return estimateFeeResp;
     });
-    sandbox.stub(utils, 'isAccountDeployed').callsFake(async () => {
-      return false;
-    });
     sandbox.stub(utils, 'deployAccount').callsFake(async () => {
       return createAccountProxyResp;
     });
@@ -85,7 +82,8 @@ describe('Test function: executeTxn', function () {
     apiParams.requestParams = requestObject;
   });
 
-  it('should executeTxn correctly', async function () {
+  it('should executeTxn correctly and deploy account if not deployed', async function () {
+    sandbox.stub(utils, 'isAccountDeployed').resolves(false);
     const stub = sandbox.stub(utils, 'executeTxn').resolves({
       transaction_hash: 'transaction_hash',
     });
@@ -115,7 +113,39 @@ describe('Test function: executeTxn', function () {
     );
   });
 
-  it('should executeTxn multiple', async function () {
+  it('should executeTxn and not deploy an account if account is deployed', async function () {
+    sandbox.stub(utils, 'isAccountDeployed').resolves(true);
+    const stub = sandbox.stub(utils, 'executeTxn').resolves({
+      transaction_hash: 'transaction_hash',
+    });
+    const result = await executeTxn(apiParams);
+    const { privateKey } = await utils.getKeysFromAddress(
+      apiParams.keyDeriver,
+      STARKNET_MAINNET_NETWORK,
+      state,
+      account1.address,
+    );
+
+    expect(result).to.eql({
+      transaction_hash: 'transaction_hash',
+    });
+    expect(stub).to.have.been.calledOnce;
+    expect(stub).to.have.been.calledWith(
+      STARKNET_MAINNET_NETWORK,
+      account1.address,
+      privateKey,
+      {
+        entrypoint: 'transfer',
+        calldata: ['0', '0', '0'],
+        contractAddress: createAccountProxyTxn.contractAddress,
+      },
+      undefined,
+      { maxFee: '22702500105945', nonce: undefined },
+    );
+  });
+
+  it('should executeTxn multiple and not deploy an account if not deployed', async function () {
+    sandbox.stub(utils, 'isAccountDeployed').resolves(false);
     const stub = sandbox.stub(utils, 'executeTxn').resolves({
       transaction_hash: 'transaction_hash',
     });
@@ -172,6 +202,7 @@ describe('Test function: executeTxn', function () {
   });
 
   it('should throw error if executeTxn fail', async function () {
+    sandbox.stub(utils, 'isAccountDeployed').resolves(false);
     const stub = sandbox.stub(utils, 'executeTxn').rejects('error');
     const { privateKey } = await utils.getKeysFromAddress(
       apiParams.keyDeriver,
