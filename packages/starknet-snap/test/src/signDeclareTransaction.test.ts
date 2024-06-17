@@ -74,10 +74,6 @@ describe('Test function: signDeclareTransaction', function () {
   it('should 1) throw an error and 2) show upgrade modal if account deployed required', async function () {
     const isUpgradeRequiredStub = sandbox.stub(utils, 'isUpgradeRequired').resolves(true);
     const showUpgradeRequestModalStub = sandbox.stub(snapsUtil, 'showUpgradeRequestModal').resolves();
-    const declareContractStub = sandbox.stub(utils, 'declareContract').resolves({
-      transaction_hash: 'transaction_hash',
-      class_hash: 'class_hash',
-    });
     let result;
     try {
       result = await signDeclareTransaction(apiParams);
