@@ -253,7 +253,7 @@ export const onInstall: OnInstallHandler = async () => {
 export const onUpdate: OnUpdateHandler = async () => {
   const component = panel([
     text('Features released with this update:'),
-    text('Deprecation of the Starknet Goerli Testnet'),
+    text('Cairo contract upgrade support.'),
   ]);
 
   await snap.request({

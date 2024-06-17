@@ -237,6 +237,7 @@ describe('Test function: sendTransaction', function () {
         });
         walletStub.rpcStubs.snap_manageState.resolves(state);
         walletStub.rpcStubs.snap_dialog.resolves(true);
+        sandbox.stub(utils, 'waitForTransaction').resolves({} as unknown as GetTransactionReceiptResponse);
       });
 
       describe('when account is deployed', function () {
