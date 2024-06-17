@@ -16,8 +16,8 @@ export async function declareContract(params: ApiParams) {
     const senderAddress = requestParamsObj.senderAddress;
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
     const { privateKey } = await getKeysFromAddress(keyDeriver, network, state, senderAddress);
-    
-    if(isUpgradeRequired(network, senderAddress)){
+
+    if (isUpgradeRequired(network, senderAddress)) {
       showUpgradeRequestModal(wallet);
       return false;
     }

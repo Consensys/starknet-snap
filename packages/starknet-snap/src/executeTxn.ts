@@ -17,7 +17,7 @@ export async function executeTxn(params: ApiParams) {
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
     const { privateKey: senderPrivateKey } = await getKeysFromAddress(keyDeriver, network, state, senderAddress);
 
-    if(isUpgradeRequired(network, senderAddress)){
+    if (isUpgradeRequired(network, senderAddress)) {
       showUpgradeRequestModal(wallet);
       return false;
     }
