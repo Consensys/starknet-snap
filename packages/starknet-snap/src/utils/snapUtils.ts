@@ -765,11 +765,9 @@ export async function showUpgradeRequestModal(wallet) {
     params: {
       type: DialogType.Alert,
       content: panel([
-        heading('Account Upgrade Required'),
+        heading('Account Upgrade Mandatory!'),
         text(
-          `Please upgrade your account to the latest version of the smart contract. \nVisit the [companion dapp for Starknet](${dappUrl(
-            process.env.SNAP_ENV,
-          )}) and click “Upgrade” to install. Thank you!`,
+          `Visit the [companion dapp for Starknet](${dappUrl(process.env.SNAP_ENV)}) and click “Upgrade”.\nThank you!`,
         ),
       ]),
     },
