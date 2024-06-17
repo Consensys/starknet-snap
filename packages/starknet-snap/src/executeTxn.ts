@@ -29,8 +29,7 @@ export async function executeTxn(params: ApiParams) {
       addressIndex,
     } = await getKeysFromAddress(keyDeriver, network, state, senderAddress);
 
-    const { upgradeRequired } = await getCorrectContractAddress(network, publicKey);
-    if (upgradeRequired) {
+    if (await isUpgradeRequired(network, publicKey)) {
       showUpgradeRequestModal(wallet);
       return false;
     }
