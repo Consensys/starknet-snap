@@ -6,6 +6,7 @@ import {
   getBalance,
   estimateAccountDeployFee,
   isAccountDeployed,
+  waitForTransaction,
 } from './utils/starknetUtils';
 import {
   getEtherErc20Token,
@@ -23,7 +24,14 @@ import { DialogType } from '@metamask/rpc-methods';
 import { heading, panel, text } from '@metamask/snaps-sdk';
 import { logger } from './utils/logger';
 
-export async function createAccount(params: ApiParams, silentMode = false) {
+/**
+ * Create an starknet account.
+ *
+ * @template Params - The ApiParams of the request.
+ * @param silentMode - The flag to disable the confirmation dialog from snap.
+ * @param waitMode - The flag to enable an determination by doing an recursive fetch to check if the deploy account status is on L2 or not. The wait mode is only useful when it compose with other txn together, it can make sure the deploy txn execute complete, avoiding the latter txn failed.
+ */
+export async function createAccount(params: ApiParams, silentMode = false, waitMode = false) {
   try {
     const { state, wallet, saveMutex, keyDeriver, requestParams } = params;
     const requestParamsObj = requestParams as CreateAccountRequestParams;
@@ -100,9 +108,17 @@ export async function createAccount(params: ApiParams, silentMode = false) {
         }
       }
 
-      const deployResp = await deployAccount(network, contractAddress, contractCallData, publicKey, privateKey, undefined, {
-        maxFee: estimateDeployFee?.suggestedMaxFee,
-      });
+      const deployResp = await deployAccount(
+        network,
+        contractAddress,
+        contractCallData,
+        publicKey,
+        privateKey,
+        undefined,
+        {
+          maxFee: estimateDeployFee?.suggestedMaxFee,
+        },
+      );
 
       if (deployResp.contract_address && deployResp.transaction_hash) {
         const userAccount: AccContract = {
@@ -137,6 +153,10 @@ export async function createAccount(params: ApiParams, silentMode = false) {
       }
 
       logger.log(`createAccount:\ndeployResp: ${toJson(deployResp)}`);
+
+      if (waitMode) {
+        await waitForTransaction(network, deployResp.contract_address, privateKey, deployResp.transaction_hash);
+      }
 
       return {
         address: deployResp.contract_address,

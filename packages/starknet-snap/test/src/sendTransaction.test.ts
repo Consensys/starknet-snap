@@ -26,6 +26,7 @@ import {
 import { getAddressKeyDeriver } from '../../src/utils/keyPair';
 import { Mutex } from 'async-mutex';
 import { ApiParams, SendTransactionRequestParams } from '../../src/types/snapApi';
+import { GetTransactionReceiptResponse } from 'starknet';
 
 chai.use(sinonChai);
 chai.use(chaiAsPromised);
@@ -227,6 +228,7 @@ describe('Test function: sendTransaction', function () {
         executeTxnStub = sandbox.stub(utils, 'executeTxn').resolves(executeTxnResp);
         walletStub.rpcStubs.snap_manageState.resolves(state);
         walletStub.rpcStubs.snap_dialog.resolves(true);
+        sandbox.stub(utils, 'waitForTransaction').resolves({} as unknown as GetTransactionReceiptResponse);
       });
 
       describe('when account is deployed', function () {

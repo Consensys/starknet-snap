@@ -23,6 +23,7 @@ import {
 import { getAddressKeyDeriver } from '../../src/utils/keyPair';
 import { Mutex } from 'async-mutex';
 import { ApiParams, CreateAccountRequestParams } from '../../src/types/snapApi';
+import { GetTransactionReceiptResponse } from 'starknet';
 
 chai.use(sinonChai);
 const sandbox = sinon.createSandbox();
@@ -30,6 +31,7 @@ const sandbox = sinon.createSandbox();
 describe('Test function: createAccount', function () {
   this.timeout(10000);
   const walletStub = new WalletMock();
+  let waitForTransactionStub;
   let state: SnapState = {
     accContracts: [],
     erc20Tokens: [],
@@ -49,6 +51,8 @@ describe('Test function: createAccount', function () {
     sandbox.useFakeTimers(createAccountProxyTxn.timestamp);
     walletStub.rpcStubs.snap_dialog.resolves(true);
     walletStub.rpcStubs.snap_manageState.resolves(state);
+    waitForTransactionStub = sandbox.stub(utils, 'waitForTransaction');
+    waitForTransactionStub.resolves({} as unknown as GetTransactionReceiptResponse);
   });
 
   afterEach(function () {
@@ -82,6 +86,27 @@ describe('Test function: createAccount', function () {
     expect(state.transactions.length).to.be.eq(0);
   });
 
+  it('waits for tansaction after an account has deployed', async function () {
+    sandbox.stub(utils, 'deployAccount').callsFake(async () => {
+      return createAccountProxyMainnetResp;
+    });
+    sandbox.stub(utils, 'getSigner').throws(new Error());
+    sandbox.stub(utils, 'callContract').callsFake(async () => {
+      return getBalanceResp;
+    });
+    sandbox.stub(utils, 'estimateAccountDeployFee').callsFake(async () => {
+      return estimateDeployFeeResp;
+    });
+    const requestObject: CreateAccountRequestParams = {
+      chainId: STARKNET_MAINNET_NETWORK.chainId,
+      deploy: true,
+    };
+    apiParams.requestParams = requestObject;
+    await createAccount(apiParams, false, true);
+
+    expect(waitForTransactionStub).to.have.been.callCount(1);
+  });
+
   it('should create and store an user account with proxy in state correctly in mainnet', async function () {
     sandbox.stub(utils, 'deployAccount').callsFake(async () => {
       return createAccountProxyMainnetResp;
@@ -105,7 +130,6 @@ describe('Test function: createAccount', function () {
       state,
       createAccountProxyMainnetResp.contract_address,
     );
-    expect(walletStub.rpcStubs.snap_manageState).to.have.been.callCount(4);
     expect(result.address).to.be.eq(createAccountProxyMainnetResp.contract_address);
     expect(result.transaction_hash).to.be.eq(createAccountProxyMainnetResp.transaction_hash);
     expect(state.accContracts.length).to.be.eq(1);

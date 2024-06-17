@@ -2,7 +2,6 @@ name: Publish Dev to NPM
 on:
   push:
     branches:
-      - main
       - 'releases/**'
     paths:
       - "packages/**"
