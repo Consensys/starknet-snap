@@ -3,6 +3,7 @@ import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import { WalletMock } from '../wallet.mock.test';
 import * as utils from '../../src/utils/starknetUtils';
+import * as snapsUtil from '../../src/utils/snapUtils';
 import { declareContract } from '../../src/declareContract';
 import { SnapState } from '../../src/types/snapState';
 import { STARKNET_MAINNET_NETWORK, STARKNET_SEPOLIA_TESTNET_NETWORK } from '../../src/utils/constants';
@@ -55,7 +56,27 @@ describe('Test function: declareContract', function () {
     sandbox.restore();
   });
 
+  it('should 1) throw an error and 2) show upgrade modal if account deployed required', async function () {
+    const isUpgradeRequiredStub = sandbox.stub(utils, 'isUpgradeRequired').resolves(true);
+    const showUpgradeRequestModalStub = sandbox.stub(snapsUtil, 'showUpgradeRequestModal').resolves();
+    const declareContractStub = sandbox.stub(utils, 'declareContract').resolves({
+      transaction_hash: 'transaction_hash',
+      class_hash: 'class_hash',
+    });
+    let result;
+    try {
+      result = await declareContract(apiParams);
+    } catch (err) {
+      result = err;
+    } finally {
+      expect(isUpgradeRequiredStub).to.have.been.calledOnceWith(STARKNET_SEPOLIA_TESTNET_NETWORK, account1.address);
+      expect(showUpgradeRequestModalStub).to.have.been.calledOnce;
+      expect(result).to.be.an('Error');
+    }
+  });
+
   it('should declareContract correctly', async function () {
+    sandbox.stub(utils, 'isUpgradeRequired').resolves(false);
     const declareContractStub = sandbox.stub(utils, 'declareContract').resolves({
       transaction_hash: 'transaction_hash',
       class_hash: 'class_hash',
@@ -83,6 +104,7 @@ describe('Test function: declareContract', function () {
   });
 
   it('should throw error if declareContract fail', async function () {
+    sandbox.stub(utils, 'isUpgradeRequired').resolves(false);
     const declareContractStub = sandbox.stub(utils, 'declareContract').rejects('error');
     const { privateKey } = await utils.getKeysFromAddress(
       apiParams.keyDeriver,
@@ -109,6 +131,7 @@ describe('Test function: declareContract', function () {
   });
 
   it('should return false if user rejected to sign the transaction', async function () {
+    sandbox.stub(utils, 'isUpgradeRequired').resolves(false);
     walletStub.rpcStubs.snap_dialog.resolves(false);
     const declareContractStub = sandbox.stub(utils, 'declareContract').resolves({
       transaction_hash: 'transaction_hash',

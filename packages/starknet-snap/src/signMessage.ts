@@ -20,8 +20,8 @@ export async function signMessage(params: ApiParams) {
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
 
     if (await isUpgradeRequired(network, signerAddress)) {
-      showUpgradeRequestModal(wallet);
-      return false;
+      await showUpgradeRequestModal(wallet);
+      throw new Error('Upgrade required');
     }
 
     logger.log(`signMessage:\nsignerAddress: ${signerAddress}\ntypedDataMessage: ${toJson(typedDataMessage)}`);

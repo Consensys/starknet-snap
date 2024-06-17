@@ -11,6 +11,7 @@ import { Mutex } from 'async-mutex';
 import { ApiParams, SignDeclareTransactionRequestParams } from '../../src/types/snapApi';
 import { DeclareSignerDetails, constants } from 'starknet';
 import * as utils from '../../src/utils/starknetUtils';
+import * as snapsUtil from '../../src/utils/snapUtils';
 
 chai.use(sinonChai);
 const sandbox = sinon.createSandbox();
@@ -63,13 +64,34 @@ describe('Test function: signDeclareTransaction', function () {
   });
 
   it('should sign a transaction from an user account correctly', async function () {
+    sandbox.stub(utils, 'isUpgradeRequired').resolves(false);
     sandbox.stub(utils, 'signDeclareTransaction').resolves(signature3);
     const result = await signDeclareTransaction(apiParams);
     expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledOnce;
     expect(result).to.be.eql(signature3);
   });
 
+  it('should 1) throw an error and 2) show upgrade modal if account deployed required', async function () {
+    const isUpgradeRequiredStub = sandbox.stub(utils, 'isUpgradeRequired').resolves(true);
+    const showUpgradeRequestModalStub = sandbox.stub(snapsUtil, 'showUpgradeRequestModal').resolves();
+    const declareContractStub = sandbox.stub(utils, 'declareContract').resolves({
+      transaction_hash: 'transaction_hash',
+      class_hash: 'class_hash',
+    });
+    let result;
+    try {
+      result = await signDeclareTransaction(apiParams);
+    } catch (err) {
+      result = err;
+    } finally {
+      expect(isUpgradeRequiredStub).to.have.been.calledOnceWith(STARKNET_SEPOLIA_TESTNET_NETWORK, account1.address);
+      expect(showUpgradeRequestModalStub).to.have.been.calledOnce;
+      expect(result).to.be.an('Error');
+    }
+  });
+
   it('should throw error if signDeclareTransaction fail', async function () {
+    sandbox.stub(utils, 'isUpgradeRequired').resolves(false);
     sandbox.stub(utils, 'signDeclareTransaction').throws(new Error());
     let result;
     try {
@@ -83,6 +105,7 @@ describe('Test function: signDeclareTransaction', function () {
   });
 
   it('should return false if user deny to sign the transaction', async function () {
+    sandbox.stub(utils, 'isUpgradeRequired').resolves(false);
     const stub = sandbox.stub(utils, 'signDeclareTransaction');
     walletStub.rpcStubs.snap_dialog.resolves(false);
 
@@ -93,6 +116,7 @@ describe('Test function: signDeclareTransaction', function () {
   });
 
   it('should skip dialog if enableAuthorize is false', async function () {
+    sandbox.stub(utils, 'isUpgradeRequired').resolves(false);
     sandbox.stub(utils, 'signDeclareTransaction').resolves(signature3);
     const paramsObject = apiParams.requestParams as SignDeclareTransactionRequestParams;
     paramsObject.enableAuthorize = false;
@@ -103,6 +127,7 @@ describe('Test function: signDeclareTransaction', function () {
   });
 
   it('should skip dialog if enableAuthorize is omit', async function () {
+    sandbox.stub(utils, 'isUpgradeRequired').resolves(false);
     sandbox.stub(utils, 'signDeclareTransaction').resolves(signature3);
     const paramsObject = apiParams.requestParams as SignDeclareTransactionRequestParams;
     paramsObject.enableAuthorize = undefined;

@@ -14,6 +14,7 @@ import {
   estimateFeeResp,
 } from '../constants.test';
 import * as createAccountUtils from '../../src/createAccount';
+import * as snapsUtil from '../../src/utils/snapUtils';
 import { getAddressKeyDeriver } from '../../src/utils/keyPair';
 import { Mutex } from 'async-mutex';
 import { ApiParams, ExecuteTxnRequestParams } from '../../src/types/snapApi';
@@ -79,7 +80,23 @@ describe('Test function: executeTxn', function () {
     apiParams.requestParams = requestObject;
   });
 
+  it('should 1) throw an error and 2) show upgrade modal if account deployed required', async function () {
+    const isUpgradeRequiredStub = sandbox.stub(utils, 'isUpgradeRequired').resolves(true);
+    const showUpgradeRequestModalStub = sandbox.stub(snapsUtil, 'showUpgradeRequestModal').resolves();
+    let result;
+    try {
+      result = await executeTxn(apiParams);
+    } catch (err) {
+      result = err;
+    } finally {
+      expect(isUpgradeRequiredStub).to.have.been.calledOnceWith(STARKNET_MAINNET_NETWORK, account1.address);
+      expect(showUpgradeRequestModalStub).to.have.been.calledOnce;
+      expect(result).to.be.an('Error');
+    }
+  });
+
   it('should executeTxn correctly and deploy an account', async function () {
+    sandbox.stub(utils, 'isUpgradeRequired').resolves(false);
     sandbox.stub(utils, 'isAccountDeployed').resolves(false);
     const createAccountStub = sandbox.stub(createAccountUtils, 'createAccount').resolvesThis();
     const stub = sandbox.stub(utils, 'executeTxn').resolves({
@@ -111,6 +128,7 @@ describe('Test function: executeTxn', function () {
   });
 
   it('should executeTxn multiple and deploy an account', async function () {
+    sandbox.stub(utils, 'isUpgradeRequired').resolves(false);
     sandbox.stub(utils, 'isAccountDeployed').resolves(false);
     const createAccountStub = sandbox.stub(createAccountUtils, 'createAccount').resolvesThis();
     const stub = sandbox.stub(utils, 'executeTxn').resolves({
@@ -171,6 +189,7 @@ describe('Test function: executeTxn', function () {
 
   it('should executeTxn and not deploy an account', async function () {
     const createAccountStub = sandbox.stub(createAccountUtils, 'createAccount');
+    sandbox.stub(utils, 'isUpgradeRequired').resolves(false);
     sandbox.stub(utils, 'isAccountDeployed').resolves(true);
     const stub = sandbox.stub(utils, 'executeTxn').resolves({
       transaction_hash: 'transaction_hash',
@@ -204,6 +223,7 @@ describe('Test function: executeTxn', function () {
 
   it('should executeTxn multiple and not deploy an account', async function () {
     const createAccountStub = sandbox.stub(createAccountUtils, 'createAccount');
+    sandbox.stub(utils, 'isUpgradeRequired').resolves(false);
     sandbox.stub(utils, 'isAccountDeployed').resolves(true);
     const stub = sandbox.stub(utils, 'executeTxn').resolves({
       transaction_hash: 'transaction_hash',
@@ -262,6 +282,7 @@ describe('Test function: executeTxn', function () {
   });
 
   it('should throw error if executeTxn fail', async function () {
+    sandbox.stub(utils, 'isUpgradeRequired').resolves(false);
     sandbox.stub(utils, 'isAccountDeployed').resolves(true);
     const stub = sandbox.stub(utils, 'executeTxn').rejects('error');
     const { privateKey } = await utils.getKeysFromAddress(
@@ -291,16 +312,5 @@ describe('Test function: executeTxn', function () {
         { maxFee: '22702500105945', nonce: undefined },
       );
     }
-  });
-
-  it('should return false if user rejected to sign the transaction', async function () {
-    walletStub.rpcStubs.snap_dialog.resolves(false);
-    const stub = sandbox.stub(utils, 'executeTxn').resolves({
-      transaction_hash: 'transaction_hash',
-    });
-
-    const result = await executeTxn(apiParams);
-    expect(result).to.equal(false);
-    expect(stub).to.have.been.not.called;
   });
 });

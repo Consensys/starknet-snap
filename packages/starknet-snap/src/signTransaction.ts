@@ -16,8 +16,8 @@ export async function signTransaction(params: ApiParams): Promise<Signature | bo
     const { privateKey } = await getKeysFromAddress(keyDeriver, network, state, signerAddress);
 
     if (await isUpgradeRequired(network, signerAddress)) {
-      showUpgradeRequestModal(wallet);
-      return false;
+      await showUpgradeRequestModal(wallet);
+      throw new Error('Upgrade required');
     }
 
     logger.log(`signTransaction params: ${toJson(requestParamsObj.transactions, 2)}}`);

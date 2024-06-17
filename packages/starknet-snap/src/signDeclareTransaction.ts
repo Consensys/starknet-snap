@@ -20,8 +20,8 @@ export async function signDeclareTransaction(params: ApiParams): Promise<Signatu
     const { privateKey } = await getKeysFromAddress(keyDeriver, network, state, signerAddress);
 
     if (await isUpgradeRequired(network, signerAddress)) {
-      showUpgradeRequestModal(wallet);
-      return false;
+      await showUpgradeRequestModal(wallet);
+      throw new Error('Upgrade required');
     }
 
     logger.log(`signDeclareTransaction params: ${toJson(requestParamsObj.transaction, 2)}}`);

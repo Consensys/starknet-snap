@@ -28,9 +28,9 @@ export async function executeTxn(params: ApiParams) {
       addressIndex,
     } = await getKeysFromAddress(keyDeriver, network, state, senderAddress);
 
-    if (await isUpgradeRequired(network, publicKey)) {
-      showUpgradeRequestModal(wallet);
-      return false;
+    if (await isUpgradeRequired(network, senderAddress)) {
+      await showUpgradeRequestModal(wallet);
+      throw new Error('Upgrade required');
     }
 
     const txnInvocationArray = Array.isArray(requestParamsObj.txnInvocation)

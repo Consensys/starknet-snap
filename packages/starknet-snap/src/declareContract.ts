@@ -18,8 +18,8 @@ export async function declareContract(params: ApiParams) {
     const { privateKey } = await getKeysFromAddress(keyDeriver, network, state, senderAddress);
 
     if (await isUpgradeRequired(network, senderAddress)) {
-      showUpgradeRequestModal(wallet);
-      return false;
+      await showUpgradeRequestModal(wallet);
+      throw new Error('Upgrade required');
     }
 
     const snapComponents = getDeclareSnapTxt(
