@@ -1,5 +1,10 @@
 import { toJson } from './utils/serializer';
-import { signMessage as signMessageUtil, getKeysFromAddress, isUpgradeRequired, validateAndParseAddress } from './utils/starknetUtils';
+import {
+  signMessage as signMessageUtil,
+  getKeysFromAddress,
+  isUpgradeRequired,
+  validateAndParseAddress,
+} from './utils/starknetUtils';
 import { getNetworkFromChainId, addDialogTxt, showUpgradeRequestModal } from './utils/snapUtils';
 import { ApiParams, SignMessageRequestParams } from './types/snapApi';
 import { DialogType } from '@metamask/rpc-methods';
@@ -14,7 +19,7 @@ export async function signMessage(params: ApiParams) {
     const typedDataMessage = requestParamsObj.typedDataMessage;
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
 
-    if(await isUpgradeRequired(network, signerAddress)){
+    if (await isUpgradeRequired(network, signerAddress)) {
       showUpgradeRequestModal(wallet);
       return false;
     }

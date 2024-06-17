@@ -60,10 +60,12 @@ describe('Test function: executeTxn', function () {
 
   describe('when account is deployed and does not require update', function () {
     beforeEach(async function () {
-      sandbox.stub(utils, 'getCorrectContractAddress').resolves({address: "", signerPubKey: "", upgradeRequired: false});
+      sandbox
+        .stub(utils, 'getCorrectContractAddress')
+        .resolves({ address: '', signerPubKey: '', upgradeRequired: false });
       sandbox.stub(utils, 'isAccountDeployed').resolves(true);
     });
-    
+
     it('should executeTxn correctly', async function () {
       const stub = sandbox.stub(utils, 'executeTxn').resolves({
         transaction_hash: 'transaction_hash',
@@ -75,7 +77,7 @@ describe('Test function: executeTxn', function () {
         state,
         account1.address,
       );
-  
+
       expect(result).to.eql({
         transaction_hash: 'transaction_hash',
       });
@@ -93,7 +95,7 @@ describe('Test function: executeTxn', function () {
         { maxFee: 100 },
       );
     });
-  
+
     it('should executeTxn multiple', async function () {
       const stub = sandbox.stub(utils, 'executeTxn').resolves({
         transaction_hash: 'transaction_hash',
@@ -124,7 +126,7 @@ describe('Test function: executeTxn', function () {
         state,
         account1.address,
       );
-  
+
       expect(result).to.eql({
         transaction_hash: 'transaction_hash',
       });
@@ -149,7 +151,7 @@ describe('Test function: executeTxn', function () {
         { maxFee: 100 },
       );
     });
-  
+
     it('should throw error if executeTxn fail', async function () {
       const stub = sandbox.stub(utils, 'executeTxn').rejects('error');
       const { privateKey } = await utils.getKeysFromAddress(
@@ -180,7 +182,7 @@ describe('Test function: executeTxn', function () {
         );
       }
     });
-  
+
     it('should return false if user rejected to sign the transaction', async function () {
       walletStub.rpcStubs.snap_dialog.resolves(false);
       const stub = sandbox.stub(utils, 'executeTxn').resolves({
@@ -190,5 +192,5 @@ describe('Test function: executeTxn', function () {
       expect(result).to.equal(false);
       expect(stub).to.have.been.not.called;
     });
-  })
+  });
 });

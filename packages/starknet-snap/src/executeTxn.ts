@@ -1,6 +1,13 @@
 import { toJson } from './utils/serializer';
 import { getNetworkFromChainId, getTxnSnapTxt, showUpgradeRequestModal } from './utils/snapUtils';
-import { getKeysFromAddress, executeTxn as executeTxnUtil, isAccountDeployed, isUpgradeRequired, getPermutationAddresses, getCorrectContractAddress } from './utils/starknetUtils';
+import {
+  getKeysFromAddress,
+  executeTxn as executeTxnUtil,
+  isAccountDeployed,
+  isUpgradeRequired,
+  getPermutationAddresses,
+  getCorrectContractAddress,
+} from './utils/starknetUtils';
 import { ApiParams, ExecuteTxnRequestParams } from './types/snapApi';
 import { createAccount } from './createAccount';
 import { DialogType } from '@metamask/rpc-methods';
@@ -16,14 +23,14 @@ export async function executeTxn(params: ApiParams) {
 
     const senderAddress = requestParamsObj.senderAddress;
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
-    const { 
+    const {
       privateKey: senderPrivateKey,
       publicKey,
       addressIndex,
     } = await getKeysFromAddress(keyDeriver, network, state, senderAddress);
 
-    const {upgradeRequired} = await getCorrectContractAddress(network, publicKey);
-    if(upgradeRequired){
+    const { upgradeRequired } = await getCorrectContractAddress(network, publicKey);
+    if (upgradeRequired) {
       showUpgradeRequestModal(wallet);
       return false;
     }
@@ -74,10 +81,12 @@ export async function executeTxn(params: ApiParams) {
     });
     if (!response) return false;
     //In case this is the first transaction we assign a nonce of 1 to make sure it does after the deploy transaction
-    const invocationsDetails = accountDeployedFirst ? {
-      ...requestParamsObj.invocationsDetails,
-      nonce: 1
-    } : requestParamsObj.invocationsDetails;
+    const invocationsDetails = accountDeployedFirst
+      ? {
+          ...requestParamsObj.invocationsDetails,
+          nonce: 1,
+        }
+      : requestParamsObj.invocationsDetails;
     return await executeTxnUtil(
       network,
       senderAddress,

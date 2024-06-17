@@ -15,7 +15,7 @@ export async function signTransaction(params: ApiParams): Promise<Signature | bo
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
     const { privateKey } = await getKeysFromAddress(keyDeriver, network, state, signerAddress);
 
-    if(await isUpgradeRequired(network, signerAddress)){
+    if (await isUpgradeRequired(network, signerAddress)) {
       showUpgradeRequestModal(wallet);
       return false;
     }

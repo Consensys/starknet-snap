@@ -17,8 +17,8 @@ export async function declareContract(params: ApiParams) {
     const senderAddress = requestParamsObj.senderAddress;
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
     const { privateKey } = await getKeysFromAddress(keyDeriver, network, state, senderAddress);
-    
-    if(await isUpgradeRequired(network, senderAddress)){
+
+    if (await isUpgradeRequired(network, senderAddress)) {
       showUpgradeRequestModal(wallet);
       return false;
     }
@@ -36,7 +36,7 @@ export async function declareContract(params: ApiParams) {
         content: panel([heading('Do you want to sign this transaction?'), ...snapComponents]),
       },
     });
-    
+
     if (!response) return false;
     return await utils.declareContract(
       network,
