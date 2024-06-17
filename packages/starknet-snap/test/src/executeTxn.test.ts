@@ -79,195 +79,186 @@ describe('Test function: executeTxn', function () {
     apiParams.requestParams = requestObject;
   });
 
-  describe('when account is not deployed', () => {
-    let createAccountStub;
-    beforeEach(function () {
-      createAccountStub = sandbox.stub(createAccountUtils, 'createAccount').resolvesThis();
+  it('should executeTxn correctly and deploy an account', async function () {
+    sandbox.stub(utils, 'isAccountDeployed').resolves(false);
+    const createAccountStub = sandbox.stub(createAccountUtils, 'createAccount').resolvesThis();
+    const stub = sandbox.stub(utils, 'executeTxn').resolves({
+      transaction_hash: 'transaction_hash',
     });
-    afterEach(function () {
-      expect(createAccountStub).to.have.been.calledOnceWith(sinon.match.any, true, true);
+    const result = await executeTxn(apiParams);
+    const { privateKey } = await utils.getKeysFromAddress(
+      apiParams.keyDeriver,
+      STARKNET_MAINNET_NETWORK,
+      state,
+      account1.address,
+    );
+    expect(result).to.eql({
+      transaction_hash: 'transaction_hash',
     });
-    it('should executeTxn correctly and deploy an account', async function () {
-      sandbox.stub(utils, 'isAccountDeployed').resolves(false);
-      const stub = sandbox.stub(utils, 'executeTxn').resolves({
-        transaction_hash: 'transaction_hash',
-      });
-      const result = await executeTxn(apiParams);
-      const { privateKey } = await utils.getKeysFromAddress(
-        apiParams.keyDeriver,
-        STARKNET_MAINNET_NETWORK,
-        state,
-        account1.address,
-      );
-      expect(result).to.eql({
-        transaction_hash: 'transaction_hash',
-      });
-      expect(stub).to.have.been.calledOnceWith(
-        STARKNET_MAINNET_NETWORK,
-        account1.address,
-        privateKey,
-        {
-          entrypoint: 'transfer',
-          calldata: ['0', '0', '0'],
-          contractAddress: createAccountProxyTxn.contractAddress,
-        },
-        undefined,
-        { maxFee: '22702500105945', nonce: 1 },
-      );
-    });
-
-    it('should executeTxn multiple and deploy an account', async function () {
-      sandbox.stub(utils, 'isAccountDeployed').resolves(false);
-      const stub = sandbox.stub(utils, 'executeTxn').resolves({
-        transaction_hash: 'transaction_hash',
-      });
-      apiParams.requestParams = {
-        chainId: STARKNET_MAINNET_NETWORK.chainId,
-        senderAddress: account1.address,
-        txnInvocation: [
-          {
-            entrypoint: 'transfer',
-            calldata: ['0', '0', '0'],
-            contractAddress: createAccountProxyTxn.contractAddress,
-          },
-          {
-            entrypoint: 'transfer2',
-            calldata: ['0', '0', '0'],
-            contractAddress: createAccountProxyTxn.contractAddress,
-          },
-        ],
-        invocationsDetails: {
-          maxFee: 100,
-        },
-      };
-      const result = await executeTxn(apiParams);
-      const { privateKey } = await utils.getKeysFromAddress(
-        apiParams.keyDeriver,
-        STARKNET_MAINNET_NETWORK,
-        state,
-        account1.address,
-      );
-
-      expect(result).to.eql({
-        transaction_hash: 'transaction_hash',
-      });
-      expect(stub).to.have.been.calledOnce;
-      expect(stub).to.have.been.calledWith(
-        STARKNET_MAINNET_NETWORK,
-        account1.address,
-        privateKey,
-        [
-          {
-            entrypoint: 'transfer',
-            calldata: ['0', '0', '0'],
-            contractAddress: createAccountProxyTxn.contractAddress,
-          },
-          {
-            entrypoint: 'transfer2',
-            calldata: ['0', '0', '0'],
-            contractAddress: createAccountProxyTxn.contractAddress,
-          },
-        ],
-        undefined,
-        { maxFee: '22702500105945', nonce: 1 },
-      );
-    });
+    expect(stub).to.have.been.calledOnceWith(
+      STARKNET_MAINNET_NETWORK,
+      account1.address,
+      privateKey,
+      {
+        entrypoint: 'transfer',
+        calldata: ['0', '0', '0'],
+        contractAddress: createAccountProxyTxn.contractAddress,
+      },
+      undefined,
+      { maxFee: '22702500105945', nonce: 1 },
+    );
+    expect(createAccountStub).to.have.been.calledOnceWith(sinon.match.any, true, true);
   });
-  let createAccountStub;
-  describe('when account is not deployed', () => {
-    beforeEach(function () {
-      createAccountStub = sandbox.stub(createAccountUtils, 'createAccount');
-    });
-    afterEach(function () {
-      expect(createAccountStub).to.not.have.been.called;
-    });
-    it('should executeTxn and not deploy an account', async function () {
-      sandbox.stub(utils, 'isAccountDeployed').resolves(true);
-      const stub = sandbox.stub(utils, 'executeTxn').resolves({
-        transaction_hash: 'transaction_hash',
-      });
-      const result = await executeTxn(apiParams);
-      const { privateKey } = await utils.getKeysFromAddress(
-        apiParams.keyDeriver,
-        STARKNET_MAINNET_NETWORK,
-        state,
-        account1.address,
-      );
 
-      expect(result).to.eql({
-        transaction_hash: 'transaction_hash',
-      });
-      expect(stub).to.have.been.calledOnce;
-      expect(stub).to.have.been.calledWith(
-        STARKNET_MAINNET_NETWORK,
-        account1.address,
-        privateKey,
+  it('should executeTxn multiple and deploy an account', async function () {
+    sandbox.stub(utils, 'isAccountDeployed').resolves(false);
+    const createAccountStub = sandbox.stub(createAccountUtils, 'createAccount').resolvesThis();
+    const stub = sandbox.stub(utils, 'executeTxn').resolves({
+      transaction_hash: 'transaction_hash',
+    });
+    apiParams.requestParams = {
+      chainId: STARKNET_MAINNET_NETWORK.chainId,
+      senderAddress: account1.address,
+      txnInvocation: [
         {
           entrypoint: 'transfer',
           calldata: ['0', '0', '0'],
           contractAddress: createAccountProxyTxn.contractAddress,
         },
-        undefined,
-        { maxFee: '22702500105945', nonce: undefined },
-      );
-    });
-
-    it('should executeTxn multiple and not deploy an account', async function () {
-      sandbox.stub(utils, 'isAccountDeployed').resolves(true);
-      const stub = sandbox.stub(utils, 'executeTxn').resolves({
-        transaction_hash: 'transaction_hash',
-      });
-      apiParams.requestParams = {
-        chainId: STARKNET_MAINNET_NETWORK.chainId,
-        senderAddress: account1.address,
-        txnInvocation: [
-          {
-            entrypoint: 'transfer',
-            calldata: ['0', '0', '0'],
-            contractAddress: createAccountProxyTxn.contractAddress,
-          },
-          {
-            entrypoint: 'transfer2',
-            calldata: ['0', '0', '0'],
-            contractAddress: createAccountProxyTxn.contractAddress,
-          },
-        ],
-        invocationsDetails: {
-          maxFee: 100,
+        {
+          entrypoint: 'transfer2',
+          calldata: ['0', '0', '0'],
+          contractAddress: createAccountProxyTxn.contractAddress,
         },
-      };
-      const result = await executeTxn(apiParams);
-      const { privateKey } = await utils.getKeysFromAddress(
-        apiParams.keyDeriver,
-        STARKNET_MAINNET_NETWORK,
-        state,
-        account1.address,
-      );
+      ],
+      invocationsDetails: {
+        maxFee: 100,
+      },
+    };
+    const result = await executeTxn(apiParams);
+    const { privateKey } = await utils.getKeysFromAddress(
+      apiParams.keyDeriver,
+      STARKNET_MAINNET_NETWORK,
+      state,
+      account1.address,
+    );
 
-      expect(result).to.eql({
-        transaction_hash: 'transaction_hash',
-      });
-      expect(stub).to.have.been.calledOnce;
-      expect(stub).to.have.been.calledWith(
-        STARKNET_MAINNET_NETWORK,
-        account1.address,
-        privateKey,
-        [
-          {
-            entrypoint: 'transfer',
-            calldata: ['0', '0', '0'],
-            contractAddress: createAccountProxyTxn.contractAddress,
-          },
-          {
-            entrypoint: 'transfer2',
-            calldata: ['0', '0', '0'],
-            contractAddress: createAccountProxyTxn.contractAddress,
-          },
-        ],
-        undefined,
-        { maxFee: '22702500105945', nonce: undefined },
-      );
+    expect(result).to.eql({
+      transaction_hash: 'transaction_hash',
     });
+    expect(stub).to.have.been.calledOnce;
+    expect(stub).to.have.been.calledWith(
+      STARKNET_MAINNET_NETWORK,
+      account1.address,
+      privateKey,
+      [
+        {
+          entrypoint: 'transfer',
+          calldata: ['0', '0', '0'],
+          contractAddress: createAccountProxyTxn.contractAddress,
+        },
+        {
+          entrypoint: 'transfer2',
+          calldata: ['0', '0', '0'],
+          contractAddress: createAccountProxyTxn.contractAddress,
+        },
+      ],
+      undefined,
+      { maxFee: '22702500105945', nonce: 1 },
+    );
+    expect(createAccountStub).to.have.been.calledOnceWith(sinon.match.any, true, true);
+  });
+
+  it('should executeTxn and not deploy an account', async function () {
+    const createAccountStub = sandbox.stub(createAccountUtils, 'createAccount');
+    sandbox.stub(utils, 'isAccountDeployed').resolves(true);
+    const stub = sandbox.stub(utils, 'executeTxn').resolves({
+      transaction_hash: 'transaction_hash',
+    });
+    const result = await executeTxn(apiParams);
+    const { privateKey } = await utils.getKeysFromAddress(
+      apiParams.keyDeriver,
+      STARKNET_MAINNET_NETWORK,
+      state,
+      account1.address,
+    );
+
+    expect(result).to.eql({
+      transaction_hash: 'transaction_hash',
+    });
+    expect(stub).to.have.been.calledOnce;
+    expect(stub).to.have.been.calledWith(
+      STARKNET_MAINNET_NETWORK,
+      account1.address,
+      privateKey,
+      {
+        entrypoint: 'transfer',
+        calldata: ['0', '0', '0'],
+        contractAddress: createAccountProxyTxn.contractAddress,
+      },
+      undefined,
+      { maxFee: '22702500105945', nonce: undefined },
+    );
+    expect(createAccountStub).to.not.have.been.called;
+  });
+
+  it('should executeTxn multiple and not deploy an account', async function () {
+    const createAccountStub = sandbox.stub(createAccountUtils, 'createAccount');
+    sandbox.stub(utils, 'isAccountDeployed').resolves(true);
+    const stub = sandbox.stub(utils, 'executeTxn').resolves({
+      transaction_hash: 'transaction_hash',
+    });
+    apiParams.requestParams = {
+      chainId: STARKNET_MAINNET_NETWORK.chainId,
+      senderAddress: account1.address,
+      txnInvocation: [
+        {
+          entrypoint: 'transfer',
+          calldata: ['0', '0', '0'],
+          contractAddress: createAccountProxyTxn.contractAddress,
+        },
+        {
+          entrypoint: 'transfer2',
+          calldata: ['0', '0', '0'],
+          contractAddress: createAccountProxyTxn.contractAddress,
+        },
+      ],
+      invocationsDetails: {
+        maxFee: 100,
+      },
+    };
+    const result = await executeTxn(apiParams);
+    const { privateKey } = await utils.getKeysFromAddress(
+      apiParams.keyDeriver,
+      STARKNET_MAINNET_NETWORK,
+      state,
+      account1.address,
+    );
+
+    expect(result).to.eql({
+      transaction_hash: 'transaction_hash',
+    });
+    expect(stub).to.have.been.calledOnce;
+    expect(stub).to.have.been.calledWith(
+      STARKNET_MAINNET_NETWORK,
+      account1.address,
+      privateKey,
+      [
+        {
+          entrypoint: 'transfer',
+          calldata: ['0', '0', '0'],
+          contractAddress: createAccountProxyTxn.contractAddress,
+        },
+        {
+          entrypoint: 'transfer2',
+          calldata: ['0', '0', '0'],
+          contractAddress: createAccountProxyTxn.contractAddress,
+        },
+      ],
+      undefined,
+      { maxFee: '22702500105945', nonce: undefined },
+    );
+    expect(createAccountStub).to.not.have.been.called;
   });
 
   it('should throw error if executeTxn fail', async function () {
