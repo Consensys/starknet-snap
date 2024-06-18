@@ -113,8 +113,8 @@ export const signature4SignMessageWithUnfoundAddress = [
 ];
 
 export const signature3 = [
-  '607985888254383597713678062496326274484078117880260232069103402822721981909',
-  '2165861203006010568296813740808310355035386348183576985427784501900302491063',
+  '1256731126561482761572869006981488976832873819808625500210956924080068064716',
+  '1621003388569060642997584706464972362757030330535363446245801982840065859049',
 ];
 // Derived from seed phrase: "dog simple gown ankle release anger local pulp rose river approve miracle"
 export const bip44Entropy: JsonBIP44CoinTypeNode = {
@@ -149,7 +149,7 @@ export const createAccountProxyMainnetResp2 = {
 
 export const createAccountProxyResp = {
   transaction_hash: '0x3b690b4c9dd639881a46f6a344ee90254562175ed7a7f5a028f69b8c32ccb47',
-  contract_address: '0x4b36a2b0a1e9d2af3416914798de776e37d9e0ab9a50d2dec30485dca64bb8',
+  contract_address: '0x04882a372da3dfe1c53170ad75893832469bf87b62b13e84662565c4a88f25cd',
 };
 
 export const createAccountFailedProxyResp = {
