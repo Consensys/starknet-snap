@@ -1,0 +1,30 @@
+name: SonarCloud Scan
+
+on:
+  workflow_call:
+    secrets:
+      SONAR_TOKEN_WALLET_UI:
+        required: true
+      SONAR_TOKEN_STARKNET_SNAP:
+        required: true
+
+jobs:
+  code-scan:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: SonarCloud Scan Starknet-Snap
+        uses: SonarSource/sonarcloud-github-action@v2.1.1
+        with:
+          projectBaseDir: packages/starknet-snap/
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_STARKNET_SNAP }}
+      - name: SonarCloud Scan Wallet-UI
+        uses: SonarSource/sonarcloud-github-action@v2.1.1
+        with:
+          projectBaseDir: packages/wallet-ui/
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_WALLET_UI }}
