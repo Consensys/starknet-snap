@@ -315,6 +315,8 @@ describe('Test function: executeTxn', function () {
   });
 
   it('should return false if user rejected to sign the transaction', async function () {
+    sandbox.stub(utils, 'isAccountDeployed').resolves(true);
+    sandbox.stub(utils, 'isUpgradeRequired').resolves(false);
     walletStub.rpcStubs.snap_dialog.resolves(false);
     const stub = sandbox.stub(utils, 'executeTxn').resolves({
       transaction_hash: 'transaction_hash',
