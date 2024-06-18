@@ -22,7 +22,10 @@ jobs:
   build-lint-test:
     name: Build, lint, and test
     uses: ./.github/workflows/build-lint-test.yml
-
+    secrets:
+      SONAR_TOKEN_WALLET_UI: ${{ secrets.SONAR_TOKEN_WALLET_UI }}
+      SONAR_TOKEN_STARKNET_SNAP: ${{ secrets.SONAR_TOKEN_STARKNET_SNAP }}
+      
   all-jobs-completed:
     name: All jobs completed
     runs-on: ubuntu-latest

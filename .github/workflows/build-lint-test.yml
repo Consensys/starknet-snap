@@ -1,7 +1,10 @@
-name: Build, Lint, and Test
+name: Build, Lint, Test and Scan
 
 on:
   workflow_call:
+    secrets:
+      SONAR_TOKEN_WALLET_UI: ${{ secrets.SONAR_TOKEN_WALLET_UI }}
+      SONAR_TOKEN_STARKNET_SNAP: ${{ secrets.SONAR_TOKEN_STARKNET_SNAP }}
 
 jobs:
   prepare:
