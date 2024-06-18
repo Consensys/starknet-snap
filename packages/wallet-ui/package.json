@@ -70,21 +70,19 @@
     "terser": "^5.14.2"
   },
   "scripts": {
-    "setup": "yarn install --immutable && yarn allow-scripts",
-    "start:all": "yarn clean && yarn install && yarn build && yarn start",
-    "start": "react-scripts start",
+    "build:clean": "yarn clean && yarn build",
     "build": "react-scripts build",
+    "serve": "react-scripts serve",
+    "clean": "rimraf dist",
+    "start": "react-scripts start",
     "test": "react-scripts test --coverage --passWithNoTests",
+    "lint": "yarn lint:eslint && yarn lint:misc --check",
+    "lint:eslint": "eslint . --cache --ext js,ts,tsx",
+    "lint:fix": "yarn lint:eslint --fix && yarn lint:misc --write",
+    "lint:misc": "prettier '**/*.ts' '**/*.json' '**/*.tsx' '**/*.md' '!CHANGELOG.md' --ignore-path .gitignore",
     "eject": "react-scripts eject",
-    "lint:react": "eslint ./src/**/*.ts ./src/**/*.tsx -f json -o eslint-report.json",
-    "lint:misc": "prettier --check ./src/**/*.js ./src/**/*.ts ./src/**/*.tsx",
-    "pretty": "prettier --write ./src/**/*.js  ./src/**/*.ts ./src/**/*.tsx",
-    "lint": "yarn lint:react && yarn lint:misc",
-    "clean": "rimraf build",
     "storybook": "start-storybook -p 6006",
-    "build-storybook": "build-storybook",
-    "type:check": "tsc --pretty --noEmit",
-    "release": "sh ../../scripts/release.sh"
+    "build-storybook": "build-storybook"
   },
   "eslintConfig": {
     "extends": [

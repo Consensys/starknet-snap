@@ -9,11 +9,12 @@
     "packages/*"
   ],
   "scripts": {
-    "setup": "yarn workspaces foreach run setup",
-    "build": "yarn workspaces foreach run build",
-    "test": "yarn workspace @consensys/starknet-snap run test",
-    "lint": "yarn workspaces foreach run lint",
-    "clean": "yarn workspaces foreach run clean",
+    "allow-scripts": "yarn workspaces foreach --parallel --interlaced --verbose run allow-scripts",
+    "clean": "yarn workspaces foreach --parallel --interlaced --verbose run clean",
+    "build": "yarn workspaces foreach --parallel --interlaced --verbose run build",
+    "lint": "yarn workspaces foreach --parallel --interlaced --verbose run lint",
+    "start": "yarn workspaces foreach --parallel --interlaced --verbose run start",
+    "test": "yarn workspaces foreach --parallel --interlaced --verbose run test",
     "prepare": "husky install"
   },
   "devDependencies": {
@@ -23,5 +24,8 @@
   },
   "resolutions": {
     "luxon@^3.2.1": "patch:luxon@npm%3A3.3.0#./.yarn/patches/luxon-npm-3.3.0-bdbae9bfd5.patch"
+  },
+  "engines": {
+    "node": ">=18.6.0"
   }
 }
