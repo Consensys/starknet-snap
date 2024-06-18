@@ -33,7 +33,6 @@
     "web-vitals": "^2.1.4"
   },
   "devDependencies": {
-    "@lavamoat/allow-scripts": "^2.0.3",
     "@storybook/addon-actions": "^6.5.3",
     "@storybook/addon-essentials": "^6.5.3",
     "@storybook/addon-interactions": "^6.5.3",
@@ -70,6 +69,7 @@
     "terser": "^5.14.2"
   },
   "scripts": {
+    "allow-scripts": "yarn workspace root allow-scripts",
     "build:clean": "yarn clean && yarn build",
     "build": "react-scripts build",
     "serve": "react-scripts serve",
@@ -101,20 +101,5 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  },
-  "lavamoat": {
-    "allowScripts": {
-      "@fortawesome/fontawesome-svg-core": true,
-      "@fortawesome/free-regular-svg-icons": true,
-      "@fortawesome/free-solid-svg-icons": true,
-      "@fortawesome/free-solid-svg-icons>@fortawesome/fontawesome-common-types": true,
-      "@fortawesome/fontawesome-svg-core>@fortawesome/fontawesome-common-types": true,
-      "@lavamoat/preinstall-always-fail": false,
-      "@storybook/react>@storybook/core-common>webpack>watchpack>watchpack-chokidar2>chokidar>fsevents": true,
-      "@storybook/react>core-js": true,
-      "react-scripts>@pmmmwh/react-refresh-webpack-plugin>core-js-pure": true,
-      "styled-components": true,
-      "react-scripts>tailwindcss>postcss-load-config>ts-node>@swc/core": false
-    }
   }
 }

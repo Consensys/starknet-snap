@@ -3,8 +3,7 @@ import { signMessage as signMessageUtil, getKeysFromAddress } from './utils/star
 import { getNetworkFromChainId, addDialogTxt } from './utils/snapUtils';
 import { ApiParams, SignMessageRequestParams } from './types/snapApi';
 import { validateAndParseAddress } from '../src/utils/starknetUtils';
-import { DialogType } from '@metamask/rpc-methods';
-import { heading, panel } from '@metamask/snaps-sdk';
+import { heading, panel, DialogType } from '@metamask/snaps-sdk';
 import { logger } from './utils/logger';
 
 export async function signMessage(params: ApiParams) {
