@@ -7,7 +7,7 @@ import {
   estimateFeeBulk,
   getAccContractAddressAndCallData,
   addFeesFromAllTransactions,
-  isUpgradeRequired,
+  isUpgradeRequired
 } from './utils/starknetUtils';
 import { ApiParams, ExecuteTxnRequestParams } from './types/snapApi';
 import { createAccount } from './createAccount';

@@ -313,4 +313,15 @@ describe('Test function: executeTxn', function () {
       );
     }
   });
+
+  it('should return false if user rejected to sign the transaction', async function () {
+    walletStub.rpcStubs.snap_dialog.resolves(false);
+    const stub = sandbox.stub(utils, 'executeTxn').resolves({
+      transaction_hash: 'transaction_hash',
+    });
+
+    const result = await executeTxn(apiParams);
+    expect(result).to.equal(false);
+    expect(stub).to.have.been.not.called;
+  });
 });
