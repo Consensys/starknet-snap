@@ -83,7 +83,7 @@ jobs:
         with:
           path: |
             ./packages/**/coverage
-          key: ${{ github.sha }}-coverage-report
+          key: ${{ github.sha }}-${{ matrix.node-version }}-coverage-report
   
   code-scan-snap:
     name: Scan Starknet Snap
@@ -120,7 +120,7 @@ jobs:
         with:
           path: |
             ./packages/**/coverage
-          key: ${{ github.sha }}-coverage-report
+          key: ${{ github.sha }}-20.x-coverage-report
       - name: SonarCloud Scan Wallet-UI
         uses: SonarSource/sonarcloud-github-action@v2.1.1
         with:
