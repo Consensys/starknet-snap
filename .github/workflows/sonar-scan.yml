@@ -9,8 +9,8 @@ on:
         required: true
 
 jobs:
-  code-scan:
-    name: Test
+  code-scan-snap:
+    name: Scan Starknet Snap
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -21,6 +21,12 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_STARKNET_SNAP }}
+  
+  code-scan-wallet-ui:
+    name: Scan Wallet UI
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
       - name: SonarCloud Scan Wallet-UI
         uses: SonarSource/sonarcloud-github-action@v2.1.1
         with:
