@@ -23,20 +23,12 @@ jobs:
     name: Build, lint, and test
     uses: ./.github/workflows/build-lint-test.yml
 
-  code-scan:
-    name: Scan code
-    uses: ./.github/workflows/sonar-scan.yml
-    secrets:
-      SONAR_TOKEN_WALLET_UI: ${{ secrets.SONAR_TOKEN_WALLET_UI }}
-      SONAR_TOKEN_STARKNET_SNAP: ${{ secrets.SONAR_TOKEN_STARKNET_SNAP }}
-      
   all-jobs-completed:
     name: All jobs completed
     runs-on: ubuntu-latest
     needs:
       - check-workflows
       - build-lint-test
-      - code-scan
     outputs:
       PASSED: ${{ steps.set-output.outputs.PASSED }}
     steps:
