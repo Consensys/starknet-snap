@@ -251,10 +251,7 @@ export const onInstall: OnInstallHandler = async () => {
 };
 
 export const onUpdate: OnUpdateHandler = async () => {
-  const component = panel([
-    text('Features released with this update:'),
-    text('Cairo contract upgrade support.'),
-  ]);
+  const component = panel([text('Features released with this update:'), text('Cairo contract upgrade support.')]);
 
   await snap.request({
     method: 'snap_dialog',
