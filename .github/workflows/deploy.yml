@@ -28,6 +28,14 @@ jobs:
           HASH=$(git rev-parse --short HEAD)
           DATE=$(date +%Y%m%d)
           ENV=${{ inputs.environment }}
+          
+          {
+            echo "AWS_CLOUDFRONT_DISTRIBUTIONS_ID=${{ vars.AWS_CLOUDFRONT_DISTRIBUTIONS_ID }}"
+            echo "AWS_S3_GET_STARKNET_URL=${{ vars.AWS_S3_GET_STARKNET_URL }}"
+            echo "AWS_S3_URL=${{ vars.AWS_S3_URL }}"
+            echo "GET_STARKNET_PUBLIC_PATH=${{ vars.GET_STARKNET_PUBLIC_PATH }}"
+          } >> "$GITHUB_OUTPUT"
+
           if [[ $ENV == "dev" ]]; then
             {
               echo "VERSION=${BASE}-dev-${HASH}-${DATE}"
@@ -54,6 +62,10 @@ jobs:
       VERSION: ${{ steps.prepare_parameters.outputs.VERSION }}
       TAG: ${{ steps.prepare_parameters.outputs.TAG }}
       ENV: ${{ steps.prepare_parameters.outputs.ENV }}
+      AWS_S3_GET_STARKNET_URL: ${{ steps.prepare_parameters.outputs.GET_STARKNET_PUBLIC_PATH }}
+      AWS_CLOUDFRONT_DISTRIBUTIONS_ID: ${{ steps.prepare_parameters.outputs.AWS_CLOUDFRONT_DISTRIBUTIONS_ID }}
+      AWS_S3_URL: ${{ steps.prepare_parameters.outputs.AWS_S3_URL }}
+      GET_STARKNET_PUBLIC_PATH: ${{ steps.prepare_parameters.outputs.GET_STARKNET_PUBLIC_PATH }}
 
   install-build:
     needs: 
@@ -71,13 +83,20 @@ jobs:
           node-version: 20.x
       - name: Validate Praameters
         run: |
-          echo "${{ needs.perpare-deployment.outputs.TAG }}"
-          echo "${{ needs.perpare-deployment.outputs.VERSION }}"
-          echo "${{ vars.GET_STARKNET_PUBLIC_PATH }}"
-          if [[ "${{vars.GET_STARKNET_PUBLIC_PATH}}" == "" ]]; then
+          echo "$TAG"
+          echo "$VERSION"
+          echo "$GET_STARKNET_PUBLIC_PATH"
+          if [[ "$TAG" == "" ]]; then
             echo "Missing Parameter"
             exit 1
           fi
+          if [[ "$VERSION" == "" ]]; then
+            echo "Missing Parameter"
+            exit 1
+          fi
+        env:
+          TAG: ${{ needs.perpare-deployment.outputs.TAG }}
+          VERSION: ${{ needs.perpare-deployment.outputs.VERSION }}
       - name: Install
         run: |
           yarn --no-immutable
