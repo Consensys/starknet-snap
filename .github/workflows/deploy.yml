@@ -140,11 +140,13 @@ jobs:
         with:
           node-version: 20.x
       - name: Restore Cached Build
-        uses: actions/cache/restore@v3
+        uses: actions/cache@v3
         id: restore-build
         with:
           # add /packages/snap/snap.manifest.json to include an updated shasum from build due to version update in auto PR
           path: |
+            ./packages/get-starknet/dist/webpack
+            ./packages/wallet-ui/build
             ./packages/starknet-snap/package.json
             ./packages/starknet-snap/dist
             ./packages/starknet-snap/snap.manifest.json
@@ -170,11 +172,13 @@ jobs:
           node-version: '20.x'
           registry-url: 'https://registry.npmjs.org'
       - name: Restore Cached Build 
-        uses: actions/cache/restore@v3
+        uses: actions/cache@v3
         id: restore-build
         with:
           # add /packages/snap/snap.manifest.json to include an updated shasum from build due to version update in auto PR
           path: |
+            ./packages/get-starknet/dist/webpack
+            ./packages/wallet-ui/build
             ./packages/starknet-snap/package.json
             ./packages/starknet-snap/dist
             ./packages/starknet-snap/snap.manifest.json
@@ -203,11 +207,15 @@ jobs:
         with:
           ref: ${{ github.sha }}
       - name: Restore Cached Build 
-        uses: actions/cache/restore@v3
+        uses: actions/cache@v3
         id: restore-build
         with:
           path: |
+            ./packages/get-starknet/dist/webpack
             ./packages/wallet-ui/build
+            ./packages/starknet-snap/package.json
+            ./packages/starknet-snap/dist
+            ./packages/starknet-snap/snap.manifest.json
             ./node_modules/.yarn-state.yml
           key: ${{ github.sha }}
       - name: Deploy to AWS
@@ -233,11 +241,15 @@ jobs:
         with:
           ref: ${{ github.sha }}
       - name: Restore Cached Build 
-        uses: actions/cache/restore@v3
+        uses: actions/cache@v3
         id: restore-build
         with:
           path: |
             ./packages/get-starknet/dist/webpack
+            ./packages/wallet-ui/build
+            ./packages/starknet-snap/package.json
+            ./packages/starknet-snap/dist
+            ./packages/starknet-snap/snap.manifest.json
             ./node_modules/.yarn-state.yml
           key: ${{ github.sha }}
       - name: Deploy to AWS
