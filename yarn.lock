@@ -3246,6 +3246,21 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@consensys/starknet-snap@file:../starknet-snap::locator=wallet-ui%40workspace%3Apackages%2Fwallet-ui":
+  version: 2.7.0
+  resolution: "@consensys/starknet-snap@file:../starknet-snap#../starknet-snap::hash=64cb92&locator=wallet-ui%40workspace%3Apackages%2Fwallet-ui"
+  dependencies:
+    "@metamask/snaps-sdk": 3.0.1
+    async-mutex: ^0.3.2
+    dotenv: ^16.4.5
+    ethereum-unit-converter: ^0.0.17
+    ethers: ^5.5.1
+    starknet: 6.7.0
+    starknet_v4.22.0: "npm:starknet@4.22.0"
+  checksum: 12c71045fd6bd5d137d51a9fb9a92b3aae206b7b1b1a036bd8fe4ddbf953d94967be56ecb170c4e871a30fa065ba64571dca714180522b89b5a9bf4cc6476b41
+  languageName: node
+  linkType: hard
+
 "@consensys/starknet-snap@workspace:packages/starknet-snap":
   version: 0.0.0-use.local
   resolution: "@consensys/starknet-snap@workspace:packages/starknet-snap"
@@ -28328,6 +28343,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "wallet-ui@workspace:packages/wallet-ui"
   dependencies:
+    "@consensys/starknet-snap": "file:../starknet-snap"
     "@emotion/react": ^11.9.0
     "@emotion/styled": ^11.8.1
     "@fortawesome/fontawesome-svg-core": ^6.1.1
