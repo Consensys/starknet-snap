@@ -62,7 +62,7 @@ jobs:
       VERSION: ${{ steps.prepare_parameters.outputs.VERSION }}
       TAG: ${{ steps.prepare_parameters.outputs.TAG }}
       ENV: ${{ steps.prepare_parameters.outputs.ENV }}
-      AWS_S3_GET_STARKNET_URL: ${{ steps.prepare_parameters.outputs.GET_STARKNET_PUBLIC_PATH }}
+      AWS_S3_GET_STARKNET_URL: ${{ steps.prepare_parameters.outputs.AWS_S3_GET_STARKNET_URL }}
       AWS_CLOUDFRONT_DISTRIBUTIONS_ID: ${{ steps.prepare_parameters.outputs.AWS_CLOUDFRONT_DISTRIBUTIONS_ID }}
       AWS_S3_URL: ${{ steps.prepare_parameters.outputs.AWS_S3_URL }}
       GET_STARKNET_PUBLIC_PATH: ${{ steps.prepare_parameters.outputs.GET_STARKNET_PUBLIC_PATH }}
@@ -87,7 +87,7 @@ jobs:
           yarn allow-scripts
       - name: Build Snap
         run: |
-          echo "Building Snap with version $VERSION for env $SNAP_ENV"
+          echo "Building Snap with version $VERSION"
 
           npm --prefix ./packages/starknet-snap version --new-version "$VERSION" --no-git-tag-version --allow-same-version
 
@@ -106,11 +106,14 @@ jobs:
           ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
       - name: Build UI
         run: |
+          echo "Building UI with version $VERSION"
           REACT_APP_SNAP_VERSION="$VERSION" yarn workspace wallet-ui build
         env:
           VERSION: ${{ needs.perpare-deployment.outputs.VERSION }}
       - name: Build Get Starknet Package
-        run: GET_STARKNET_PUBLIC_PATH=$GET_STARKNET_PUBLIC_PATH yarn workspace @consensys/get-starknet build
+        run: |
+          echo "Building Get Starknet with GET_STARKNET_PUBLIC_PATH=$GET_STARKNET_PUBLIC_PATH" 
+          GET_STARKNET_PUBLIC_PATH=$GET_STARKNET_PUBLIC_PATH yarn workspace @consensys/get-starknet build
         env:
           GET_STARKNET_PUBLIC_PATH: ${{ needs.perpare-deployment.outputs.GET_STARKNET_PUBLIC_PATH }}
       - name: Cache Build
@@ -120,6 +123,7 @@ jobs:
           path: |
             ./packages/get-starknet/dist/webpack
             ./packages/wallet-ui/build
+            ./packages/starknet-snap/package.json
             ./packages/starknet-snap/dist
             ./packages/starknet-snap/snap.manifest.json
             ./node_modules/.yarn-state.yml
@@ -146,6 +150,7 @@ jobs:
           path: |
             ./packages/starknet-snap/dist
             ./packages/starknet-snap/snap.manifest.json
+            ./packages/starknet-snap/package.json
             ./node_modules/.yarn-state.yml
           key: ${{ github.sha }}
       - name: Dry Run Publish
@@ -175,6 +180,7 @@ jobs:
           path: |
             ./packages/starknet-snap/dist
             ./packages/starknet-snap/snap.manifest.json
+            ./packages/starknet-snap/package.json
             ./node_modules/.yarn-state.yml
           key: ${{ github.sha }}
       - name: Run Publish
