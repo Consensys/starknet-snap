@@ -17,7 +17,7 @@
     "setup": "yarn install --no-immutable",
     "build:prod": "webpack --config webpack.config.prod.js",
     "build:dev": "webpack --config webpack.config.dev.js",
-    "build:stag": "webpack --config webpack.config.staging.js",
+    "build:staging": "webpack --config webpack.config.staging.js",
     "serve": "SNAP_ID=local:http://localhost:8081/ webpack --config webpack.config.prod.js --env PUBLIC_PATH=http://localhost:8082/ && webpack-cli serve --config webpack.config.local.js",
     "prettier": "prettier --write \"src/**/*.ts\"",
     "lint": "eslint 'src/*.{js,ts,tsx}' --max-warnings 0 -f json -o eslint-report.json",
