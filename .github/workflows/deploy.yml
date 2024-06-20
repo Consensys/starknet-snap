@@ -8,7 +8,7 @@ on:
         type: environment
         required: true
 jobs:
-  perpare-deployment:
+  prepare-deployment:
     environment: ${{ inputs.environment }}
     permissions:
       contents: write
@@ -69,7 +69,7 @@ jobs:
 
   install-build:
     needs: 
-      - perpare-deployment
+      - prepare-deployment
     permissions:
       contents: write
     runs-on: ubuntu-latest
@@ -108,11 +108,11 @@ jobs:
 
           GET_STARKNET_PUBLIC_PATH=$GET_STARKNET_PUBLIC_PATH yarn workspace @consensys/get-starknet build
         env:
-          SNAP_ENV: ${{ needs.perpare-deployment.outputs.ENV }}
-          VERSION: ${{ needs.perpare-deployment.outputs.VERSION }}
+          SNAP_ENV: ${{ needs.prepare-deployment.outputs.ENV }}
+          VERSION: ${{ needs.prepare-deployment.outputs.VERSION }}
           VOYAGER_API_KEY: ${{ secrets.VOYAGER_API_KEY }}
           ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
-          GET_STARKNET_PUBLIC_PATH: ${{ needs.perpare-deployment.outputs.GET_STARKNET_PUBLIC_PATH }}
+          GET_STARKNET_PUBLIC_PATH: ${{ needs.prepare-deployment.outputs.GET_STARKNET_PUBLIC_PATH }}
       - name: Cache Build
         uses: actions/cache@v3
         id: restore-build
@@ -129,7 +129,7 @@ jobs:
   publish-npm-dry-run:
     runs-on: ubuntu-latest
     needs: 
-      - perpare-deployment
+      - prepare-deployment
       - install-build
     steps:
       - uses: actions/checkout@v3
@@ -156,13 +156,13 @@ jobs:
         run: |
           npm pack ./packages/starknet-snap --tag "$TAG" --access public
         env:
-          TAG: ${{ needs.perpare-deployment.outputs.TAG }}
+          TAG: ${{ needs.prepare-deployment.outputs.TAG }}
 
   publish-npm:
     runs-on: ubuntu-latest
     needs: 
       - publish-npm-dry-run
-      - perpare-deployment
+      - prepare-deployment
     steps:
       - uses: actions/checkout@v3
         with:
@@ -189,12 +189,12 @@ jobs:
           npm publish ./packages/starknet-snap --tag "$TAG" --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          TAG: ${{ needs.perpare-deployment.outputs.TAG }}
+          TAG: ${{ needs.prepare-deployment.outputs.TAG }}
 
   deploy-wallet-ui:
     runs-on: ubuntu-latest
     needs: 
-      - perpare-deployment
+      - prepare-deployment
       - publish-npm
     steps:
       - name: Configure AWS credentials
@@ -223,12 +223,12 @@ jobs:
           echo "Deployed Dapp to : $AWS_S3_URL"
           aws s3 sync ./packages/wallet-ui/build "$AWS_S3_URL"
         env:
-          AWS_S3_URL: ${{ needs.perpare-deployment.outputs.AWS_S3_URL }}
+          AWS_S3_URL: ${{ needs.prepare-deployment.outputs.AWS_S3_URL }}
 
   deploy-get-starknet:
     runs-on: ubuntu-latest
     needs: 
-      - perpare-deployment
+      - prepare-deployment
       - install-build
     steps:
       - name: Configure AWS credentials
@@ -257,14 +257,14 @@ jobs:
           echo "Deployed get Starknet to : $AWS_S3_GET_STARKNET_URL"
           aws s3 sync ./packages/get-starknet/dist/webpack "$AWS_S3_GET_STARKNET_URL"
         env:
-          AWS_S3_GET_STARKNET_URL: ${{ needs.perpare-deployment.outputs.AWS_S3_GET_STARKNET_URL }}
+          AWS_S3_GET_STARKNET_URL: ${{ needs.prepare-deployment.outputs.AWS_S3_GET_STARKNET_URL }}
 
   invalid-aws-cdn-cache:
     runs-on: ubuntu-latest
     needs: 
       - deploy-wallet-ui
       - deploy-get-starknet
-      - perpare-deployment
+      - prepare-deployment
     steps:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -284,4 +284,4 @@ jobs:
               echo "Invalidation $INVALIDED_ID completed"
           done
         env: 
-          AWS_CLOUDFRONT_DISTRIBUTIONS_ID: ${{ needs.perpare-deployment.outputs.AWS_CLOUDFRONT_DISTRIBUTIONS_ID }}
+          AWS_CLOUDFRONT_DISTRIBUTIONS_ID: ${{ needs.prepare-deployment.outputs.AWS_CLOUDFRONT_DISTRIBUTIONS_ID }}
