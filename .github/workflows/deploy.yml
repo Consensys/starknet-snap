@@ -8,84 +8,250 @@ on:
         type: environment
         required: true
 jobs:
-  deploy:
+  perpare-deployment:
     environment: ${{ inputs.environment }}
-    name: Deploy Snap and UI
-    runs-on: ubuntu-20.04
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.sha }}
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20.x
+      - name: Prepare Parameters 
+        id: prepare_parameters
+        run: |
+          BASE=$(node -p "require('./packages/starknet-snap/package.json').version")
+          HASH=$(git rev-parse --short HEAD)
+          DATE=$(date +%Y%m%d)
+          ENV=${{ inputs.environment }}
+          if [[ $ENV == "dev" ]]; then
+            {
+              echo "VERSION=${BASE}-dev-${HASH}-${DATE}"
+              echo "TAG=dev"
+              echo "ENV=dev"
+            } >> "$GITHUB_OUTPUT"
+          elif [[ $ENV  == "staging" ]]; then
+            {
+              echo "VERSION=${BASE}-staging"
+              echo "TAG=staging"
+              echo "ENV=staging"
+            } >> "$GITHUB_OUTPUT"
+          elif [[ $ENV  == "production" ]]; then
+            {
+              echo "VERSION=${BASE}"
+              echo "TAG=latest"
+              echo "ENV=prod"
+            } >> "$GITHUB_OUTPUT"
+          else
+            echo "Invalid environment"
+            exit 1
+          fi
+    outputs:
+      VERSION: ${{ steps.prepare_parameters.outputs.VERSION }}
+      TAG: ${{ steps.prepare_parameters.outputs.TAG }}
+      ENV: ${{ steps.prepare_parameters.outputs.ENV }}
 
+  install-build:
+    needs: 
+      - perpare-deployment
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.sha }}
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20.x
+      - name: Install
+        run: |
+          yarn --no-immutable
+          yarn allow-scripts
+      - name: Build Snap
+        run: |
+          npm --prefix ./packages/starknet-snap version --new-version "$VERSION" --no-git-tag-version --allow-same-version
+
+          yarn workspace @consensys/starknet-snap build
+
+          BUILD_VERSION=$(node -p "require('./packages/starknet-snap/package.json').version")
+          
+          if [[ "$VERSION" != "$BUILD_VERSION" ]]; then
+            echo "Version mismatch"
+            exit 1
+          fi
+        env:
+          SNAP_ENV: ${{ needs.perpare-deployment.outputs.ENV }}
+          VERSION: ${{ needs.perpare-deployment.outputs.VERSION }}
+          VOYAGER_API_KEY: ${{ secrets.VOYAGER_API_KEY }}
+          ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
+      - name: Build UI
+        run: |
+          REACT_APP_SNAP_VERSION="$VERSION" yarn workspace wallet-ui build
+        env:
+          VERSION: ${{ needs.perpare-deployment.outputs.VERSION }}
+      - name: Build Get Starknet Package
+        run: GET_STARKNET_PUBLIC_PATH=$GET_STARKNET_PUBLIC_PATH yarn workspace @consensys/get-starknet build
+        env:
+          GET_STARKNET_PUBLIC_PATH: ${{ vars.GET_STARKNET_PUBLIC_PATH }}
+      - name: Cache Build
+        uses: actions/cache@v3
+        id: restore-build
+        with:
+          path: |
+            ./packages/get-starknet/dist/webpack
+            ./packages/wallet-ui/build
+            ./packages/starknet-snap/dist
+            ./packages/starknet-snap/snap.manifest.json
+            ./node_modules/.yarn-state.yml
+          key: ${{ github.sha }}
+
+  publish-npm-dry-run:
+    runs-on: ubuntu-latest
+    needs: 
+      - perpare-deployment
+      - install-build
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.sha }}
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20.x
+      - name: Restore Cached Build
+        uses: actions/cache@v3
+        id: restore-build
+        with:
+          # add /packages/snap/snap.manifest.json to include an updated shasum from build due to version update in auto PR
+          path: |
+            ./packages/starknet-snap/dist
+            ./packages/starknet-snap/snap.manifest.json
+            ./node_modules/.yarn-state.yml
+          key: ${{ github.sha }}
+      - name: Dry Run Publish
+        run: |
+          npm pack ./packages/starknet-snap --tag "$TAG" --access public
+        env:
+          TAG: ${{ needs.perpare-deployment.outputs.TAG }}
+
+  publish-npm:
+    runs-on: ubuntu-latest
+    needs: 
+      - publish-npm-dry-run
+      - perpare-deployment
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '20.x'
+          registry-url: 'https://registry.npmjs.org'
+      - name: Restore Cached Build 
+        uses: actions/cache@v3
+        id: restore-build
+        with:
+          # add /packages/snap/snap.manifest.json to include an updated shasum from build due to version update in auto PR
+          path: |
+            ./packages/starknet-snap/dist
+            ./packages/starknet-snap/snap.manifest.json
+            ./node_modules/.yarn-state.yml
+          key: ${{ github.sha }}
+      - name: Run Publish
+        run: |
+          npm publish ./packages/starknet-snap --tag "$TAG" --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          TAG: ${{ needs.perpare-deployment.outputs.TAG }}
+
+  deploy-wallet-ui:
+    runs-on: ubuntu-latest
+    needs: 
+      - perpare-deployment
+      - publish-npm
+    steps:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: eu-central-1
-
-      - name: Use Node.js 16.x
-        uses: actions/setup-node@v2
+      - uses: actions/checkout@v3
         with:
-          node-version: 20.x
-          registry-url: 'https://registry.npmjs.org'
-      - name: Get Yarn cache directory
-        run: echo "::set-output name=YARN_CACHE_DIR::$(yarn cache dir)"
-        id: yarn-cache-dir
-      - name: Get Yarn version
-        run: echo "::set-output name=YARN_VERSION::$(yarn --version)"
-        id: yarn-version
-      - name: Cache yarn dependencies
-        uses: actions/cache@v2
+          ref: ${{ github.sha }}
+      - name: Restore Cached Build 
+        uses: actions/cache@v3
+        id: restore-build
         with:
-          path: ${{ steps.yarn-cache-dir.outputs.YARN_CACHE_DIR }}
-          key: yarn-cache-${{ runner.os }}-${{ steps.yarn-version.outputs.YARN_VERSION }}-${{ hashFiles('yarn.lock') }}
-      - run: yarn install --no-immutable
-      - run: yarn setup
-      - run: yarn clean
-
-      - name: Staging Deployment
-        run: |
-          VERSION=$(node -p "require('./packages/starknet-snap/package.json').version")
-          REACT_APP_SNAP_VERSION=${VERSION}-staging yarn workspace wallet-ui build
-          
-          npm --prefix ./packages/starknet-snap version --new-version ${VERSION}-staging --no-git-tag-version
-          yarn workspace @consensys/starknet-snap build
-          
-          npm publish ./packages/starknet-snap  --tag staging --access public 2>&1 > /dev/null || :
-          aws s3 sync ./packages/wallet-ui/build s3://staging.snaps.consensys.io/starknet
+          path: |
+            ./packages/wallet-ui/build
+            ./node_modules/.yarn-state.yml
+          key: ${{ github.sha }}
+      - name: Deploy to AWS
+        run: | 
+          echo "Deployed Dapp to : $AWS_S3_URL"
+          aws s3 sync ./packages/wallet-ui/build "$AWS_S3_URL"
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          SNAP_ENV: staging
-          VOYAGER_API_KEY: ${{ secrets.VOYAGER_API_KEY }}
-          ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
-        if: inputs.environment == 'staging'
+          AWS_S3_URL: ${{ vars.AWS_S3_URL }}
 
-      - name: Production Deployment
-        run: |
-          VERSION=$(node -p "require('./packages/starknet-snap/package.json').version")
-          REACT_APP_SNAP_VERSION=${VERSION} REACT_APP_DEBUG_LEVEL=off yarn workspace wallet-ui build
-
-          npm --prefix ./packages/starknet-snap version --new-version ${VERSION} --no-git-tag-version --allow-same-version
-          yarn workspace @consensys/starknet-snap build
-          
-          npm publish ./packages/starknet-snap --tag latest --access public 2>&1 > /dev/null || :
-          aws s3 sync ./packages/wallet-ui/build s3://snaps.consensys.io/starknet
+  deploy-get-starknet:
+    runs-on: ubuntu-latest
+    needs: 
+      - perpare-deployment
+      - install-build
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-central-1
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.sha }}
+      - name: Restore Cached Build 
+        uses: actions/cache@v3
+        id: restore-build
+        with:
+          path: |
+            ./packages/get-starknet/dist/webpack
+            ./node_modules/.yarn-state.yml
+          key: ${{ github.sha }}
+      - name: Deploy to AWS
+        run: | 
+          echo "Deployed get Starknet to : $AWS_S3_GET_STARKNET_URL"
+          aws s3 sync ./packages/get-starknet/dist/webpack "$AWS_S3_GET_STARKNET_URL"
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          SNAP_ENV: prod
-          VOYAGER_API_KEY: ${{ secrets.VOYAGER_API_KEY }}
-          ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
-        if: inputs.environment == 'production'
+          AWS_S3_GET_STARKNET_URL: ${{ vars.AWS_S3_GET_STARKNET_URL }}
 
-      - name: invalid aws cloudfront cache
-        env: 
-          AWS_CLOUDFRONT_DISTRIBUTIONS_ID: ${{ vars.AWS_CLOUDFRONT_DISTRIBUTIONS_ID }}
+  invalid-aws-cdn-cache:
+    runs-on: ubuntu-latest
+    needs: 
+      - deploy-wallet-ui
+      - deploy-get-starknet
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-central-1
+      - name: Invalid AWS CDN Cache
         run: |
           echo "Distribution ID : $AWS_CLOUDFRONT_DISTRIBUTIONS_ID"
-          for process in $(echo $AWS_CLOUDFRONT_DISTRIBUTIONS_ID | sed "s/,/ /g")
+          echo "$AWS_CLOUDFRONT_DISTRIBUTIONS_ID" | tr ',' '\n' | while read -r DISTRIBUTIONS_ID  
           do
-              echo "Processing Distribution ID : $process"
-              id="$(aws cloudfront create-invalidation --distribution-id $process --paths "/starknet/*" | grep Id | awk -F'"' '{ print $4}')"
-              echo "Waiting for invalidation $id"
-              aws cloudfront wait invalidation-completed --id $id --distribution-id $process
-              echo "Invalidation $id completed"
+              echo "Processing Distribution ID : $DISTRIBUTIONS_ID"
+              INVALIDED_ID="$(aws cloudfront create-invalidation --distribution-id "$DISTRIBUTIONS_ID" --paths "/starknet/*" | grep Id | awk -F'"' '{ print $4}')"
+              echo "Waiting for invalidation $INVALIDED_ID"
+              aws cloudfront wait invalidation-completed --id "$INVALIDED_ID" --distribution-id "$DISTRIBUTIONS_ID"
+              echo "Invalidation $INVALIDED_ID completed"
           done
+        env: 
+          AWS_CLOUDFRONT_DISTRIBUTIONS_ID: ${{ vars.AWS_CLOUDFRONT_DISTRIBUTIONS_ID }}

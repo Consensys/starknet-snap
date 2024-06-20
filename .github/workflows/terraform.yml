@@ -33,7 +33,7 @@ jobs:
 
       - name: Get terraform version
         id: version
-        run: echo "::set-output name=terraform-version::$(cat ./terraform/.tfswitchrc)"
+        run: echo "terraform-version=$(cat ./terraform/.tfswitchrc)" >> "$GITHUB_OUTPUT"
 
       - uses: hashicorp/setup-terraform@v1
         with:
@@ -58,7 +58,7 @@ jobs:
         if: github.event_name == 'pull_request'
         run: |
           terraform plan -input=false -no-color | tee terraform.stdout.txt
-          echo "::set-output name=plan-short::$(grep -e 'Plan: [0-9]* to add, [0-9]* to change, [0-9]* to destroy.' terraform.stdout.txt)"
+          echo "plan-short=$(grep -e 'Plan: [0-9]* to add, [0-9]* to change, [0-9]* to destroy.' terraform.stdout.txt)" >> "$GITHUB_OUTPUT"
         continue-on-error: true
         working-directory: "./terraform/live"
 
