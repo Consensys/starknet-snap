@@ -3228,7 +3228,6 @@ __metadata:
     chai-as-promised: ^7.1.1
     depcheck: ^1.4.7
     dotenv: ^16.4.5
-    dotenv-webpack: ^8.1.0
     eslint: ^8.13.0
     get-starknet-core: ^3.2.0
     html-webpack-plugin: 5.6.0
@@ -14237,30 +14236,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dotenv-defaults@npm:^2.0.2":
-  version: 2.0.2
-  resolution: "dotenv-defaults@npm:2.0.2"
-  dependencies:
-    dotenv: ^8.2.0
-  checksum: c005960bd048e2189c4799e729c41f362e415e6e0b54313d3f31e853a84b049bf770b25cb21c112c2805bb13a8376edc9de451fb514abf8546392d327c27f6e5
-  languageName: node
-  linkType: hard
-
 "dotenv-expand@npm:^5.1.0":
   version: 5.1.0
   resolution: "dotenv-expand@npm:5.1.0"
   checksum: 8017675b7f254384915d55f9eb6388e577cf0a1231a28d54b0ca03b782be9501b0ac90ac57338636d395fa59051e6209e9b44b8ddf169ce6076dffb5dea227d3
-  languageName: node
-  linkType: hard
-
-"dotenv-webpack@npm:^8.1.0":
-  version: 8.1.0
-  resolution: "dotenv-webpack@npm:8.1.0"
-  dependencies:
-    dotenv-defaults: ^2.0.2
-  peerDependencies:
-    webpack: ^4 || ^5
-  checksum: 9bb53318941b9ea39da7caf4dddd473f0e6bd3b97679fb4b853324e38841d848f8428af784e76d8efeb659f325b9cbcf420422458d635ca6fe72b9057c7c1abe
   languageName: node
   linkType: hard
 
@@ -14278,7 +14257,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dotenv@npm:^8.0.0, dotenv@npm:^8.2.0":
+"dotenv@npm:^8.0.0":
   version: 8.6.0
   resolution: "dotenv@npm:8.6.0"
   checksum: 38e902c80b0666ab59e9310a3d24ed237029a7ce34d976796349765ac96b8d769f6df19090f1f471b77a25ca391971efde8a1ea63bb83111bd8bec8e5cc9b2cd

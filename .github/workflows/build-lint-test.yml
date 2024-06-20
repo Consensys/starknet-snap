@@ -1,0 +1,132 @@
+name: Build, Lint, Test and Scan
+
+on:
+  workflow_call:
+    secrets:
+      SONAR_TOKEN_WALLET_UI:
+        required: true
+      SONAR_TOKEN_STARKNET_SNAP:
+        required: true
+
+jobs:
+  prepare:
+    name: Prepare
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'yarn'
+      - name: Install Yarn dependencies
+        run: yarn --no-immutable
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    needs:
+      - prepare
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'yarn'
+      - name: Cache NPM tarballs
+        id: cache-npm-tarballs
+        uses: actions/cache@v3
+        with:
+          path: |
+            node_modules/.cache/npm
+          key: npm-tarballs-${{ github.run_id }}
+          restore-keys: |
+            npm-tarballs
+      - run: yarn --no-immutable
+      - run: yarn build
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    needs:
+      - prepare
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'yarn'
+      - run: yarn --no-immutable
+      - run: yarn lint
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    needs:
+      - prepare
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'yarn'
+      - run: yarn --no-immutable
+      - run: yarn build
+      - run: yarn test
+      - name: Cache Coverage Report
+        uses: actions/cache@v3
+        id: cache-coverage-report
+        with:
+          path: |
+            ./packages/**/coverage
+          key: ${{ github.sha }}-${{ matrix.node-version }}-coverage-report
+  
+  code-scan-snap:
+    name: Scan Starknet Snap
+    runs-on: ubuntu-latest
+    needs:
+      - test
+    steps:
+      - uses: actions/checkout@v3
+      - name: Restore Coverage Report
+        uses: actions/cache@v3
+        id: restore-coverage-report
+        with:
+          path: |
+            ./packages/**/coverage
+          key: ${{ github.sha }}-20.x-coverage-report
+      - name: SonarCloud Scan Starknet-Snap
+        uses: SonarSource/sonarcloud-github-action@v2.1.1
+        with:
+          projectBaseDir: packages/starknet-snap/
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_STARKNET_SNAP }}
+  
+  code-scan-wallet-ui:
+    name: Scan Wallet UI
+    runs-on: ubuntu-latest
+    needs:
+      - test
+    steps:
+      - uses: actions/checkout@v3
+      - name: Restore Coverage Report
+        uses: actions/cache@v3
+        id: restore-coverage-report
+        with:
+          path: |
+            ./packages/**/coverage
+          key: ${{ github.sha }}-20.x-coverage-report
+      - name: SonarCloud Scan Wallet-UI
+        uses: SonarSource/sonarcloud-github-action@v2.1.1
+        with:
+          projectBaseDir: packages/wallet-ui/
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_WALLET_UI }}
