@@ -195,10 +195,8 @@ jobs:
           key: ${{ github.sha }}
       - name: Deploy to AWS
         run: | 
-          echo "Deployed Dapp to : $AWS_S3_URL"
-          aws s3 sync ./packages/wallet-ui/build "$AWS_S3_URL"
-        env:
-          AWS_S3_URL: ${{ vars.AWS_S3_URL }}
+          echo "Deployed Dapp to : ${{ vars.AWS_S3_URL }}"
+          aws s3 sync ./packages/wallet-ui/build "${{ vars.AWS_S3_URL }}"
 
   deploy-get-starknet:
     runs-on: ubuntu-latest
@@ -225,10 +223,8 @@ jobs:
           key: ${{ github.sha }}
       - name: Deploy to AWS
         run: | 
-          echo "Deployed get Starknet to : $AWS_S3_GET_STARKNET_URL"
-          aws s3 sync ./packages/get-starknet/dist/webpack "$AWS_S3_GET_STARKNET_URL"
-        env:
-          AWS_S3_GET_STARKNET_URL: ${{ vars.AWS_S3_GET_STARKNET_URL }}
+          echo "Deployed get Starknet to : ${{ vars.AWS_S3_GET_STARKNET_URL }}"
+          aws s3 sync ./packages/get-starknet/dist/webpack "${{ vars.AWS_S3_GET_STARKNET_URL }}"
 
   invalid-aws-cdn-cache:
     runs-on: ubuntu-latest
