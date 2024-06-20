@@ -1,6 +1,6 @@
 import { toJson } from './utils/serializer';
 import { constants, num } from 'starknet';
-import { validateAndParseAddress } from '../src/utils/starknetUtils';
+import { validateAndParseAddress, isUpgradeRequired } from '../src/utils/starknetUtils';
 import { ApiParams, ExtractPublicKeyRequestParams } from './types/snapApi';
 import { getAccount, getNetworkFromChainId } from './utils/snapUtils';
 import { getKeysFromAddress } from './utils/starknetUtils';
@@ -24,6 +24,10 @@ export async function extractPublicKey(params: ApiParams) {
       validateAndParseAddress(requestParamsObj.userAddress);
     } catch (err) {
       throw new Error(`The given user address is invalid: ${requestParamsObj.userAddress}`);
+    }
+
+    if (await isUpgradeRequired(network, userAddress)) {
+      throw new Error('Upgrade required');
     }
 
     let userPublicKey;

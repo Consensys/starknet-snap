@@ -3,9 +3,9 @@ import {
   getKeysFromAddressIndex,
   getAccContractAddressAndCallData,
   deployAccount,
-  callContract,
+  getBalance,
   estimateAccountDeployFee,
-  getSigner,
+  isAccountDeployed,
   waitForTransaction,
 } from './utils/starknetUtils';
 import {
@@ -53,8 +53,6 @@ export async function createAccount(params: ApiParams, silentMode = false, waitM
 
     let failureReason = '';
     let estimateDeployFee: EstimateFee;
-    let signerAssigned = true;
-    let signer = '';
 
     if (deploy) {
       if (!silentMode) {
@@ -80,24 +78,16 @@ export async function createAccount(params: ApiParams, silentMode = false, waitM
           };
       }
 
-      try {
-        signer = await getSigner(contractAddress, network);
-        logger.log(`createAccount:\ngetSigner: contractAddress = ${contractAddress}, signerPublicKey= ${signer}`);
-        failureReason = 'The account address had already been deployed';
-      } catch (err) {
-        signerAssigned = false;
-        logger.log(`createAccount:\ngetSigner: err in get signer: ${toJson(err)}`);
-      }
+      const signerAssigned = await isAccountDeployed(network, contractAddress);
 
       if (!signerAssigned) {
         try {
-          const getBalanceResp = await callContract(
-            network,
+          const balance = await getBalance(
             getEtherErc20Token(state, network.chainId)?.address,
-            'balanceOf',
-            [num.toBigInt(contractAddress).toString(10)],
+            num.toBigInt(contractAddress).toString(10),
+            network,
           );
-          logger.log(`createAccount:\ngetBalanceResp: ${toJson(getBalanceResp)}`);
+          logger.log(`createAccount:\ngetBalanceResp: ${balance}`);
           estimateDeployFee = await estimateAccountDeployFee(
             network,
             contractAddress,
@@ -106,7 +96,7 @@ export async function createAccount(params: ApiParams, silentMode = false, waitM
             privateKey,
           );
           logger.log(`createAccount:\nestimateDeployFee: ${toJson(estimateDeployFee)}`);
-          if (Number(getBalanceResp[0]) < Number(estimateDeployFee.suggestedMaxFee)) {
+          if (Number(balance) < Number(estimateDeployFee.suggestedMaxFee)) {
             const gasFeeStr = ethers.utils.formatUnits(estimateDeployFee.suggestedMaxFee.toString(10), 18);
             const gasFeeFloat = parseFloat(gasFeeStr).toFixed(6); // 6 decimal places for ether
             const gasFeeInEther = Number(gasFeeFloat) === 0 ? '0.000001' : gasFeeFloat;
@@ -118,9 +108,17 @@ export async function createAccount(params: ApiParams, silentMode = false, waitM
         }
       }
 
-      const deployResp = await deployAccount(network, contractAddress, contractCallData, publicKey, privateKey, {
-        maxFee: estimateDeployFee?.suggestedMaxFee,
-      });
+      const deployResp = await deployAccount(
+        network,
+        contractAddress,
+        contractCallData,
+        publicKey,
+        privateKey,
+        undefined,
+        {
+          maxFee: estimateDeployFee?.suggestedMaxFee,
+        },
+      );
 
       if (deployResp.contract_address && deployResp.transaction_hash) {
         const userAccount: AccContract = {

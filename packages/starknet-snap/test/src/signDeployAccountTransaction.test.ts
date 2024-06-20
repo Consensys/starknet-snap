@@ -43,7 +43,7 @@ describe('Test function: signDeployAccountTransaction', function () {
   } as unknown as DeployAccountSignerDetails;
 
   const requestObject: SignDeployAccountTransactionRequestParams = {
-    chainId: STARKNET_MAINNET_NETWORK.chainId,
+    chainId: STARKNET_SEPOLIA_TESTNET_NETWORK.chainId,
     signerAddress: account1.address,
     transaction: declareNDeployPayload,
     enableAuthorize: true,

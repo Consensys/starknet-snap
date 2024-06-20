@@ -12,8 +12,10 @@ export const MAXIMUM_TOKEN_NAME_LENGTH = 64;
 export const MAXIMUM_TOKEN_SYMBOL_LENGTH = 16;
 
 export const TRANSFER_SELECTOR_HEX = '0x83afd3f4caedc6eebf44246fe54e38c95e3179a5ec9ea81740eca5b482d12e';
+export const UPGRADE_SELECTOR_HEX = '0xf2f7c15cbe06c8d94597cd91fd7f3369eae842359235712def5584f8d270cd';
 
-export const ACCOUNT_CLASS_HASH_V0 = '0x033434ad846cdd5f23eb73ff09fe6fddd568284a0fb7d1be20ee482f044dabe2'; // from argent-x repo
+export const ACCOUNT_CLASS_HASH_LEGACY = '0x033434ad846cdd5f23eb73ff09fe6fddd568284a0fb7d1be20ee482f044dabe2'; // from argent-x repo
+export const ACCOUNT_CLASS_HASH = '0x29927c8af6bccf3f6fda035981e765a7bdbf18a2dc0d630494f8758aa908e2b'; // from argent-x repo
 
 interface IDappConfig {
   dev: string;
@@ -33,7 +35,7 @@ export const STARKNET_MAINNET_NETWORK: Network = {
   baseUrl: 'https://alpha-mainnet.starknet.io',
   nodeUrl: 'https://starknet-mainnet.infura.io/v3/60c7253fb48147658095fe0460ac9ee9',
   voyagerUrl: 'https://voyager.online',
-  accountClassHash: '', // from argent-x repo
+  accountClassHash: '',
 };
 
 // Keep this constants for unit test
@@ -70,7 +72,7 @@ export const STARKNET_INTEGRATION_NETWORK: Network = {
   baseUrl: 'https://external.integration.starknet.io',
   nodeUrl: '',
   voyagerUrl: '',
-  accountClassHash: '', // from argent-x repo
+  accountClassHash: '',
 };
 
 export const ETHER_MAINNET: Erc20Token = {
@@ -178,4 +180,10 @@ export const PRELOADED_NETWORKS = [
   STARKNET_INTEGRATION_NETWORK,
 ];
 
-export const PROXY_CONTRACT_HASH = '0x25ec026985a3bf9d0cc1fe17326b245dfdc3ff89b8fde106542a3ea56c5a918'; // from argent-x repo
+export const PROXY_CONTRACT_HASH = '0x25ec026985a3bf9d0cc1fe17326b245dfdc3ff89b8fde106542a3ea56c5a918'; // for cairo 0 proxy contract
+
+export const MIN_ACC_CONTRACT_VERSION = [0, 3, 0];
+
+export const CAIRO_VERSION = '1';
+
+export const CAIRO_VERSION_LEGACY = '0';
