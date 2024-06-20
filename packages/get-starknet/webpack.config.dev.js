@@ -3,15 +3,20 @@ const { merge } = require('webpack-merge');
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const common = require('./webpack.common.js');
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const path = require('path');
-module.exports = merge(common, {
-  mode: 'development',
+const { ModuleFederationPlugin } = require('webpack').container;
+
+module.exports = (env) => merge(common, {
+  mode: 'production',
   output: {
-    publicPath: 'http://localhost:8082/', // Adjust the development publicPath as needed
+    publicPath: 'https://dev.snaps.consensys.io/starknet/get-starknet/v1/', 
   },
-  devServer: {
-    static: path.join(__dirname, 'dist/webpack'),
-    compress: true,
-    port: 8082,
-  },
+  plugins: [
+    new ModuleFederationPlugin({
+      name: 'MetaMaskStarknetSnapWallet',
+      filename: 'remoteEntry.js',
+      exposes: {
+        './index': './src/index.ts',
+      },
+    }),
+  ],
 });

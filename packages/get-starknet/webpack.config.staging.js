@@ -8,7 +8,7 @@ const { ModuleFederationPlugin } = require('webpack').container;
 module.exports = (env) => merge(common, {
   mode: 'production',
   output: {
-    publicPath: 'https://snaps.consensys.io/starknet/get-starknet/v1/', 
+    publicPath: 'https://staging.snaps.consensys.io/starknet/get-starknet/v1/', 
   },
   plugins: [
     new ModuleFederationPlugin({
