@@ -69,6 +69,15 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 20.x
+      - name: Validate Praameters
+        run: |
+          echo "${{ needs.perpare-deployment.outputs.TAG }}"
+          echo "${{ needs.perpare-deployment.outputs.VERSION }}"
+          echo "${{ vars.GET_STARKNET_PUBLIC_PATH }}"
+          if [[ "${{vars.GET_STARKNET_PUBLIC_PATH}}" == "" ]]; then
+            echo "Missing Parameter"
+            exit 1
+          fi
       - name: Install
         run: |
           yarn --no-immutable
