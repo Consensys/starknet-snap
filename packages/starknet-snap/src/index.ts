@@ -45,6 +45,7 @@ import { estimateFees } from './estimateFees';
 import { declareContract } from './declareContract';
 import { signDeclareTransaction } from './signDeclareTransaction';
 import { signDeployAccountTransaction } from './signDeployAccountTransaction';
+import { upgradeAccContract } from './upgradeAccContract';
 import { logger } from './utils/logger';
 import { getStarkName } from './getStarkName';
 
@@ -211,6 +212,10 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ origin, request }) => 
         apiParams.keyDeriver = await getAddressKeyDeriver(snap);
         return await estimateFees(apiParams);
 
+      case 'starkNet_upgradeAccContract':
+        apiParams.keyDeriver = await getAddressKeyDeriver(snap);
+        return upgradeAccContract(apiParams);
+
       case 'starkNet_declareContract':
         apiParams.keyDeriver = await getAddressKeyDeriver(snap);
         return await declareContract(apiParams);
@@ -246,10 +251,7 @@ export const onInstall: OnInstallHandler = async () => {
 };
 
 export const onUpdate: OnUpdateHandler = async () => {
-  const component = panel([
-    text('Features released with this update:'),
-    text('Deprecation of the Starknet Goerli Testnet'),
-  ]);
+  const component = panel([text('Features released with this update:'), text('Cairo contract upgrade support.')]);
 
   await snap.request({
     method: 'snap_dialog',

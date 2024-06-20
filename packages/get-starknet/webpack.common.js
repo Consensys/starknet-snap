@@ -1,7 +1,6 @@
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const path = require('path');
-const Dotenv = require('dotenv-webpack');
-const webpack = require('webpack');
+
 
 module.exports = {
   entry: './src/index.ts',
@@ -24,10 +23,4 @@ module.exports = {
       },
     ],
   },
-  plugins: [
-    new Dotenv(),
-    new webpack.DefinePlugin({
-        'process.env.SNAP_ID': JSON.stringify(process.env.SNAP_ID || 'npm:@consensys/starknet-snap')
-    })
-  ]
 };

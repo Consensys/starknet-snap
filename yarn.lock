@@ -3228,7 +3228,6 @@ __metadata:
     chai-as-promised: ^7.1.1
     depcheck: ^1.4.7
     dotenv: ^16.4.5
-    dotenv-webpack: ^8.1.0
     eslint: ^8.13.0
     get-starknet-core: ^3.2.0
     html-webpack-plugin: 5.6.0
@@ -3257,7 +3256,7 @@ __metadata:
     ethers: ^5.5.1
     starknet: 6.7.0
     starknet_v4.22.0: "npm:starknet@4.22.0"
-  checksum: fea483f5ca9f6a7999bce67277488d03b1812e4e756f4f404d879137022ef0169a57f11f701cd88fc41d5ef5056b201fc9a7e1873a51818d12628f0342568943
+  checksum: d9b1b74d87bd0062457119a8a47fde7ca7914e5e235d2bda51b6f99f74f6a621d6134845518e0c4c969cc84eeaca24bc0cf4ee91245a69c98dc4e4a0a955caab
   languageName: node
   linkType: hard
 
@@ -13871,30 +13870,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dotenv-defaults@npm:^2.0.2":
-  version: 2.0.2
-  resolution: "dotenv-defaults@npm:2.0.2"
-  dependencies:
-    dotenv: ^8.2.0
-  checksum: c005960bd048e2189c4799e729c41f362e415e6e0b54313d3f31e853a84b049bf770b25cb21c112c2805bb13a8376edc9de451fb514abf8546392d327c27f6e5
-  languageName: node
-  linkType: hard
-
 "dotenv-expand@npm:^5.1.0":
   version: 5.1.0
   resolution: "dotenv-expand@npm:5.1.0"
   checksum: 8017675b7f254384915d55f9eb6388e577cf0a1231a28d54b0ca03b782be9501b0ac90ac57338636d395fa59051e6209e9b44b8ddf169ce6076dffb5dea227d3
-  languageName: node
-  linkType: hard
-
-"dotenv-webpack@npm:^8.1.0":
-  version: 8.1.0
-  resolution: "dotenv-webpack@npm:8.1.0"
-  dependencies:
-    dotenv-defaults: ^2.0.2
-  peerDependencies:
-    webpack: ^4 || ^5
-  checksum: 9bb53318941b9ea39da7caf4dddd473f0e6bd3b97679fb4b853324e38841d848f8428af784e76d8efeb659f325b9cbcf420422458d635ca6fe72b9057c7c1abe
   languageName: node
   linkType: hard
 
@@ -13912,7 +13891,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dotenv@npm:^8.0.0, dotenv@npm:^8.2.0":
+"dotenv@npm:^8.0.0":
   version: 8.6.0
   resolution: "dotenv@npm:8.6.0"
   checksum: 38e902c80b0666ab59e9310a3d24ed237029a7ce34d976796349765ac96b8d769f6df19090f1f471b77a25ca391971efde8a1ea63bb83111bd8bec8e5cc9b2cd
@@ -24701,15 +24680,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"semver@npm:^7.5.3, semver@npm:^7.6.0":
-  version: 7.6.2
-  resolution: "semver@npm:7.6.2"
-  bin:
-    semver: bin/semver.js
-  checksum: 40f6a95101e8d854357a644da1b8dd9d93ce786d5c6a77227bc69dbb17bea83d0d1d1d7c4cd5920a6df909f48e8bd8a5909869535007f90278289f2451d0292d
-  languageName: node
-  linkType: hard
-
 "semver@npm:^7.5.4":
   version: 7.6.0
   resolution: "semver@npm:7.6.0"
@@ -27716,7 +27686,7 @@ __metadata:
     react-scripts: 5.0.1
     redux-persist: ^6.0.0
     rimraf: ^3.0.2
-    semver: ^7.3.7
+    semver: ^7.5.2
     starknet: ^4.22.0
     styled-components: ^5.3.5
     toastr2: ^3.0.0-alpha.18
