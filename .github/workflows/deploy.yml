@@ -28,7 +28,7 @@ jobs:
           HASH=$(git rev-parse --short HEAD)
           DATE=$(date +%Y%m%d)
           ENV=${{ inputs.environment }}
-          
+
           {
             echo "AWS_CLOUDFRONT_DISTRIBUTIONS_ID=${{ vars.AWS_CLOUDFRONT_DISTRIBUTIONS_ID }}"
             echo "AWS_S3_GET_STARKNET_URL=${{ vars.AWS_S3_GET_STARKNET_URL }}"
@@ -81,28 +81,14 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 20.x
-      - name: Validate Praameters
-        run: |
-          echo "$TAG"
-          echo "$VERSION"
-          echo "$GET_STARKNET_PUBLIC_PATH"
-          if [[ "$TAG" == "" ]]; then
-            echo "Missing Parameter"
-            exit 1
-          fi
-          if [[ "$VERSION" == "" ]]; then
-            echo "Missing Parameter"
-            exit 1
-          fi
-        env:
-          TAG: ${{ needs.perpare-deployment.outputs.TAG }}
-          VERSION: ${{ needs.perpare-deployment.outputs.VERSION }}
       - name: Install
         run: |
           yarn --no-immutable
           yarn allow-scripts
       - name: Build Snap
         run: |
+          echo "Building Snap with version $VERSION for env $SNAP_ENV"
+
           npm --prefix ./packages/starknet-snap version --new-version "$VERSION" --no-git-tag-version --allow-same-version
 
           yarn workspace @consensys/starknet-snap build
@@ -126,7 +112,7 @@ jobs:
       - name: Build Get Starknet Package
         run: GET_STARKNET_PUBLIC_PATH=$GET_STARKNET_PUBLIC_PATH yarn workspace @consensys/get-starknet build
         env:
-          GET_STARKNET_PUBLIC_PATH: ${{ vars.GET_STARKNET_PUBLIC_PATH }}
+          GET_STARKNET_PUBLIC_PATH: ${{ needs.perpare-deployment.outputs.GET_STARKNET_PUBLIC_PATH }}
       - name: Cache Build
         uses: actions/cache@v3
         id: restore-build
@@ -223,8 +209,10 @@ jobs:
           key: ${{ github.sha }}
       - name: Deploy to AWS
         run: | 
-          echo "Deployed Dapp to : ${{ vars.AWS_S3_URL }}"
-          aws s3 sync ./packages/wallet-ui/build "${{ vars.AWS_S3_URL }}"
+          echo "Deployed Dapp to : $AWS_S3_URL"
+          aws s3 sync ./packages/wallet-ui/build "$AWS_S3_URL"
+        env:
+          AWS_S3_URL: ${{ needs.perpare-deployment.outputs.AWS_S3_URL }}
 
   deploy-get-starknet:
     runs-on: ubuntu-latest
@@ -251,8 +239,10 @@ jobs:
           key: ${{ github.sha }}
       - name: Deploy to AWS
         run: | 
-          echo "Deployed get Starknet to : ${{ vars.AWS_S3_GET_STARKNET_URL }}"
-          aws s3 sync ./packages/get-starknet/dist/webpack "${{ vars.AWS_S3_GET_STARKNET_URL }}"
+          echo "Deployed get Starknet to : $AWS_S3_GET_STARKNET_URL"
+          aws s3 sync ./packages/get-starknet/dist/webpack "$AWS_S3_GET_STARKNET_URL"
+        env:
+          AWS_S3_GET_STARKNET_URL: ${{ needs.perpare-deployment.outputs.AWS_S3_GET_STARKNET_URL }}
 
   invalid-aws-cdn-cache:
     runs-on: ubuntu-latest
@@ -278,4 +268,4 @@ jobs:
               echo "Invalidation $INVALIDED_ID completed"
           done
         env: 
-          AWS_CLOUDFRONT_DISTRIBUTIONS_ID: ${{ vars.AWS_CLOUDFRONT_DISTRIBUTIONS_ID }}
+          AWS_CLOUDFRONT_DISTRIBUTIONS_ID: ${{ needs.perpare-deployment.outputs.AWS_CLOUDFRONT_DISTRIBUTIONS_ID }}
