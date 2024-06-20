@@ -264,6 +264,7 @@ jobs:
     needs: 
       - deploy-wallet-ui
       - deploy-get-starknet
+      - perpare-deployment
     steps:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
