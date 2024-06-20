@@ -145,9 +145,11 @@ jobs:
         with:
           # add /packages/snap/snap.manifest.json to include an updated shasum from build due to version update in auto PR
           path: |
+            ./packages/get-starknet/dist/webpack
+            ./packages/wallet-ui/build
+            ./packages/starknet-snap/package.json
             ./packages/starknet-snap/dist
             ./packages/starknet-snap/snap.manifest.json
-            ./packages/starknet-snap/package.json
             ./node_modules/.yarn-state.yml
           key: ${{ github.sha }}
       - name: Dry Run Publish
@@ -175,9 +177,11 @@ jobs:
         with:
           # add /packages/snap/snap.manifest.json to include an updated shasum from build due to version update in auto PR
           path: |
+            ./packages/get-starknet/dist/webpack
+            ./packages/wallet-ui/build
+            ./packages/starknet-snap/package.json
             ./packages/starknet-snap/dist
             ./packages/starknet-snap/snap.manifest.json
-            ./packages/starknet-snap/package.json
             ./node_modules/.yarn-state.yml
           key: ${{ github.sha }}
       - name: Run Publish
@@ -207,7 +211,11 @@ jobs:
         id: restore-build
         with:
           path: |
+            ./packages/get-starknet/dist/webpack
             ./packages/wallet-ui/build
+            ./packages/starknet-snap/package.json
+            ./packages/starknet-snap/dist
+            ./packages/starknet-snap/snap.manifest.json
             ./node_modules/.yarn-state.yml
           key: ${{ github.sha }}
       - name: Deploy to AWS
@@ -238,6 +246,10 @@ jobs:
         with:
           path: |
             ./packages/get-starknet/dist/webpack
+            ./packages/wallet-ui/build
+            ./packages/starknet-snap/package.json
+            ./packages/starknet-snap/dist
+            ./packages/starknet-snap/snap.manifest.json
             ./node_modules/.yarn-state.yml
           key: ${{ github.sha }}
       - name: Deploy to AWS
