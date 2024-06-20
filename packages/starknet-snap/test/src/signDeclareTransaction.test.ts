@@ -41,7 +41,7 @@ describe('Test function: signDeclareTransaction', function () {
   } as unknown as DeclareSignerDetails;
 
   const requestObject: SignDeclareTransactionRequestParams = {
-    chainId: STARKNET_MAINNET_NETWORK.chainId,
+    chainId: STARKNET_SEPOLIA_TESTNET_NETWORK.chainId,
     signerAddress: account1.address,
     transaction: declarePayload,
     enableAuthorize: true,

@@ -11,17 +11,22 @@ import {
   estimateFeeBulk,
   addFeesFromAllTransactions,
   isAccountDeployed,
+  isUpgradeRequired,
 } from './utils/starknetUtils';
-
-import { PROXY_CONTRACT_HASH } from './utils/constants';
+import { ACCOUNT_CLASS_HASH } from './utils/constants';
 import { logger } from './utils/logger';
 
 export async function estimateFee(params: ApiParams) {
   try {
     const { state, keyDeriver, requestParams } = params;
     const requestParamsObj = requestParams as EstimateFeeRequestParams;
+    const contractAddress = requestParamsObj.contractAddress;
+    const contractFuncName = requestParamsObj.contractFuncName;
+    const contractCallData = getCallDataArray(requestParamsObj.contractCallData);
+    const senderAddress = requestParamsObj.senderAddress;
+    const network = getNetworkFromChainId(state, requestParamsObj.chainId);
 
-    if (!requestParamsObj.contractAddress || !requestParamsObj.senderAddress || !requestParamsObj.contractFuncName) {
+    if (!contractAddress || !requestParamsObj.senderAddress || !contractFuncName) {
       throw new Error(
         `The given contract address, sender address, and function name need to be non-empty string, got: ${toJson(
           requestParamsObj,
@@ -30,21 +35,20 @@ export async function estimateFee(params: ApiParams) {
     }
 
     try {
-      validateAndParseAddress(requestParamsObj.contractAddress);
+      validateAndParseAddress(contractAddress);
     } catch (err) {
-      throw new Error(`The given contract address is invalid: ${requestParamsObj.contractAddress}`);
+      throw new Error(`The given contract address is invalid: ${contractAddress}`);
     }
     try {
-      validateAndParseAddress(requestParamsObj.senderAddress);
+      validateAndParseAddress(senderAddress);
     } catch (err) {
-      throw new Error(`The given sender address is invalid: ${requestParamsObj.senderAddress}`);
+      throw new Error(`The given sender address is invalid: ${senderAddress}`);
     }
 
-    const contractAddress = requestParamsObj.contractAddress;
-    const contractFuncName = requestParamsObj.contractFuncName;
-    const contractCallData = getCallDataArray(requestParamsObj.contractCallData);
-    const senderAddress = requestParamsObj.senderAddress;
-    const network = getNetworkFromChainId(state, requestParamsObj.chainId);
+    if (await isUpgradeRequired(network, senderAddress)) {
+      throw new Error('Upgrade required');
+    }
+
     const { privateKey: senderPrivateKey, publicKey } = await getKeysFromAddress(
       keyDeriver,
       network,
@@ -61,7 +65,7 @@ export async function estimateFee(params: ApiParams) {
     logger.log(`estimateFee:\ntxnInvocation: ${toJson(txnInvocation)}`);
 
     //Estimate deploy account fee if the signer has not been deployed yet
-    const accountDeployed = await isAccountDeployed(network, publicKey);
+    const accountDeployed = await isAccountDeployed(network, senderAddress);
     let bulkTransactions: Invocations = [
       {
         type: TransactionType.INVOKE,
@@ -71,7 +75,7 @@ export async function estimateFee(params: ApiParams) {
     if (!accountDeployed) {
       const { callData } = getAccContractAddressAndCallData(publicKey);
       const deployAccountpayload = {
-        classHash: PROXY_CONTRACT_HASH,
+        classHash: ACCOUNT_CLASS_HASH,
         contractAddress: senderAddress,
         constructorCalldata: callData,
         addressSalt: publicKey,

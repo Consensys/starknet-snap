@@ -14,6 +14,7 @@ import { ConnectModal } from 'components/ui/organism/ConnectModal';
 import { PopIn } from 'components/ui/molecule/PopIn';
 import { LoadingBackdrop } from 'components/ui/molecule/LoadingBackdrop';
 import { ConnectInfoModal } from 'components/ui/organism/ConnectInfoModal';
+import { UpgradeModel } from 'components/ui/organism/UpgradeModel';
 import 'toastr2/dist/toastr.min.css';
 import { NoMetamaskModal } from 'components/ui/organism/NoMetamaskModal';
 import { MinVersionModal } from './components/ui/organism/MinVersionModal';
@@ -25,7 +26,7 @@ library.add(fas, far);
 function App() {
   const { initSnap, getWalletData, checkConnection } = useStarkNetSnap();
   const { connected, forceReconnect, provider } = useAppSelector((state) => state.wallet);
-  const { infoModalVisible, minVersionModalVisible } = useAppSelector((state) => state.modals);
+  const { infoModalVisible, minVersionModalVisible, upgradeModalVisible } = useAppSelector((state) => state.modals);
   const { loader } = useAppSelector((state) => state.UI);
   const networks = useAppSelector((state) => state.networks);
   const { accounts } = useAppSelector((state) => state.wallet);
@@ -71,6 +72,9 @@ function App() {
         </PopIn>
         <PopIn isOpen={infoModalVisible} showClose={false}>
           <ConnectInfoModal address={address} />
+        </PopIn>
+        <PopIn isOpen={!minVersionModalVisible && upgradeModalVisible} showClose={false}>
+          <UpgradeModel address={address} />
         </PopIn>
         <Home address={address} />
         <PopIn isOpen={loading}>{loading && <LoadingBackdrop>{loader.loadingMessage}</LoadingBackdrop>}</PopIn>

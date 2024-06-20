@@ -31,13 +31,22 @@ import {
   UniversalDetails,
   DeclareSignerDetails,
   DeployAccountSignerDetails,
+  CairoVersion,
   InvocationsSignerDetails,
   ProviderInterface,
-  CairoVersion,
   GetTransactionReceiptResponse,
 } from 'starknet';
 import { Network, SnapState, Transaction, TransactionType } from '../types/snapState';
-import { ACCOUNT_CLASS_HASH_V0, PROXY_CONTRACT_HASH, TRANSFER_SELECTOR_HEX } from './constants';
+import {
+  PROXY_CONTRACT_HASH,
+  TRANSFER_SELECTOR_HEX,
+  UPGRADE_SELECTOR_HEX,
+  MIN_ACC_CONTRACT_VERSION,
+  ACCOUNT_CLASS_HASH_LEGACY,
+  ACCOUNT_CLASS_HASH,
+  CAIRO_VERSION,
+  CAIRO_VERSION_LEGACY,
+} from './constants';
 import { getAddressKey } from './keyPair';
 import {
   getAccount,
@@ -49,6 +58,7 @@ import {
 } from './snapUtils';
 import { logger } from './logger';
 import { RpcV4GetTransactionReceiptResponse } from '../types/snapApi';
+import { hexToString } from './formatterUtils';
 
 export const getCallDataArray = (callDataStr: string): string[] => {
   return (callDataStr ?? '')
@@ -63,6 +73,16 @@ export const getProvider = (network: Network): ProviderInterface => {
     nodeUrl: getRPCUrl(network.chainId),
   };
   return new Provider(providerParam);
+};
+
+export const getAccountInstance = (
+  network: Network,
+  userAddress: string,
+  privateKey: string | Uint8Array,
+  cairoVersion?: CairoVersion,
+): Account => {
+  const provider = getProvider(network);
+  return new Account(provider, userAddress, privateKey, cairoVersion ?? CAIRO_VERSION);
 };
 
 export const callContract = async (
@@ -82,34 +102,6 @@ export const callContract = async (
   );
 };
 
-export const declareContract = async (
-  network: Network,
-  senderAddress: string,
-  privateKey: string | Uint8Array,
-  contractPayload: DeclareContractPayload,
-  invocationsDetails?: UniversalDetails,
-): Promise<DeclareContractResponse> => {
-  const provider = getProvider(network);
-  const account = new Account(provider, senderAddress, privateKey, '0');
-  return account.declare(contractPayload, { ...invocationsDetails, skipValidate: false, blockIdentifier: 'latest' });
-};
-
-export const estimateFee = async (
-  network: Network,
-  senderAddress: string,
-  privateKey: string | Uint8Array,
-  txnInvocation: Call | Call[],
-  invocationsDetails?: UniversalDetails,
-): Promise<EstimateFee> => {
-  const provider = getProvider(network);
-  const account = new Account(provider, senderAddress, privateKey, '0');
-  return account.estimateInvokeFee(txnInvocation, {
-    ...invocationsDetails,
-    skipValidate: false,
-    blockIdentifier: 'latest',
-  });
-};
-
 export const waitForTransaction = async (
   network: Network,
   senderAddress: string,
@@ -117,9 +109,37 @@ export const waitForTransaction = async (
   txnHash: num.BigNumberish,
   cairoVersion?: CairoVersion,
 ): Promise<GetTransactionReceiptResponse> => {
-  const provider = getProvider(network);
-  const account = new Account(provider, senderAddress, privateKey, cairoVersion ?? '0');
-  return account.waitForTransaction(txnHash);
+  return getAccountInstance(network, senderAddress, privateKey, cairoVersion).waitForTransaction(txnHash);
+};
+
+export const declareContract = async (
+  network: Network,
+  senderAddress: string,
+  privateKey: string | Uint8Array,
+  contractPayload: DeclareContractPayload,
+  invocationsDetails?: UniversalDetails,
+  cairoVersion?: CairoVersion,
+): Promise<DeclareContractResponse> => {
+  return getAccountInstance(network, senderAddress, privateKey, cairoVersion).declare(contractPayload, {
+    ...invocationsDetails,
+    skipValidate: false,
+    blockIdentifier: 'latest',
+  });
+};
+
+export const estimateFee = async (
+  network: Network,
+  senderAddress: string,
+  privateKey: string | Uint8Array,
+  txnInvocation: Call | Call[],
+  cairoVersion?: CairoVersion,
+  invocationsDetails?: UniversalDetails,
+): Promise<EstimateFee> => {
+  return getAccountInstance(network, senderAddress, privateKey, cairoVersion).estimateInvokeFee(txnInvocation, {
+    ...invocationsDetails,
+    skipValidate: false,
+    blockIdentifier: 'latest',
+  });
 };
 
 export const estimateFeeBulk = async (
@@ -128,10 +148,9 @@ export const estimateFeeBulk = async (
   privateKey: string | Uint8Array,
   txnInvocation: Invocations,
   invocationsDetails?: UniversalDetails,
+  cairoVersion?: CairoVersion,
 ): Promise<EstimateFee[]> => {
-  const provider = getProvider(network);
-  const account = new Account(provider, senderAddress, privateKey, '0');
-  return account.estimateFeeBulk(txnInvocation, {
+  return getAccountInstance(network, senderAddress, privateKey, cairoVersion).estimateFeeBulk(txnInvocation, {
     ...invocationsDetails,
     skipValidate: false,
     blockIdentifier: 'latest',
@@ -145,10 +164,9 @@ export const executeTxn = async (
   txnInvocation: Call | Call[],
   abis?: Abi[],
   invocationsDetails?: UniversalDetails,
+  cairoVersion?: CairoVersion,
 ): Promise<InvokeFunctionResponse> => {
-  const provider = getProvider(network);
-  const account = new Account(provider, senderAddress, privateKey, '0');
-  return account.execute(txnInvocation, abis, {
+  return getAccountInstance(network, senderAddress, privateKey, cairoVersion).execute(txnInvocation, abis, {
     ...invocationsDetails,
     skipValidate: false,
     blockIdentifier: 'latest',
@@ -161,17 +179,16 @@ export const deployAccount = async (
   contractCallData: RawCalldata,
   addressSalt: num.BigNumberish,
   privateKey: string | Uint8Array,
+  cairoVersion?: CairoVersion,
   invocationsDetails?: UniversalDetails,
 ): Promise<DeployContractResponse> => {
-  const provider = getProvider(network);
-  const account = new Account(provider, contractAddress, privateKey, '0');
   const deployAccountPayload = {
-    classHash: PROXY_CONTRACT_HASH,
+    classHash: ACCOUNT_CLASS_HASH,
     contractAddress: contractAddress,
     constructorCalldata: contractCallData,
     addressSalt,
   };
-  return account.deployAccount(deployAccountPayload, {
+  return getAccountInstance(network, contractAddress, privateKey, cairoVersion).deployAccount(deployAccountPayload, {
     ...invocationsDetails,
     skipValidate: false,
     blockIdentifier: 'latest',
@@ -184,25 +201,50 @@ export const estimateAccountDeployFee = async (
   contractCallData: RawCalldata,
   addressSalt: num.BigNumberish,
   privateKey: string | Uint8Array,
+  cairoVersion?: CairoVersion,
   invocationsDetails?: UniversalDetails,
 ): Promise<EstimateFee> => {
-  const provider = getProvider(network);
-  const account = new Account(provider, contractAddress, privateKey, '0');
   const deployAccountPayload = {
-    classHash: PROXY_CONTRACT_HASH,
+    classHash: ACCOUNT_CLASS_HASH,
     contractAddress: contractAddress,
     constructorCalldata: contractCallData,
     addressSalt,
   };
-  return account.estimateAccountDeployFee(deployAccountPayload, {
-    ...invocationsDetails,
-    skipValidate: false,
-    blockIdentifier: 'latest',
-  });
+  return getAccountInstance(network, contractAddress, privateKey, cairoVersion).estimateAccountDeployFee(
+    deployAccountPayload,
+    {
+      ...invocationsDetails,
+      skipValidate: false,
+      blockIdentifier: 'latest',
+    },
+  );
 };
 
 export const getSigner = async (userAccAddress: string, network: Network): Promise<string> => {
   const resp = await callContract(network, userAccAddress, 'getSigner');
+  return resp[0];
+};
+
+export const getVersion = async (userAccAddress: string, network: Network): Promise<string> => {
+  const resp = await callContract(network, userAccAddress, 'getVersion');
+  return resp[0];
+};
+
+export const getOwner = async (userAccAddress: string, network: Network): Promise<string> => {
+  const resp = await callContract(network, userAccAddress, 'get_owner');
+  return resp[0];
+};
+
+export const getContractOwner = async (
+  userAccAddress: string,
+  network: Network,
+  version: CairoVersion,
+): Promise<string> => {
+  return version === '0' ? getSigner(userAccAddress, network) : getOwner(userAccAddress, network);
+};
+
+export const getBalance = async (address: string, tokenAddress: string, network: Network) => {
+  const resp = await callContract(network, tokenAddress, 'balanceOf', [num.toBigInt(address).toString(10)]);
   return resp[0];
 };
 
@@ -320,8 +362,11 @@ export const getMassagedTransactions = async (
   );
 
   const bigIntTransferSelectorHex = num.toBigInt(TRANSFER_SELECTOR_HEX);
+  const bigIntUpgradeSelectorHex = num.toBigInt(UPGRADE_SELECTOR_HEX);
   let massagedTxns = await Promise.all(
     txns.map(async (txn) => {
+      logger.log(`getMassagedTransactions: txn:\n${toJson(txn)}`);
+
       let txnResp: GetTransactionResponse;
       let statusResp;
       try {
@@ -343,12 +388,20 @@ export const getMassagedTransactions = async (
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         contractAddress: txnResp.calldata?.[1] || txnResp.contract_address || txn.contract_address || '',
+
+        contractFuncName:
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          num.toBigInt(txnResp.calldata?.[2] || '') === bigIntTransferSelectorHex
+            ? 'transfer'
+            : // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            num.toBigInt(txnResp.calldata?.[2] || '') === bigIntUpgradeSelectorHex
+            ? 'upgrade'
+            : txn.operations ?? '',
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        contractFuncName: num.toBigInt(txnResp.calldata?.[2] || '') === bigIntTransferSelectorHex ? 'transfer' : '',
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        contractCallData: txnResp.calldata?.slice(6, txnResp.calldata?.length - 1) || [],
+        contractCallData: txnResp.calldata || [],
         timestamp: txn.timestamp,
         status: '', //DEPRECATION
         finalityStatus: statusResp.finalityStatus || '',
@@ -369,6 +422,7 @@ export const getMassagedTransactions = async (
     massagedTxns = massagedTxns.filter(
       (massagedTxn) =>
         num.toBigInt(massagedTxn.contractAddress) === bigIntContractAddress ||
+        massagedTxn.contractFuncName === 'upgrade' ||
         deployTxns.find((deployTxn) => deployTxn.hash === massagedTxn.txnHash),
     );
   }
@@ -442,9 +496,38 @@ export const getNextAddressIndex = (chainId: string, state: SnapState, derivatio
   return uninitializedAccount?.addressIndex ?? accounts.length;
 };
 
+/**
+ * calculate contract address by publicKey
+ *
+ * @param  publicKey - address's publicKey.
+ * @returns - address and calldata.
+ */
 export const getAccContractAddressAndCallData = (publicKey) => {
   const callData = CallData.compile({
-    implementation: ACCOUNT_CLASS_HASH_V0,
+    signer: publicKey,
+    guardian: '0',
+  });
+
+  let address = hash.calculateContractAddressFromHash(publicKey, ACCOUNT_CLASS_HASH, callData, 0);
+
+  if (address.length < 66) {
+    address = address.replace('0x', '0x' + '0'.repeat(66 - address.length));
+  }
+  return {
+    address,
+    callData,
+  };
+};
+
+/**
+ * calculate contract address by publicKey
+ *
+ * @param  publicKey - address's publicKey.
+ * @returns - address and calldata.
+ */
+export const getAccContractAddressAndCallDataLegacy = (publicKey) => {
+  const callData = CallData.compile({
+    implementation: ACCOUNT_CLASS_HASH_LEGACY,
     selector: hash.getSelectorFromName('initialize'),
     calldata: CallData.compile({ signer: publicKey, guardian: '0' }),
   });
@@ -471,23 +554,10 @@ export const getKeysFromAddress = async (
     addressIndex = acc.addressIndex;
     logger.log(`getNextAddressIndex:\nFound address in state: ${addressIndex} ${address}`);
   } else {
-    const bigIntAddress = num.toBigInt(address);
-    for (let i = 0; i < maxScan; i++) {
-      const { publicKey } = await getKeysFromAddressIndex(keyDeriver, network.chainId, state, i);
-      const { address: calculatedAddress } = getAccContractAddressAndCallData(publicKey);
-      if (num.toBigInt(calculatedAddress) === bigIntAddress) {
-        addressIndex = i;
-        logger.log(`getNextAddressIndex:\nFound address in scan: ${addressIndex} ${address}`);
-        break;
-      }
-    }
+    const result = await findAddressIndex(network.chainId, address, keyDeriver, state, maxScan);
+    addressIndex = result.index;
   }
-
-  if (!isNaN(addressIndex)) {
-    return getKeysFromAddressIndex(keyDeriver, network.chainId, state, addressIndex);
-  }
-  logger.log(`getNextAddressIndex:\nAddress not found: ${address}`);
-  throw new Error(`Address not found: ${address}`);
+  return getKeysFromAddressIndex(keyDeriver, network.chainId, state, addressIndex);
 };
 
 export const getKeysFromAddressIndex = async (
@@ -513,16 +583,23 @@ export const getKeysFromAddressIndex = async (
   };
 };
 
-export const isAccountDeployed = async (network: Network, publicKey: string) => {
-  let accountDeployed = true;
+/**
+ * Check address is deployed by using getVersion
+ *
+ * @param  network - Network.
+ * @param  address - Input address.
+ * @returns - boolean.
+ */
+export const isAccountDeployed = async (network: Network, address: string) => {
   try {
-    const { address: signerContractAddress } = getAccContractAddressAndCallData(publicKey);
-    await getSigner(signerContractAddress, network);
+    await getVersion(address, network);
+    return true;
   } catch (err) {
-    accountDeployed = false;
+    if (!err.message.includes('Contract not found')) {
+      throw err;
+    }
+    return false;
   }
-  logger.log(`isAccountDeployed: ${accountDeployed}`);
-  return accountDeployed;
 };
 
 export const addFeesFromAllTransactions = (fees: EstimateFee[]): Partial<EstimateFee> => {
@@ -546,6 +623,143 @@ export const validateAndParseAddress = (address: num.BigNumberish, length = 63) 
   const trimmedAddress = address.toString().replace(/^0x0?/, '');
   if (trimmedAddress.length !== length) throw new Error(`Address ${address} has an invalid length`);
   return _validateAndParseAddressFn(address);
+};
+
+/**
+ * Find address index from the keyDeriver
+ *
+ * @param  chainId - Network ChainId.
+ * @param  address - Input address.
+ * @param  keyDeriver - keyDeriver from MetaMask wallet.
+ * @param  state - MetaMask Snap state.
+ * @param  maxScan - Number of scaning in the keyDeriver.
+ * @returns - address index and cairoVersion.
+ */
+export const findAddressIndex = async (
+  chainId: string,
+  address: string,
+  keyDeriver,
+  state: SnapState,
+  maxScan = 20,
+) => {
+  const bigIntAddress = num.toBigInt(address);
+  for (let i = 0; i < maxScan; i++) {
+    const { publicKey } = await getKeysFromAddressIndex(keyDeriver, chainId, state, i);
+    const { address: calculatedAddress, addressLegacy: calculatedAddressLegacy } = getPermutationAddresses(publicKey);
+
+    if (num.toBigInt(calculatedAddress) === bigIntAddress || num.toBigInt(calculatedAddressLegacy) === bigIntAddress) {
+      logger.log(`findAddressIndex:\nFound address in scan: ${i} ${address}`);
+      return {
+        index: i,
+        cairoVersion: num.toBigInt(calculatedAddress) === bigIntAddress ? 1 : 0,
+      };
+    }
+  }
+  throw new Error(`Address not found: ${address}`);
+};
+
+/**
+ * Get address permutation by public key
+ *
+ * @param  pk - Public key.
+ * @returns - address and addressLegacy.
+ */
+export const getPermutationAddresses = (pk: string) => {
+  const { address } = getAccContractAddressAndCallData(pk);
+  const { address: addressLegacy } = getAccContractAddressAndCallDataLegacy(pk);
+
+  return {
+    address,
+    addressLegacy,
+  };
+};
+
+/**
+ * Check address needed upgrade by using getVersion and compare with MIN_ACC_CONTRACT_VERSION
+ *
+ * @param  network - Network.
+ * @param  address - Input address.
+ * @returns - boolean.
+ */
+export const isUpgradeRequired = async (network: Network, address: string) => {
+  try {
+    logger.log(`isUpgradeRequired: address = ${address}`);
+    const hexResp = await getVersion(address, network);
+    return isGTEMinVersion(hexToString(hexResp)) ? false : true;
+  } catch (err) {
+    if (!err.message.includes('Contract not found')) {
+      throw err;
+    }
+    //[TODO] if address is cairo0 but not deployed we throw error
+    return false;
+  }
+};
+
+/**
+ * Compare version number with MIN_ACC_CONTRACT_VERSION
+ *
+ * @param  version - version, e.g (2.3.0).
+ * @returns - boolean.
+ */
+export const isGTEMinVersion = (version: string) => {
+  logger.log(`isGTEMinVersion: version = ${version}`);
+  const versionArr = version.split('.');
+  return Number(versionArr[1]) >= MIN_ACC_CONTRACT_VERSION[1];
+};
+
+/**
+ * Get user address by public key, return address if the address has deployed
+ *
+ * @param  network - Network.
+ * @param  publicKey - address's public key.
+ * @returns - address and address's public key.
+ */
+export const getCorrectContractAddress = async (network: Network, publicKey: string) => {
+  const { address: contractAddress, addressLegacy: contractAddressLegacy } = getPermutationAddresses(publicKey);
+
+  logger.log(
+    `getContractAddressByKey: contractAddress = ${contractAddress}\ncontractAddressLegacy = ${contractAddressLegacy}\npublicKey = ${publicKey}`,
+  );
+
+  let address = contractAddress;
+  let upgradeRequired = false;
+  let pk = '';
+
+  try {
+    await getVersion(contractAddress, network);
+    pk = await getContractOwner(address, network, CAIRO_VERSION);
+  } catch (e) {
+    if (!e.message.includes('Contract not found')) {
+      throw e;
+    }
+
+    logger.log(
+      `getContractAddressByKey: cairo ${CAIRO_VERSION} contract cant found, try cairo ${CAIRO_VERSION_LEGACY}`,
+    );
+
+    try {
+      const version = await getVersion(contractAddressLegacy, network);
+      upgradeRequired = isGTEMinVersion(hexToString(version)) ? false : true;
+      pk = await getContractOwner(
+        contractAddressLegacy,
+        network,
+        upgradeRequired ? CAIRO_VERSION_LEGACY : CAIRO_VERSION,
+      );
+      address = contractAddressLegacy;
+    } catch (e) {
+      if (!e.message.includes('Contract not found')) {
+        throw e;
+      }
+
+      logger.log(`getContractAddressByKey: no deployed contract found, fallback to cairo ${CAIRO_VERSION}`);
+    }
+  }
+
+  return {
+    address,
+    signerPubKey: pk,
+    upgradeRequired: upgradeRequired,
+  };
 };
 
 export const signTransactions = async (
