@@ -1,8 +1,12 @@
 import { toJson } from './utils/serializer';
-import { signMessage as signMessageUtil, getKeysFromAddress, isUpgradeRequired } from './utils/starknetUtils';
-import { getNetworkFromChainId, addDialogTxt } from './utils/snapUtils';
+import {
+  signMessage as signMessageUtil,
+  getKeysFromAddress,
+  isUpgradeRequired,
+  validateAndParseAddress,
+} from './utils/starknetUtils';
+import { getNetworkFromChainId, addDialogTxt, showUpgradeRequestModal } from './utils/snapUtils';
 import { ApiParams, SignMessageRequestParams } from './types/snapApi';
-import { validateAndParseAddress } from '../src/utils/starknetUtils';
 import { DialogType } from '@metamask/rpc-methods';
 import { heading, panel } from '@metamask/snaps-sdk';
 import { logger } from './utils/logger';
@@ -14,6 +18,11 @@ export async function signMessage(params: ApiParams) {
     const signerAddress = requestParamsObj.signerAddress;
     const typedDataMessage = requestParamsObj.typedDataMessage;
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
+
+    if (await isUpgradeRequired(network, signerAddress)) {
+      await showUpgradeRequestModal(wallet);
+      throw new Error('Upgrade required');
+    }
 
     logger.log(`signMessage:\nsignerAddress: ${signerAddress}\ntypedDataMessage: ${toJson(typedDataMessage)}`);
 
