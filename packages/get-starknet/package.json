@@ -12,11 +12,9 @@
     "url": "https://github.com/ConsenSys/starknet-snap.git"
   },
   "scripts": {
-    "start": "webpack-cli serve --config webpack.serve.config.js",
+    "start": "GET_STARKNET_PUBLIC_PATH=http://localhost:8082/ SNAP_ID=local:http://localhost:8081 yarn build && webpack-cli serve --config webpack.config.local.js",
     "clean": "rimraf dist",
-    "setup": "yarn install --no-immutable",
     "build": "webpack --config webpack.config.build.js",
-    "serve:local": "GET_STARKNET_PUBLIC_PATH=http://localhost:8082/ yarn build && SNAP_ID=local:http://localhost:8081/ webpack-cli serve --config webpack.config.local.js",
     "prettier": "prettier --write \"src/**/*.ts\"",
     "lint": "eslint 'src/*.{js,ts,tsx}' --max-warnings 0 -f json -o eslint-report.json",
     "lint:fix": "eslint '**/*.{js,ts,tsx}' --fix",
