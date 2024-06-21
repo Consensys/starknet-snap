@@ -3,6 +3,20 @@
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
 
+## [1.22.0](https://github.com/Consensys/starknet-snap/compare/wallet-ui-v1.21.0...wallet-ui-v1.22.0) (2024-06-21)
+
+
+### Features
+
+* cairo 1 support ([#202](https://github.com/Consensys/starknet-snap/issues/202)) ([c5e36e9](https://github.com/Consensys/starknet-snap/commit/c5e36e9a6f3c63155d990bf519cd6af6eb3cd006))
+* Enable Local Testing of Webpack Federation Module (get-starknet remoteEntry.js) ([#249](https://github.com/Consensys/starknet-snap/issues/249)) ([b06f9f2](https://github.com/Consensys/starknet-snap/commit/b06f9f26e6fa5be001075d128032064444990c17))
+* sf-640 revamp cicd workflow ([#255](https://github.com/Consensys/starknet-snap/issues/255)) ([6faaf02](https://github.com/Consensys/starknet-snap/commit/6faaf024bd0b8112e5cea930a2bf8aad564a9454))
+
+
+### Bug Fixes
+
+* sf 639 update contract upgrade message ([#256](https://github.com/Consensys/starknet-snap/issues/256)) ([9decd4b](https://github.com/Consensys/starknet-snap/commit/9decd4b9c52a7b84951ea81658f77f1532ca2522))
+
 ## [1.21.0](https://github.com/Consensys/starknet-snap/compare/wallet-ui-v1.20.0...wallet-ui-v1.21.0) (2024-04-05)
 
 
