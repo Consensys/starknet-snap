@@ -1,5 +1,5 @@
 import { Invocations, TransactionType } from 'starknet';
-import { getNetworkFromChainId, getTxnSnapTxt, addDialogTxt } from './utils/snapUtils';
+import { getNetworkFromChainId, getTxnSnapTxt, addDialogTxt, showUpgradeRequestModal } from './utils/snapUtils';
 import {
   getKeysFromAddress,
   executeTxn as executeTxnUtil,
@@ -7,12 +7,13 @@ import {
   estimateFeeBulk,
   getAccContractAddressAndCallData,
   addFeesFromAllTransactions,
+  isUpgradeRequired,
 } from './utils/starknetUtils';
 import { ApiParams, ExecuteTxnRequestParams } from './types/snapApi';
 import { createAccount } from './createAccount';
 import { heading, panel, divider, DialogType } from '@metamask/snaps-sdk';
 import { logger } from './utils/logger';
-import { PROXY_CONTRACT_HASH } from './utils/constants';
+import { ACCOUNT_CLASS_HASH } from './utils/constants';
 
 export async function executeTxn(params: ApiParams) {
   try {
@@ -26,6 +27,11 @@ export async function executeTxn(params: ApiParams) {
       addressIndex,
     } = await getKeysFromAddress(keyDeriver, network, state, senderAddress);
 
+    if (await isUpgradeRequired(network, senderAddress)) {
+      await showUpgradeRequestModal(wallet);
+      throw new Error('Upgrade required');
+    }
+
     const txnInvocationArray = Array.isArray(requestParamsObj.txnInvocation)
       ? requestParamsObj.txnInvocation
       : [requestParamsObj.txnInvocation];
@@ -33,11 +39,11 @@ export async function executeTxn(params: ApiParams) {
       type: TransactionType.INVOKE,
       payload: ele,
     }));
-    const accountDeployed = await isAccountDeployed(network, publicKey);
+    const accountDeployed = await isAccountDeployed(network, senderAddress);
     if (!accountDeployed) {
       const { callData } = getAccContractAddressAndCallData(publicKey);
       const deployAccountpayload = {
-        classHash: PROXY_CONTRACT_HASH,
+        classHash: ACCOUNT_CLASS_HASH,
         contractAddress: senderAddress,
         constructorCalldata: callData,
         addressSalt: publicKey,
