@@ -71,6 +71,7 @@ export async function sendTransaction(params: ApiParams) {
       senderAddress,
       maxFee,
       network,
+      requestParamsObj.transactionVersion === constants.TRANSACTION_VERSION.V3 ? 'STRK' : 'ETH',
     );
     const response = await wallet.request({
       method: 'snap_dialog',

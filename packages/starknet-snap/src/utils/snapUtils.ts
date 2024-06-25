@@ -206,6 +206,7 @@ export function getTxnSnapTxt(
   txnInvocation: Call | Call[],
   abis?: Abi[],
   invocationsDetails?: InvocationsDetails,
+  feeToken?: string,
 ) {
   const components = [];
   addDialogTxt(components, 'Network', network.name);
@@ -216,7 +217,7 @@ export function getTxnSnapTxt(
   }
 
   if (invocationsDetails?.maxFee) {
-    addDialogTxt(components, 'Max Fee(ETH)', convert(invocationsDetails.maxFee, 'wei', 'ether'));
+    addDialogTxt(components, `Max Fee(${feeToken ?? 'ETH'})`, convert(invocationsDetails.maxFee, 'wei', 'ether'));
   }
   if (invocationsDetails?.nonce) {
     addDialogTxt(components, 'Nonce', invocationsDetails.nonce.toString());
@@ -235,6 +236,7 @@ export function getSendTxnText(
   senderAddress: string,
   maxFee: num.BigNumberish,
   network: Network,
+  feeToken?: string,
 ): Array<Component> {
   // Retrieve the ERC-20 token from snap state for confirmation display purpose
   const token = getErc20Token(state, contractAddress, network.chainId);
@@ -242,7 +244,7 @@ export function getSendTxnText(
   addDialogTxt(components, 'Signer Address', senderAddress);
   addDialogTxt(components, 'Contract', contractAddress);
   addDialogTxt(components, 'Call Data', `[${contractCallData.join(', ')}]`);
-  addDialogTxt(components, 'Estimated Gas Fee(ETH)', convert(maxFee, 'wei', 'ether'));
+  addDialogTxt(components, `Estimated Gas Fee(${feeToken ?? 'ETH'})`, convert(maxFee, 'wei', 'ether'));
   addDialogTxt(components, 'Network', network.name);
 
   if (token && contractFuncName === 'transfer') {
@@ -281,6 +283,7 @@ export function getDeclareSnapTxt(
   network: Network,
   contractPayload: DeclareContractPayload,
   invocationsDetails?: InvocationsDetails,
+  feeToken?: string,
 ) {
   const components = [];
   addDialogTxt(components, 'Network', network.name);
@@ -303,7 +306,7 @@ export function getDeclareSnapTxt(
     addDialogTxt(components, 'Casm', JSON.stringify(contractPayload.casm, null, 2));
   }
   if (invocationsDetails?.maxFee !== undefined) {
-    addDialogTxt(components, 'Max Fee(ETH)', convert(invocationsDetails.maxFee, 'wei', 'ether'));
+    addDialogTxt(components, `Max Fee(${feeToken ?? 'ETH'})`, convert(invocationsDetails.maxFee, 'wei', 'ether'));
   }
   if (invocationsDetails?.nonce !== undefined) {
     addDialogTxt(components, 'Nonce', invocationsDetails.nonce.toString());

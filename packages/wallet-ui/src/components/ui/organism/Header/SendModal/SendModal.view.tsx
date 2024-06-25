@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { AmountInput } from 'components/ui/molecule/AmountInput';
 import { SendSummaryModal } from '../SendSummaryModal';
 import {
@@ -17,6 +17,7 @@ import { ethers } from 'ethers';
 import { AddressInput } from 'components/ui/molecule/AddressInput';
 import { isValidAddress } from 'utils/utils';
 import { Bold, Normal } from '../../ConnectInfoModal/ConnectInfoModal.style';
+import { DropDown } from 'components/ui/molecule/DropDown';
 
 interface Props {
   closeModal?: () => void;
@@ -30,6 +31,7 @@ export const SendModalView = ({ closeModal }: Props) => {
     amount: '',
     address: '',
     chainId: networks.items.length > 0 ? networks.items[networks.activeNetwork].chainId : '',
+    feeToken: 'ETH', // Default fee token
   });
   const [errors, setErrors] = useState({ amount: '', address: '' });
 
@@ -62,8 +64,13 @@ export const SendModalView = ({ closeModal }: Props) => {
           }
         }
         break;
+      case 'feeToken':
+        setFields((prevFields) => ({
+          ...prevFields,
+          feeToken: fieldValue,
+        }));
+        break;
     }
-
     setFields((prevFields) => ({
       ...prevFields,
       [fieldName]: fieldValue,
@@ -105,6 +112,18 @@ export const SendModalView = ({ closeModal }: Props) => {
               decimalsMax={wallet.erc20TokenBalanceSelected.decimals}
               asset={wallet.erc20TokenBalanceSelected}
             />
+            <SeparatorSmall />
+            <div>
+              <label htmlFor="feeToken">Fee Token</label>
+              <DropDown
+                value={fields.feeToken}
+                options={[
+                  { label: 'ETH', value: 'ETH' },
+                  { label: 'STRK', value: 'STRK' },
+                ]}
+                onChange={(e) => handleChange('feeToken', e.value)}
+              />
+            </div>
           </Wrapper>
           <Buttons>
             <ButtonStyled onClick={closeModal} backgroundTransparent borderVisible>
@@ -123,6 +142,7 @@ export const SendModalView = ({ closeModal }: Props) => {
           address={fields.address}
           amount={fields.amount}
           chainId={fields.chainId}
+          selectedFeeToken={fields.feeToken} // Pass the selected fee token
         />
       )}
     </>

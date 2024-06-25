@@ -1,4 +1,4 @@
-import { Invocations, TransactionType } from 'starknet';
+import { Invocations, TransactionType, constants } from 'starknet';
 import { getNetworkFromChainId, getTxnSnapTxt, addDialogTxt, showUpgradeRequestModal } from './utils/snapUtils';
 import {
   getKeysFromAddress,
@@ -14,7 +14,7 @@ import { createAccount } from './createAccount';
 import { DialogType } from '@metamask/rpc-methods';
 import { heading, panel, divider } from '@metamask/snaps-sdk';
 import { logger } from './utils/logger';
-import { ACCOUNT_CLASS_HASH } from './utils/constants';
+import { ACCOUNT_CLASS_HASH, TRANSACTION_VERSION } from './utils/constants';
 
 export async function executeTxn(params: ApiParams) {
   try {
@@ -61,6 +61,7 @@ export async function executeTxn(params: ApiParams) {
       senderAddress,
       senderPrivateKey,
       bulkTransactions,
+      requestParams.transactionVersion ?? TRANSACTION_VERSION,
       requestParamsObj.invocationsDetails ? requestParamsObj.invocationsDetails : undefined,
     );
     const estimateFeeResp = addFeesFromAllTransactions(fees);
@@ -96,6 +97,7 @@ export async function executeTxn(params: ApiParams) {
         requestParamsObj.txnInvocation,
         requestParamsObj.abis,
         requestParamsObj.invocationsDetails,
+        requestParamsObj.transactionVersion === constants.TRANSACTION_VERSION.V3 ? 'STRK' : 'ETH',
       ),
     );
 

@@ -5,6 +5,7 @@ import { getKeysFromAddress, declareContract as declareContractUtil, isUpgradeRe
 import { DialogType } from '@metamask/rpc-methods';
 import { heading, panel } from '@metamask/snaps-sdk';
 import { logger } from './utils/logger';
+import { constants } from 'starknet';
 
 export async function declareContract(params: ApiParams) {
   try {
@@ -27,6 +28,7 @@ export async function declareContract(params: ApiParams) {
       network,
       requestParamsObj.contractPayload,
       requestParamsObj.invocationsDetails,
+      requestParamsObj.transactionVersion === constants.TRANSACTION_VERSION.V3 ? 'STRK' : 'ETH',
     );
 
     const response = await wallet.request({
