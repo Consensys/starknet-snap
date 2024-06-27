@@ -12,7 +12,7 @@ import {
   RejectedTxn,
   RejectedTxn2,
 } from '../../constants.test';
-import { VoyagerTransactionType, TransactionStatus } from '../../../src/types/snapState';
+import { VoyagerTransactionType, TransactionStatus, Transaction } from '../../../src/types/snapState';
 
 import * as filter from '../../../src/utils/transaction/filter';
 
@@ -23,7 +23,7 @@ describe('Test function: getTransactions', function () {
     it('Should filter transactions based on timestamp', () => {
       const timestamp = 1653553084;
       let timestampForTest = 1653553083;
-      const cloneTransactions = transactions.reduce((acc, txn) => {
+      const cloneTransactions = transactions.reduce((acc: Transaction[], txn: Transaction) => {
         acc.push({ ...txn, timestamp: timestampForTest });
         timestampForTest += 1;
         return acc;
@@ -37,7 +37,7 @@ describe('Test function: getTransactions', function () {
   describe('SenderAddressFilter', () => {
     it('Should filter transactions based on senderAddress', () => {
       const senderAddress = transactions[0].senderAddress;
-      const cloneTransactions = transactions.reduce((acc, txn) => {
+      const cloneTransactions = transactions.reduce((acc: Transaction[], txn: Transaction) => {
         acc.push({ ...txn, senderAddress: senderAddress });
         return acc;
       }, []);
@@ -50,7 +50,7 @@ describe('Test function: getTransactions', function () {
   describe('ContractAddressFilter', () => {
     it('Should filter transactions based on contract address', () => {
       const contractAddress = transactions[0].contractAddress;
-      const cloneTransactions = transactions.reduce((acc, txn) => {
+      const cloneTransactions = transactions.reduce((acc: Transaction[], txn: Transaction) => {
         acc.push({ ...txn, contractAddress: contractAddress });
         return acc;
       }, []);
@@ -93,7 +93,7 @@ describe('Test function: getTransactions', function () {
     });
 
     it('Should filter empty status transactions', () => {
-      const cloneTransactions = transactions.reduce((acc, txn) => {
+      const cloneTransactions = transactions.reduce((acc: Transaction[], txn: Transaction) => {
         acc.push({ ...txn, status: '', finalityStatus: '', executionStatus: '' });
         return acc;
       }, []);
@@ -107,7 +107,7 @@ describe('Test function: getTransactions', function () {
     });
 
     it('Should filter finalityStatus transactions when status present', () => {
-      const cloneTransactions = transactions.reduce((acc, txn) => {
+      const cloneTransactions = transactions.reduce((acc: Transaction[], txn: Transaction) => {
         acc.push({ ...txn, status: '', finalityStatus: TransactionStatus.ACCEPTED_ON_L1, executionStatus: '' });
         return acc;
       }, []);
@@ -121,7 +121,7 @@ describe('Test function: getTransactions', function () {
     });
 
     it('Should filter executionStatus transactions when status present', () => {
-      const cloneTransactions = transactions.reduce((acc, txn) => {
+      const cloneTransactions = transactions.reduce((acc: Transaction[], txn: Transaction) => {
         acc.push({
           ...txn,
           status: '',

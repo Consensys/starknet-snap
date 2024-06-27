@@ -1,9 +1,13 @@
-import { toJson } from './utils/serializer';
-import { ApiParams, GetStoredTransactionsRequestParams } from './types/snapApi';
+import type { ApiParams, GetStoredTransactionsRequestParams } from './types/snapApi';
 import { DEFAULT_GET_TXNS_LAST_NUM_OF_DAYS } from './utils/constants';
-import { getNetworkFromChainId, getTransactions, getValidNumber } from './utils/snapUtils';
 import { logger } from './utils/logger';
+import { toJson } from './utils/serializer';
+import { getNetworkFromChainId, getTransactions, getValidNumber } from './utils/snapUtils';
 
+/**
+ *
+ * @param params
+ */
 export async function getStoredTransactions(params: ApiParams) {
   try {
     const { state, requestParams } = params;
@@ -30,8 +34,9 @@ export async function getStoredTransactions(params: ApiParams) {
 
     logger.log(`getStoredTransactions: transactions:\n${toJson(transactions, 2)}`);
     return transactions;
-  } catch (err) {
-    logger.error(`Problem found: ${err}`);
-    throw err;
+  } catch (error) {
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+    logger.error(`Problem found: ${error}`);
+    throw error;
   }
 }

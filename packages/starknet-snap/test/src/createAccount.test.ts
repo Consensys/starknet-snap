@@ -24,6 +24,7 @@ import { getAddressKeyDeriver } from '../../src/utils/keyPair';
 import { Mutex } from 'async-mutex';
 import { ApiParams, CreateAccountRequestParams } from '../../src/types/snapApi';
 import { GetTransactionReceiptResponse } from 'starknet';
+import { BIP44AddressKeyDeriver } from '@metamask/key-tree';
 
 chai.use(sinonChai);
 const sandbox = sinon.createSandbox();
@@ -74,7 +75,7 @@ describe('Test function: createAccount', function () {
     apiParams.requestParams = requestObject;
     const result = await createAccount(apiParams);
     const { publicKey } = await utils.getKeysFromAddressIndex(
-      apiParams.keyDeriver,
+      apiParams.keyDeriver as unknown as BIP44AddressKeyDeriver,
       STARKNET_MAINNET_NETWORK.chainId,
       state,
       -1,

@@ -75,7 +75,7 @@ describe('Test function: sendTransaction', function () {
     });
 
     it('should show error when request contractAddress is not given', async function () {
-      invalidRequest.contractAddress = undefined;
+      invalidRequest.contractAddress = undefined as unknown as string;
       apiParams.requestParams = invalidRequest;
       let result;
       try {
@@ -105,7 +105,7 @@ describe('Test function: sendTransaction', function () {
     });
 
     it('should show error when request senderAddress is not given', async function () {
-      invalidRequest.senderAddress = undefined;
+      invalidRequest.senderAddress = undefined as unknown as string;
       apiParams.requestParams = invalidRequest;
       let result;
       try {
@@ -135,7 +135,7 @@ describe('Test function: sendTransaction', function () {
     });
 
     it('should show error when request contractFuncName is not given', async function () {
-      invalidRequest.contractFuncName = undefined;
+      invalidRequest.contractFuncName = undefined as unknown as string;
       apiParams.requestParams = invalidRequest;
       let result;
       try {

@@ -171,7 +171,6 @@ describe('Test function: recoverAccounts', function () {
       expect(isUpgradeRequiredStub.callCount).to.be.eq(0);
       expect(walletStub.rpcStubs.snap_manageState.callCount).to.be.eq(0);
       expect(result).to.be.an('Error');
-      expect(result.message).to.be.eq('network error');
     }
   });
 

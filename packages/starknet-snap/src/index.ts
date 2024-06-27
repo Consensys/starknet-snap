@@ -1,23 +1,44 @@
-import { toJson } from './utils/serializer';
-import { getAddressKeyDeriver } from './utils/keyPair';
-import { createAccount } from './createAccount';
-import { signMessage } from './signMessage';
-import { signTransaction } from './signTransaction';
-import { getErc20TokenBalance } from './getErc20TokenBalance';
-import { getTransactionStatus } from './getTransactionStatus';
-import { sendTransaction } from './sendTransaction';
-import { verifySignedMessage } from './verifySignedMessage';
-import { getValue } from './getValue';
+import type {
+  OnRpcRequestHandler,
+  OnHomePageHandler,
+  OnInstallHandler,
+  OnUpdateHandler,
+  Component,
+} from '@metamask/snaps-sdk';
+import { InternalError, panel, row, divider, text, copyable } from '@metamask/snaps-sdk';
+import { Mutex } from 'async-mutex';
+import { ethers } from 'ethers';
+
 import { addErc20Token } from './addErc20Token';
-import { getStoredErc20Tokens } from './getStoredErc20Tokens';
+import { addNetwork } from './addNetwork';
+import { createAccount } from './createAccount';
+import { declareContract } from './declareContract';
+import { estimateAccDeployFee } from './estimateAccountDeployFee';
 import { estimateFee } from './estimateFee';
-import { getStoredUserAccounts } from './getStoredUserAccounts';
-import { AccContract, SnapState } from './types/snapState';
+import { estimateFees } from './estimateFees';
+import { executeTxn } from './executeTxn';
 import { extractPrivateKey } from './extractPrivateKey';
 import { extractPublicKey } from './extractPublicKey';
-import { addNetwork } from './addNetwork';
-import { switchNetwork } from './switchNetwork';
 import { getCurrentNetwork } from './getCurrentNetwork';
+import { getErc20TokenBalance } from './getErc20TokenBalance';
+import { getStarkName } from './getStarkName';
+import { getStoredErc20Tokens } from './getStoredErc20Tokens';
+import { getStoredNetworks } from './getStoredNetworks';
+import { getStoredTransactions } from './getStoredTransactions';
+import { getStoredUserAccounts } from './getStoredUserAccounts';
+import { getTransactions } from './getTransactions';
+import { getTransactionStatus } from './getTransactionStatus';
+import { getValue } from './getValue';
+import { recoverAccounts } from './recoverAccounts';
+import { sendTransaction } from './sendTransaction';
+import { signDeclareTransaction } from './signDeclareTransaction';
+import { signDeployAccountTransaction } from './signDeployAccountTransaction';
+import { signMessage } from './signMessage';
+import { signTransaction } from './signTransaction';
+import { switchNetwork } from './switchNetwork';
+import type { ApiParams, ApiRequestParams } from './types/snapApi';
+import type { AccContract, SnapState } from './types/snapState';
+import { upgradeAccContract } from './upgradeAccContract';
 import {
   PRELOADED_TOKENS,
   STARKNET_INTEGRATION_NETWORK,
@@ -25,6 +46,9 @@ import {
   STARKNET_SEPOLIA_TESTNET_NETWORK,
   STARKNET_TESTNET_NETWORK,
 } from './utils/constants';
+import { getAddressKeyDeriver } from './utils/keyPair';
+import { logger } from './utils/logger';
+import { toJson } from './utils/serializer';
 import {
   dappUrl,
   getNetworkFromChainId,
@@ -33,25 +57,7 @@ import {
   upsertNetwork,
   removeNetwork,
 } from './utils/snapUtils';
-import { getStoredNetworks } from './getStoredNetworks';
-import { getStoredTransactions } from './getStoredTransactions';
-import { getTransactions } from './getTransactions';
-import { recoverAccounts } from './recoverAccounts';
-import { Mutex } from 'async-mutex';
-import { ApiParams, ApiRequestParams } from './types/snapApi';
-import { estimateAccDeployFee } from './estimateAccountDeployFee';
-import { executeTxn } from './executeTxn';
-import { estimateFees } from './estimateFees';
-import { declareContract } from './declareContract';
-import { signDeclareTransaction } from './signDeclareTransaction';
-import { signDeployAccountTransaction } from './signDeployAccountTransaction';
-import { upgradeAccContract } from './upgradeAccContract';
-import { logger } from './utils/logger';
-import { getStarkName } from './getStarkName';
-
-import type { OnRpcRequestHandler, OnHomePageHandler, OnInstallHandler, OnUpdateHandler } from '@metamask/snaps-sdk';
-import { InternalError, panel, row, divider, text, copyable } from '@metamask/snaps-sdk';
-import { ethers } from 'ethers';
+import { verifySignedMessage } from './verifySignedMessage';
 
 declare const snap;
 const saveMutex = new Mutex();
@@ -59,10 +65,11 @@ const saveMutex = new Mutex();
 export const onRpcRequest: OnRpcRequestHandler = async ({ origin, request }) => {
   try {
     const requestParams = request?.params as unknown as ApiRequestParams;
-    const isDev = !!requestParams?.isDev;
+    const isDev = Boolean(requestParams?.isDev);
     const debugLevel = requestParams?.debugLevel;
 
-    logger.init(debugLevel);
+    logger.init(debugLevel as unknown as string);
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     console.log(`debugLevel: ${logger.getLogLevel()}`);
     // Switch statement for methods not requiring state to speed things up a bit
     logger.log(origin, request);
@@ -78,7 +85,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ origin, request }) => 
       },
     });
 
-    if (!state) {
+    if (state === undefined) {
       state = {
         accContracts: [],
         erc20Tokens: [],
@@ -226,8 +233,8 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ origin, request }) => 
       default:
         throw new Error('Method not found.');
     }
-  } catch (err) {
-    throw new InternalError(err);
+  } catch (error) {
+    throw new InternalError(error) as unknown as Error;
   }
 };
 
@@ -236,7 +243,8 @@ export const onInstall: OnInstallHandler = async () => {
     text('Your MetaMask wallet is now compatible with Starknet!'),
     text(
       `To manage your Starknet account and send and receive funds, visit the [companion dapp for Starknet](${dappUrl(
-        process.env.SNAP_ENV,
+        // eslint-disable-next-line no-restricted-globals
+        process.env.SNAP_ENV as unknown as string,
       )}).`,
     ),
   ]);
@@ -263,7 +271,7 @@ export const onUpdate: OnUpdateHandler = async () => {
 };
 
 export const onHomePage: OnHomePageHandler = async () => {
-  const panelItems = [];
+  const panelItems: Component[] = [];
   try {
     const state: SnapState = await snap.request({
       method: 'snap_manageState',
@@ -273,29 +281,29 @@ export const onHomePage: OnHomePageHandler = async () => {
     });
 
     // Account may not exist if the recover account process has not executed.
-    let accContract: AccContract;
+    let accContract: AccContract | undefined;
     if (state) {
-      let chainId = STARKNET_SEPOLIA_TESTNET_NETWORK.chainId;
+      let { chainId } = STARKNET_SEPOLIA_TESTNET_NETWORK;
 
       if (state.currentNetwork && state.currentNetwork.chainId !== STARKNET_TESTNET_NETWORK.chainId) {
         chainId = state.currentNetwork.chainId;
       }
 
       if (state.accContracts && state.accContracts.length > 0) {
-        accContract = state.accContracts.find((n) => isSameChainId(n.chainId, chainId));
+        accContract = state.accContracts.find((acc) => isSameChainId(acc.chainId, chainId));
       }
     }
 
     if (accContract) {
       const userAddress = accContract.address;
-      const chainId = accContract.chainId;
+      const { chainId } = accContract;
       const network = getNetworkFromChainId(state, chainId);
       panelItems.push(text('Address'));
       panelItems.push(copyable(`${userAddress}`));
       panelItems.push(row('Network', text(`${network.name}`)));
 
       const ercToken = state.erc20Tokens.find(
-        (t) => t.symbol.toLowerCase() === 'eth' && isSameChainId(t.chainId, chainId),
+        (token) => token.symbol.toLowerCase() === 'eth' && isSameChainId(token.chainId, chainId),
       );
       if (ercToken) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -303,7 +311,7 @@ export const onHomePage: OnHomePageHandler = async () => {
           state,
           requestParams: {
             tokenAddress: ercToken.address,
-            userAddress: userAddress,
+            userAddress,
             chainId: network.chainId,
           },
         };
@@ -314,14 +322,20 @@ export const onHomePage: OnHomePageHandler = async () => {
 
       panelItems.push(divider());
       panelItems.push(
-        text(`Visit the [companion dapp for Starknet](${dappUrl(process.env.SNAP_ENV)}) to manage your account.`),
+        text(
+          `Visit the [companion dapp for Starknet](${dappUrl(
+            // eslint-disable-next-line no-restricted-globals
+            process.env.SNAP_ENV as unknown as string,
+          )}) to manage your account.`,
+        ),
       );
     } else {
       panelItems.push(text(`**Your Starknet account is not yet deployed or recovered.**`));
       panelItems.push(
         text(
           `Initiate a transaction to create your Starknet account. Visit the [companion dapp for Starknet](${dappUrl(
-            process.env.SNAP_ENV,
+            // eslint-disable-next-line no-restricted-globals
+            process.env.SNAP_ENV as unknown as string,
           )}) to get started.`,
         ),
       );
@@ -329,7 +343,7 @@ export const onHomePage: OnHomePageHandler = async () => {
     return {
       content: panel(panelItems),
     };
-  } catch (err) {
-    throw new InternalError(err);
+  } catch (error) {
+    throw new InternalError(error) as unknown as Error;
   }
 };

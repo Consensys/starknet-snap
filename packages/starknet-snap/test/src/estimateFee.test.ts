@@ -63,7 +63,7 @@ describe('Test function: estimateFee', function () {
     });
 
     it('should throw an error if the function name is undefined', async function () {
-      invalidRequest.contractFuncName = undefined;
+      invalidRequest.contractFuncName = undefined as unknown as string;
       apiParams.requestParams = invalidRequest;
       let result;
       try {
@@ -194,7 +194,7 @@ describe('Test function: estimateFee', function () {
               payload: {
                 contractAddress: apiRequest.contractAddress,
                 entrypoint: apiRequest.contractFuncName,
-                calldata: utils.getCallDataArray(apiRequest.contractCallData),
+                calldata: utils.getCallDataArray(apiRequest.contractCallData as unknown as string),
               },
             },
           ];

@@ -41,6 +41,7 @@ describe('Test function: getStoredTransactions', function () {
     const requestObject: GetStoredTransactionsRequestParams = {};
     apiParams.requestParams = requestObject;
     const result = await getStoredTransactions(apiParams);
+
     expect(walletStub.rpcStubs.snap_manageState).not.to.have.been.called;
     expect(result.length).to.be.eq(3);
     expect(result).to.be.eql([txn3, createAccountProxyTxn, initAccountTxn]);

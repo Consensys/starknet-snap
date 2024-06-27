@@ -1,4 +1,22 @@
+import type { BIP44AddressKeyDeriver } from '@metamask/key-tree';
+import { heading, panel, text, DialogType } from '@metamask/snaps-sdk';
+import { ethers } from 'ethers';
+import type { EstimateFee } from 'starknet';
+import { constants, num as numUtils } from 'starknet';
+
+import type { ApiParams, CreateAccountRequestParams } from './types/snapApi';
+import type { AccContract, Transaction } from './types/snapState';
+import { VoyagerTransactionType, TransactionStatus } from './types/snapState';
+import { logger } from './utils/logger';
 import { toJson } from './utils/serializer';
+import {
+  getEtherErc20Token,
+  getNetworkFromChainId,
+  getValidNumber,
+  upsertAccount,
+  upsertTransaction,
+  addDialogTxt,
+} from './utils/snapUtils';
 import {
   getKeysFromAddressIndex,
   getAccContractAddressAndCallData,
@@ -8,25 +26,12 @@ import {
   isAccountDeployed,
   waitForTransaction,
 } from './utils/starknetUtils';
-import {
-  getEtherErc20Token,
-  getNetworkFromChainId,
-  getValidNumber,
-  upsertAccount,
-  upsertTransaction,
-  addDialogTxt,
-} from './utils/snapUtils';
-import { AccContract, VoyagerTransactionType, Transaction, TransactionStatus } from './types/snapState';
-import { ApiParams, CreateAccountRequestParams } from './types/snapApi';
-import { EstimateFee, num } from 'starknet';
-import { ethers } from 'ethers';
-import { heading, panel, text, DialogType } from '@metamask/snaps-sdk';
-import { logger } from './utils/logger';
 
 /**
  * Create an starknet account.
  *
  * @template Params - The ApiParams of the request.
+ * @param params
  * @param silentMode - The flag to disable the confirmation dialog from snap.
  * @param waitMode - The flag to enable an determination by doing an recursive fetch to check if the deploy account status is on L2 or not. The wait mode is only useful when it compose with other txn together, it can make sure the deploy txn execute complete, avoiding the latter txn failed.
  */
@@ -37,21 +42,26 @@ export async function createAccount(params: ApiParams, silentMode = false, waitM
 
     const addressIndex = getValidNumber(requestParamsObj.addressIndex, -1, 0);
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
-    const deploy = !!requestParamsObj.deploy;
+    const deploy = Boolean(requestParamsObj.deploy);
 
     const {
       privateKey,
       publicKey,
       addressIndex: addressIndexInUsed,
       derivationPath,
-    } = await getKeysFromAddressIndex(keyDeriver, network.chainId, state, addressIndex);
+    } = await getKeysFromAddressIndex(
+      keyDeriver as unknown as BIP44AddressKeyDeriver,
+      network.chainId,
+      state,
+      addressIndex,
+    );
     const { address: contractAddress, callData: contractCallData } = getAccContractAddressAndCallData(publicKey);
     logger.log(
       `createAccount:\ncontractAddress = ${contractAddress}\npublicKey = ${publicKey}\naddressIndex = ${addressIndexInUsed}`,
     );
 
     let failureReason = '';
-    let estimateDeployFee: EstimateFee;
+    let estimateDeployFee: EstimateFee | undefined;
 
     if (deploy) {
       if (!silentMode) {
@@ -71,21 +81,22 @@ export async function createAccount(params: ApiParams, silentMode = false, waitM
             ]),
           },
         });
-        if (!response)
+        if (!response) {
           return {
             address: contractAddress,
           };
+        }
       }
 
-      const signerAssigned = await isAccountDeployed(network, contractAddress);
+      const isDeployed = await isAccountDeployed(network, contractAddress);
 
-      if (!signerAssigned) {
+      if (!isDeployed) {
         try {
-          const balance = await getBalance(
-            getEtherErc20Token(state, network.chainId)?.address,
-            num.toBigInt(contractAddress).toString(10),
-            network,
-          );
+          const token = getEtherErc20Token(state, network.chainId);
+          if (!token) {
+            throw new Error('ETH token not found');
+          }
+          const balance = await getBalance(token.address, numUtils.toBigInt(contractAddress).toString(10), network);
           logger.log(`createAccount:\ngetBalanceResp: ${balance}`);
           estimateDeployFee = await estimateAccountDeployFee(
             network,
@@ -101,9 +112,10 @@ export async function createAccount(params: ApiParams, silentMode = false, waitM
             const gasFeeInEther = Number(gasFeeFloat) === 0 ? '0.000001' : gasFeeFloat;
             failureReason = `The account address needs to hold at least ${gasFeeInEther} ETH for deploy fee`;
           }
-        } catch (err) {
+        } catch (error) {
           failureReason = 'The account address ETH balance cannot be read';
-          logger.error(`createAccount: failed to read the ETH balance of ${contractAddress}: ${err}`);
+          // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+          logger.error(`createAccount: failed to read the ETH balance of ${contractAddress}: ${error}`);
         }
       }
 
@@ -115,7 +127,7 @@ export async function createAccount(params: ApiParams, silentMode = false, waitM
         privateKey,
         undefined,
         {
-          maxFee: estimateDeployFee?.suggestedMaxFee,
+          maxFee: estimateDeployFee ? estimateDeployFee.suggestedMaxFee : constants.ZERO,
         },
       );
 
@@ -159,14 +171,16 @@ export async function createAccount(params: ApiParams, silentMode = false, waitM
 
       return {
         address: deployResp.contract_address,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         transaction_hash: deployResp.transaction_hash,
       };
     }
     return {
       address: contractAddress,
     };
-  } catch (err) {
-    logger.error(`Problem found: ${err}`);
-    throw err;
+  } catch (error) {
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+    logger.error(`Problem found: ${error}`);
+    throw error;
   }
 }

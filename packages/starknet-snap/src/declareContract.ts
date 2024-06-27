@@ -1,10 +1,15 @@
+import { heading, panel, DialogType } from '@metamask/snaps-sdk';
+
+import type { ApiParams, DeclareContractRequestParams } from './types/snapApi';
+import { logger } from './utils/logger';
 import { toJson } from './utils/serializer';
-import { ApiParams, DeclareContractRequestParams } from './types/snapApi';
 import { getNetworkFromChainId, getDeclareSnapTxt, showUpgradeRequestModal } from './utils/snapUtils';
 import { getKeysFromAddress, declareContract as declareContractUtil, isUpgradeRequired } from './utils/starknetUtils';
-import { heading, panel, DialogType } from '@metamask/snaps-sdk';
-import { logger } from './utils/logger';
 
+/**
+ *
+ * @param params
+ */
 export async function declareContract(params: ApiParams) {
   try {
     const { state, keyDeriver, requestParams, wallet } = params;
@@ -12,7 +17,7 @@ export async function declareContract(params: ApiParams) {
 
     logger.log(`executeTxn params: ${toJson(requestParamsObj, 2)}}`);
 
-    const senderAddress = requestParamsObj.senderAddress;
+    const { senderAddress } = requestParamsObj;
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
     const { privateKey } = await getKeysFromAddress(keyDeriver, network, state, senderAddress);
 
@@ -36,7 +41,9 @@ export async function declareContract(params: ApiParams) {
       },
     });
 
-    if (!response) return false;
+    if (!response) {
+      return false;
+    }
 
     return await declareContractUtil(
       network,
@@ -45,8 +52,9 @@ export async function declareContract(params: ApiParams) {
       requestParamsObj.contractPayload,
       requestParamsObj.invocationsDetails,
     );
-  } catch (err) {
-    logger.error(`Problem found: ${err}`);
-    throw err;
+  } catch (error) {
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+    logger.error(`Problem found: ${error}`);
+    throw error;
   }
 }
