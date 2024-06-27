@@ -46,6 +46,7 @@ import {
   ACCOUNT_CLASS_HASH,
   CAIRO_VERSION,
   CAIRO_VERSION_LEGACY,
+  TRANSACTION_VERSION,
 } from './constants';
 import { getAddressKey } from './keyPair';
 import {
@@ -80,9 +81,16 @@ export const getAccountInstance = (
   userAddress: string,
   privateKey: string | Uint8Array,
   cairoVersion?: CairoVersion,
+  transactionVersion?: constants.TRANSACTION_VERSION.V2 | constants.TRANSACTION_VERSION.V3,
 ): Account => {
   const provider = getProvider(network);
-  return new Account(provider, userAddress, privateKey, cairoVersion ?? CAIRO_VERSION);
+  return new Account(
+    provider,
+    userAddress,
+    privateKey,
+    cairoVersion ?? CAIRO_VERSION,
+    transactionVersion ?? TRANSACTION_VERSION,
+  );
 };
 
 export const callContract = async (
@@ -132,14 +140,18 @@ export const estimateFee = async (
   senderAddress: string,
   privateKey: string | Uint8Array,
   txnInvocation: Call | Call[],
+  transactionVersion?: constants.TRANSACTION_VERSION.V2 | constants.TRANSACTION_VERSION.V3,
   cairoVersion?: CairoVersion,
   invocationsDetails?: UniversalDetails,
 ): Promise<EstimateFee> => {
-  return getAccountInstance(network, senderAddress, privateKey, cairoVersion).estimateInvokeFee(txnInvocation, {
+  return getAccountInstance(network, senderAddress, privateKey, cairoVersion, transactionVersion).estimateInvokeFee(
+    txnInvocation,
+    {
     ...invocationsDetails,
     skipValidate: false,
     blockIdentifier: 'latest',
-  });
+    },
+  );
 };
 
 export const estimateFeeBulk = async (
@@ -147,14 +159,18 @@ export const estimateFeeBulk = async (
   senderAddress: string,
   privateKey: string | Uint8Array,
   txnInvocation: Invocations,
+  transactionVersion?: constants.TRANSACTION_VERSION.V2 | constants.TRANSACTION_VERSION.V3,
   invocationsDetails?: UniversalDetails,
   cairoVersion?: CairoVersion,
 ): Promise<EstimateFee[]> => {
-  return getAccountInstance(network, senderAddress, privateKey, cairoVersion).estimateFeeBulk(txnInvocation, {
+  return getAccountInstance(network, senderAddress, privateKey, cairoVersion, transactionVersion).estimateFeeBulk(
+    txnInvocation,
+    {
     ...invocationsDetails,
     skipValidate: false,
     blockIdentifier: 'latest',
-  });
+    },
+  );
 };
 
 export const executeTxn = async (

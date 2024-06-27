@@ -3,6 +3,7 @@ import { getNetworkFromChainId } from './utils/snapUtils';
 import { getKeysFromAddress, estimateFeeBulk } from './utils/starknetUtils';
 import { ApiParams, EstimateFeesRequestParams } from './types/snapApi';
 import { logger } from './utils/logger';
+import { TRANSACTION_VERSION } from './utils/constants';
 
 export async function estimateFees(params: ApiParams) {
   try {
@@ -20,6 +21,7 @@ export async function estimateFees(params: ApiParams) {
       senderAddress,
       senderPrivateKey,
       requestParamsObj.invocations,
+      requestParamsObj.transactionVersion ?? TRANSACTION_VERSION,
       requestParamsObj.invocationDetails,
     );
 
