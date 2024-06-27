@@ -1,15 +1,30 @@
 module.exports = {
-  env: {
-    browser: true,
-    es2021: true,
-  },
-  extends: ['plugin:@typescript-eslint/recommended'],
-  parser: '@typescript-eslint/parser',
+  extends: ['../../.eslintrc.js'],
+
   parserOptions: {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
+    tsconfigRootDir: __dirname,
   },
-  plugins: ['@typescript-eslint'],
-  rules: {
-  },
+
+  overrides: [
+    {
+      files: ['snap.config.ts'],
+      extends: ['@metamask/eslint-config-nodejs'],
+    },
+
+    {
+      files: ['*.test.ts'],
+      rules: {
+        '@typescript-eslint/unbound-method': 'off',
+      },
+    },
+
+    {
+      files: ['*.ts'],
+      rules: {
+        'import/no-nodejs-modules': 'off',
+      },
+    },
+  ],
+
+  ignorePatterns: ['!.eslintrc.js', 'dist/'],
 };
