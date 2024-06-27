@@ -187,7 +187,6 @@ export const executeTxn = async (
     ...invocationsDetails,
     skipValidate: false,
     blockIdentifier: 'latest',
-    version: constants.TRANSACTION_VERSION.V3,
   });
 };
 
