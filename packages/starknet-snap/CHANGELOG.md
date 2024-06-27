@@ -1,6 +1,21 @@
 # Changelog
 
 
+## [2.8.0](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v2.7.0...starknet-snap-v2.8.0) (2024-06-21)
+
+
+### Features
+
+* add waiting mode for create account ([#251](https://github.com/Consensys/starknet-snap/issues/251)) ([0c91142](https://github.com/Consensys/starknet-snap/commit/0c911420595193672885d97d12769570a96316ce))
+* cairo 1 support ([#202](https://github.com/Consensys/starknet-snap/issues/202)) ([c5e36e9](https://github.com/Consensys/starknet-snap/commit/c5e36e9a6f3c63155d990bf519cd6af6eb3cd006))
+* sf-640 revamp cicd workflow ([#255](https://github.com/Consensys/starknet-snap/issues/255)) ([6faaf02](https://github.com/Consensys/starknet-snap/commit/6faaf024bd0b8112e5cea930a2bf8aad564a9454))
+* show upgrade dialog on get-starknet calls ([#247](https://github.com/Consensys/starknet-snap/issues/247)) ([4d8a2d7](https://github.com/Consensys/starknet-snap/commit/4d8a2d7948459033c91991c357f3fe2f620fe46b))
+
+
+### Bug Fixes
+
+* ensure account deployment for executTxn in get-starknet  ([#250](https://github.com/Consensys/starknet-snap/issues/250)) ([c98f2c7](https://github.com/Consensys/starknet-snap/commit/c98f2c74f5983736dedb960a5bf2ce57d9a3f99c))
+
 ## [2.7.0](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v2.6.2...starknet-snap-v2.7.0) (2024-05-01)
 
 
