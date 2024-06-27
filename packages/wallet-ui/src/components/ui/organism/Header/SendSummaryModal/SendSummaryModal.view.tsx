@@ -98,33 +98,34 @@ export const SendSummaryModalView = ({ address, amount, chainId, closeModal, sel
 
       if (feeToken) {
         const gasFeesStr = ethers.utils.formatUnits(gasFeesBN, feeToken.decimals);
-      const gasFeesFloat = parseFloat(gasFeesStr);
+        const gasFeesFloat = parseFloat(gasFeesStr);
         setGasFeesAmount(getMaxDecimalsReadable(feeToken, gasFeesStr));
         if (feeToken.usdPrice) {
           setGasFeesAmountUSD(getAmountPrice(feeToken, gasFeesFloat, false));
-      }
-      const amountBN = ethers.utils.parseUnits(amount, wallet.erc20TokenBalanceSelected.decimals);
+        }
+
+        const amountBN = ethers.utils.parseUnits(amount, wallet.erc20TokenBalanceSelected.decimals);
         if (wallet.erc20TokenBalanceSelected.address === feeToken.address) {
-        const totalAmountBN = gasFeesBN.add(amountBN);
-        totalToCheck = totalAmountBN;
+          const totalAmountBN = gasFeesBN.add(amountBN);
+          totalToCheck = totalAmountBN;
           const totalAmount = ethers.utils.formatUnits(totalAmountBN, feeToken.decimals);
           setTotalAmount(getMaxDecimalsReadable(feeToken, totalAmount));
-        const totalAmountFloat = parseFloat(totalAmount);
+          const totalAmountFloat = parseFloat(totalAmount);
           if (feeToken.usdPrice) {
             setTotalAmountUSD(getAmountPrice(feeToken, totalAmountFloat, false));
-        }
-      } else if (amountUsdPrice) {
+          }
+        } else if (amountUsdPrice) {
           const amountGasFeeUSDFloat = parseFloat(getAmountPrice(feeToken, gasFeesFloat, false));
-        const amountUSDFloat = parseFloat(amountUsdPrice);
-        const totalUSDAmount = amountUSDFloat + amountGasFeeUSDFloat;
-        setTotalAmountUSD(totalUSDAmount.toFixed(2));
-      }
+          const amountUSDFloat = parseFloat(amountUsdPrice);
+          const totalUSDAmount = amountUSDFloat + amountGasFeeUSDFloat;
+          setTotalAmountUSD(totalUSDAmount.toFixed(2));
+        }
 
         if (totalToCheck.gt(feeToken.amount)) {
-        setTotalExceedsBalance(true);
-      } else {
-        setTotalExceedsBalance(false);
-      }
+          setTotalExceedsBalance(true);
+        } else {
+          setTotalExceedsBalance(false);
+        }
       } else {
         setTotalExceedsBalance(true);
       }
@@ -148,11 +149,11 @@ export const SendSummaryModalView = ({ address, amount, chainId, closeModal, sel
         wallet.accounts[0] as unknown as string,
         gasFees.suggestedMaxFee,
         chainId,
+        selectedFeeToken,
       )
         .then((result) => {
           if (result) {
             toastr.success('Transaction sent successfully');
-            // can't trigger getTransaction by calling dispatch or setErc20TokenBalance here
             getTransactions(
               wallet.accounts[0] as unknown as string,
               wallet.erc20TokenBalanceSelected.address,

@@ -235,6 +235,7 @@ export function getSendTxnText(
   senderAddress: string,
   maxFee: num.BigNumberish,
   network: Network,
+  feeToken?: string,
 ): Array<Component> {
   // Retrieve the ERC-20 token from snap state for confirmation display purpose
   const token = getErc20Token(state, contractAddress, network.chainId);
@@ -242,7 +243,7 @@ export function getSendTxnText(
   addDialogTxt(components, 'Signer Address', senderAddress);
   addDialogTxt(components, 'Contract', contractAddress);
   addDialogTxt(components, 'Call Data', `[${contractCallData.join(', ')}]`);
-  addDialogTxt(components, 'Estimated Gas Fee(ETH)', convert(maxFee, 'wei', 'ether'));
+  addDialogTxt(components, `Estimated Gas Fee(${feeToken ?? 'ETH'})`, convert(maxFee, 'wei', 'ether'));
   addDialogTxt(components, 'Network', network.name);
 
   if (token && contractFuncName === 'transfer') {
