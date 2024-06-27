@@ -196,6 +196,7 @@ export const deployAccount = async (
   contractCallData: RawCalldata,
   addressSalt: num.BigNumberish,
   privateKey: string | Uint8Array,
+  transactionVersion?: constants.TRANSACTION_VERSION.V2 | constants.TRANSACTION_VERSION.V3,
   cairoVersion?: CairoVersion,
   invocationsDetails?: UniversalDetails,
 ): Promise<DeployContractResponse> => {
@@ -205,7 +206,7 @@ export const deployAccount = async (
     constructorCalldata: contractCallData,
     addressSalt,
   };
-  return getAccountInstance(network, contractAddress, privateKey, cairoVersion).deployAccount(deployAccountPayload, {
+  return getAccountInstance(network, contractAddress, privateKey, cairoVersion, transactionVersion).deployAccount(deployAccountPayload, {
     ...invocationsDetails,
     skipValidate: false,
     blockIdentifier: 'latest',
@@ -228,7 +229,7 @@ export const estimateAccountDeployFee = async (
     constructorCalldata: contractCallData,
     addressSalt,
   };
-  return getAccountInstance(network, contractAddress, privateKey, cairoVersion).estimateAccountDeployFee(
+  return getAccountInstance(network, contractAddress, privateKey, cairoVersion, transactionVersion).estimateAccountDeployFee(
     deployAccountPayload,
     {
       ...invocationsDetails,

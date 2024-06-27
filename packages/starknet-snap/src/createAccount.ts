@@ -18,11 +18,12 @@ import {
 } from './utils/snapUtils';
 import { AccContract, VoyagerTransactionType, Transaction, TransactionStatus } from './types/snapState';
 import { ApiParams, CreateAccountRequestParams } from './types/snapApi';
-import { EstimateFee, num } from 'starknet';
+import { EstimateFee, constants, num } from 'starknet';
 import { ethers } from 'ethers';
 import { DialogType } from '@metamask/rpc-methods';
 import { heading, panel, text } from '@metamask/snaps-sdk';
 import { logger } from './utils/logger';
+import { TRANSACTION_VERSION } from './utils/constants';
 
 /**
  * Create an starknet account.
@@ -39,7 +40,8 @@ export async function createAccount(params: ApiParams, silentMode = false, waitM
     const addressIndex = getValidNumber(requestParamsObj.addressIndex, -1, 0);
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
     const deploy = !!requestParamsObj.deploy;
-
+    const transactionVersion = requestParams.transactionVersion ?? TRANSACTION_VERSION;
+    const feeToken = requestParams.transactionVersion === constants.TRANSACTION_VERSION.V3 ? "STRK" : "ETH";
     const {
       privateKey,
       publicKey,
@@ -94,13 +96,14 @@ export async function createAccount(params: ApiParams, silentMode = false, waitM
             contractCallData,
             publicKey,
             privateKey,
+            transactionVersion
           );
           logger.log(`createAccount:\nestimateDeployFee: ${toJson(estimateDeployFee)}`);
           if (Number(balance) < Number(estimateDeployFee.suggestedMaxFee)) {
             const gasFeeStr = ethers.utils.formatUnits(estimateDeployFee.suggestedMaxFee.toString(10), 18);
-            const gasFeeFloat = parseFloat(gasFeeStr).toFixed(6); // 6 decimal places for ether
-            const gasFeeInEther = Number(gasFeeFloat) === 0 ? '0.000001' : gasFeeFloat;
-            failureReason = `The account address needs to hold at least ${gasFeeInEther} ETH for deploy fee`;
+            const gasFeeFloat = parseFloat(gasFeeStr).toFixed(6); // 6 decimal places for ether/strk
+            const gasFeeInFeeToken = Number(gasFeeFloat) === 0 ? '0.000001' : gasFeeFloat;
+            failureReason = `The account address needs to hold at least ${gasFeeInFeeToken} ${feeToken} for deploy fee`;
           }
         } catch (err) {
           failureReason = 'The account address ETH balance cannot be read';
@@ -114,6 +117,7 @@ export async function createAccount(params: ApiParams, silentMode = false, waitM
         contractCallData,
         publicKey,
         privateKey,
+        transactionVersion,
         undefined,
         {
           maxFee: estimateDeployFee?.suggestedMaxFee,

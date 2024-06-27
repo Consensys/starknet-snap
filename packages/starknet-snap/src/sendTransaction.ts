@@ -16,6 +16,7 @@ import { createAccount } from './createAccount';
 import { DialogType } from '@metamask/rpc-methods';
 import { heading, panel } from '@metamask/snaps-sdk';
 import { logger } from './utils/logger';
+import { TRANSACTION_VERSION } from './utils/constants';
 
 export async function sendTransaction(params: ApiParams) {
   try {
@@ -94,7 +95,7 @@ export async function sendTransaction(params: ApiParams) {
     if (!accountDeployed) {
       //Deploy account before sending the transaction
       logger.log('sendTransaction:\nFirst transaction : send deploy transaction');
-      const createAccountApiParams = {
+      const createAccountApiParams: ApiParams = {
         state,
         wallet: params.wallet,
         saveMutex: params.saveMutex,
@@ -103,6 +104,7 @@ export async function sendTransaction(params: ApiParams) {
           addressIndex,
           deploy: true,
           chainId: requestParamsObj.chainId,
+          transactionVersion: requestParamsObj.transactionVersion ?? TRANSACTION_VERSION
         },
       };
       await createAccount(createAccountApiParams, true, true);
