@@ -407,7 +407,7 @@ export const getMassagedTransactions = async (
 
       /* eslint-disable */
       const massagedTxn: Transaction = {
-        txnHash: txnResp ? txnResp.transaction_hash : txn.hash,
+        txnHash: txnResp?.transaction_hash ?? txn.hash,
         txnType: txn.type?.toLowerCase(),
         chainId: network.chainId,
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -432,8 +432,8 @@ export const getMassagedTransactions = async (
         contractCallData: txnResp.calldata ?? [],
         timestamp: txn.timestamp,
         status: '', // DEPRECATION
-        finalityStatus: statusResp ? statusResp.finalityStatus ?? '' : '',
-        executionStatus: statusResp ? statusResp.executionStatus : '',
+        finalityStatus: statusResp?.finalityStatus ?? '',
+        executionStatus: statusResp?.executionStatus ?? '',
         eventIds: [],
         failureReason: '',
       };
