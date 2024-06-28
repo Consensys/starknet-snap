@@ -21,17 +21,15 @@ export async function addErc20Token(params: ApiParams) {
   try {
     const { state, wallet, saveMutex, requestParams } = params;
     const requestParamsObj = requestParams as AddErc20TokenRequestParams;
+    const { tokenAddress, tokenName, tokenSymbol } = requestParamsObj;
 
-    if (!requestParamsObj.tokenAddress || !requestParamsObj.tokenName || !requestParamsObj.tokenSymbol) {
+    if (!tokenAddress || !tokenName || !tokenSymbol) {
       throw new Error(
         `The given token address, name, and symbol need to be non-empty string, got: ${toJson(requestParamsObj)}`,
       );
     }
 
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
-    const { tokenAddress } = requestParamsObj;
-    const { tokenName } = requestParamsObj;
-    const { tokenSymbol } = requestParamsObj;
     const tokenDecimals = getValidNumber(requestParamsObj.tokenDecimals, DEFAULT_DECIMAL_PLACES, 0);
 
     validateAddErc20TokenParams(requestParamsObj, network);
