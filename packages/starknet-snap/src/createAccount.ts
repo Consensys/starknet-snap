@@ -2,7 +2,7 @@ import type { BIP44AddressKeyDeriver } from '@metamask/key-tree';
 import { heading, panel, text, DialogType } from '@metamask/snaps-sdk';
 import { ethers } from 'ethers';
 import type { EstimateFee } from 'starknet';
-import { constants, num as numUtils } from 'starknet';
+import { num as numUtils } from 'starknet';
 
 import type { ApiParams, CreateAccountRequestParams } from './types/snapApi';
 import type { AccContract, Transaction } from './types/snapState';
@@ -127,7 +127,7 @@ export async function createAccount(params: ApiParams, silentMode = false, waitM
         privateKey,
         undefined,
         {
-          maxFee: estimateDeployFee ? estimateDeployFee.suggestedMaxFee : constants.ZERO,
+          maxFee: estimateDeployFee?.suggestedMaxFee,
         },
       );
 

@@ -511,7 +511,7 @@ export function getAccounts(state: SnapState, chainId: string) {
  */
 export async function upsertAccount(userAccount: AccContract, wallet: SnapsProvider, mutex: Mutex, state?: SnapState) {
   return mutex.runExclusive(async () => {
-    if (state === undefined) {
+    if (!state) {
       // eslint-disable-next-line require-atomic-updates, no-param-reassign
       state = await getState(wallet);
     }
@@ -565,12 +565,13 @@ export function getNetworks(state: SnapState) {
  */
 export async function upsertNetwork(network: Network, wallet: SnapsProvider, mutex: Mutex, state?: SnapState) {
   return mutex.runExclusive(async () => {
-    if (state === undefined) {
+    if (!state) {
       // eslint-disable-next-line require-atomic-updates, no-param-reassign
       state = await getState(wallet);
     }
 
     const storedNetwork = getNetwork(state, network.chainId);
+
     if (storedNetwork === undefined) {
       if (!state.networks) {
         state.networks = [];
@@ -600,7 +601,7 @@ export async function upsertNetwork(network: Network, wallet: SnapsProvider, mut
  */
 export async function removeNetwork(network: Network, wallet: SnapsProvider, mutex: Mutex, state?: SnapState) {
   return mutex.runExclusive(async () => {
-    if (state === undefined) {
+    if (!state) {
       // eslint-disable-next-line require-atomic-updates, no-param-reassign
       state = await getState(wallet);
     }
@@ -657,7 +658,7 @@ export function getEtherErc20Token(state: SnapState, chainId: string) {
  */
 export async function upsertErc20Token(erc20Token: Erc20Token, wallet: SnapsProvider, mutex: Mutex, state?: SnapState) {
   return mutex.runExclusive(async () => {
-    if (state === undefined) {
+    if (!state) {
       // eslint-disable-next-line require-atomic-updates, no-param-reassign
       state = await getState(wallet);
     }
@@ -827,7 +828,7 @@ export function getTransactions(
  */
 export async function upsertTransaction(txn: Transaction, wallet: SnapsProvider, mutex: Mutex, state?: SnapState) {
   return mutex.runExclusive(async () => {
-    if (state === undefined) {
+    if (!state) {
       // eslint-disable-next-line require-atomic-updates, no-param-reassign
       state = await getState(wallet);
     }
@@ -865,7 +866,7 @@ export async function upsertTransaction(txn: Transaction, wallet: SnapsProvider,
  */
 export async function upsertTransactions(txns: Transaction[], wallet: SnapsProvider, mutex: Mutex, state?: SnapState) {
   return mutex.runExclusive(async () => {
-    if (state === undefined) {
+    if (!state) {
       // eslint-disable-next-line require-atomic-updates, no-param-reassign
       state = await getState(wallet);
     }
@@ -904,7 +905,7 @@ export async function removeAcceptedTransaction(
   state?: SnapState,
 ) {
   return mutex.runExclusive(async () => {
-    if (state === undefined) {
+    if (!state) {
       // eslint-disable-next-line require-atomic-updates, no-param-reassign
       state = await getState(wallet);
     }
@@ -937,7 +938,7 @@ export function getCurrentNetwork(state: SnapState) {
  */
 export async function setCurrentNetwork(network: Network, wallet: SnapsProvider, mutex: Mutex, state?: SnapState) {
   return mutex.runExclusive(async () => {
-    if (state === undefined) {
+    if (!state) {
       // eslint-disable-next-line require-atomic-updates, no-param-reassign
       state = await getState(wallet);
     }

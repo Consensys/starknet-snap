@@ -1,5 +1,4 @@
-import { MetaMaskSnap } from './snap';
-import {
+import type {
   Abi,
   ArraySignatureType,
   Call,
@@ -9,12 +8,14 @@ import {
   Signature,
   SignerInterface,
   TypedData,
-  ec,
-  num,
 } from 'starknet';
+import { ec, num as numUtils } from 'starknet';
+
+import type { MetaMaskSnap } from './snap';
 
 export class MetaMaskSigner implements SignerInterface {
   #snap: MetaMaskSnap;
+
   #address: string;
 
   constructor(snap: MetaMaskSnap, address: string) {
@@ -28,7 +29,7 @@ export class MetaMaskSigner implements SignerInterface {
 
   async signMessage(typedData: TypedData, accountAddress: string): Promise<Signature> {
     const result = (await this.#snap.signMessage(typedData, false, accountAddress)) as ArraySignatureType;
-    return new ec.starkCurve.Signature(num.toBigInt(result[0]), num.toBigInt(result[1]));
+    return new ec.starkCurve.Signature(numUtils.toBigInt(result[0]), numUtils.toBigInt(result[1]));
   }
 
   async signTransaction(
@@ -42,16 +43,16 @@ export class MetaMaskSigner implements SignerInterface {
       transactionsDetail,
       abis,
     )) as ArraySignatureType;
-    return new ec.starkCurve.Signature(num.toBigInt(result[0]), num.toBigInt(result[1]));
+    return new ec.starkCurve.Signature(numUtils.toBigInt(result[0]), numUtils.toBigInt(result[1]));
   }
 
   async signDeployAccountTransaction(transaction: DeployAccountSignerDetails): Promise<Signature> {
     const result = (await this.#snap.signDeployAccountTransaction(this.#address, transaction)) as ArraySignatureType;
-    return new ec.starkCurve.Signature(num.toBigInt(result[0]), num.toBigInt(result[1]));
+    return new ec.starkCurve.Signature(numUtils.toBigInt(result[0]), numUtils.toBigInt(result[1]));
   }
 
   async signDeclareTransaction(transaction: DeclareSignerDetails): Promise<Signature> {
     const result = (await this.#snap.signDeclareTransaction(this.#address, transaction)) as ArraySignatureType;
-    return new ec.starkCurve.Signature(num.toBigInt(result[0]), num.toBigInt(result[1]));
+    return new ec.starkCurve.Signature(numUtils.toBigInt(result[0]), numUtils.toBigInt(result[1]));
   }
 }

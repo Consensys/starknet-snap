@@ -62,7 +62,7 @@ import { verifySignedMessage } from './verifySignedMessage';
 declare const snap;
 const saveMutex = new Mutex();
 
-export const onRpcRequest: OnRpcRequestHandler = async ({ origin, request }) => {
+export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
   try {
     const requestParams = request?.params as unknown as ApiRequestParams;
     const isDev = Boolean(requestParams?.isDev);
@@ -71,8 +71,9 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ origin, request }) => 
     logger.init(debugLevel as unknown as string);
     // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     console.log(`debugLevel: ${logger.getLogLevel()}`);
+
+    logger.log(`${request.method}:\nrequestParams: ${toJson(requestParams)}`);
     // Switch statement for methods not requiring state to speed things up a bit
-    logger.log(origin, request);
     if (request.method === 'ping') {
       logger.log('pong');
       return 'pong';
@@ -84,8 +85,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ origin, request }) => 
         operation: 'get',
       },
     });
-
-    if (state === undefined) {
+    if (!state) {
       state = {
         accContracts: [],
         erc20Tokens: [],
@@ -101,7 +101,6 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ origin, request }) => 
         },
       });
     }
-
     // pre-inserted the default networks and tokens
     await upsertNetwork(STARKNET_MAINNET_NETWORK, snap, saveMutex, state);
     if (isDev) {
@@ -116,8 +115,6 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ origin, request }) => 
     for (const token of PRELOADED_TOKENS) {
       await upsertErc20Token(token, snap, saveMutex, state);
     }
-
-    logger.log(`${request.method}:\nrequestParams: ${toJson(requestParams)}`);
 
     const apiParams: ApiParams = {
       state,
