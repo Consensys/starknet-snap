@@ -206,6 +206,7 @@ export function getTxnSnapTxt(
   txnInvocation: Call | Call[],
   abis?: Abi[],
   invocationsDetails?: InvocationsDetails,
+  feeToken?: string,
 ) {
   const components = [];
   addDialogTxt(components, 'Network', network.name);
@@ -216,7 +217,7 @@ export function getTxnSnapTxt(
   }
 
   if (invocationsDetails?.maxFee) {
-    addDialogTxt(components, 'Max Fee(ETH)', convert(invocationsDetails.maxFee, 'wei', 'ether'));
+    addDialogTxt(components, `Max Fee(${feeToken ?? 'ETH'})`, convert(invocationsDetails.maxFee, 'wei', 'ether'));
   }
   if (invocationsDetails?.nonce) {
     addDialogTxt(components, 'Nonce', invocationsDetails.nonce.toString());

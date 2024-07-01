@@ -1,4 +1,4 @@
-import { Invocations, TransactionType } from 'starknet';
+import { Invocations, TransactionType, constants } from 'starknet';
 import { getNetworkFromChainId, getTxnSnapTxt, addDialogTxt, showUpgradeRequestModal } from './utils/snapUtils';
 import {
   getKeysFromAddress,
@@ -14,7 +14,8 @@ import { createAccount } from './createAccount';
 import { DialogType } from '@metamask/rpc-methods';
 import { heading, panel, divider } from '@metamask/snaps-sdk';
 import { logger } from './utils/logger';
-import { ACCOUNT_CLASS_HASH } from './utils/constants';
+import { ACCOUNT_CLASS_HASH, TRANSACTION_VERSION } from './utils/constants';
+import { ethers } from 'ethers';
 
 export async function executeTxn(params: ApiParams) {
   try {
@@ -22,6 +23,19 @@ export async function executeTxn(params: ApiParams) {
     const requestParamsObj = requestParams as ExecuteTxnRequestParams;
     const senderAddress = requestParamsObj.senderAddress;
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
+
+    console.log('transactionVersion');
+    console.log(params);
+    console.log('hello');
+    const transactionVersion: constants.TRANSACTION_VERSION.V2 | constants.TRANSACTION_VERSION.V3 = requestParamsObj
+      .invocationsDetails.version
+      ? (ethers.utils.hexlify(requestParamsObj.invocationsDetails.version) as
+          | constants.TRANSACTION_VERSION.V2
+          | constants.TRANSACTION_VERSION.V3)
+      : TRANSACTION_VERSION;
+    console.log(transactionVersion);
+    const feeToken = transactionVersion === constants.TRANSACTION_VERSION.V3 ? 'STRK' : 'ETH';
+    console.log(feeToken);
     const {
       privateKey: senderPrivateKey,
       publicKey,
@@ -55,12 +69,14 @@ export async function executeTxn(params: ApiParams) {
         payload: deployAccountpayload,
       });
     }
-
+    // Because it is set through the transactionVersion parameter.
+    delete requestParamsObj.invocationsDetails.version;
     const fees = await estimateFeeBulk(
       network,
       senderAddress,
       senderPrivateKey,
       bulkTransactions,
+      transactionVersion,
       requestParamsObj.invocationsDetails ? requestParamsObj.invocationsDetails : undefined,
     );
     const estimateFeeResp = addFeesFromAllTransactions(fees);
@@ -85,6 +101,7 @@ export async function executeTxn(params: ApiParams) {
           addressIndex,
           deploy: true,
           chainId: requestParamsObj.chainId,
+          transactionVersion,
         },
       } as ApiParams;
     }
@@ -96,6 +113,7 @@ export async function executeTxn(params: ApiParams) {
         requestParamsObj.txnInvocation,
         requestParamsObj.abis,
         requestParamsObj.invocationsDetails,
+        feeToken,
       ),
     );
 
@@ -120,6 +138,7 @@ export async function executeTxn(params: ApiParams) {
       requestParamsObj.txnInvocation,
       requestParamsObj.abis,
       { maxFee, nonce: nonceSendTransaction },
+      transactionVersion,
     );
   } catch (err) {
     logger.error(`Problem found: ${err}`);
