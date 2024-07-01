@@ -4,7 +4,7 @@ import {  MetaMaskSnapWallet } from './src/wallet';
 const init = async() => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const provider =  await MetaMaskSnap.GetProvider(window as any) as any;
-    const wallet = new MetaMaskSnapWallet(provider, '*');
+    const wallet = new MetaMaskSnapWallet('*');
     
     const address = await wallet.enable();
     console.log("address", address)
