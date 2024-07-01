@@ -147,9 +147,9 @@ export const estimateFee = async (
   return getAccountInstance(network, senderAddress, privateKey, cairoVersion, transactionVersion).estimateInvokeFee(
     txnInvocation,
     {
-    ...invocationsDetails,
-    skipValidate: false,
-    blockIdentifier: 'latest',
+      ...invocationsDetails,
+      skipValidate: false,
+      blockIdentifier: 'latest',
     },
   );
 };
@@ -166,9 +166,9 @@ export const estimateFeeBulk = async (
   return getAccountInstance(network, senderAddress, privateKey, cairoVersion, transactionVersion).estimateFeeBulk(
     txnInvocation,
     {
-    ...invocationsDetails,
-    skipValidate: false,
-    blockIdentifier: 'latest',
+      ...invocationsDetails,
+      skipValidate: false,
+      blockIdentifier: 'latest',
     },
   );
 };
@@ -183,11 +183,15 @@ export const executeTxn = async (
   transactionVersion?: constants.TRANSACTION_VERSION.V2 | constants.TRANSACTION_VERSION.V3,
   cairoVersion?: CairoVersion,
 ): Promise<InvokeFunctionResponse> => {
-  return getAccountInstance(network, senderAddress, privateKey, cairoVersion, transactionVersion).execute(txnInvocation, abis, {
-    ...invocationsDetails,
-    skipValidate: false,
-    blockIdentifier: 'latest',
-  });
+  return getAccountInstance(network, senderAddress, privateKey, cairoVersion, transactionVersion).execute(
+    txnInvocation,
+    abis,
+    {
+      ...invocationsDetails,
+      skipValidate: false,
+      blockIdentifier: 'latest',
+    },
+  );
 };
 
 export const deployAccount = async (
@@ -206,11 +210,14 @@ export const deployAccount = async (
     constructorCalldata: contractCallData,
     addressSalt,
   };
-  return getAccountInstance(network, contractAddress, privateKey, cairoVersion, transactionVersion).deployAccount(deployAccountPayload, {
-    ...invocationsDetails,
-    skipValidate: false,
-    blockIdentifier: 'latest',
-  });
+  return getAccountInstance(network, contractAddress, privateKey, cairoVersion, transactionVersion).deployAccount(
+    deployAccountPayload,
+    {
+      ...invocationsDetails,
+      skipValidate: false,
+      blockIdentifier: 'latest',
+    },
+  );
 };
 
 export const estimateAccountDeployFee = async (
@@ -229,14 +236,17 @@ export const estimateAccountDeployFee = async (
     constructorCalldata: contractCallData,
     addressSalt,
   };
-  return getAccountInstance(network, contractAddress, privateKey, cairoVersion, transactionVersion).estimateAccountDeployFee(
-    deployAccountPayload,
-    {
-      ...invocationsDetails,
-      skipValidate: false,
-      blockIdentifier: 'latest',
-    },
-  );
+  return getAccountInstance(
+    network,
+    contractAddress,
+    privateKey,
+    cairoVersion,
+    transactionVersion,
+  ).estimateAccountDeployFee(deployAccountPayload, {
+    ...invocationsDetails,
+    skipValidate: false,
+    blockIdentifier: 'latest',
+  });
 };
 
 export const getSigner = async (userAccAddress: string, network: Network): Promise<string> => {

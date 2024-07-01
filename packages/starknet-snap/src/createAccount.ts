@@ -40,8 +40,8 @@ export async function createAccount(params: ApiParams, silentMode = false, waitM
     const addressIndex = getValidNumber(requestParamsObj.addressIndex, -1, 0);
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
     const deploy = !!requestParamsObj.deploy;
-    const transactionVersion = requestParams.transactionVersion ?? TRANSACTION_VERSION;
-    const feeToken = requestParams.transactionVersion === constants.TRANSACTION_VERSION.V3 ? "STRK" : "ETH";
+    const transactionVersion = requestParamsObj.transactionVersion ?? TRANSACTION_VERSION;
+    const feeToken = requestParamsObj.transactionVersion === constants.TRANSACTION_VERSION.V3 ? 'STRK' : 'ETH';
     const {
       privateKey,
       publicKey,
@@ -96,7 +96,7 @@ export async function createAccount(params: ApiParams, silentMode = false, waitM
             contractCallData,
             publicKey,
             privateKey,
-            transactionVersion
+            transactionVersion,
           );
           logger.log(`createAccount:\nestimateDeployFee: ${toJson(estimateDeployFee)}`);
           if (Number(balance) < Number(estimateDeployFee.suggestedMaxFee)) {
