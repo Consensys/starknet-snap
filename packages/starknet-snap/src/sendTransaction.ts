@@ -104,18 +104,28 @@ export async function sendTransaction(params: ApiParams) {
           addressIndex,
           deploy: true,
           chainId: requestParamsObj.chainId,
-          transactionVersion: requestParamsObj.transactionVersion ?? TRANSACTION_VERSION
+          transactionVersion: requestParamsObj.transactionVersion ?? TRANSACTION_VERSION,
         },
       };
+      console.log('creating the account: createAccount');
       await createAccount(createAccountApiParams, true, true);
+      console.log('account created');
     }
 
     //In case this is the first transaction we assign a nonce of 1 to make sure it does after the deploy transaction
     const nonceSendTransaction = accountDeployed ? undefined : 1;
-    const txnResp = await executeTxn(network, senderAddress, senderPrivateKey, txnInvocation, undefined, {
-      maxFee,
-      nonce: nonceSendTransaction,
-    }, requestParamsObj.transactionVersion ?? TRANSACTION_VERSION);
+    const txnResp = await executeTxn(
+      network,
+      senderAddress,
+      senderPrivateKey,
+      txnInvocation,
+      undefined,
+      {
+        maxFee,
+        nonce: nonceSendTransaction,
+      },
+      requestParamsObj.transactionVersion ?? TRANSACTION_VERSION,
+    );
 
     logger.log(`sendTransaction:\ntxnResp: ${toJson(txnResp)}`);
 
