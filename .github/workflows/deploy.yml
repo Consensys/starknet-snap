@@ -66,6 +66,7 @@ jobs:
       AWS_CLOUDFRONT_DISTRIBUTIONS_ID: ${{ steps.prepare_parameters.outputs.AWS_CLOUDFRONT_DISTRIBUTIONS_ID }}
       AWS_S3_URL: ${{ steps.prepare_parameters.outputs.AWS_S3_URL }}
       GET_STARKNET_PUBLIC_PATH: ${{ steps.prepare_parameters.outputs.GET_STARKNET_PUBLIC_PATH }}
+      CACHE_KEY: ${{ github.sha }}-${{ steps.prepare_parameters.outputs.ENV }}
 
   install-build:
     needs: 
@@ -124,7 +125,7 @@ jobs:
             ./packages/starknet-snap/dist
             ./packages/starknet-snap/snap.manifest.json
             ./node_modules/.yarn-state.yml
-          key: ${{ github.sha }}
+          key: ${{ needs.prepare-deployment.outputs.CACHE_KEY }}
 
   publish-npm-dry-run:
     runs-on: ubuntu-latest
@@ -151,7 +152,7 @@ jobs:
             ./packages/starknet-snap/dist
             ./packages/starknet-snap/snap.manifest.json
             ./node_modules/.yarn-state.yml
-          key: ${{ github.sha }}
+          key: ${{ needs.prepare-deployment.outputs.CACHE_KEY }}
       - name: Dry Run Publish
         run: |
           npm pack ./packages/starknet-snap --tag "$TAG" --access public
@@ -183,7 +184,7 @@ jobs:
             ./packages/starknet-snap/dist
             ./packages/starknet-snap/snap.manifest.json
             ./node_modules/.yarn-state.yml
-          key: ${{ github.sha }}
+          key: ${{ needs.prepare-deployment.outputs.CACHE_KEY }}
       - name: Run Publish
         run: |
           npm publish ./packages/starknet-snap --tag "$TAG" --access public
@@ -217,7 +218,7 @@ jobs:
             ./packages/starknet-snap/dist
             ./packages/starknet-snap/snap.manifest.json
             ./node_modules/.yarn-state.yml
-          key: ${{ github.sha }}
+          key: ${{ needs.prepare-deployment.outputs.CACHE_KEY }}
       - name: Deploy to AWS
         run: | 
           echo "Deployed Dapp to : $AWS_S3_URL"
@@ -251,7 +252,7 @@ jobs:
             ./packages/starknet-snap/dist
             ./packages/starknet-snap/snap.manifest.json
             ./node_modules/.yarn-state.yml
-          key: ${{ github.sha }}
+          key: ${{ needs.prepare-deployment.outputs.CACHE_KEY }}
       - name: Deploy to AWS
         run: | 
           echo "Deployed get Starknet to : $AWS_S3_GET_STARKNET_URL"
