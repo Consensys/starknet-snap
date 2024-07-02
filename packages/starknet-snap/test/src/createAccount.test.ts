@@ -67,7 +67,6 @@ describe('Test function: createAccount', function () {
   });
 
   it('should only return derived address without sending deploy txn correctly in mainnet if deploy is false', async function () {
-    sandbox.stub(utils, 'isAccountDeployed').resolves(false);
     const requestObject: CreateAccountRequestParams = {
       chainId: STARKNET_MAINNET_NETWORK.chainId,
     };
@@ -94,9 +93,7 @@ describe('Test function: createAccount', function () {
     sandbox.stub(utils, 'callContract').callsFake(async () => {
       return getBalanceResp;
     });
-    sandbox.stub(utils, 'estimateAccountDeployFee').callsFake(async () => {
-      return estimateDeployFeeResp;
-    });
+
     const requestObject: CreateAccountRequestParams = {
       chainId: STARKNET_MAINNET_NETWORK.chainId,
       deploy: true,
@@ -111,13 +108,7 @@ describe('Test function: createAccount', function () {
     sandbox.stub(utils, 'deployAccount').callsFake(async () => {
       return createAccountProxyMainnetResp;
     });
-    sandbox.stub(utils, 'isAccountDeployed').resolves(false);
-    sandbox.stub(utils, 'getBalance').callsFake(async () => {
-      return getBalanceResp[0];
-    });
-    sandbox.stub(utils, 'estimateAccountDeployFee').callsFake(async () => {
-      return estimateDeployFeeResp;
-    });
+
     const requestObject: CreateAccountRequestParams = {
       chainId: STARKNET_MAINNET_NETWORK.chainId,
       deploy: true,
@@ -146,13 +137,7 @@ describe('Test function: createAccount', function () {
     sandbox.stub(utils, 'deployAccount').callsFake(async () => {
       return createAccountProxyMainnetResp2;
     });
-    sandbox.stub(utils, 'isAccountDeployed').resolves(false);
-    sandbox.stub(utils, 'getBalance').callsFake(async () => {
-      return getBalanceResp[0];
-    });
-    sandbox.stub(utils, 'estimateAccountDeployFee').callsFake(async () => {
-      return estimateDeployFeeResp;
-    });
+
     const requestObject: CreateAccountRequestParams = {
       chainId: STARKNET_MAINNET_NETWORK.chainId,
       addressIndex: 1,
@@ -181,13 +166,7 @@ describe('Test function: createAccount', function () {
     sandbox.stub(utils, 'deployAccount').callsFake(async () => {
       return createAccountProxyResp;
     });
-    sandbox.stub(utils, 'isAccountDeployed').resolves(false);
-    sandbox.stub(utils, 'getBalance').callsFake(async () => {
-      return getBalanceResp[0];
-    });
-    sandbox.stub(utils, 'estimateAccountDeployFee').callsFake(async () => {
-      return estimateDeployFeeResp;
-    });
+
     const requestObject: CreateAccountRequestParams = { deploy: true };
     apiParams.requestParams = requestObject;
     const result = await createAccount(apiParams, true);
@@ -226,98 +205,11 @@ describe('Test function: createAccount', function () {
     expect(state.transactions.length).to.be.eq(0);
   });
 
-  it('should not create any user account with proxy in state in SN_SEPOLIA if account already deployed', async function () {
-    sandbox.stub(utils, 'deployAccount').callsFake(async () => {
-      return createAccountProxyResp;
-    });
-    sandbox.stub(utils, 'isAccountDeployed').resolves(true);
-    sandbox.stub(utils, 'getBalance').callsFake(async () => {
-      return getBalanceResp[0];
-    });
-    sandbox.stub(utils, 'estimateAccountDeployFee').callsFake(async () => {
-      return estimateDeployFeeResp;
-    });
-    const requestObject: CreateAccountRequestParams = { deploy: true };
-    apiParams.requestParams = requestObject;
-    const result = await createAccount(apiParams);
-    expect(walletStub.rpcStubs.snap_manageState).to.have.been.callCount(4);
-    expect(result.address).to.be.eq(createAccountProxyResp.contract_address);
-    expect(result.transaction_hash).to.be.eq(createAccountProxyResp.transaction_hash);
-    expect(state.accContracts.length).to.be.eq(1);
-    expect(state.transactions.length).to.be.eq(1);
-  });
-
-  it('should not create any user account with proxy in state in SN_SEPOLIA if account does not have enough ETH balance', async function () {
-    sandbox.stub(utils, 'deployAccount').callsFake(async () => {
-      return createAccountProxyResp;
-    });
-    sandbox.stub(utils, 'isAccountDeployed').resolves(false);
-    sandbox.stub(utils, 'getBalance').callsFake(async () => {
-      return getBalanceResp[0];
-    });
-    sandbox.stub(utils, 'estimateAccountDeployFee').callsFake(async () => {
-      return estimateDeployFeeResp2;
-    });
-    const requestObject: CreateAccountRequestParams = { deploy: true };
-    apiParams.requestParams = requestObject;
-    const result = await createAccount(apiParams);
-    expect(walletStub.rpcStubs.snap_manageState).to.have.been.callCount(4);
-    expect(result.address).to.be.eq(createAccountProxyResp.contract_address);
-    expect(result.transaction_hash).to.be.eq(createAccountProxyResp.transaction_hash);
-    expect(state.accContracts.length).to.be.eq(1);
-    expect(state.transactions.length).to.be.eq(1);
-  });
-
-  it('should not create any user account with proxy in state in SN_SEPOLIA if account does not have enough ETH balance for suggestedMaxFee > 0.000001 ETH', async function () {
-    sandbox.stub(utils, 'deployAccount').callsFake(async () => {
-      return createAccountProxyResp;
-    });
-    sandbox.stub(utils, 'isAccountDeployed').resolves(false);
-    sandbox.stub(utils, 'getBalance').callsFake(async () => {
-      return getBalanceResp[0];
-    });
-    sandbox.stub(utils, 'estimateAccountDeployFee').callsFake(async () => {
-      return estimateDeployFeeResp3;
-    });
-    const requestObject: CreateAccountRequestParams = { deploy: true };
-    apiParams.requestParams = requestObject;
-    const result = await createAccount(apiParams);
-    expect(walletStub.rpcStubs.snap_manageState).to.have.been.callCount(4);
-    expect(result.address).to.be.eq(createAccountProxyResp.contract_address);
-    expect(result.transaction_hash).to.be.eq(createAccountProxyResp.transaction_hash);
-    expect(state.accContracts.length).to.be.eq(1);
-    expect(state.transactions.length).to.be.eq(1);
-  });
-
-  it('should not create any user account with proxy in state in SN_SEPOLIA if get account ETH balance throws error', async function () {
-    sandbox.stub(utils, 'deployAccount').callsFake(async () => {
-      return createAccountProxyResp;
-    });
-    sandbox.stub(utils, 'isAccountDeployed').resolves(false);
-    sandbox.stub(utils, 'getBalance').throws(new Error());
-    sandbox.stub(utils, 'estimateAccountDeployFee').callsFake(async () => {
-      return estimateDeployFeeResp2;
-    });
-    const requestObject: CreateAccountRequestParams = { deploy: true };
-    apiParams.requestParams = requestObject;
-    const result = await createAccount(apiParams);
-    expect(walletStub.rpcStubs.snap_manageState).to.have.been.callCount(4);
-    expect(result.address).to.be.eq(createAccountProxyResp.contract_address);
-    expect(result.transaction_hash).to.be.eq(createAccountProxyResp.transaction_hash);
-    expect(state.accContracts.length).to.be.eq(1);
-    expect(state.transactions.length).to.be.eq(1);
-  });
-
   it('should skip upsert account and transaction if deployTxn response code has no transaction_hash in SN_SEPOLIA', async function () {
     sandbox.stub(utils, 'deployAccount').callsFake(async () => {
       return createAccountFailedProxyResp;
     });
-    sandbox.stub(utils, 'isAccountDeployed').resolves(false);
-    sandbox.stub(utils, 'callContract').resolves(getBalanceResp);
-    sandbox.stub(utils, 'getSigner').throws(new Error());
-    sandbox.stub(utils, 'estimateAccountDeployFee').callsFake(async () => {
-      return estimateDeployFeeResp;
-    });
+
     const requestObject: CreateAccountRequestParams = { deploy: true };
     apiParams.requestParams = requestObject;
     const result = await createAccount(apiParams);
@@ -333,12 +225,7 @@ describe('Test function: createAccount', function () {
     sandbox.stub(utils, 'deployAccount').callsFake(async () => {
       return createAccountProxyResp;
     });
-    sandbox.stub(utils, 'isAccountDeployed').resolves(false);
-    sandbox.stub(utils, 'callContract').resolves(getBalanceResp);
-    sandbox.stub(utils, 'getSigner').throws(new Error());
-    sandbox.stub(utils, 'estimateAccountDeployFee').callsFake(async () => {
-      return estimateDeployFeeResp;
-    });
+
     const requestObject: CreateAccountRequestParams = { deploy: true };
     apiParams.requestParams = requestObject;
 
@@ -348,28 +235,6 @@ describe('Test function: createAccount', function () {
     } catch (err) {
       result = err;
     } finally {
-      expect(result).to.be.an('Error');
-    }
-  });
-
-  it('should throw error if isAccountDeployed failed', async function () {
-    const isAccountAddressDeployedStub = sandbox.stub(utils, 'isAccountDeployed').throws(new Error());
-    const deployAccountStub = sandbox.stub(utils, 'deployAccount');
-    const estimateAccountDeployFeeStub = sandbox.stub(utils, 'estimateAccountDeployFee');
-    const getBalanceStub = sandbox.stub(utils, 'getBalance');
-    const requestObject: CreateAccountRequestParams = { deploy: true };
-    apiParams.requestParams = requestObject;
-
-    let result;
-    try {
-      await createAccount(apiParams);
-    } catch (err) {
-      result = err;
-    } finally {
-      expect(isAccountAddressDeployedStub).to.have.been.callCount(1);
-      expect(deployAccountStub).to.have.been.callCount(0);
-      expect(estimateAccountDeployFeeStub).to.have.been.callCount(0);
-      expect(getBalanceStub).to.have.been.callCount(0);
       expect(result).to.be.an('Error');
     }
   });
