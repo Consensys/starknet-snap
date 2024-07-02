@@ -1,8 +1,5 @@
 import type { BIP44AddressKeyDeriver } from '@metamask/key-tree';
 import { heading, panel, text, DialogType } from '@metamask/snaps-sdk';
-import { ethers } from 'ethers';
-import type { EstimateFee } from 'starknet';
-import { num as numUtils } from 'starknet';
 
 import type { ApiParams, CreateAccountRequestParams } from './types/snapApi';
 import type { AccContract, Transaction } from './types/snapState';
@@ -10,7 +7,6 @@ import { VoyagerTransactionType, TransactionStatus } from './types/snapState';
 import { logger } from './utils/logger';
 import { toJson } from './utils/serializer';
 import {
-  getEtherErc20Token,
   getNetworkFromChainId,
   getValidNumber,
   upsertAccount,
@@ -21,9 +17,6 @@ import {
   getKeysFromAddressIndex,
   getAccContractAddressAndCallData,
   deployAccount,
-  getBalance,
-  estimateAccountDeployFee,
-  isAccountDeployed,
   waitForTransaction,
 } from './utils/starknetUtils';
 
@@ -60,9 +53,6 @@ export async function createAccount(params: ApiParams, silentMode = false, waitM
       `createAccount:\ncontractAddress = ${contractAddress}\npublicKey = ${publicKey}\naddressIndex = ${addressIndexInUsed}`,
     );
 
-    let failureReason = '';
-    let estimateDeployFee: EstimateFee | undefined;
-
     if (deploy) {
       if (!silentMode) {
         const components = [];
@@ -88,48 +78,8 @@ export async function createAccount(params: ApiParams, silentMode = false, waitM
         }
       }
 
-      const isDeployed = await isAccountDeployed(network, contractAddress);
-
-      if (!isDeployed) {
-        try {
-          const token = getEtherErc20Token(state, network.chainId);
-          if (!token) {
-            throw new Error('ETH token not found');
-          }
-          const balance = await getBalance(token.address, numUtils.toBigInt(contractAddress).toString(10), network);
-          logger.log(`createAccount:\ngetBalanceResp: ${balance}`);
-          estimateDeployFee = await estimateAccountDeployFee(
-            network,
-            contractAddress,
-            contractCallData,
-            publicKey,
-            privateKey,
-          );
-          logger.log(`createAccount:\nestimateDeployFee: ${toJson(estimateDeployFee)}`);
-          if (Number(balance) < Number(estimateDeployFee.suggestedMaxFee)) {
-            const gasFeeStr = ethers.utils.formatUnits(estimateDeployFee.suggestedMaxFee.toString(10), 18);
-            const gasFeeFloat = parseFloat(gasFeeStr).toFixed(6); // 6 decimal places for ether
-            const gasFeeInEther = Number(gasFeeFloat) === 0 ? '0.000001' : gasFeeFloat;
-            failureReason = `The account address needs to hold at least ${gasFeeInEther} ETH for deploy fee`;
-          }
-        } catch (error) {
-          failureReason = 'The account address ETH balance cannot be read';
-          // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-          logger.error(`createAccount: failed to read the ETH balance of ${contractAddress}: ${error}`);
-        }
-      }
-
-      const deployResp = await deployAccount(
-        network,
-        contractAddress,
-        contractCallData,
-        publicKey,
-        privateKey,
-        undefined,
-        {
-          maxFee: estimateDeployFee?.suggestedMaxFee,
-        },
-      );
+      // Deploy account will auto estimate the fee from the network if not provided
+      const deployResp = await deployAccount(network, contractAddress, contractCallData, publicKey, privateKey);
 
       if (deployResp.contract_address && deployResp.transaction_hash) {
         const userAccount: AccContract = {
@@ -155,7 +105,7 @@ export async function createAccount(params: ApiParams, silentMode = false, waitM
           finalityStatus: TransactionStatus.RECEIVED,
           executionStatus: TransactionStatus.RECEIVED,
           status: '',
-          failureReason,
+          failureReason: '',
           eventIds: [],
           timestamp: Math.floor(Date.now() / 1000),
         };
