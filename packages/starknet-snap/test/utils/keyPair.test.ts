@@ -23,7 +23,7 @@ describe('Test function: getAddressKey', function () {
   it('should get the ground address key from the BIP-44 entropy correctly', async function () {
     const deriveStarkNetAddress = await getBIP44AddressKeyDeriver(bip44Entropy);
     const privateKey = (await deriveStarkNetAddress(0)).privateKey;
-    const expectedResult = grindKey(privateKey);
+    const expectedResult = grindKey(privateKey as unknown as string);
     const result = await getAddressKey(keyDeriver);
     expect(walletStub.rpcStubs.snap_getBip44Entropy).to.have.been.calledOnce;
     expect(result.addressKey).to.be.eql(expectedResult);
@@ -32,7 +32,7 @@ describe('Test function: getAddressKey', function () {
   it('should get the ground address key as the given private key if null keyValueLimit is given in grindKey', async function () {
     const deriveStarkNetAddress = await getBIP44AddressKeyDeriver(bip44Entropy);
     const privateKey = (await deriveStarkNetAddress(0)).privateKey;
-    const groundKey = grindKey(privateKey, null);
+    const groundKey = grindKey(privateKey as unknown as string, null);
     expect(walletStub.rpcStubs.snap_getBip44Entropy).to.have.been.calledOnce;
     expect(groundKey).to.be.eql(privateKey);
   });
@@ -41,7 +41,7 @@ describe('Test function: getAddressKey', function () {
     const addressIndex = 10;
     const deriveStarkNetAddress = await getBIP44AddressKeyDeriver(bip44Entropy);
     const privateKey = (await deriveStarkNetAddress(addressIndex)).privateKey;
-    const expectedResult = grindKey(privateKey);
+    const expectedResult = grindKey(privateKey as unknown as string);
     const result = await getAddressKey(keyDeriver, addressIndex);
     expect(walletStub.rpcStubs.snap_getBip44Entropy).to.have.been.calledOnce;
     expect(result.addressKey).to.be.eql(expectedResult);

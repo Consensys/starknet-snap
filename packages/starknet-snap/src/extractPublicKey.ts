@@ -1,17 +1,21 @@
-import { toJson } from './utils/serializer';
-import { constants, num } from 'starknet';
-import { validateAndParseAddress, isUpgradeRequired } from '../src/utils/starknetUtils';
-import { ApiParams, ExtractPublicKeyRequestParams } from './types/snapApi';
-import { getAccount, getNetworkFromChainId } from './utils/snapUtils';
-import { getKeysFromAddress } from './utils/starknetUtils';
-import { logger } from './utils/logger';
+import { constants, num as numUtils } from 'starknet';
 
+import type { ApiParams, ExtractPublicKeyRequestParams } from './types/snapApi';
+import { logger } from './utils/logger';
+import { toJson } from './utils/serializer';
+import { getAccount, getNetworkFromChainId } from './utils/snapUtils';
+import { validateAndParseAddress, isUpgradeRequired, getKeysFromAddress } from './utils/starknetUtils';
+
+/**
+ *
+ * @param params
+ */
 export async function extractPublicKey(params: ApiParams) {
   try {
     const { state, keyDeriver, requestParams } = params;
     const requestParamsObj = requestParams as ExtractPublicKeyRequestParams;
 
-    const userAddress = requestParamsObj.userAddress;
+    const { userAddress } = requestParamsObj;
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
 
     if (!requestParamsObj.userAddress) {
@@ -22,7 +26,7 @@ export async function extractPublicKey(params: ApiParams) {
 
     try {
       validateAndParseAddress(requestParamsObj.userAddress);
-    } catch (err) {
+    } catch (error) {
       throw new Error(`The given user address is invalid: ${requestParamsObj.userAddress}`);
     }
 
@@ -32,19 +36,20 @@ export async function extractPublicKey(params: ApiParams) {
 
     let userPublicKey;
     const accContract = getAccount(state, userAddress, network.chainId);
-    if (!accContract?.publicKey || num.toBigInt(accContract.publicKey) === constants.ZERO) {
+    if (!accContract?.publicKey || numUtils.toBigInt(accContract.publicKey) === constants.ZERO) {
       logger.log(`extractPublicKey: User address cannot be found or the signer public key is 0x0: ${userAddress}`);
       const { publicKey } = await getKeysFromAddress(keyDeriver, network, state, userAddress);
       userPublicKey = publicKey;
     } else {
       userPublicKey = accContract.publicKey;
     }
-
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     logger.log(`extractPublicKey:\nuserPublicKey: ${userPublicKey}`);
 
     return userPublicKey;
-  } catch (err) {
-    logger.error(`Problem found: ${err}`);
-    throw err;
+  } catch (error) {
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+    logger.error(`Problem found: ${error}`);
+    throw error;
   }
 }

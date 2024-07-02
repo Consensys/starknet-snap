@@ -1,11 +1,17 @@
-import { toJson } from './utils/serializer';
-import { num } from 'starknet';
-import { getKeysFromAddressIndex, getCorrectContractAddress } from './utils/starknetUtils';
-import { getNetworkFromChainId, getValidNumber, upsertAccount } from './utils/snapUtils';
-import { AccContract } from './types/snapState';
-import { ApiParams, RecoverAccountsRequestParams } from './types/snapApi';
-import { logger } from './utils/logger';
+import type { BIP44AddressKeyDeriver } from '@metamask/key-tree';
+import { num as numUtils } from 'starknet';
 
+import type { ApiParams, RecoverAccountsRequestParams } from './types/snapApi';
+import type { AccContract } from './types/snapState';
+import { logger } from './utils/logger';
+import { toJson } from './utils/serializer';
+import { getNetworkFromChainId, getValidNumber, upsertAccount } from './utils/snapUtils';
+import { getKeysFromAddressIndex, getCorrectContractAddress } from './utils/starknetUtils';
+
+/**
+ *
+ * @param params
+ */
 export async function recoverAccounts(params: ApiParams) {
   try {
     const { state, wallet, saveMutex, keyDeriver, requestParams } = params;
@@ -18,13 +24,13 @@ export async function recoverAccounts(params: ApiParams) {
 
     logger.log(`recoverAccounts:\nstartIndex: ${startIndex}, maxScanned: ${maxScanned}, maxMissed: ${maxMissed}`);
 
-    let i = startIndex,
-      j = 0;
+    let i = startIndex;
+    let j = 0;
     const scannedAccounts: AccContract[] = [];
 
     while (i < startIndex + maxScanned && j < maxMissed) {
       const { publicKey, addressIndex, derivationPath } = await getKeysFromAddressIndex(
-        keyDeriver,
+        keyDeriver as unknown as BIP44AddressKeyDeriver,
         network.chainId,
         state,
         i,
@@ -40,12 +46,12 @@ export async function recoverAccounts(params: ApiParams) {
 
       if (signerPublicKey) {
         logger.log(`recoverAccounts: index ${i}:\ncontractAddress = ${contractAddress}\n`);
-        if (num.toBigInt(signerPublicKey) === num.toBigInt(publicKey)) {
+        if (numUtils.toBigInt(signerPublicKey) === numUtils.toBigInt(publicKey)) {
           logger.log(`recoverAccounts: index ${i} matched\npublicKey: ${publicKey}`);
         }
         j = 0;
       } else {
-        j++;
+        j += 1;
       }
 
       const userAccount: AccContract = {
@@ -56,7 +62,7 @@ export async function recoverAccounts(params: ApiParams) {
         derivationPath,
         deployTxnHash: '',
         chainId: network.chainId,
-        upgradeRequired: upgradeRequired,
+        upgradeRequired,
       };
 
       logger.log(`recoverAccounts: index ${i}\nuserAccount: ${toJson(userAccount)}`);
@@ -64,14 +70,15 @@ export async function recoverAccounts(params: ApiParams) {
       await upsertAccount(userAccount, wallet, saveMutex);
 
       scannedAccounts.push(userAccount);
-      i++;
+      i += 1;
     }
 
     logger.log(`recoverAccounts:\nscannedAccounts: ${toJson(scannedAccounts, 2)}`);
 
     return scannedAccounts;
-  } catch (err) {
-    logger.error(`Problem found: ${err}`);
-    throw err;
+  } catch (error) {
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+    logger.error(`Problem found: ${error}`);
+    throw error;
   }
 }

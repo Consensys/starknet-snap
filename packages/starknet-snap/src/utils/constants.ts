@@ -1,5 +1,6 @@
 import { constants } from 'starknet';
-import { Erc20Token, Network } from '../types/snapState';
+
+import type { Erc20Token, Network } from '../types/snapState';
 
 export const VOYAGER_API_TXN_URL_SUFFIX = '/api/txn';
 export const VOYAGER_API_TXNS_URL_SUFFIX = '/api/txns';
@@ -17,11 +18,11 @@ export const UPGRADE_SELECTOR_HEX = '0xf2f7c15cbe06c8d94597cd91fd7f3369eae842359
 export const ACCOUNT_CLASS_HASH_LEGACY = '0x033434ad846cdd5f23eb73ff09fe6fddd568284a0fb7d1be20ee482f044dabe2'; // from argent-x repo
 export const ACCOUNT_CLASS_HASH = '0x29927c8af6bccf3f6fda035981e765a7bdbf18a2dc0d630494f8758aa908e2b'; // from argent-x repo
 
-interface IDappConfig {
+type IDappConfig = {
   dev: string;
   staging: string;
   prod: string;
-}
+};
 
 export const DAPP: IDappConfig = {
   dev: 'https://dev.snaps.consensys.io/starknet',

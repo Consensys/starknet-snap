@@ -1,10 +1,11 @@
+import type { BIP44AddressKeyDeriver } from '@metamask/key-tree';
+import { heading, panel, text, DialogType } from '@metamask/snaps-sdk';
+
+import type { ApiParams, CreateAccountRequestParams } from './types/snapApi';
+import type { AccContract, Transaction } from './types/snapState';
+import { VoyagerTransactionType, TransactionStatus } from './types/snapState';
+import { logger } from './utils/logger';
 import { toJson } from './utils/serializer';
-import {
-  getKeysFromAddressIndex,
-  getAccContractAddressAndCallData,
-  deployAccount,
-  waitForTransaction,
-} from './utils/starknetUtils';
 import {
   getNetworkFromChainId,
   getValidNumber,
@@ -12,15 +13,18 @@ import {
   upsertTransaction,
   addDialogTxt,
 } from './utils/snapUtils';
-import { AccContract, VoyagerTransactionType, Transaction, TransactionStatus } from './types/snapState';
-import { ApiParams, CreateAccountRequestParams } from './types/snapApi';
-import { heading, panel, text, DialogType } from '@metamask/snaps-sdk';
-import { logger } from './utils/logger';
+import {
+  getKeysFromAddressIndex,
+  getAccContractAddressAndCallData,
+  deployAccount,
+  waitForTransaction,
+} from './utils/starknetUtils';
 
 /**
  * Create an starknet account.
  *
  * @template Params - The ApiParams of the request.
+ * @param params
  * @param silentMode - The flag to disable the confirmation dialog from snap.
  * @param waitMode - The flag to enable an determination by doing an recursive fetch to check if the deploy account status is on L2 or not. The wait mode is only useful when it compose with other txn together, it can make sure the deploy txn execute complete, avoiding the latter txn failed.
  */
@@ -31,14 +35,19 @@ export async function createAccount(params: ApiParams, silentMode = false, waitM
 
     const addressIndex = getValidNumber(requestParamsObj.addressIndex, -1, 0);
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
-    const deploy = !!requestParamsObj.deploy;
+    const deploy = Boolean(requestParamsObj.deploy);
 
     const {
       privateKey,
       publicKey,
       addressIndex: addressIndexInUsed,
       derivationPath,
-    } = await getKeysFromAddressIndex(keyDeriver, network.chainId, state, addressIndex);
+    } = await getKeysFromAddressIndex(
+      keyDeriver as unknown as BIP44AddressKeyDeriver,
+      network.chainId,
+      state,
+      addressIndex,
+    );
     const { address: contractAddress, callData: contractCallData } = getAccContractAddressAndCallData(publicKey);
     logger.log(
       `createAccount:\ncontractAddress = ${contractAddress}\npublicKey = ${publicKey}\naddressIndex = ${addressIndexInUsed}`,
@@ -62,10 +71,11 @@ export async function createAccount(params: ApiParams, silentMode = false, waitM
             ]),
           },
         });
-        if (!response)
+        if (!response) {
           return {
             address: contractAddress,
           };
+        }
       }
 
       // Deploy account will auto estimate the fee from the network if not provided
@@ -111,14 +121,16 @@ export async function createAccount(params: ApiParams, silentMode = false, waitM
 
       return {
         address: deployResp.contract_address,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         transaction_hash: deployResp.transaction_hash,
       };
     }
     return {
       address: contractAddress,
     };
-  } catch (err) {
-    logger.error(`Problem found: ${err}`);
-    throw err;
+  } catch (error) {
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+    logger.error(`Problem found: ${error}`);
+    throw error;
   }
 }

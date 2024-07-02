@@ -1,21 +1,27 @@
-import { toJson } from './utils/serializer';
-import { num, constants } from 'starknet';
-import { validateAndParseAddress } from '../src/utils/starknetUtils';
+import { heading, panel, DialogType } from '@metamask/snaps-sdk';
+import { num as numUtils, constants } from 'starknet';
+
+import { createAccount } from './createAccount';
 import { estimateFee } from './estimateFee';
-import { Transaction, TransactionStatus, VoyagerTransactionType } from './types/snapState';
+import type { ApiParams, SendTransactionRequestParams } from './types/snapApi';
+import type { Transaction } from './types/snapState';
+import { TransactionStatus, VoyagerTransactionType } from './types/snapState';
+import { logger } from './utils/logger';
+import { toJson } from './utils/serializer';
 import { getNetworkFromChainId, getSendTxnText, upsertTransaction } from './utils/snapUtils';
 import {
+  validateAndParseAddress,
   getKeysFromAddress,
   getCallDataArray,
   executeTxn,
   isAccountDeployed,
   isUpgradeRequired,
 } from './utils/starknetUtils';
-import { ApiParams, SendTransactionRequestParams } from './types/snapApi';
-import { createAccount } from './createAccount';
-import { heading, panel, DialogType } from '@metamask/snaps-sdk';
-import { logger } from './utils/logger';
 
+/**
+ *
+ * @param params
+ */
 export async function sendTransaction(params: ApiParams) {
   try {
     const { state, wallet, saveMutex, keyDeriver, requestParams } = params;
@@ -31,19 +37,19 @@ export async function sendTransaction(params: ApiParams) {
 
     try {
       validateAndParseAddress(requestParamsObj.contractAddress);
-    } catch (err) {
+    } catch (error) {
       throw new Error(`The given contract address is invalid: ${requestParamsObj.contractAddress}`);
     }
     try {
       validateAndParseAddress(requestParamsObj.senderAddress);
-    } catch (err) {
+    } catch (error) {
       throw new Error(`The given sender address is invalid: ${requestParamsObj.senderAddress}`);
     }
 
-    const contractAddress = requestParamsObj.contractAddress;
-    const contractFuncName = requestParamsObj.contractFuncName;
-    const contractCallData = getCallDataArray(requestParamsObj.contractCallData);
-    const senderAddress = requestParamsObj.senderAddress;
+    const { contractAddress } = requestParamsObj;
+    const { contractFuncName } = requestParamsObj;
+    const contractCallData = getCallDataArray(requestParamsObj.contractCallData as unknown as string);
+    const { senderAddress } = requestParamsObj;
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
 
     if (await isUpgradeRequired(network, senderAddress)) {
@@ -56,10 +62,10 @@ export async function sendTransaction(params: ApiParams) {
       state,
       senderAddress,
     );
-    let maxFee = requestParamsObj.maxFee ? num.toBigInt(requestParamsObj.maxFee) : constants.ZERO;
+    let maxFee = requestParamsObj.maxFee ? numUtils.toBigInt(requestParamsObj.maxFee) : constants.ZERO;
     if (maxFee === constants.ZERO) {
       const { suggestedMaxFee } = await estimateFee(params);
-      maxFee = num.toBigInt(suggestedMaxFee);
+      maxFee = numUtils.toBigInt(suggestedMaxFee);
     }
 
     const signingTxnComponents = getSendTxnText(
@@ -78,7 +84,9 @@ export async function sendTransaction(params: ApiParams) {
         content: panel([heading('Do you want to sign this transaction ?'), ...signingTxnComponents]),
       },
     });
-    if (!response) return false;
+    if (!response) {
+      return false;
+    }
 
     const txnInvocation = {
       contractAddress,
@@ -90,7 +98,7 @@ export async function sendTransaction(params: ApiParams) {
 
     const accountDeployed = await isAccountDeployed(network, senderAddress);
     if (!accountDeployed) {
-      //Deploy account before sending the transaction
+      // Deploy account before sending the transaction
       logger.log('sendTransaction:\nFirst transaction : send deploy transaction');
       const createAccountApiParams = {
         state,
@@ -106,7 +114,7 @@ export async function sendTransaction(params: ApiParams) {
       await createAccount(createAccountApiParams, true, true);
     }
 
-    //In case this is the first transaction we assign a nonce of 1 to make sure it does after the deploy transaction
+    // In case this is the first transaction we assign a nonce of 1 to make sure it does after the deploy transaction
     const nonceSendTransaction = accountDeployed ? undefined : 1;
     const txnResp = await executeTxn(network, senderAddress, senderPrivateKey, txnInvocation, undefined, {
       maxFee,
@@ -123,17 +131,17 @@ export async function sendTransaction(params: ApiParams) {
         senderAddress,
         contractAddress,
         contractFuncName,
-        contractCallData: contractCallData.map((data: num.BigNumberish) => {
+        contractCallData: contractCallData.map((data: numUtils.BigNumberish) => {
           try {
-            return num.toHex(num.toBigInt(data));
-          } catch (e) {
-            //data is already send to chain, hence we should not throw error
+            return numUtils.toHex(numUtils.toBigInt(data));
+          } catch (error) {
+            // data is already send to chain, hence we should not throw error
             return '0x0';
           }
         }),
         finalityStatus: TransactionStatus.RECEIVED,
         executionStatus: TransactionStatus.RECEIVED,
-        status: '', //DEPRECATED LATER
+        status: '', // DEPRECATED LATER
         failureReason: '',
         eventIds: [],
         timestamp: Math.floor(Date.now() / 1000),
@@ -143,8 +151,9 @@ export async function sendTransaction(params: ApiParams) {
     }
 
     return txnResp;
-  } catch (err) {
-    logger.error(`Problem found: ${err}`);
-    throw err;
+  } catch (error) {
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+    logger.error(`Problem found: ${error}`);
+    throw error;
   }
 }

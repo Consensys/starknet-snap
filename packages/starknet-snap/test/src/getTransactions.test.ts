@@ -4,7 +4,7 @@ import sinonChai from 'sinon-chai';
 import { WalletMock } from '../wallet.mock.test';
 import * as utils from '../../src/utils/starknetUtils';
 import * as snapUtils from '../../src/utils/snapUtils';
-import { SnapState } from '../../src/types/snapState';
+import { SnapState, Transaction } from '../../src/types/snapState';
 import { STARKNET_SEPOLIA_TESTNET_NETWORK, STARKNET_MAINNET_NETWORK } from '../../src/utils/constants';
 import {
   createAccountProxyTxn,
@@ -28,13 +28,15 @@ import {
 import { getTransactions, updateStatus } from '../../src/getTransactions';
 import { Mutex } from 'async-mutex';
 import { ApiParams, GetTransactionsRequestParams } from '../../src/types/snapApi';
-import { num } from 'starknet';
+import { GetTransactionResponse, num } from 'starknet';
+import { VoyagerTransactions } from '../../src/types/voyager';
+import { TransactionStatuses } from '../../src/types/starknet';
 
 chai.use(sinonChai);
 const sandbox = sinon.createSandbox();
 describe('Test function: getTransactions', function () {
   const walletStub = new WalletMock();
-  let getTransactionStatusStub = null;
+  let getTransactionStatusStub: sinon.SinonStub;
   const state: SnapState = {
     accContracts: [],
     erc20Tokens: [],
@@ -61,26 +63,26 @@ describe('Test function: getTransactions', function () {
   beforeEach(function () {
     sandbox.useFakeTimers(1653553083147);
     sandbox.stub(utils, 'getTransactionsFromVoyager').callsFake(async () => {
-      return getTxnsFromVoyagerResp;
+      return getTxnsFromVoyagerResp as unknown as VoyagerTransactions;
     });
     sandbox.stub(utils, 'getTransaction').callsFake(async (...args) => {
       if (args?.[0] === getTxnsFromVoyagerResp.items[0].hash) {
-        return getTxnFromSequencerResp1;
+        return getTxnFromSequencerResp1 as unknown as GetTransactionResponse;
       } else if (args?.[0] === getTxnsFromVoyagerResp.items[1].hash) {
-        return getTxnFromSequencerResp2;
+        return getTxnFromSequencerResp2 as unknown as GetTransactionResponse;
       } else {
-        return null;
+        return null as unknown as GetTransactionResponse;
       }
     });
     getTransactionStatusStub = sandbox.stub(utils, 'getTransactionStatus').callsFake(async (...args) => {
       if (args?.[0] === getTxnsFromVoyagerResp.items[0].hash) {
-        return getTxnStatusResp;
+        return getTxnStatusResp as unknown as TransactionStatuses;
       } else if (args?.[0] === getTxnsFromVoyagerResp.items[1].hash) {
-        return getTxnStatusResp;
+        return getTxnStatusResp as unknown as TransactionStatuses;
       } else if (args?.[0] === expectedMassagedTxn5.txnHash) {
-        return undefined;
+        return undefined as unknown as TransactionStatuses;
       }
-      return getTxnStatusAcceptL2Resp;
+      return getTxnStatusAcceptL2Resp as unknown as TransactionStatuses;
     });
     walletStub.rpcStubs.snap_manageState.resolves(state);
   });
@@ -118,9 +120,11 @@ describe('Test function: getTransactions', function () {
     expect(getTransactionStatusStub.callCount).to.be.eq(4);
     expect(walletStub.rpcStubs.snap_manageState).to.have.been.called;
     expect(mergeTxn).not.to.be.undefined;
-    expect(mergeTxn.status).to.be.eq('');
-    expect(mergeTxn.finalityStatus).to.be.eq(getTxnStatusResp.finalityStatus);
-    expect(mergeTxn.executionStatus).to.be.eq(getTxnStatusResp.executionStatus);
+    if (mergeTxn !== undefined) {
+      expect(mergeTxn.status).to.be.eq('');
+      expect(mergeTxn.finalityStatus).to.be.eq(getTxnStatusResp.finalityStatus);
+      expect(mergeTxn.executionStatus).to.be.eq(getTxnStatusResp.executionStatus);
+    }
     expect(result.length).to.be.eq(4);
     expect(result).to.be.eql(expectedMassagedTxns);
   });
@@ -207,8 +211,8 @@ describe('Test function: getTransactions', function () {
 });
 
 describe('Test function: getTransactions.updateStatus', function () {
-  let getTransactionStatusStub = null;
-  let txns = [];
+  let getTransactionStatusStub: sinon.SinonStub;
+  let txns: Transaction[] = [];
   beforeEach(function () {
     txns = [{ ...unsettedTransactionInMassagedTxn }];
     getTransactionStatusStub = sandbox.stub(utils, 'getTransactionStatus').callsFake(async () => {

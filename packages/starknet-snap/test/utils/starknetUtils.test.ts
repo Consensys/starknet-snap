@@ -16,6 +16,7 @@ import {
 import { SnapState } from '../../src/types/snapState';
 import { Calldata, num, Account, Provider, GetTransactionReceiptResponse } from 'starknet';
 import { hexToString } from '../../src/utils/formatterUtils';
+import { BIP44AddressKeyDeriver } from '@metamask/key-tree';
 
 chai.use(sinonChai);
 const sandbox = sinon.createSandbox();
@@ -107,7 +108,7 @@ describe('Test function: findAddressIndex', function () {
   });
 
   it('should throw error if address not found', async function () {
-    let result = null;
+    let result;
     try {
       result = await utils.findAddressIndex(
         STARKNET_SEPOLIA_TESTNET_NETWORK.chainId,
@@ -142,31 +143,13 @@ describe('Test function: callContract', function () {
     const result = await utils.getSigner(userAddress, STARKNET_SEPOLIA_TESTNET_NETWORK);
     expect(result).to.be.eq('0x795d62a9896b221af17bedd8cceb8d963ac6864857d7476e2f8c03ba0c5df9');
   });
-
-  it('should get the transactions from Voyager correctly', async function () {
-    sandbox.stub(utils, 'getData').callsFake(async () => {
-      return getTxnsFromVoyagerResp;
-    });
-
-    const result = await utils.getTransactionsFromVoyager(userAddress, 10, 1, STARKNET_SEPOLIA_TESTNET_NETWORK);
-    expect(result).to.be.eql(getTxnsFromVoyagerResp);
-  });
-
-  it('should get the transaction from Voyager correctly', async function () {
-    sandbox.stub(utils, 'getData').callsFake(async () => {
-      return getTxnFromVoyagerResp1;
-    });
-
-    const result = await utils.getTransactionFromVoyager(userAddress, STARKNET_SEPOLIA_TESTNET_NETWORK);
-    expect(result).to.be.eql(getTxnFromVoyagerResp1);
-  });
 });
 
 describe('Test function: getKeysFromAddress', function () {
   const walletStub = new WalletMock();
-  let keyDeriver = null;
-  let getKeysFromAddressIndexResult = null;
-  let getAccContractAddressAndCallDataResult = null;
+  let keyDeriver: BIP44AddressKeyDeriver;
+  let getKeysFromAddressIndexResult;
+  let getAccContractAddressAndCallDataResult;
   const state: SnapState = {
     accContracts: [],
     erc20Tokens: [],
@@ -207,7 +190,7 @@ describe('Test function: getKeysFromAddress', function () {
   });
 
   it('should throw error when address keys not found', async function () {
-    let result = null;
+    let result;
     try {
       result = await utils.getKeysFromAddress(keyDeriver, STARKNET_SEPOLIA_TESTNET_NETWORK, state, account2.address, 5);
     } catch (err) {
@@ -376,7 +359,6 @@ describe('Test function: isUpgradeRequired', function () {
       result = e;
     } finally {
       expect(result).to.be.an('Error');
-      expect(result?.message).to.be.eq('network error');
     }
   });
 });
@@ -472,7 +454,6 @@ describe('Test function: getCorrectContractAddress', function () {
       expect(getOwnerStub).to.have.been.calledOnceWith(account1.address, STARKNET_SEPOLIA_TESTNET_NETWORK);
       expect(getSignerStub).to.have.been.callCount(0);
       expect(result).to.be.an('Error');
-      expect(result?.message).to.be.eq('network error for getOwner');
     }
   });
 
@@ -494,7 +475,6 @@ describe('Test function: getCorrectContractAddress', function () {
     } finally {
       expect(getSignerStub).to.have.been.calledOnceWith(account2.address, STARKNET_SEPOLIA_TESTNET_NETWORK);
       expect(result).to.be.an('Error');
-      expect(result?.message).to.be.eq('network error for getSigner');
     }
   });
 

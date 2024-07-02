@@ -52,7 +52,7 @@ describe('Test function: extractPrivateKey', function () {
     });
 
     it('should throw an error if the user address is undefined', async function () {
-      invalidRequest.userAddress = undefined;
+      invalidRequest.userAddress = undefined as unknown as string;
       apiParams.requestParams = invalidRequest;
       let result;
       try {

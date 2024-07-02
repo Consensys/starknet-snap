@@ -1,14 +1,20 @@
+import type { BIP44AddressKeyDeriver } from '@metamask/key-tree';
+import type { EstimateFee } from 'starknet';
+
+import type { ApiParams, EstimateAccountDeployFeeRequestParams } from './types/snapApi';
+import { logger } from './utils/logger';
 import { toJson } from './utils/serializer';
-import { EstimateFee } from 'starknet';
-import { ApiParams, EstimateAccountDeployFeeRequestParams } from './types/snapApi';
 import { getNetworkFromChainId, getValidNumber } from './utils/snapUtils';
 import {
   estimateAccountDeployFee,
   getKeysFromAddressIndex,
   getAccContractAddressAndCallData,
 } from './utils/starknetUtils';
-import { logger } from './utils/logger';
 
+/**
+ *
+ * @param params
+ */
 export async function estimateAccDeployFee(params: ApiParams) {
   try {
     const { state, keyDeriver, requestParams } = params;
@@ -21,7 +27,12 @@ export async function estimateAccDeployFee(params: ApiParams) {
       publicKey,
       addressIndex: addressIndexInUsed,
       privateKey,
-    } = await getKeysFromAddressIndex(keyDeriver, network.chainId, state, addressIndex);
+    } = await getKeysFromAddressIndex(
+      keyDeriver as unknown as BIP44AddressKeyDeriver,
+      network.chainId,
+      state,
+      addressIndex,
+    );
     const { address: contractAddress, callData: contractCallData } = getAccContractAddressAndCallData(publicKey);
     logger.log(
       `estimateAccountDeployFee:\ncontractAddress = ${contractAddress}\npublicKey = ${publicKey}\naddressIndex = ${addressIndexInUsed}`,
@@ -46,8 +57,9 @@ export async function estimateAccDeployFee(params: ApiParams) {
     logger.log(`estimateAccountDeployFee:\nresp: ${toJson(resp)}`);
 
     return resp;
-  } catch (err) {
-    logger.error(`Problem found: ${err}`);
-    throw err;
+  } catch (error) {
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+    logger.error(`Problem found: ${error}`);
+    throw error;
   }
 }

@@ -69,7 +69,7 @@ describe('Test function: verifySignedMessage', function () {
     });
 
     it('should throw an error if the signature is undefined', async function () {
-      invalidRequest.signature = undefined;
+      invalidRequest.signature = undefined as unknown as string;
       apiParams.requestParams = invalidRequest;
       let result;
       try {

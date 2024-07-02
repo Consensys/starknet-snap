@@ -1,9 +1,13 @@
+import type { Invocations } from 'starknet';
+import { TransactionType } from 'starknet';
+
+import type { ApiParams, EstimateFeeRequestParams } from './types/snapApi';
+import { ACCOUNT_CLASS_HASH } from './utils/constants';
+import { logger } from './utils/logger';
 import { toJson } from './utils/serializer';
-import { Invocations, TransactionType } from 'starknet';
-import { validateAndParseAddress } from '../src/utils/starknetUtils';
-import { ApiParams, EstimateFeeRequestParams } from './types/snapApi';
 import { getNetworkFromChainId } from './utils/snapUtils';
 import {
+  validateAndParseAddress,
   getKeysFromAddress,
   getCallDataArray,
   estimateFee as estimateFeeUtil,
@@ -13,17 +17,19 @@ import {
   isAccountDeployed,
   isUpgradeRequired,
 } from './utils/starknetUtils';
-import { ACCOUNT_CLASS_HASH } from './utils/constants';
-import { logger } from './utils/logger';
 
+/**
+ *
+ * @param params
+ */
 export async function estimateFee(params: ApiParams) {
   try {
     const { state, keyDeriver, requestParams } = params;
     const requestParamsObj = requestParams as EstimateFeeRequestParams;
-    const contractAddress = requestParamsObj.contractAddress;
-    const contractFuncName = requestParamsObj.contractFuncName;
-    const contractCallData = getCallDataArray(requestParamsObj.contractCallData);
-    const senderAddress = requestParamsObj.senderAddress;
+    const { contractAddress } = requestParamsObj;
+    const { contractFuncName } = requestParamsObj;
+    const contractCallData = getCallDataArray(requestParamsObj.contractCallData as unknown as string);
+    const { senderAddress } = requestParamsObj;
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
 
     if (!contractAddress || !requestParamsObj.senderAddress || !contractFuncName) {
@@ -36,12 +42,12 @@ export async function estimateFee(params: ApiParams) {
 
     try {
       validateAndParseAddress(contractAddress);
-    } catch (err) {
+    } catch (error) {
       throw new Error(`The given contract address is invalid: ${contractAddress}`);
     }
     try {
       validateAndParseAddress(senderAddress);
-    } catch (err) {
+    } catch (error) {
       throw new Error(`The given sender address is invalid: ${senderAddress}`);
     }
 
@@ -64,7 +70,7 @@ export async function estimateFee(params: ApiParams) {
 
     logger.log(`estimateFee:\ntxnInvocation: ${toJson(txnInvocation)}`);
 
-    //Estimate deploy account fee if the signer has not been deployed yet
+    // Estimate deploy account fee if the signer has not been deployed yet
     const accountDeployed = await isAccountDeployed(network, senderAddress);
     let bulkTransactions: Invocations = [
       {
@@ -119,8 +125,9 @@ export async function estimateFee(params: ApiParams) {
     logger.log(`estimateFee:\nresp: ${toJson(resp)}`);
 
     return resp;
-  } catch (err) {
-    logger.error(`Problem found: ${err}`);
-    throw err;
+  } catch (error) {
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+    logger.error(`Problem found: ${error}`);
+    throw error;
   }
 }

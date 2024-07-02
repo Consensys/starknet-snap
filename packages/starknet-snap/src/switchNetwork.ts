@@ -1,9 +1,14 @@
-import { toJson } from './utils/serializer';
-import { ApiParams, SwitchNetworkRequestParams } from './types/snapApi';
-import { getNetwork, setCurrentNetwork, getNetworkTxt } from './utils/snapUtils';
 import { panel, heading, DialogType } from '@metamask/snaps-sdk';
-import { logger } from './utils/logger';
 
+import type { ApiParams, SwitchNetworkRequestParams } from './types/snapApi';
+import { logger } from './utils/logger';
+import { toJson } from './utils/serializer';
+import { getNetwork, setCurrentNetwork, getNetworkTxt } from './utils/snapUtils';
+
+/**
+ *
+ * @param params
+ */
 export async function switchNetwork(params: ApiParams) {
   try {
     const { state, wallet, saveMutex, requestParams } = params;
@@ -14,7 +19,7 @@ export async function switchNetwork(params: ApiParams) {
     }
     const components = getNetworkTxt(network);
 
-    if (requestParamsObj.enableAuthorize === true) {
+    if (requestParamsObj.enableAuthorize) {
       const response = await wallet.request({
         method: 'snap_dialog',
         params: {
@@ -22,15 +27,18 @@ export async function switchNetwork(params: ApiParams) {
           content: panel([heading('Do you want to switch to this network?'), ...components]),
         },
       });
-      if (!response) return false;
+      if (!response) {
+        return false;
+      }
     }
 
     logger.log(`switchNetwork: network:\n${toJson(network, 2)}`);
     await setCurrentNetwork(network, wallet, saveMutex, state);
 
     return true;
-  } catch (err) {
-    logger.error(`Problem found: ${err}`);
-    throw err;
+  } catch (error) {
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+    logger.error(`Problem found: ${error}`);
+    throw error;
   }
 }

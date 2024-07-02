@@ -57,7 +57,7 @@ describe('Test function: upgradeAccContract', function () {
 
   describe('when validation fail', function () {
     it('should show error when request contractAddress is not given', async function () {
-      (apiParams.requestParams as UpgradeTransactionRequestParams).contractAddress = undefined;
+      (apiParams.requestParams as UpgradeTransactionRequestParams).contractAddress = undefined as unknown as string;
 
       let result;
       try {

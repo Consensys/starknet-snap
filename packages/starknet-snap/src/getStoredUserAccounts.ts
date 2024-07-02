@@ -1,8 +1,12 @@
-import { toJson } from './utils/serializer';
-import { ApiParams, GetStoredUserAccountsRequestParams } from './types/snapApi';
-import { getAccounts, getNetworkFromChainId } from './utils/snapUtils';
+import type { ApiParams, GetStoredUserAccountsRequestParams } from './types/snapApi';
 import { logger } from './utils/logger';
+import { toJson } from './utils/serializer';
+import { getAccounts, getNetworkFromChainId } from './utils/snapUtils';
 
+/**
+ *
+ * @param params
+ */
 export async function getStoredUserAccounts(params: ApiParams) {
   try {
     const { state, requestParams } = params;
@@ -17,8 +21,9 @@ export async function getStoredUserAccounts(params: ApiParams) {
     logger.log(`getStoredUserAccounts: userAccounts:\n${toJson(userAccounts, 2)}`);
 
     return userAccounts;
-  } catch (err) {
-    logger.error(`Problem found: ${err}`);
-    throw err;
+  } catch (error) {
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+    logger.error(`Problem found: ${error}`);
+    throw error;
   }
 }

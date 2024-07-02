@@ -18,6 +18,7 @@ import {
   STARKNET_TESTNET_NETWORK,
   STARKNET_MAINNET_NETWORK,
 } from '../../src/utils/constants';
+import { SnapsProvider } from '@metamask/snaps-sdk';
 
 describe('Snap Utils', () => {
   it('should return the proper dapp URL based on the environment', () => {
@@ -37,7 +38,7 @@ describe('Snap Utils', () => {
   });
 
   it('should return the PROD URL if envt is undefined', () => {
-    expect(dappUrl(undefined)).to.be.equal('https://snaps.consensys.io/starknet');
+    expect(dappUrl(undefined as unknown as string)).to.be.equal('https://snaps.consensys.io/starknet');
   });
 });
 
@@ -61,7 +62,7 @@ describe('removeNetwork', () => {
   it('removes the network if the target network found', async function () {
     const { walletStub, state } = setupStubs();
 
-    await removeNetwork(STARKNET_TESTNET_NETWORK, walletStub, new Mutex());
+    await removeNetwork(STARKNET_TESTNET_NETWORK, walletStub as unknown as SnapsProvider, new Mutex());
 
     expect(state.networks).to.be.eql([STARKNET_SEPOLIA_TESTNET_NETWORK, STARKNET_MAINNET_NETWORK]);
   });
@@ -69,7 +70,7 @@ describe('removeNetwork', () => {
   it('does not remove the network if the target network not found', async function () {
     const { walletStub, state } = setupStubs();
 
-    await removeNetwork(STARKNET_TESTNET_NETWORK, walletStub, new Mutex());
+    await removeNetwork(STARKNET_TESTNET_NETWORK, walletStub as unknown as SnapsProvider, new Mutex());
 
     expect(state.networks).to.be.eql([STARKNET_SEPOLIA_TESTNET_NETWORK, STARKNET_MAINNET_NETWORK]);
   });
@@ -79,7 +80,7 @@ describe('removeNetwork', () => {
 
     expect(state.currentNetwork).to.be.eql(STARKNET_TESTNET_NETWORK);
 
-    await removeNetwork(STARKNET_TESTNET_NETWORK, walletStub, new Mutex());
+    await removeNetwork(STARKNET_TESTNET_NETWORK, walletStub as unknown as SnapsProvider, new Mutex());
 
     expect(state.networks).to.be.eql([STARKNET_SEPOLIA_TESTNET_NETWORK, STARKNET_MAINNET_NETWORK]);
     expect(state.currentNetwork).to.be.eql(undefined);
@@ -90,7 +91,7 @@ describe('removeNetwork', () => {
 
     expect(state.currentNetwork).to.be.eql(STARKNET_MAINNET_NETWORK);
 
-    await removeNetwork(STARKNET_TESTNET_NETWORK, walletStub, new Mutex());
+    await removeNetwork(STARKNET_TESTNET_NETWORK, walletStub as unknown as SnapsProvider, new Mutex());
 
     expect(state.networks).to.be.eql([STARKNET_SEPOLIA_TESTNET_NETWORK, STARKNET_MAINNET_NETWORK]);
     expect(state.currentNetwork).to.be.eql(STARKNET_MAINNET_NETWORK);

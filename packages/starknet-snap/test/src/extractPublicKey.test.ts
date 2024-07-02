@@ -51,7 +51,7 @@ describe('Test function: extractPublicKey', function () {
     });
 
     it('should throw error if param userAddress is undefined', async function () {
-      invalidRequest.userAddress = undefined;
+      invalidRequest.userAddress = undefined as unknown as string;
       apiParams.requestParams = invalidRequest;
       let result;
       try {

@@ -1,6 +1,10 @@
+import { heading, panel, DialogType } from '@metamask/snaps-sdk';
+
+import type { AddErc20TokenRequestParams, ApiParams } from './types/snapApi';
+import type { Erc20Token } from './types/snapState';
+import { DEFAULT_DECIMAL_PLACES } from './utils/constants';
+import { logger } from './utils/logger';
 import { toJson } from './utils/serializer';
-import { AddErc20TokenRequestParams, ApiParams } from './types/snapApi';
-import { Erc20Token } from './types/snapState';
 import {
   getNetworkFromChainId,
   upsertErc20Token,
@@ -8,25 +12,24 @@ import {
   validateAddErc20TokenParams,
   getAddTokenText,
 } from './utils/snapUtils';
-import { DEFAULT_DECIMAL_PLACES } from './utils/constants';
-import { heading, panel, DialogType } from '@metamask/snaps-sdk';
-import { logger } from './utils/logger';
 
+/**
+ *
+ * @param params
+ */
 export async function addErc20Token(params: ApiParams) {
   try {
     const { state, wallet, saveMutex, requestParams } = params;
     const requestParamsObj = requestParams as AddErc20TokenRequestParams;
+    const { tokenAddress, tokenName, tokenSymbol } = requestParamsObj;
 
-    if (!requestParamsObj.tokenAddress || !requestParamsObj.tokenName || !requestParamsObj.tokenSymbol) {
+    if (!tokenAddress || !tokenName || !tokenSymbol) {
       throw new Error(
         `The given token address, name, and symbol need to be non-empty string, got: ${toJson(requestParamsObj)}`,
       );
     }
 
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
-    const tokenAddress = requestParamsObj.tokenAddress;
-    const tokenName = requestParamsObj.tokenName;
-    const tokenSymbol = requestParamsObj.tokenSymbol;
     const tokenDecimals = getValidNumber(requestParamsObj.tokenDecimals, DEFAULT_DECIMAL_PLACES, 0);
 
     validateAddErc20TokenParams(requestParamsObj, network);
@@ -41,7 +44,9 @@ export async function addErc20Token(params: ApiParams) {
         ]),
       },
     });
-    if (!response) return false;
+    if (!response) {
+      return false;
+    }
 
     const erc20Token: Erc20Token = {
       address: tokenAddress,
@@ -55,8 +60,9 @@ export async function addErc20Token(params: ApiParams) {
 
     logger.log(`addErc20Token:\nerc20Token: ${toJson(erc20Token)}`);
     return erc20Token;
-  } catch (err) {
-    logger.error(`Problem found: ${err}`);
-    throw err;
+  } catch (error) {
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+    logger.error(`Problem found: ${error}`);
+    throw error;
   }
 }

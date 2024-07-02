@@ -1,5 +1,4 @@
-import { AccContract, MetaMaskProvider, Network, RequestSnapResponse } from './type';
-import {
+import type {
   Abi,
   AllowArray,
   Call,
@@ -14,9 +13,13 @@ import {
   TypedData,
 } from 'starknet';
 
+import type { AccContract, MetaMaskProvider, Network, RequestSnapResponse } from './type';
+
 export class MetaMaskSnap {
   #provider: MetaMaskProvider;
+
   #snapId: string;
+
   #version: string;
 
   constructor(snapId: string, version: string, provider: MetaMaskProvider) {
@@ -57,7 +60,7 @@ export class MetaMaskSnap {
             signerAddress,
             transactions,
             transactionsDetail,
-            abis: abis,
+            abis,
             ...(await this.#getSnapParams()),
           }),
         },
@@ -136,7 +139,7 @@ export class MetaMaskSnap {
           params: this.removeUndefined({
             signerAddress,
             typedDataMessage,
-            enableAuthorize: enableAuthorize,
+            enableAuthorize,
             ...(await this.#getSnapParams()),
           }),
         },
@@ -176,10 +179,10 @@ export class MetaMaskSnap {
           params: {},
         },
       },
-    })) as unknown as Network[];
+    })) as Network[];
 
-    const network = response.find((n) => {
-      return n.chainId === chainId;
+    const network = response.find((item) => {
+      return item.chainId === chainId;
     });
 
     return network;
@@ -190,12 +193,7 @@ export class MetaMaskSnap {
     return result[0];
   }
 
-  async recoverAccounts(
-    chainId: string,
-    startScanIndex = 0,
-    maxScanned = 1,
-    maxMissed = 1,
-  ): Promise<Array<AccContract>> {
+  async recoverAccounts(chainId: string, startScanIndex = 0, maxScanned = 1, maxMissed = 1): Promise<AccContract[]> {
     return (await this.#provider.request({
       method: 'wallet_invokeSnap',
       params: {
@@ -210,7 +208,7 @@ export class MetaMaskSnap {
           },
         },
       },
-    })) as Array<AccContract>;
+    })) as AccContract[];
   }
 
   async switchNetwork(chainId: string): Promise<boolean> {
@@ -275,7 +273,7 @@ export class MetaMaskSnap {
           params: {},
         },
       },
-    })) as unknown as Network;
+    })) as Network;
 
     return response;
   }
@@ -287,30 +285,36 @@ export class MetaMaskSnap {
     };
   }
 
-  static async GetProvider(window: { ethereum?: unknown }) {
+  static async getProvider(window: {
+    ethereum?: {
+      detected?: MetaMaskProvider[];
+      providers?: MetaMaskProvider[];
+    };
+  }) {
     const { ethereum } = window;
     if (!ethereum) {
       return null;
     }
-    let providers = [ethereum];
+    let providers: MetaMaskProvider[] = [ethereum as unknown as MetaMaskProvider];
 
-    //ethereum.detected or ethereum.providers may exist when more than 1 wallet installed
-    if (ethereum.hasOwnProperty('detected')) {
-      providers = ethereum['detected'];
-    } else if (ethereum.hasOwnProperty('providers')) {
-      providers = ethereum['providers'];
+    // ethereum.detected or ethereum.providers may exist when more than 1 wallet installed
+
+    if (Object.prototype.hasOwnProperty.call(ethereum, 'detected')) {
+      providers = ethereum.detected as unknown as MetaMaskProvider[];
+    } else if (Object.prototype.hasOwnProperty.call(ethereum, 'providers')) {
+      providers = ethereum.providers as unknown as MetaMaskProvider[];
     }
 
-    //delect provider by sending request
+    // delect provider by sending request
     for (const provider of providers) {
-      if (provider && (await MetaMaskSnap.IsSupportSnap(provider as MetaMaskProvider))) {
+      if (provider && (await MetaMaskSnap.isSupportSnap(provider))) {
         return provider;
       }
     }
     return null;
   }
 
-  static async IsSupportSnap(provider: MetaMaskProvider) {
+  static async isSupportSnap(provider: MetaMaskProvider) {
     try {
       await provider.request({
         method: 'wallet_getSnaps',
@@ -328,7 +332,7 @@ export class MetaMaskSnap {
         [this.#snapId]: { version: this.#version },
       },
     })) as RequestSnapResponse;
-    if (!response || !response[this.#snapId]?.enabled) {
+    if (!response?.[this.#snapId]?.enabled) {
       return false;
     }
     return true;
@@ -346,13 +350,13 @@ export class MetaMaskSnap {
         },
       });
       return true;
-    } catch (err) {
+    } catch (error) {
       return false;
     }
   }
 
   removeUndefined(obj: Record<string, unknown>) {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    return Object.fromEntries(Object.entries(obj).filter(([_, v]) => v !== undefined));
+    return Object.fromEntries(Object.entries(obj).filter(([_, val]) => val !== undefined));
   }
 }

@@ -85,7 +85,7 @@ describe('Test function: getValue', function () {
   it('should throw an error if the function name is undefined', async function () {
     const requestObject: GetValueRequestParams = {
       contractAddress: '0x07394cbe418daa16e42b87ba67372d4ab4a5df0b05c6e554d158458ce245bc10',
-      contractFuncName: undefined,
+      contractFuncName: undefined as unknown as string,
       contractCallData: '0x7426b2da7a8978e0d472d64f15f984d658226cb55a4fd8aa7689688a7eab37b',
     };
     apiParams.requestParams = requestObject;

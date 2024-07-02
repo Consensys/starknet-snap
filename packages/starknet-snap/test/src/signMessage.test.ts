@@ -66,7 +66,7 @@ describe('Test function: signMessage', function () {
     });
 
     it('should throw an error if the signerAddress is undefined', async function () {
-      invalidRequest.signerAddress = undefined;
+      invalidRequest.signerAddress = undefined as unknown as string;
       apiParams.requestParams = invalidRequest;
       let result;
       try {
@@ -199,7 +199,7 @@ describe('Test function: signMessage', function () {
 
       it('should throw an error if the signerAddress is undefined', async function () {
         const requestObject: SignMessageRequestParams = {
-          signerAddress: undefined,
+          signerAddress: undefined as unknown as string,
           typedDataMessage: typedDataExample,
         };
         apiParams.requestParams = requestObject;

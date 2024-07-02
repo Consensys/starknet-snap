@@ -103,7 +103,7 @@ describe('Test function: addNetwork', function () {
 
   it('should throw an error if the network name is undefined', async function () {
     const requestObject: AddNetworkRequestParams = {
-      networkName: undefined,
+      networkName: undefined as unknown as string,
       networkChainId: '0x534e5f474f777',
       networkBaseUrl: 'https://alpha-unit-SN_SEPOLIA-2.starknet.io',
       networkNodeUrl: '',
@@ -122,7 +122,7 @@ describe('Test function: addNetwork', function () {
   it('should throw an error if the network chain id is undefined', async function () {
     const requestObject: AddNetworkRequestParams = {
       networkName: 'Starknet Unit SN_SEPOLIA 2',
-      networkChainId: undefined,
+      networkChainId: undefined as unknown as string,
       networkBaseUrl: 'https://alpha-unit-SN_SEPOLIA-2.starknet.io',
       networkNodeUrl: '',
     };

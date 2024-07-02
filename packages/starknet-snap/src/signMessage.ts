@@ -1,21 +1,26 @@
+import { heading, panel, DialogType } from '@metamask/snaps-sdk';
+
+import type { ApiParams, SignMessageRequestParams } from './types/snapApi';
+import { logger } from './utils/logger';
 import { toJson } from './utils/serializer';
+import { getNetworkFromChainId, addDialogTxt, showUpgradeRequestModal } from './utils/snapUtils';
 import {
   signMessage as signMessageUtil,
   getKeysFromAddress,
   isUpgradeRequired,
   validateAndParseAddress,
 } from './utils/starknetUtils';
-import { getNetworkFromChainId, addDialogTxt, showUpgradeRequestModal } from './utils/snapUtils';
-import { ApiParams, SignMessageRequestParams } from './types/snapApi';
-import { heading, panel, DialogType } from '@metamask/snaps-sdk';
-import { logger } from './utils/logger';
 
+/**
+ *
+ * @param params
+ */
 export async function signMessage(params: ApiParams) {
   try {
     const { state, wallet, keyDeriver, requestParams } = params;
     const requestParamsObj = requestParams as SignMessageRequestParams;
-    const signerAddress = requestParamsObj.signerAddress;
-    const typedDataMessage = requestParamsObj.typedDataMessage;
+    const { signerAddress } = requestParamsObj;
+    const { typedDataMessage } = requestParamsObj;
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
 
     if (await isUpgradeRequired(network, signerAddress)) {
@@ -31,7 +36,7 @@ export async function signMessage(params: ApiParams) {
 
     try {
       validateAndParseAddress(signerAddress);
-    } catch (err) {
+    } catch (error) {
       throw new Error(`The given signer address is invalid: ${signerAddress}`);
     }
 
@@ -43,7 +48,7 @@ export async function signMessage(params: ApiParams) {
     addDialogTxt(components, 'Message', toJson(typedDataMessage));
     addDialogTxt(components, 'Signer Address', signerAddress);
 
-    if (requestParamsObj.enableAuthorize === true) {
+    if (requestParamsObj.enableAuthorize) {
       const response = await wallet.request({
         method: 'snap_dialog',
         params: {
@@ -52,7 +57,9 @@ export async function signMessage(params: ApiParams) {
         },
       });
 
-      if (!response) return false;
+      if (!response) {
+        return false;
+      }
     }
 
     const { privateKey: signerPrivateKey } = await getKeysFromAddress(keyDeriver, network, state, signerAddress);
@@ -62,8 +69,9 @@ export async function signMessage(params: ApiParams) {
     logger.log(`signMessage:\ntypedDataSignature: ${toJson(typedDataSignature)}`);
 
     return typedDataSignature;
-  } catch (err) {
-    logger.error(`Problem found: ${err}`);
-    throw err;
+  } catch (error) {
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+    logger.error(`Problem found: ${error}`);
+    throw error;
   }
 }
