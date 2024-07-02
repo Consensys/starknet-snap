@@ -180,13 +180,18 @@ export const executeTxn = async (
   txnInvocation: Call | Call[],
   abis?: Abi[],
   invocationsDetails?: UniversalDetails,
+  transactionVersion?: constants.TRANSACTION_VERSION.V2 | constants.TRANSACTION_VERSION.V3,
   cairoVersion?: CairoVersion,
 ): Promise<InvokeFunctionResponse> => {
-  return getAccountInstance(network, senderAddress, privateKey, cairoVersion).execute(txnInvocation, abis, {
-    ...invocationsDetails,
-    skipValidate: false,
-    blockIdentifier: 'latest',
-  });
+  return getAccountInstance(network, senderAddress, privateKey, cairoVersion, transactionVersion).execute(
+    txnInvocation,
+    abis,
+    {
+      ...invocationsDetails,
+      skipValidate: false,
+      blockIdentifier: 'latest',
+    },
+  );
 };
 
 export const deployAccount = async (
@@ -217,6 +222,7 @@ export const estimateAccountDeployFee = async (
   contractCallData: RawCalldata,
   addressSalt: num.BigNumberish,
   privateKey: string | Uint8Array,
+  transactionVersion?: constants.TRANSACTION_VERSION.V2 | constants.TRANSACTION_VERSION.V3,
   cairoVersion?: CairoVersion,
   invocationsDetails?: UniversalDetails,
 ): Promise<EstimateFee> => {
