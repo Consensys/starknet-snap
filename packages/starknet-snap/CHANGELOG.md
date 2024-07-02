@@ -1,6 +1,18 @@
 # Changelog
 
 
+## [2.9.0](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v2.8.0...starknet-snap-v2.9.0) (2024-07-02)
+
+
+### Features
+
+* clean up and update dependency ([#259](https://github.com/Consensys/starknet-snap/issues/259)) ([fcb83e1](https://github.com/Consensys/starknet-snap/commit/fcb83e128fd4e483cdf9f4670e4e70e1d3876f7a))
+
+
+### Bug Fixes
+
+* remove get balance from createAccount ([#272](https://github.com/Consensys/starknet-snap/issues/272)) ([02b92f9](https://github.com/Consensys/starknet-snap/commit/02b92f988476dd621e2c48c4b3f1733e55a5878c))
+
 ## [2.8.0](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v2.7.0...starknet-snap-v2.8.0) (2024-06-21)
 
 
