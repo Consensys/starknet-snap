@@ -22,6 +22,7 @@ import { ethers } from 'ethers';
 import { getAssetPriceUSD } from './coinGecko';
 import semver from 'semver/preload';
 import { setActiveNetwork } from 'slices/networkSlice';
+import { constants } from 'starknet';
 
 export const useStarkNetSnap = () => {
   const dispatch = useAppDispatch();
@@ -305,6 +306,7 @@ export const useStarkNetSnap = () => {
     contractCallData: string,
     senderAddress: string,
     chainId: string,
+    transactionVersion?: constants.TRANSACTION_VERSION.V2 | constants.TRANSACTION_VERSION.V3,
   ) {
     try {
       const response = await provider.request({
@@ -320,6 +322,7 @@ export const useStarkNetSnap = () => {
               contractCallData,
               senderAddress,
               chainId,
+              transactionVersion,
             },
           },
         },
