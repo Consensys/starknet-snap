@@ -1,4 +1,4 @@
-import { Invocations, TransactionType } from 'starknet';
+import { Invocations, TransactionType, constants } from 'starknet';
 import { getNetworkFromChainId, getTxnSnapTxt, addDialogTxt, showUpgradeRequestModal } from './utils/snapUtils';
 import {
   getKeysFromAddress,
@@ -61,6 +61,7 @@ export async function executeTxn(params: ApiParams) {
       senderAddress,
       senderPrivateKey,
       bulkTransactions,
+      constants.TRANSACTION_VERSION.V2,
       requestParamsObj.invocationsDetails ? requestParamsObj.invocationsDetails : undefined,
     );
     const estimateFeeResp = addFeesFromAllTransactions(fees);

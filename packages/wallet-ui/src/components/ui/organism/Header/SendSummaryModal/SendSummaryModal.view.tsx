@@ -103,7 +103,6 @@ export const SendSummaryModalView = ({ address, amount, chainId, closeModal, sel
         if (feeToken.usdPrice) {
           setGasFeesAmountUSD(getAmountPrice(feeToken, gasFeesFloat, false));
         }
-
         const amountBN = ethers.utils.parseUnits(amount, wallet.erc20TokenBalanceSelected.decimals);
         if (wallet.erc20TokenBalanceSelected.address === feeToken.address) {
           const totalAmountBN = gasFeesBN.add(amountBN);
