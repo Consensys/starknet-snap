@@ -44,8 +44,6 @@ export async function createAccount(params: ApiParams, silentMode = false, waitM
       `createAccount:\ncontractAddress = ${contractAddress}\npublicKey = ${publicKey}\naddressIndex = ${addressIndexInUsed}`,
     );
 
-    const failureReason = '';
-
     if (deploy) {
       if (!silentMode) {
         const components = [];
@@ -97,7 +95,7 @@ export async function createAccount(params: ApiParams, silentMode = false, waitM
           finalityStatus: TransactionStatus.RECEIVED,
           executionStatus: TransactionStatus.RECEIVED,
           status: '',
-          failureReason,
+          failureReason: '',
           eventIds: [],
           timestamp: Math.floor(Date.now() / 1000),
         };
