@@ -3,8 +3,7 @@ import { AddNetworkRequestParams, ApiParams } from './types/snapApi';
 import { validateAddNetworkParams, upsertNetwork, getNetworkTxt } from './utils/snapUtils';
 import { logger } from './utils/logger';
 import { Network } from './types/snapState';
-import { DialogType } from '@metamask/rpc-methods';
-import { panel, heading } from '@metamask/snaps-sdk';
+import { panel, heading, DialogType } from '@metamask/snaps-sdk';
 
 export async function addNetwork(params: ApiParams) {
   try {

@@ -3,8 +3,7 @@ import { Signature } from 'starknet';
 import { ApiParams, SignTransactionRequestParams } from './types/snapApi';
 import { getKeysFromAddress, signTransactions, isUpgradeRequired } from './utils/starknetUtils';
 import { getNetworkFromChainId, getSignTxnTxt, showUpgradeRequestModal } from './utils/snapUtils';
-import { DialogType } from '@metamask/rpc-methods';
-import { heading, panel } from '@metamask/snaps-sdk';
+import { heading, panel, DialogType } from '@metamask/snaps-sdk';
 import { logger } from '../src/utils/logger';
 
 export async function signTransaction(params: ApiParams): Promise<Signature | boolean> {

@@ -11,8 +11,7 @@ import {
 } from './utils/starknetUtils';
 import { ApiParams, ExecuteTxnRequestParams } from './types/snapApi';
 import { createAccount } from './createAccount';
-import { DialogType } from '@metamask/rpc-methods';
-import { heading, panel, divider } from '@metamask/snaps-sdk';
+import { heading, panel, divider, DialogType } from '@metamask/snaps-sdk';
 import { logger } from './utils/logger';
 import { ACCOUNT_CLASS_HASH } from './utils/constants';
 

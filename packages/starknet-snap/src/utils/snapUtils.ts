@@ -11,7 +11,7 @@ import {
   constants,
 } from 'starknet';
 import { validateAndParseAddress } from './starknetUtils';
-import { Component, text, copyable, panel, heading } from '@metamask/snaps-sdk';
+import { Component, text, copyable, panel, heading, DialogType } from '@metamask/snaps-sdk';
 import {
   Network,
   Erc20Token,
@@ -42,7 +42,6 @@ import {
   ChainIdFilter,
 } from './transaction/filter';
 import { logger } from './logger';
-import { DialogType } from '@metamask/rpc-methods';
 
 function hasOnlyAsciiChars(str: string) {
   return /^[ -~]+$/.test(str);

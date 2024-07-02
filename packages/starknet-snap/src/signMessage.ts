@@ -7,8 +7,7 @@ import {
 } from './utils/starknetUtils';
 import { getNetworkFromChainId, addDialogTxt, showUpgradeRequestModal } from './utils/snapUtils';
 import { ApiParams, SignMessageRequestParams } from './types/snapApi';
-import { DialogType } from '@metamask/rpc-methods';
-import { heading, panel } from '@metamask/snaps-sdk';
+import { heading, panel, DialogType } from '@metamask/snaps-sdk';
 import { logger } from './utils/logger';
 
 export async function signMessage(params: ApiParams) {
