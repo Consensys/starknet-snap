@@ -13,7 +13,7 @@ import {
   isAccountDeployed,
   isUpgradeRequired,
 } from './utils/starknetUtils';
-import { ACCOUNT_CLASS_HASH } from './utils/constants';
+import { ACCOUNT_CLASS_HASH, TRANSACTION_VERSION } from './utils/constants';
 import { logger } from './utils/logger';
 
 export async function estimateFee(params: ApiParams) {
@@ -25,6 +25,7 @@ export async function estimateFee(params: ApiParams) {
     const contractCallData = getCallDataArray(requestParamsObj.contractCallData);
     const senderAddress = requestParamsObj.senderAddress;
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
+    const transactionVersion = requestParamsObj.transactionVersion ?? TRANSACTION_VERSION;
 
     if (!contractAddress || !requestParamsObj.senderAddress || !contractFuncName) {
       throw new Error(
@@ -98,10 +99,22 @@ export async function estimateFee(params: ApiParams) {
     if (accountDeployed) {
       // This condition branch will be removed later when starknet.js
       // supports estimateFeeBulk in rpc mode
-      estimateFeeResp = await estimateFeeUtil(network, senderAddress, senderPrivateKey, txnInvocation);
+      estimateFeeResp = await estimateFeeUtil(
+        network,
+        senderAddress,
+        senderPrivateKey,
+        txnInvocation,
+        transactionVersion,
+      );
       logger.log(`estimateFee:\nestimateFeeUtil estimateFeeResp: ${toJson(estimateFeeResp)}`);
     } else {
-      const estimateBulkFeeResp = await estimateFeeBulk(network, senderAddress, senderPrivateKey, bulkTransactions);
+      const estimateBulkFeeResp = await estimateFeeBulk(
+        network,
+        senderAddress,
+        senderPrivateKey,
+        bulkTransactions,
+        transactionVersion,
+      );
       logger.log(`estimateFee:\nestimateFeeBulk estimateBulkFeeResp: ${toJson(estimateBulkFeeResp)}`);
       estimateFeeResp = addFeesFromAllTransactions(estimateBulkFeeResp);
     }

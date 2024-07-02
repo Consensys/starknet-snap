@@ -12,6 +12,7 @@ import {
   DeployAccountSignerDetails,
   DeclareSignerDetails,
   typedData,
+  constants,
 } from 'starknet';
 
 export interface ApiParams {
@@ -51,6 +52,7 @@ export interface BaseRequestParams {
   chainId?: string;
   isDev?: boolean;
   debugLevel?: string;
+  transactionVersion?: constants.TRANSACTION_VERSION.V2 | constants.TRANSACTION_VERSION.V3;
 }
 
 export interface CreateAccountRequestParams extends BaseRequestParams {

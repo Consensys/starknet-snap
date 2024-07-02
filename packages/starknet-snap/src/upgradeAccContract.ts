@@ -59,7 +59,14 @@ export async function upgradeAccContract(params: ApiParams) {
 
     let maxFee = requestParamsObj.maxFee ? num.toBigInt(requestParamsObj.maxFee) : constants.ZERO;
     if (maxFee === constants.ZERO) {
-      const estFeeResp = await estimateFee(network, contractAddress, privateKey, txnInvocation, CAIRO_VERSION_LEGACY);
+      const estFeeResp = await estimateFee(
+        network,
+        contractAddress,
+        privateKey,
+        txnInvocation,
+        constants.TRANSACTION_VERSION.V2,
+        CAIRO_VERSION_LEGACY,
+      );
       maxFee = num.toBigInt(estFeeResp.suggestedMaxFee.toString(10) ?? '0');
     }
 
