@@ -115,7 +115,7 @@ jobs:
           GET_STARKNET_PUBLIC_PATH: ${{ needs.prepare-deployment.outputs.GET_STARKNET_PUBLIC_PATH }}
       - name: Cache Build
         uses: actions/cache@v3
-        id: restore-build
+        id: cache
         with:
           path: |
             ./packages/get-starknet/dist/webpack
