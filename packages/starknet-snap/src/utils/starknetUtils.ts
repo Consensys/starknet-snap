@@ -147,9 +147,9 @@ export const estimateFee = async (
   return getAccountInstance(network, senderAddress, privateKey, cairoVersion, transactionVersion).estimateInvokeFee(
     txnInvocation,
     {
-    ...invocationsDetails,
-    skipValidate: false,
-    blockIdentifier: 'latest',
+      ...invocationsDetails,
+      skipValidate: false,
+      blockIdentifier: 'latest',
     },
   );
 };
@@ -166,9 +166,9 @@ export const estimateFeeBulk = async (
   return getAccountInstance(network, senderAddress, privateKey, cairoVersion, transactionVersion).estimateFeeBulk(
     txnInvocation,
     {
-    ...invocationsDetails,
-    skipValidate: false,
-    blockIdentifier: 'latest',
+      ...invocationsDetails,
+      skipValidate: false,
+      blockIdentifier: 'latest',
     },
   );
 };
