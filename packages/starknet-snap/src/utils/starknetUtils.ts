@@ -183,11 +183,15 @@ export const executeTxn = async (
   transactionVersion?: constants.TRANSACTION_VERSION.V2 | constants.TRANSACTION_VERSION.V3,
   cairoVersion?: CairoVersion,
 ): Promise<InvokeFunctionResponse> => {
-  return getAccountInstance(network, senderAddress, privateKey, cairoVersion, transactionVersion).execute(txnInvocation, abis, {
-    ...invocationsDetails,
-    skipValidate: false,
-    blockIdentifier: 'latest',
-  });
+  return getAccountInstance(network, senderAddress, privateKey, cairoVersion, transactionVersion).execute(
+    txnInvocation,
+    abis,
+    {
+      ...invocationsDetails,
+      skipValidate: false,
+      blockIdentifier: 'latest',
+    },
+  );
 };
 
 export const deployAccount = async (

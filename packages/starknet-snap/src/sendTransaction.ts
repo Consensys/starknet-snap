@@ -16,6 +16,7 @@ import { createAccount } from './createAccount';
 import { DialogType } from '@metamask/rpc-methods';
 import { heading, panel } from '@metamask/snaps-sdk';
 import { logger } from './utils/logger';
+import { TRANSACTION_VERSION } from './utils/constants';
 
 export async function sendTransaction(params: ApiParams) {
   try {
@@ -110,10 +111,18 @@ export async function sendTransaction(params: ApiParams) {
 
     //In case this is the first transaction we assign a nonce of 1 to make sure it does after the deploy transaction
     const nonceSendTransaction = accountDeployed ? undefined : 1;
-    const txnResp = await executeTxn(network, senderAddress, senderPrivateKey, txnInvocation, undefined, {
-      maxFee,
-      nonce: nonceSendTransaction,
-    }, requestParamsObj.transactionVersion ?? TRANSACTION_VERSION);
+    const txnResp = await executeTxn(
+      network,
+      senderAddress,
+      senderPrivateKey,
+      txnInvocation,
+      undefined,
+      {
+        maxFee,
+        nonce: nonceSendTransaction,
+      },
+      requestParamsObj.transactionVersion ?? TRANSACTION_VERSION,
+    );
 
     logger.log(`sendTransaction:\ntxnResp: ${toJson(txnResp)}`);
 
