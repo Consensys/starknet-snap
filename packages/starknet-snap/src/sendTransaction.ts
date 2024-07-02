@@ -95,7 +95,7 @@ export async function sendTransaction(params: ApiParams) {
     if (!accountDeployed) {
       //Deploy account before sending the transaction
       logger.log('sendTransaction:\nFirst transaction : send deploy transaction');
-      const createAccountApiParams = {
+      const createAccountApiParams: ApiParams = {
         state,
         wallet: params.wallet,
         saveMutex: params.saveMutex,
@@ -104,6 +104,7 @@ export async function sendTransaction(params: ApiParams) {
           addressIndex,
           deploy: true,
           chainId: requestParamsObj.chainId,
+          transactionVersion: requestParamsObj.transactionVersion ?? TRANSACTION_VERSION,
         },
       };
       await createAccount(createAccountApiParams, true, true);
