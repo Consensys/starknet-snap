@@ -107,9 +107,7 @@ export async function sendTransaction(params: ApiParams) {
           transactionVersion: requestParamsObj.transactionVersion ?? TRANSACTION_VERSION,
         },
       };
-      console.log('creating the account: createAccount');
       await createAccount(createAccountApiParams, true, true);
-      console.log('account created');
     }
 
     //In case this is the first transaction we assign a nonce of 1 to make sure it does after the deploy transaction
