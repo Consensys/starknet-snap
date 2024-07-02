@@ -11,7 +11,7 @@ import {
 } from './utils/starknetUtils';
 import { getNetworkFromChainId, upsertTransaction, getSendTxnText } from './utils/snapUtils';
 import { ApiParams, UpgradeTransactionRequestParams } from './types/snapApi';
-import { ACCOUNT_CLASS_HASH, CAIRO_VERSION_LEGACY } from './utils/constants';
+import { ACCOUNT_CLASS_HASH, CAIRO_VERSION_LEGACY, TRANSACTION_VERSION } from './utils/constants';
 import { DialogType } from '@metamask/rpc-methods';
 import { heading, panel } from '@metamask/snaps-sdk';
 import { logger } from './utils/logger';
@@ -59,7 +59,14 @@ export async function upgradeAccContract(params: ApiParams) {
 
     let maxFee = requestParamsObj.maxFee ? num.toBigInt(requestParamsObj.maxFee) : constants.ZERO;
     if (maxFee === constants.ZERO) {
-      const estFeeResp = await estimateFee(network, contractAddress, privateKey, txnInvocation, CAIRO_VERSION_LEGACY);
+      const estFeeResp = await estimateFee(
+        network,
+        contractAddress,
+        privateKey,
+        txnInvocation,
+        constants.TRANSACTION_VERSION.V2,
+        CAIRO_VERSION_LEGACY,
+      );
       maxFee = num.toBigInt(estFeeResp.suggestedMaxFee.toString(10) ?? '0');
     }
 
@@ -86,6 +93,7 @@ export async function upgradeAccContract(params: ApiParams) {
       {
         maxFee,
       },
+      TRANSACTION_VERSION,
       CAIRO_VERSION_LEGACY,
     );
 

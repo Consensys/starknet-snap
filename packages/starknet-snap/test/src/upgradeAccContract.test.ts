@@ -162,6 +162,7 @@ describe('Test function: upgradeAccContract', function () {
         {
           maxFee: num.toBigInt(10000),
         },
+        '0x2',
         CAIRO_VERSION_LEGACY,
       );
       expect(result).to.be.equal(sendTransactionResp);
@@ -196,6 +197,7 @@ describe('Test function: upgradeAccContract', function () {
         {
           maxFee: num.toBigInt(estimateFeeResp.suggestedMaxFee),
         },
+        '0x2',
         CAIRO_VERSION_LEGACY,
       );
       expect(result).to.be.equal(sendTransactionResp);
