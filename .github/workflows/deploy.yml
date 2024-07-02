@@ -125,7 +125,7 @@ jobs:
             ./packages/starknet-snap/dist
             ./packages/starknet-snap/snap.manifest.json
             ./node_modules/.yarn-state.yml
-          key: ${{ steps.prepare_parameters.outputs.CACHE_KEY }}
+          key: ${{ needs.prepare_parameters.outputs.CACHE_KEY }}
 
   publish-npm-dry-run:
     runs-on: ubuntu-latest
@@ -152,7 +152,7 @@ jobs:
             ./packages/starknet-snap/dist
             ./packages/starknet-snap/snap.manifest.json
             ./node_modules/.yarn-state.yml
-          key: ${{ steps.prepare_parameters.outputs.CACHE_KEY }}
+          key: ${{ needs.prepare_parameters.outputs.CACHE_KEY }}
       - name: Dry Run Publish
         run: |
           npm pack ./packages/starknet-snap --tag "$TAG" --access public
@@ -184,7 +184,7 @@ jobs:
             ./packages/starknet-snap/dist
             ./packages/starknet-snap/snap.manifest.json
             ./node_modules/.yarn-state.yml
-          key: ${{ steps.prepare_parameters.outputs.CACHE_KEY }}
+          key: ${{ needs.prepare_parameters.outputs.CACHE_KEY }}
       - name: Run Publish
         run: |
           npm publish ./packages/starknet-snap --tag "$TAG" --access public
@@ -218,7 +218,7 @@ jobs:
             ./packages/starknet-snap/dist
             ./packages/starknet-snap/snap.manifest.json
             ./node_modules/.yarn-state.yml
-          key: ${{ steps.prepare_parameters.outputs.CACHE_KEY }}
+          key: ${{ needs.prepare_parameters.outputs.CACHE_KEY }}
       - name: Deploy to AWS
         run: | 
           echo "Deployed Dapp to : $AWS_S3_URL"
@@ -252,7 +252,7 @@ jobs:
             ./packages/starknet-snap/dist
             ./packages/starknet-snap/snap.manifest.json
             ./node_modules/.yarn-state.yml
-          key: ${{ steps.prepare_parameters.outputs.CACHE_KEY }}
+          key: ${{ needs.prepare_parameters.outputs.CACHE_KEY }}
       - name: Deploy to AWS
         run: | 
           echo "Deployed get Starknet to : $AWS_S3_GET_STARKNET_URL"
