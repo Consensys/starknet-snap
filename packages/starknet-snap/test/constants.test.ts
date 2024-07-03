@@ -70,6 +70,13 @@ export const Cairo1Account1: AccContract = {
   chainId: constants.StarknetChainId.SN_GOERLI,
 };
 
+export const token0: Erc20Token = {
+  address: '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
+  name: 'Ether',
+  symbol: 'ETH',
+  decimals: 18,
+  chainId: STARKNET_SEPOLIA_TESTNET_NETWORK.chainId,
+};
 export const token1: Erc20Token = {
   address: '0x244c20d51109adcf604fde1bbf878e5dcd549b3877ac87911ec6a158bd7aa62',
   name: 'Starknet ERC-20 sample',
@@ -363,6 +370,7 @@ export const mainnetTxn1: Transaction = {
 };
 
 export const getBalanceResp = ['0x0', '0x0'];
+export const getNonZeroBalanceResp = ['0x100000', '0x0'];
 
 export const estimateDeployFeeResp = {
   overall_fee: num.toBigInt('0x0'),

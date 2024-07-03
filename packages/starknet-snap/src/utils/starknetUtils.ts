@@ -35,6 +35,7 @@ import {
   InvocationsSignerDetails,
   ProviderInterface,
   GetTransactionReceiptResponse,
+  BigNumberish,
 } from 'starknet';
 import { Network, SnapState, Transaction, TransactionType } from '../types/snapState';
 import {
@@ -51,6 +52,7 @@ import { getAddressKey } from './keyPair';
 import {
   getAccount,
   getAccounts,
+  getEtherErc20Token,
   getRPCUrl,
   getTransactionFromVoyagerUrl,
   getTransactionsFromVoyagerUrl,
@@ -526,6 +528,7 @@ export const getAccContractAddressAndCallData = (publicKey) => {
  * @returns - address and calldata.
  */
 export const getAccContractAddressAndCallDataLegacy = (publicKey) => {
+  // [TODO]: Check why use ACCOUNT_CLASS_HASH_LEGACY and PROXY_CONTRACT_HASH ?
   const callData = CallData.compile({
     implementation: ACCOUNT_CLASS_HASH_LEGACY,
     selector: hash.getSelectorFromName('initialize'),
@@ -708,13 +711,62 @@ export const isGTEMinVersion = (version: string) => {
 };
 
 /**
+ * Generate the transaction invocation object for upgrading a contract.
+ *
+ * @param contractAddress - The address of the contract to upgrade.
+ * @returns An object representing the transaction invocation.
+ */
+export function getUpgradeTxnInvocation(contractAddress: string) {
+  const method = 'upgrade';
+
+  const calldata = CallData.compile({
+    implementation: ACCOUNT_CLASS_HASH,
+    calldata: [0],
+  });
+
+  return {
+    contractAddress,
+    entrypoint: method,
+    calldata,
+  };
+}
+
+/**
+ * Calculate the transaction fee for upgrading a contract.
+ *
+ * @param network - The network on which the contract is deployed.
+ * @param contractAddress - The address of the contract to upgrade.
+ * @param privateKey - The private key of the account performing the upgrade.
+ * @param maxFee - The maximum fee allowed for the transaction.
+ * @returns The calculated transaction fee as a bigint.
+ */
+export async function estimateAccountUpgradeFee(
+  network: any,
+  contractAddress: string,
+  privateKey: string,
+  maxFee: BigNumberish = constants.ZERO,
+) {
+  if (maxFee === constants.ZERO) {
+    const txnInvocation = getUpgradeTxnInvocation(contractAddress);
+    const estFeeResp = await estimateFee(network, contractAddress, privateKey, txnInvocation, CAIRO_VERSION_LEGACY);
+    return num.toBigInt(estFeeResp.suggestedMaxFee.toString(10) ?? '0');
+  }
+  return maxFee;
+}
+
+/**
  * Get user address by public key, return address if the address has deployed
  *
  * @param  network - Network.
  * @param  publicKey - address's public key.
  * @returns - address and address's public key.
  */
-export const getCorrectContractAddress = async (network: Network, publicKey: string) => {
+export const getCorrectContractAddress = async (
+  network: Network,
+  publicKey: string,
+  state: SnapState,
+  maxFee = constants.ZERO,
+) => {
   const { address: contractAddress, addressLegacy: contractAddressLegacy } = getPermutationAddresses(publicKey);
 
   logger.log(
@@ -723,6 +775,7 @@ export const getCorrectContractAddress = async (network: Network, publicKey: str
 
   let address = contractAddress;
   let upgradeRequired = false;
+  let deployRequired = false;
   let pk = '';
 
   try {
@@ -747,18 +800,41 @@ export const getCorrectContractAddress = async (network: Network, publicKey: str
       );
       address = contractAddressLegacy;
     } catch (e) {
-      if (!e.message.includes('Contract not found')) {
+      if (e.message.includes('network error for getSigner')) {
         throw e;
       }
+      // Edge case detection
+      logger.log(`getContractAddressByKey: no deployed contract found, checking balance for edge cases`);
 
-      logger.log(`getContractAddressByKey: no deployed contract found, fallback to cairo ${CAIRO_VERSION}`);
+      try {
+        const balance = num.toBigInt(
+          (await getBalance(
+            getEtherErc20Token(state, network.chainId)?.address,
+            num.toBigInt(contractAddressLegacy).toString(10),
+            network,
+          )) ?? num.toBigInt(constants.ZERO),
+        );
+        if (balance > maxFee) {
+          upgradeRequired = true;
+          deployRequired = true;
+          logger.log(
+            `getContractAddressByKey: no deployed cairo0 contract found with non-zero balance, force cairo ${CAIRO_VERSION_LEGACY}`,
+          );
+        } else {
+          logger.log(`getContractAddressByKey: no deployed contract found, fallback to cairo ${CAIRO_VERSION}`);
+        }
+      } catch (err) {
+        logger.log(`getContractAddressByKey: balance check failed with error ${err}`);
+        throw err;
+      }
     }
   }
 
   return {
     address,
     signerPubKey: pk,
-    upgradeRequired: upgradeRequired,
+    upgradeRequired,
+    deployRequired,
   };
 };
 

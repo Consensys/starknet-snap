@@ -9,6 +9,7 @@ import { UpgradeButton, StarknetLogo, Title, Wrapper, DescriptionCentered, Txnli
 
 interface Props {
   address: string;
+  deploy: boolean; // whether to deploy before upgrade
 }
 
 enum Stage {
@@ -18,7 +19,7 @@ enum Stage {
   FAIL = 3,
 }
 
-export const UpgradeModelView = ({ address }: Props) => {
+export const UpgradeModelView = ({ address, deploy }: Props) => {
   const dispatch = useAppDispatch();
   const { upgradeAccount, waitForAccountUpdate } = useStarkNetSnap();
   const [txnHash, setTxnHash] = useState('');
@@ -29,7 +30,7 @@ export const UpgradeModelView = ({ address }: Props) => {
 
   const onUpgrade = async () => {
     try {
-      const resp = await upgradeAccount(address, '0', chainId);
+      const resp = await upgradeAccount(address, '0', chainId, deploy);
 
       if (resp === false) {
         return;
@@ -69,6 +70,8 @@ export const UpgradeModelView = ({ address }: Props) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stage, dispatch]);
 
+  const upgradeTxt = deploy ? 'Deploy & Upgrade' : 'Upgrade';
+
   const renderComponent = () => {
     switch (stage) {
       case Stage.INIT:
@@ -83,11 +86,11 @@ export const UpgradeModelView = ({ address }: Props) => {
               this version.
               <br />
               <br />
-              Click on the "Upgrade" button to install it.
+              Click on the "{upgradeTxt}" button to install it.
               <br />
               Thank you!
             </DescriptionCentered>
-            <UpgradeButton onClick={onUpgrade}>Upgrade</UpgradeButton>
+            <UpgradeButton onClick={onUpgrade}>{upgradeTxt}</UpgradeButton>
           </>
         );
       case Stage.WAITING_FOR_TXN:

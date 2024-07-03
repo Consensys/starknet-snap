@@ -12,6 +12,11 @@ import {
   account1,
   account2,
   account3,
+  token1,
+  token2,
+  token0,
+  getBalanceResp,
+  getNonZeroBalanceResp,
 } from '../constants.test';
 import { SnapState } from '../../src/types/snapState';
 import { Calldata, num, Account, Provider, GetTransactionReceiptResponse } from 'starknet';
@@ -423,6 +428,12 @@ describe('Test function: getContractOwner', function () {
 });
 
 describe('Test function: getCorrectContractAddress', function () {
+  const state: SnapState = {
+    accContracts: [],
+    erc20Tokens: [token0],
+    networks: [STARKNET_SEPOLIA_TESTNET_NETWORK],
+    transactions: [],
+  };
   const walletStub = new WalletMock();
   let getAccContractAddressAndCallDataStub: sinon.SinonStub;
   let getAccContractAddressAndCallDataLegacyStub: sinon.SinonStub;
@@ -453,7 +464,7 @@ describe('Test function: getCorrectContractAddress', function () {
     sandbox.stub(utils, 'getSigner').callsFake(async () => PK);
     sandbox.stub(utils, 'getVersion').callsFake(async () => cairoVersionHex);
 
-    await utils.getCorrectContractAddress(STARKNET_SEPOLIA_TESTNET_NETWORK, PK);
+    await utils.getCorrectContractAddress(STARKNET_SEPOLIA_TESTNET_NETWORK, PK, state);
     expect(getAccContractAddressAndCallDataStub).to.have.been.calledOnceWith(PK);
     expect(getAccContractAddressAndCallDataLegacyStub).to.have.been.calledOnceWith(PK);
   });
@@ -465,7 +476,7 @@ describe('Test function: getCorrectContractAddress', function () {
 
     let result = null;
     try {
-      await utils.getCorrectContractAddress(STARKNET_SEPOLIA_TESTNET_NETWORK, PK);
+      await utils.getCorrectContractAddress(STARKNET_SEPOLIA_TESTNET_NETWORK, PK, state);
     } catch (e) {
       result = e;
     } finally {
@@ -488,7 +499,7 @@ describe('Test function: getCorrectContractAddress', function () {
 
     let result = null;
     try {
-      await utils.getCorrectContractAddress(STARKNET_SEPOLIA_TESTNET_NETWORK, PK);
+      await utils.getCorrectContractAddress(STARKNET_SEPOLIA_TESTNET_NETWORK, PK, state);
     } catch (e) {
       result = e;
     } finally {
@@ -504,7 +515,7 @@ describe('Test function: getCorrectContractAddress', function () {
       getSignerStub = sandbox.stub(utils, 'getSigner').resolves(PK);
       getOwnerStub = sandbox.stub(utils, 'getOwner').resolves(PK);
 
-      const result = await utils.getCorrectContractAddress(STARKNET_SEPOLIA_TESTNET_NETWORK, PK);
+      const result = await utils.getCorrectContractAddress(STARKNET_SEPOLIA_TESTNET_NETWORK, PK, state);
       expect(getVersionStub).to.have.been.calledOnceWith(account1.address, STARKNET_SEPOLIA_TESTNET_NETWORK);
       expect(getOwnerStub).to.have.been.calledOnceWith(account1.address, STARKNET_SEPOLIA_TESTNET_NETWORK);
       expect(getSignerStub).to.have.been.callCount(0);
@@ -514,7 +525,7 @@ describe('Test function: getCorrectContractAddress', function () {
     });
   });
 
-  describe(`when contact is Cairo${CAIRO_VERSION} has not deployed`, function () {
+  describe(`when contract is Cairo${CAIRO_VERSION} has not deployed`, function () {
     describe(`when when is Cairo${CAIRO_VERSION_LEGACY} has deployed`, function () {
       describe(`when when is Cairo${CAIRO_VERSION_LEGACY} has upgraded`, function () {
         it(`should return Cairo${CAIRO_VERSION_LEGACY} address with upgrade = false`, async function () {
@@ -528,7 +539,7 @@ describe('Test function: getCorrectContractAddress', function () {
           getSignerStub = sandbox.stub(utils, 'getSigner').resolves(PK);
           getOwnerStub = sandbox.stub(utils, 'getOwner').resolves(PK);
 
-          const result = await utils.getCorrectContractAddress(STARKNET_SEPOLIA_TESTNET_NETWORK, PK);
+          const result = await utils.getCorrectContractAddress(STARKNET_SEPOLIA_TESTNET_NETWORK, PK, state);
 
           expect(getOwnerStub).to.have.been.calledOnceWith(account2.address, STARKNET_SEPOLIA_TESTNET_NETWORK);
           expect(getSignerStub).to.have.been.callCount(0);
@@ -550,7 +561,7 @@ describe('Test function: getCorrectContractAddress', function () {
           getSignerStub = sandbox.stub(utils, 'getSigner').resolves(PK);
           getOwnerStub = sandbox.stub(utils, 'getOwner').resolves(PK);
 
-          const result = await utils.getCorrectContractAddress(STARKNET_SEPOLIA_TESTNET_NETWORK, PK);
+          const result = await utils.getCorrectContractAddress(STARKNET_SEPOLIA_TESTNET_NETWORK, PK, state);
 
           expect(getSignerStub).to.have.been.calledOnceWith(account2.address, STARKNET_SEPOLIA_TESTNET_NETWORK);
           expect(getOwnerStub).to.have.been.callCount(0);
@@ -561,20 +572,37 @@ describe('Test function: getCorrectContractAddress', function () {
       });
     });
 
-    describe(`when when is Cairo${CAIRO_VERSION_LEGACY} has not deployed`, function () {
-      it(`should return Cairo${CAIRO_VERSION} address with upgrade = false`, async function () {
+    describe(`when when Cairo${CAIRO_VERSION_LEGACY} is not deployed`, function () {
+      it(`should return Cairo${CAIRO_VERSION} address with upgrade = false if no balance`, async function () {
         sandbox.stub(utils, 'getVersion').rejects(new Error('Contract not found'));
+        sandbox.stub(utils, 'getBalance').callsFake(async () => getBalanceResp[0]);
 
         getSignerStub = sandbox.stub(utils, 'getSigner').resolves(PK);
         getOwnerStub = sandbox.stub(utils, 'getOwner').resolves(PK);
 
-        const result = await utils.getCorrectContractAddress(STARKNET_SEPOLIA_TESTNET_NETWORK, PK);
+        const result = await utils.getCorrectContractAddress(STARKNET_SEPOLIA_TESTNET_NETWORK, PK, state);
 
         expect(getSignerStub).to.have.been.callCount(0);
         expect(getOwnerStub).to.have.been.callCount(0);
         expect(result.address).to.be.eq(account1.address);
         expect(result.signerPubKey).to.be.eq('');
         expect(result.upgradeRequired).to.be.eq(false);
+      });
+      it(`should return Cairo${CAIRO_VERSION_LEGACY} address with upgrade = true and deploy = true if no balance`, async function () {
+        sandbox.stub(utils, 'getVersion').rejects(new Error('Contract not found'));
+        sandbox.stub(utils, 'getBalance').callsFake(async () => getNonZeroBalanceResp[0]);
+
+        getSignerStub = sandbox.stub(utils, 'getSigner').resolves(PK);
+        getOwnerStub = sandbox.stub(utils, 'getOwner').resolves(PK);
+
+        const result = await utils.getCorrectContractAddress(STARKNET_SEPOLIA_TESTNET_NETWORK, PK, state);
+
+        expect(getSignerStub).to.have.been.callCount(0);
+        expect(getOwnerStub).to.have.been.callCount(0);
+        expect(result.address).to.be.eq(account1.address);
+        expect(result.signerPubKey).to.be.eq('');
+        expect(result.upgradeRequired).to.be.eq(true);
+        expect(result.deployRequired).to.be.eq(true);
       });
     });
   });

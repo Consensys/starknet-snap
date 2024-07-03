@@ -26,7 +26,7 @@ library.add(fas, far);
 function App() {
   const { initSnap, getWalletData, checkConnection } = useStarkNetSnap();
   const { connected, forceReconnect, provider } = useAppSelector((state) => state.wallet);
-  const { infoModalVisible, minVersionModalVisible, upgradeModalVisible } = useAppSelector((state) => state.modals);
+  const { infoModalVisible, minVersionModalVisible, upgradeModalVisible, upgradeModalDeployText } = useAppSelector((state) => state.modals);
   const { loader } = useAppSelector((state) => state.UI);
   const networks = useAppSelector((state) => state.networks);
   const { accounts } = useAppSelector((state) => state.wallet);
@@ -74,7 +74,7 @@ function App() {
           <ConnectInfoModal address={address} />
         </PopIn>
         <PopIn isOpen={!minVersionModalVisible && upgradeModalVisible} showClose={false}>
-          <UpgradeModel address={address} />
+          <UpgradeModel address={address} deploy={upgradeModalDeployText} />
         </PopIn>
         <Home address={address} />
         <PopIn isOpen={loading}>{loading && <LoadingBackdrop>{loader.loadingMessage}</LoadingBackdrop>}</PopIn>

@@ -7,13 +7,15 @@ import {
   isUpgradeRequired,
   executeTxn,
   isAccountDeployed,
-  estimateFee,
+  getUpgradeTxnInvocation,
+  estimateAccountUpgradeFee,
 } from './utils/starknetUtils';
 import { getNetworkFromChainId, upsertTransaction, getSendTxnText } from './utils/snapUtils';
 import { ApiParams, UpgradeTransactionRequestParams } from './types/snapApi';
 import { ACCOUNT_CLASS_HASH, CAIRO_VERSION_LEGACY } from './utils/constants';
 import { heading, panel, DialogType } from '@metamask/snaps-sdk';
 import { logger } from './utils/logger';
+import { createAccount } from './createAccount';
 
 export async function upgradeAccContract(params: ApiParams) {
   try {
@@ -21,7 +23,7 @@ export async function upgradeAccContract(params: ApiParams) {
     const requestParamsObj = requestParams as UpgradeTransactionRequestParams;
     const contractAddress = requestParamsObj.contractAddress;
     const chainId = requestParamsObj.chainId;
-
+    const forceDeploy = requestParamsObj.forceDeploy;
     if (!contractAddress) {
       throw new Error(`The given contract address need to be non-empty string, got: ${toJson(requestParamsObj)}`);
     }
@@ -32,16 +34,15 @@ export async function upgradeAccContract(params: ApiParams) {
     }
 
     const network = getNetworkFromChainId(state, chainId);
-
-    if (!(await isAccountDeployed(network, contractAddress))) {
-      throw new Error('Contract has not deployed');
+    if (!(await isAccountDeployed(network, contractAddress)) && !forceDeploy) {
+      throw new Error('Contract is not deployed and address has no balance');
     }
 
     if (!(await isUpgradeRequired(network, contractAddress))) {
       throw new Error('Upgrade is not required');
     }
 
-    const { privateKey } = await getKeysFromAddress(keyDeriver, network, state, contractAddress);
+    const { privateKey, addressIndex } = await getKeysFromAddress(keyDeriver, network, state, contractAddress);
 
     const method = 'upgrade';
 
@@ -50,17 +51,10 @@ export async function upgradeAccContract(params: ApiParams) {
       calldata: [0],
     });
 
-    const txnInvocation = {
-      contractAddress,
-      entrypoint: method,
-      calldata,
-    };
+    const txnInvocation = getUpgradeTxnInvocation(contractAddress);
 
     let maxFee = requestParamsObj.maxFee ? num.toBigInt(requestParamsObj.maxFee) : constants.ZERO;
-    if (maxFee === constants.ZERO) {
-      const estFeeResp = await estimateFee(network, contractAddress, privateKey, txnInvocation, CAIRO_VERSION_LEGACY);
-      maxFee = num.toBigInt(estFeeResp.suggestedMaxFee.toString(10) ?? '0');
-    }
+    maxFee = num.toBigInt(await estimateAccountUpgradeFee(network, contractAddress, privateKey, maxFee));
 
     const dialogComponents = getSendTxnText(state, contractAddress, method, calldata, contractAddress, maxFee, network);
 
@@ -74,7 +68,31 @@ export async function upgradeAccContract(params: ApiParams) {
 
     if (!response) return false;
 
-    logger.log(`sendTransaction:\ntxnInvocation: ${toJson(txnInvocation)}\nmaxFee: ${maxFee.toString()}}`);
+    logger.log(`upgradeAccContract:\ntxnInvocation: ${toJson(txnInvocation)}\nmaxFee: ${maxFee.toString()}}`);
+
+    const accountDeployed = await isAccountDeployed(network, contractAddress);
+    if (forceDeploy) {
+      if (accountDeployed) {
+        throw new Error(`Upgrade with Force Deploy cannot be executed on deployed account`);
+      }
+      //Deploy account before sending the transaction
+      logger.log('upgradeAccContract:\nFirst transaction : send deploy transaction');
+      const createAccountApiParams = {
+        state,
+        wallet: params.wallet,
+        saveMutex: params.saveMutex,
+        keyDeriver,
+        requestParams: {
+          addressIndex,
+          deploy: true,
+          chainId: requestParamsObj.chainId,
+        },
+      };
+      await createAccount(createAccountApiParams, true, true);
+    }
+
+    //In case we forceDeployed we assign a nonce of 1 to make sure it does after the deploy transaction
+    const nonce = forceDeploy ? 1 : undefined;
 
     const txnResp = await executeTxn(
       network,
@@ -84,11 +102,12 @@ export async function upgradeAccContract(params: ApiParams) {
       undefined,
       {
         maxFee,
+        nonce,
       },
       CAIRO_VERSION_LEGACY,
     );
 
-    logger.log(`sendTransaction:\ntxnResp: ${toJson(txnResp)}`);
+    logger.log(`upgradeAccContract:\ntxnResp: ${toJson(txnResp)}`);
 
     if (!txnResp?.transaction_hash) {
       throw new Error(`Transaction hash is not found`);

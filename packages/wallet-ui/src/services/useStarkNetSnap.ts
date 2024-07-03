@@ -1,4 +1,4 @@
-import { setInfoModalVisible, setMinVersionModalVisible, setUpgradeModalVisible } from 'slices/modalSlice';
+import { setInfoModalVisible, setMinVersionModalVisible, setUpgradeModalVisible, setUpgradeModalDeployText } from 'slices/modalSlice';
 import { setNetworks } from 'slices/networkSlice';
 import { useAppDispatch, useAppSelector } from 'hooks/redux';
 import {
@@ -235,11 +235,14 @@ export const useStarkNetSnap = () => {
     const tokens = await getTokens(chainId);
     let acc: Account[] | Account = await recoverAccounts(chainId);
     let upgradeRequired = false;
-
+    let deployRequired = false;
+    console.log("accounts")
+    console.log(acc)
     if (!acc || acc.length === 0 || !acc[0].publicKey) {
       acc = await addAccount(chainId);
     } else {
       upgradeRequired = (Array.isArray(acc) ? acc[0].upgradeRequired : (acc as Account).upgradeRequired) ?? false;
+      deployRequired = (Array.isArray(acc) ? acc[0].deployRequired : (acc as Account).deployRequired) ?? false;
     }
 
     const tokenBalances = await Promise.all(
@@ -270,6 +273,7 @@ export const useStarkNetSnap = () => {
       dispatch(setInfoModalVisible(true));
     }
     dispatch(setUpgradeModalVisible(upgradeRequired));
+    dispatch(setUpgradeModalDeployText(deployRequired));
     dispatch(disableLoading());
   };
 
@@ -415,7 +419,7 @@ export const useStarkNetSnap = () => {
     }
   };
 
-  const upgradeAccount = async (contractAddress: string, maxFee: string, chainId: string) => {
+  const upgradeAccount = async (contractAddress: string, maxFee: string, chainId: string, forceDeploy: boolean) => {
     dispatch(enableLoadingWithMessage('Upgrading account...'));
     try {
       const response = await provider.request({
@@ -429,6 +433,7 @@ export const useStarkNetSnap = () => {
               contractAddress,
               maxFee,
               chainId,
+              forceDeploy,
             },
           },
         },

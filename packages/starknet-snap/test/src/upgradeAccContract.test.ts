@@ -94,7 +94,7 @@ describe('Test function: upgradeAccContract', function () {
         result = err;
       } finally {
         expect(result).to.be.an('Error');
-        expect(result.message).to.be.include('Contract has not deployed');
+        expect(result.message).to.be.include('Contract is not deployed and address has no balance');
       }
     });
 
@@ -161,6 +161,7 @@ describe('Test function: upgradeAccContract', function () {
         undefined,
         {
           maxFee: num.toBigInt(10000),
+          nonce: undefined,
         },
         CAIRO_VERSION_LEGACY,
       );
@@ -195,6 +196,7 @@ describe('Test function: upgradeAccContract', function () {
         undefined,
         {
           maxFee: num.toBigInt(estimateFeeResp.suggestedMaxFee),
+          nonce: undefined,
         },
         CAIRO_VERSION_LEGACY,
       );

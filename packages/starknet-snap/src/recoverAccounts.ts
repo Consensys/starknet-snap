@@ -1,6 +1,11 @@
 import { toJson } from './utils/serializer';
 import { num } from 'starknet';
-import { getKeysFromAddressIndex, getCorrectContractAddress } from './utils/starknetUtils';
+import {
+  getKeysFromAddressIndex,
+  getCorrectContractAddress,
+  estimateAccountDeployFee,
+  estimateAccountUpgradeFee,
+} from './utils/starknetUtils';
 import { getNetworkFromChainId, getValidNumber, upsertAccount } from './utils/snapUtils';
 import { AccContract } from './types/snapState';
 import { ApiParams, RecoverAccountsRequestParams } from './types/snapApi';
@@ -29,11 +34,13 @@ export async function recoverAccounts(params: ApiParams) {
         state,
         i,
       );
+
       const {
         address: contractAddress,
         signerPubKey: signerPublicKey,
         upgradeRequired,
-      } = await getCorrectContractAddress(network, publicKey);
+        deployRequired,
+      } = await getCorrectContractAddress(network, publicKey, state);
       logger.log(
         `recoverAccounts: index ${i}:\ncontractAddress = ${contractAddress}\npublicKey = ${publicKey}\nisUpgradeRequired = ${upgradeRequired}`,
       );
@@ -57,6 +64,7 @@ export async function recoverAccounts(params: ApiParams) {
         deployTxnHash: '',
         chainId: network.chainId,
         upgradeRequired: upgradeRequired,
+        deployRequired: deployRequired,
       };
 
       logger.log(`recoverAccounts: index ${i}\nuserAccount: ${toJson(userAccount)}`);
