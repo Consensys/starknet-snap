@@ -238,11 +238,12 @@ export const useStarkNetSnap = () => {
     let deployRequired = false;
     console.log("accounts")
     console.log(acc)
-    if (!acc || acc.length === 0 || !acc[0].publicKey) {
+    deployRequired = (Array.isArray(acc) ? acc[0].deployRequired : (acc as Account).deployRequired) ?? false;
+    if (!acc || acc.length === 0 || (!acc[0].publicKey && !deployRequired)) {
       acc = await addAccount(chainId);
     } else {
       upgradeRequired = (Array.isArray(acc) ? acc[0].upgradeRequired : (acc as Account).upgradeRequired) ?? false;
-      deployRequired = (Array.isArray(acc) ? acc[0].deployRequired : (acc as Account).deployRequired) ?? false;
+     
     }
 
     const tokenBalances = await Promise.all(

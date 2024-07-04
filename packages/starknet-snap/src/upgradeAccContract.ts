@@ -34,42 +34,17 @@ export async function upgradeAccContract(params: ApiParams) {
     }
 
     const network = getNetworkFromChainId(state, chainId);
-    if (!(await isAccountDeployed(network, contractAddress)) && !forceDeploy) {
-      throw new Error('Contract is not deployed and address has no balance');
-    }
 
-    if (!(await isUpgradeRequired(network, contractAddress))) {
-      throw new Error('Upgrade is not required');
+    if(!forceDeploy){
+      if (!(await isAccountDeployed(network, contractAddress))) {
+        throw new Error('Contract is not deployed and address has no balance');
+      }
+  
+      if (!(await isUpgradeRequired(network, contractAddress))) {
+        throw new Error('Upgrade is not required');
+      }
     }
-
     const { privateKey, addressIndex } = await getKeysFromAddress(keyDeriver, network, state, contractAddress);
-
-    const method = 'upgrade';
-
-    const calldata = CallData.compile({
-      implementation: ACCOUNT_CLASS_HASH,
-      calldata: [0],
-    });
-
-    const txnInvocation = getUpgradeTxnInvocation(contractAddress);
-
-    let maxFee = requestParamsObj.maxFee ? num.toBigInt(requestParamsObj.maxFee) : constants.ZERO;
-    maxFee = num.toBigInt(await estimateAccountUpgradeFee(network, contractAddress, privateKey, maxFee));
-
-    const dialogComponents = getSendTxnText(state, contractAddress, method, calldata, contractAddress, maxFee, network);
-
-    const response = await wallet.request({
-      method: 'snap_dialog',
-      params: {
-        type: DialogType.Confirmation,
-        content: panel([heading('Do you want to sign this transaction ?'), ...dialogComponents]),
-      },
-    });
-
-    if (!response) return false;
-
-    logger.log(`upgradeAccContract:\ntxnInvocation: ${toJson(txnInvocation)}\nmaxFee: ${maxFee.toString()}}`);
-
     const accountDeployed = await isAccountDeployed(network, contractAddress);
     if (forceDeploy) {
       if (accountDeployed) {
@@ -88,11 +63,41 @@ export async function upgradeAccContract(params: ApiParams) {
           chainId: requestParamsObj.chainId,
         },
       };
-      await createAccount(createAccountApiParams, true, true);
+      await createAccount(createAccountApiParams, false, true, CAIRO_VERSION_LEGACY);
     }
 
     //In case we forceDeployed we assign a nonce of 1 to make sure it does after the deploy transaction
     const nonce = forceDeploy ? 1 : undefined;
+
+        
+    const method = 'upgrade';
+
+    const calldata = CallData.compile({
+      implementation: ACCOUNT_CLASS_HASH,
+      calldata: [0],
+    });
+
+    const txnInvocation = getUpgradeTxnInvocation(contractAddress);
+
+
+    let maxFee = requestParamsObj.maxFee ? num.toBigInt(requestParamsObj.maxFee) : constants.ZERO;
+    console.log("estimateFee")
+    maxFee = num.toBigInt(await estimateAccountUpgradeFee(network, contractAddress, privateKey, maxFee));
+    console.log("getSendTxnText")
+    const dialogComponents = getSendTxnText(state, contractAddress, method, calldata, contractAddress, maxFee, network);
+    console.log("whaat")
+    const response = await wallet.request({
+      method: 'snap_dialog',
+      params: {
+        type: DialogType.Confirmation,
+        content: panel([heading('Do you want to sign this transaction ?'), ...dialogComponents]),
+      },
+    });
+
+    if (!response) return false;
+
+    logger.log(`upgradeAccContract:\ntxnInvocation: ${toJson(txnInvocation)}\nmaxFee: ${maxFee.toString()}}`);
+
 
     const txnResp = await executeTxn(
       network,

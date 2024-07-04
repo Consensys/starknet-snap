@@ -8,7 +8,7 @@ export default {
   component: UpgradeModelView,
 } as Meta;
 
-export const ContentOnly = () => <UpgradeModelView address="xxxxxx" />;
+export const ContentOnly = () => <UpgradeModelView address="xxxxxx" deploy={false} />;
 
 export const WithModal = () => {
   let [isOpen, setIsOpen] = useState(false);
@@ -16,7 +16,7 @@ export const WithModal = () => {
     <>
       <button onClick={() => setIsOpen(!isOpen)}>Open Modal</button>
       <PopIn isOpen={isOpen} setIsOpen={setIsOpen} showClose={false}>
-        <UpgradeModelView address="xxxxxx"></UpgradeModelView>
+        <UpgradeModelView address="xxxxxx" deploy={false}></UpgradeModelView>
       </PopIn>
     </>
   );

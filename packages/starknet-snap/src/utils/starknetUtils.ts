@@ -52,6 +52,7 @@ import { getAddressKey } from './keyPair';
 import {
   getAccount,
   getAccounts,
+  getErc20Token,
   getEtherErc20Token,
   getRPCUrl,
   getTransactionFromVoyagerUrl,
@@ -61,6 +62,7 @@ import {
 import { logger } from './logger';
 import { RpcV4GetTransactionReceiptResponse } from '../types/snapApi';
 import { hexToString } from './formatterUtils';
+import { getErc20TokenBalance } from '../getErc20TokenBalance';
 
 export const getCallDataArray = (callDataStr: string): string[] => {
   return (callDataStr ?? '')
@@ -184,8 +186,9 @@ export const deployAccount = async (
   cairoVersion?: CairoVersion,
   invocationsDetails?: UniversalDetails,
 ): Promise<DeployContractResponse> => {
+  const classHash = cairoVersion == CAIRO_VERSION ? ACCOUNT_CLASS_HASH : PROXY_CONTRACT_HASH;
   const deployAccountPayload = {
-    classHash: ACCOUNT_CLASS_HASH,
+    classHash: classHash,
     contractAddress: contractAddress,
     constructorCalldata: contractCallData,
     addressSalt,
@@ -805,18 +808,20 @@ export const getCorrectContractAddress = async (
       }
       // Edge case detection
       logger.log(`getContractAddressByKey: no deployed contract found, checking balance for edge cases`);
-
+      console.log(getEtherErc20Token(state, network.chainId)?.address)
       try {
         const balance = num.toBigInt(
           (await getBalance(
+            contractAddressLegacy,
             getEtherErc20Token(state, network.chainId)?.address,
-            num.toBigInt(contractAddressLegacy).toString(10),
             network,
           )) ?? num.toBigInt(constants.ZERO),
         );
+        console.log(balance)  
         if (balance > maxFee) {
           upgradeRequired = true;
           deployRequired = true;
+          address = contractAddressLegacy;
           logger.log(
             `getContractAddressByKey: no deployed cairo0 contract found with non-zero balance, force cairo ${CAIRO_VERSION_LEGACY}`,
           );
