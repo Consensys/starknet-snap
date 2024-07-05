@@ -2,7 +2,7 @@ import {
   setInfoModalVisible,
   setMinVersionModalVisible,
   setUpgradeModalVisible,
-  setUpgradeModalDeployText,
+  setDeployModalVisible,
 } from 'slices/modalSlice';
 import { setNetworks } from 'slices/networkSlice';
 import { useAppDispatch, useAppSelector } from 'hooks/redux';
@@ -241,8 +241,6 @@ export const useStarkNetSnap = () => {
     let acc: Account[] | Account = await recoverAccounts(chainId);
     let upgradeRequired = false;
     let deployRequired = false;
-    console.log('accounts');
-    console.log(acc);
     deployRequired = (Array.isArray(acc) ? acc[0].deployRequired : (acc as Account).deployRequired) ?? false;
     if (!acc || acc.length === 0 || (!acc[0].publicKey && !deployRequired)) {
       acc = await addAccount(chainId);
@@ -277,8 +275,8 @@ export const useStarkNetSnap = () => {
     if (!Array.isArray(acc)) {
       dispatch(setInfoModalVisible(true));
     }
-    dispatch(setUpgradeModalVisible(upgradeRequired));
-    dispatch(setUpgradeModalDeployText(deployRequired));
+    dispatch(setUpgradeModalVisible(upgradeRequired && !deployRequired));
+    dispatch(setDeployModalVisible(deployRequired));
     dispatch(disableLoading());
   };
 
@@ -424,7 +422,36 @@ export const useStarkNetSnap = () => {
     }
   };
 
-  const upgradeAccount = async (contractAddress: string, maxFee: string, chainId: string, forceDeploy: boolean) => {
+  const deployAccount = async (contractAddress: string, maxFee: string, chainId: string) => {
+    dispatch(enableLoadingWithMessage('Deploying account...'));
+    try {
+      const response = await provider.request({
+        method: 'wallet_invokeSnap',
+        params: {
+          snapId,
+          request: {
+            method: 'starkNet_createAccountLegacy',
+            params: {
+              ...defaultParam,
+              contractAddress,
+              maxFee,
+              chainId,
+              deploy: true,
+            },
+          },
+        },
+      });
+      dispatch(disableLoading());
+      return response;
+    } catch (err) {
+      dispatch(disableLoading());
+      //eslint-disable-next-line no-console
+      console.error(err);
+      throw err;
+    }
+  };
+
+  const upgradeAccount = async (contractAddress: string, maxFee: string, chainId: string) => {
     dispatch(enableLoadingWithMessage('Upgrading account...'));
     try {
       const response = await provider.request({
@@ -438,7 +465,6 @@ export const useStarkNetSnap = () => {
               contractAddress,
               maxFee,
               chainId,
-              forceDeploy,
             },
           },
         },
@@ -772,6 +798,7 @@ export const useStarkNetSnap = () => {
     estimateFees,
     sendTransaction,
     upgradeAccount,
+    deployAccount,
     getTransactions,
     getTransactionStatus,
     recoverAccounts,

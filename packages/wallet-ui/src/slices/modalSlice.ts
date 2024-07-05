@@ -4,14 +4,14 @@ export interface modalState {
   infoModalVisible: boolean;
   minVersionModalVisible: boolean;
   upgradeModalVisible: boolean;
-  upgradeModalDeployText: boolean;
+  deployModalVisible: boolean;
 }
 
 const initialState: modalState = {
   infoModalVisible: false,
   minVersionModalVisible: false,
   upgradeModalVisible: false,
-  upgradeModalDeployText: false,
+  deployModalVisible: false,
 };
 
 export const modalSlice = createSlice({
@@ -25,8 +25,8 @@ export const modalSlice = createSlice({
     setUpgradeModalVisible: (state, { payload }) => {
       state.upgradeModalVisible = payload;
     },
-    setUpgradeModalDeployText: (state, { payload }) => {
-      state.upgradeModalDeployText = payload;
+    setDeployModalVisible: (state, { payload }) => {
+      state.deployModalVisible = payload;
     },
     setMinVersionModalVisible: (state, { payload }) => {
       state.minVersionModalVisible = payload;
@@ -34,7 +34,7 @@ export const modalSlice = createSlice({
   },
 });
 
-export const { setInfoModalVisible, setMinVersionModalVisible, setUpgradeModalVisible, setUpgradeModalDeployText } =
+export const { setInfoModalVisible, setMinVersionModalVisible, setUpgradeModalVisible, setDeployModalVisible } =
   modalSlice.actions;
 
 export default modalSlice.reducer;

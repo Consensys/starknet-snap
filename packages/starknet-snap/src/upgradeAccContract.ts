@@ -1,5 +1,5 @@
 import { toJson } from './utils/serializer';
-import { num, constants, CallData, EstimateFee, TransactionType, Invocations } from 'starknet';
+import { num, constants, CallData } from 'starknet';
 import { Transaction, TransactionStatus, VoyagerTransactionType } from './types/snapState';
 import {
   getKeysFromAddress,
@@ -7,19 +7,13 @@ import {
   isUpgradeRequired,
   executeTxn,
   isAccountDeployed,
-  getUpgradeTxnInvocation,
-  estimateAccountUpgradeFee,
-  getAccContractAddressAndCallDataLegacy,
-  estimateAccountDeployFee,
-  estimateFeeBulk,
-  addFeesFromAllTransactions,
+  estimateFee,
 } from './utils/starknetUtils';
 import { getNetworkFromChainId, upsertTransaction, getSendTxnText } from './utils/snapUtils';
 import { ApiParams, UpgradeTransactionRequestParams } from './types/snapApi';
-import { ACCOUNT_CLASS_HASH, CAIRO_VERSION_LEGACY, PROXY_CONTRACT_HASH } from './utils/constants';
+import { ACCOUNT_CLASS_HASH, CAIRO_VERSION_LEGACY } from './utils/constants';
 import { heading, panel, DialogType } from '@metamask/snaps-sdk';
 import { logger } from './utils/logger';
-import { createAccount } from './createAccount';
 
 export async function upgradeAccContract(params: ApiParams) {
   try {
@@ -27,7 +21,7 @@ export async function upgradeAccContract(params: ApiParams) {
     const requestParamsObj = requestParams as UpgradeTransactionRequestParams;
     const contractAddress = requestParamsObj.contractAddress;
     const chainId = requestParamsObj.chainId;
-    const forceDeploy = requestParamsObj.forceDeploy;
+
     if (!contractAddress) {
       throw new Error(`The given contract address need to be non-empty string, got: ${toJson(requestParamsObj)}`);
     }
@@ -39,78 +33,15 @@ export async function upgradeAccContract(params: ApiParams) {
 
     const network = getNetworkFromChainId(state, chainId);
 
-    if (!forceDeploy) {
-      if (!(await isAccountDeployed(network, contractAddress))) {
-        throw new Error('Contract is not deployed and address has no balance');
-      }
-
-      if (!(await isUpgradeRequired(network, contractAddress))) {
-        throw new Error('Upgrade is not required');
-      }
-    }
-    const { privateKey, addressIndex, publicKey } = await getKeysFromAddress(keyDeriver, network, state, contractAddress);
-    
-    const upgradeAccountpayload = getUpgradeTxnInvocation(contractAddress)    
-    const bulkTransactions: Invocations =[];
-    // [TODO] This fails.
-    // const bulkTransactions: Invocations =[
-    //   {
-    //     type: TransactionType.INVOKE,
-    //     payload: upgradeAccountpayload,
-    //   }];
-    
-    const accountDeployed = await isAccountDeployed(network, contractAddress);
-    if (forceDeploy) {
-      if (accountDeployed) {
-        throw new Error(`Upgrade with Force Deploy cannot be executed on deployed account`);
-      }
-    
-      const { callData } = getAccContractAddressAndCallDataLegacy(publicKey);
-      const deployAccountpayload = {
-        classHash: PROXY_CONTRACT_HASH,
-        contractAddress: contractAddress,
-        constructorCalldata: callData,
-        addressSalt: publicKey,
-      };
-
-      bulkTransactions.unshift({
-        type: TransactionType.DEPLOY_ACCOUNT,
-        payload: deployAccountpayload,
-      });
-    }
-    
-    const fees = await estimateFeeBulk(
-      network,
-      contractAddress,
-      privateKey,
-      bulkTransactions,
-      undefined,
-    );
-
-    const estimateFeeResp = addFeesFromAllTransactions(fees);
-
-    const maxFee = estimateFeeResp.suggestedMaxFee.toString(10);
-    logger.log(`MaxFee: ${maxFee}`);
-
-    if (forceDeploy) {
-      //Deploy account before sending the upgrade transaction
-      logger.log('upgradeAccContract:\nFirst transaction : send deploy transaction');
-      const createAccountApiParams = {
-        state,
-        wallet: params.wallet,
-        saveMutex: params.saveMutex,
-        keyDeriver,
-        requestParams: {
-          addressIndex,
-          deploy: true,
-          chainId: requestParamsObj.chainId,
-        },
-      };
-      await createAccount(createAccountApiParams, false, true, CAIRO_VERSION_LEGACY);
+    if (!(await isAccountDeployed(network, contractAddress))) {
+      throw new Error('Contract has not deployed');
     }
 
-    //In case we forceDeployed we assign a nonce of 1 to make sure it does after the deploy transaction
-    const nonce = forceDeploy ? 1 : undefined;
+    if (!(await isUpgradeRequired(network, contractAddress))) {
+      throw new Error('Upgrade is not required');
+    }
+
+    const { privateKey } = await getKeysFromAddress(keyDeriver, network, state, contractAddress);
 
     const method = 'upgrade';
 
@@ -119,8 +50,20 @@ export async function upgradeAccContract(params: ApiParams) {
       calldata: [0],
     });
 
-    const txnInvocation = getUpgradeTxnInvocation(contractAddress);
+    const txnInvocation = {
+      contractAddress,
+      entrypoint: method,
+      calldata,
+    };
+
+    let maxFee = requestParamsObj.maxFee ? num.toBigInt(requestParamsObj.maxFee) : constants.ZERO;
+    if (maxFee === constants.ZERO) {
+      const estFeeResp = await estimateFee(network, contractAddress, privateKey, txnInvocation, CAIRO_VERSION_LEGACY);
+      maxFee = num.toBigInt(estFeeResp.suggestedMaxFee.toString(10) ?? '0');
+    }
+
     const dialogComponents = getSendTxnText(state, contractAddress, method, calldata, contractAddress, maxFee, network);
+
     const response = await wallet.request({
       method: 'snap_dialog',
       params: {
@@ -131,7 +74,7 @@ export async function upgradeAccContract(params: ApiParams) {
 
     if (!response) return false;
 
-    logger.log(`upgradeAccContract:\ntxnInvocation: ${toJson(txnInvocation)}\nmaxFee: ${maxFee.toString()}}`);
+    logger.log(`sendTransaction:\ntxnInvocation: ${toJson(txnInvocation)}\nmaxFee: ${maxFee.toString()}}`);
 
     const txnResp = await executeTxn(
       network,
@@ -141,12 +84,11 @@ export async function upgradeAccContract(params: ApiParams) {
       undefined,
       {
         maxFee,
-        nonce,
       },
       CAIRO_VERSION_LEGACY,
     );
 
-    logger.log(`upgradeAccContract:\ntxnResp: ${toJson(txnResp)}`);
+    logger.log(`sendTransaction:\ntxnResp: ${toJson(txnResp)}`);
 
     if (!txnResp?.transaction_hash) {
       throw new Error(`Transaction hash is not found`);

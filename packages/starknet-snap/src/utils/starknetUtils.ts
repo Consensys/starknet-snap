@@ -807,28 +807,33 @@ export const getCorrectContractAddress = async (
       if (e.message.includes('network error for getSigner')) {
         throw e;
       }
-      // Edge case detection
-      logger.log(`getContractAddressByKey: no deployed contract found, checking balance for edge cases`);
-      console.log(getEtherErc20Token(state, network.chainId)?.address);
-      try {
-        const balance = num.toBigInt(
-          (await getBalance(contractAddressLegacy, getEtherErc20Token(state, network.chainId)?.address, network)) ??
-            num.toBigInt(constants.ZERO),
-        );
-        console.log(balance);
-        if (balance > maxFee) {
-          upgradeRequired = true;
-          deployRequired = true;
-          address = contractAddressLegacy;
-          logger.log(
-            `getContractAddressByKey: no deployed cairo0 contract found with non-zero balance, force cairo ${CAIRO_VERSION_LEGACY}`,
+      const accountDeployed = await isAccountDeployed(network, address);
+      if (accountDeployed) {
+        address = contractAddressLegacy;
+        upgradeRequired = true;
+        deployRequired = false;
+      } else {
+        // Edge case detection
+        logger.log(`getContractAddressByKey: no deployed contract found, checking balance for edge cases`);
+        try {
+          const balance = num.toBigInt(
+            (await getBalance(contractAddressLegacy, getEtherErc20Token(state, network.chainId)?.address, network)) ??
+              num.toBigInt(constants.ZERO),
           );
-        } else {
-          logger.log(`getContractAddressByKey: no deployed contract found, fallback to cairo ${CAIRO_VERSION}`);
+          if (balance > maxFee) {
+            upgradeRequired = true;
+            deployRequired = true;
+            address = contractAddressLegacy;
+            logger.log(
+              `getContractAddressByKey: no deployed cairo0 contract found with non-zero balance, force cairo ${CAIRO_VERSION_LEGACY}`,
+            );
+          } else {
+            logger.log(`getContractAddressByKey: no deployed contract found, fallback to cairo ${CAIRO_VERSION}`);
+          }
+        } catch (err) {
+          logger.log(`getContractAddressByKey: balance check failed with error ${err}`);
+          throw err;
         }
-      } catch (err) {
-        logger.log(`getContractAddressByKey: balance check failed with error ${err}`);
-        throw err;
       }
     }
   }

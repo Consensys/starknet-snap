@@ -1,14 +1,14 @@
 import { Meta } from '@storybook/react';
 import { useState } from 'react';
 import { PopIn } from 'components/ui/molecule/PopIn';
-import { UpgradeModelView } from './UpgradeModel.view';
+import { DeployModalView } from './DeployModal.view';
 
 export default {
-  title: 'Organism/UpgradeModel',
-  component: UpgradeModelView,
+  title: 'Organism/DeployModal',
+  component: DeployModalView,
 } as Meta;
 
-export const ContentOnly = () => <UpgradeModelView address="xxxxxx" />;
+export const ContentOnly = () => <DeployModalView address="xxxxxx" />;
 
 export const WithModal = () => {
   let [isOpen, setIsOpen] = useState(false);
@@ -16,7 +16,7 @@ export const WithModal = () => {
     <>
       <button onClick={() => setIsOpen(!isOpen)}>Open Modal</button>
       <PopIn isOpen={isOpen} setIsOpen={setIsOpen} showClose={false}>
-        <UpgradeModelView address="xxxxxx"></UpgradeModelView>
+        <DeployModalView address="xxxxxx"></DeployModalView>
       </PopIn>
     </>
   );

@@ -36,8 +36,6 @@ export async function createAccount(
   try {
     const { state, wallet, saveMutex, keyDeriver, requestParams } = params;
     const requestParamsObj = requestParams as CreateAccountRequestParams;
-    console.log('requestParamsObj.addressIndex');
-    console.log(requestParamsObj.addressIndex);
     const addressIndex = getValidNumber(requestParamsObj.addressIndex, -1, 0);
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
     const deploy = !!requestParamsObj.deploy;
