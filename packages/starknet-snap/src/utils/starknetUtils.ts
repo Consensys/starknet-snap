@@ -209,8 +209,9 @@ export const estimateAccountDeployFee = async (
   cairoVersion?: CairoVersion,
   invocationsDetails?: UniversalDetails,
 ): Promise<EstimateFee> => {
+  const classHash = cairoVersion == CAIRO_VERSION ? ACCOUNT_CLASS_HASH : PROXY_CONTRACT_HASH;
   const deployAccountPayload = {
-    classHash: ACCOUNT_CLASS_HASH,
+    classHash: classHash,
     contractAddress: contractAddress,
     constructorCalldata: contractCallData,
     addressSalt,
@@ -808,16 +809,13 @@ export const getCorrectContractAddress = async (
       }
       // Edge case detection
       logger.log(`getContractAddressByKey: no deployed contract found, checking balance for edge cases`);
-      console.log(getEtherErc20Token(state, network.chainId)?.address)
+      console.log(getEtherErc20Token(state, network.chainId)?.address);
       try {
         const balance = num.toBigInt(
-          (await getBalance(
-            contractAddressLegacy,
-            getEtherErc20Token(state, network.chainId)?.address,
-            network,
-          )) ?? num.toBigInt(constants.ZERO),
+          (await getBalance(contractAddressLegacy, getEtherErc20Token(state, network.chainId)?.address, network)) ??
+            num.toBigInt(constants.ZERO),
         );
-        console.log(balance)  
+        console.log(balance);
         if (balance > maxFee) {
           upgradeRequired = true;
           deployRequired = true;

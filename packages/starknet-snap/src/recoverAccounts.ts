@@ -34,7 +34,7 @@ export async function recoverAccounts(params: ApiParams) {
         state,
         i,
       );
-
+      // [TODO] : add fee here to getCorrectContractAddress
       const {
         address: contractAddress,
         signerPubKey: signerPublicKey,

@@ -1,5 +1,5 @@
 import { toJson } from './utils/serializer';
-import { num, constants, CallData } from 'starknet';
+import { num, constants, CallData, EstimateFee, TransactionType, Invocations } from 'starknet';
 import { Transaction, TransactionStatus, VoyagerTransactionType } from './types/snapState';
 import {
   getKeysFromAddress,
@@ -9,10 +9,14 @@ import {
   isAccountDeployed,
   getUpgradeTxnInvocation,
   estimateAccountUpgradeFee,
+  getAccContractAddressAndCallDataLegacy,
+  estimateAccountDeployFee,
+  estimateFeeBulk,
+  addFeesFromAllTransactions,
 } from './utils/starknetUtils';
 import { getNetworkFromChainId, upsertTransaction, getSendTxnText } from './utils/snapUtils';
 import { ApiParams, UpgradeTransactionRequestParams } from './types/snapApi';
-import { ACCOUNT_CLASS_HASH, CAIRO_VERSION_LEGACY } from './utils/constants';
+import { ACCOUNT_CLASS_HASH, CAIRO_VERSION_LEGACY, PROXY_CONTRACT_HASH } from './utils/constants';
 import { heading, panel, DialogType } from '@metamask/snaps-sdk';
 import { logger } from './utils/logger';
 import { createAccount } from './createAccount';
@@ -35,22 +39,61 @@ export async function upgradeAccContract(params: ApiParams) {
 
     const network = getNetworkFromChainId(state, chainId);
 
-    if(!forceDeploy){
+    if (!forceDeploy) {
       if (!(await isAccountDeployed(network, contractAddress))) {
         throw new Error('Contract is not deployed and address has no balance');
       }
-  
+
       if (!(await isUpgradeRequired(network, contractAddress))) {
         throw new Error('Upgrade is not required');
       }
     }
-    const { privateKey, addressIndex } = await getKeysFromAddress(keyDeriver, network, state, contractAddress);
+    const { privateKey, addressIndex, publicKey } = await getKeysFromAddress(keyDeriver, network, state, contractAddress);
+    
+    const upgradeAccountpayload = getUpgradeTxnInvocation(contractAddress)    
+    const bulkTransactions: Invocations =[];
+    // [TODO] This fails.
+    // const bulkTransactions: Invocations =[
+    //   {
+    //     type: TransactionType.INVOKE,
+    //     payload: upgradeAccountpayload,
+    //   }];
+    
     const accountDeployed = await isAccountDeployed(network, contractAddress);
     if (forceDeploy) {
       if (accountDeployed) {
         throw new Error(`Upgrade with Force Deploy cannot be executed on deployed account`);
       }
-      //Deploy account before sending the transaction
+    
+      const { callData } = getAccContractAddressAndCallDataLegacy(publicKey);
+      const deployAccountpayload = {
+        classHash: PROXY_CONTRACT_HASH,
+        contractAddress: contractAddress,
+        constructorCalldata: callData,
+        addressSalt: publicKey,
+      };
+
+      bulkTransactions.unshift({
+        type: TransactionType.DEPLOY_ACCOUNT,
+        payload: deployAccountpayload,
+      });
+    }
+    
+    const fees = await estimateFeeBulk(
+      network,
+      contractAddress,
+      privateKey,
+      bulkTransactions,
+      undefined,
+    );
+
+    const estimateFeeResp = addFeesFromAllTransactions(fees);
+
+    const maxFee = estimateFeeResp.suggestedMaxFee.toString(10);
+    logger.log(`MaxFee: ${maxFee}`);
+
+    if (forceDeploy) {
+      //Deploy account before sending the upgrade transaction
       logger.log('upgradeAccContract:\nFirst transaction : send deploy transaction');
       const createAccountApiParams = {
         state,
@@ -69,7 +112,6 @@ export async function upgradeAccContract(params: ApiParams) {
     //In case we forceDeployed we assign a nonce of 1 to make sure it does after the deploy transaction
     const nonce = forceDeploy ? 1 : undefined;
 
-        
     const method = 'upgrade';
 
     const calldata = CallData.compile({
@@ -78,14 +120,7 @@ export async function upgradeAccContract(params: ApiParams) {
     });
 
     const txnInvocation = getUpgradeTxnInvocation(contractAddress);
-
-
-    let maxFee = requestParamsObj.maxFee ? num.toBigInt(requestParamsObj.maxFee) : constants.ZERO;
-    console.log("estimateFee")
-    maxFee = num.toBigInt(await estimateAccountUpgradeFee(network, contractAddress, privateKey, maxFee));
-    console.log("getSendTxnText")
     const dialogComponents = getSendTxnText(state, contractAddress, method, calldata, contractAddress, maxFee, network);
-    console.log("whaat")
     const response = await wallet.request({
       method: 'snap_dialog',
       params: {
@@ -97,7 +132,6 @@ export async function upgradeAccContract(params: ApiParams) {
     if (!response) return false;
 
     logger.log(`upgradeAccContract:\ntxnInvocation: ${toJson(txnInvocation)}\nmaxFee: ${maxFee.toString()}}`);
-
 
     const txnResp = await executeTxn(
       network,

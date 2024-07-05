@@ -12,8 +12,6 @@ import {
   account1,
   account2,
   account3,
-  token1,
-  token2,
   token0,
   getBalanceResp,
   getNonZeroBalanceResp,
@@ -573,7 +571,7 @@ describe('Test function: getCorrectContractAddress', function () {
     });
 
     describe(`when when Cairo${CAIRO_VERSION_LEGACY} is not deployed`, function () {
-      it(`should return Cairo${CAIRO_VERSION} address with upgrade = false if no balance`, async function () {
+      it(`should return Cairo${CAIRO_VERSION} address with upgrade = false and deploy = false if no balance`, async function () {
         sandbox.stub(utils, 'getVersion').rejects(new Error('Contract not found'));
         sandbox.stub(utils, 'getBalance').callsFake(async () => getBalanceResp[0]);
 
@@ -588,7 +586,7 @@ describe('Test function: getCorrectContractAddress', function () {
         expect(result.signerPubKey).to.be.eq('');
         expect(result.upgradeRequired).to.be.eq(false);
       });
-      it(`should return Cairo${CAIRO_VERSION_LEGACY} address with upgrade = true and deploy = true if no balance`, async function () {
+      it(`should return Cairo${CAIRO_VERSION_LEGACY} address with upgrade = true and deploy = true if balance`, async function () {
         sandbox.stub(utils, 'getVersion').rejects(new Error('Contract not found'));
         sandbox.stub(utils, 'getBalance').callsFake(async () => getNonZeroBalanceResp[0]);
 
@@ -599,7 +597,7 @@ describe('Test function: getCorrectContractAddress', function () {
 
         expect(getSignerStub).to.have.been.callCount(0);
         expect(getOwnerStub).to.have.been.callCount(0);
-        expect(result.address).to.be.eq(account1.address);
+        expect(result.address).to.be.eq(account2.address);
         expect(result.signerPubKey).to.be.eq('');
         expect(result.upgradeRequired).to.be.eq(true);
         expect(result.deployRequired).to.be.eq(true);

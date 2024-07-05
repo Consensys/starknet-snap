@@ -34,6 +34,7 @@ export const modalSlice = createSlice({
   },
 });
 
-export const { setInfoModalVisible, setMinVersionModalVisible, setUpgradeModalVisible, setUpgradeModalDeployText } = modalSlice.actions;
+export const { setInfoModalVisible, setMinVersionModalVisible, setUpgradeModalVisible, setUpgradeModalDeployText } =
+  modalSlice.actions;
 
 export default modalSlice.reducer;
