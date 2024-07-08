@@ -680,6 +680,23 @@ export const useStarkNetSnap = () => {
     return txStatus;
   };
 
+  const waitForAccountCreation = async (transactionHash: string, accountAddress: string, chainId: string) => {
+    dispatch(enableLoadingWithMessage('Waiting for transaction to be finalised.'));
+    try {
+      // read transaction to check if the txn is ready
+      await waitForTransaction(transactionHash, chainId);
+      await recoverAccounts(chainId);
+      dispatch(disableLoading());
+      return true;
+    } catch (e) {
+      //eslint-disable-next-line no-console
+      console.log(`error while wait for transaction: ${e}`);
+      dispatch(disableLoading());
+      return false;
+    }
+    
+  }
+
   const waitForAccountUpdate = async (transactionHash: string, accountAddress: string, chainId: string) => {
     dispatch(enableLoadingWithMessage('Waiting for transaction to be finalised.'));
     const toastr = new Toastr();
@@ -804,6 +821,7 @@ export const useStarkNetSnap = () => {
     recoverAccounts,
     waitForTransaction,
     waitForAccountUpdate,
+    waitForAccountCreation,
     updateTokenBalance,
     getTokenBalance,
     addErc20Token,

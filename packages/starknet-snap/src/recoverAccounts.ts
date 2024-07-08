@@ -3,8 +3,6 @@ import { num } from 'starknet';
 import {
   getKeysFromAddressIndex,
   getCorrectContractAddress,
-  estimateAccountDeployFee,
-  estimateAccountUpgradeFee,
 } from './utils/starknetUtils';
 import { getNetworkFromChainId, getValidNumber, upsertAccount } from './utils/snapUtils';
 import { AccContract } from './types/snapState';
@@ -34,7 +32,6 @@ export async function recoverAccounts(params: ApiParams) {
         state,
         i,
       );
-      // [TODO] : add fee here to getCorrectContractAddress
       const {
         address: contractAddress,
         signerPubKey: signerPublicKey,

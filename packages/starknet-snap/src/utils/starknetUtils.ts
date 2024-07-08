@@ -825,7 +825,7 @@ export const getCorrectContractAddress = async (
             deployRequired = true;
             address = contractAddressLegacy;
             logger.log(
-              `getContractAddressByKey: no deployed cairo0 contract found with non-zero balance, force cairo ${CAIRO_VERSION_LEGACY}`,
+              `getContractAddressByKey: non deployed cairo0 contract found with non-zero balance, force cairo ${CAIRO_VERSION_LEGACY}`,
             );
           } else {
             logger.log(`getContractAddressByKey: no deployed contract found, fallback to cairo ${CAIRO_VERSION}`);

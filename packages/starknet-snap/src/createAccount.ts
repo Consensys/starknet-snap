@@ -5,20 +5,21 @@ import {
   deployAccount,
   waitForTransaction,
   getAccContractAddressAndCallDataLegacy,
+  estimateAccountDeployFee,
 } from './utils/starknetUtils';
 import {
   getNetworkFromChainId,
   getValidNumber,
   upsertAccount,
   upsertTransaction,
-  addDialogTxt,
+  getSendTxnText,
 } from './utils/snapUtils';
 import { AccContract, VoyagerTransactionType, Transaction, TransactionStatus } from './types/snapState';
 import { ApiParams, CreateAccountRequestParams } from './types/snapApi';
-import { heading, panel, text, DialogType } from '@metamask/snaps-sdk';
+import { heading, panel, DialogType } from '@metamask/snaps-sdk';
 import { logger } from './utils/logger';
-import { CAIRO_VERSION, CAIRO_VERSION_LEGACY } from './utils/constants';
-import { CairoContract, CairoVersion } from 'starknet';
+import { ACCOUNT_CLASS_HASH_LEGACY, CAIRO_VERSION, CAIRO_VERSION_LEGACY } from './utils/constants';
+import { CairoVersion, EstimateFee, num } from 'starknet';
 
 /**
  * Create an starknet account.
@@ -57,22 +58,30 @@ export async function createAccount(
 
     if (deploy) {
       if (!silentMode) {
-        const components = [];
-        addDialogTxt(components, 'Address', contractAddress);
-        addDialogTxt(components, 'Public Key', publicKey);
-        addDialogTxt(components, 'Address Index', addressIndex.toString());
+
+        logger.log(
+          `estimateAccountDeployFee:\ncontractAddress = ${contractAddress}\npublicKey = ${publicKey}\naddressIndex = ${addressIndexInUsed}`,
+        );
+    
+        const estimateDeployFee: EstimateFee = await estimateAccountDeployFee(
+          network,
+          contractAddress,
+          contractCallData,
+          publicKey,
+          privateKey,
+        );
+        logger.log(`estimateAccountDeployFee:\nestimateDeployFee: ${toJson(estimateDeployFee)}`);
+        let maxFee = num.toBigInt(estimateDeployFee.suggestedMaxFee.toString(10) ?? '0');
+        const dialogComponents = getSendTxnText(state, ACCOUNT_CLASS_HASH_LEGACY, "deploy", contractCallData, contractAddress, maxFee, network);
 
         const response = await wallet.request({
           method: 'snap_dialog',
           params: {
             type: DialogType.Confirmation,
-            content: panel([
-              heading('Do you want to sign this deploy account transaction ?'),
-              text(`It will be signed with address: ${contractAddress}`),
-              ...components,
-            ]),
+            content: panel([heading('Do you want to sign this deploy transaction ?'), ...dialogComponents]),
           },
         });
+
         if (!response)
           return {
             address: contractAddress,

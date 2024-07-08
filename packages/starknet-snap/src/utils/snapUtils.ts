@@ -772,3 +772,18 @@ export async function showUpgradeRequestModal(wallet) {
     },
   });
 }
+
+export async function showDeployRequestModal(wallet) {
+  await wallet.request({
+    method: 'snap_dialog',
+    params: {
+      type: DialogType.Alert,
+      content: panel([
+        heading('Account Deployment Mandatory!'),
+        text(
+          `Visit the [companion dapp for Starknet](${dappUrl(process.env.SNAP_ENV)}) to deploy pour account.\nThank you!`,
+        ),
+      ]),
+    },
+  });
+}

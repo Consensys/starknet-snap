@@ -53,6 +53,9 @@ describe('Test function: createAccount', function () {
     walletStub.rpcStubs.snap_manageState.resolves(state);
     waitForTransactionStub = sandbox.stub(utils, 'waitForTransaction');
     waitForTransactionStub.resolves({} as unknown as GetTransactionReceiptResponse);
+    sandbox.stub(utils, 'estimateAccountDeployFee').callsFake(async () => {
+      return estimateDeployFeeResp;
+    });
   });
 
   afterEach(function () {

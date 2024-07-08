@@ -20,7 +20,7 @@ enum Stage {
 
 export const DeployModalView = ({ address }: Props) => {
   const dispatch = useAppDispatch();
-  const { deployAccount, waitForAccountUpdate } = useStarkNetSnap();
+  const { deployAccount, waitForAccountCreation } = useStarkNetSnap();
   const [txnHash, setTxnHash] = useState('');
   const [stage, setStage] = useState(Stage.INIT);
   const networks = useAppSelector((state) => state.networks);
@@ -50,7 +50,7 @@ export const DeployModalView = ({ address }: Props) => {
   useEffect(() => {
     if (txnHash) {
       setStage(Stage.WAITING_FOR_TXN);
-      waitForAccountUpdate(txnHash, address, chainId)
+      waitForAccountCreation(txnHash, address, chainId)
         .then((resp) => {
           setStage(resp === true ? Stage.SUCCESS : Stage.FAIL);
         })
@@ -63,7 +63,7 @@ export const DeployModalView = ({ address }: Props) => {
 
   useEffect(() => {
     if (stage === Stage.SUCCESS) {
-      toastr.success(`Account deployd successfully`);
+      toastr.success(`Account deployed successfully`);
       dispatch(setDeployModalVisible(false));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
