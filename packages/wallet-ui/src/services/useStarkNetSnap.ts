@@ -694,8 +694,7 @@ export const useStarkNetSnap = () => {
       dispatch(disableLoading());
       return false;
     }
-    
-  }
+  };
 
   const waitForAccountUpdate = async (transactionHash: string, accountAddress: string, chainId: string) => {
     dispatch(enableLoadingWithMessage('Waiting for transaction to be finalised.'));

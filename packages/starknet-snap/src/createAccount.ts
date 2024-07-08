@@ -58,11 +58,10 @@ export async function createAccount(
 
     if (deploy) {
       if (!silentMode) {
-
         logger.log(
           `estimateAccountDeployFee:\ncontractAddress = ${contractAddress}\npublicKey = ${publicKey}\naddressIndex = ${addressIndexInUsed}`,
         );
-    
+
         const estimateDeployFee: EstimateFee = await estimateAccountDeployFee(
           network,
           contractAddress,
@@ -71,8 +70,16 @@ export async function createAccount(
           privateKey,
         );
         logger.log(`estimateAccountDeployFee:\nestimateDeployFee: ${toJson(estimateDeployFee)}`);
-        let maxFee = num.toBigInt(estimateDeployFee.suggestedMaxFee.toString(10) ?? '0');
-        const dialogComponents = getSendTxnText(state, ACCOUNT_CLASS_HASH_LEGACY, "deploy", contractCallData, contractAddress, maxFee, network);
+        const maxFee = num.toBigInt(estimateDeployFee.suggestedMaxFee.toString(10) ?? '0');
+        const dialogComponents = getSendTxnText(
+          state,
+          ACCOUNT_CLASS_HASH_LEGACY,
+          'deploy',
+          contractCallData,
+          contractAddress,
+          maxFee,
+          network,
+        );
 
         const response = await wallet.request({
           method: 'snap_dialog',

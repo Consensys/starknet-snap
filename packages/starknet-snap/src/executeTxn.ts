@@ -1,5 +1,11 @@
 import { Invocations, TransactionType } from 'starknet';
-import { getNetworkFromChainId, getTxnSnapTxt, addDialogTxt, showUpgradeRequestModal, showDeployRequestModal } from './utils/snapUtils';
+import {
+  getNetworkFromChainId,
+  getTxnSnapTxt,
+  addDialogTxt,
+  showUpgradeRequestModal,
+  showDeployRequestModal,
+} from './utils/snapUtils';
 import {
   getKeysFromAddress,
   executeTxn as executeTxnUtil,
@@ -27,12 +33,10 @@ export async function executeTxn(params: ApiParams) {
       addressIndex,
     } = await getKeysFromAddress(keyDeriver, network, state, senderAddress);
 
-    const {
-      upgradeRequired,
-      deployRequired,
-    } = await getCorrectContractAddress(network, publicKey, state);
+    const { upgradeRequired, deployRequired } = await getCorrectContractAddress(network, publicKey, state);
 
-    if (upgradeRequired && deployRequired) { // Edge case force cairo0 deploy because non-zero balance
+    if (upgradeRequired && deployRequired) {
+      // Edge case force cairo0 deploy because non-zero balance
       await showDeployRequestModal(wallet);
       throw new Error('Deploy required');
     }

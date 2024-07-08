@@ -52,7 +52,6 @@ import { getAddressKey } from './keyPair';
 import {
   getAccount,
   getAccounts,
-  getErc20Token,
   getEtherErc20Token,
   getRPCUrl,
   getTransactionFromVoyagerUrl,
@@ -62,7 +61,6 @@ import {
 import { logger } from './logger';
 import { RpcV4GetTransactionReceiptResponse } from '../types/snapApi';
 import { hexToString } from './formatterUtils';
-import { getErc20TokenBalance } from '../getErc20TokenBalance';
 
 export const getCallDataArray = (callDataStr: string): string[] => {
   return (callDataStr ?? '')
@@ -745,7 +743,7 @@ export function getUpgradeTxnInvocation(contractAddress: string) {
  * @returns The calculated transaction fee as a bigint.
  */
 export async function estimateAccountUpgradeFee(
-  network: any,
+  network: Network,
   contractAddress: string,
   privateKey: string,
   maxFee: BigNumberish = constants.ZERO,

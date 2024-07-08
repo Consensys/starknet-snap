@@ -17,8 +17,6 @@ import {
   estimateDeployFeeResp,
   getBalanceResp,
   account1,
-  estimateDeployFeeResp2,
-  estimateDeployFeeResp3,
 } from '../constants.test';
 import { getAddressKeyDeriver } from '../../src/utils/keyPair';
 import { Mutex } from 'async-mutex';

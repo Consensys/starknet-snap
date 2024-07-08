@@ -781,7 +781,9 @@ export async function showDeployRequestModal(wallet) {
       content: panel([
         heading('Account Deployment Mandatory!'),
         text(
-          `Visit the [companion dapp for Starknet](${dappUrl(process.env.SNAP_ENV)}) to deploy pour account.\nThank you!`,
+          `Visit the [companion dapp for Starknet](${dappUrl(
+            process.env.SNAP_ENV,
+          )}) to deploy pour account.\nThank you!`,
         ),
       ]),
     },

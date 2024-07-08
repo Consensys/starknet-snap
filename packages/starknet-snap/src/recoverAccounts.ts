@@ -1,9 +1,6 @@
 import { toJson } from './utils/serializer';
 import { num } from 'starknet';
-import {
-  getKeysFromAddressIndex,
-  getCorrectContractAddress,
-} from './utils/starknetUtils';
+import { getKeysFromAddressIndex, getCorrectContractAddress } from './utils/starknetUtils';
 import { getNetworkFromChainId, getValidNumber, upsertAccount } from './utils/snapUtils';
 import { AccContract } from './types/snapState';
 import { ApiParams, RecoverAccountsRequestParams } from './types/snapApi';
