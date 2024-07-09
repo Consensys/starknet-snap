@@ -112,9 +112,11 @@ describe('Test function: estimateFee', function () {
     });
 
     describe('when account require upgrade', function () {
-      let isUpgradeRequiredStub: sinon.SinonStub;
+      let getCorrectContractAddressStub: sinon.SinonStub;
       beforeEach(async function () {
-        isUpgradeRequiredStub = sandbox.stub(utils, 'isUpgradeRequired').resolves(true);
+        getCorrectContractAddressStub = sandbox
+          .stub(utils, 'getCorrectContractAddress')
+          .resolves({ address: '', signerPubKey: '', upgradeRequired: true, deployRequired: false });
       });
 
       it('should throw error if upgrade required', async function () {
@@ -124,7 +126,10 @@ describe('Test function: estimateFee', function () {
         } catch (err) {
           result = err;
         } finally {
-          expect(isUpgradeRequiredStub).to.have.been.calledOnceWith(STARKNET_SEPOLIA_TESTNET_NETWORK, account2.address);
+          expect(getCorrectContractAddressStub).to.have.been.calledOnceWith(
+            STARKNET_SEPOLIA_TESTNET_NETWORK,
+            account2.publicKey,
+          );
           expect(result).to.be.an('Error');
         }
       });

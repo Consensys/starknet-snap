@@ -1,6 +1,6 @@
 import { toJson } from './utils/serializer';
 import { constants, num } from 'starknet';
-import { validateAndParseAddress, isUpgradeRequired } from '../src/utils/starknetUtils';
+import { validateAndParseAddress, getCorrectContractAddress } from '../src/utils/starknetUtils';
 import { ApiParams, ExtractPublicKeyRequestParams } from './types/snapApi';
 import { getAccount, getNetworkFromChainId } from './utils/snapUtils';
 import { getKeysFromAddress } from './utils/starknetUtils';
@@ -26,7 +26,15 @@ export async function extractPublicKey(params: ApiParams) {
       throw new Error(`The given user address is invalid: ${requestParamsObj.userAddress}`);
     }
 
-    if (await isUpgradeRequired(network, userAddress)) {
+    const { publicKey } = await getKeysFromAddress(keyDeriver, network, state, userAddress);
+    const { upgradeRequired, deployRequired, address } = await getCorrectContractAddress(network, publicKey);
+
+    if (upgradeRequired && deployRequired) {
+      // Edge case force cairo0 deploy because non-zero balance
+      throw new Error(`Cairo 0 contract address ${address} balance is not empty, deploy required`);
+    }
+
+    if (upgradeRequired && !deployRequired) {
       throw new Error('Upgrade required');
     }
 
@@ -34,7 +42,6 @@ export async function extractPublicKey(params: ApiParams) {
     const accContract = getAccount(state, userAddress, network.chainId);
     if (!accContract?.publicKey || num.toBigInt(accContract.publicKey) === constants.ZERO) {
       logger.log(`extractPublicKey: User address cannot be found or the signer public key is 0x0: ${userAddress}`);
-      const { publicKey } = await getKeysFromAddress(keyDeriver, network, state, userAddress);
       userPublicKey = publicKey;
     } else {
       userPublicKey = accContract.publicKey;

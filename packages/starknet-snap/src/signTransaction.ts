@@ -1,8 +1,13 @@
 import { toJson } from './utils/serializer';
 import { Signature } from 'starknet';
 import { ApiParams, SignTransactionRequestParams } from './types/snapApi';
-import { getKeysFromAddress, signTransactions, isUpgradeRequired } from './utils/starknetUtils';
-import { getNetworkFromChainId, getSignTxnTxt, showUpgradeRequestModal } from './utils/snapUtils';
+import { getKeysFromAddress, signTransactions, getCorrectContractAddress } from './utils/starknetUtils';
+import {
+  getNetworkFromChainId,
+  getSignTxnTxt,
+  showDeployRequestModal,
+  showUpgradeRequestModal,
+} from './utils/snapUtils';
 import { heading, panel, DialogType } from '@metamask/snaps-sdk';
 import { logger } from '../src/utils/logger';
 
@@ -12,9 +17,17 @@ export async function signTransaction(params: ApiParams): Promise<Signature | bo
     const requestParamsObj = requestParams as SignTransactionRequestParams;
     const signerAddress = requestParamsObj.signerAddress;
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
-    const { privateKey } = await getKeysFromAddress(keyDeriver, network, state, signerAddress);
+    const { privateKey, publicKey } = await getKeysFromAddress(keyDeriver, network, state, signerAddress);
 
-    if (await isUpgradeRequired(network, signerAddress)) {
+    const { upgradeRequired, deployRequired, address } = await getCorrectContractAddress(network, publicKey);
+
+    if (upgradeRequired && deployRequired) {
+      // Edge case force cairo0 deploy because non-zero balance
+      await showDeployRequestModal(wallet);
+      throw new Error(`Cairo 0 contract address ${address} balance is not empty, deploy required`);
+    }
+
+    if (upgradeRequired && !deployRequired) {
       await showUpgradeRequestModal(wallet);
       throw new Error('Upgrade required');
     }

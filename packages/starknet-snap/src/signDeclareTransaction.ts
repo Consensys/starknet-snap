@@ -4,9 +4,14 @@ import { ApiParams, SignDeclareTransactionRequestParams } from './types/snapApi'
 import {
   getKeysFromAddress,
   signDeclareTransaction as signDeclareTransactionUtil,
-  isUpgradeRequired,
+  getCorrectContractAddress,
 } from './utils/starknetUtils';
-import { getNetworkFromChainId, getSignTxnTxt, showUpgradeRequestModal } from './utils/snapUtils';
+import {
+  getNetworkFromChainId,
+  getSignTxnTxt,
+  showDeployRequestModal,
+  showUpgradeRequestModal,
+} from './utils/snapUtils';
 import { heading, panel, DialogType } from '@metamask/snaps-sdk';
 import { logger } from './utils/logger';
 
@@ -16,9 +21,17 @@ export async function signDeclareTransaction(params: ApiParams): Promise<Signatu
     const requestParamsObj = requestParams as SignDeclareTransactionRequestParams;
     const signerAddress = requestParamsObj.signerAddress;
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
-    const { privateKey } = await getKeysFromAddress(keyDeriver, network, state, signerAddress);
+    const { privateKey, publicKey } = await getKeysFromAddress(keyDeriver, network, state, signerAddress);
 
-    if (await isUpgradeRequired(network, signerAddress)) {
+    const { upgradeRequired, deployRequired, address } = await getCorrectContractAddress(network, publicKey);
+
+    if (upgradeRequired && deployRequired) {
+      // Edge case force cairo0 deploy because non-zero balance
+      await showDeployRequestModal(wallet);
+      throw new Error(`Cairo 0 contract address ${address} balance is not empty, deploy required`);
+    }
+
+    if (upgradeRequired && !deployRequired) {
       await showUpgradeRequestModal(wallet);
       throw new Error('Upgrade required');
     }
