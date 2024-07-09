@@ -33,12 +33,12 @@ export async function executeTxn(params: ApiParams) {
       addressIndex,
     } = await getKeysFromAddress(keyDeriver, network, state, senderAddress);
 
-    const { upgradeRequired, deployRequired } = await getCorrectContractAddress(network, publicKey, state);
+    const { upgradeRequired, deployRequired, address } = await getCorrectContractAddress(network, publicKey);
 
     if (upgradeRequired && deployRequired) {
       // Edge case force cairo0 deploy because non-zero balance
       await showDeployRequestModal(wallet);
-      throw new Error('Deploy required');
+      throw new Error(`Cairo 0 contract address ${address} balance is not empty, deploy required`);
     }
 
     if (upgradeRequired && !deployRequired) {

@@ -34,7 +34,7 @@ export async function recoverAccounts(params: ApiParams) {
         signerPubKey: signerPublicKey,
         upgradeRequired,
         deployRequired,
-      } = await getCorrectContractAddress(network, publicKey, state);
+      } = await getCorrectContractAddress(network, publicKey);
       logger.log(
         `recoverAccounts: index ${i}:\ncontractAddress = ${contractAddress}\npublicKey = ${publicKey}\nisUpgradeRequired = ${upgradeRequired}`,
       );

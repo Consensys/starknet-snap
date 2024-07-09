@@ -259,6 +259,9 @@ export function getSendTxnText(
       logger.error(`getSigningTxnText: error found in amount conversion: ${err}`);
     }
   }
+  if (contractFuncName === 'deploy') {
+    // [TODO] handle specific deploy dialog aspects ?
+  }
 
   return components;
 }

@@ -18,7 +18,7 @@ import { AccContract, VoyagerTransactionType, Transaction, TransactionStatus } f
 import { ApiParams, CreateAccountRequestParams } from './types/snapApi';
 import { heading, panel, DialogType } from '@metamask/snaps-sdk';
 import { logger } from './utils/logger';
-import { ACCOUNT_CLASS_HASH_LEGACY, CAIRO_VERSION, CAIRO_VERSION_LEGACY } from './utils/constants';
+import { CAIRO_VERSION, CAIRO_VERSION_LEGACY } from './utils/constants';
 import { CairoVersion, EstimateFee, num } from 'starknet';
 
 /**
@@ -68,12 +68,13 @@ export async function createAccount(
           contractCallData,
           publicKey,
           privateKey,
+          cairoVersion,
         );
         logger.log(`estimateAccountDeployFee:\nestimateDeployFee: ${toJson(estimateDeployFee)}`);
         const maxFee = num.toBigInt(estimateDeployFee.suggestedMaxFee.toString(10) ?? '0');
         const dialogComponents = getSendTxnText(
           state,
-          ACCOUNT_CLASS_HASH_LEGACY,
+          contractAddress,
           'deploy',
           contractCallData,
           contractAddress,
@@ -114,6 +115,8 @@ export async function createAccount(
           derivationPath,
           deployTxnHash: deployResp.transaction_hash,
           chainId: network.chainId,
+          upgradeRequired: cairoVersion !== CAIRO_VERSION,
+          deployRequired: false,
         };
 
         await upsertAccount(userAccount, wallet, saveMutex);

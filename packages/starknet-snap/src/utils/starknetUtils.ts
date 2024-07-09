@@ -47,12 +47,13 @@ import {
   ACCOUNT_CLASS_HASH,
   CAIRO_VERSION,
   CAIRO_VERSION_LEGACY,
+  ETHER_MAINNET,
+  ETHER_SEPOLIA_TESTNET,
 } from './constants';
 import { getAddressKey } from './keyPair';
 import {
   getAccount,
   getAccounts,
-  getEtherErc20Token,
   getRPCUrl,
   getTransactionFromVoyagerUrl,
   getTransactionsFromVoyagerUrl,
@@ -763,12 +764,7 @@ export async function estimateAccountUpgradeFee(
  * @param  publicKey - address's public key.
  * @returns - address and address's public key.
  */
-export const getCorrectContractAddress = async (
-  network: Network,
-  publicKey: string,
-  state: SnapState,
-  maxFee = constants.ZERO,
-) => {
+export const getCorrectContractAddress = async (network: Network, publicKey: string, maxFee = constants.ZERO) => {
   const { address: contractAddress, addressLegacy: contractAddressLegacy } = getPermutationAddresses(publicKey);
 
   logger.log(
@@ -788,50 +784,44 @@ export const getCorrectContractAddress = async (
       throw e;
     }
 
-    logger.log(
-      `getContractAddressByKey: cairo ${CAIRO_VERSION} contract cant found, try cairo ${CAIRO_VERSION_LEGACY}`,
-    );
+    logger.log(`getContractAddressByKey: cairo ${CAIRO_VERSION} contract not found, try cairo ${CAIRO_VERSION_LEGACY}`);
 
     try {
+      address = contractAddressLegacy;
       const version = await getVersion(contractAddressLegacy, network);
       upgradeRequired = isGTEMinVersion(hexToString(version)) ? false : true;
+      console.log(`upgradeRequired: ${upgradeRequired}`);
       pk = await getContractOwner(
         contractAddressLegacy,
         network,
         upgradeRequired ? CAIRO_VERSION_LEGACY : CAIRO_VERSION,
       );
-      address = contractAddressLegacy;
     } catch (e) {
-      if (e.message.includes('network error for getSigner')) {
+      if (!e.message.includes('Contract not found')) {
         throw e;
       }
-      const accountDeployed = await isAccountDeployed(network, address);
-      if (accountDeployed) {
-        address = contractAddressLegacy;
-        upgradeRequired = true;
-        deployRequired = false;
-      } else {
-        // Edge case detection
-        logger.log(`getContractAddressByKey: no deployed contract found, checking balance for edge cases`);
-        try {
-          const balance = num.toBigInt(
-            (await getBalance(contractAddressLegacy, getEtherErc20Token(state, network.chainId)?.address, network)) ??
-              num.toBigInt(constants.ZERO),
+      // Here account is not deployed, proceed with edge case detection
+      logger.log(`getContractAddressByKey: no deployed contract found, checking balance for edge cases`);
+      try {
+        const etherErc20TokenAddress =
+          network.chainId === ETHER_SEPOLIA_TESTNET.chainId ? ETHER_SEPOLIA_TESTNET.address : ETHER_MAINNET.address;
+
+        const balance = num.toBigInt(
+          (await getBalance(contractAddressLegacy, etherErc20TokenAddress, network)) ?? num.toBigInt(constants.ZERO),
+        );
+        if (balance > maxFee) {
+          upgradeRequired = true;
+          deployRequired = true;
+          logger.log(
+            `getContractAddressByKey: non deployed cairo0 contract found with non-zero balance, force cairo ${CAIRO_VERSION_LEGACY}`,
           );
-          if (balance > maxFee) {
-            upgradeRequired = true;
-            deployRequired = true;
-            address = contractAddressLegacy;
-            logger.log(
-              `getContractAddressByKey: non deployed cairo0 contract found with non-zero balance, force cairo ${CAIRO_VERSION_LEGACY}`,
-            );
-          } else {
-            logger.log(`getContractAddressByKey: no deployed contract found, fallback to cairo ${CAIRO_VERSION}`);
-          }
-        } catch (err) {
-          logger.log(`getContractAddressByKey: balance check failed with error ${err}`);
-          throw err;
+        } else {
+          address = contractAddress;
+          logger.log(`getContractAddressByKey: no deployed contract found, fallback to cairo ${CAIRO_VERSION}`);
         }
+      } catch (err) {
+        logger.log(`getContractAddressByKey: balance check failed with error ${err}`);
+        throw err;
       }
     }
   }

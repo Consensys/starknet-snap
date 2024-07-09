@@ -69,8 +69,6 @@ export const UpgradeModelView = ({ address }: Props) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stage, dispatch]);
 
-  const upgradeTxt = 'Upgrade';
-
   const renderComponent = () => {
     switch (stage) {
       case Stage.INIT:
@@ -85,11 +83,11 @@ export const UpgradeModelView = ({ address }: Props) => {
               this version.
               <br />
               <br />
-              Click on the "{upgradeTxt}" button to install it.
+              Click on the Upgrade button to install it.
               <br />
               Thank you!
             </DescriptionCentered>
-            <UpgradeButton onClick={onUpgrade}>{upgradeTxt}</UpgradeButton>
+            <UpgradeButton onClick={onUpgrade}>Upgrade</UpgradeButton>
           </>
         );
       case Stage.WAITING_FOR_TXN:
