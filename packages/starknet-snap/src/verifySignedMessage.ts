@@ -5,6 +5,7 @@ import {
   getFullPublicKeyPairFromPrivateKey,
   getKeysFromAddress,
   getCorrectContractAddress,
+  validateAccountRequireUpgradeOrDeploy,
 } from './utils/starknetUtils';
 import { getNetworkFromChainId } from './utils/snapUtils';
 import { ApiParams, VerifySignedMessageRequestParams } from './types/snapApi';
@@ -46,16 +47,7 @@ export async function verifySignedMessage(params: ApiParams) {
       state,
       verifySignerAddress,
     );
-    const { upgradeRequired, deployRequired, address } = await getCorrectContractAddress(network, publicKey);
-
-    if (upgradeRequired && deployRequired) {
-      // Edge case force cairo0 deploy because non-zero balance
-      throw new Error(`Cairo 0 contract address ${address} balance is not empty, deploy required`);
-    }
-
-    if (upgradeRequired && !deployRequired) {
-      throw new Error('Upgrade required');
-    }
+    await validateAccountRequireUpgradeOrDeploy(network,verifySignerAddress, publicKey);
 
     const fullPublicKey = getFullPublicKeyPairFromPrivateKey(signerPrivateKey);
 

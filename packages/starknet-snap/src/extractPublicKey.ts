@@ -1,6 +1,6 @@
 import { toJson } from './utils/serializer';
 import { constants, num } from 'starknet';
-import { validateAndParseAddress, getCorrectContractAddress } from '../src/utils/starknetUtils';
+import { validateAndParseAddress, getCorrectContractAddress, validateAccountRequireUpgradeOrDeploy } from '../src/utils/starknetUtils';
 import { ApiParams, ExtractPublicKeyRequestParams } from './types/snapApi';
 import { getAccount, getNetworkFromChainId } from './utils/snapUtils';
 import { getKeysFromAddress } from './utils/starknetUtils';
@@ -27,16 +27,7 @@ export async function extractPublicKey(params: ApiParams) {
     }
 
     const { publicKey } = await getKeysFromAddress(keyDeriver, network, state, userAddress);
-    const { upgradeRequired, deployRequired, address } = await getCorrectContractAddress(network, publicKey);
-
-    if (upgradeRequired && deployRequired) {
-      // Edge case force cairo0 deploy because non-zero balance
-      throw new Error(`Cairo 0 contract address ${address} balance is not empty, deploy required`);
-    }
-
-    if (upgradeRequired && !deployRequired) {
-      throw new Error('Upgrade required');
-    }
+    await validateAccountRequireUpgradeOrDeploy(network, userAddress, publicKey);
 
     let userPublicKey;
     const accContract = getAccount(state, userAddress, network.chainId);

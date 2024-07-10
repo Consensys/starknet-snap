@@ -48,6 +48,7 @@ describe('Test function: estimateFee', function () {
     walletStub.rpcStubs.snap_getBip44Entropy.callsFake(getBip44EntropyStub);
     apiParams.keyDeriver = await getAddressKeyDeriver(walletStub);
     sandbox.stub(utils, 'callContract').resolves(getBalanceResp);
+    sandbox.stub(utils, 'getAccContractAddressAndCallDataLegacy').resolves(account2.address)
   });
 
   afterEach(function () {
@@ -105,6 +106,12 @@ describe('Test function: estimateFee', function () {
   describe('when request param validation pass', function () {
     beforeEach(async function () {
       apiParams.requestParams = Object.assign({}, requestObject);
+      sandbox.stub(utils, 'getKeysFromAddress').resolves({
+        privateKey: 'pk',
+        publicKey: account2.publicKey,
+        addressIndex: account2.addressIndex,
+        derivationPath: `m / bip32:1' / bip32:1' / bip32:1' / bip32:1'`,
+      });
     });
 
     afterEach(async function () {
@@ -112,11 +119,10 @@ describe('Test function: estimateFee', function () {
     });
 
     describe('when account require upgrade', function () {
-      let getCorrectContractAddressStub: sinon.SinonStub;
+      let validateAccountRequireUpgradeOrDeployStup: sinon.SinonStub;
       beforeEach(async function () {
-        getCorrectContractAddressStub = sandbox
-          .stub(utils, 'getCorrectContractAddress')
-          .resolves({ address: '', signerPubKey: '', upgradeRequired: true, deployRequired: false });
+        validateAccountRequireUpgradeOrDeployStup = sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy')
+      .throws(new utils.UpgradeRequiredError("Upgrade Required"))
       });
 
       it('should throw error if upgrade required', async function () {
@@ -126,11 +132,13 @@ describe('Test function: estimateFee', function () {
         } catch (err) {
           result = err;
         } finally {
-          expect(getCorrectContractAddressStub).to.have.been.calledOnceWith(
+          expect(validateAccountRequireUpgradeOrDeployStup).to.have.been.calledOnceWith(
             STARKNET_SEPOLIA_TESTNET_NETWORK,
+            account2.address,
             account2.publicKey,
           );
           expect(result).to.be.an('Error');
+          expect(result.message).to.equal('Upgrade Required');
         }
       });
     });
@@ -150,7 +158,8 @@ describe('Test function: estimateFee', function () {
       describe('when account is deployed', function () {
         beforeEach(async function () {
           estimateFeeBulkStub = sandbox.stub(utils, 'estimateFeeBulk');
-          sandbox.stub(utils, 'isAccountDeployed').resolves(true);
+          sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy')
+          .resolves(null);
         });
 
         it('should estimate the fee correctly', async function () {
@@ -165,6 +174,8 @@ describe('Test function: estimateFee', function () {
       describe('when account is not deployed', function () {
         beforeEach(async function () {
           estimateFeeStub = sandbox.stub(utils, 'estimateFee');
+          sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy')
+          .resolves(null);
           sandbox.stub(utils, 'isAccountDeployed').resolves(false);
         });
 

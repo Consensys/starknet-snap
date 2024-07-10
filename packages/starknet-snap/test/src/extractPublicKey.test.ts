@@ -86,17 +86,18 @@ describe('Test function: extractPublicKey', function () {
       apiParams.requestParams = Object.assign({}, requestObject);
     });
 
-    describe('when require upgrade checking fail', function () {
+    describe('when validateAccountRequireUpgradeOrDeploy checking fail', function () {
       it('should throw error', async function () {
-        const getCorrectContractAddressStub = sandbox.stub(utils, 'getCorrectContractAddress').throws('network error');
+        const validateAccountRequireUpgradeOrDeployStup = sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').throws('network error');
         let result;
         try {
           result = await extractPublicKey(apiParams);
         } catch (err) {
           result = err;
         } finally {
-          expect(getCorrectContractAddressStub).to.have.been.calledOnceWith(
+          expect(validateAccountRequireUpgradeOrDeployStup).to.have.been.calledOnceWith(
             STARKNET_SEPOLIA_TESTNET_NETWORK,
+            account1.address,
             account1.publicKey,
           );
           expect(result).to.be.an('Error');
@@ -105,11 +106,10 @@ describe('Test function: extractPublicKey', function () {
     });
 
     describe('when account require upgrade', function () {
-      let getCorrectContractAddressStub: sinon.SinonStub;
+      let validateAccountRequireUpgradeOrDeployStup: sinon.SinonStub;
       beforeEach(async function () {
-        getCorrectContractAddressStub = sandbox
-          .stub(utils, 'getCorrectContractAddress')
-          .resolves({ address: '', signerPubKey: '', upgradeRequired: true, deployRequired: false });
+        validateAccountRequireUpgradeOrDeployStup = sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy')
+      .throws(new utils.UpgradeRequiredError("Upgrade Required"))
       });
 
       it('should throw error if upgrade required', async function () {
@@ -119,8 +119,9 @@ describe('Test function: extractPublicKey', function () {
         } catch (err) {
           result = err;
         } finally {
-          expect(getCorrectContractAddressStub).to.have.been.calledOnceWith(
+          expect(validateAccountRequireUpgradeOrDeployStup).to.have.been.calledOnceWith(
             STARKNET_SEPOLIA_TESTNET_NETWORK,
+            account1.address,
             account1.publicKey,
           );
           expect(result).to.be.an('Error');
@@ -130,9 +131,8 @@ describe('Test function: extractPublicKey', function () {
 
     describe('when account does not require upgrade', function () {
       beforeEach(async function () {
-        sandbox
-          .stub(utils, 'getCorrectContractAddress')
-          .resolves({ address: '', signerPubKey: '', upgradeRequired: false, deployRequired: false });
+        sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy')
+          .resolves(null);
       });
 
       it('should get the public key of the specified user account correctly', async function () {

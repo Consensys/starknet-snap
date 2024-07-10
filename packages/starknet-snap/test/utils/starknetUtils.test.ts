@@ -581,7 +581,7 @@ describe('Test function: getCorrectContractAddress', function () {
       });
       it(`should return Cairo${CAIRO_VERSION_LEGACY} address with upgrade = true and deploy = true if balance`, async function () {
         sandbox.stub(utils, 'getVersion').rejects(new Error('Contract not found'));
-        sandbox.stub(utils, 'getBalance').callsFake(async () => getNonZeroBalanceResp[0]);
+        sandbox.stub(utils, 'isEthBalanceEmpty').resolves(false);
 
         getSignerStub = sandbox.stub(utils, 'getSigner').resolves(PK);
         getOwnerStub = sandbox.stub(utils, 'getOwner').resolves(PK);

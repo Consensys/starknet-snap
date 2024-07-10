@@ -1,5 +1,5 @@
 import { toJson } from './utils/serializer';
-import { getCorrectContractAddress, validateAndParseAddress } from '../src/utils/starknetUtils';
+import { getCorrectContractAddress, validateAccountRequireUpgradeOrDeploy, validateAndParseAddress } from '../src/utils/starknetUtils';
 import { ApiParams, ExtractPrivateKeyRequestParams } from './types/snapApi';
 import { getNetworkFromChainId } from './utils/snapUtils';
 import { getKeysFromAddress } from './utils/starknetUtils';
@@ -23,16 +23,7 @@ export async function extractPrivateKey(params: ApiParams) {
     }
 
     const { privateKey: userPrivateKey, publicKey } = await getKeysFromAddress(keyDeriver, network, state, userAddress);
-    const { upgradeRequired, deployRequired, address } = await getCorrectContractAddress(network, publicKey);
-
-    if (upgradeRequired && deployRequired) {
-      // Edge case force cairo0 deploy because non-zero balance
-      throw new Error(`Cairo 0 contract address ${address} balance is not empty, deploy required`);
-    }
-
-    if (upgradeRequired && !deployRequired) {
-      throw new Error('Upgrade required');
-    }
+    await validateAccountRequireUpgradeOrDeploy(network,userAddress, publicKey);
 
     const response = await wallet.request({
       method: 'snap_dialog',

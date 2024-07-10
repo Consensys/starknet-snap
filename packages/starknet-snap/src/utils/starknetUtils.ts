@@ -63,6 +63,18 @@ import { logger } from './logger';
 import { RpcV4GetTransactionReceiptResponse } from '../types/snapApi';
 import { hexToString } from './formatterUtils';
 
+export class UpgradeRequiredError extends Error {
+  constructor(msg:string) {
+    super(msg);
+  }
+}
+
+export class DeployRequiredError extends Error {
+  constructor(msg:string) {
+    super(msg);
+  }
+}
+
 export const getCallDataArray = (callDataStr: string): string[] => {
   return (callDataStr ?? '')
     .split(',')
@@ -252,6 +264,17 @@ export const getBalance = async (address: string, tokenAddress: string, network:
   const resp = await callContract(network, tokenAddress, 'balanceOf', [num.toBigInt(address).toString(10)]);
   return resp[0];
 };
+
+
+export const isEthBalanceEmpty = async (network: Network, address: string, maxFee: bigint = constants.ZERO) => {
+  const etherErc20TokenAddress =
+    network.chainId === ETHER_SEPOLIA_TESTNET.chainId ? ETHER_SEPOLIA_TESTNET.address : ETHER_MAINNET.address;
+
+  return num.toBigInt(
+    (await getBalance(address, etherErc20TokenAddress, network)) ?? num.toBigInt(constants.ZERO),
+  ) <= maxFee;
+};
+
 
 export const getTransactionStatus = async (transactionHash: num.BigNumberish, network: Network) => {
   const provider = getProvider(network);
@@ -681,6 +704,30 @@ export const getPermutationAddresses = (pk: string) => {
 };
 
 /**
+ * Check address needed deploy by using getVersion and check if eth balance is non empty.
+ *
+ * @param  network - Network.
+ * @param  address - Input address.
+ * @returns - boolean.
+ */
+export const isDeployRequired = async (network: Network, address: string, pubKey: string) => {
+  logger.log(`isDeployRequired: address = ${address}`);
+  const { address: addressLegacy } = getAccContractAddressAndCallDataLegacy(pubKey);
+
+  try {
+    if (address === addressLegacy) {
+      await getVersion(address, network);
+    }
+    return false;
+  } catch (err) {
+    if (!err.message.includes('Contract not found')) {
+      throw err;
+    }
+    return !await(isEthBalanceEmpty(network, address));
+  }
+};
+
+/**
  * Check address needed upgrade by using getVersion and compare with MIN_ACC_CONTRACT_VERSION
  *
  * @param  network - Network.
@@ -801,23 +848,18 @@ export const getCorrectContractAddress = async (network: Network, publicKey: str
         throw e;
       }
       // Here account is not deployed, proceed with edge case detection
-      logger.log(`getContractAddressByKey: no deployed contract found, checking balance for edge cases`);
       try {
-        const etherErc20TokenAddress =
-          network.chainId === ETHER_SEPOLIA_TESTNET.chainId ? ETHER_SEPOLIA_TESTNET.address : ETHER_MAINNET.address;
-
-        const balance = num.toBigInt(
-          (await getBalance(contractAddressLegacy, etherErc20TokenAddress, network)) ?? num.toBigInt(constants.ZERO),
-        );
-        if (balance > maxFee) {
+        if (await isEthBalanceEmpty(network, address, maxFee)){
+          console.log("but not here")
+          address = contractAddress;
+          logger.log(`getContractAddressByKey: no deployed contract found, fallback to cairo ${CAIRO_VERSION}`);
+        }
+        else{
           upgradeRequired = true;
           deployRequired = true;
           logger.log(
             `getContractAddressByKey: non deployed cairo0 contract found with non-zero balance, force cairo ${CAIRO_VERSION_LEGACY}`,
           );
-        } else {
-          address = contractAddress;
-          logger.log(`getContractAddressByKey: no deployed contract found, fallback to cairo ${CAIRO_VERSION}`);
         }
       } catch (err) {
         logger.log(`getContractAddressByKey: balance check failed with error ${err}`);
@@ -871,4 +913,12 @@ export const signMessage = async (privateKey: string, typedDataMessage: TypedDat
 export const getStarkNameUtil = async (network: Network, userAddress: string) => {
   const provider = getProvider(network);
   return Account.getStarkName(provider, userAddress);
+};
+
+export const validateAccountRequireUpgradeOrDeploy = async (network: Network, address: string, pubKey: string, displayDialog = true) => {
+  if (await isUpgradeRequired(network, address)) {
+    throw new UpgradeRequiredError('Upgrade required')
+  } else if (!(await isDeployRequired(network, address, pubKey))) {
+    throw new DeployRequiredError(`Cairo 0 contract address ${address} balance is not empty, deploy required`)
+  }
 };

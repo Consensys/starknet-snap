@@ -1,6 +1,6 @@
 import { toJson } from './utils/serializer';
 import { Invocations, TransactionType } from 'starknet';
-import { getCorrectContractAddress, validateAndParseAddress } from '../src/utils/starknetUtils';
+import { getCorrectContractAddress, validateAccountRequireUpgradeOrDeploy, validateAndParseAddress } from '../src/utils/starknetUtils';
 import { ApiParams, EstimateFeeRequestParams } from './types/snapApi';
 import { getNetworkFromChainId } from './utils/snapUtils';
 import {
@@ -51,16 +51,7 @@ export async function estimateFee(params: ApiParams) {
       senderAddress,
     );
 
-    const { upgradeRequired, deployRequired, address } = await getCorrectContractAddress(network, publicKey);
-
-    if (upgradeRequired && deployRequired) {
-      // Edge case force cairo0 deploy because non-zero balance
-      throw new Error(`Cairo 0 contract address ${address} balance is not empty, deploy required`);
-    }
-
-    if (upgradeRequired && !deployRequired) {
-      throw new Error('Upgrade required');
-    }
+    await validateAccountRequireUpgradeOrDeploy(network, senderAddress, publicKey);
 
     const txnInvocation = {
       contractAddress,
