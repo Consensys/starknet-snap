@@ -30,7 +30,7 @@ export async function declareContract(params: ApiParams) {
     try {
       await validateAccountRequireUpgradeOrDeploy(network, senderAddress, publicKey);
     } catch (e) {
-            if (e instanceof DeployRequiredError) {
+      if (e instanceof DeployRequiredError) {
         await showDeployRequestModal(wallet);
       }
       if (e instanceof UpgradeRequiredError) {

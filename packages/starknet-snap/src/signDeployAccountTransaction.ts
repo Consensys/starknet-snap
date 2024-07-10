@@ -28,7 +28,7 @@ export async function signDeployAccountTransaction(params: ApiParams): Promise<S
     try {
       await validateAccountRequireUpgradeOrDeploy(network, signerAddress, publicKey);
     } catch (e) {
-            if (e instanceof DeployRequiredError) {
+      if (e instanceof DeployRequiredError) {
         await showDeployRequestModal(wallet);
       }
       if (e instanceof UpgradeRequiredError) {

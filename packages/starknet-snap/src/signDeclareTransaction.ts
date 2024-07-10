@@ -28,7 +28,7 @@ export async function signDeclareTransaction(params: ApiParams): Promise<Signatu
     try {
       await validateAccountRequireUpgradeOrDeploy(network, signerAddress, publicKey);
     } catch (e) {
-            if (e instanceof DeployRequiredError) {
+      if (e instanceof DeployRequiredError) {
         await showDeployRequestModal(wallet);
       }
       if (e instanceof UpgradeRequiredError) {
