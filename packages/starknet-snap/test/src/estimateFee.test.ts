@@ -18,6 +18,7 @@ import {
 import { Mutex } from 'async-mutex';
 import { ApiParams, EstimateFeeRequestParams } from '../../src/types/snapApi';
 import { TransactionType } from 'starknet';
+import { UpgradeRequiredError } from '../../src/utils/exceptions';
 
 chai.use(sinonChai);
 const sandbox = sinon.createSandbox();
@@ -123,7 +124,7 @@ describe('Test function: estimateFee', function () {
       beforeEach(async function () {
         validateAccountRequireUpgradeOrDeployStub = sandbox
           .stub(utils, 'validateAccountRequireUpgradeOrDeploy')
-          .throws(new utils.UpgradeRequiredError('Upgrade Required'));
+          .throws(new UpgradeRequiredError('Upgrade Required'));
       });
 
       it('should throw error if upgrade required', async function () {

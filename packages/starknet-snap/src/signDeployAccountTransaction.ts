@@ -5,15 +5,8 @@ import {
   getKeysFromAddress,
   signDeployAccountTransaction as signDeployAccountTransactionUtil,
   validateAccountRequireUpgradeOrDeploy,
-  DeployRequiredError,
-  UpgradeRequiredError,
 } from './utils/starknetUtils';
-import {
-  getNetworkFromChainId,
-  getSignTxnTxt,
-  showDeployRequestModal,
-  showUpgradeRequestModal,
-} from './utils/snapUtils';
+import { getNetworkFromChainId, getSignTxnTxt, showAccountRequireUpgradeOrDeployModal } from './utils/snapUtils';
 import { heading, panel, DialogType } from '@metamask/snaps-sdk';
 import { logger } from '../src/utils/logger';
 
@@ -28,12 +21,7 @@ export async function signDeployAccountTransaction(params: ApiParams): Promise<S
     try {
       await validateAccountRequireUpgradeOrDeploy(network, signerAddress, publicKey);
     } catch (e) {
-      if (e instanceof DeployRequiredError) {
-        await showDeployRequestModal(wallet);
-      }
-      if (e instanceof UpgradeRequiredError) {
-        await showUpgradeRequestModal(wallet);
-      }
+      await showAccountRequireUpgradeOrDeployModal(wallet, e);
       throw e;
     }
 

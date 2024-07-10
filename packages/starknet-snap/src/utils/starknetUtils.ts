@@ -62,18 +62,7 @@ import {
 import { logger } from './logger';
 import { RpcV4GetTransactionReceiptResponse } from '../types/snapApi';
 import { hexToString } from './formatterUtils';
-
-export class UpgradeRequiredError extends Error {
-  constructor(msg: string) {
-    super(msg);
-  }
-}
-
-export class DeployRequiredError extends Error {
-  constructor(msg: string) {
-    super(msg);
-  }
-}
+import { DeployRequiredError, UpgradeRequiredError } from './exceptions';
 
 export const getCallDataArray = (callDataStr: string): string[] => {
   return (callDataStr ?? '')
@@ -835,7 +824,6 @@ export const getCorrectContractAddress = async (network: Network, publicKey: str
       address = contractAddressLegacy;
       const version = await getVersion(contractAddressLegacy, network);
       upgradeRequired = isGTEMinVersion(hexToString(version)) ? false : true;
-      console.log(`upgradeRequired: ${upgradeRequired}`);
       pk = await getContractOwner(
         contractAddressLegacy,
         network,
@@ -848,7 +836,6 @@ export const getCorrectContractAddress = async (network: Network, publicKey: str
       // Here account is not deployed, proceed with edge case detection
       try {
         if (await isEthBalanceEmpty(network, address, maxFee)) {
-          console.log('but not here');
           address = contractAddress;
           logger.log(`getContractAddressByKey: no deployed contract found, fallback to cairo ${CAIRO_VERSION}`);
         } else {

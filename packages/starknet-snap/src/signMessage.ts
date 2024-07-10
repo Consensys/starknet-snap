@@ -4,15 +4,8 @@ import {
   getKeysFromAddress,
   validateAndParseAddress,
   validateAccountRequireUpgradeOrDeploy,
-  DeployRequiredError,
-  UpgradeRequiredError,
 } from './utils/starknetUtils';
-import {
-  getNetworkFromChainId,
-  addDialogTxt,
-  showUpgradeRequestModal,
-  showDeployRequestModal,
-} from './utils/snapUtils';
+import { getNetworkFromChainId, addDialogTxt, showAccountRequireUpgradeOrDeployModal } from './utils/snapUtils';
 import { ApiParams, SignMessageRequestParams } from './types/snapApi';
 import { heading, panel, DialogType } from '@metamask/snaps-sdk';
 import { logger } from './utils/logger';
@@ -24,6 +17,14 @@ export async function signMessage(params: ApiParams) {
     const signerAddress = requestParamsObj.signerAddress;
     const typedDataMessage = requestParamsObj.typedDataMessage;
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
+
+    logger.log(`signMessage:\nsignerAddress: ${signerAddress}\ntypedDataMessage: ${toJson(typedDataMessage)}`);
+
+    try {
+      validateAndParseAddress(signerAddress);
+    } catch (err) {
+      throw new Error(`The given signer address is invalid: ${signerAddress}`);
+    }
 
     const { privateKey: signerPrivateKey, publicKey } = await getKeysFromAddress(
       keyDeriver,
@@ -38,21 +39,8 @@ export async function signMessage(params: ApiParams) {
     try {
       await validateAccountRequireUpgradeOrDeploy(network, signerAddress, publicKey);
     } catch (e) {
-      if (e instanceof DeployRequiredError) {
-        await showDeployRequestModal(wallet);
-      }
-      if (e instanceof UpgradeRequiredError) {
-        await showUpgradeRequestModal(wallet);
-      }
+      await showAccountRequireUpgradeOrDeployModal(wallet, e);
       throw e;
-    }
-
-    logger.log(`signMessage:\nsignerAddress: ${signerAddress}\ntypedDataMessage: ${toJson(typedDataMessage)}`);
-
-    try {
-      validateAndParseAddress(signerAddress);
-    } catch (err) {
-      throw new Error(`The given signer address is invalid: ${signerAddress}`);
     }
 
     const components = [];

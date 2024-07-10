@@ -1,17 +1,10 @@
 import { toJson } from './utils/serializer';
 import { ApiParams, DeclareContractRequestParams } from './types/snapApi';
-import {
-  getNetworkFromChainId,
-  getDeclareSnapTxt,
-  showUpgradeRequestModal,
-  showDeployRequestModal,
-} from './utils/snapUtils';
+import { getNetworkFromChainId, getDeclareSnapTxt, showAccountRequireUpgradeOrDeployModal } from './utils/snapUtils';
 import {
   getKeysFromAddress,
   declareContract as declareContractUtil,
   validateAccountRequireUpgradeOrDeploy,
-  DeployRequiredError,
-  UpgradeRequiredError,
 } from './utils/starknetUtils';
 import { heading, panel, DialogType } from '@metamask/snaps-sdk';
 import { logger } from './utils/logger';
@@ -30,12 +23,7 @@ export async function declareContract(params: ApiParams) {
     try {
       await validateAccountRequireUpgradeOrDeploy(network, senderAddress, publicKey);
     } catch (e) {
-      if (e instanceof DeployRequiredError) {
-        await showDeployRequestModal(wallet);
-      }
-      if (e instanceof UpgradeRequiredError) {
-        await showUpgradeRequestModal(wallet);
-      }
+      await showAccountRequireUpgradeOrDeployModal(wallet, e);
       throw e;
     }
 

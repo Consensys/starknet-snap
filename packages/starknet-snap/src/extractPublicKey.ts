@@ -26,6 +26,7 @@ export async function extractPublicKey(params: ApiParams) {
       throw new Error(`The given user address is invalid: ${requestParamsObj.userAddress}`);
     }
 
+    // [TODO] logic below is redundant, getKeysFromAddress is doing the same
     const { publicKey } = await getKeysFromAddress(keyDeriver, network, state, userAddress);
     await validateAccountRequireUpgradeOrDeploy(network, userAddress, publicKey);
 

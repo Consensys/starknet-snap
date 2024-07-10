@@ -3,8 +3,7 @@ import {
   getNetworkFromChainId,
   getTxnSnapTxt,
   addDialogTxt,
-  showUpgradeRequestModal,
-  showDeployRequestModal,
+  showAccountRequireUpgradeOrDeployModal,
 } from './utils/snapUtils';
 import {
   getKeysFromAddress,
@@ -14,8 +13,6 @@ import {
   getAccContractAddressAndCallData,
   addFeesFromAllTransactions,
   validateAccountRequireUpgradeOrDeploy,
-  DeployRequiredError,
-  UpgradeRequiredError,
 } from './utils/starknetUtils';
 import { ApiParams, ExecuteTxnRequestParams } from './types/snapApi';
 import { createAccount } from './createAccount';
@@ -38,12 +35,7 @@ export async function executeTxn(params: ApiParams) {
     try {
       await validateAccountRequireUpgradeOrDeploy(network, senderAddress, publicKey);
     } catch (e) {
-      if (e instanceof DeployRequiredError) {
-        await showDeployRequestModal(wallet);
-      }
-      if (e instanceof UpgradeRequiredError) {
-        await showUpgradeRequestModal(wallet);
-      }
+      await showAccountRequireUpgradeOrDeployModal(wallet, e);
       throw e;
     }
 

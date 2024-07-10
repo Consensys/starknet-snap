@@ -18,6 +18,7 @@ import { getAddressKeyDeriver } from '../../src/utils/keyPair';
 import * as utils from '../../src/utils/starknetUtils';
 import { Mutex } from 'async-mutex';
 import { ApiParams, SignMessageRequestParams } from '../../src/types/snapApi';
+import { DeployRequiredError, UpgradeRequiredError } from '../../src/utils/exceptions';
 
 chai.use(sinonChai);
 const sandbox = sinon.createSandbox();
@@ -142,7 +143,7 @@ describe('Test function: signMessage', function () {
       beforeEach(async function () {
         validateAccountRequireUpgradeOrDeployStub = sandbox
           .stub(utils, 'validateAccountRequireUpgradeOrDeploy')
-          .throws(new utils.UpgradeRequiredError('Upgrade Required'));
+          .throws(new UpgradeRequiredError('Upgrade Required'));
       });
 
       it('should throw error if upgrade required', async function () {
@@ -169,7 +170,7 @@ describe('Test function: signMessage', function () {
         validateAccountRequireUpgradeOrDeployStub = sandbox
           .stub(utils, 'validateAccountRequireUpgradeOrDeploy')
           .throws(
-            new utils.DeployRequiredError(
+            new DeployRequiredError(
               `Cairo 0 contract address ${account1.address} balance is not empty, deploy required`,
             ),
           );

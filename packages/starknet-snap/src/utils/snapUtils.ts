@@ -42,6 +42,7 @@ import {
   ChainIdFilter,
 } from './transaction/filter';
 import { logger } from './logger';
+import { DeployRequiredError, UpgradeRequiredError } from './exceptions';
 
 function hasOnlyAsciiChars(str: string) {
   return /^[ -~]+$/.test(str);
@@ -792,4 +793,12 @@ export async function showDeployRequestModal(wallet) {
       ]),
     },
   });
+}
+
+export async function showAccountRequireUpgradeOrDeployModal(wallet, e: DeployRequiredError | UpgradeRequiredError) {
+  if (e instanceof DeployRequiredError) {
+    await showDeployRequestModal(wallet);
+  } else if (e instanceof UpgradeRequiredError) {
+    await showUpgradeRequestModal(wallet);
+  }
 }

@@ -10,6 +10,7 @@ import { getAddressKeyDeriver } from '../../src/utils/keyPair';
 import * as utils from '../../src/utils/starknetUtils';
 import { Mutex } from 'async-mutex';
 import { ApiParams, ExtractPublicKeyRequestParams } from '../../src/types/snapApi';
+import { UpgradeRequiredError } from '../../src/utils/exceptions';
 
 chai.use(sinonChai);
 const sandbox = sinon.createSandbox();
@@ -112,7 +113,7 @@ describe('Test function: extractPublicKey', function () {
       beforeEach(async function () {
         validateAccountRequireUpgradeOrDeployStub = sandbox
           .stub(utils, 'validateAccountRequireUpgradeOrDeploy')
-          .throws(new utils.UpgradeRequiredError('Upgrade Required'));
+          .throws(new UpgradeRequiredError('Upgrade Required'));
       });
 
       it('should throw error if upgrade required', async function () {

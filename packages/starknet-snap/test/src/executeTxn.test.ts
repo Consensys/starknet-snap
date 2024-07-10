@@ -19,6 +19,7 @@ import { getAddressKeyDeriver } from '../../src/utils/keyPair';
 import { Mutex } from 'async-mutex';
 import { ApiParams, ExecuteTxnRequestParams } from '../../src/types/snapApi';
 import { GetTransactionReceiptResponse } from 'starknet';
+import { DeployRequiredError, UpgradeRequiredError } from '../../src/utils/exceptions';
 
 chai.use(sinonChai);
 const sandbox = sinon.createSandbox();
@@ -72,6 +73,13 @@ describe('Test function: executeTxn', function () {
     walletStub.rpcStubs.snap_dialog.resolves(true);
     walletStub.rpcStubs.snap_manageState.resolves(state);
     sandbox.stub(utils, 'waitForTransaction').resolves({} as unknown as GetTransactionReceiptResponse);
+    sandbox.stub(snapsUtil, 'showAccountRequireUpgradeOrDeployModal').callsFake(async (wallet, e) => {
+      if (e instanceof DeployRequiredError) {
+        await snapsUtil.showDeployRequestModal(wallet);
+      } else if (e instanceof UpgradeRequiredError) {
+        await snapsUtil.showUpgradeRequestModal(wallet);
+      }
+    });
   });
 
   afterEach(function () {
@@ -83,7 +91,7 @@ describe('Test function: executeTxn', function () {
   it('should 1) throw an error and 2) show upgrade modal if account upgrade required', async function () {
     const validateAccountRequireUpgradeOrDeployStub = sandbox
       .stub(utils, 'validateAccountRequireUpgradeOrDeploy')
-      .throws(new utils.UpgradeRequiredError('Upgrade Required'));
+      .throws(new UpgradeRequiredError('Upgrade Required'));
     const showUpgradeRequestModalStub = sandbox.stub(snapsUtil, 'showUpgradeRequestModal').resolves();
     let result;
     try {
@@ -101,9 +109,7 @@ describe('Test function: executeTxn', function () {
     const validateAccountRequireUpgradeOrDeployStub = sandbox
       .stub(utils, 'validateAccountRequireUpgradeOrDeploy')
       .throws(
-        new utils.DeployRequiredError(
-          `Cairo 0 contract address ${account1.address} balance is not empty, deploy required`,
-        ),
+        new DeployRequiredError(`Cairo 0 contract address ${account1.address} balance is not empty, deploy required`),
       );
     const showDeployRequestModalStub = sandbox.stub(snapsUtil, 'showDeployRequestModal').resolves();
     let result;
