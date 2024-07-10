@@ -115,7 +115,7 @@ export async function createAccount(
           derivationPath,
           deployTxnHash: deployResp.transaction_hash,
           chainId: network.chainId,
-          upgradeRequired: cairoVersion !== CAIRO_VERSION,
+          upgradeRequired: cairoVersion === CAIRO_VERSION_LEGACY,
           deployRequired: false,
         };
 

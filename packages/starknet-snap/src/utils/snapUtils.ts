@@ -373,6 +373,7 @@ export async function upsertAccount(userAccount: AccContract, wallet, mutex: Mut
       storedAccount.publicKey = userAccount.publicKey;
       storedAccount.deployTxnHash = userAccount.deployTxnHash || storedAccount.deployTxnHash;
       storedAccount.upgradeRequired = userAccount.upgradeRequired;
+      storedAccount.deployRequired = userAccount.deployRequired;
     }
 
     await wallet.request({

@@ -680,7 +680,7 @@ export const useStarkNetSnap = () => {
     return txStatus;
   };
 
-  const waitForAccountCreation = async (transactionHash: string, accountAddress: string, chainId: string) => {
+  const waitForAccountCreation = async (transactionHash: string, chainId: string) => {
     dispatch(enableLoadingWithMessage('Waiting for transaction to be finalised.'));
     try {
       // read transaction to check if the txn is ready

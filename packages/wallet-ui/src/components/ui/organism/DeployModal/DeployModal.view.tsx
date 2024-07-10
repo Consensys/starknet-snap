@@ -50,7 +50,7 @@ export const DeployModalView = ({ address }: Props) => {
   useEffect(() => {
     if (txnHash) {
       setStage(Stage.WAITING_FOR_TXN);
-      waitForAccountCreation(txnHash, address, chainId)
+      waitForAccountCreation(txnHash, chainId)
         .then((resp) => {
           setStage(resp === true ? Stage.SUCCESS : Stage.FAIL);
         })
@@ -69,8 +69,6 @@ export const DeployModalView = ({ address }: Props) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stage, dispatch]);
 
-  const deployTxt = 'Deploy';
-
   const renderComponent = () => {
     switch (stage) {
       case Stage.INIT:
@@ -83,11 +81,11 @@ export const DeployModalView = ({ address }: Props) => {
               A deployment of your address is necessary to proceed with the Snap.
               <br />
               <br />
-              Click on the "{deployTxt}" button to proceed.
+              Click on the "Deploy" button to proceed.
               <br />
               Thank you!
             </DescriptionCentered>
-            <DeployButton onClick={onDeploy}>{deployTxt}</DeployButton>
+            <DeployButton onClick={onDeploy}>Deploy</DeployButton>
           </>
         );
       case Stage.WAITING_FOR_TXN:

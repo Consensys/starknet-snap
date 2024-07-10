@@ -83,7 +83,7 @@ export const UpgradeModelView = ({ address }: Props) => {
               this version.
               <br />
               <br />
-              Click on the Upgrade button to install it.
+              Click on the "Upgrade" button to install it.
               <br />
               Thank you!
             </DescriptionCentered>
