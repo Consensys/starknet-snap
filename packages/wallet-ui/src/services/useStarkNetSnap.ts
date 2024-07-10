@@ -1,4 +1,9 @@
-import { setInfoModalVisible, setMinVersionModalVisible, setUpgradeModalVisible } from 'slices/modalSlice';
+import {
+  setInfoModalVisible,
+  setMinVersionModalVisible,
+  setUpgradeModalVisible,
+  setDeployModalVisible,
+} from 'slices/modalSlice';
 import { setNetworks } from 'slices/networkSlice';
 import { useAppDispatch, useAppSelector } from 'hooks/redux';
 import {
@@ -235,8 +240,9 @@ export const useStarkNetSnap = () => {
     const tokens = await getTokens(chainId);
     let acc: Account[] | Account = await recoverAccounts(chainId);
     let upgradeRequired = false;
-
-    if (!acc || acc.length === 0 || !acc[0].publicKey) {
+    let deployRequired = false;
+    deployRequired = (Array.isArray(acc) ? acc[0].deployRequired : (acc as Account).deployRequired) ?? false;
+    if (!acc || acc.length === 0 || (!acc[0].publicKey && !deployRequired)) {
       acc = await addAccount(chainId);
     } else {
       upgradeRequired = (Array.isArray(acc) ? acc[0].upgradeRequired : (acc as Account).upgradeRequired) ?? false;
@@ -269,7 +275,8 @@ export const useStarkNetSnap = () => {
     if (!Array.isArray(acc)) {
       dispatch(setInfoModalVisible(true));
     }
-    dispatch(setUpgradeModalVisible(upgradeRequired));
+    dispatch(setUpgradeModalVisible(upgradeRequired && !deployRequired));
+    dispatch(setDeployModalVisible(deployRequired));
     dispatch(disableLoading());
   };
 
@@ -412,6 +419,35 @@ export const useStarkNetSnap = () => {
     } catch (err) {
       //eslint-disable-next-line no-console
       console.error(err);
+    }
+  };
+
+  const deployAccount = async (contractAddress: string, maxFee: string, chainId: string) => {
+    dispatch(enableLoadingWithMessage('Deploying account...'));
+    try {
+      const response = await provider.request({
+        method: 'wallet_invokeSnap',
+        params: {
+          snapId,
+          request: {
+            method: 'starkNet_createAccountLegacy',
+            params: {
+              ...defaultParam,
+              contractAddress,
+              maxFee,
+              chainId,
+              deploy: true,
+            },
+          },
+        },
+      });
+      dispatch(disableLoading());
+      return response;
+    } catch (err) {
+      dispatch(disableLoading());
+      //eslint-disable-next-line no-console
+      console.error(err);
+      throw err;
     }
   };
 
@@ -644,6 +680,22 @@ export const useStarkNetSnap = () => {
     return txStatus;
   };
 
+  const waitForAccountCreation = async (transactionHash: string, chainId: string) => {
+    dispatch(enableLoadingWithMessage('Waiting for transaction to be finalised.'));
+    try {
+      // read transaction to check if the txn is ready
+      await waitForTransaction(transactionHash, chainId);
+      await recoverAccounts(chainId);
+      dispatch(disableLoading());
+      return true;
+    } catch (e) {
+      //eslint-disable-next-line no-console
+      console.log(`error while wait for transaction: ${e}`);
+      dispatch(disableLoading());
+      return false;
+    }
+  };
+
   const waitForAccountUpdate = async (transactionHash: string, accountAddress: string, chainId: string) => {
     dispatch(enableLoadingWithMessage('Waiting for transaction to be finalised.'));
     const toastr = new Toastr();
@@ -762,11 +814,13 @@ export const useStarkNetSnap = () => {
     estimateFees,
     sendTransaction,
     upgradeAccount,
+    deployAccount,
     getTransactions,
     getTransactionStatus,
     recoverAccounts,
     waitForTransaction,
     waitForAccountUpdate,
+    waitForAccountCreation,
     updateTokenBalance,
     getTokenBalance,
     addErc20Token,

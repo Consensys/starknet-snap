@@ -19,6 +19,7 @@ import { getAddressKeyDeriver } from '../../src/utils/keyPair';
 import { Mutex } from 'async-mutex';
 import { ApiParams, ExecuteTxnRequestParams } from '../../src/types/snapApi';
 import { GetTransactionReceiptResponse } from 'starknet';
+import { DeployRequiredError, UpgradeRequiredError } from '../../src/utils/exceptions';
 
 chai.use(sinonChai);
 const sandbox = sinon.createSandbox();
@@ -72,6 +73,13 @@ describe('Test function: executeTxn', function () {
     walletStub.rpcStubs.snap_dialog.resolves(true);
     walletStub.rpcStubs.snap_manageState.resolves(state);
     sandbox.stub(utils, 'waitForTransaction').resolves({} as unknown as GetTransactionReceiptResponse);
+    sandbox.stub(snapsUtil, 'showAccountRequireUpgradeOrDeployModal').callsFake(async (wallet, e) => {
+      if (e instanceof DeployRequiredError) {
+        await snapsUtil.showDeployRequestModal(wallet);
+      } else if (e instanceof UpgradeRequiredError) {
+        await snapsUtil.showUpgradeRequestModal(wallet);
+      }
+    });
   });
 
   afterEach(function () {
@@ -80,8 +88,10 @@ describe('Test function: executeTxn', function () {
     apiParams.requestParams = requestObject;
   });
 
-  it('should 1) throw an error and 2) show upgrade modal if account deployed required', async function () {
-    const isUpgradeRequiredStub = sandbox.stub(utils, 'isUpgradeRequired').resolves(true);
+  it('should 1) throw an error and 2) show upgrade modal if account upgrade required', async function () {
+    const validateAccountRequireUpgradeOrDeployStub = sandbox
+      .stub(utils, 'validateAccountRequireUpgradeOrDeploy')
+      .throws(new UpgradeRequiredError('Upgrade Required'));
     const showUpgradeRequestModalStub = sandbox.stub(snapsUtil, 'showUpgradeRequestModal').resolves();
     let result;
     try {
@@ -89,14 +99,33 @@ describe('Test function: executeTxn', function () {
     } catch (err) {
       result = err;
     } finally {
-      expect(isUpgradeRequiredStub).to.have.been.calledOnceWith(STARKNET_MAINNET_NETWORK, account1.address);
+      expect(validateAccountRequireUpgradeOrDeployStub).to.have.been.calledOnce;
       expect(showUpgradeRequestModalStub).to.have.been.calledOnce;
       expect(result).to.be.an('Error');
     }
   });
 
+  it('should 1) throw an error and 2) show deploy modal if account deployed required', async function () {
+    const validateAccountRequireUpgradeOrDeployStub = sandbox
+      .stub(utils, 'validateAccountRequireUpgradeOrDeploy')
+      .throws(
+        new DeployRequiredError(`Cairo 0 contract address ${account1.address} balance is not empty, deploy required`),
+      );
+    const showDeployRequestModalStub = sandbox.stub(snapsUtil, 'showDeployRequestModal').resolves();
+    let result;
+    try {
+      result = await executeTxn(apiParams);
+    } catch (err) {
+      result = err;
+    } finally {
+      expect(validateAccountRequireUpgradeOrDeployStub).to.have.been.calledOnce;
+      expect(showDeployRequestModalStub).to.have.been.calledOnce;
+      expect(result).to.be.an('Error');
+    }
+  });
+
   it('should executeTxn correctly and deploy an account', async function () {
-    sandbox.stub(utils, 'isUpgradeRequired').resolves(false);
+    sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolves(null);
     sandbox.stub(utils, 'isAccountDeployed').resolves(false);
     const createAccountStub = sandbox.stub(createAccountUtils, 'createAccount').resolvesThis();
     const stub = sandbox.stub(utils, 'executeTxn').resolves({
@@ -128,7 +157,7 @@ describe('Test function: executeTxn', function () {
   });
 
   it('should executeTxn multiple and deploy an account', async function () {
-    sandbox.stub(utils, 'isUpgradeRequired').resolves(false);
+    sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolves(null);
     sandbox.stub(utils, 'isAccountDeployed').resolves(false);
     const createAccountStub = sandbox.stub(createAccountUtils, 'createAccount').resolvesThis();
     const stub = sandbox.stub(utils, 'executeTxn').resolves({
@@ -189,7 +218,7 @@ describe('Test function: executeTxn', function () {
 
   it('should executeTxn and not deploy an account', async function () {
     const createAccountStub = sandbox.stub(createAccountUtils, 'createAccount');
-    sandbox.stub(utils, 'isUpgradeRequired').resolves(false);
+    sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolves(null);
     sandbox.stub(utils, 'isAccountDeployed').resolves(true);
     const stub = sandbox.stub(utils, 'executeTxn').resolves({
       transaction_hash: 'transaction_hash',
@@ -223,7 +252,7 @@ describe('Test function: executeTxn', function () {
 
   it('should executeTxn multiple and not deploy an account', async function () {
     const createAccountStub = sandbox.stub(createAccountUtils, 'createAccount');
-    sandbox.stub(utils, 'isUpgradeRequired').resolves(false);
+    sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolves(null);
     sandbox.stub(utils, 'isAccountDeployed').resolves(true);
     const stub = sandbox.stub(utils, 'executeTxn').resolves({
       transaction_hash: 'transaction_hash',
@@ -282,7 +311,7 @@ describe('Test function: executeTxn', function () {
   });
 
   it('should throw error if executeTxn fail', async function () {
-    sandbox.stub(utils, 'isUpgradeRequired').resolves(false);
+    sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolves(null);
     sandbox.stub(utils, 'isAccountDeployed').resolves(true);
     const stub = sandbox.stub(utils, 'executeTxn').rejects('error');
     const { privateKey } = await utils.getKeysFromAddress(
@@ -315,8 +344,8 @@ describe('Test function: executeTxn', function () {
   });
 
   it('should return false if user rejected to sign the transaction', async function () {
+    sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolves(null);
     sandbox.stub(utils, 'isAccountDeployed').resolves(true);
-    sandbox.stub(utils, 'isUpgradeRequired').resolves(false);
     walletStub.rpcStubs.snap_dialog.resolves(false);
     const stub = sandbox.stub(utils, 'executeTxn').resolves({
       transaction_hash: 'transaction_hash',

@@ -1,8 +1,8 @@
 import { toJson } from './utils/serializer';
-import { validateAndParseAddress } from '../src/utils/starknetUtils';
+import { validateAccountRequireUpgradeOrDeploy, validateAndParseAddress } from '../src/utils/starknetUtils';
 import { ApiParams, ExtractPrivateKeyRequestParams } from './types/snapApi';
 import { getNetworkFromChainId } from './utils/snapUtils';
-import { getKeysFromAddress, isUpgradeRequired } from './utils/starknetUtils';
+import { getKeysFromAddress } from './utils/starknetUtils';
 import { copyable, panel, text, DialogType } from '@metamask/snaps-sdk';
 import { logger } from './utils/logger';
 
@@ -22,9 +22,8 @@ export async function extractPrivateKey(params: ApiParams) {
       throw new Error(`The given user address is invalid: ${userAddress}`);
     }
 
-    if (await isUpgradeRequired(network, userAddress)) {
-      throw new Error('Upgrade required');
-    }
+    const { privateKey: userPrivateKey, publicKey } = await getKeysFromAddress(keyDeriver, network, state, userAddress);
+    await validateAccountRequireUpgradeOrDeploy(network, userAddress, publicKey);
 
     const response = await wallet.request({
       method: 'snap_dialog',
@@ -35,8 +34,6 @@ export async function extractPrivateKey(params: ApiParams) {
     });
 
     if (response === true) {
-      const { privateKey: userPrivateKey } = await getKeysFromAddress(keyDeriver, network, state, userAddress);
-
       await wallet.request({
         method: 'snap_dialog',
         params: {

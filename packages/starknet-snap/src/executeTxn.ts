@@ -1,5 +1,10 @@
 import { Invocations, TransactionType } from 'starknet';
-import { getNetworkFromChainId, getTxnSnapTxt, addDialogTxt, showUpgradeRequestModal } from './utils/snapUtils';
+import {
+  getNetworkFromChainId,
+  getTxnSnapTxt,
+  addDialogTxt,
+  showAccountRequireUpgradeOrDeployModal,
+} from './utils/snapUtils';
 import {
   getKeysFromAddress,
   executeTxn as executeTxnUtil,
@@ -7,7 +12,7 @@ import {
   estimateFeeBulk,
   getAccContractAddressAndCallData,
   addFeesFromAllTransactions,
-  isUpgradeRequired,
+  validateAccountRequireUpgradeOrDeploy,
 } from './utils/starknetUtils';
 import { ApiParams, ExecuteTxnRequestParams } from './types/snapApi';
 import { createAccount } from './createAccount';
@@ -27,9 +32,11 @@ export async function executeTxn(params: ApiParams) {
       addressIndex,
     } = await getKeysFromAddress(keyDeriver, network, state, senderAddress);
 
-    if (await isUpgradeRequired(network, senderAddress)) {
-      await showUpgradeRequestModal(wallet);
-      throw new Error('Upgrade required');
+    try {
+      await validateAccountRequireUpgradeOrDeploy(network, senderAddress, publicKey);
+    } catch (e) {
+      await showAccountRequireUpgradeOrDeployModal(wallet, e);
+      throw e;
     }
 
     const txnInvocationArray = Array.isArray(requestParamsObj.txnInvocation)

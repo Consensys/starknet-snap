@@ -4,9 +4,9 @@ import { ApiParams, SignDeclareTransactionRequestParams } from './types/snapApi'
 import {
   getKeysFromAddress,
   signDeclareTransaction as signDeclareTransactionUtil,
-  isUpgradeRequired,
+  validateAccountRequireUpgradeOrDeploy,
 } from './utils/starknetUtils';
-import { getNetworkFromChainId, getSignTxnTxt, showUpgradeRequestModal } from './utils/snapUtils';
+import { getNetworkFromChainId, getSignTxnTxt, showAccountRequireUpgradeOrDeployModal } from './utils/snapUtils';
 import { heading, panel, DialogType } from '@metamask/snaps-sdk';
 import { logger } from './utils/logger';
 
@@ -16,11 +16,13 @@ export async function signDeclareTransaction(params: ApiParams): Promise<Signatu
     const requestParamsObj = requestParams as SignDeclareTransactionRequestParams;
     const signerAddress = requestParamsObj.signerAddress;
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
-    const { privateKey } = await getKeysFromAddress(keyDeriver, network, state, signerAddress);
+    const { privateKey, publicKey } = await getKeysFromAddress(keyDeriver, network, state, signerAddress);
 
-    if (await isUpgradeRequired(network, signerAddress)) {
-      await showUpgradeRequestModal(wallet);
-      throw new Error('Upgrade required');
+    try {
+      await validateAccountRequireUpgradeOrDeploy(network, signerAddress, publicKey);
+    } catch (e) {
+      await showAccountRequireUpgradeOrDeployModal(wallet, e);
+      throw e;
     }
 
     logger.log(`signDeclareTransaction params: ${toJson(requestParamsObj.transaction, 2)}}`);
