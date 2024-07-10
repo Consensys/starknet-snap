@@ -93,14 +93,16 @@ describe('Test function: verifySignedMessage', function () {
 
     describe('when validateAccountRequireUpgradeOrDeploy fail', function () {
       it('should throw error', async function () {
-        const validateAccountRequireUpgradeOrDeployStup = sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').throws('network error');
+        const validateAccountRequireUpgradeOrDeployStub = sandbox
+          .stub(utils, 'validateAccountRequireUpgradeOrDeploy')
+          .throws('network error');
         let result;
         try {
           result = await verifySignedMessage(apiParams);
         } catch (err) {
           result = err;
         } finally {
-          expect(validateAccountRequireUpgradeOrDeployStup).to.have.been.calledOnceWith(
+          expect(validateAccountRequireUpgradeOrDeployStub).to.have.been.calledOnceWith(
             STARKNET_SEPOLIA_TESTNET_NETWORK,
             account1.address,
             account1.publicKey,
@@ -111,10 +113,11 @@ describe('Test function: verifySignedMessage', function () {
     });
 
     describe('when account require upgrade', function () {
-      let validateAccountRequireUpgradeOrDeployStup: sinon.SinonStub;
+      let validateAccountRequireUpgradeOrDeployStub: sinon.SinonStub;
       beforeEach(async function () {
-        validateAccountRequireUpgradeOrDeployStup = sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy')
-      .throws(new utils.UpgradeRequiredError("Upgrade Required"))
+        validateAccountRequireUpgradeOrDeployStub = sandbox
+          .stub(utils, 'validateAccountRequireUpgradeOrDeploy')
+          .throws(new utils.UpgradeRequiredError('Upgrade Required'));
       });
 
       it('should throw error if upgrade required', async function () {
@@ -124,7 +127,7 @@ describe('Test function: verifySignedMessage', function () {
         } catch (err) {
           result = err;
         } finally {
-          expect(validateAccountRequireUpgradeOrDeployStup).to.have.been.calledOnceWith(
+          expect(validateAccountRequireUpgradeOrDeployStub).to.have.been.calledOnceWith(
             STARKNET_SEPOLIA_TESTNET_NETWORK,
             account1.address,
             account1.publicKey,
@@ -136,8 +139,7 @@ describe('Test function: verifySignedMessage', function () {
 
     describe('when account is not require upgrade', function () {
       beforeEach(async function () {
-        sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy')
-          .resolves(null);
+        sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolves(null);
       });
 
       it('should verify a signed message from an user account correctly', async function () {

@@ -57,8 +57,9 @@ describe('Test function: declareContract', function () {
   });
 
   it('should 1) throw an error and 2) show upgrade modal if account upgrade required', async function () {
-    const validateAccountRequireUpgradeOrDeployStup = sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy')
-      .throws(new utils.UpgradeRequiredError("Upgrade Required"))
+    const validateAccountRequireUpgradeOrDeployStub = sandbox
+      .stub(utils, 'validateAccountRequireUpgradeOrDeploy')
+      .throws(new utils.UpgradeRequiredError('Upgrade Required'));
     const showUpgradeRequestModalStub = sandbox.stub(snapsUtil, 'showUpgradeRequestModal').resolves();
     let result;
     try {
@@ -66,7 +67,7 @@ describe('Test function: declareContract', function () {
     } catch (err) {
       result = err;
     } finally {
-      expect(validateAccountRequireUpgradeOrDeployStup).to.have.been.calledOnceWith(
+      expect(validateAccountRequireUpgradeOrDeployStub).to.have.been.calledOnceWith(
         STARKNET_SEPOLIA_TESTNET_NETWORK,
         account1.address,
         account1.publicKey,
@@ -77,8 +78,13 @@ describe('Test function: declareContract', function () {
   });
 
   it('should 1) throw an error and 2) show deploy modal if account deployed required', async function () {
-    const validateAccountRequireUpgradeOrDeployStup = sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy')
-      .throws(new utils.DeployRequiredError(`Cairo 0 contract address ${account1.address} balance is not empty, deploy required`))
+    const validateAccountRequireUpgradeOrDeployStub = sandbox
+      .stub(utils, 'validateAccountRequireUpgradeOrDeploy')
+      .throws(
+        new utils.DeployRequiredError(
+          `Cairo 0 contract address ${account1.address} balance is not empty, deploy required`,
+        ),
+      );
     const showDeployRequestModalStub = sandbox.stub(snapsUtil, 'showDeployRequestModal').resolves();
     let result;
     try {
@@ -86,7 +92,7 @@ describe('Test function: declareContract', function () {
     } catch (err) {
       result = err;
     } finally {
-      expect(validateAccountRequireUpgradeOrDeployStup).to.have.been.calledOnceWith(
+      expect(validateAccountRequireUpgradeOrDeployStub).to.have.been.calledOnceWith(
         STARKNET_SEPOLIA_TESTNET_NETWORK,
         account1.address,
         account1.publicKey,
@@ -97,8 +103,7 @@ describe('Test function: declareContract', function () {
   });
 
   it('should declareContract correctly', async function () {
-    sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy')
-      .resolves(null);
+    sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolves(null);
     const declareContractStub = sandbox.stub(utils, 'declareContract').resolves({
       transaction_hash: 'transaction_hash',
       class_hash: 'class_hash',
@@ -126,8 +131,7 @@ describe('Test function: declareContract', function () {
   });
 
   it('should throw error if declareContract fail', async function () {
-    sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy')
-      .resolves(null);
+    sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolves(null);
     const declareContractStub = sandbox.stub(utils, 'declareContract').rejects('error');
     const { privateKey } = await utils.getKeysFromAddress(
       apiParams.keyDeriver,
@@ -154,8 +158,7 @@ describe('Test function: declareContract', function () {
   });
 
   it('should return false if user rejected to sign the transaction', async function () {
-    sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy')
-      .resolves(null);
+    sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolves(null);
     walletStub.rpcStubs.snap_dialog.resolves(false);
     const declareContractStub = sandbox.stub(utils, 'declareContract').resolves({
       transaction_hash: 'transaction_hash',

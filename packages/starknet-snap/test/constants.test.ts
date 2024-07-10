@@ -370,7 +370,6 @@ export const mainnetTxn1: Transaction = {
 };
 
 export const getBalanceResp = ['0x0', '0x0'];
-export const getNonZeroBalanceResp = ['0x100000', '0x0'];
 
 export const estimateDeployFeeResp = {
   overall_fee: num.toBigInt('0x0'),

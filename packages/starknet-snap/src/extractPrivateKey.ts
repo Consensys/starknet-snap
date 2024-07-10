@@ -1,5 +1,5 @@
 import { toJson } from './utils/serializer';
-import { getCorrectContractAddress, validateAccountRequireUpgradeOrDeploy, validateAndParseAddress } from '../src/utils/starknetUtils';
+import { validateAccountRequireUpgradeOrDeploy, validateAndParseAddress } from '../src/utils/starknetUtils';
 import { ApiParams, ExtractPrivateKeyRequestParams } from './types/snapApi';
 import { getNetworkFromChainId } from './utils/snapUtils';
 import { getKeysFromAddress } from './utils/starknetUtils';
@@ -23,7 +23,7 @@ export async function extractPrivateKey(params: ApiParams) {
     }
 
     const { privateKey: userPrivateKey, publicKey } = await getKeysFromAddress(keyDeriver, network, state, userAddress);
-    await validateAccountRequireUpgradeOrDeploy(network,userAddress, publicKey);
+    await validateAccountRequireUpgradeOrDeploy(network, userAddress, publicKey);
 
     const response = await wallet.request({
       method: 'snap_dialog',

@@ -4,7 +4,9 @@ import { ApiParams, SignDeployAccountTransactionRequestParams } from './types/sn
 import {
   getKeysFromAddress,
   signDeployAccountTransaction as signDeployAccountTransactionUtil,
-  getCorrectContractAddress,
+  validateAccountRequireUpgradeOrDeploy,
+  DeployRequiredError,
+  UpgradeRequiredError,
 } from './utils/starknetUtils';
 import {
   getNetworkFromChainId,
@@ -23,17 +25,16 @@ export async function signDeployAccountTransaction(params: ApiParams): Promise<S
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
     const { privateKey, publicKey } = await getKeysFromAddress(keyDeriver, network, state, signerAddress);
 
-    const { upgradeRequired, deployRequired, address } = await getCorrectContractAddress(network, publicKey);
-
-    if (upgradeRequired && deployRequired) {
-      // Edge case force cairo0 deploy because non-zero balance
-      await showDeployRequestModal(wallet);
-      throw new Error(`Cairo 0 contract address ${address} balance is not empty, deploy required`);
-    }
-
-    if (upgradeRequired && !deployRequired) {
-      await showUpgradeRequestModal(wallet);
-      throw new Error('Upgrade required');
+    try {
+      await validateAccountRequireUpgradeOrDeploy(network, signerAddress, publicKey);
+    } catch (e) {
+            if (e instanceof DeployRequiredError) {
+        await showDeployRequestModal(wallet);
+      }
+      if (e instanceof UpgradeRequiredError) {
+        await showUpgradeRequestModal(wallet);
+      }
+      throw e;
     }
 
     logger.log(`signDeployAccountTransaction params: ${toJson(requestParamsObj.transaction, 2)}}`);

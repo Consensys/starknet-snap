@@ -81,9 +81,9 @@ describe('Test function: executeTxn', function () {
   });
 
   it('should 1) throw an error and 2) show upgrade modal if account upgrade required', async function () {
-    const getCorrectContractAddressStub = sandbox
-      .stub(utils, 'getCorrectContractAddress')
-      .resolves({ address: '', signerPubKey: '', upgradeRequired: true, deployRequired: false });
+    const validateAccountRequireUpgradeOrDeployStub = sandbox
+      .stub(utils, 'validateAccountRequireUpgradeOrDeploy')
+      .throws(new utils.UpgradeRequiredError('Upgrade Required'));
     const showUpgradeRequestModalStub = sandbox.stub(snapsUtil, 'showUpgradeRequestModal').resolves();
     let result;
     try {
@@ -91,16 +91,20 @@ describe('Test function: executeTxn', function () {
     } catch (err) {
       result = err;
     } finally {
-      expect(getCorrectContractAddressStub).to.have.been.calledOnce;
+      expect(validateAccountRequireUpgradeOrDeployStub).to.have.been.calledOnce;
       expect(showUpgradeRequestModalStub).to.have.been.calledOnce;
       expect(result).to.be.an('Error');
     }
   });
 
   it('should 1) throw an error and 2) show deploy modal if account deployed required', async function () {
-    const getCorrectContractAddressStub = sandbox
-      .stub(utils, 'getCorrectContractAddress')
-      .resolves({ address: '', signerPubKey: '', upgradeRequired: true, deployRequired: true });
+    const validateAccountRequireUpgradeOrDeployStub = sandbox
+      .stub(utils, 'validateAccountRequireUpgradeOrDeploy')
+      .throws(
+        new utils.DeployRequiredError(
+          `Cairo 0 contract address ${account1.address} balance is not empty, deploy required`,
+        ),
+      );
     const showDeployRequestModalStub = sandbox.stub(snapsUtil, 'showDeployRequestModal').resolves();
     let result;
     try {
@@ -108,16 +112,14 @@ describe('Test function: executeTxn', function () {
     } catch (err) {
       result = err;
     } finally {
-      expect(getCorrectContractAddressStub).to.have.been.calledOnce;
+      expect(validateAccountRequireUpgradeOrDeployStub).to.have.been.calledOnce;
       expect(showDeployRequestModalStub).to.have.been.calledOnce;
       expect(result).to.be.an('Error');
     }
   });
 
   it('should executeTxn correctly and deploy an account', async function () {
-    sandbox
-      .stub(utils, 'getCorrectContractAddress')
-      .resolves({ address: '', signerPubKey: '', upgradeRequired: false, deployRequired: false });
+    sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolves(null);
     sandbox.stub(utils, 'isAccountDeployed').resolves(false);
     const createAccountStub = sandbox.stub(createAccountUtils, 'createAccount').resolvesThis();
     const stub = sandbox.stub(utils, 'executeTxn').resolves({
@@ -149,9 +151,7 @@ describe('Test function: executeTxn', function () {
   });
 
   it('should executeTxn multiple and deploy an account', async function () {
-    sandbox
-      .stub(utils, 'getCorrectContractAddress')
-      .resolves({ address: '', signerPubKey: '', upgradeRequired: false, deployRequired: true });
+    sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolves(null);
     sandbox.stub(utils, 'isAccountDeployed').resolves(false);
     const createAccountStub = sandbox.stub(createAccountUtils, 'createAccount').resolvesThis();
     const stub = sandbox.stub(utils, 'executeTxn').resolves({
@@ -212,9 +212,7 @@ describe('Test function: executeTxn', function () {
 
   it('should executeTxn and not deploy an account', async function () {
     const createAccountStub = sandbox.stub(createAccountUtils, 'createAccount');
-    sandbox
-      .stub(utils, 'getCorrectContractAddress')
-      .resolves({ address: '', signerPubKey: '', upgradeRequired: false, deployRequired: false });
+    sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolves(null);
     sandbox.stub(utils, 'isAccountDeployed').resolves(true);
     const stub = sandbox.stub(utils, 'executeTxn').resolves({
       transaction_hash: 'transaction_hash',
@@ -248,9 +246,7 @@ describe('Test function: executeTxn', function () {
 
   it('should executeTxn multiple and not deploy an account', async function () {
     const createAccountStub = sandbox.stub(createAccountUtils, 'createAccount');
-    sandbox
-      .stub(utils, 'getCorrectContractAddress')
-      .resolves({ address: '', signerPubKey: '', upgradeRequired: false, deployRequired: false });
+    sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolves(null);
     sandbox.stub(utils, 'isAccountDeployed').resolves(true);
     const stub = sandbox.stub(utils, 'executeTxn').resolves({
       transaction_hash: 'transaction_hash',
@@ -309,9 +305,7 @@ describe('Test function: executeTxn', function () {
   });
 
   it('should throw error if executeTxn fail', async function () {
-    sandbox
-      .stub(utils, 'getCorrectContractAddress')
-      .resolves({ address: '', signerPubKey: '', upgradeRequired: false, deployRequired: false });
+    sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolves(null);
     sandbox.stub(utils, 'isAccountDeployed').resolves(true);
     const stub = sandbox.stub(utils, 'executeTxn').rejects('error');
     const { privateKey } = await utils.getKeysFromAddress(
@@ -344,9 +338,7 @@ describe('Test function: executeTxn', function () {
   });
 
   it('should return false if user rejected to sign the transaction', async function () {
-    sandbox
-      .stub(utils, 'getCorrectContractAddress')
-      .resolves({ address: '', signerPubKey: '', upgradeRequired: false, deployRequired: false });
+    sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolves(null);
     sandbox.stub(utils, 'isAccountDeployed').resolves(true);
     walletStub.rpcStubs.snap_dialog.resolves(false);
     const stub = sandbox.stub(utils, 'executeTxn').resolves({

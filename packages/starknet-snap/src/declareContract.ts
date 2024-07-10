@@ -30,14 +30,13 @@ export async function declareContract(params: ApiParams) {
     try {
       await validateAccountRequireUpgradeOrDeploy(network, senderAddress, publicKey);
     } catch (e) {
-      //we can move this part to a snap utils function
-      if (e instanceof DeployRequiredError) {
+            if (e instanceof DeployRequiredError) {
         await showDeployRequestModal(wallet);
-      } 
+      }
       if (e instanceof UpgradeRequiredError) {
         await showUpgradeRequestModal(wallet);
       }
-      throw e
+      throw e;
     }
 
     const snapComponents = getDeclareSnapTxt(

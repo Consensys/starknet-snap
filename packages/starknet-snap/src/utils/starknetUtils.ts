@@ -64,13 +64,13 @@ import { RpcV4GetTransactionReceiptResponse } from '../types/snapApi';
 import { hexToString } from './formatterUtils';
 
 export class UpgradeRequiredError extends Error {
-  constructor(msg:string) {
+  constructor(msg: string) {
     super(msg);
   }
 }
 
 export class DeployRequiredError extends Error {
-  constructor(msg:string) {
+  constructor(msg: string) {
     super(msg);
   }
 }
@@ -265,16 +265,14 @@ export const getBalance = async (address: string, tokenAddress: string, network:
   return resp[0];
 };
 
-
 export const isEthBalanceEmpty = async (network: Network, address: string, maxFee: bigint = constants.ZERO) => {
   const etherErc20TokenAddress =
     network.chainId === ETHER_SEPOLIA_TESTNET.chainId ? ETHER_SEPOLIA_TESTNET.address : ETHER_MAINNET.address;
 
-  return num.toBigInt(
-    (await getBalance(address, etherErc20TokenAddress, network)) ?? num.toBigInt(constants.ZERO),
-  ) <= maxFee;
+  return (
+    num.toBigInt((await getBalance(address, etherErc20TokenAddress, network)) ?? num.toBigInt(constants.ZERO)) <= maxFee
+  );
 };
-
 
 export const getTransactionStatus = async (transactionHash: num.BigNumberish, network: Network) => {
   const provider = getProvider(network);
@@ -723,7 +721,7 @@ export const isDeployRequired = async (network: Network, address: string, pubKey
     if (!err.message.includes('Contract not found')) {
       throw err;
     }
-    return !await(isEthBalanceEmpty(network, address));
+    return !(await isEthBalanceEmpty(network, address));
   }
 };
 
@@ -849,12 +847,11 @@ export const getCorrectContractAddress = async (network: Network, publicKey: str
       }
       // Here account is not deployed, proceed with edge case detection
       try {
-        if (await isEthBalanceEmpty(network, address, maxFee)){
-          console.log("but not here")
+        if (await isEthBalanceEmpty(network, address, maxFee)) {
+          console.log('but not here');
           address = contractAddress;
           logger.log(`getContractAddressByKey: no deployed contract found, fallback to cairo ${CAIRO_VERSION}`);
-        }
-        else{
+        } else {
           upgradeRequired = true;
           deployRequired = true;
           logger.log(
@@ -915,10 +912,10 @@ export const getStarkNameUtil = async (network: Network, userAddress: string) =>
   return Account.getStarkName(provider, userAddress);
 };
 
-export const validateAccountRequireUpgradeOrDeploy = async (network: Network, address: string, pubKey: string, displayDialog = true) => {
+export const validateAccountRequireUpgradeOrDeploy = async (network: Network, address: string, pubKey: string) => {
   if (await isUpgradeRequired(network, address)) {
-    throw new UpgradeRequiredError('Upgrade required')
+    throw new UpgradeRequiredError('Upgrade required');
   } else if (!(await isDeployRequired(network, address, pubKey))) {
-    throw new DeployRequiredError(`Cairo 0 contract address ${address} balance is not empty, deploy required`)
+    throw new DeployRequiredError(`Cairo 0 contract address ${address} balance is not empty, deploy required`);
   }
 };

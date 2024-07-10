@@ -13,7 +13,6 @@ import {
   account2,
   account3,
   getBalanceResp,
-  getNonZeroBalanceResp,
 } from '../constants.test';
 import { SnapState } from '../../src/types/snapState';
 import { Calldata, num, Account, Provider, GetTransactionReceiptResponse } from 'starknet';

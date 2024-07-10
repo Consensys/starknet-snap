@@ -13,7 +13,9 @@ import {
   estimateFeeBulk,
   getAccContractAddressAndCallData,
   addFeesFromAllTransactions,
-  getCorrectContractAddress,
+  validateAccountRequireUpgradeOrDeploy,
+  DeployRequiredError,
+  UpgradeRequiredError,
 } from './utils/starknetUtils';
 import { ApiParams, ExecuteTxnRequestParams } from './types/snapApi';
 import { createAccount } from './createAccount';
@@ -33,17 +35,16 @@ export async function executeTxn(params: ApiParams) {
       addressIndex,
     } = await getKeysFromAddress(keyDeriver, network, state, senderAddress);
 
-    const { upgradeRequired, deployRequired, address } = await getCorrectContractAddress(network, publicKey);
-
-    if (upgradeRequired && deployRequired) {
-      // Edge case force cairo0 deploy because non-zero balance
-      await showDeployRequestModal(wallet);
-      throw new Error(`Cairo 0 contract address ${address} balance is not empty, deploy required`);
-    }
-
-    if (upgradeRequired && !deployRequired) {
-      await showUpgradeRequestModal(wallet);
-      throw new Error('Upgrade required');
+    try {
+      await validateAccountRequireUpgradeOrDeploy(network, senderAddress, publicKey);
+    } catch (e) {
+            if (e instanceof DeployRequiredError) {
+        await showDeployRequestModal(wallet);
+      }
+      if (e instanceof UpgradeRequiredError) {
+        await showUpgradeRequestModal(wallet);
+      }
+      throw e;
     }
 
     const txnInvocationArray = Array.isArray(requestParamsObj.txnInvocation)

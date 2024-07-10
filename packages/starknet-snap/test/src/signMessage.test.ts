@@ -102,9 +102,7 @@ describe('Test function: signMessage', function () {
     });
 
     it('skip dialog if enableAuthorize is false or omit', async function () {
-      sandbox
-        .stub(utils, 'getCorrectContractAddress')
-        .resolves({ address: '', signerPubKey: '', upgradeRequired: false, deployRequired: false });
+      sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolves(null);
       const paramsObject = apiParams.requestParams as SignMessageRequestParams;
 
       paramsObject.enableAuthorize = false;
@@ -120,15 +118,18 @@ describe('Test function: signMessage', function () {
 
     describe('when require upgrade checking fail', function () {
       it('should throw error', async function () {
-        const getCorrectContractAddressStub = sandbox.stub(utils, 'getCorrectContractAddress').throws('network error');
+        const validateAccountRequireUpgradeOrDeployStub = sandbox
+          .stub(utils, 'validateAccountRequireUpgradeOrDeploy')
+          .throws('network error');
         let result;
         try {
           result = await signMessage(apiParams);
         } catch (err) {
           result = err;
         } finally {
-          expect(getCorrectContractAddressStub).to.have.been.calledOnceWith(
+          expect(validateAccountRequireUpgradeOrDeployStub).to.have.been.calledOnceWith(
             STARKNET_SEPOLIA_TESTNET_NETWORK,
+            account1.address,
             account1.publicKey,
           );
           expect(result).to.be.an('Error');
@@ -137,11 +138,11 @@ describe('Test function: signMessage', function () {
     });
 
     describe('when account require upgrade', function () {
-      let getCorrectContractAddressStub: sinon.SinonStub;
+      let validateAccountRequireUpgradeOrDeployStub: sinon.SinonStub;
       beforeEach(async function () {
-        getCorrectContractAddressStub = sandbox
-          .stub(utils, 'getCorrectContractAddress')
-          .resolves({ address: '', signerPubKey: '', upgradeRequired: true, deployRequired: false });
+        validateAccountRequireUpgradeOrDeployStub = sandbox
+          .stub(utils, 'validateAccountRequireUpgradeOrDeploy')
+          .throws(new utils.UpgradeRequiredError('Upgrade Required'));
       });
 
       it('should throw error if upgrade required', async function () {
@@ -151,11 +152,45 @@ describe('Test function: signMessage', function () {
         } catch (err) {
           result = err;
         } finally {
-          expect(getCorrectContractAddressStub).to.have.been.calledOnceWith(
+          expect(validateAccountRequireUpgradeOrDeployStub).to.have.been.calledOnceWith(
             STARKNET_SEPOLIA_TESTNET_NETWORK,
+            account1.address,
             account1.publicKey,
           );
           expect(result).to.be.an('Error');
+          expect(result.message).to.equal('Upgrade Required');
+        }
+      });
+    });
+
+    describe('when account require deploy', function () {
+      let validateAccountRequireUpgradeOrDeployStub: sinon.SinonStub;
+      beforeEach(async function () {
+        validateAccountRequireUpgradeOrDeployStub = sandbox
+          .stub(utils, 'validateAccountRequireUpgradeOrDeploy')
+          .throws(
+            new utils.DeployRequiredError(
+              `Cairo 0 contract address ${account1.address} balance is not empty, deploy required`,
+            ),
+          );
+      });
+
+      it('should throw error if deploy required', async function () {
+        let result;
+        try {
+          result = await signMessage(apiParams);
+        } catch (err) {
+          result = err;
+        } finally {
+          expect(validateAccountRequireUpgradeOrDeployStub).to.have.been.calledOnceWith(
+            STARKNET_SEPOLIA_TESTNET_NETWORK,
+            account1.address,
+            account1.publicKey,
+          );
+          expect(result).to.be.an('Error');
+          expect(result.message).to.equal(
+            `Cairo 0 contract address ${account1.address} balance is not empty, deploy required`,
+          );
         }
       });
     });
@@ -166,9 +201,7 @@ describe('Test function: signMessage', function () {
           ...apiParams.requestParams,
           signerAddress: Cairo1Account1.address,
         };
-        sandbox
-          .stub(utils, 'getCorrectContractAddress')
-          .resolves({ address: '', signerPubKey: '', upgradeRequired: false, deployRequired: false });
+        sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolves(null);
       });
 
       it('should sign a message from an user account correctly', async function () {

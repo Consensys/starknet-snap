@@ -4,7 +4,6 @@ import {
   verifyTypedDataMessageSignature,
   getFullPublicKeyPairFromPrivateKey,
   getKeysFromAddress,
-  getCorrectContractAddress,
   validateAccountRequireUpgradeOrDeploy,
 } from './utils/starknetUtils';
 import { getNetworkFromChainId } from './utils/snapUtils';
@@ -47,7 +46,7 @@ export async function verifySignedMessage(params: ApiParams) {
       state,
       verifySignerAddress,
     );
-    await validateAccountRequireUpgradeOrDeploy(network,verifySignerAddress, publicKey);
+    await validateAccountRequireUpgradeOrDeploy(network, verifySignerAddress, publicKey);
 
     const fullPublicKey = getFullPublicKeyPairFromPrivateKey(signerPrivateKey);
 

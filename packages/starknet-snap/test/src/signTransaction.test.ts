@@ -74,18 +74,16 @@ describe('Test function: signTransaction', function () {
   });
 
   it('should sign a transaction from an user account correctly', async function () {
-    sandbox
-      .stub(utils, 'getCorrectContractAddress')
-      .resolves({ address: '', signerPubKey: '', upgradeRequired: false, deployRequired: false });
+    sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolves(null);
     const result = await signTransaction(apiParams);
     expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledOnce;
     expect(result).to.be.eql(signature3);
   });
 
-  it('should 1) throw an error and 2) show upgrade modal if account deployed required', async function () {
-    const getCorrectContractAddressStub = sandbox
-      .stub(utils, 'getCorrectContractAddress')
-      .resolves({ address: '', signerPubKey: '', upgradeRequired: true, deployRequired: false });
+  it('should 1) throw an error and 2) show upgrade modal if account upgrade required', async function () {
+    const validateAccountRequireUpgradeOrDeployStub = sandbox
+      .stub(utils, 'validateAccountRequireUpgradeOrDeploy')
+      .throws(new utils.UpgradeRequiredError('Upgrade Required'));
     const showUpgradeRequestModalStub = sandbox.stub(snapsUtil, 'showUpgradeRequestModal').resolves();
     let result;
     try {
@@ -93,19 +91,44 @@ describe('Test function: signTransaction', function () {
     } catch (err) {
       result = err;
     } finally {
-      expect(getCorrectContractAddressStub).to.have.been.calledOnceWith(
+      expect(validateAccountRequireUpgradeOrDeployStub).to.have.been.calledOnceWith(
         STARKNET_SEPOLIA_TESTNET_NETWORK,
+        account1.address,
         account1.publicKey,
       );
       expect(showUpgradeRequestModalStub).to.have.been.calledOnce;
+      expect(result).to.be.an('Error');
+      expect(result.message).to.equal('Upgrade Required');
+    }
+  });
+
+  it('should 1) throw an error and 2) show deploy modal if account deployed required', async function () {
+    const validateAccountRequireUpgradeOrDeployStub = sandbox
+      .stub(utils, 'validateAccountRequireUpgradeOrDeploy')
+      .throws(
+        new utils.DeployRequiredError(
+          `Cairo 0 contract address ${account1.address} balance is not empty, deploy required`,
+        ),
+      );
+    const showDeployRequestModalStub = sandbox.stub(snapsUtil, 'showDeployRequestModal').resolves();
+    let result;
+    try {
+      result = await signTransaction(apiParams);
+    } catch (err) {
+      result = err;
+    } finally {
+      expect(validateAccountRequireUpgradeOrDeployStub).to.have.been.calledOnceWith(
+        STARKNET_SEPOLIA_TESTNET_NETWORK,
+        account1.address,
+        account1.publicKey,
+      );
+      expect(showDeployRequestModalStub).to.have.been.calledOnce;
       expect(result).to.be.an('Error');
     }
   });
 
   it('should throw error if signTransaction fail', async function () {
-    sandbox
-      .stub(utils, 'getCorrectContractAddress')
-      .resolves({ address: '', signerPubKey: '', upgradeRequired: false, deployRequired: false });
+    sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolves(null);
     sandbox.stub(utils, 'signTransactions').throws(new Error());
     let result;
     try {
@@ -119,9 +142,7 @@ describe('Test function: signTransaction', function () {
   });
 
   it('should return false if user deny to sign the transaction', async function () {
-    sandbox
-      .stub(utils, 'getCorrectContractAddress')
-      .resolves({ address: '', signerPubKey: '', upgradeRequired: false, deployRequired: false });
+    sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolves(null);
     const stub = sandbox.stub(utils, 'signTransactions');
     walletStub.rpcStubs.snap_dialog.resolves(false);
 
@@ -132,9 +153,7 @@ describe('Test function: signTransaction', function () {
   });
 
   it('should skip dialog if enableAuthorize is false', async function () {
-    sandbox
-      .stub(utils, 'getCorrectContractAddress')
-      .resolves({ address: '', signerPubKey: '', upgradeRequired: false, deployRequired: false });
+    sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolves(null);
     const paramsObject = apiParams.requestParams as SignTransactionRequestParams;
     paramsObject.enableAuthorize = false;
     const result = await signTransaction(apiParams);
@@ -144,9 +163,7 @@ describe('Test function: signTransaction', function () {
   });
 
   it('should skip dialog if enableAuthorize is omit', async function () {
-    sandbox
-      .stub(utils, 'getCorrectContractAddress')
-      .resolves({ address: '', signerPubKey: '', upgradeRequired: false, deployRequired: false });
+    sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolves(null);
     const paramsObject = apiParams.requestParams as SignTransactionRequestParams;
     paramsObject.enableAuthorize = undefined;
     const result = await signTransaction(apiParams);
