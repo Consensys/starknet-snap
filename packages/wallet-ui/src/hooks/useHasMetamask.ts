@@ -87,10 +87,8 @@ export const useHasMetamask = () => {
         // Use the new detection method
 
         if (provider && (await isSupportSnap(provider))) {
-          window.ethereum = provider;
           dispatch(setProvider(provider));
           setHasMetamask(provider != null);
-          return window.ethereum;
         } else {
           dispatch(setProvider(null));
           setHasMetamask(false);
