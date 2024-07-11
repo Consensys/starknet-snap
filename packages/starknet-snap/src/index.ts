@@ -264,7 +264,6 @@ export const onUpdate: OnUpdateHandler = async () => {
 };
 
 export const onHomePage: OnHomePageHandler = async () => {
-  const panelItems = [];
   try {
     const state: SnapState = await snap.request({
       method: 'snap_manageState',
@@ -294,6 +293,7 @@ export const onHomePage: OnHomePageHandler = async () => {
     const balance = (await getBalance(address, ethToken.address, network)) ?? BigInt(0);
     const displayBalance = ethers.utils.formatUnits(ethers.BigNumber.from(balance), ethToken.decimals);
 
+    const panelItems = [];
     panelItems.push(text('Address'));
     panelItems.push(copyable(`${address}`));
     panelItems.push(row('Network', text(`${network.name}`)));
