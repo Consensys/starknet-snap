@@ -6,6 +6,7 @@ import Toastr from 'toastr2';
 import { setDeployModalVisible } from 'slices/modalSlice';
 import { openExplorerTab, shortenAddress } from '../../../../utils/utils';
 import { DeployButton, StarknetLogo, Title, Wrapper, DescriptionCentered, Txnlink } from './DeployModal.style';
+import { AccountAddressView } from 'components/ui/molecule/AccountAddress/AccountAddress.view';
 
 interface Props {
   address: string;
@@ -75,8 +76,12 @@ export const DeployModalView = ({ address }: Props) => {
         return (
           <>
             <DescriptionCentered>
-              You have a non-zero balance on an non-deployed address
+              You have a non-zero balance on an Cairo 0 non-deployed address
               <br />
+              <br />
+              <center>
+                <AccountAddressView address={address}></AccountAddressView>
+              </center>
               <br />
               A deployment of your address is necessary to proceed with the Snap.
               <br />
