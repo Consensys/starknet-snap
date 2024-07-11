@@ -15,6 +15,7 @@
     "clean": "yarn workspaces foreach --parallel --interlaced --verbose run clean",
     "build": "yarn workspaces foreach --parallel --interlaced --verbose run build",
     "lint": "yarn workspaces foreach --parallel --interlaced --verbose run lint",
+    "lint:fix": "yarn workspaces foreach --parallel --interlaced --verbose run lint:fix",
     "start": "yarn workspaces foreach --parallel --interlaced --verbose run start",
     "test": "yarn workspaces foreach --parallel --interlaced --verbose run test",
     "prepare": "husky install"
