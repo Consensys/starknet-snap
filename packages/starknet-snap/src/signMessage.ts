@@ -2,10 +2,10 @@ import { toJson } from './utils/serializer';
 import {
   signMessage as signMessageUtil,
   getKeysFromAddress,
-  isUpgradeRequired,
   validateAndParseAddress,
+  validateAccountRequireUpgradeOrDeploy,
 } from './utils/starknetUtils';
-import { getNetworkFromChainId, addDialogTxt, showUpgradeRequestModal } from './utils/snapUtils';
+import { getNetworkFromChainId, addDialogTxt, showAccountRequireUpgradeOrDeployModal } from './utils/snapUtils';
 import { ApiParams, SignMessageRequestParams } from './types/snapApi';
 import { heading, panel, DialogType } from '@metamask/snaps-sdk';
 import { logger } from './utils/logger';
@@ -18,16 +18,7 @@ export async function signMessage(params: ApiParams) {
     const typedDataMessage = requestParamsObj.typedDataMessage;
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
 
-    if (await isUpgradeRequired(network, signerAddress)) {
-      await showUpgradeRequestModal(wallet);
-      throw new Error('Upgrade required');
-    }
-
     logger.log(`signMessage:\nsignerAddress: ${signerAddress}\ntypedDataMessage: ${toJson(typedDataMessage)}`);
-
-    if (!signerAddress) {
-      throw new Error(`The given signer address need to be non-empty string, got: ${toJson(signerAddress)}`);
-    }
 
     try {
       validateAndParseAddress(signerAddress);
@@ -35,8 +26,21 @@ export async function signMessage(params: ApiParams) {
       throw new Error(`The given signer address is invalid: ${signerAddress}`);
     }
 
-    if (await isUpgradeRequired(network, signerAddress)) {
-      throw new Error('Upgrade required');
+    const { privateKey: signerPrivateKey, publicKey } = await getKeysFromAddress(
+      keyDeriver,
+      network,
+      state,
+      signerAddress,
+    );
+    if (!signerAddress) {
+      throw new Error(`The given signer address need to be non-empty string, got: ${toJson(signerAddress)}`);
+    }
+
+    try {
+      await validateAccountRequireUpgradeOrDeploy(network, signerAddress, publicKey);
+    } catch (e) {
+      await showAccountRequireUpgradeOrDeployModal(wallet, e);
+      throw e;
     }
 
     const components = [];
@@ -54,8 +58,6 @@ export async function signMessage(params: ApiParams) {
 
       if (!response) return false;
     }
-
-    const { privateKey: signerPrivateKey } = await getKeysFromAddress(keyDeriver, network, state, signerAddress);
 
     const typedDataSignature = signMessageUtil(signerPrivateKey, typedDataMessage, signerAddress);
 

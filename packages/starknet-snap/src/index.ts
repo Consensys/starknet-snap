@@ -12,27 +12,23 @@ import { addErc20Token } from './addErc20Token';
 import { getStoredErc20Tokens } from './getStoredErc20Tokens';
 import { estimateFee } from './estimateFee';
 import { getStoredUserAccounts } from './getStoredUserAccounts';
-import { AccContract, SnapState } from './types/snapState';
+import { SnapState } from './types/snapState';
 import { extractPrivateKey } from './extractPrivateKey';
 import { extractPublicKey } from './extractPublicKey';
 import { addNetwork } from './addNetwork';
 import { switchNetwork } from './switchNetwork';
 import { getCurrentNetwork } from './getCurrentNetwork';
 import {
+  CAIRO_VERSION_LEGACY,
+  ETHER_MAINNET,
+  ETHER_SEPOLIA_TESTNET,
   PRELOADED_TOKENS,
   STARKNET_INTEGRATION_NETWORK,
   STARKNET_MAINNET_NETWORK,
   STARKNET_SEPOLIA_TESTNET_NETWORK,
   STARKNET_TESTNET_NETWORK,
 } from './utils/constants';
-import {
-  dappUrl,
-  getNetworkFromChainId,
-  isSameChainId,
-  upsertErc20Token,
-  upsertNetwork,
-  removeNetwork,
-} from './utils/snapUtils';
+import { dappUrl, upsertErc20Token, upsertNetwork, removeNetwork } from './utils/snapUtils';
 import { getStoredNetworks } from './getStoredNetworks';
 import { getStoredTransactions } from './getStoredTransactions';
 import { getTransactions } from './getTransactions';
@@ -52,6 +48,7 @@ import { getStarkName } from './getStarkName';
 import type { OnRpcRequestHandler, OnHomePageHandler, OnInstallHandler, OnUpdateHandler } from '@metamask/snaps-sdk';
 import { InternalError, panel, row, divider, text, copyable } from '@metamask/snaps-sdk';
 import { ethers } from 'ethers';
+import { getBalance, getCorrectContractAddress, getKeysFromAddressIndex } from './utils/starknetUtils';
 
 declare const snap;
 const saveMutex = new Mutex();
@@ -123,6 +120,10 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ origin, request }) => 
       case 'starkNet_createAccount':
         apiParams.keyDeriver = await getAddressKeyDeriver(snap);
         return createAccount(apiParams);
+
+      case 'starkNet_createAccountLegacy':
+        apiParams.keyDeriver = await getAddressKeyDeriver(snap);
+        return createAccount(apiParams, false, true, CAIRO_VERSION_LEGACY);
 
       case 'starkNet_getStoredUserAccounts':
         return await getStoredUserAccounts(apiParams);
@@ -263,7 +264,6 @@ export const onUpdate: OnUpdateHandler = async () => {
 };
 
 export const onHomePage: OnHomePageHandler = async () => {
-  const panelItems = [];
   try {
     const state: SnapState = await snap.request({
       method: 'snap_manageState',
@@ -272,60 +272,37 @@ export const onHomePage: OnHomePageHandler = async () => {
       },
     });
 
-    // Account may not exist if the recover account process has not executed.
-    let accContract: AccContract;
-    if (state) {
-      let chainId = STARKNET_SEPOLIA_TESTNET_NETWORK.chainId;
-
-      if (state.currentNetwork && state.currentNetwork.chainId !== STARKNET_TESTNET_NETWORK.chainId) {
-        chainId = state.currentNetwork.chainId;
-      }
-
-      if (state.accContracts && state.accContracts.length > 0) {
-        accContract = state.accContracts.find((n) => isSameChainId(n.chainId, chainId));
-      }
+    if (!state) {
+      throw new Error('State not found.');
     }
 
-    if (accContract) {
-      const userAddress = accContract.address;
-      const chainId = accContract.chainId;
-      const network = getNetworkFromChainId(state, chainId);
-      panelItems.push(text('Address'));
-      panelItems.push(copyable(`${userAddress}`));
-      panelItems.push(row('Network', text(`${network.name}`)));
+    // default network is testnet
+    let network = STARKNET_SEPOLIA_TESTNET_NETWORK;
 
-      const ercToken = state.erc20Tokens.find(
-        (t) => t.symbol.toLowerCase() === 'eth' && isSameChainId(t.chainId, chainId),
-      );
-      if (ercToken) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const params: any = {
-          state,
-          requestParams: {
-            tokenAddress: ercToken.address,
-            userAddress: userAddress,
-            chainId: network.chainId,
-          },
-        };
-        const balance = await getErc20TokenBalance(params);
-        const displayBalance = ethers.utils.formatUnits(ethers.BigNumber.from(balance), ercToken.decimals);
-        panelItems.push(row('Balance', text(`${displayBalance} ETH`)));
-      }
-
-      panelItems.push(divider());
-      panelItems.push(
-        text(`Visit the [companion dapp for Starknet](${dappUrl(process.env.SNAP_ENV)}) to manage your account.`),
-      );
-    } else {
-      panelItems.push(text(`**Your Starknet account is not yet deployed or recovered.**`));
-      panelItems.push(
-        text(
-          `Initiate a transaction to create your Starknet account. Visit the [companion dapp for Starknet](${dappUrl(
-            process.env.SNAP_ENV,
-          )}) to get started.`,
-        ),
-      );
+    if (state.currentNetwork && state.currentNetwork.chainId !== STARKNET_TESTNET_NETWORK.chainId) {
+      network = state.currentNetwork;
     }
+
+    // we only support 1 address at this moment
+    const idx = 0;
+    const keyDeriver = await getAddressKeyDeriver(snap);
+    const { publicKey } = await getKeysFromAddressIndex(keyDeriver, network.chainId, state, idx);
+    const { address } = await getCorrectContractAddress(network, publicKey);
+
+    const ethToken = network.chainId === ETHER_SEPOLIA_TESTNET.chainId ? ETHER_SEPOLIA_TESTNET : ETHER_MAINNET;
+    const balance = (await getBalance(address, ethToken.address, network)) ?? BigInt(0);
+    const displayBalance = ethers.utils.formatUnits(ethers.BigNumber.from(balance), ethToken.decimals);
+
+    const panelItems = [];
+    panelItems.push(text('Address'));
+    panelItems.push(copyable(`${address}`));
+    panelItems.push(row('Network', text(`${network.name}`)));
+    panelItems.push(row('Balance', text(`${displayBalance} ETH`)));
+    panelItems.push(divider());
+    panelItems.push(
+      text(`Visit the [companion dapp for Starknet](${dappUrl(process.env.SNAP_ENV)}) to manage your account.`),
+    );
+
     return {
       content: panel(panelItems),
     };

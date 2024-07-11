@@ -1,7 +1,11 @@
 import { toJson } from './utils/serializer';
 import { ApiParams, DeclareContractRequestParams } from './types/snapApi';
-import { getNetworkFromChainId, getDeclareSnapTxt, showUpgradeRequestModal } from './utils/snapUtils';
-import { getKeysFromAddress, declareContract as declareContractUtil, isUpgradeRequired } from './utils/starknetUtils';
+import { getNetworkFromChainId, getDeclareSnapTxt, showAccountRequireUpgradeOrDeployModal } from './utils/snapUtils';
+import {
+  getKeysFromAddress,
+  declareContract as declareContractUtil,
+  validateAccountRequireUpgradeOrDeploy,
+} from './utils/starknetUtils';
 import { heading, panel, DialogType } from '@metamask/snaps-sdk';
 import { logger } from './utils/logger';
 
@@ -14,11 +18,13 @@ export async function declareContract(params: ApiParams) {
 
     const senderAddress = requestParamsObj.senderAddress;
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
-    const { privateKey } = await getKeysFromAddress(keyDeriver, network, state, senderAddress);
+    const { privateKey, publicKey } = await getKeysFromAddress(keyDeriver, network, state, senderAddress);
 
-    if (await isUpgradeRequired(network, senderAddress)) {
-      await showUpgradeRequestModal(wallet);
-      throw new Error('Upgrade required');
+    try {
+      await validateAccountRequireUpgradeOrDeploy(network, senderAddress, publicKey);
+    } catch (e) {
+      await showAccountRequireUpgradeOrDeployModal(wallet, e);
+      throw e;
     }
 
     const snapComponents = getDeclareSnapTxt(
