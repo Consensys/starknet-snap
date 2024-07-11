@@ -6,7 +6,6 @@ import { getNetworkFromChainId } from './utils/snapUtils';
 import {
   getKeysFromAddress,
   getCallDataArray,
-  estimateFee as estimateFeeUtil,
   getAccContractAddressAndCallData,
   estimateFeeBulk,
   addFeesFromAllTransactions,
@@ -90,18 +89,9 @@ export async function estimateFee(params: ApiParams) {
       ];
     }
 
-    let estimateFeeResp;
-
-    if (accountDeployed) {
-      // This condition branch will be removed later when starknet.js
-      // supports estimateFeeBulk in rpc mode
-      estimateFeeResp = await estimateFeeUtil(network, senderAddress, senderPrivateKey, txnInvocation);
-      logger.log(`estimateFee:\nestimateFeeUtil estimateFeeResp: ${toJson(estimateFeeResp)}`);
-    } else {
-      const estimateBulkFeeResp = await estimateFeeBulk(network, senderAddress, senderPrivateKey, bulkTransactions);
-      logger.log(`estimateFee:\nestimateFeeBulk estimateBulkFeeResp: ${toJson(estimateBulkFeeResp)}`);
-      estimateFeeResp = addFeesFromAllTransactions(estimateBulkFeeResp);
-    }
+    const estimateBulkFeeResp = await estimateFeeBulk(network, senderAddress, senderPrivateKey, bulkTransactions);
+    logger.log(`estimateFee:\nestimateFeeBulk estimateBulkFeeResp: ${toJson(estimateBulkFeeResp)}`);
+    const estimateFeeResp = addFeesFromAllTransactions(estimateBulkFeeResp);
 
     logger.log(`estimateFee:\nestimateFeeResp: ${toJson(estimateFeeResp)}`);
 

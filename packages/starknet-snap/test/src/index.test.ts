@@ -2,17 +2,7 @@ import chai, { expect } from 'chai';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import { WalletMock } from '../wallet.mock.test';
-import { getValue } from '../../src/getValue';
-import {
-  createAccountProxyTxn,
-  testnetAccAddresses,
-  testnetPublicKeys,
-  mainnetPublicKeys,
-  mainnetAccAddresses,
-  invalidNetwork as INVALID_NETWORK,
-  getBip44EntropyStub,
-  account1,
-} from '../constants.test';
+import { getBip44EntropyStub, account1 } from '../constants.test';
 import { SnapState } from '../../src/types/snapState';
 import {
   ETHER_MAINNET,
@@ -20,8 +10,7 @@ import {
   STARKNET_MAINNET_NETWORK,
   STARKNET_SEPOLIA_TESTNET_NETWORK,
 } from '../../src/utils/constants';
-import { Mutex } from 'async-mutex';
-import * as snapUtils from '../../src/utils/snapUtils';
+
 import * as starknetUtils from '../../src/utils/starknetUtils';
 import { onHomePage } from '../../src';
 
@@ -31,7 +20,7 @@ const sandbox = sinon.createSandbox();
 describe('Test function: onHomePage', function () {
   const walletStub = new WalletMock();
   // eslint-disable-next-line no-restricted-globals
-  const globalAny: any = global;
+  const globalAny = global as unknown as { snap: WalletMock };
   const state: SnapState = {
     accContracts: [],
     erc20Tokens: [ETHER_MAINNET, ETHER_SEPOLIA_TESTNET],

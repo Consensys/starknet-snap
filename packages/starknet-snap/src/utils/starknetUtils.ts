@@ -131,6 +131,16 @@ export const declareContract = async (
   });
 };
 
+export const getAccountNonce = async (
+  network: Network,
+  senderAddress: string,
+  privateKey: string | Uint8Array,
+  cairoVersion?: CairoVersion,
+): Promise<BigNumberish> => {
+  const nonceString = await getAccountInstance(network, senderAddress, privateKey, cairoVersion).getNonce('latest');
+  return parseInt(nonceString.toLowerCase(), 16);
+};
+
 export const estimateFee = async (
   network: Network,
   senderAddress: string,
@@ -139,11 +149,22 @@ export const estimateFee = async (
   cairoVersion?: CairoVersion,
   invocationsDetails?: UniversalDetails,
 ): Promise<EstimateFee> => {
-  return getAccountInstance(network, senderAddress, privateKey, cairoVersion).estimateInvokeFee(txnInvocation, {
-    ...invocationsDetails,
-    skipValidate: false,
-    blockIdentifier: 'latest',
-  });
+  try {
+    return await getAccountInstance(network, senderAddress, privateKey, cairoVersion).estimateInvokeFee(txnInvocation, {
+      ...invocationsDetails,
+      skipValidate: false,
+      blockIdentifier: 'latest',
+    });
+  } catch (e) {
+    // [Todo only if nonce error]
+    const nonce = await getAccountNonce(network, senderAddress, privateKey);
+    return await getAccountInstance(network, senderAddress, privateKey, cairoVersion).estimateInvokeFee(txnInvocation, {
+      ...invocationsDetails,
+      nonce,
+      skipValidate: false,
+      blockIdentifier: 'latest',
+    });
+  }
 };
 
 export const estimateFeeBulk = async (
@@ -154,11 +175,22 @@ export const estimateFeeBulk = async (
   invocationsDetails?: UniversalDetails,
   cairoVersion?: CairoVersion,
 ): Promise<EstimateFee[]> => {
-  return getAccountInstance(network, senderAddress, privateKey, cairoVersion).estimateFeeBulk(txnInvocation, {
-    ...invocationsDetails,
-    skipValidate: false,
-    blockIdentifier: 'latest',
-  });
+  try {
+    return await getAccountInstance(network, senderAddress, privateKey, cairoVersion).estimateFeeBulk(txnInvocation, {
+      ...invocationsDetails,
+      skipValidate: false,
+      blockIdentifier: 'latest',
+    });
+  } catch (e) {
+    // [Todo only if nonce error]
+    const nonce = await getAccountNonce(network, senderAddress, privateKey);
+    return await getAccountInstance(network, senderAddress, privateKey, cairoVersion).estimateFeeBulk(txnInvocation, {
+      ...invocationsDetails,
+      nonce,
+      skipValidate: false,
+      blockIdentifier: 'latest',
+    });
+  }
 };
 
 export const executeTxn = async (
@@ -902,7 +934,8 @@ export const getStarkNameUtil = async (network: Network, userAddress: string) =>
 export const validateAccountRequireUpgradeOrDeploy = async (network: Network, address: string, pubKey: string) => {
   if (await isUpgradeRequired(network, address)) {
     throw new UpgradeRequiredError('Upgrade required');
-  } else if (!(await isDeployRequired(network, address, pubKey))) {
+  }
+  if (await isDeployRequired(network, address, pubKey)) {
     throw new DeployRequiredError(`Cairo 0 contract address ${address} balance is not empty, deploy required`);
   }
 };
