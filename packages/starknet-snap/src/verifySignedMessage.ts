@@ -4,7 +4,7 @@ import {
   verifyTypedDataMessageSignature,
   getFullPublicKeyPairFromPrivateKey,
   getKeysFromAddress,
-  isUpgradeRequired,
+  validateAccountRequireUpgradeOrDeploy,
 } from './utils/starknetUtils';
 import { getNetworkFromChainId } from './utils/snapUtils';
 import { ApiParams, VerifySignedMessageRequestParams } from './types/snapApi';
@@ -40,11 +40,13 @@ export async function verifySignedMessage(params: ApiParams) {
       throw new Error(`The given signer address is invalid: ${verifySignerAddress}`);
     }
 
-    if (await isUpgradeRequired(network, verifySignerAddress)) {
-      throw new Error('Upgrade required');
-    }
-
-    const { privateKey: signerPrivateKey } = await getKeysFromAddress(keyDeriver, network, state, verifySignerAddress);
+    const { privateKey: signerPrivateKey, publicKey } = await getKeysFromAddress(
+      keyDeriver,
+      network,
+      state,
+      verifySignerAddress,
+    );
+    await validateAccountRequireUpgradeOrDeploy(network, verifySignerAddress, publicKey);
 
     const fullPublicKey = getFullPublicKeyPairFromPrivateKey(signerPrivateKey);
 

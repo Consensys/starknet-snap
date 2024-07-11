@@ -17,6 +17,7 @@ export interface AccContract {
   deployTxnHash: string; // in hex
   chainId: string; // in hex
   upgradeRequired?: boolean;
+  deployRequired?: boolean;
 }
 
 export interface Erc20Token {

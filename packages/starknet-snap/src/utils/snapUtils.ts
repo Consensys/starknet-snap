@@ -42,6 +42,7 @@ import {
   ChainIdFilter,
 } from './transaction/filter';
 import { logger } from './logger';
+import { DeployRequiredError, UpgradeRequiredError } from './exceptions';
 
 function hasOnlyAsciiChars(str: string) {
   return /^[ -~]+$/.test(str);
@@ -259,6 +260,9 @@ export function getSendTxnText(
       logger.error(`getSigningTxnText: error found in amount conversion: ${err}`);
     }
   }
+  if (contractFuncName === 'deploy') {
+    // [TODO] handle specific deploy dialog aspects ?
+  }
 
   return components;
 }
@@ -370,6 +374,7 @@ export async function upsertAccount(userAccount: AccContract, wallet, mutex: Mut
       storedAccount.publicKey = userAccount.publicKey;
       storedAccount.deployTxnHash = userAccount.deployTxnHash || storedAccount.deployTxnHash;
       storedAccount.upgradeRequired = userAccount.upgradeRequired;
+      storedAccount.deployRequired = userAccount.deployRequired;
     }
 
     await wallet.request({
@@ -771,4 +776,29 @@ export async function showUpgradeRequestModal(wallet) {
       ]),
     },
   });
+}
+
+export async function showDeployRequestModal(wallet) {
+  await wallet.request({
+    method: 'snap_dialog',
+    params: {
+      type: DialogType.Alert,
+      content: panel([
+        heading('Account Deployment Mandatory!'),
+        text(
+          `Visit the [companion dapp for Starknet](${dappUrl(
+            process.env.SNAP_ENV,
+          )}) to deploy pour account.\nThank you!`,
+        ),
+      ]),
+    },
+  });
+}
+
+export async function showAccountRequireUpgradeOrDeployModal(wallet, e: DeployRequiredError | UpgradeRequiredError) {
+  if (e instanceof DeployRequiredError) {
+    await showDeployRequestModal(wallet);
+  } else if (e instanceof UpgradeRequiredError) {
+    await showUpgradeRequestModal(wallet);
+  }
 }
