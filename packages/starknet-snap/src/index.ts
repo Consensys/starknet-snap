@@ -19,6 +19,7 @@ import { addNetwork } from './addNetwork';
 import { switchNetwork } from './switchNetwork';
 import { getCurrentNetwork } from './getCurrentNetwork';
 import {
+  CAIRO_VERSION_LEGACY,
   PRELOADED_TOKENS,
   STARKNET_INTEGRATION_NETWORK,
   STARKNET_MAINNET_NETWORK,
@@ -123,6 +124,10 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ origin, request }) => 
       case 'starkNet_createAccount':
         apiParams.keyDeriver = await getAddressKeyDeriver(snap);
         return createAccount(apiParams);
+
+      case 'starkNet_createAccountLegacy':
+        apiParams.keyDeriver = await getAddressKeyDeriver(snap);
+        return createAccount(apiParams, false, true, CAIRO_VERSION_LEGACY);
 
       case 'starkNet_getStoredUserAccounts':
         return await getStoredUserAccounts(apiParams);

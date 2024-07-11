@@ -35,6 +35,7 @@ import {
   InvocationsSignerDetails,
   ProviderInterface,
   GetTransactionReceiptResponse,
+  BigNumberish,
 } from 'starknet';
 import { Network, SnapState, Transaction, TransactionType } from '../types/snapState';
 import {
@@ -46,6 +47,8 @@ import {
   ACCOUNT_CLASS_HASH,
   CAIRO_VERSION,
   CAIRO_VERSION_LEGACY,
+  ETHER_MAINNET,
+  ETHER_SEPOLIA_TESTNET,
 } from './constants';
 import { getAddressKey } from './keyPair';
 import {
@@ -59,6 +62,7 @@ import {
 import { logger } from './logger';
 import { RpcV4GetTransactionReceiptResponse } from '../types/snapApi';
 import { hexToString } from './formatterUtils';
+import { DeployRequiredError, UpgradeRequiredError } from './exceptions';
 
 export const getCallDataArray = (callDataStr: string): string[] => {
   return (callDataStr ?? '')
@@ -182,8 +186,9 @@ export const deployAccount = async (
   cairoVersion?: CairoVersion,
   invocationsDetails?: UniversalDetails,
 ): Promise<DeployContractResponse> => {
+  const classHash = cairoVersion == CAIRO_VERSION ? ACCOUNT_CLASS_HASH : PROXY_CONTRACT_HASH;
   const deployAccountPayload = {
-    classHash: ACCOUNT_CLASS_HASH,
+    classHash: classHash,
     contractAddress: contractAddress,
     constructorCalldata: contractCallData,
     addressSalt,
@@ -204,8 +209,9 @@ export const estimateAccountDeployFee = async (
   cairoVersion?: CairoVersion,
   invocationsDetails?: UniversalDetails,
 ): Promise<EstimateFee> => {
+  const classHash = cairoVersion == CAIRO_VERSION ? ACCOUNT_CLASS_HASH : PROXY_CONTRACT_HASH;
   const deployAccountPayload = {
-    classHash: ACCOUNT_CLASS_HASH,
+    classHash: classHash,
     contractAddress: contractAddress,
     constructorCalldata: contractCallData,
     addressSalt,
@@ -246,6 +252,15 @@ export const getContractOwner = async (
 export const getBalance = async (address: string, tokenAddress: string, network: Network) => {
   const resp = await callContract(network, tokenAddress, 'balanceOf', [num.toBigInt(address).toString(10)]);
   return resp[0];
+};
+
+export const isEthBalanceEmpty = async (network: Network, address: string, maxFee: bigint = constants.ZERO) => {
+  const etherErc20TokenAddress =
+    network.chainId === ETHER_SEPOLIA_TESTNET.chainId ? ETHER_SEPOLIA_TESTNET.address : ETHER_MAINNET.address;
+
+  return (
+    num.toBigInt((await getBalance(address, etherErc20TokenAddress, network)) ?? num.toBigInt(constants.ZERO)) <= maxFee
+  );
 };
 
 export const getTransactionStatus = async (transactionHash: num.BigNumberish, network: Network) => {
@@ -526,6 +541,7 @@ export const getAccContractAddressAndCallData = (publicKey) => {
  * @returns - address and calldata.
  */
 export const getAccContractAddressAndCallDataLegacy = (publicKey) => {
+  // [TODO]: Check why use ACCOUNT_CLASS_HASH_LEGACY and PROXY_CONTRACT_HASH ?
   const callData = CallData.compile({
     implementation: ACCOUNT_CLASS_HASH_LEGACY,
     selector: hash.getSelectorFromName('initialize'),
@@ -675,6 +691,30 @@ export const getPermutationAddresses = (pk: string) => {
 };
 
 /**
+ * Check address needed deploy by using getVersion and check if eth balance is non empty.
+ *
+ * @param  network - Network.
+ * @param  address - Input address.
+ * @returns - boolean.
+ */
+export const isDeployRequired = async (network: Network, address: string, pubKey: string) => {
+  logger.log(`isDeployRequired: address = ${address}`);
+  const { address: addressLegacy } = getAccContractAddressAndCallDataLegacy(pubKey);
+
+  try {
+    if (address === addressLegacy) {
+      await getVersion(address, network);
+    }
+    return false;
+  } catch (err) {
+    if (!err.message.includes('Contract not found')) {
+      throw err;
+    }
+    return !(await isEthBalanceEmpty(network, address));
+  }
+};
+
+/**
  * Check address needed upgrade by using getVersion and compare with MIN_ACC_CONTRACT_VERSION
  *
  * @param  network - Network.
@@ -708,13 +748,57 @@ export const isGTEMinVersion = (version: string) => {
 };
 
 /**
+ * Generate the transaction invocation object for upgrading a contract.
+ *
+ * @param contractAddress - The address of the contract to upgrade.
+ * @returns An object representing the transaction invocation.
+ */
+export function getUpgradeTxnInvocation(contractAddress: string) {
+  const method = 'upgrade';
+
+  const calldata = CallData.compile({
+    implementation: ACCOUNT_CLASS_HASH,
+    calldata: [0],
+  });
+
+  return {
+    contractAddress,
+    entrypoint: method,
+    calldata,
+  };
+}
+
+/**
+ * Calculate the transaction fee for upgrading a contract.
+ *
+ * @param network - The network on which the contract is deployed.
+ * @param contractAddress - The address of the contract to upgrade.
+ * @param privateKey - The private key of the account performing the upgrade.
+ * @param maxFee - The maximum fee allowed for the transaction.
+ * @returns The calculated transaction fee as a bigint.
+ */
+export async function estimateAccountUpgradeFee(
+  network: Network,
+  contractAddress: string,
+  privateKey: string,
+  maxFee: BigNumberish = constants.ZERO,
+) {
+  if (maxFee === constants.ZERO) {
+    const txnInvocation = getUpgradeTxnInvocation(contractAddress);
+    const estFeeResp = await estimateFee(network, contractAddress, privateKey, txnInvocation, CAIRO_VERSION_LEGACY);
+    return num.toBigInt(estFeeResp.suggestedMaxFee.toString(10) ?? '0');
+  }
+  return maxFee;
+}
+
+/**
  * Get user address by public key, return address if the address has deployed
  *
  * @param  network - Network.
  * @param  publicKey - address's public key.
  * @returns - address and address's public key.
  */
-export const getCorrectContractAddress = async (network: Network, publicKey: string) => {
+export const getCorrectContractAddress = async (network: Network, publicKey: string, maxFee = constants.ZERO) => {
   const { address: contractAddress, addressLegacy: contractAddressLegacy } = getPermutationAddresses(publicKey);
 
   logger.log(
@@ -723,6 +807,7 @@ export const getCorrectContractAddress = async (network: Network, publicKey: str
 
   let address = contractAddress;
   let upgradeRequired = false;
+  let deployRequired = false;
   let pk = '';
 
   try {
@@ -733,11 +818,10 @@ export const getCorrectContractAddress = async (network: Network, publicKey: str
       throw e;
     }
 
-    logger.log(
-      `getContractAddressByKey: cairo ${CAIRO_VERSION} contract cant found, try cairo ${CAIRO_VERSION_LEGACY}`,
-    );
+    logger.log(`getContractAddressByKey: cairo ${CAIRO_VERSION} contract not found, try cairo ${CAIRO_VERSION_LEGACY}`);
 
     try {
+      address = contractAddressLegacy;
       const version = await getVersion(contractAddressLegacy, network);
       upgradeRequired = isGTEMinVersion(hexToString(version)) ? false : true;
       pk = await getContractOwner(
@@ -745,20 +829,34 @@ export const getCorrectContractAddress = async (network: Network, publicKey: str
         network,
         upgradeRequired ? CAIRO_VERSION_LEGACY : CAIRO_VERSION,
       );
-      address = contractAddressLegacy;
     } catch (e) {
       if (!e.message.includes('Contract not found')) {
         throw e;
       }
-
-      logger.log(`getContractAddressByKey: no deployed contract found, fallback to cairo ${CAIRO_VERSION}`);
+      // Here account is not deployed, proceed with edge case detection
+      try {
+        if (await isEthBalanceEmpty(network, address, maxFee)) {
+          address = contractAddress;
+          logger.log(`getContractAddressByKey: no deployed contract found, fallback to cairo ${CAIRO_VERSION}`);
+        } else {
+          upgradeRequired = true;
+          deployRequired = true;
+          logger.log(
+            `getContractAddressByKey: non deployed cairo0 contract found with non-zero balance, force cairo ${CAIRO_VERSION_LEGACY}`,
+          );
+        }
+      } catch (err) {
+        logger.log(`getContractAddressByKey: balance check failed with error ${err}`);
+        throw err;
+      }
     }
   }
 
   return {
     address,
     signerPubKey: pk,
-    upgradeRequired: upgradeRequired,
+    upgradeRequired,
+    deployRequired,
   };
 };
 
@@ -799,4 +897,12 @@ export const signMessage = async (privateKey: string, typedDataMessage: TypedDat
 export const getStarkNameUtil = async (network: Network, userAddress: string) => {
   const provider = getProvider(network);
   return Account.getStarkName(provider, userAddress);
+};
+
+export const validateAccountRequireUpgradeOrDeploy = async (network: Network, address: string, pubKey: string) => {
+  if (await isUpgradeRequired(network, address)) {
+    throw new UpgradeRequiredError('Upgrade required');
+  } else if (!(await isDeployRequired(network, address, pubKey))) {
+    throw new DeployRequiredError(`Cairo 0 contract address ${address} balance is not empty, deploy required`);
+  }
 };
