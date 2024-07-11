@@ -76,7 +76,7 @@ export const DeployModalView = ({ address }: Props) => {
         return (
           <>
             <DescriptionCentered>
-              You have a non-zero balance on an Cairo 0 non-deployed address
+              You have a non-zero balance on a Cairo 0 non-deployed address
               <br />
               <br />
               <center>
