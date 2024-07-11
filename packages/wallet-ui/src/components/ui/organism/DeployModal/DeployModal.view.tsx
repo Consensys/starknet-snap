@@ -50,7 +50,7 @@ export const DeployModalView = ({ address }: Props) => {
   useEffect(() => {
     if (txnHash) {
       setStage(Stage.WAITING_FOR_TXN);
-      waitForAccountCreation(txnHash, chainId)
+      waitForAccountCreation(txnHash, address, chainId)
         .then((resp) => {
           setStage(resp === true ? Stage.SUCCESS : Stage.FAIL);
         })

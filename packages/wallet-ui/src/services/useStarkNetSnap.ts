@@ -680,20 +680,44 @@ export const useStarkNetSnap = () => {
     return txStatus;
   };
 
-  const waitForAccountCreation = async (transactionHash: string, chainId: string) => {
+  const waitForAccountCreation = async (transactionHash: string, accountAddress: string, chainId: string) => {
     dispatch(enableLoadingWithMessage('Waiting for transaction to be finalised.'));
+    const toastr = new Toastr();
+    let result = false;
+
     try {
       // read transaction to check if the txn is ready
       await waitForTransaction(transactionHash, chainId);
-      await recoverAccounts(chainId);
-      dispatch(disableLoading());
-      return true;
     } catch (e) {
       //eslint-disable-next-line no-console
       console.log(`error while wait for transaction: ${e}`);
-      dispatch(disableLoading());
-      return false;
     }
+
+    try {
+      const executeFn = async (): Promise<boolean> => {
+        // read contract to check if upgrade is required
+        const resp = await readContract(accountAddress, 'getVersion');
+        if (!resp || !resp[0]) {
+          return false;
+        }
+
+        // recover accounts to update snap state
+        await recoverAccounts(chainId);
+        return true;
+      };
+
+      result = await retry(executeFn, {
+        maxAttempts: 20,
+      });
+    } catch (e: any) {
+      //eslint-disable-next-line no-console
+      console.log(`error while processing waitForAccountDeploy: ${e}`);
+      toastr.error('Snap is unable to verify the contract deploy process');
+    }
+
+    dispatch(disableLoading());
+
+    return result;
   };
 
   const waitForAccountUpdate = async (transactionHash: string, accountAddress: string, chainId: string) => {
