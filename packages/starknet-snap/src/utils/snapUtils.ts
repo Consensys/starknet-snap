@@ -788,7 +788,7 @@ export async function showDeployRequestModal(wallet) {
         text(
           `Visit the [companion dapp for Starknet](${dappUrl(
             process.env.SNAP_ENV,
-          )}) to deploy pour account.\nThank you!`,
+          )}) to deploy your account.\nThank you!`,
         ),
       ]),
     },
