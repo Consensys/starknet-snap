@@ -149,22 +149,16 @@ export const estimateFee = async (
   cairoVersion?: CairoVersion,
   invocationsDetails?: UniversalDetails,
 ): Promise<EstimateFee> => {
-  try {
-    return await getAccountInstance(network, senderAddress, privateKey, cairoVersion).estimateInvokeFee(txnInvocation, {
-      ...invocationsDetails,
-      skipValidate: false,
-      blockIdentifier: 'latest',
-    });
-  } catch (e) {
-    // [Todo only if nonce error]
-    const nonce = await getAccountNonce(network, senderAddress, privateKey);
-    return await getAccountInstance(network, senderAddress, privateKey, cairoVersion).estimateInvokeFee(txnInvocation, {
-      ...invocationsDetails,
-      nonce,
-      skipValidate: false,
-      blockIdentifier: 'latest',
-    });
+  let nonce = invocationsDetails && invocationsDetails.nonce;
+  if (!nonce) {
+    nonce = await getAccountNonce(network, senderAddress, privateKey);
   }
+  return await getAccountInstance(network, senderAddress, privateKey, cairoVersion).estimateInvokeFee(txnInvocation, {
+    ...invocationsDetails,
+    nonce,
+    skipValidate: false,
+    blockIdentifier: 'latest',
+  });
 };
 
 export const estimateFeeBulk = async (
@@ -175,22 +169,16 @@ export const estimateFeeBulk = async (
   invocationsDetails?: UniversalDetails,
   cairoVersion?: CairoVersion,
 ): Promise<EstimateFee[]> => {
-  try {
-    return await getAccountInstance(network, senderAddress, privateKey, cairoVersion).estimateFeeBulk(txnInvocation, {
-      ...invocationsDetails,
-      skipValidate: false,
-      blockIdentifier: 'latest',
-    });
-  } catch (e) {
-    // [Todo only if nonce error]
-    const nonce = await getAccountNonce(network, senderAddress, privateKey);
-    return await getAccountInstance(network, senderAddress, privateKey, cairoVersion).estimateFeeBulk(txnInvocation, {
-      ...invocationsDetails,
-      nonce,
-      skipValidate: false,
-      blockIdentifier: 'latest',
-    });
+  let nonce = invocationsDetails && invocationsDetails.nonce;
+  if (!nonce) {
+    nonce = await getAccountNonce(network, senderAddress, privateKey);
   }
+  return await getAccountInstance(network, senderAddress, privateKey, cairoVersion).estimateFeeBulk(txnInvocation, {
+    ...invocationsDetails,
+    nonce,
+    skipValidate: false,
+    blockIdentifier: 'latest',
+  });
 };
 
 export const executeTxn = async (
