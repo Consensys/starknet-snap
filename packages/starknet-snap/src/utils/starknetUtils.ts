@@ -934,8 +934,7 @@ export const getStarkNameUtil = async (network: Network, userAddress: string) =>
 export const validateAccountRequireUpgradeOrDeploy = async (network: Network, address: string, pubKey: string) => {
   if (await isUpgradeRequired(network, address)) {
     throw new UpgradeRequiredError('Upgrade required');
-  }
-  if (await isDeployRequired(network, address, pubKey)) {
+  } else if (await isDeployRequired(network, address, pubKey)) {
     throw new DeployRequiredError(`Cairo 0 contract address ${address} balance is not empty, deploy required`);
   }
 };
