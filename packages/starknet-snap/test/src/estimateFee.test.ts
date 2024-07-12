@@ -147,7 +147,6 @@ describe('Test function: estimateFee', function () {
 
     describe('when account is not require upgrade', function () {
       let estimateFeeBulkStub: sinon.SinonStub;
-      let estimateFeeStub: sinon.SinonStub;
 
       beforeEach(async function () {
         sandbox.stub(utils, 'isUpgradeRequired').resolves(false);
@@ -159,22 +158,19 @@ describe('Test function: estimateFee', function () {
 
       describe('when account is deployed', function () {
         beforeEach(async function () {
-          estimateFeeBulkStub = sandbox.stub(utils, 'estimateFeeBulk');
+          estimateFeeBulkStub = sandbox.stub(utils, 'estimateFeeBulk').resolves([estimateFeeResp]);
           sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolves(null);
         });
 
         it('should estimate the fee correctly', async function () {
-          estimateFeeStub = sandbox.stub(utils, 'estimateFee').resolves(estimateFeeResp);
           const result = await estimateFee(apiParams);
           expect(result.suggestedMaxFee).to.be.eq(estimateFeeResp.suggestedMaxFee.toString(10));
-          expect(estimateFeeStub).callCount(1);
-          expect(estimateFeeBulkStub).callCount(0);
+          expect(estimateFeeBulkStub).callCount(1);
         });
       });
 
       describe('when account is not deployed', function () {
         beforeEach(async function () {
-          estimateFeeStub = sandbox.stub(utils, 'estimateFee');
           sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolves(null);
           sandbox.stub(utils, 'isAccountDeployed').resolves(false);
         });
@@ -216,7 +212,6 @@ describe('Test function: estimateFee', function () {
           ];
 
           expect(result.suggestedMaxFee).to.be.eq(expectedSuggestedMaxFee.toString(10));
-          expect(estimateFeeStub).callCount(0);
           expect(estimateFeeBulkStub).callCount(1);
           expect(estimateFeeBulkStub).to.be.calledWith(
             STARKNET_SEPOLIA_TESTNET_NETWORK,
@@ -237,7 +232,6 @@ describe('Test function: estimateFee', function () {
             result = err;
           } finally {
             expect(result).to.be.an('Error');
-            expect(estimateFeeStub).callCount(0);
             expect(estimateFeeBulkStub).callCount(1);
           }
         });
