@@ -14,6 +14,7 @@ All notable changes to this project will be documented in this file. See [standa
 ### Bug Fixes
 
 * non zero balance on non deployed cairo 0 account ([#276](https://github.com/Consensys/starknet-snap/issues/276)) ([d9beafe](https://github.com/Consensys/starknet-snap/commit/d9beafe45b304685581162ef9247a31919eb7556))
+* implement EIP-6963 multi injected provider discovery ([#276](https://github.com/Consensys/starknet-snap/issues/276)) ([d9beafe](https://github.com/Consensys/starknet-snap/commit/d9beafe45b304685581162ef9247a31919eb7556))
 
 ## [1.22.0](https://github.com/Consensys/starknet-snap/compare/wallet-ui-v1.21.0...wallet-ui-v1.22.0) (2024-06-21)
 
