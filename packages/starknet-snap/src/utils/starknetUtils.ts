@@ -36,6 +36,7 @@ import {
   ProviderInterface,
   GetTransactionReceiptResponse,
   BigNumberish,
+  BlockIdentifier,
 } from 'starknet';
 import { Network, SnapState, Transaction, TransactionType } from '../types/snapState';
 import {
@@ -94,15 +95,19 @@ export const callContract = async (
   contractAddress: string,
   contractFuncName: string,
   contractCallData: RawCalldata = [],
+  blockIdentifier?: BlockIdentifier,
 ): Promise<CallContractResponse> => {
   const provider = getProvider(network);
+  if (!blockIdentifier) {
+    blockIdentifier = 'latest';
+  }
   return provider.callContract(
     {
       contractAddress,
       entrypoint: contractFuncName,
       calldata: contractCallData,
     },
-    'latest',
+    blockIdentifier,
   );
 };
 

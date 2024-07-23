@@ -35,7 +35,13 @@ export async function getErc20TokenBalance(params: ApiParams) {
 
     logger.log(`getErc20Balance:\nerc20Address: ${erc20Address}\nuserAddress: ${userAddress}`);
 
-    const resp = await callContract(network, erc20Address, 'balanceOf', [num.toBigInt(userAddress).toString(10)]);
+    const resp = await callContract(
+      network,
+      erc20Address,
+      'balanceOf',
+      [num.toBigInt(userAddress).toString(10)],
+      'pending',
+    );
 
     logger.log(`getErc20Balance:\nresp: ${toJson(resp)}`);
 
