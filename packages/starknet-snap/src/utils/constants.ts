@@ -188,3 +188,6 @@ export const MIN_ACC_CONTRACT_VERSION = [0, 3, 0];
 export const CAIRO_VERSION = '1';
 
 export const CAIRO_VERSION_LEGACY = '0';
+
+// Cairo 1 : 0x07874b73bbf01b78eafd0d96061d47aafc9c5c15bd58c290d7ddacdd10f1f84b
+// Cairo 0 : 0x07fffa2dd979c33b5fe6e3129bea0fcc9a7492e6404cae53a8d40c890c9512d3

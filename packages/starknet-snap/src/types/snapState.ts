@@ -1,15 +1,14 @@
-import type { RawCalldata } from 'starknet';
+import { RawCalldata } from 'starknet';
 
-/* eslint-disable */
-export type SnapState = {
+export interface SnapState {
   accContracts: AccContract[];
   erc20Tokens: Erc20Token[];
   networks: Network[];
   transactions: Transaction[];
   currentNetwork?: Network;
-};
+}
 
-export type AccContract = {
+export interface AccContract {
   addressSalt: string;
   publicKey: string; // in hex
   address: string; // in hex
@@ -18,17 +17,18 @@ export type AccContract = {
   deployTxnHash: string; // in hex
   chainId: string; // in hex
   upgradeRequired?: boolean;
-};
+  deployRequired?: boolean;
+}
 
-export type Erc20Token = {
+export interface Erc20Token {
   address: string; // in hex
   name: string;
   symbol: string;
   decimals: number;
   chainId: string; // in hex
-};
+}
 
-export type Network = {
+export interface Network {
   name: string;
   chainId: string; // in hex
   baseUrl: string;
@@ -36,7 +36,7 @@ export type Network = {
   voyagerUrl: string;
   accountClassHash: string; // in hex
   useOldAccounts?: boolean;
-};
+}
 
 export enum TransactionType { // for sending txns via Starknet gateway
   DEPLOY = 'DEPLOY',
@@ -78,7 +78,7 @@ export enum TransactionStatusType { // for retrieving txn from StarkNet feeder g
   DEPRECATION = 'status',
 }
 
-export type Transaction = {
+export interface Transaction {
   txnHash: string; // in hex
   txnType: VoyagerTransactionType | string;
   chainId: string; // in hex
@@ -92,5 +92,4 @@ export type Transaction = {
   failureReason: string;
   eventIds: string[];
   timestamp: number;
-};
-/* eslint-disable */
+}

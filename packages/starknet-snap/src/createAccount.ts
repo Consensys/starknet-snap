@@ -1,85 +1,110 @@
-import type { BIP44AddressKeyDeriver } from '@metamask/key-tree';
-import { heading, panel, text, DialogType } from '@metamask/snaps-sdk';
-
-import type { ApiParams, CreateAccountRequestParams } from './types/snapApi';
-import type { AccContract, Transaction } from './types/snapState';
-import { VoyagerTransactionType, TransactionStatus } from './types/snapState';
-import { logger } from './utils/logger';
 import { toJson } from './utils/serializer';
-import {
-  getNetworkFromChainId,
-  getValidNumber,
-  upsertAccount,
-  upsertTransaction,
-  addDialogTxt,
-} from './utils/snapUtils';
 import {
   getKeysFromAddressIndex,
   getAccContractAddressAndCallData,
   deployAccount,
   waitForTransaction,
+  getAccContractAddressAndCallDataLegacy,
+  estimateAccountDeployFee,
 } from './utils/starknetUtils';
+import {
+  getNetworkFromChainId,
+  getValidNumber,
+  upsertAccount,
+  upsertTransaction,
+  getSendTxnText,
+} from './utils/snapUtils';
+import { AccContract, VoyagerTransactionType, Transaction, TransactionStatus } from './types/snapState';
+import { ApiParams, CreateAccountRequestParams } from './types/snapApi';
+import { heading, panel, DialogType } from '@metamask/snaps-sdk';
+import { logger } from './utils/logger';
+import { CAIRO_VERSION, CAIRO_VERSION_LEGACY } from './utils/constants';
+import { CairoVersion, EstimateFee, num } from 'starknet';
 
 /**
  * Create an starknet account.
  *
  * @template Params - The ApiParams of the request.
- * @param params
  * @param silentMode - The flag to disable the confirmation dialog from snap.
  * @param waitMode - The flag to enable an determination by doing an recursive fetch to check if the deploy account status is on L2 or not. The wait mode is only useful when it compose with other txn together, it can make sure the deploy txn execute complete, avoiding the latter txn failed.
  */
-export async function createAccount(params: ApiParams, silentMode = false, waitMode = false) {
+export async function createAccount(
+  params: ApiParams,
+  silentMode = false,
+  waitMode = false,
+  cairoVersion: CairoVersion = CAIRO_VERSION,
+) {
   try {
     const { state, wallet, saveMutex, keyDeriver, requestParams } = params;
     const requestParamsObj = requestParams as CreateAccountRequestParams;
-
     const addressIndex = getValidNumber(requestParamsObj.addressIndex, -1, 0);
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
-    const deploy = Boolean(requestParamsObj.deploy);
+    const deploy = !!requestParamsObj.deploy;
 
     const {
       privateKey,
       publicKey,
       addressIndex: addressIndexInUsed,
       derivationPath,
-    } = await getKeysFromAddressIndex(
-      keyDeriver as unknown as BIP44AddressKeyDeriver,
-      network.chainId,
-      state,
-      addressIndex,
-    );
-    const { address: contractAddress, callData: contractCallData } = getAccContractAddressAndCallData(publicKey);
+    } = await getKeysFromAddressIndex(keyDeriver, network.chainId, state, addressIndex);
+
+    const { address: contractAddress, callData: contractCallData } =
+      cairoVersion == CAIRO_VERSION_LEGACY
+        ? getAccContractAddressAndCallDataLegacy(publicKey)
+        : getAccContractAddressAndCallData(publicKey);
     logger.log(
       `createAccount:\ncontractAddress = ${contractAddress}\npublicKey = ${publicKey}\naddressIndex = ${addressIndexInUsed}`,
     );
 
     if (deploy) {
       if (!silentMode) {
-        const components = [];
-        addDialogTxt(components, 'Address', contractAddress);
-        addDialogTxt(components, 'Public Key', publicKey);
-        addDialogTxt(components, 'Address Index', addressIndex.toString());
+        logger.log(
+          `estimateAccountDeployFee:\ncontractAddress = ${contractAddress}\npublicKey = ${publicKey}\naddressIndex = ${addressIndexInUsed}`,
+        );
+
+        const estimateDeployFee: EstimateFee = await estimateAccountDeployFee(
+          network,
+          contractAddress,
+          contractCallData,
+          publicKey,
+          privateKey,
+          cairoVersion,
+        );
+        logger.log(`estimateAccountDeployFee:\nestimateDeployFee: ${toJson(estimateDeployFee)}`);
+        const maxFee = num.toBigInt(estimateDeployFee.suggestedMaxFee.toString(10) ?? '0');
+        const dialogComponents = getSendTxnText(
+          state,
+          contractAddress,
+          'deploy',
+          contractCallData,
+          contractAddress,
+          maxFee,
+          network,
+        );
 
         const response = await wallet.request({
           method: 'snap_dialog',
           params: {
             type: DialogType.Confirmation,
-            content: panel([
-              heading('Do you want to sign this deploy account transaction ?'),
-              text(`It will be signed with address: ${contractAddress}`),
-              ...components,
-            ]),
+            content: panel([heading('Do you want to sign this deploy transaction ?'), ...dialogComponents]),
           },
         });
-        if (!response) {
+
+        if (!response)
           return {
             address: contractAddress,
           };
-        }
       }
 
       // Deploy account will auto estimate the fee from the network if not provided
-      const deployResp = await deployAccount(network, contractAddress, contractCallData, publicKey, privateKey);
+      const deployResp = await deployAccount(
+        network,
+        contractAddress,
+        contractCallData,
+        publicKey,
+        privateKey,
+        cairoVersion,
+      );
 
       if (deployResp.contract_address && deployResp.transaction_hash) {
         const userAccount: AccContract = {
@@ -90,6 +115,8 @@ export async function createAccount(params: ApiParams, silentMode = false, waitM
           derivationPath,
           deployTxnHash: deployResp.transaction_hash,
           chainId: network.chainId,
+          upgradeRequired: cairoVersion === CAIRO_VERSION_LEGACY,
+          deployRequired: false,
         };
 
         await upsertAccount(userAccount, wallet, saveMutex);
@@ -121,16 +148,14 @@ export async function createAccount(params: ApiParams, silentMode = false, waitM
 
       return {
         address: deployResp.contract_address,
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         transaction_hash: deployResp.transaction_hash,
       };
     }
     return {
       address: contractAddress,
     };
-  } catch (error) {
-    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-    logger.error(`Problem found: ${error}`);
-    throw error;
+  } catch (err) {
+    logger.error(`Problem found: ${err}`);
+    throw err;
   }
 }
