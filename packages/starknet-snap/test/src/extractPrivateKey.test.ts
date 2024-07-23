@@ -10,7 +10,6 @@ import { getAddressKeyDeriver } from '../../src/utils/keyPair';
 import * as utils from '../../src/utils/starknetUtils';
 import { Mutex } from 'async-mutex';
 import { ApiParams, ExtractPrivateKeyRequestParams } from '../../src/types/snapApi';
-import { UpgradeRequiredError } from '../../src/utils/exceptions';
 
 chai.use(sinonChai);
 const sandbox = sinon.createSandbox();
@@ -88,33 +87,25 @@ describe('Test function: extractPrivateKey', function () {
       apiParams.requestParams = Object.assign({}, requestObject);
     });
 
-    describe('when validateAccountRequireUpgradeOrDeploy fail', function () {
+    describe('when require upgrade checking fail', function () {
       it('should throw error', async function () {
-        const validateAccountRequireUpgradeOrDeployStub = sandbox
-          .stub(utils, 'validateAccountRequireUpgradeOrDeploy')
-          .throws('network error');
+        const isUpgradeRequiredStub = sandbox.stub(utils, 'isUpgradeRequired').throws('network error');
         let result;
         try {
           result = await extractPrivateKey(apiParams);
         } catch (err) {
           result = err;
         } finally {
-          expect(validateAccountRequireUpgradeOrDeployStub).to.have.been.calledOnceWith(
-            STARKNET_SEPOLIA_TESTNET_NETWORK,
-            account1.address,
-            account1.publicKey,
-          );
+          expect(isUpgradeRequiredStub).to.have.been.calledOnceWith(STARKNET_SEPOLIA_TESTNET_NETWORK, account1.address);
           expect(result).to.be.an('Error');
         }
       });
     });
 
     describe('when account require upgrade', function () {
-      let validateAccountRequireUpgradeOrDeployStub: sinon.SinonStub;
+      let isUpgradeRequiredStub: sinon.SinonStub;
       beforeEach(async function () {
-        validateAccountRequireUpgradeOrDeployStub = sandbox
-          .stub(utils, 'validateAccountRequireUpgradeOrDeploy')
-          .throws(new UpgradeRequiredError('Upgrade Required'));
+        isUpgradeRequiredStub = sandbox.stub(utils, 'isUpgradeRequired').resolves(true);
       });
 
       it('should throw error if upgrade required', async function () {
@@ -124,11 +115,7 @@ describe('Test function: extractPrivateKey', function () {
         } catch (err) {
           result = err;
         } finally {
-          expect(validateAccountRequireUpgradeOrDeployStub).to.have.been.calledOnceWith(
-            STARKNET_SEPOLIA_TESTNET_NETWORK,
-            account1.address,
-            account1.publicKey,
-          );
+          expect(isUpgradeRequiredStub).to.have.been.calledOnceWith(STARKNET_SEPOLIA_TESTNET_NETWORK, account1.address);
           expect(result).to.be.an('Error');
         }
       });
@@ -136,7 +123,7 @@ describe('Test function: extractPrivateKey', function () {
 
     describe('when account is not require upgrade', function () {
       beforeEach(async function () {
-        sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolves(null);
+        sandbox.stub(utils, 'isUpgradeRequired').resolves(false);
       });
 
       it('should get the private key of the specified user account correctly', async function () {

@@ -1,25 +1,26 @@
-import { toJson } from './serializer';
-import { Mutex } from 'async-mutex';
-import {
-  num,
+import type { Component, Json, SnapsProvider } from '@metamask/snaps-sdk';
+import { text, copyable, panel, heading, DialogType } from '@metamask/snaps-sdk';
+import type { Mutex } from 'async-mutex';
+import convert from 'ethereum-unit-converter';
+import { num as numUtils, constants } from 'starknet';
+import type {
   InvocationsDetails,
   DeclareContractPayload,
   Abi,
   DeclareSignerDetails,
   Call,
   DeployAccountSignerDetails,
-  constants,
 } from 'starknet';
-import { validateAndParseAddress } from './starknetUtils';
-import { Component, text, copyable, panel, heading, DialogType } from '@metamask/snaps-sdk';
-import {
+
+import type { AddErc20TokenRequestParams, AddNetworkRequestParams } from '../types/snapApi';
+import { TransactionStatus } from '../types/snapState';
+import type {
   Network,
   Erc20Token,
   AccContract,
   SnapState,
   Transaction,
   VoyagerTransactionType,
-  TransactionStatus,
 } from '../types/snapState';
 import {
   DAPP,
@@ -30,8 +31,9 @@ import {
   PRELOADED_TOKENS,
   STARKNET_SEPOLIA_TESTNET_NETWORK,
 } from './constants';
-import convert from 'ethereum-unit-converter';
-import { AddErc20TokenRequestParams, AddNetworkRequestParams } from '../types/snapApi';
+import { logger } from './logger';
+import { toJson } from './serializer';
+import { validateAndParseAddress } from './starknetUtils';
 import {
   filterTransactions,
   TimestampFilter,
@@ -41,21 +43,64 @@ import {
   StatusFilter,
   ChainIdFilter,
 } from './transaction/filter';
-import { logger } from './logger';
-import { DeployRequiredError, UpgradeRequiredError } from './exceptions';
 
-function hasOnlyAsciiChars(str: string) {
-  return /^[ -~]+$/.test(str);
+/**
+ *
+ * @param wallet
+ */
+async function getState(wallet: SnapsProvider): Promise<SnapState> {
+  return (await wallet.request({
+    method: 'snap_manageState',
+    params: {
+      operation: 'get',
+    },
+  })) as unknown as SnapState;
 }
 
+/**
+ *
+ * @param wallet
+ * @param state
+ */
+async function setState(wallet: SnapsProvider, state: SnapState): Promise<void> {
+  await wallet.request({
+    method: 'snap_manageState',
+    params: {
+      operation: 'update',
+      newState: state as unknown as Record<string, Json>,
+    },
+  });
+}
+
+/**
+ *
+ * @param str
+ */
+function hasOnlyAsciiChars(str: string) {
+  return /^[ -~]+$/u.test(str);
+}
+
+/**
+ *
+ * @param fieldStr
+ * @param maxLength
+ */
 function isValidAsciiStrField(fieldStr: string, maxLength: number) {
   return hasOnlyAsciiChars(fieldStr) && fieldStr.trim().length > 0 && fieldStr.length <= maxLength;
 }
 
+/**
+ *
+ * @param str
+ */
 function isHexWithPrefix(str: string) {
-  return /^0x[0-9a-fA-F]+$/.test(str);
+  return /^0x[0-9a-fA-F]+$/u.test(str);
 }
 
+/**
+ *
+ * @param urlStr
+ */
 function isValidHttpUrl(urlStr: string) {
   let url: URL;
   try {
@@ -66,49 +111,93 @@ function isValidHttpUrl(urlStr: string) {
   return url.protocol === 'http:' || url.protocol === 'https:';
 }
 
+/**
+ *
+ * @param tokenName
+ */
 function isValidTokenName(tokenName: string) {
   return isValidAsciiStrField(tokenName, MAXIMUM_TOKEN_NAME_LENGTH);
 }
 
+/**
+ *
+ * @param tokenSymbol
+ */
 function isValidTokenSymbol(tokenSymbol: string) {
   return isValidAsciiStrField(tokenSymbol, MAXIMUM_TOKEN_SYMBOL_LENGTH);
 }
 
+/**
+ *
+ * @param networkName
+ */
 function isValidNetworkName(networkName: string) {
   return isValidAsciiStrField(networkName, MAXIMUM_NETWORK_NAME_LENGTH);
 }
 
+/**
+ *
+ * @param tokenName
+ * @param chainId
+ */
 function isPreloadedTokenName(tokenName: string, chainId: string) {
-  return !!PRELOADED_TOKENS.find(
-    (token) => token.name.trim() === tokenName.trim() && isSameChainId(token.chainId, chainId),
+  return Boolean(
+    PRELOADED_TOKENS.find((token) => token.name.trim() === tokenName.trim() && isSameChainId(token.chainId, chainId)),
   );
 }
 
+/**
+ *
+ * @param tokenSymbol
+ * @param chainId
+ */
 function isPreloadedTokenSymbol(tokenSymbol: string, chainId: string) {
-  return !!PRELOADED_TOKENS.find(
-    (token) => token.symbol.trim() === tokenSymbol.trim() && isSameChainId(token.chainId, chainId),
+  return Boolean(
+    PRELOADED_TOKENS.find(
+      (token) => token.symbol.trim() === tokenSymbol.trim() && isSameChainId(token.chainId, chainId),
+    ),
   );
 }
 
+/**
+ *
+ * @param tokenAddress
+ * @param chainId
+ */
 function isPreloadedTokenAddress(tokenAddress: string, chainId: string) {
-  const bigIntTokenAddress = num.toBigInt(tokenAddress);
-  return !!PRELOADED_TOKENS.find(
-    (token) => num.toBigInt(token.address) === bigIntTokenAddress && isSameChainId(token.chainId, chainId),
+  const bigIntTokenAddress = numUtils.toBigInt(tokenAddress);
+  return Boolean(
+    PRELOADED_TOKENS.find(
+      (token) => numUtils.toBigInt(token.address) === bigIntTokenAddress && isSameChainId(token.chainId, chainId),
+    ),
   );
 }
 
+/**
+ *
+ * @param chainId
+ */
 function isPreloadedNetworkChainId(chainId: string) {
-  return !!PRELOADED_NETWORKS.find((network) => isSameChainId(network.chainId, chainId));
+  return Boolean(PRELOADED_NETWORKS.find((network) => isSameChainId(network.chainId, chainId)));
 }
 
+/**
+ *
+ * @param networkName
+ */
 function isPreloadedNetworkName(networkName: string) {
-  return !!PRELOADED_NETWORKS.find((network) => network.name.trim() === networkName.trim());
+  return Boolean(PRELOADED_NETWORKS.find((network) => network.name.trim() === networkName.trim()));
 }
 
+/**
+ *
+ * @param params
+ * @param network
+ */
 export function validateAddErc20TokenParams(params: AddErc20TokenRequestParams, network: Network) {
   try {
     validateAndParseAddress(params.tokenAddress);
-  } catch (err) {
+  } catch (error) {
     throw new Error(`The given token address is invalid: ${params.tokenAddress}`);
   }
 
@@ -135,6 +224,10 @@ export function validateAddErc20TokenParams(params: AddErc20TokenRequestParams, 
   }
 }
 
+/**
+ *
+ * @param params
+ */
 export function validateAddNetworkParams(params: AddNetworkRequestParams) {
   if (!isValidNetworkName(params.networkName)) {
     throw new Error(
@@ -165,8 +258,13 @@ export function validateAddNetworkParams(params: AddNetworkRequestParams) {
   }
 }
 
+/**
+ *
+ * @param chainId1
+ * @param chainId2
+ */
 export function isSameChainId(chainId1: string, chainId2: string) {
-  return num.toBigInt(chainId1) === num.toBigInt(chainId2);
+  return numUtils.toBigInt(chainId1) === numUtils.toBigInt(chainId2);
 }
 
 export const getValidNumber = (
@@ -179,11 +277,21 @@ export const getValidNumber = (
   return obj === '' || isNaN(toNum) || toNum > maxVal || toNum < minVal ? defaultValue : toNum;
 };
 
-export function addDialogTxt(components: Array<Component>, label: string, value: string) {
+/**
+ *
+ * @param components
+ * @param label
+ * @param value
+ */
+export function addDialogTxt(components: Component[], label: string, value: string) {
   components.push(text(`**${label}:**`));
   components.push(copyable(value));
 }
 
+/**
+ *
+ * @param network
+ */
 export function getNetworkTxt(network: Network) {
   const components = [];
   addDialogTxt(components, 'Chain Name', network.name);
@@ -200,6 +308,14 @@ export function getNetworkTxt(network: Network) {
   return components;
 }
 
+/**
+ *
+ * @param senderAddress
+ * @param network
+ * @param txnInvocation
+ * @param abis
+ * @param invocationsDetails
+ */
 export function getTxnSnapTxt(
   senderAddress: string,
   network: Network,
@@ -227,15 +343,25 @@ export function getTxnSnapTxt(
   return components;
 }
 
+/**
+ *
+ * @param state
+ * @param contractAddress
+ * @param contractFuncName
+ * @param contractCallData
+ * @param senderAddress
+ * @param maxFee
+ * @param network
+ */
 export function getSendTxnText(
   state: SnapState,
   contractAddress: string,
   contractFuncName: string,
   contractCallData: string[],
   senderAddress: string,
-  maxFee: num.BigNumberish,
+  maxFee: numUtils.BigNumberish,
   network: Network,
-): Array<Component> {
+): Component[] {
   // Retrieve the ERC-20 token from snap state for confirmation display purpose
   const token = getErc20Token(state, contractAddress, network.chainId);
   const components = [];
@@ -256,17 +382,21 @@ export function getSendTxnText(
       addDialogTxt(components, 'Sender Address', senderAddress);
       addDialogTxt(components, 'Recipient Address', contractCallData[0]);
       addDialogTxt(components, `Amount(${token.symbol})`, amount);
-    } catch (err) {
-      logger.error(`getSigningTxnText: error found in amount conversion: ${err}`);
+    } catch (error) {
+      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+      logger.error(`getSigningTxnText: error found in amount conversion: ${error}`);
     }
-  }
-  if (contractFuncName === 'deploy') {
-    // [TODO] handle specific deploy dialog aspects ?
   }
 
   return components;
 }
 
+/**
+ *
+ * @param signerAddress
+ * @param network
+ * @param txnInvocation
+ */
 export function getSignTxnTxt(
   signerAddress: string,
   network: Network,
@@ -279,6 +409,13 @@ export function getSignTxnTxt(
   return components;
 }
 
+/**
+ *
+ * @param senderAddress
+ * @param network
+ * @param contractPayload
+ * @param invocationsDetails
+ */
 export function getDeclareSnapTxt(
   senderAddress: string,
   network: Network,
@@ -317,6 +454,14 @@ export function getDeclareSnapTxt(
   return components;
 }
 
+/**
+ *
+ * @param tokenAddress
+ * @param tokenName
+ * @param tokenSymbol
+ * @param tokenDecimals
+ * @param network
+ */
 export function getAddTokenText(
   tokenAddress: string,
   tokenName: string,
@@ -333,32 +478,46 @@ export function getAddTokenText(
   return components;
 }
 
+/**
+ *
+ * @param state
+ * @param accountAddress
+ * @param chainId
+ */
 export function getAccount(state: SnapState, accountAddress: string, chainId: string) {
-  const bigIntAccountAddress = num.toBigInt(accountAddress);
+  const bigIntAccountAddress = numUtils.toBigInt(accountAddress);
   return state.accContracts?.find(
-    (acc) => num.toBigInt(acc.address) === bigIntAccountAddress && isSameChainId(acc.chainId, chainId),
+    (acc) => numUtils.toBigInt(acc.address) === bigIntAccountAddress && isSameChainId(acc.chainId, chainId),
   );
 }
 
+/**
+ *
+ * @param state
+ * @param chainId
+ */
 export function getAccounts(state: SnapState, chainId: string) {
   return state.accContracts
     .filter((acc) => isSameChainId(acc.chainId, chainId))
     .sort((a: AccContract, b: AccContract) => a.addressIndex - b.addressIndex);
 }
 
-export async function upsertAccount(userAccount: AccContract, wallet, mutex: Mutex, state: SnapState = undefined) {
+/**
+ *
+ * @param userAccount
+ * @param wallet
+ * @param mutex
+ * @param state
+ */
+export async function upsertAccount(userAccount: AccContract, wallet: SnapsProvider, mutex: Mutex, state?: SnapState) {
   return mutex.runExclusive(async () => {
     if (!state) {
-      state = await wallet.request({
-        method: 'snap_manageState',
-        params: {
-          operation: 'get',
-        },
-      });
+      // eslint-disable-next-line require-atomic-updates, no-param-reassign
+      state = await getState(wallet);
     }
 
     const storedAccount = getAccount(state, userAccount.address, userAccount.chainId);
-    if (!storedAccount) {
+    if (storedAccount === undefined) {
       if (!state.accContracts) {
         state.accContracts = [];
       }
@@ -374,42 +533,46 @@ export async function upsertAccount(userAccount: AccContract, wallet, mutex: Mut
       storedAccount.publicKey = userAccount.publicKey;
       storedAccount.deployTxnHash = userAccount.deployTxnHash || storedAccount.deployTxnHash;
       storedAccount.upgradeRequired = userAccount.upgradeRequired;
-      storedAccount.deployRequired = userAccount.deployRequired;
     }
 
-    await wallet.request({
-      method: 'snap_manageState',
-      params: {
-        operation: 'update',
-        newState: state,
-      },
-    });
+    await setState(wallet, state);
   });
 }
 
+/**
+ *
+ * @param state
+ * @param chainId
+ */
 export function getNetwork(state: SnapState, chainId: string) {
-  return state.networks?.find(
-    (network) => isSameChainId(network.chainId, chainId) && !Boolean(network?.useOldAccounts),
-  );
+  return state.networks?.find((network) => isSameChainId(network.chainId, chainId) && !network?.useOldAccounts);
 }
 
+/**
+ *
+ * @param state
+ */
 export function getNetworks(state: SnapState) {
   return state.networks;
 }
 
-export async function upsertNetwork(network: Network, wallet, mutex: Mutex, state: SnapState = undefined) {
+/**
+ *
+ * @param network
+ * @param wallet
+ * @param mutex
+ * @param state
+ */
+export async function upsertNetwork(network: Network, wallet: SnapsProvider, mutex: Mutex, state?: SnapState) {
   return mutex.runExclusive(async () => {
     if (!state) {
-      state = await wallet.request({
-        method: 'snap_manageState',
-        params: {
-          operation: 'get',
-        },
-      });
+      // eslint-disable-next-line require-atomic-updates, no-param-reassign
+      state = await getState(wallet);
     }
 
     const storedNetwork = getNetwork(state, network.chainId);
-    if (!storedNetwork) {
+
+    if (storedNetwork === undefined) {
       if (!state.networks) {
         state.networks = [];
       }
@@ -425,25 +588,22 @@ export async function upsertNetwork(network: Network, wallet, mutex: Mutex, stat
       storedNetwork.voyagerUrl = network.voyagerUrl;
     }
 
-    await wallet.request({
-      method: 'snap_manageState',
-      params: {
-        operation: 'update',
-        newState: state,
-      },
-    });
+    await setState(wallet, state);
   });
 }
 
-export async function removeNetwork(network: Network, wallet, mutex: Mutex, state: SnapState = undefined) {
+/**
+ *
+ * @param network
+ * @param wallet
+ * @param mutex
+ * @param state
+ */
+export async function removeNetwork(network: Network, wallet: SnapsProvider, mutex: Mutex, state?: SnapState) {
   return mutex.runExclusive(async () => {
     if (!state) {
-      state = await wallet.request({
-        method: 'snap_manageState',
-        params: {
-          operation: 'get',
-        },
-      });
+      // eslint-disable-next-line require-atomic-updates, no-param-reassign
+      state = await getState(wallet);
     }
 
     if (state.currentNetwork && isSameChainId(state.currentNetwork.chainId, network.chainId)) {
@@ -453,45 +613,58 @@ export async function removeNetwork(network: Network, wallet, mutex: Mutex, stat
     const storedNetwork = getNetwork(state, network.chainId);
     if (storedNetwork) {
       state.networks = state.networks.filter((net) => !isSameChainId(net.chainId, network.chainId));
-      await wallet.request({
-        method: 'snap_manageState',
-        params: {
-          operation: 'update',
-          newState: state,
-        },
-      });
+      await setState(wallet, state);
     }
   });
 }
 
+/**
+ *
+ * @param state
+ * @param tokenAddress
+ * @param chainId
+ */
 export function getErc20Token(state: SnapState, tokenAddress: string, chainId: string) {
-  const bigIntTokenAddress = num.toBigInt(tokenAddress);
+  const bigIntTokenAddress = numUtils.toBigInt(tokenAddress);
   return state.erc20Tokens?.find(
-    (token) => num.toBigInt(token.address) === bigIntTokenAddress && isSameChainId(token.chainId, chainId),
+    (token) => numUtils.toBigInt(token.address) === bigIntTokenAddress && isSameChainId(token.chainId, chainId),
   );
 }
 
+/**
+ *
+ * @param state
+ * @param chainId
+ */
 export function getErc20Tokens(state: SnapState, chainId: string) {
   return state.erc20Tokens?.filter((token) => isSameChainId(token.chainId, chainId));
 }
 
+/**
+ *
+ * @param state
+ * @param chainId
+ */
 export function getEtherErc20Token(state: SnapState, chainId: string) {
   return state.erc20Tokens?.find((token) => isSameChainId(token.chainId, chainId) && token.symbol === 'ETH');
 }
 
-export async function upsertErc20Token(erc20Token: Erc20Token, wallet, mutex: Mutex, state: SnapState = undefined) {
+/**
+ *
+ * @param erc20Token
+ * @param wallet
+ * @param mutex
+ * @param state
+ */
+export async function upsertErc20Token(erc20Token: Erc20Token, wallet: SnapsProvider, mutex: Mutex, state?: SnapState) {
   return mutex.runExclusive(async () => {
     if (!state) {
-      state = await wallet.request({
-        method: 'snap_manageState',
-        params: {
-          operation: 'get',
-        },
-      });
+      // eslint-disable-next-line require-atomic-updates, no-param-reassign
+      state = await getState(wallet);
     }
 
     const storedErc20Token = getErc20Token(state, erc20Token.address, erc20Token.chainId);
-    if (!storedErc20Token) {
+    if (storedErc20Token === undefined) {
       if (!state.erc20Tokens) {
         state.erc20Tokens = [];
       }
@@ -508,30 +681,38 @@ export async function upsertErc20Token(erc20Token: Erc20Token, wallet, mutex: Mu
       storedErc20Token.decimals = erc20Token.decimals;
     }
 
-    await wallet.request({
-      method: 'snap_manageState',
-      params: {
-        operation: 'update',
-        newState: state,
-      },
-    });
+    await setState(wallet, state);
   });
 }
 
+/**
+ *
+ * @param state
+ * @param targerChainId
+ */
 export function getNetworkFromChainId(state: SnapState, targerChainId: string | undefined) {
-  const chainId = targerChainId || STARKNET_SEPOLIA_TESTNET_NETWORK.chainId;
+  const chainId = targerChainId ?? STARKNET_SEPOLIA_TESTNET_NETWORK.chainId;
   const network = getNetwork(state, chainId);
-  if (!network) {
+  if (network === undefined) {
     throw new Error(`can't find the network in snap state with chainId: ${chainId}`);
   }
+  // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
   logger.log(`getNetworkFromChainId: From ${targerChainId}:\n${toJson(network)}`);
   return network;
 }
 
+/**
+ *
+ * @param network
+ */
 export function getChainIdHex(network: Network) {
-  return `0x${num.toBigInt(network.chainId).toString(16)}`;
+  return `0x${numUtils.toBigInt(network.chainId).toString(16)}`;
 }
 
+/**
+ *
+ * @param chainId
+ */
 export function getRPCUrl(chainId: string) {
   switch (chainId) {
     case constants.StarknetChainId.SN_MAIN:
@@ -542,10 +723,18 @@ export function getRPCUrl(chainId: string) {
   }
 }
 
+/**
+ *
+ */
 export function getRPCCredentials(): string {
+  // eslint-disable-next-line no-restricted-globals
   return process.env.ALCHEMY_API_KEY ?? '';
 }
 
+/**
+ *
+ * @param chainId
+ */
 export function getVoyagerUrl(chainId: string) {
   switch (chainId) {
     case STARKNET_SEPOLIA_TESTNET_NETWORK.chainId:
@@ -556,27 +745,56 @@ export function getVoyagerUrl(chainId: string) {
   }
 }
 
+/**
+ *
+ */
 export function getVoyagerCredentials(): Record<string, string> {
   return {
-    'X-API-Key': process.env.VOYAGER_API_KEY,
+    // eslint-disable-next-line no-restricted-globals
+    'X-API-Key': process.env.VOYAGER_API_KEY as unknown as string,
   };
 }
 
+/**
+ *
+ * @param network
+ */
 export function getTransactionFromVoyagerUrl(network: Network) {
   return `${getVoyagerUrl(network.chainId)}/txn`;
 }
 
+/**
+ *
+ * @param network
+ */
 export function getTransactionsFromVoyagerUrl(network: Network) {
   return `${getVoyagerUrl(network.chainId)}/txns`;
 }
 
+/**
+ *
+ * @param state
+ * @param txnHash
+ * @param chainId
+ */
 export function getTransaction(state: SnapState, txnHash: string, chainId: string) {
-  const bigIntTxnHash = num.toBigInt(txnHash);
+  const bigIntTxnHash = numUtils.toBigInt(txnHash);
   return state.transactions?.find(
-    (txn) => num.toBigInt(txn.txnHash) === bigIntTxnHash && isSameChainId(txn.chainId, chainId),
+    (txn) => numUtils.toBigInt(txn.txnHash) === bigIntTxnHash && isSameChainId(txn.chainId, chainId),
   );
 }
 
+/**
+ *
+ * @param state
+ * @param chainId
+ * @param senderAddress
+ * @param contractAddress
+ * @param txnType
+ * @param finalityStatus
+ * @param executionStatus
+ * @param minTimestamp
+ */
 export function getTransactions(
   state: SnapState,
   chainId: string,
@@ -592,8 +810,8 @@ export function getTransactions(
     filteredTxns = filterTransactions(state.transactions, [
       new ChainIdFilter(chainId),
       new TimestampFilter(minTimestamp),
-      new SenderAddressFilter(senderAddress ? num.toBigInt(senderAddress) : undefined),
-      new ContractAddressFilter(contractAddress ? num.toBigInt(contractAddress) : undefined),
+      new SenderAddressFilter(senderAddress ? numUtils.toBigInt(senderAddress) : undefined),
+      new ContractAddressFilter(contractAddress ? numUtils.toBigInt(contractAddress) : undefined),
       new TxnTypeFilter(txnType),
       new StatusFilter(finalityStatus, executionStatus),
     ]);
@@ -601,19 +819,22 @@ export function getTransactions(
   return filteredTxns;
 }
 
-export async function upsertTransaction(txn: Transaction, wallet, mutex: Mutex, state: SnapState = undefined) {
+/**
+ *
+ * @param txn
+ * @param wallet
+ * @param mutex
+ * @param state
+ */
+export async function upsertTransaction(txn: Transaction, wallet: SnapsProvider, mutex: Mutex, state?: SnapState) {
   return mutex.runExclusive(async () => {
     if (!state) {
-      state = await wallet.request({
-        method: 'snap_manageState',
-        params: {
-          operation: 'get',
-        },
-      });
+      // eslint-disable-next-line require-atomic-updates, no-param-reassign
+      state = await getState(wallet);
     }
 
     const storedTxn = getTransaction(state, txn.txnHash, txn.chainId);
-    if (!storedTxn) {
+    if (storedTxn === undefined) {
       if (!state.transactions) {
         state.transactions = [];
       }
@@ -632,30 +853,27 @@ export async function upsertTransaction(txn: Transaction, wallet, mutex: Mutex, 
       storedTxn.timestamp = txn.timestamp;
     }
 
-    await wallet.request({
-      method: 'snap_manageState',
-      params: {
-        operation: 'update',
-        newState: state,
-      },
-    });
+    await setState(wallet, state);
   });
 }
 
-export async function upsertTransactions(txns: Transaction[], wallet, mutex: Mutex, state: SnapState = undefined) {
+/**
+ *
+ * @param txns
+ * @param wallet
+ * @param mutex
+ * @param state
+ */
+export async function upsertTransactions(txns: Transaction[], wallet: SnapsProvider, mutex: Mutex, state?: SnapState) {
   return mutex.runExclusive(async () => {
     if (!state) {
-      state = await wallet.request({
-        method: 'snap_manageState',
-        params: {
-          operation: 'get',
-        },
-      });
+      // eslint-disable-next-line require-atomic-updates, no-param-reassign
+      state = await getState(wallet);
     }
 
-    txns.forEach((txn) => {
+    for (const txn of txns) {
       const storedTxn = getTransaction(state, txn.txnHash, txn.chainId);
-      if (!storedTxn) {
+      if (storedTxn === undefined) {
         if (!state.transactions) {
           state.transactions = [];
         }
@@ -667,32 +885,29 @@ export async function upsertTransactions(txns: Transaction[], wallet, mutex: Mut
         storedTxn.failureReason = txn.failureReason;
         storedTxn.timestamp = txn.timestamp;
       }
-    });
+    }
 
-    await wallet.request({
-      method: 'snap_manageState',
-      params: {
-        operation: 'update',
-        newState: state,
-      },
-    });
+    await setState(wallet, state);
   });
 }
 
+/**
+ *
+ * @param minTimeStamp
+ * @param wallet
+ * @param mutex
+ * @param state
+ */
 export async function removeAcceptedTransaction(
   minTimeStamp: number,
-  wallet,
+  wallet: SnapsProvider,
   mutex: Mutex,
-  state: SnapState = undefined,
+  state?: SnapState,
 ) {
   return mutex.runExclusive(async () => {
     if (!state) {
-      state = await wallet.request({
-        method: 'snap_manageState',
-        params: {
-          operation: 'get',
-        },
-      });
+      // eslint-disable-next-line require-atomic-updates, no-param-reassign
+      state = await getState(wallet);
     }
 
     state.transactions = state.transactions.filter(
@@ -702,50 +917,63 @@ export async function removeAcceptedTransaction(
         (txn.finalityStatus === TransactionStatus.ACCEPTED_ON_L2 && txn.timestamp * 1000 >= minTimeStamp),
     );
 
-    await wallet.request({
-      method: 'snap_manageState',
-      params: {
-        operation: 'update',
-        newState: state,
-      },
-    });
+    await setState(wallet, state);
   });
 }
 
+/**
+ *
+ * @param state
+ */
 export function getCurrentNetwork(state: SnapState) {
-  return state.currentNetwork || STARKNET_SEPOLIA_TESTNET_NETWORK;
+  return state.currentNetwork ?? STARKNET_SEPOLIA_TESTNET_NETWORK;
 }
 
-export async function setCurrentNetwork(network: Network, wallet, mutex: Mutex, state: SnapState = undefined) {
+/**
+ *
+ * @param network
+ * @param wallet
+ * @param mutex
+ * @param state
+ */
+export async function setCurrentNetwork(network: Network, wallet: SnapsProvider, mutex: Mutex, state?: SnapState) {
   return mutex.runExclusive(async () => {
     if (!state) {
-      state = await wallet.request({
-        method: 'snap_manageState',
-        params: {
-          operation: 'get',
-        },
-      });
+      // eslint-disable-next-line require-atomic-updates, no-param-reassign
+      state = await getState(wallet);
     }
 
+    // eslint-disable-next-line require-atomic-updates
     state.currentNetwork = network;
 
-    await wallet.request({
-      method: 'snap_manageState',
-      params: {
-        operation: 'update',
-        newState: state,
-      },
-    });
+    await setState(wallet, state);
   });
 }
 
-export function toMap<k, v, z>(arr: Array<v>, key: string, keyConverter?: (v: z) => k): Map<k, v> {
-  return arr.reduce((map, obj: v) => {
-    map.set(keyConverter && typeof keyConverter === 'function' ? keyConverter(obj[key] as z) : obj[key], obj);
+/**
+ *
+ * @param arr
+ * @param mappingKey
+ * @param keyConverter
+ */
+export function toMap<Key, Val, FnParam>(
+  arr: Val[],
+  mappingKey: string,
+  keyConverter?: (v: FnParam) => Key,
+): Map<Key, Val> {
+  return arr.reduce((map, obj: Val) => {
+    map.set(
+      keyConverter && typeof keyConverter === 'function' ? keyConverter(obj[mappingKey] as FnParam) : obj[mappingKey],
+      obj,
+    );
     return map;
-  }, new Map<k, v>());
+  }, new Map<Key, Val>());
 }
 
+/**
+ *
+ * @param envt
+ */
 export function dappUrl(envt: string) {
   if (!envt) {
     return DAPP.prod;
@@ -763,6 +991,10 @@ export function dappUrl(envt: string) {
   }
 }
 
+/**
+ *
+ * @param wallet
+ */
 export async function showUpgradeRequestModal(wallet) {
   await wallet.request({
     method: 'snap_dialog',
@@ -771,34 +1003,12 @@ export async function showUpgradeRequestModal(wallet) {
       content: panel([
         heading('Account Upgrade Mandatory!'),
         text(
-          `Visit the [companion dapp for Starknet](${dappUrl(process.env.SNAP_ENV)}) and click “Upgrade”.\nThank you!`,
-        ),
-      ]),
-    },
-  });
-}
-
-export async function showDeployRequestModal(wallet) {
-  await wallet.request({
-    method: 'snap_dialog',
-    params: {
-      type: DialogType.Alert,
-      content: panel([
-        heading('Account Deployment Mandatory!'),
-        text(
           `Visit the [companion dapp for Starknet](${dappUrl(
-            process.env.SNAP_ENV,
-          )}) to deploy your account.\nThank you!`,
+            // eslint-disable-next-line no-restricted-globals
+            process.env.SNAP_ENV as unknown as string,
+          )}) and click “Upgrade”.\nThank you!`,
         ),
       ]),
     },
   });
-}
-
-export async function showAccountRequireUpgradeOrDeployModal(wallet, e: DeployRequiredError | UpgradeRequiredError) {
-  if (e instanceof DeployRequiredError) {
-    await showDeployRequestModal(wallet);
-  } else if (e instanceof UpgradeRequiredError) {
-    await showUpgradeRequestModal(wallet);
-  }
 }

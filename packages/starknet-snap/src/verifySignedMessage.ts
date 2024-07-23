@@ -1,16 +1,20 @@
-import { toJson } from './utils/serializer';
 import typedDataExample from './typedData/typedDataExample.json';
+import type { ApiParams, VerifySignedMessageRequestParams } from './types/snapApi';
+import { logger } from './utils/logger';
+import { toJson } from './utils/serializer';
+import { getNetworkFromChainId } from './utils/snapUtils';
 import {
   verifyTypedDataMessageSignature,
   getFullPublicKeyPairFromPrivateKey,
   getKeysFromAddress,
-  validateAccountRequireUpgradeOrDeploy,
+  isUpgradeRequired,
+  validateAndParseAddress,
 } from './utils/starknetUtils';
-import { getNetworkFromChainId } from './utils/snapUtils';
-import { ApiParams, VerifySignedMessageRequestParams } from './types/snapApi';
-import { logger } from './utils/logger';
-import { validateAndParseAddress } from '../src/utils/starknetUtils';
 
+/**
+ *
+ * @param params
+ */
 export async function verifySignedMessage(params: ApiParams) {
   try {
     const { state, keyDeriver, requestParams } = params;
@@ -36,17 +40,15 @@ export async function verifySignedMessage(params: ApiParams) {
 
     try {
       validateAndParseAddress(verifySignerAddress);
-    } catch (err) {
+    } catch (error) {
       throw new Error(`The given signer address is invalid: ${verifySignerAddress}`);
     }
 
-    const { privateKey: signerPrivateKey, publicKey } = await getKeysFromAddress(
-      keyDeriver,
-      network,
-      state,
-      verifySignerAddress,
-    );
-    await validateAccountRequireUpgradeOrDeploy(network, verifySignerAddress, publicKey);
+    if (await isUpgradeRequired(network, verifySignerAddress)) {
+      throw new Error('Upgrade required');
+    }
+
+    const { privateKey: signerPrivateKey } = await getKeysFromAddress(keyDeriver, network, state, verifySignerAddress);
 
     const fullPublicKey = getFullPublicKeyPairFromPrivateKey(signerPrivateKey);
 
@@ -59,8 +61,9 @@ export async function verifySignedMessage(params: ApiParams) {
 
     logger.log(`verifySignedMessage:\nisVerified: ${isVerified}`);
     return isVerified;
-  } catch (err) {
-    logger.error(`Problem found: ${err}`);
-    throw err;
+  } catch (error) {
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+    logger.error(`Problem found: ${error}`);
+    throw error;
   }
 }

@@ -66,18 +66,14 @@ describe('Test function: recoverAccounts', function () {
 
     for (let i = 0; i < maxScanned; i++) {
       if (i < validPublicKeys) {
-        getCorrectContractAddressStub.onCall(i).resolves({
-          address: mainnetAccAddresses[i],
-          signerPubKey: mainnetPublicKeys[i],
-          upgradeRequired: false,
-          deployRequired: false,
-        });
+        getCorrectContractAddressStub
+          .onCall(i)
+          .resolves({ address: mainnetAccAddresses[i], signerPubKey: mainnetPublicKeys[i], upgradeRequired: false });
       } else {
         getCorrectContractAddressStub.onCall(i).resolves({
           address: mainnetAccAddresses[i],
           signerPubKey: num.toHex(constants.ZERO),
           upgradeRequired: false,
-          deployRequired: false,
         });
       }
     }
@@ -114,18 +110,14 @@ describe('Test function: recoverAccounts', function () {
 
     for (let i = 0; i < maxScanned; i++) {
       if (i < validPublicKeys) {
-        getCorrectContractAddressStub.onCall(i).resolves({
-          address: testnetAccAddresses[i],
-          signerPubKey: testnetPublicKeys[i],
-          upgradeRequired: false,
-          deployRequired: false,
-        });
+        getCorrectContractAddressStub
+          .onCall(i)
+          .resolves({ address: testnetAccAddresses[i], signerPubKey: testnetPublicKeys[i], upgradeRequired: false });
       } else {
         getCorrectContractAddressStub.onCall(i).resolves({
           address: testnetAccAddresses[i],
           signerPubKey: num.toHex(constants.ZERO),
           upgradeRequired: false,
-          deployRequired: false,
         });
       }
     }
@@ -191,18 +183,14 @@ describe('Test function: recoverAccounts', function () {
 
     for (let i = 0; i < maxScanned; i++) {
       if (i < validPublicKeys) {
-        getCorrectContractAddressStub.onCall(i).resolves({
-          address: mainnetAccAddresses[i],
-          signerPubKey: mainnetPublicKeys[i],
-          upgradeRequired: false,
-          deployRequired: false,
-        });
+        getCorrectContractAddressStub
+          .onCall(i)
+          .resolves({ address: mainnetAccAddresses[i], signerPubKey: mainnetPublicKeys[i], upgradeRequired: false });
       } else {
         getCorrectContractAddressStub.onCall(i).resolves({
           address: mainnetAccAddresses[i],
           signerPubKey: num.toHex(constants.ZERO),
           upgradeRequired: false,
-          deployRequired: false,
         });
       }
     }

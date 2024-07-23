@@ -20,16 +20,13 @@ import { NoMetamaskModal } from 'components/ui/organism/NoMetamaskModal';
 import { MinVersionModal } from './components/ui/organism/MinVersionModal';
 import { useHasMetamask } from 'hooks/useHasMetamask';
 import { DUMMY_ADDRESS } from 'utils/constants';
-import { DeployModal } from 'components/ui/organism/DeployModal';
 
 library.add(fas, far);
 
 function App() {
   const { initSnap, getWalletData, checkConnection } = useStarkNetSnap();
   const { connected, forceReconnect, provider } = useAppSelector((state) => state.wallet);
-  const { infoModalVisible, minVersionModalVisible, upgradeModalVisible, deployModalVisible } = useAppSelector(
-    (state) => state.modals,
-  );
+  const { infoModalVisible, minVersionModalVisible, upgradeModalVisible } = useAppSelector((state) => state.modals);
   const { loader } = useAppSelector((state) => state.UI);
   const networks = useAppSelector((state) => state.networks);
   const { accounts } = useAppSelector((state) => state.wallet);
@@ -59,6 +56,7 @@ function App() {
   }, [networks.activeNetwork, provider]);
 
   const loading = loader.isLoading;
+
   return (
     <ThemeProvider theme={theme}>
       <GlobalStyle />
@@ -77,9 +75,6 @@ function App() {
         </PopIn>
         <PopIn isOpen={!minVersionModalVisible && upgradeModalVisible} showClose={false}>
           <UpgradeModel address={address} />
-        </PopIn>
-        <PopIn isOpen={!minVersionModalVisible && deployModalVisible} showClose={false}>
-          <DeployModal address={address} />
         </PopIn>
         <Home address={address} />
         <PopIn isOpen={loading}>{loading && <LoadingBackdrop>{loader.loadingMessage}</LoadingBackdrop>}</PopIn>

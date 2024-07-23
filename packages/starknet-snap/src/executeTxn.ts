@@ -1,10 +1,13 @@
-import { Invocations, TransactionType } from 'starknet';
-import {
-  getNetworkFromChainId,
-  getTxnSnapTxt,
-  addDialogTxt,
-  showAccountRequireUpgradeOrDeployModal,
-} from './utils/snapUtils';
+import type { Component } from '@metamask/snaps-sdk';
+import { heading, panel, divider, DialogType } from '@metamask/snaps-sdk';
+import type { Invocations } from 'starknet';
+import { TransactionType } from 'starknet';
+
+import { createAccount } from './createAccount';
+import type { ApiParams, ExecuteTxnRequestParams } from './types/snapApi';
+import { ACCOUNT_CLASS_HASH } from './utils/constants';
+import { logger } from './utils/logger';
+import { getNetworkFromChainId, getTxnSnapTxt, addDialogTxt, showUpgradeRequestModal } from './utils/snapUtils';
 import {
   getKeysFromAddress,
   executeTxn as executeTxnUtil,
@@ -12,19 +15,18 @@ import {
   estimateFeeBulk,
   getAccContractAddressAndCallData,
   addFeesFromAllTransactions,
-  validateAccountRequireUpgradeOrDeploy,
+  isUpgradeRequired,
 } from './utils/starknetUtils';
-import { ApiParams, ExecuteTxnRequestParams } from './types/snapApi';
-import { createAccount } from './createAccount';
-import { heading, panel, divider, DialogType } from '@metamask/snaps-sdk';
-import { logger } from './utils/logger';
-import { ACCOUNT_CLASS_HASH } from './utils/constants';
 
+/**
+ *
+ * @param params
+ */
 export async function executeTxn(params: ApiParams) {
   try {
     const { state, keyDeriver, requestParams, wallet } = params;
     const requestParamsObj = requestParams as ExecuteTxnRequestParams;
-    const senderAddress = requestParamsObj.senderAddress;
+    const { senderAddress } = requestParamsObj;
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
     const {
       privateKey: senderPrivateKey,
@@ -32,11 +34,9 @@ export async function executeTxn(params: ApiParams) {
       addressIndex,
     } = await getKeysFromAddress(keyDeriver, network, state, senderAddress);
 
-    try {
-      await validateAccountRequireUpgradeOrDeploy(network, senderAddress, publicKey);
-    } catch (e) {
-      await showAccountRequireUpgradeOrDeployModal(wallet, e);
-      throw e;
+    if (await isUpgradeRequired(network, senderAddress)) {
+      await showUpgradeRequestModal(wallet);
+      throw new Error('Upgrade required');
     }
 
     const txnInvocationArray = Array.isArray(requestParamsObj.txnInvocation)
@@ -71,11 +71,15 @@ export async function executeTxn(params: ApiParams) {
     );
     const estimateFeeResp = addFeesFromAllTransactions(fees);
 
+    if (estimateFeeResp === undefined || estimateFeeResp.suggestedMaxFee === undefined) {
+      throw new Error('Unable to estimate fees');
+    }
+
     const maxFee = estimateFeeResp.suggestedMaxFee.toString(10);
     logger.log(`MaxFee: ${maxFee}`);
 
-    let snapComponents = [];
-    let createAccountApiParams: ApiParams;
+    let snapComponents: Component[] = [];
+    let createAccountApiParams = {} as ApiParams;
     if (!accountDeployed) {
       snapComponents.push(heading(`The account will be deployed`));
       addDialogTxt(snapComponents, 'Address', senderAddress);
@@ -92,7 +96,7 @@ export async function executeTxn(params: ApiParams) {
           deploy: true,
           chainId: requestParamsObj.chainId,
         },
-      } as ApiParams;
+      };
     }
 
     snapComponents = snapComponents.concat(
@@ -112,7 +116,9 @@ export async function executeTxn(params: ApiParams) {
         content: panel([heading('Do you want to sign this transaction(s)?'), ...snapComponents]),
       },
     });
-    if (!response) return false;
+    if (!response) {
+      return false;
+    }
 
     if (!accountDeployed) {
       await createAccount(createAccountApiParams, true, true);
@@ -127,8 +133,9 @@ export async function executeTxn(params: ApiParams) {
       requestParamsObj.abis,
       { maxFee, nonce: nonceSendTransaction },
     );
-  } catch (err) {
-    logger.error(`Problem found: ${err}`);
-    throw err;
+  } catch (error) {
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+    logger.error(`Problem found: ${error}`);
+    throw error;
   }
 }

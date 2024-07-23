@@ -1,20 +1,6 @@
 # Changelog
 
 
-## [2.9.0](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v2.8.0...starknet-snap-v2.9.0) (2024-07-16)
-
-
-### Features
-
-* clean up and update dependency ([#259](https://github.com/Consensys/starknet-snap/issues/259)) ([fcb83e1](https://github.com/Consensys/starknet-snap/commit/fcb83e128fd4e483cdf9f4670e4e70e1d3876f7a))
-
-
-### Bug Fixes
-
-* non zero balance on non deployed cairo 0 account ([#276](https://github.com/Consensys/starknet-snap/issues/276)) ([d9beafe](https://github.com/Consensys/starknet-snap/commit/d9beafe45b304685581162ef9247a31919eb7556))
-* remove get balance from createAccount ([#272](https://github.com/Consensys/starknet-snap/issues/272)) ([02b92f9](https://github.com/Consensys/starknet-snap/commit/02b92f988476dd621e2c48c4b3f1733e55a5878c))
-* validateAccountRequireUpgradeOrDeploy condition check ([#288](https://github.com/Consensys/starknet-snap/issues/288)) ([0f49ab0](https://github.com/Consensys/starknet-snap/commit/0f49ab09b57735158a74eed715cc6665c372ee6d))
-
 ## [2.8.0](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v2.7.0...starknet-snap-v2.8.0) (2024-06-21)
 
 

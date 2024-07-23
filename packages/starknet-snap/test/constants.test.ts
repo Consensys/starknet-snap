@@ -26,7 +26,7 @@ export const account1: AccContract = {
   addressIndex: 0,
   derivationPath: "m / bip32:44' / bip32:9004' / bip32:0' / bip32:0",
   deployTxnHash: '0x5da2d94a324bc56f80cf1fb985c22c85769db434ed403ae71774a07103d229b',
-  publicKey: '0x154c7b20442ee954f50831702ca844ec185ad484c21719575d351583deec90b',
+  publicKey: '0x0154c7b20442ee954f50831702ca844ec185ad484c21719575d351583deec90b',
   chainId: STARKNET_SEPOLIA_TESTNET_NETWORK.chainId,
 };
 
@@ -36,7 +36,7 @@ export const account2: AccContract = {
   addressIndex: 1,
   derivationPath: "m / bip32:44' / bip32:9004' / bip32:0' / bip32:0",
   deployTxnHash: '0x5bc00132b8f2fc0f673dc232594b26727e712b204a2716f9dc28a8c5f607b5e',
-  publicKey: '0x19e59f349e1aa813ab4556c5836d0472e5e1ae82d1e5c3b3e8aabfeb290befd',
+  publicKey: '0x019e59f349e1aa813ab4556c5836d0472e5e1ae82d1e5c3b3e8aabfeb290befd',
   chainId: STARKNET_SEPOLIA_TESTNET_NETWORK.chainId,
 };
 
@@ -70,13 +70,6 @@ export const Cairo1Account1: AccContract = {
   chainId: constants.StarknetChainId.SN_GOERLI,
 };
 
-export const token0: Erc20Token = {
-  address: '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
-  name: 'Ether',
-  symbol: 'ETH',
-  decimals: 18,
-  chainId: STARKNET_SEPOLIA_TESTNET_NETWORK.chainId,
-};
 export const token1: Erc20Token = {
   address: '0x244c20d51109adcf604fde1bbf878e5dcd549b3877ac87911ec6a158bd7aa62',
   name: 'Starknet ERC-20 sample',

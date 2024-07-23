@@ -1,9 +1,4 @@
-import {
-  setInfoModalVisible,
-  setMinVersionModalVisible,
-  setUpgradeModalVisible,
-  setDeployModalVisible,
-} from 'slices/modalSlice';
+import { setInfoModalVisible, setMinVersionModalVisible, setUpgradeModalVisible } from 'slices/modalSlice';
 import { setNetworks } from 'slices/networkSlice';
 import { useAppDispatch, useAppSelector } from 'hooks/redux';
 import {
@@ -240,9 +235,8 @@ export const useStarkNetSnap = () => {
     const tokens = await getTokens(chainId);
     let acc: Account[] | Account = await recoverAccounts(chainId);
     let upgradeRequired = false;
-    let deployRequired = false;
-    deployRequired = (Array.isArray(acc) ? acc[0].deployRequired : (acc as Account).deployRequired) ?? false;
-    if (!acc || acc.length === 0 || (!acc[0].publicKey && !deployRequired)) {
+
+    if (!acc || acc.length === 0 || !acc[0].publicKey) {
       acc = await addAccount(chainId);
     } else {
       upgradeRequired = (Array.isArray(acc) ? acc[0].upgradeRequired : (acc as Account).upgradeRequired) ?? false;
@@ -275,8 +269,7 @@ export const useStarkNetSnap = () => {
     if (!Array.isArray(acc)) {
       dispatch(setInfoModalVisible(true));
     }
-    dispatch(setUpgradeModalVisible(upgradeRequired && !deployRequired));
-    dispatch(setDeployModalVisible(deployRequired));
+    dispatch(setUpgradeModalVisible(upgradeRequired));
     dispatch(disableLoading());
   };
 
@@ -419,35 +412,6 @@ export const useStarkNetSnap = () => {
     } catch (err) {
       //eslint-disable-next-line no-console
       console.error(err);
-    }
-  };
-
-  const deployAccount = async (contractAddress: string, maxFee: string, chainId: string) => {
-    dispatch(enableLoadingWithMessage('Deploying account...'));
-    try {
-      const response = await provider.request({
-        method: 'wallet_invokeSnap',
-        params: {
-          snapId,
-          request: {
-            method: 'starkNet_createAccountLegacy',
-            params: {
-              ...defaultParam,
-              contractAddress,
-              maxFee,
-              chainId,
-              deploy: true,
-            },
-          },
-        },
-      });
-      dispatch(disableLoading());
-      return response;
-    } catch (err) {
-      dispatch(disableLoading());
-      //eslint-disable-next-line no-console
-      console.error(err);
-      throw err;
     }
   };
 
@@ -680,46 +644,6 @@ export const useStarkNetSnap = () => {
     return txStatus;
   };
 
-  const waitForAccountCreation = async (transactionHash: string, accountAddress: string, chainId: string) => {
-    dispatch(enableLoadingWithMessage('Waiting for transaction to be finalised.'));
-    const toastr = new Toastr();
-    let result = false;
-
-    try {
-      // read transaction to check if the txn is ready
-      await waitForTransaction(transactionHash, chainId);
-    } catch (e) {
-      //eslint-disable-next-line no-console
-      console.log(`error while wait for transaction: ${e}`);
-    }
-
-    try {
-      const executeFn = async (): Promise<boolean> => {
-        // read contract to check if upgrade is required
-        const resp = await readContract(accountAddress, 'getVersion');
-        if (!resp || !resp[0]) {
-          return false;
-        }
-
-        // recover accounts to update snap state
-        await recoverAccounts(chainId);
-        return true;
-      };
-
-      result = await retry(executeFn, {
-        maxAttempts: 20,
-      });
-    } catch (e: any) {
-      //eslint-disable-next-line no-console
-      console.log(`error while processing waitForAccountDeploy: ${e}`);
-      toastr.error('Snap is unable to verify the contract deploy process');
-    }
-
-    dispatch(disableLoading());
-
-    return result;
-  };
-
   const waitForAccountUpdate = async (transactionHash: string, accountAddress: string, chainId: string) => {
     dispatch(enableLoadingWithMessage('Waiting for transaction to be finalised.'));
     const toastr = new Toastr();
@@ -838,13 +762,11 @@ export const useStarkNetSnap = () => {
     estimateFees,
     sendTransaction,
     upgradeAccount,
-    deployAccount,
     getTransactions,
     getTransactionStatus,
     recoverAccounts,
     waitForTransaction,
     waitForAccountUpdate,
-    waitForAccountCreation,
     updateTokenBalance,
     getTokenBalance,
     addErc20Token,

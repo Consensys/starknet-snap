@@ -1,35 +1,38 @@
+import { heading, panel, DialogType } from '@metamask/snaps-sdk';
+import type { Signature } from 'starknet';
+
+import type { ApiParams, SignDeployAccountTransactionRequestParams } from './types/snapApi';
+import { logger } from './utils/logger';
 import { toJson } from './utils/serializer';
-import { Signature } from 'starknet';
-import { ApiParams, SignDeployAccountTransactionRequestParams } from './types/snapApi';
+import { getNetworkFromChainId, getSignTxnTxt, showUpgradeRequestModal } from './utils/snapUtils';
 import {
   getKeysFromAddress,
   signDeployAccountTransaction as signDeployAccountTransactionUtil,
-  validateAccountRequireUpgradeOrDeploy,
+  isUpgradeRequired,
 } from './utils/starknetUtils';
-import { getNetworkFromChainId, getSignTxnTxt, showAccountRequireUpgradeOrDeployModal } from './utils/snapUtils';
-import { heading, panel, DialogType } from '@metamask/snaps-sdk';
-import { logger } from '../src/utils/logger';
 
+/**
+ *
+ * @param params
+ */
 export async function signDeployAccountTransaction(params: ApiParams): Promise<Signature | boolean> {
   try {
     const { state, keyDeriver, requestParams, wallet } = params;
     const requestParamsObj = requestParams as SignDeployAccountTransactionRequestParams;
-    const signerAddress = requestParamsObj.signerAddress;
+    const { signerAddress } = requestParamsObj;
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
-    const { privateKey, publicKey } = await getKeysFromAddress(keyDeriver, network, state, signerAddress);
+    const { privateKey } = await getKeysFromAddress(keyDeriver, network, state, signerAddress);
 
-    try {
-      await validateAccountRequireUpgradeOrDeploy(network, signerAddress, publicKey);
-    } catch (e) {
-      await showAccountRequireUpgradeOrDeployModal(wallet, e);
-      throw e;
+    if (await isUpgradeRequired(network, signerAddress)) {
+      await showUpgradeRequestModal(wallet);
+      throw new Error('Upgrade required');
     }
 
     logger.log(`signDeployAccountTransaction params: ${toJson(requestParamsObj.transaction, 2)}}`);
 
     const snapComponents = getSignTxnTxt(signerAddress, network, requestParamsObj.transaction);
 
-    if (requestParamsObj.enableAuthorize === true) {
+    if (requestParamsObj.enableAuthorize) {
       const response = await wallet.request({
         method: 'snap_dialog',
         params: {
@@ -38,11 +41,14 @@ export async function signDeployAccountTransaction(params: ApiParams): Promise<S
         },
       });
 
-      if (!response) return false;
+      if (!response) {
+        return false;
+      }
     }
 
     return await signDeployAccountTransactionUtil(privateKey, requestParamsObj.transaction);
   } catch (error) {
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     logger.error(`Problem found: ${error}`);
     throw error;
   }
