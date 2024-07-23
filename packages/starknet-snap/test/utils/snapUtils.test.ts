@@ -10,6 +10,10 @@ import {
   getTransactionsFromVoyagerUrl,
   getVoyagerCredentials,
   getRPCUrl,
+  getValidNumber,
+  addDialogTxt,
+  getNetworkTxt,
+  getTxnSnapTxt,
 } from '../../src/utils/snapUtils';
 import { WalletMock } from '../wallet.mock.test';
 import { Network, SnapState } from '../../src/types/snapState';
@@ -152,5 +156,203 @@ describe('getRPCUrl', () => {
     expect(getRPCUrl(STARKNET_SEPOLIA_TESTNET_NETWORK.chainId)).to.be.equal(
       'https://starknet-sepolia.g.alchemy.com/starknet/version/rpc/v0_7/',
     );
+  });
+});
+
+describe('getValidNumber', () => {
+  it('should return the number when obj is a valid number within the range', () => {
+    expect(getValidNumber('5', 0, 1, 10)).to.eq(5);
+  });
+
+  it('should return defaultValue when obj is an empty string', () => {
+    expect(getValidNumber('', 0, 1, 10)).to.eq(0);
+  });
+
+  it('should return defaultValue when obj is not a number', () => {
+    expect(getValidNumber('abc', 0, 1, 10)).to.eq(0);
+  });
+
+  it('should return defaultValue when number is less than minVal', () => {
+    expect(getValidNumber('-5', 0, 0, 10)).to.eq(0);
+  });
+
+  it('should return defaultValue when number is greater than maxVal', () => {
+    expect(getValidNumber('15', 0, 0, 10)).to.eq(0);
+  });
+
+  it('should return the defaultValue when the input is NaN', () => {
+    expect(getValidNumber(NaN, 0)).to.eq(0);
+  });
+
+  it('should handle default min and max values correctly', () => {
+    expect(getValidNumber('9007199254740992', 0)).to.eq(0);
+    expect(getValidNumber('-9007199254740992', 0)).to.eq(0);
+    expect(getValidNumber('5', 0)).to.eq(5);
+  });
+});
+
+describe('addDialogTxt', () => {
+  it('should add a formatted text component to the components array', () => {
+    const components = [];
+    const label = 'Name';
+    const value = 'John Doe';
+
+    addDialogTxt(components, label, value);
+
+    expect(components).to.have.lengthOf(2);
+    expect(components[0]).to.deep.equal({type: 'text', value: '**Name:**'});
+    expect(components[1]).to.deep.equal({type: 'copyable', value: 'John Doe'});
+  });
+
+  it('should correctly format text with an empty label', () => {
+    const components = [];
+    const label = '';
+    const value = 'Some value';
+
+    addDialogTxt(components, label, value);
+
+    expect(components).to.have.lengthOf(2);
+    expect(components[0]).to.deep.equal({type: 'text', value: '**:**'});
+    expect(components[1]).to.deep.equal({type: 'copyable', value: 'Some value'});
+  });
+
+  it('should handle special characters in label and value', () => {
+    const components = [];
+    const label = 'New-Label_123';
+    const value = 'Value#456!';
+
+    addDialogTxt(components, label, value);
+
+    expect(components).to.have.lengthOf(2);
+    expect(components[0]).to.deep.equal({ type: 'text', value: '**New-Label_123:**' });
+    expect(components[1]).to.deep.equal({ type: 'copyable', value: 'Value#456!' });
+  });
+});
+
+describe('getNetworkTxt', function() {
+  let network;
+
+  beforeEach(() => {
+    network = {
+      name: 'Test Network',
+      chainId: '123'
+    };
+  });
+
+  afterEach(() => {
+    network = null
+  });
+
+  it('should return correct output with only required fields', () => {
+    const result = getNetworkTxt(network);
+
+    expect(result).to.deep.equal([
+      { type: 'text', value: '**Chain Name:**' },
+      { type: 'copyable', value: 'Test Network' },
+      { type: 'text', value: '**Chain ID:**' },
+      { type: 'copyable', value: '123' }
+    ]);
+  });
+
+  it('should return correct output with all fields present', () => {
+    network.baseUrl = 'https://base.url';
+    network.nodeUrl = 'https://rpc.url';
+    network.voyagerUrl = 'https://explorer.url';
+
+    const result = getNetworkTxt(network);
+
+    expect(result).to.deep.equal([
+      { type: 'text', value: '**Chain Name:**' },
+      { type: 'copyable', value: 'Test Network' },
+      { type: 'text', value: '**Chain ID:**' },
+      { type: 'copyable', value: '123' },
+      { type: 'text', value: '**Base URL:**' },
+      { type: 'copyable', value: 'https://base.url' },
+      { type: 'text', value: '**RPC URL:**' },
+      { type: 'copyable', value: 'https://rpc.url' },
+      { type: 'text', value: '**Explorer URL:**' },
+      { type: 'copyable', value: 'https://explorer.url' }
+    ]);
+  });
+
+  it('should return correct output with some optional fields', () => {
+    network.baseUrl = 'https://base.url';
+
+    const result = getNetworkTxt(network);
+
+    expect(result).to.deep.equal([
+      { type: 'text', value: '**Chain Name:**' },
+      { type: 'copyable', value: 'Test Network' },
+      { type: 'text', value: '**Chain ID:**' },
+      { type: 'copyable', value: '123' },
+      { type: 'text', value: '**Base URL:**' },
+      { type: 'copyable', value: 'https://base.url' }
+    ]);
+  });
+});
+
+describe('getTxnSnapTxt', () => {
+  let senderAddress;
+  let network;
+  let txnInvocation;
+  let abis;
+  let invocationsDetails;
+
+  beforeEach(() => {
+    senderAddress = '0xSenderAddress';
+    network = {
+      name: 'Test Network',
+      chainId: '123'
+    };
+    txnInvocation = {
+      method: 'transfer',
+      params: [ '0xReceiverAddress', '1000' ]
+    };
+    abis = [
+      {
+        name: 'Transfer',
+        inputs: [{ name: 'to', type: 'address' }, { name: 'value', type: 'uint256' }],
+        outputs: [{ name: '', type: 'bool' }]
+      }
+    ];
+    invocationsDetails = {
+      maxFee: '1000000000000000000',
+      nonce: 123,
+      version: 1
+    };
+  });
+
+  it('should return correct output with all fields present', () => {
+    const result = getTxnSnapTxt(senderAddress, network, txnInvocation, abis, invocationsDetails);
+
+    expect(result).to.deep.equal([
+      { type: 'text', value: '**Network:**' },
+      { type: 'copyable', value: 'Test Network' },
+      { type: 'text', value: '**Signer Address:**' },
+      { type: 'copyable', value: '0xSenderAddress' },
+      { type: 'text', value: '**Transaction Invocation:**' },
+      { type: 'copyable', value: JSON.stringify(txnInvocation, null, 2) },
+      { type: 'text', value: '**Abis:**' },
+      { type: 'copyable', value: JSON.stringify(abis, null, 2) },
+      { type: 'text', value: '**Max Fee(ETH):**' },
+      { type: 'copyable', value: '1' },
+      { type: 'text', value: '**Nonce:**' },
+      { type: 'copyable', value: '123' },
+      { type: 'text', value: '**Version:**' },
+      { type: 'copyable', value: '1' }
+    ]);
+  });
+
+  it('should return correct output with missing optional fields', () => {
+    const result = getTxnSnapTxt(senderAddress, network, txnInvocation);
+
+    expect(result).to.deep.equal([
+      { type: 'text', value: '**Network:**' },
+      { type: 'copyable', value: 'Test Network' },
+      { type: 'text', value: '**Signer Address:**' },
+      { type: 'copyable', value: '0xSenderAddress' },
+      { type: 'text', value: '**Transaction Invocation:**' },
+      { type: 'copyable', value: JSON.stringify(txnInvocation, null, 2) }
+    ]);
   });
 });

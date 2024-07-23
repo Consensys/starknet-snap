@@ -614,3 +614,36 @@ describe('Test function: waitForTransaction', function () {
     expect(stub).to.have.been.calledWith(STARKNET_SEPOLIA_TESTNET_NETWORK, userAddress, 'pk', 'txHash');
   });
 });
+
+describe('Test function: getSigner', function () {
+  const userAddress = '0x27f204588cadd08a7914f6a9808b34de0cbfc4cb53aa053663e7fd3a34dbc26';
+
+  const mockedResponse = ['0x795d62a9896b221af17bedd8cceb8d963ac6864857d7476e2f8c03ba0c5df9'];
+
+  afterEach(function () {
+    sandbox.restore();
+  });
+
+  it('should return the correct signer address', async function () {
+    const callContractStub = sandbox.stub(utils, 'callContract').resolves(mockedResponse);
+
+    const result = await utils.getSigner(userAddress, STARKNET_SEPOLIA_TESTNET_NETWORK);
+    expect(result).to.be.eq(mockedResponse[0]);
+    expect(callContractStub.calledOnceWithExactly(STARKNET_SEPOLIA_TESTNET_NETWORK, userAddress, 'getSigner')).to.be.true;
+  });
+
+
+  it('should throw an error if callContract throws an error', async function () {
+    const errorMessage = 'Error calling contract';
+    const callContractStub = sandbox.stub(utils, 'callContract').rejects(new Error(errorMessage));
+
+    try {
+      await utils.getSigner(userAddress, STARKNET_SEPOLIA_TESTNET_NETWORK);
+    } catch (err) {
+      expect(err).to.be.an('error');
+      expect(err.message).to.eq(errorMessage);
+    }
+
+    expect(callContractStub.calledOnceWithExactly(STARKNET_SEPOLIA_TESTNET_NETWORK, userAddress, 'getSigner')).to.be.true;
+  });
+});
