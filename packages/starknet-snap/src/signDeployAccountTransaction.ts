@@ -4,11 +4,11 @@ import type { Signature } from 'starknet';
 import type { ApiParams, SignDeployAccountTransactionRequestParams } from './types/snapApi';
 import { logger } from './utils/logger';
 import { toJson } from './utils/serializer';
-import { getNetworkFromChainId, getSignTxnTxt, showUpgradeRequestModal } from './utils/snapUtils';
+import { getNetworkFromChainId, getSignTxnTxt, showAccountRequireUpgradeOrDeployModal } from './utils/snapUtils';
 import {
   getKeysFromAddress,
   signDeployAccountTransaction as signDeployAccountTransactionUtil,
-  isUpgradeRequired,
+  validateAccountRequireUpgradeOrDeploy,
 } from './utils/starknetUtils';
 
 /**
@@ -21,11 +21,13 @@ export async function signDeployAccountTransaction(params: ApiParams): Promise<S
     const requestParamsObj = requestParams as SignDeployAccountTransactionRequestParams;
     const { signerAddress } = requestParamsObj;
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
-    const { privateKey } = await getKeysFromAddress(keyDeriver, network, state, signerAddress);
+    const { privateKey, publicKey } = await getKeysFromAddress(keyDeriver, network, state, signerAddress);
 
-    if (await isUpgradeRequired(network, signerAddress)) {
-      await showUpgradeRequestModal(wallet);
-      throw new Error('Upgrade required');
+    try {
+      await validateAccountRequireUpgradeOrDeploy(network, signerAddress, publicKey);
+    } catch (validateError) {
+      await showAccountRequireUpgradeOrDeployModal(wallet, validateError);
+      throw validateError;
     }
 
     logger.log(`signDeployAccountTransaction params: ${toJson(requestParamsObj.transaction, 2)}}`);

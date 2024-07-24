@@ -7,6 +7,7 @@ import { logger } from './utils/logger';
 import { toJson } from './utils/serializer';
 import { getNetworkFromChainId } from './utils/snapUtils';
 import {
+  validateAccountRequireUpgradeOrDeploy,
   validateAndParseAddress,
   getKeysFromAddress,
   getCallDataArray,
@@ -15,7 +16,6 @@ import {
   estimateFeeBulk,
   addFeesFromAllTransactions,
   isAccountDeployed,
-  isUpgradeRequired,
 } from './utils/starknetUtils';
 
 /**
@@ -51,16 +51,14 @@ export async function estimateFee(params: ApiParams) {
       throw new Error(`The given sender address is invalid: ${senderAddress}`);
     }
 
-    if (await isUpgradeRequired(network, senderAddress)) {
-      throw new Error('Upgrade required');
-    }
-
     const { privateKey: senderPrivateKey, publicKey } = await getKeysFromAddress(
       keyDeriver,
       network,
       state,
       senderAddress,
     );
+
+    await validateAccountRequireUpgradeOrDeploy(network, senderAddress, publicKey);
 
     const txnInvocation = {
       contractAddress,

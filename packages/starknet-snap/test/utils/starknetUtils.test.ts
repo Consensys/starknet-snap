@@ -12,6 +12,7 @@ import {
   account1,
   account2,
   account3,
+  getBalanceResp,
 } from '../constants.test';
 import { SnapState } from '../../src/types/snapState';
 import { Calldata, num, Account, Provider, GetTransactionReceiptResponse } from 'starknet';
@@ -479,7 +480,7 @@ describe('Test function: getCorrectContractAddress', function () {
   });
 
   describe(`when contact is Cairo${CAIRO_VERSION} has deployed`, function () {
-    it(`should return Cairo${CAIRO_VERSION} address with pubic key`, async function () {
+    it(`should return Cairo${CAIRO_VERSION} address with public key`, async function () {
       getVersionStub = sandbox.stub(utils, 'getVersion').resolves(cairoVersionHex);
       getSignerStub = sandbox.stub(utils, 'getSigner').resolves(PK);
       getOwnerStub = sandbox.stub(utils, 'getOwner').resolves(PK);
@@ -494,9 +495,9 @@ describe('Test function: getCorrectContractAddress', function () {
     });
   });
 
-  describe(`when contact is Cairo${CAIRO_VERSION} has not deployed`, function () {
-    describe(`when when is Cairo${CAIRO_VERSION_LEGACY} has deployed`, function () {
-      describe(`when when is Cairo${CAIRO_VERSION_LEGACY} has upgraded`, function () {
+  describe(`when Cairo${CAIRO_VERSION} has not deployed`, function () {
+    describe(`and Cairo${CAIRO_VERSION_LEGACY} has deployed`, function () {
+      describe(`and Cairo${CAIRO_VERSION_LEGACY} has upgraded`, function () {
         it(`should return Cairo${CAIRO_VERSION_LEGACY} address with upgrade = false`, async function () {
           sandbox
             .stub(utils, 'getVersion')
@@ -541,9 +542,10 @@ describe('Test function: getCorrectContractAddress', function () {
       });
     });
 
-    describe(`when when is Cairo${CAIRO_VERSION_LEGACY} has not deployed`, function () {
-      it(`should return Cairo${CAIRO_VERSION} address with upgrade = false`, async function () {
+    describe(`when when Cairo${CAIRO_VERSION_LEGACY} is not deployed`, function () {
+      it(`should return Cairo${CAIRO_VERSION} address with upgrade = false and deploy = false if no balance`, async function () {
         sandbox.stub(utils, 'getVersion').rejects(new Error('Contract not found'));
+        sandbox.stub(utils, 'getBalance').callsFake(async () => getBalanceResp[0]);
 
         getSignerStub = sandbox.stub(utils, 'getSigner').resolves(PK);
         getOwnerStub = sandbox.stub(utils, 'getOwner').resolves(PK);
@@ -555,6 +557,22 @@ describe('Test function: getCorrectContractAddress', function () {
         expect(result.address).to.be.eq(account1.address);
         expect(result.signerPubKey).to.be.eq('');
         expect(result.upgradeRequired).to.be.eq(false);
+      });
+      it(`should return Cairo${CAIRO_VERSION_LEGACY} address with upgrade = true and deploy = true if balance`, async function () {
+        sandbox.stub(utils, 'getVersion').rejects(new Error('Contract not found'));
+        sandbox.stub(utils, 'isEthBalanceEmpty').resolves(false);
+
+        getSignerStub = sandbox.stub(utils, 'getSigner').resolves(PK);
+        getOwnerStub = sandbox.stub(utils, 'getOwner').resolves(PK);
+
+        const result = await utils.getCorrectContractAddress(STARKNET_SEPOLIA_TESTNET_NETWORK, PK);
+
+        expect(getSignerStub).to.have.been.callCount(0);
+        expect(getOwnerStub).to.have.been.callCount(0);
+        expect(result.address).to.be.eq(account2.address);
+        expect(result.signerPubKey).to.be.eq('');
+        expect(result.upgradeRequired).to.be.eq(true);
+        expect(result.deployRequired).to.be.eq(true);
       });
     });
   });

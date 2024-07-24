@@ -31,6 +31,7 @@ import {
   PRELOADED_TOKENS,
   STARKNET_SEPOLIA_TESTNET_NETWORK,
 } from './constants';
+import { DeployRequiredError, UpgradeRequiredError } from './exceptions';
 import { logger } from './logger';
 import { toJson } from './serializer';
 import { validateAndParseAddress } from './starknetUtils';
@@ -387,6 +388,9 @@ export function getSendTxnText(
       logger.error(`getSigningTxnText: error found in amount conversion: ${error}`);
     }
   }
+  if (contractFuncName === 'deploy') {
+    // [TODO] handle specific deploy dialog aspects ?
+  }
 
   return components;
 }
@@ -533,6 +537,7 @@ export async function upsertAccount(userAccount: AccContract, wallet: SnapsProvi
       storedAccount.publicKey = userAccount.publicKey;
       storedAccount.deployTxnHash = userAccount.deployTxnHash || storedAccount.deployTxnHash;
       storedAccount.upgradeRequired = userAccount.upgradeRequired;
+      storedAccount.deployRequired = userAccount.deployRequired;
     }
 
     await setState(wallet, state);
@@ -1011,4 +1016,42 @@ export async function showUpgradeRequestModal(wallet) {
       ]),
     },
   });
+}
+
+/**
+ *
+ * @param wallet
+ */
+export async function showDeployRequestModal(wallet) {
+  await wallet.request({
+    method: 'snap_dialog',
+    params: {
+      type: DialogType.Alert,
+      content: panel([
+        heading('Account Deployment Mandatory!'),
+        text(
+          `Visit the [companion dapp for Starknet](${dappUrl(
+            // eslint-disable-next-line no-restricted-globals
+            process.env.SNAP_ENV as unknown as string,
+          )}) to deploy your account.\nThank you!`,
+        ),
+      ]),
+    },
+  });
+}
+
+/**
+ *
+ * @param wallet
+ * @param error
+ */
+export async function showAccountRequireUpgradeOrDeployModal(
+  wallet,
+  error: DeployRequiredError | UpgradeRequiredError,
+) {
+  if (error instanceof DeployRequiredError) {
+    await showDeployRequestModal(wallet);
+  } else if (error instanceof UpgradeRequiredError) {
+    await showUpgradeRequestModal(wallet);
+  }
 }

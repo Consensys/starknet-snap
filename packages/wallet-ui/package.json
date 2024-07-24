@@ -1,6 +1,6 @@
 {
   "name": "wallet-ui",
-  "version": "1.22.0",
+  "version": "1.23.0",
   "private": true,
   "homepage": "/starknet",
   "license": "(Apache-2.0 OR MIT)",
@@ -52,7 +52,6 @@
     "@fortawesome/free-solid-svg-icons": "^6.1.1",
     "@fortawesome/react-fontawesome": "^0.1.18",
     "@headlessui/react": "^1.6.4",
-    "@metamask/detect-provider": "^1.2.0",
     "@metamask/jazzicon": "github:metamask/jazzicon#d923914fda6a8795f74c2e66134f73cd72070667",
     "@mui/icons-material": "^5.6.2",
     "@mui/material": "^5.6.2",

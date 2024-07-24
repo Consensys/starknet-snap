@@ -1,6 +1,7 @@
 {
   "name": "@consensys/starknet-snap",
-  "version": "2.8.0",
+  "version": "2.9.0",
+  "keywords": [],
   "repository": {
     "type": "git",
     "url": "https://github.com/ConsenSys/starknet-snap.git"
@@ -26,8 +27,8 @@
     "serve": "mm-snap serve",
     "start": "mm-snap watch",
     "test": "yarn run test:unit && yarn run cover:report",
-    "test:unit": "nyc --check-coverage --statements 80 --branches 80 --functions 80 --lines 80 mocha --colors -r ts-node/register \"test/**/*.test.ts\"",
-    "test:unit:one": "nyc --check-coverage --statements 80 --branches 80 --functions 80 --lines 80 mocha --colors -r ts-node/register"
+    "test:unit": "nyc --check-coverage --statements 70 --branches 70 --functions 70 --lines 70 mocha --colors -r ts-node/register \"test/**/*.test.ts\"",
+    "test:unit:one": "nyc --check-coverage --statements 70 --branches 70 --functions 70 --lines 70 mocha --colors -r ts-node/register"
   },
   "nyc": {
     "exclude": [

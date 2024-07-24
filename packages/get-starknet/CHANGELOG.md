@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0](https://github.com/Consensys/starknet-snap/compare/get-starknet-v1.0.0...get-starknet-v1.1.0) (2024-07-16)
+
+
+### Features
+
+* clean up and update dependency ([#259](https://github.com/Consensys/starknet-snap/issues/259)) ([fcb83e1](https://github.com/Consensys/starknet-snap/commit/fcb83e128fd4e483cdf9f4670e4e70e1d3876f7a))
+
 ## 1.0.0 (2024-06-21)
 
 

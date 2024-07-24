@@ -39,6 +39,7 @@ export async function recoverAccounts(params: ApiParams) {
         address: contractAddress,
         signerPubKey: signerPublicKey,
         upgradeRequired,
+        deployRequired,
       } = await getCorrectContractAddress(network, publicKey);
       logger.log(
         `recoverAccounts: index ${i}:\ncontractAddress = ${contractAddress}\npublicKey = ${publicKey}\nisUpgradeRequired = ${upgradeRequired}`,
@@ -63,6 +64,7 @@ export async function recoverAccounts(params: ApiParams) {
         deployTxnHash: '',
         chainId: network.chainId,
         upgradeRequired,
+        deployRequired,
       };
 
       logger.log(`recoverAccounts: index ${i}\nuserAccount: ${toJson(userAccount)}`);

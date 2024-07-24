@@ -4,7 +4,11 @@ import type { ApiParams, ExtractPublicKeyRequestParams } from './types/snapApi';
 import { logger } from './utils/logger';
 import { toJson } from './utils/serializer';
 import { getAccount, getNetworkFromChainId } from './utils/snapUtils';
-import { validateAndParseAddress, isUpgradeRequired, getKeysFromAddress } from './utils/starknetUtils';
+import {
+  validateAndParseAddress,
+  validateAccountRequireUpgradeOrDeploy,
+  getKeysFromAddress,
+} from './utils/starknetUtils';
 
 /**
  *
@@ -30,15 +34,14 @@ export async function extractPublicKey(params: ApiParams) {
       throw new Error(`The given user address is invalid: ${requestParamsObj.userAddress}`);
     }
 
-    if (await isUpgradeRequired(network, userAddress)) {
-      throw new Error('Upgrade required');
-    }
+    // [TODO] logic below is redundant, getKeysFromAddress is doing the same
+    const { publicKey } = await getKeysFromAddress(keyDeriver, network, state, userAddress);
+    await validateAccountRequireUpgradeOrDeploy(network, userAddress, publicKey);
 
     let userPublicKey;
     const accContract = getAccount(state, userAddress, network.chainId);
     if (!accContract?.publicKey || numUtils.toBigInt(accContract.publicKey) === constants.ZERO) {
       logger.log(`extractPublicKey: User address cannot be found or the signer public key is 0x0: ${userAddress}`);
-      const { publicKey } = await getKeysFromAddress(keyDeriver, network, state, userAddress);
       userPublicKey = publicKey;
     } else {
       userPublicKey = accContract.publicKey;

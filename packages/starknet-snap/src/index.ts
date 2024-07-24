@@ -37,9 +37,12 @@ import { signMessage } from './signMessage';
 import { signTransaction } from './signTransaction';
 import { switchNetwork } from './switchNetwork';
 import type { ApiParams, ApiRequestParams } from './types/snapApi';
-import type { AccContract, SnapState } from './types/snapState';
+import type { SnapState } from './types/snapState';
 import { upgradeAccContract } from './upgradeAccContract';
 import {
+  CAIRO_VERSION_LEGACY,
+  ETHER_MAINNET,
+  ETHER_SEPOLIA_TESTNET,
   PRELOADED_TOKENS,
   STARKNET_INTEGRATION_NETWORK,
   STARKNET_MAINNET_NETWORK,
@@ -49,14 +52,8 @@ import {
 import { getAddressKeyDeriver } from './utils/keyPair';
 import { logger } from './utils/logger';
 import { toJson } from './utils/serializer';
-import {
-  dappUrl,
-  getNetworkFromChainId,
-  isSameChainId,
-  upsertErc20Token,
-  upsertNetwork,
-  removeNetwork,
-} from './utils/snapUtils';
+import { dappUrl, upsertErc20Token, upsertNetwork, removeNetwork } from './utils/snapUtils';
+import { getBalance, getCorrectContractAddress, getKeysFromAddressIndex } from './utils/starknetUtils';
 import { verifySignedMessage } from './verifySignedMessage';
 
 declare const snap;
@@ -127,6 +124,10 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
       case 'starkNet_createAccount':
         apiParams.keyDeriver = await getAddressKeyDeriver(snap);
         return createAccount(apiParams);
+
+      case 'starkNet_createAccountLegacy':
+        apiParams.keyDeriver = await getAddressKeyDeriver(snap);
+        return createAccount(apiParams, false, true, CAIRO_VERSION_LEGACY);
 
       case 'starkNet_getStoredUserAccounts':
         return await getStoredUserAccounts(apiParams);
@@ -268,7 +269,6 @@ export const onUpdate: OnUpdateHandler = async () => {
 };
 
 export const onHomePage: OnHomePageHandler = async () => {
-  const panelItems: Component[] = [];
   try {
     const state: SnapState = await snap.request({
       method: 'snap_manageState',
@@ -277,66 +277,38 @@ export const onHomePage: OnHomePageHandler = async () => {
       },
     });
 
-    // Account may not exist if the recover account process has not executed.
-    let accContract: AccContract | undefined;
-    if (state) {
-      let { chainId } = STARKNET_SEPOLIA_TESTNET_NETWORK;
-
-      if (state.currentNetwork && state.currentNetwork.chainId !== STARKNET_TESTNET_NETWORK.chainId) {
-        chainId = state.currentNetwork.chainId;
-      }
-
-      if (state.accContracts && state.accContracts.length > 0) {
-        accContract = state.accContracts.find((acc) => isSameChainId(acc.chainId, chainId));
-      }
+    if (!state) {
+      throw new Error('State not found.');
     }
 
-    if (accContract) {
-      const userAddress = accContract.address;
-      const { chainId } = accContract;
-      const network = getNetworkFromChainId(state, chainId);
-      panelItems.push(text('Address'));
-      panelItems.push(copyable(`${userAddress}`));
-      panelItems.push(row('Network', text(`${network.name}`)));
+    // default network is testnet
+    let network = STARKNET_SEPOLIA_TESTNET_NETWORK;
 
-      const ercToken = state.erc20Tokens.find(
-        (token) => token.symbol.toLowerCase() === 'eth' && isSameChainId(token.chainId, chainId),
-      );
-      if (ercToken) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const params: any = {
-          state,
-          requestParams: {
-            tokenAddress: ercToken.address,
-            userAddress,
-            chainId: network.chainId,
-          },
-        };
-        const balance = await getErc20TokenBalance(params);
-        const displayBalance = ethers.utils.formatUnits(ethers.BigNumber.from(balance), ercToken.decimals);
-        panelItems.push(row('Balance', text(`${displayBalance} ETH`)));
-      }
-
-      panelItems.push(divider());
-      panelItems.push(
-        text(
-          `Visit the [companion dapp for Starknet](${dappUrl(
-            // eslint-disable-next-line no-restricted-globals
-            process.env.SNAP_ENV as unknown as string,
-          )}) to manage your account.`,
-        ),
-      );
-    } else {
-      panelItems.push(text(`**Your Starknet account is not yet deployed or recovered.**`));
-      panelItems.push(
-        text(
-          `Initiate a transaction to create your Starknet account. Visit the [companion dapp for Starknet](${dappUrl(
-            // eslint-disable-next-line no-restricted-globals
-            process.env.SNAP_ENV as unknown as string,
-          )}) to get started.`,
-        ),
-      );
+    if (state.currentNetwork && state.currentNetwork.chainId !== STARKNET_TESTNET_NETWORK.chainId) {
+      network = state.currentNetwork;
     }
+
+    // we only support 1 address at this moment
+    const idx = 0;
+    const keyDeriver = await getAddressKeyDeriver(snap);
+    const { publicKey } = await getKeysFromAddressIndex(keyDeriver, network.chainId, state, idx);
+    const { address } = await getCorrectContractAddress(network, publicKey);
+
+    const ethToken = network.chainId === ETHER_SEPOLIA_TESTNET.chainId ? ETHER_SEPOLIA_TESTNET : ETHER_MAINNET;
+    const balance = (await getBalance(address, ethToken.address, network)) ?? BigInt(0);
+    const displayBalance = ethers.utils.formatUnits(ethers.BigNumber.from(balance), ethToken.decimals);
+
+    const panelItems: Component[] = [];
+    panelItems.push(text('Address'));
+    panelItems.push(copyable(`${address}`));
+    panelItems.push(row('Network', text(`${network.name}`)));
+    panelItems.push(row('Balance', text(`${displayBalance} ETH`)));
+    panelItems.push(divider());
+    panelItems.push(
+      // eslint-disable-next-line no-restricted-globals
+      text(`Visit the [companion dapp for Starknet](${dappUrl(process.env.SNAP_ENV)}) to manage your account.`),
+    );
+
     return {
       content: panel(panelItems),
     };

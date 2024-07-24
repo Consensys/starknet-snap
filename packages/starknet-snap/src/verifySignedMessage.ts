@@ -7,7 +7,7 @@ import {
   verifyTypedDataMessageSignature,
   getFullPublicKeyPairFromPrivateKey,
   getKeysFromAddress,
-  isUpgradeRequired,
+  validateAccountRequireUpgradeOrDeploy,
   validateAndParseAddress,
 } from './utils/starknetUtils';
 
@@ -44,11 +44,13 @@ export async function verifySignedMessage(params: ApiParams) {
       throw new Error(`The given signer address is invalid: ${verifySignerAddress}`);
     }
 
-    if (await isUpgradeRequired(network, verifySignerAddress)) {
-      throw new Error('Upgrade required');
-    }
-
-    const { privateKey: signerPrivateKey } = await getKeysFromAddress(keyDeriver, network, state, verifySignerAddress);
+    const { privateKey: signerPrivateKey, publicKey } = await getKeysFromAddress(
+      keyDeriver,
+      network,
+      state,
+      verifySignerAddress,
+    );
+    await validateAccountRequireUpgradeOrDeploy(network, verifySignerAddress, publicKey);
 
     const fullPublicKey = getFullPublicKeyPairFromPrivateKey(signerPrivateKey);
 

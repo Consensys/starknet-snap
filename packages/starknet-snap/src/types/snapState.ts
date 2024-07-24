@@ -18,6 +18,7 @@ export type AccContract = {
   deployTxnHash: string; // in hex
   chainId: string; // in hex
   upgradeRequired?: boolean;
+  deployRequired?: boolean;
 };
 
 export type Erc20Token = {
