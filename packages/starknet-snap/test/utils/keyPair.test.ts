@@ -1,7 +1,11 @@
 import { getBIP44AddressKeyDeriver } from '@metamask/key-tree';
 import chai, { expect } from 'chai';
 import sinonChai from 'sinon-chai';
-import { getAddressKey, getAddressKeyDeriver, grindKey } from '../../src/utils/keyPair';
+import {
+  getAddressKey,
+  getAddressKeyDeriver,
+  grindKey,
+} from '../../src/utils/keyPair';
 import { bip44Entropy } from '../constants.test';
 import { WalletMock } from '../wallet.mock.test';
 

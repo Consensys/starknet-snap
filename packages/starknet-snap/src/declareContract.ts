@@ -3,7 +3,11 @@ import { heading, panel, DialogType } from '@metamask/snaps-sdk';
 import type { ApiParams, DeclareContractRequestParams } from './types/snapApi';
 import { logger } from './utils/logger';
 import { toJson } from './utils/serializer';
-import { getNetworkFromChainId, getDeclareSnapTxt, showAccountRequireUpgradeOrDeployModal } from './utils/snapUtils';
+import {
+  getNetworkFromChainId,
+  getDeclareSnapTxt,
+  showAccountRequireUpgradeOrDeployModal,
+} from './utils/snapUtils';
 import {
   getKeysFromAddress,
   declareContract as declareContractUtil,
@@ -23,10 +27,19 @@ export async function declareContract(params: ApiParams) {
 
     const { senderAddress } = requestParamsObj;
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
-    const { privateKey, publicKey } = await getKeysFromAddress(keyDeriver, network, state, senderAddress);
+    const { privateKey, publicKey } = await getKeysFromAddress(
+      keyDeriver,
+      network,
+      state,
+      senderAddress,
+    );
 
     try {
-      await validateAccountRequireUpgradeOrDeploy(network, senderAddress, publicKey);
+      await validateAccountRequireUpgradeOrDeploy(
+        network,
+        senderAddress,
+        publicKey,
+      );
     } catch (validateError) {
       await showAccountRequireUpgradeOrDeployModal(wallet, validateError);
       throw validateError;
@@ -43,7 +56,10 @@ export async function declareContract(params: ApiParams) {
       method: 'snap_dialog',
       params: {
         type: DialogType.Confirmation,
-        content: panel([heading('Do you want to sign this transaction?'), ...snapComponents]),
+        content: panel([
+          heading('Do you want to sign this transaction?'),
+          ...snapComponents,
+        ]),
       },
     });
 

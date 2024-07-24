@@ -28,11 +28,17 @@ export async function estimateFee(params: ApiParams) {
     const requestParamsObj = requestParams as EstimateFeeRequestParams;
     const { contractAddress } = requestParamsObj;
     const { contractFuncName } = requestParamsObj;
-    const contractCallData = getCallDataArray(requestParamsObj.contractCallData as unknown as string);
+    const contractCallData = getCallDataArray(
+      requestParamsObj.contractCallData as unknown as string,
+    );
     const { senderAddress } = requestParamsObj;
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
 
-    if (!contractAddress || !requestParamsObj.senderAddress || !contractFuncName) {
+    if (
+      !contractAddress ||
+      !requestParamsObj.senderAddress ||
+      !contractFuncName
+    ) {
       throw new Error(
         `The given contract address, sender address, and function name need to be non-empty string, got: ${toJson(
           requestParamsObj,
@@ -43,7 +49,9 @@ export async function estimateFee(params: ApiParams) {
     try {
       validateAndParseAddress(contractAddress);
     } catch (error) {
-      throw new Error(`The given contract address is invalid: ${contractAddress}`);
+      throw new Error(
+        `The given contract address is invalid: ${contractAddress}`,
+      );
     }
     try {
       validateAndParseAddress(senderAddress);
@@ -51,14 +59,14 @@ export async function estimateFee(params: ApiParams) {
       throw new Error(`The given sender address is invalid: ${senderAddress}`);
     }
 
-    const { privateKey: senderPrivateKey, publicKey } = await getKeysFromAddress(
-      keyDeriver,
-      network,
-      state,
-      senderAddress,
-    );
+    const { privateKey: senderPrivateKey, publicKey } =
+      await getKeysFromAddress(keyDeriver, network, state, senderAddress);
 
-    await validateAccountRequireUpgradeOrDeploy(network, senderAddress, publicKey);
+    await validateAccountRequireUpgradeOrDeploy(
+      network,
+      senderAddress,
+      publicKey,
+    );
 
     const txnInvocation = {
       contractAddress,
@@ -102,11 +110,29 @@ export async function estimateFee(params: ApiParams) {
     if (accountDeployed) {
       // This condition branch will be removed later when starknet.js
       // supports estimateFeeBulk in rpc mode
-      estimateFeeResp = await estimateFeeUtil(network, senderAddress, senderPrivateKey, txnInvocation);
-      logger.log(`estimateFee:\nestimateFeeUtil estimateFeeResp: ${toJson(estimateFeeResp)}`);
+      estimateFeeResp = await estimateFeeUtil(
+        network,
+        senderAddress,
+        senderPrivateKey,
+        txnInvocation,
+      );
+      logger.log(
+        `estimateFee:\nestimateFeeUtil estimateFeeResp: ${toJson(
+          estimateFeeResp,
+        )}`,
+      );
     } else {
-      const estimateBulkFeeResp = await estimateFeeBulk(network, senderAddress, senderPrivateKey, bulkTransactions);
-      logger.log(`estimateFee:\nestimateFeeBulk estimateBulkFeeResp: ${toJson(estimateBulkFeeResp)}`);
+      const estimateBulkFeeResp = await estimateFeeBulk(
+        network,
+        senderAddress,
+        senderPrivateKey,
+        bulkTransactions,
+      );
+      logger.log(
+        `estimateFee:\nestimateFeeBulk estimateBulkFeeResp: ${toJson(
+          estimateBulkFeeResp,
+        )}`,
+      );
       estimateFeeResp = addFeesFromAllTransactions(estimateBulkFeeResp);
     }
 

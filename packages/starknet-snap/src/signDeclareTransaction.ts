@@ -1,10 +1,17 @@
 import { heading, panel, DialogType } from '@metamask/snaps-sdk';
 import type { Signature } from 'starknet';
 
-import type { ApiParams, SignDeclareTransactionRequestParams } from './types/snapApi';
+import type {
+  ApiParams,
+  SignDeclareTransactionRequestParams,
+} from './types/snapApi';
 import { logger } from './utils/logger';
 import { toJson } from './utils/serializer';
-import { getNetworkFromChainId, getSignTxnTxt, showAccountRequireUpgradeOrDeployModal } from './utils/snapUtils';
+import {
+  getNetworkFromChainId,
+  getSignTxnTxt,
+  showAccountRequireUpgradeOrDeployModal,
+} from './utils/snapUtils';
 import {
   getKeysFromAddress,
   signDeclareTransaction as signDeclareTransactionUtil,
@@ -15,31 +22,55 @@ import {
  *
  * @param params
  */
-export async function signDeclareTransaction(params: ApiParams): Promise<Signature | boolean> {
+export async function signDeclareTransaction(
+  params: ApiParams,
+): Promise<Signature | boolean> {
   try {
     const { state, keyDeriver, requestParams, wallet } = params;
-    const requestParamsObj = requestParams as SignDeclareTransactionRequestParams;
+    const requestParamsObj =
+      requestParams as SignDeclareTransactionRequestParams;
     const { signerAddress } = requestParamsObj;
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
-    const { privateKey, publicKey } = await getKeysFromAddress(keyDeriver, network, state, signerAddress);
+    const { privateKey, publicKey } = await getKeysFromAddress(
+      keyDeriver,
+      network,
+      state,
+      signerAddress,
+    );
 
     try {
-      await validateAccountRequireUpgradeOrDeploy(network, signerAddress, publicKey);
+      await validateAccountRequireUpgradeOrDeploy(
+        network,
+        signerAddress,
+        publicKey,
+      );
     } catch (validateError) {
       await showAccountRequireUpgradeOrDeployModal(wallet, validateError);
       throw validateError;
     }
 
-    logger.log(`signDeclareTransaction params: ${toJson(requestParamsObj.transaction, 2)}}`);
+    logger.log(
+      `signDeclareTransaction params: ${toJson(
+        requestParamsObj.transaction,
+        2,
+      )}}`,
+    );
 
-    const snapComponents = getSignTxnTxt(signerAddress, network, requestParamsObj.transaction);
+    const snapComponents = getSignTxnTxt(
+      signerAddress,
+      network,
+      requestParamsObj.transaction,
+    );
 
     if (requestParamsObj.enableAuthorize) {
       const response = await wallet.request({
         method: 'snap_dialog',
         params: {
           type: DialogType.Confirmation,
-          content: panel([heading('Do you want to sign this transaction?'), ...snapComponents]),
+          content: panel([
+            heading('Do you want to sign this transaction?'),
+            ...snapComponents,
+          ]),
         },
       });
 
@@ -48,7 +79,10 @@ export async function signDeclareTransaction(params: ApiParams): Promise<Signatu
       }
     }
 
-    return await signDeclareTransactionUtil(privateKey, requestParamsObj.transaction);
+    return await signDeclareTransactionUtil(
+      privateKey,
+      requestParamsObj.transaction,
+    );
   } catch (error) {
     // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     logger.error(`Problem found: ${error}`);

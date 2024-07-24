@@ -2,7 +2,10 @@ import type { ApiParams, GetStarkNameRequestParam } from './types/snapApi';
 import { logger } from './utils/logger';
 import { toJson } from './utils/serializer';
 import { getNetworkFromChainId } from './utils/snapUtils';
-import { getStarkNameUtil, validateAndParseAddress } from './utils/starknetUtils';
+import {
+  getStarkNameUtil,
+  validateAndParseAddress,
+} from './utils/starknetUtils';
 
 /**
  *
@@ -14,13 +17,19 @@ export async function getStarkName(params: ApiParams) {
     const requestParamsObj = requestParams as GetStarkNameRequestParam;
 
     if (!requestParamsObj.userAddress) {
-      throw new Error(`The given user address need to be non-empty string, got: ${toJson(requestParamsObj)}`);
+      throw new Error(
+        `The given user address need to be non-empty string, got: ${toJson(
+          requestParamsObj,
+        )}`,
+      );
     }
 
     try {
       validateAndParseAddress(requestParamsObj.userAddress);
     } catch (error) {
-      throw new Error(`The given user address is invalid: ${requestParamsObj.userAddress}`);
+      throw new Error(
+        `The given user address is invalid: ${requestParamsObj.userAddress}`,
+      );
     }
 
     const { userAddress } = requestParamsObj;

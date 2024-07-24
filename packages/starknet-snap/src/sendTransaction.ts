@@ -8,7 +8,11 @@ import type { Transaction } from './types/snapState';
 import { TransactionStatus, VoyagerTransactionType } from './types/snapState';
 import { logger } from './utils/logger';
 import { toJson } from './utils/serializer';
-import { getNetworkFromChainId, getSendTxnText, upsertTransaction } from './utils/snapUtils';
+import {
+  getNetworkFromChainId,
+  getSendTxnText,
+  upsertTransaction,
+} from './utils/snapUtils';
 import {
   validateAndParseAddress,
   getKeysFromAddress,
@@ -27,7 +31,11 @@ export async function sendTransaction(params: ApiParams) {
     const { state, wallet, saveMutex, keyDeriver, requestParams } = params;
     const requestParamsObj = requestParams as SendTransactionRequestParams;
 
-    if (!requestParamsObj.contractAddress || !requestParamsObj.senderAddress || !requestParamsObj.contractFuncName) {
+    if (
+      !requestParamsObj.contractAddress ||
+      !requestParamsObj.senderAddress ||
+      !requestParamsObj.contractFuncName
+    ) {
       throw new Error(
         `The given contract address, sender address, and function name need to be non-empty string, got: ${toJson(
           requestParamsObj,
@@ -38,17 +46,23 @@ export async function sendTransaction(params: ApiParams) {
     try {
       validateAndParseAddress(requestParamsObj.contractAddress);
     } catch (error) {
-      throw new Error(`The given contract address is invalid: ${requestParamsObj.contractAddress}`);
+      throw new Error(
+        `The given contract address is invalid: ${requestParamsObj.contractAddress}`,
+      );
     }
     try {
       validateAndParseAddress(requestParamsObj.senderAddress);
     } catch (error) {
-      throw new Error(`The given sender address is invalid: ${requestParamsObj.senderAddress}`);
+      throw new Error(
+        `The given sender address is invalid: ${requestParamsObj.senderAddress}`,
+      );
     }
 
     const { contractAddress } = requestParamsObj;
     const { contractFuncName } = requestParamsObj;
-    const contractCallData = getCallDataArray(requestParamsObj.contractCallData as unknown as string);
+    const contractCallData = getCallDataArray(
+      requestParamsObj.contractCallData as unknown as string,
+    );
     const { senderAddress } = requestParamsObj;
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
 
@@ -56,13 +70,11 @@ export async function sendTransaction(params: ApiParams) {
       throw new Error('Upgrade required');
     }
 
-    const { privateKey: senderPrivateKey, addressIndex } = await getKeysFromAddress(
-      keyDeriver,
-      network,
-      state,
-      senderAddress,
-    );
-    let maxFee = requestParamsObj.maxFee ? numUtils.toBigInt(requestParamsObj.maxFee) : constants.ZERO;
+    const { privateKey: senderPrivateKey, addressIndex } =
+      await getKeysFromAddress(keyDeriver, network, state, senderAddress);
+    let maxFee = requestParamsObj.maxFee
+      ? numUtils.toBigInt(requestParamsObj.maxFee)
+      : constants.ZERO;
     if (maxFee === constants.ZERO) {
       const { suggestedMaxFee } = await estimateFee(params);
       maxFee = numUtils.toBigInt(suggestedMaxFee);
@@ -81,7 +93,10 @@ export async function sendTransaction(params: ApiParams) {
       method: 'snap_dialog',
       params: {
         type: DialogType.Confirmation,
-        content: panel([heading('Do you want to sign this transaction ?'), ...signingTxnComponents]),
+        content: panel([
+          heading('Do you want to sign this transaction ?'),
+          ...signingTxnComponents,
+        ]),
       },
     });
     if (!response) {
@@ -94,12 +109,18 @@ export async function sendTransaction(params: ApiParams) {
       calldata: contractCallData,
     };
 
-    logger.log(`sendTransaction:\ntxnInvocation: ${toJson(txnInvocation)}\nmaxFee: ${maxFee.toString()}}`);
+    logger.log(
+      `sendTransaction:\ntxnInvocation: ${toJson(
+        txnInvocation,
+      )}\nmaxFee: ${maxFee.toString()}}`,
+    );
 
     const accountDeployed = await isAccountDeployed(network, senderAddress);
     if (!accountDeployed) {
       // Deploy account before sending the transaction
-      logger.log('sendTransaction:\nFirst transaction : send deploy transaction');
+      logger.log(
+        'sendTransaction:\nFirst transaction : send deploy transaction',
+      );
       const createAccountApiParams = {
         state,
         wallet: params.wallet,
@@ -116,10 +137,17 @@ export async function sendTransaction(params: ApiParams) {
 
     // In case this is the first transaction we assign a nonce of 1 to make sure it does after the deploy transaction
     const nonceSendTransaction = accountDeployed ? undefined : 1;
-    const txnResp = await executeTxn(network, senderAddress, senderPrivateKey, txnInvocation, undefined, {
-      maxFee,
-      nonce: nonceSendTransaction,
-    });
+    const txnResp = await executeTxn(
+      network,
+      senderAddress,
+      senderPrivateKey,
+      txnInvocation,
+      undefined,
+      {
+        maxFee,
+        nonce: nonceSendTransaction,
+      },
+    );
 
     logger.log(`sendTransaction:\ntxnResp: ${toJson(txnResp)}`);
 
@@ -131,14 +159,16 @@ export async function sendTransaction(params: ApiParams) {
         senderAddress,
         contractAddress,
         contractFuncName,
-        contractCallData: contractCallData.map((data: numUtils.BigNumberish) => {
-          try {
-            return numUtils.toHex(numUtils.toBigInt(data));
-          } catch (error) {
-            // data is already send to chain, hence we should not throw error
-            return '0x0';
-          }
-        }),
+        contractCallData: contractCallData.map(
+          (data: numUtils.BigNumberish) => {
+            try {
+              return numUtils.toHex(numUtils.toBigInt(data));
+            } catch (error) {
+              // data is already send to chain, hence we should not throw error
+              return '0x0';
+            }
+          },
+        ),
         finalityStatus: TransactionStatus.RECEIVED,
         executionStatus: TransactionStatus.RECEIVED,
         status: '', // DEPRECATED LATER

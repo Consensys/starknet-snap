@@ -1,5 +1,8 @@
 import typedDataExample from './typedData/typedDataExample.json';
-import type { ApiParams, VerifySignedMessageRequestParams } from './types/snapApi';
+import type {
+  ApiParams,
+  VerifySignedMessageRequestParams,
+} from './types/snapApi';
 import { logger } from './utils/logger';
 import { toJson } from './utils/serializer';
 import { getNetworkFromChainId } from './utils/snapUtils';
@@ -34,23 +37,27 @@ export async function verifySignedMessage(params: ApiParams) {
 
     if (!verifySignerAddress || !verifySignature) {
       throw new Error(
-        `The given signer address and signature need to be non-empty string, got: ${toJson(requestParamsObj)}`,
+        `The given signer address and signature need to be non-empty string, got: ${toJson(
+          requestParamsObj,
+        )}`,
       );
     }
 
     try {
       validateAndParseAddress(verifySignerAddress);
     } catch (error) {
-      throw new Error(`The given signer address is invalid: ${verifySignerAddress}`);
+      throw new Error(
+        `The given signer address is invalid: ${verifySignerAddress}`,
+      );
     }
 
-    const { privateKey: signerPrivateKey, publicKey } = await getKeysFromAddress(
-      keyDeriver,
+    const { privateKey: signerPrivateKey, publicKey } =
+      await getKeysFromAddress(keyDeriver, network, state, verifySignerAddress);
+    await validateAccountRequireUpgradeOrDeploy(
       network,
-      state,
       verifySignerAddress,
+      publicKey,
     );
-    await validateAccountRequireUpgradeOrDeploy(network, verifySignerAddress, publicKey);
 
     const fullPublicKey = getFullPublicKeyPairFromPrivateKey(signerPrivateKey);
 

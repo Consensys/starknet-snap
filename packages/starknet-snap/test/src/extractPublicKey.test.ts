@@ -5,11 +5,19 @@ import { WalletMock } from '../wallet.mock.test';
 import { SnapState } from '../../src/types/snapState';
 import { extractPublicKey } from '../../src/extractPublicKey';
 import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../../src/utils/constants';
-import { account1, getBip44EntropyStub, unfoundUserAddress, unfoundUserPublicKey } from '../constants.test';
+import {
+  account1,
+  getBip44EntropyStub,
+  unfoundUserAddress,
+  unfoundUserPublicKey,
+} from '../constants.test';
 import { getAddressKeyDeriver } from '../../src/utils/keyPair';
 import * as utils from '../../src/utils/starknetUtils';
 import { Mutex } from 'async-mutex';
-import { ApiParams, ExtractPublicKeyRequestParams } from '../../src/types/snapApi';
+import {
+  ApiParams,
+  ExtractPublicKeyRequestParams,
+} from '../../src/types/snapApi';
 import { UpgradeRequiredError } from '../../src/utils/exceptions';
 
 chai.use(sinonChai);
@@ -98,7 +106,9 @@ describe('Test function: extractPublicKey', function () {
         } catch (err) {
           result = err;
         } finally {
-          expect(validateAccountRequireUpgradeOrDeployStub).to.have.been.calledOnceWith(
+          expect(
+            validateAccountRequireUpgradeOrDeployStub,
+          ).to.have.been.calledOnceWith(
             STARKNET_SEPOLIA_TESTNET_NETWORK,
             account1.address,
             account1.publicKey,
@@ -123,7 +133,9 @@ describe('Test function: extractPublicKey', function () {
         } catch (err) {
           result = err;
         } finally {
-          expect(validateAccountRequireUpgradeOrDeployStub).to.have.been.calledOnceWith(
+          expect(
+            validateAccountRequireUpgradeOrDeployStub,
+          ).to.have.been.calledOnceWith(
             STARKNET_SEPOLIA_TESTNET_NETWORK,
             account1.address,
             account1.publicKey,
@@ -135,7 +147,9 @@ describe('Test function: extractPublicKey', function () {
 
     describe('when account does not require upgrade', function () {
       beforeEach(async function () {
-        sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolves(null);
+        sandbox
+          .stub(utils, 'validateAccountRequireUpgradeOrDeploy')
+          .resolves(null);
       });
 
       it('should get the public key of the specified user account correctly', async function () {

@@ -23,8 +23,14 @@ export type ILogger = {
   getLogLevel: () => LogLevel;
 };
 
-// eslint-disable-next-line @typescript-eslint/no-empty-function, @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
-export const emptyLog: LoggingFn = (message?: any, ...optionalParams: any[]) => {};
+export const emptyLog: LoggingFn = (
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
+  message?: any,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
+  ...optionalParams: any[]
+) =>
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  {};
 
 class Logger implements ILogger {
   readonly log: LoggingFn;

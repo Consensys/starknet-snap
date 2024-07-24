@@ -43,7 +43,10 @@ import type { RpcV4GetTransactionReceiptResponse } from '../types/snapApi';
 import type { Network, SnapState, Transaction } from '../types/snapState';
 import { TransactionType } from '../types/snapState';
 import type { TransactionStatuses } from '../types/starknet';
-import type { VoyagerTransactions, VoyagerTransactionItem } from '../types/voyager';
+import type {
+  VoyagerTransactions,
+  VoyagerTransactionItem,
+} from '../types/voyager';
 import {
   PROXY_CONTRACT_HASH,
   TRANSFER_SELECTOR_HEX,
@@ -61,9 +64,18 @@ import { hexToString } from './formatterUtils';
 import { getAddressKey } from './keyPair';
 import { logger } from './logger';
 import { toJson } from './serializer';
-import { getAccount, getAccounts, getRPCUrl, getTransactionsFromVoyagerUrl, getVoyagerCredentials } from './snapUtils';
+import {
+  getAccount,
+  getAccounts,
+  getRPCUrl,
+  getTransactionsFromVoyagerUrl,
+  getVoyagerCredentials,
+} from './snapUtils';
 
-export const getData = async (url = '', headers: Record<string, string> = {}) => {
+export const getData = async (
+  url = '',
+  headers: Record<string, string> = {},
+) => {
   // Default options are marked with *
   const response = await fetch(url, {
     method: 'GET', // *GET, POST, PUT, DELETE, etc.
@@ -112,7 +124,12 @@ export const getAccountInstance = (
   cairoVersion?: CairoVersion,
 ): Account => {
   const provider = getProvider(network);
-  return new Account(provider, userAddress, privateKey, cairoVersion ?? CAIRO_VERSION);
+  return new Account(
+    provider,
+    userAddress,
+    privateKey,
+    cairoVersion ?? CAIRO_VERSION,
+  );
 };
 
 export const callContract = async (
@@ -139,7 +156,12 @@ export const waitForTransaction = async (
   txnHash: numUtils.BigNumberish,
   cairoVersion?: CairoVersion,
 ): Promise<GetTransactionReceiptResponse> => {
-  return getAccountInstance(network, senderAddress, privateKey, cairoVersion).waitForTransaction(txnHash);
+  return getAccountInstance(
+    network,
+    senderAddress,
+    privateKey,
+    cairoVersion,
+  ).waitForTransaction(txnHash);
 };
 
 export const declareContract = async (
@@ -150,7 +172,12 @@ export const declareContract = async (
   invocationsDetails?: UniversalDetails,
   cairoVersion?: CairoVersion,
 ): Promise<DeclareContractResponse> => {
-  return getAccountInstance(network, senderAddress, privateKey, cairoVersion).declare(contractPayload, {
+  return getAccountInstance(
+    network,
+    senderAddress,
+    privateKey,
+    cairoVersion,
+  ).declare(contractPayload, {
     ...invocationsDetails,
     skipValidate: false,
     blockIdentifier: 'latest',
@@ -165,7 +192,12 @@ export const estimateFee = async (
   cairoVersion?: CairoVersion,
   invocationsDetails?: UniversalDetails,
 ): Promise<EstimateFee> => {
-  return getAccountInstance(network, senderAddress, privateKey, cairoVersion).estimateInvokeFee(txnInvocation, {
+  return getAccountInstance(
+    network,
+    senderAddress,
+    privateKey,
+    cairoVersion,
+  ).estimateInvokeFee(txnInvocation, {
     ...invocationsDetails,
     skipValidate: false,
     blockIdentifier: 'latest',
@@ -180,7 +212,12 @@ export const estimateFeeBulk = async (
   invocationsDetails?: UniversalDetails,
   cairoVersion?: CairoVersion,
 ): Promise<EstimateFee[]> => {
-  return getAccountInstance(network, senderAddress, privateKey, cairoVersion).estimateFeeBulk(txnInvocation, {
+  return getAccountInstance(
+    network,
+    senderAddress,
+    privateKey,
+    cairoVersion,
+  ).estimateFeeBulk(txnInvocation, {
     ...invocationsDetails,
     skipValidate: false,
     blockIdentifier: 'latest',
@@ -196,7 +233,12 @@ export const executeTxn = async (
   invocationsDetails?: UniversalDetails,
   cairoVersion?: CairoVersion,
 ): Promise<InvokeFunctionResponse> => {
-  return getAccountInstance(network, senderAddress, privateKey, cairoVersion).execute(txnInvocation, abis, {
+  return getAccountInstance(
+    network,
+    senderAddress,
+    privateKey,
+    cairoVersion,
+  ).execute(txnInvocation, abis, {
     ...invocationsDetails,
     skipValidate: false,
     blockIdentifier: 'latest',
@@ -212,14 +254,20 @@ export const deployAccount = async (
   cairoVersion?: CairoVersion,
   invocationsDetails?: UniversalDetails,
 ): Promise<DeployContractResponse> => {
-  const classHash = cairoVersion === CAIRO_VERSION ? ACCOUNT_CLASS_HASH : PROXY_CONTRACT_HASH;
+  const classHash =
+    cairoVersion === CAIRO_VERSION ? ACCOUNT_CLASS_HASH : PROXY_CONTRACT_HASH;
   const deployAccountPayload = {
     classHash,
     contractAddress,
     constructorCalldata: contractCallData,
     addressSalt,
   };
-  return getAccountInstance(network, contractAddress, privateKey, cairoVersion).deployAccount(deployAccountPayload, {
+  return getAccountInstance(
+    network,
+    contractAddress,
+    privateKey,
+    cairoVersion,
+  ).deployAccount(deployAccountPayload, {
     ...invocationsDetails,
     skipValidate: false,
     blockIdentifier: 'latest',
@@ -235,34 +283,46 @@ export const estimateAccountDeployFee = async (
   cairoVersion?: CairoVersion,
   invocationsDetails?: UniversalDetails,
 ): Promise<EstimateFee> => {
-  const classHash = cairoVersion === CAIRO_VERSION ? ACCOUNT_CLASS_HASH : PROXY_CONTRACT_HASH;
+  const classHash =
+    cairoVersion === CAIRO_VERSION ? ACCOUNT_CLASS_HASH : PROXY_CONTRACT_HASH;
   const deployAccountPayload = {
     classHash,
     contractAddress,
     constructorCalldata: contractCallData,
     addressSalt,
   };
-  return getAccountInstance(network, contractAddress, privateKey, cairoVersion).estimateAccountDeployFee(
-    deployAccountPayload,
-    {
-      ...invocationsDetails,
-      skipValidate: false,
-      blockIdentifier: 'latest',
-    },
-  );
+  return getAccountInstance(
+    network,
+    contractAddress,
+    privateKey,
+    cairoVersion,
+  ).estimateAccountDeployFee(deployAccountPayload, {
+    ...invocationsDetails,
+    skipValidate: false,
+    blockIdentifier: 'latest',
+  });
 };
 
-export const getSigner = async (userAccAddress: string, network: Network): Promise<string> => {
+export const getSigner = async (
+  userAccAddress: string,
+  network: Network,
+): Promise<string> => {
   const resp = await callContract(network, userAccAddress, 'getSigner');
   return resp[0];
 };
 
-export const getVersion = async (userAccAddress: string, network: Network): Promise<string> => {
+export const getVersion = async (
+  userAccAddress: string,
+  network: Network,
+): Promise<string> => {
   const resp = await callContract(network, userAccAddress, 'getVersion');
   return resp[0];
 };
 
-export const getOwner = async (userAccAddress: string, network: Network): Promise<string> => {
+export const getOwner = async (
+  userAccAddress: string,
+  network: Network,
+): Promise<string> => {
   const resp = await callContract(network, userAccAddress, 'get_owner');
   return resp[0];
 };
@@ -272,35 +332,58 @@ export const getContractOwner = async (
   network: Network,
   version: CairoVersion,
 ): Promise<string> => {
-  return version === '0' ? getSigner(userAccAddress, network) : getOwner(userAccAddress, network);
+  return version === '0'
+    ? getSigner(userAccAddress, network)
+    : getOwner(userAccAddress, network);
 };
 
-export const getBalance = async (address: string, tokenAddress: string, network: Network) => {
-  const resp = await callContract(network, tokenAddress, 'balanceOf', [numUtils.toBigInt(address).toString(10)]);
+export const getBalance = async (
+  address: string,
+  tokenAddress: string,
+  network: Network,
+) => {
+  const resp = await callContract(network, tokenAddress, 'balanceOf', [
+    numUtils.toBigInt(address).toString(10),
+  ]);
   return resp[0];
 };
 
-export const isEthBalanceEmpty = async (network: Network, address: string, maxFee: bigint = constants.ZERO) => {
+export const isEthBalanceEmpty = async (
+  network: Network,
+  address: string,
+  maxFee: bigint = constants.ZERO,
+) => {
   const etherErc20TokenAddress =
-    network.chainId === ETHER_SEPOLIA_TESTNET.chainId ? ETHER_SEPOLIA_TESTNET.address : ETHER_MAINNET.address;
+    network.chainId === ETHER_SEPOLIA_TESTNET.chainId
+      ? ETHER_SEPOLIA_TESTNET.address
+      : ETHER_MAINNET.address;
 
   return (
     numUtils.toBigInt(
-      (await getBalance(address, etherErc20TokenAddress, network)) ?? numUtils.toBigInt(constants.ZERO),
+      (await getBalance(address, etherErc20TokenAddress, network)) ??
+        numUtils.toBigInt(constants.ZERO),
     ) <= maxFee
   );
 };
 
-export const getTransactionStatus = async (transactionHash: numUtils.BigNumberish, network: Network) => {
+export const getTransactionStatus = async (
+  transactionHash: numUtils.BigNumberish,
+  network: Network,
+) => {
   const provider = getProvider(network);
-  const receipt = (await provider.getTransactionReceipt(transactionHash)) as RpcV4GetTransactionReceiptResponse;
+  const receipt = (await provider.getTransactionReceipt(
+    transactionHash,
+  )) as RpcV4GetTransactionReceiptResponse;
   return {
     executionStatus: receipt.execution_status,
     finalityStatus: receipt.finality_status,
   };
 };
 
-export const getTransaction = async (transactionHash: numUtils.BigNumberish, network: Network) => {
+export const getTransaction = async (
+  transactionHash: numUtils.BigNumberish,
+  network: Network,
+) => {
   const provider = getProvider(network);
   return provider.getTransaction(transactionHash);
 };
@@ -317,7 +400,9 @@ export const getTransactionsFromVoyager = async (
   }
   // "ps" only effective on value: 10, 25, 50 as what's currently available in Voyager page
   return getData(
-    `${getTransactionsFromVoyagerUrl(network)}?${toQueryStr}ps=${pageSize}&p=${pageNum}`,
+    `${getTransactionsFromVoyagerUrl(
+      network,
+    )}?${toQueryStr}ps=${pageSize}&p=${pageNum}`,
     getVoyagerCredentials(),
   ) as unknown as VoyagerTransactions;
 };
@@ -334,15 +419,25 @@ const getTransactionsFromVoyagerHelper = async (
   let maxPage = i;
   do {
     try {
-      const { items, lastPage } = await getTransactionsFromVoyager(toAddress, pageSize, i, network);
+      const { items, lastPage } = await getTransactionsFromVoyager(
+        toAddress,
+        pageSize,
+        i,
+        network,
+      );
       txns.push(...items);
       maxPage = lastPage;
     } catch (error) {
-      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-      logger.error(`getTransactionsFromVoyagerHelper: error received from getTransactionsFromVoyager: ${error}`);
+      logger.error(
+        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+        `getTransactionsFromVoyagerHelper: error received from getTransactionsFromVoyager: ${error}`,
+      );
     }
     i += 1;
-  } while (i <= maxPage && txns[txns.length - 1]?.timestamp * 1000 >= minTimestamp);
+  } while (
+    i <= maxPage &&
+    txns[txns.length - 1]?.timestamp * 1000 >= minTimestamp
+  );
   // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
   logger.log(
     `getTransactionsFromVoyagerHelper: minTimestamp = ${minTimestamp}, i = ${i}, maxPage = ${maxPage}, total = ${txns.length}`,
@@ -353,11 +448,17 @@ const getTransactionsFromVoyagerHelper = async (
     if (i <= maxPage) {
       // means lastPage not fetched
       try {
-        const { items: lastPageTxns } = await getTransactionsFromVoyager(toAddress, pageSize, maxPage, network);
+        const { items: lastPageTxns } = await getTransactionsFromVoyager(
+          toAddress,
+          pageSize,
+          maxPage,
+          network,
+        );
         deployTxns = lastPageTxns.filter(
           (txn) =>
             txn.type.toLowerCase() === TransactionType.DEPLOY.toLowerCase() ||
-            txn.type.toLowerCase() === TransactionType.DEPLOY_ACCOUNT.toLowerCase(),
+            txn.type.toLowerCase() ===
+              TransactionType.DEPLOY_ACCOUNT.toLowerCase(),
         );
         txns = [...txns, ...deployTxns];
       } catch (error) {
@@ -370,14 +471,17 @@ const getTransactionsFromVoyagerHelper = async (
       deployTxns = txns.filter(
         (txn) =>
           txn.type.toLowerCase() === TransactionType.DEPLOY.toLowerCase() ||
-          txn.type.toLowerCase() === TransactionType.DEPLOY_ACCOUNT.toLowerCase(),
+          txn.type.toLowerCase() ===
+            TransactionType.DEPLOY_ACCOUNT.toLowerCase(),
       );
     }
   }
 
   // ensure the txns comes after or at the min timestamp or its in the deploy txns
   txns = txns.filter(
-    (txn) => txn.timestamp * 1000 >= minTimestamp || deployTxns.find((deployTxn) => deployTxn.hash === txn.hash),
+    (txn) =>
+      txn.timestamp * 1000 >= minTimestamp ||
+      deployTxns.find((deployTxn) => deployTxn.hash === txn.hash),
   );
 
   return {
@@ -412,14 +516,21 @@ export const getMassagedTransactions = async (
       let statusResp: TransactionStatuses | undefined;
       try {
         txnResp = await getTransaction(txn.hash, network);
-        statusResp = (await getTransactionStatus(txn.hash, network)) as unknown as TransactionStatuses;
+        statusResp = (await getTransactionStatus(
+          txn.hash,
+          network,
+        )) as unknown as TransactionStatuses;
         // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
         logger.log(`getMassagedTransactions: txnResp:\n${toJson(txnResp)}`);
         // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-        logger.log(`getMassagedTransactions: statusResp:\n${toJson(statusResp)}`);
+        logger.log(
+          `getMassagedTransactions: statusResp:\n${toJson(statusResp)}`,
+        );
       } catch (error) {
-        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-        logger.error(`getMassagedTransactions: error received from getTransaction: ${error}`);
+        logger.error(
+          // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+          `getMassagedTransactions: error received from getTransaction: ${error}`,
+        );
       }
 
       /* eslint-disable */
@@ -429,19 +540,29 @@ export const getMassagedTransactions = async (
         chainId: network.chainId,
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        senderAddress: txnResp.sender_address ?? txnResp.contract_address ?? txn.contract_address ?? '',
+        senderAddress:
+          txnResp.sender_address ??
+          txnResp.contract_address ??
+          txn.contract_address ??
+          '',
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        contractAddress: txnResp.calldata?.[1] ?? txnResp.contract_address ?? txn.contract_address ?? '',
+        contractAddress:
+          txnResp.calldata?.[1] ??
+          txnResp.contract_address ??
+          txn.contract_address ??
+          '',
 
         contractFuncName:
           // eslint-disable-next-line @typescript-eslint/ban-ts-comment
           // @ts-ignore
-          numUtils.toBigInt(txnResp.calldata?.[2] ?? '') === bigIntTransferSelectorHex
+          numUtils.toBigInt(txnResp.calldata?.[2] ?? '') ===
+          bigIntTransferSelectorHex
             ? 'transfer'
             : // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
-            numUtils.toBigInt(txnResp.calldata?.[2] ?? '') === bigIntUpgradeSelectorHex
+            numUtils.toBigInt(txnResp.calldata?.[2] ?? '') ===
+              bigIntUpgradeSelectorHex
             ? 'upgrade'
             : '',
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -460,7 +581,9 @@ export const getMassagedTransactions = async (
     }),
   );
   // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-  logger.log(`getMassagedTransactions: massagedTxns total = ${massagedTxns.length}`);
+  logger.log(
+    `getMassagedTransactions: massagedTxns total = ${massagedTxns.length}`,
+  );
   // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
   logger.log(`getMassagedTransactions: massagedTxns:\n${toJson(massagedTxns)}`);
 
@@ -468,7 +591,8 @@ export const getMassagedTransactions = async (
     const bigIntContractAddress = numUtils.toBigInt(contractAddress);
     massagedTxns = massagedTxns.filter(
       (massagedTxn) =>
-        numUtils.toBigInt(massagedTxn.contractAddress) === bigIntContractAddress ||
+        numUtils.toBigInt(massagedTxn.contractAddress) ===
+          bigIntContractAddress ||
         massagedTxn.contractFuncName === 'upgrade' ||
         deployTxns.find((deployTxn) => deployTxn.hash === massagedTxn.txnHash),
     );
@@ -482,7 +606,9 @@ export const getMassagedTransactions = async (
  * @param privateKey
  */
 export function getFullPublicKeyPairFromPrivateKey(privateKey: string) {
-  return encode.addHexPrefix(encode.buf2hex(ec.starkCurve.getPublicKey(privateKey, false)));
+  return encode.addHexPrefix(
+    encode.buf2hex(ec.starkCurve.getPublicKey(privateKey, false)),
+  );
 }
 
 export const getTypedDataMessageSignature = (
@@ -509,16 +635,23 @@ export const verifyTypedDataMessageSignature = (
   return ec.starkCurve.verify(signature, msgHash, fullPublicKey);
 };
 
-export const getNextAddressIndex = (chainId: string, state: SnapState, derivationPath: string) => {
+export const getNextAddressIndex = (
+  chainId: string,
+  state: SnapState,
+  derivationPath: string,
+) => {
   const accounts = getAccounts(state, chainId).filter(
     (acc) => acc.derivationPath === derivationPath && acc.addressIndex >= 0,
   );
   const uninitializedAccount = accounts.find(
-    (acc) => !acc.publicKey || numUtils.toBigInt(acc.publicKey) === constants.ZERO,
+    (acc) =>
+      !acc.publicKey || numUtils.toBigInt(acc.publicKey) === constants.ZERO,
   );
   logger.log(
     // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-    `getNextAddressIndex:\nUninitialized account found from state:\n${toJson(uninitializedAccount ?? 'None')}`,
+    `getNextAddressIndex:\nUninitialized account found from state:\n${toJson(
+      uninitializedAccount ?? 'None',
+    )}`,
   );
   return uninitializedAccount?.addressIndex ?? accounts.length;
 };
@@ -535,7 +668,12 @@ export const getAccContractAddressAndCallData = (publicKey) => {
     guardian: '0',
   });
 
-  let address = hash.calculateContractAddressFromHash(publicKey, ACCOUNT_CLASS_HASH, callData, 0);
+  let address = hash.calculateContractAddressFromHash(
+    publicKey,
+    ACCOUNT_CLASS_HASH,
+    callData,
+    0,
+  );
 
   if (address.length < 66) {
     address = address.replace('0x', `0x${'0'.repeat(66 - address.length)}`);
@@ -559,7 +697,12 @@ export const getAccContractAddressAndCallDataLegacy = (publicKey) => {
     selector: hash.getSelectorFromName('initialize'),
     calldata: CallData.compile({ signer: publicKey, guardian: '0' }),
   });
-  let address = hash.calculateContractAddressFromHash(publicKey, PROXY_CONTRACT_HASH, callData, 0);
+  let address = hash.calculateContractAddressFromHash(
+    publicKey,
+    PROXY_CONTRACT_HASH,
+    callData,
+    0,
+  );
   if (address.length < 66) {
     address = address.replace('0x', `0x${'0'.repeat(66 - address.length)}`);
   }
@@ -598,7 +741,10 @@ export const getKeysFromAddressIndex = async (
     logger.log(`getKeysFromAddressIndex: addressIndex found: ${addressIndex}`);
   }
 
-  const { addressKey, derivationPath } = await getAddressKey(keyDeriver, addressIndex);
+  const { addressKey, derivationPath } = await getAddressKey(
+    keyDeriver,
+    addressIndex,
+  );
   const starkKeyPub = ec.starkCurve.getStarkKey(addressKey);
   const starkKeyPrivate = numUtils.toHex(addressKey);
   return {
@@ -628,8 +774,16 @@ export const findAddressIndex = async (
 ) => {
   const bigIntAddress = numUtils.toBigInt(address);
   for (let i = 0; i < maxScan; i++) {
-    const { publicKey } = await getKeysFromAddressIndex(keyDeriver, chainId, state, i);
-    const { address: calculatedAddress, addressLegacy: calculatedAddressLegacy } = getPermutationAddresses(publicKey);
+    const { publicKey } = await getKeysFromAddressIndex(
+      keyDeriver,
+      chainId,
+      state,
+      i,
+    );
+    const {
+      address: calculatedAddress,
+      addressLegacy: calculatedAddressLegacy,
+    } = getPermutationAddresses(publicKey);
 
     if (
       numUtils.toBigInt(calculatedAddress) === bigIntAddress ||
@@ -639,7 +793,8 @@ export const findAddressIndex = async (
       logger.log(`findAddressIndex:\nFound address in scan: ${i} ${address}`);
       return {
         index: i,
-        cairoVersion: numUtils.toBigInt(calculatedAddress) === bigIntAddress ? 1 : 0,
+        cairoVersion:
+          numUtils.toBigInt(calculatedAddress) === bigIntAddress ? 1 : 0,
       };
     }
   }
@@ -658,12 +813,25 @@ export const getKeysFromAddress = async (
   if (acc) {
     addressIndex = acc.addressIndex;
     // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-    logger.log(`getNextAddressIndex:\nFound address in state: ${addressIndex} ${address}`);
+    logger.log(
+      `getNextAddressIndex:\nFound address in state: ${addressIndex} ${address}`,
+    );
   } else {
-    const result = await findAddressIndex(network.chainId, address, keyDeriver, state, maxScan);
+    const result = await findAddressIndex(
+      network.chainId,
+      address,
+      keyDeriver,
+      state,
+      maxScan,
+    );
     addressIndex = result.index;
   }
-  return getKeysFromAddressIndex(keyDeriver, network.chainId, state, addressIndex);
+  return getKeysFromAddressIndex(
+    keyDeriver,
+    network.chainId,
+    state,
+    addressIndex,
+  );
 };
 
 /**
@@ -685,7 +853,9 @@ export const isAccountDeployed = async (network: Network, address: string) => {
   }
 };
 
-export const addFeesFromAllTransactions = (fees: EstimateFee[]): Partial<EstimateFee> => {
+export const addFeesFromAllTransactions = (
+  fees: EstimateFee[],
+): Partial<EstimateFee> => {
   let overallFee = numUtils.toBigInt(0);
   let suggestedMaxFee = numUtils.toBigInt(0);
 
@@ -702,7 +872,10 @@ export const addFeesFromAllTransactions = (fees: EstimateFee[]): Partial<Estimat
 };
 
 export const _validateAndParseAddressFn = _validateAndParseAddress;
-export const validateAndParseAddress = (address: numUtils.BigNumberish, length = 63) => {
+export const validateAndParseAddress = (
+  address: numUtils.BigNumberish,
+  length = 63,
+) => {
   // getting rid of 0x and 0x0 prefixes
   const trimmedAddress = address.toString().replace(/^0x0?/u, '');
   if (trimmedAddress.length !== length) {
@@ -718,9 +891,14 @@ export const validateAndParseAddress = (address: numUtils.BigNumberish, length =
  * @param  address - Input address.
  * @returns - boolean.
  */
-export const isDeployRequired = async (network: Network, address: string, pubKey: string) => {
+export const isDeployRequired = async (
+  network: Network,
+  address: string,
+  pubKey: string,
+) => {
   logger.log(`isDeployRequired: address = ${address}`);
-  const { address: addressLegacy } = getAccContractAddressAndCallDataLegacy(pubKey);
+  const { address: addressLegacy } =
+    getAccContractAddressAndCallDataLegacy(pubKey);
 
   try {
     if (address === addressLegacy) {
@@ -806,7 +984,13 @@ export async function estimateAccountUpgradeFee(
 ) {
   if (maxFee === constants.ZERO) {
     const txnInvocation = getUpgradeTxnInvocation(contractAddress);
-    const estFeeResp = await estimateFee(network, contractAddress, privateKey, txnInvocation, CAIRO_VERSION_LEGACY);
+    const estFeeResp = await estimateFee(
+      network,
+      contractAddress,
+      privateKey,
+      txnInvocation,
+      CAIRO_VERSION_LEGACY,
+    );
     return num.toBigInt(estFeeResp.suggestedMaxFee.toString(10) ?? '0');
   }
   return maxFee;
@@ -819,8 +1003,13 @@ export async function estimateAccountUpgradeFee(
  * @param publicKey - address's public key.
  * @returns address and address's public key.
  */
-export const getCorrectContractAddress = async (network: Network, publicKey: string, maxFee = constants.ZERO) => {
-  const { address: contractAddress, addressLegacy: contractAddressLegacy } = getPermutationAddresses(publicKey);
+export const getCorrectContractAddress = async (
+  network: Network,
+  publicKey: string,
+  maxFee = constants.ZERO,
+) => {
+  const { address: contractAddress, addressLegacy: contractAddressLegacy } =
+    getPermutationAddresses(publicKey);
 
   logger.log(
     // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
@@ -840,7 +1029,9 @@ export const getCorrectContractAddress = async (network: Network, publicKey: str
       throw error4LatestContract;
     }
     // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-    logger.log(`getContractAddressByKey: cairo ${CAIRO_VERSION} contract not found, try cairo ${CAIRO_VERSION_LEGACY}`);
+    logger.log(
+      `getContractAddressByKey: cairo ${CAIRO_VERSION} contract not found, try cairo ${CAIRO_VERSION_LEGACY}`,
+    );
 
     try {
       address = contractAddressLegacy;
@@ -859,7 +1050,9 @@ export const getCorrectContractAddress = async (network: Network, publicKey: str
       try {
         if (await isEthBalanceEmpty(network, address, maxFee)) {
           address = contractAddress;
-          logger.log(`getContractAddressByKey: no deployed contract found, fallback to cairo ${CAIRO_VERSION}`);
+          logger.log(
+            `getContractAddressByKey: no deployed contract found, fallback to cairo ${CAIRO_VERSION}`,
+          );
         } else {
           upgradeRequired = true;
           deployRequired = true;
@@ -868,7 +1061,9 @@ export const getCorrectContractAddress = async (network: Network, publicKey: str
           );
         }
       } catch (err) {
-        logger.log(`getContractAddressByKey: balance check failed with error ${err}`);
+        logger.log(
+          `getContractAddressByKey: balance check failed with error ${err}`,
+        );
         throw err;
       }
     }
@@ -888,7 +1083,10 @@ export const signTransactions = async (
   transactionsDetail: InvocationsSignerDetails,
 ): Promise<Signature> => {
   const signer = new Signer(privateKey);
-  const signatures = await signer.signTransaction(transactions, transactionsDetail);
+  const signatures = await signer.signTransaction(
+    transactions,
+    transactionsDetail,
+  );
   return stark.signatureToDecimalArray(signatures);
 };
 
@@ -901,9 +1099,16 @@ export const signDeployAccountTransaction = async (
   return stark.signatureToDecimalArray(signatures);
 };
 
-export const signMessage = async (privateKey: string, typedDataMessage: TypedData, signerUserAddress: string) => {
+export const signMessage = async (
+  privateKey: string,
+  typedDataMessage: TypedData,
+  signerUserAddress: string,
+) => {
   const signer = new Signer(privateKey);
-  const signatures = await signer.signMessage(typedDataMessage, signerUserAddress);
+  const signatures = await signer.signMessage(
+    typedDataMessage,
+    signerUserAddress,
+  );
   return stark.signatureToDecimalArray(signatures);
 };
 
@@ -916,15 +1121,24 @@ export const signDeclareTransaction = async (
   return stark.signatureToDecimalArray(signatures);
 };
 
-export const getStarkNameUtil = async (network: Network, userAddress: string) => {
+export const getStarkNameUtil = async (
+  network: Network,
+  userAddress: string,
+) => {
   const provider = getProvider(network);
   return Account.getStarkName(provider, userAddress);
 };
 
-export const validateAccountRequireUpgradeOrDeploy = async (network: Network, address: string, pubKey: string) => {
+export const validateAccountRequireUpgradeOrDeploy = async (
+  network: Network,
+  address: string,
+  pubKey: string,
+) => {
   if (await isUpgradeRequired(network, address)) {
     throw new UpgradeRequiredError('Upgrade required');
   } else if (await isDeployRequired(network, address, pubKey)) {
-    throw new DeployRequiredError(`Cairo 0 contract address ${address} balance is not empty, deploy required`);
+    throw new DeployRequiredError(
+      `Cairo 0 contract address ${address} balance is not empty, deploy required`,
+    );
   }
 };

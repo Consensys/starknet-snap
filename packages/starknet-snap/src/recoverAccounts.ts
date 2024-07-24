@@ -5,8 +5,15 @@ import type { ApiParams, RecoverAccountsRequestParams } from './types/snapApi';
 import type { AccContract } from './types/snapState';
 import { logger } from './utils/logger';
 import { toJson } from './utils/serializer';
-import { getNetworkFromChainId, getValidNumber, upsertAccount } from './utils/snapUtils';
-import { getKeysFromAddressIndex, getCorrectContractAddress } from './utils/starknetUtils';
+import {
+  getNetworkFromChainId,
+  getValidNumber,
+  upsertAccount,
+} from './utils/snapUtils';
+import {
+  getKeysFromAddressIndex,
+  getCorrectContractAddress,
+} from './utils/starknetUtils';
 
 /**
  *
@@ -22,19 +29,22 @@ export async function recoverAccounts(params: ApiParams) {
     const maxMissed = getValidNumber(requestParamsObj.maxMissed, 1, 1);
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
 
-    logger.log(`recoverAccounts:\nstartIndex: ${startIndex}, maxScanned: ${maxScanned}, maxMissed: ${maxMissed}`);
+    logger.log(
+      `recoverAccounts:\nstartIndex: ${startIndex}, maxScanned: ${maxScanned}, maxMissed: ${maxMissed}`,
+    );
 
     let i = startIndex;
     let j = 0;
     const scannedAccounts: AccContract[] = [];
 
     while (i < startIndex + maxScanned && j < maxMissed) {
-      const { publicKey, addressIndex, derivationPath } = await getKeysFromAddressIndex(
-        keyDeriver as unknown as BIP44AddressKeyDeriver,
-        network.chainId,
-        state,
-        i,
-      );
+      const { publicKey, addressIndex, derivationPath } =
+        await getKeysFromAddressIndex(
+          keyDeriver as unknown as BIP44AddressKeyDeriver,
+          network.chainId,
+          state,
+          i,
+        );
       const {
         address: contractAddress,
         signerPubKey: signerPublicKey,
@@ -46,9 +56,15 @@ export async function recoverAccounts(params: ApiParams) {
       );
 
       if (signerPublicKey) {
-        logger.log(`recoverAccounts: index ${i}:\ncontractAddress = ${contractAddress}\n`);
-        if (numUtils.toBigInt(signerPublicKey) === numUtils.toBigInt(publicKey)) {
-          logger.log(`recoverAccounts: index ${i} matched\npublicKey: ${publicKey}`);
+        logger.log(
+          `recoverAccounts: index ${i}:\ncontractAddress = ${contractAddress}\n`,
+        );
+        if (
+          numUtils.toBigInt(signerPublicKey) === numUtils.toBigInt(publicKey)
+        ) {
+          logger.log(
+            `recoverAccounts: index ${i} matched\npublicKey: ${publicKey}`,
+          );
         }
         j = 0;
       } else {
@@ -67,7 +83,9 @@ export async function recoverAccounts(params: ApiParams) {
         deployRequired,
       };
 
-      logger.log(`recoverAccounts: index ${i}\nuserAccount: ${toJson(userAccount)}`);
+      logger.log(
+        `recoverAccounts: index ${i}\nuserAccount: ${toJson(userAccount)}`,
+      );
 
       await upsertAccount(userAccount, wallet, saveMutex);
 
@@ -75,7 +93,9 @@ export async function recoverAccounts(params: ApiParams) {
       i += 1;
     }
 
-    logger.log(`recoverAccounts:\nscannedAccounts: ${toJson(scannedAccounts, 2)}`);
+    logger.log(
+      `recoverAccounts:\nscannedAccounts: ${toJson(scannedAccounts, 2)}`,
+    );
 
     return scannedAccounts;
   } catch (error) {

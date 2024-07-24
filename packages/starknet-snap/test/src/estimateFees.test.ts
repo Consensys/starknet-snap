@@ -5,7 +5,12 @@ import { WalletMock } from '../wallet.mock.test';
 import { SnapState } from '../../src/types/snapState';
 import { estimateFees } from '../../src/estimateFees';
 import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../../src/utils/constants';
-import { account2, estimateDeployFeeResp2, estimateDeployFeeResp3, getBip44EntropyStub } from '../constants.test';
+import {
+  account2,
+  estimateDeployFeeResp2,
+  estimateDeployFeeResp3,
+  getBip44EntropyStub,
+} from '../constants.test';
 import { getAddressKeyDeriver } from '../../src/utils/keyPair';
 import * as utils from '../../src/utils/starknetUtils';
 import { Mutex } from 'async-mutex';
@@ -51,8 +56,13 @@ describe('Test function: estimateFees', function () {
           type: TransactionType.INVOKE,
           payload: {
             entrypoint: 'transfer',
-            contractAddress: '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
-            calldata: ['1697416752243704114657612983658108968471303240361660550219082009242042413588', '1', '0'],
+            contractAddress:
+              '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
+            calldata: [
+              '1697416752243704114657612983658108968471303240361660550219082009242042413588',
+              '1',
+              '0',
+            ],
           },
         },
       ],
@@ -82,8 +92,13 @@ describe('Test function: estimateFees', function () {
           type: TransactionType.INVOKE,
           payload: {
             entrypoint: 'transfer',
-            contractAddress: '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
-            calldata: ['1697416752243704114657612983658108968471303240361660550219082009242042413588', '1', '0'],
+            contractAddress:
+              '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
+            calldata: [
+              '1697416752243704114657612983658108968471303240361660550219082009242042413588',
+              '1',
+              '0',
+            ],
           },
         },
       ],

@@ -1,4 +1,7 @@
-import type { ApiParams, GetStoredErc20TokensRequestParams } from './types/snapApi';
+import type {
+  ApiParams,
+  GetStoredErc20TokensRequestParams,
+} from './types/snapApi';
 import { logger } from './utils/logger';
 import { toJson } from './utils/serializer';
 import { getErc20Tokens, getNetworkFromChainId } from './utils/snapUtils';

@@ -40,7 +40,11 @@ export async function executeTxn(params: ApiParams) {
     } = await getKeysFromAddress(keyDeriver, network, state, senderAddress);
 
     try {
-      await validateAccountRequireUpgradeOrDeploy(network, senderAddress, publicKey);
+      await validateAccountRequireUpgradeOrDeploy(
+        network,
+        senderAddress,
+        publicKey,
+      );
     } catch (validateError) {
       await showAccountRequireUpgradeOrDeployModal(wallet, validateError);
       throw validateError;
@@ -74,11 +78,16 @@ export async function executeTxn(params: ApiParams) {
       senderAddress,
       senderPrivateKey,
       bulkTransactions,
-      requestParamsObj.invocationsDetails ? requestParamsObj.invocationsDetails : undefined,
+      requestParamsObj.invocationsDetails
+        ? requestParamsObj.invocationsDetails
+        : undefined,
     );
     const estimateFeeResp = addFeesFromAllTransactions(fees);
 
-    if (estimateFeeResp === undefined || estimateFeeResp.suggestedMaxFee === undefined) {
+    if (
+      estimateFeeResp === undefined ||
+      estimateFeeResp.suggestedMaxFee === undefined
+    ) {
       throw new Error('Unable to estimate fees');
     }
 
@@ -120,7 +129,10 @@ export async function executeTxn(params: ApiParams) {
       method: 'snap_dialog',
       params: {
         type: DialogType.Confirmation,
-        content: panel([heading('Do you want to sign this transaction(s)?'), ...snapComponents]),
+        content: panel([
+          heading('Do you want to sign this transaction(s)?'),
+          ...snapComponents,
+        ]),
       },
     });
     if (!response) {

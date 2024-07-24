@@ -3,7 +3,11 @@ import { panel, heading, DialogType } from '@metamask/snaps-sdk';
 import type { ApiParams, SwitchNetworkRequestParams } from './types/snapApi';
 import { logger } from './utils/logger';
 import { toJson } from './utils/serializer';
-import { getNetwork, setCurrentNetwork, getNetworkTxt } from './utils/snapUtils';
+import {
+  getNetwork,
+  setCurrentNetwork,
+  getNetworkTxt,
+} from './utils/snapUtils';
 
 /**
  *
@@ -15,7 +19,9 @@ export async function switchNetwork(params: ApiParams) {
     const requestParamsObj = requestParams as SwitchNetworkRequestParams;
     const network = getNetwork(state, requestParamsObj.chainId);
     if (!network) {
-      throw new Error(`The given chainId is invalid: ${requestParamsObj.chainId}`);
+      throw new Error(
+        `The given chainId is invalid: ${requestParamsObj.chainId}`,
+      );
     }
     const components = getNetworkTxt(network);
 
@@ -24,7 +30,10 @@ export async function switchNetwork(params: ApiParams) {
         method: 'snap_dialog',
         params: {
           type: DialogType.Confirmation,
-          content: panel([heading('Do you want to switch to this network?'), ...components]),
+          content: panel([
+            heading('Do you want to switch to this network?'),
+            ...components,
+          ]),
         },
       });
       if (!response) {

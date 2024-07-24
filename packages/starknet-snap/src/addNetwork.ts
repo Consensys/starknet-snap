@@ -4,7 +4,11 @@ import type { AddNetworkRequestParams, ApiParams } from './types/snapApi';
 import type { Network } from './types/snapState';
 import { logger } from './utils/logger';
 import { toJson } from './utils/serializer';
-import { validateAddNetworkParams, upsertNetwork, getNetworkTxt } from './utils/snapUtils';
+import {
+  validateAddNetworkParams,
+  upsertNetwork,
+  getNetworkTxt,
+} from './utils/snapUtils';
 
 /**
  *
@@ -43,7 +47,10 @@ export async function addNetwork(params: ApiParams) {
       method: 'snap_dialog',
       params: {
         type: DialogType.Confirmation,
-        content: panel([heading('Do you want to add this network?'), ...components]),
+        content: panel([
+          heading('Do you want to add this network?'),
+          ...components,
+        ]),
       },
     });
     if (!response) {

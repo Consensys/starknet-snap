@@ -24,24 +24,42 @@ export async function extractPublicKey(params: ApiParams) {
 
     if (!requestParamsObj.userAddress) {
       throw new Error(
-        `The given user address need to be non-empty string, got: ${toJson(requestParamsObj.userAddress)}`,
+        `The given user address need to be non-empty string, got: ${toJson(
+          requestParamsObj.userAddress,
+        )}`,
       );
     }
 
     try {
       validateAndParseAddress(requestParamsObj.userAddress);
     } catch (error) {
-      throw new Error(`The given user address is invalid: ${requestParamsObj.userAddress}`);
+      throw new Error(
+        `The given user address is invalid: ${requestParamsObj.userAddress}`,
+      );
     }
 
     // [TODO] logic below is redundant, getKeysFromAddress is doing the same
-    const { publicKey } = await getKeysFromAddress(keyDeriver, network, state, userAddress);
-    await validateAccountRequireUpgradeOrDeploy(network, userAddress, publicKey);
+    const { publicKey } = await getKeysFromAddress(
+      keyDeriver,
+      network,
+      state,
+      userAddress,
+    );
+    await validateAccountRequireUpgradeOrDeploy(
+      network,
+      userAddress,
+      publicKey,
+    );
 
     let userPublicKey;
     const accContract = getAccount(state, userAddress, network.chainId);
-    if (!accContract?.publicKey || numUtils.toBigInt(accContract.publicKey) === constants.ZERO) {
-      logger.log(`extractPublicKey: User address cannot be found or the signer public key is 0x0: ${userAddress}`);
+    if (
+      !accContract?.publicKey ||
+      numUtils.toBigInt(accContract.publicKey) === constants.ZERO
+    ) {
+      logger.log(
+        `extractPublicKey: User address cannot be found or the signer public key is 0x0: ${userAddress}`,
+      );
       userPublicKey = publicKey;
     } else {
       userPublicKey = accContract.publicKey;

@@ -1,4 +1,7 @@
-import type { ApiParams, GetTransactionStatusRequestParams } from './types/snapApi';
+import type {
+  ApiParams,
+  GetTransactionStatusRequestParams,
+} from './types/snapApi';
 import { logger } from './utils/logger';
 import { toJson } from './utils/serializer';
 import { getNetworkFromChainId } from './utils/snapUtils';
@@ -16,8 +19,13 @@ export async function getTransactionStatus(params: ApiParams) {
     const { transactionHash } = requestParamsObj;
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
 
-    const getTxnStatusResp = await utils.getTransactionStatus(transactionHash, network);
-    logger.log(`getTransactionStatus:\ngetTxnStatusResp: ${toJson(getTxnStatusResp)}`);
+    const getTxnStatusResp = await utils.getTransactionStatus(
+      transactionHash,
+      network,
+    );
+    logger.log(
+      `getTransactionStatus:\ngetTxnStatusResp: ${toJson(getTxnStatusResp)}`,
+    );
 
     return getTxnStatusResp;
   } catch (error) {

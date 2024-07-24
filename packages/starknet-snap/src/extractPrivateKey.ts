@@ -1,6 +1,9 @@
 import { copyable, panel, text, DialogType } from '@metamask/snaps-sdk';
 
-import type { ApiParams, ExtractPrivateKeyRequestParams } from './types/snapApi';
+import type {
+  ApiParams,
+  ExtractPrivateKeyRequestParams,
+} from './types/snapApi';
 import { logger } from './utils/logger';
 import { toJson } from './utils/serializer';
 import { getNetworkFromChainId } from './utils/snapUtils';
@@ -21,7 +24,11 @@ export async function extractPrivateKey(params: ApiParams) {
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
     const { userAddress } = requestParamsObj;
     if (!userAddress) {
-      throw new Error(`The given user address need to be non-empty string, got: ${toJson(userAddress)}`);
+      throw new Error(
+        `The given user address need to be non-empty string, got: ${toJson(
+          userAddress,
+        )}`,
+      );
     }
 
     try {
@@ -30,8 +37,17 @@ export async function extractPrivateKey(params: ApiParams) {
       throw new Error(`The given user address is invalid: ${userAddress}`);
     }
 
-    const { privateKey: userPrivateKey, publicKey } = await getKeysFromAddress(keyDeriver, network, state, userAddress);
-    await validateAccountRequireUpgradeOrDeploy(network, userAddress, publicKey);
+    const { privateKey: userPrivateKey, publicKey } = await getKeysFromAddress(
+      keyDeriver,
+      network,
+      state,
+      userAddress,
+    );
+    await validateAccountRequireUpgradeOrDeploy(
+      network,
+      userAddress,
+      publicKey,
+    );
 
     const response = await wallet.request({
       method: 'snap_dialog',
@@ -46,7 +62,10 @@ export async function extractPrivateKey(params: ApiParams) {
         method: 'snap_dialog',
         params: {
           type: DialogType.Alert,
-          content: panel([text('Starknet Account Private Key'), copyable(userPrivateKey)]),
+          content: panel([
+            text('Starknet Account Private Key'),
+            copyable(userPrivateKey),
+          ]),
         },
       });
     }

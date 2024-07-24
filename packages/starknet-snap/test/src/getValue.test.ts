@@ -37,9 +37,11 @@ describe('Test function: getValue', function () {
       return ['1'];
     });
     const requestObject: GetValueRequestParams = {
-      contractAddress: '0x07394cbe418daa16e42b87ba67372d4ab4a5df0b05c6e554d158458ce245bc10',
+      contractAddress:
+        '0x07394cbe418daa16e42b87ba67372d4ab4a5df0b05c6e554d158458ce245bc10',
       contractFuncName: 'balanceOf',
-      contractCallData: '0x7426b2da7a8978e0d472d64f15f984d658226cb55a4fd8aa7689688a7eab37b',
+      contractCallData:
+        '0x7426b2da7a8978e0d472d64f15f984d658226cb55a4fd8aa7689688a7eab37b',
     };
     apiParams.requestParams = requestObject;
     const result = await getValue(apiParams);
@@ -49,9 +51,11 @@ describe('Test function: getValue', function () {
   it('should throw error if callContract failed', async function () {
     sandbox.stub(utils, 'callContract').throws(new Error());
     const requestObject: GetValueRequestParams = {
-      contractAddress: '0x07394cbe418daa16e42b87ba67372d4ab4a5df0b05c6e554d158458ce245bc10',
+      contractAddress:
+        '0x07394cbe418daa16e42b87ba67372d4ab4a5df0b05c6e554d158458ce245bc10',
       contractFuncName: 'balanceOf',
-      contractCallData: '0x7426b2da7a8978e0d472d64f15f984d658226cb55a4fd8aa7689688a7eab37b',
+      contractCallData:
+        '0x7426b2da7a8978e0d472d64f15f984d658226cb55a4fd8aa7689688a7eab37b',
     };
     apiParams.requestParams = requestObject;
 
@@ -69,7 +73,8 @@ describe('Test function: getValue', function () {
     const requestObject: GetValueRequestParams = {
       contractAddress: 'wrongAddress',
       contractFuncName: 'balanceOf',
-      contractCallData: '0x7426b2da7a8978e0d472d64f15f984d658226cb55a4fd8aa7689688a7eab37b',
+      contractCallData:
+        '0x7426b2da7a8978e0d472d64f15f984d658226cb55a4fd8aa7689688a7eab37b',
     };
     apiParams.requestParams = requestObject;
     let result;
@@ -84,9 +89,11 @@ describe('Test function: getValue', function () {
 
   it('should throw an error if the function name is undefined', async function () {
     const requestObject: GetValueRequestParams = {
-      contractAddress: '0x07394cbe418daa16e42b87ba67372d4ab4a5df0b05c6e554d158458ce245bc10',
+      contractAddress:
+        '0x07394cbe418daa16e42b87ba67372d4ab4a5df0b05c6e554d158458ce245bc10',
       contractFuncName: undefined as unknown as string,
-      contractCallData: '0x7426b2da7a8978e0d472d64f15f984d658226cb55a4fd8aa7689688a7eab37b',
+      contractCallData:
+        '0x7426b2da7a8978e0d472d64f15f984d658226cb55a4fd8aa7689688a7eab37b',
     };
     apiParams.requestParams = requestObject;
     let result;

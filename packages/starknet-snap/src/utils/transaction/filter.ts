@@ -1,6 +1,9 @@
 import { num as numUtils } from 'starknet';
 
-import type { Transaction, VoyagerTransactionType } from '../../types/snapState';
+import type {
+  Transaction,
+  VoyagerTransactionType,
+} from '../../types/snapState';
 import { TransactionStatusType } from '../../types/snapState';
 
 export type ITransactionFilter = {
@@ -78,7 +81,10 @@ export class StatusFilter implements ITransactionFilter {
 
   executionStatus: string[] = [];
 
-  constructor(finalityStatus: string | string[] | undefined, executionStatus: string | string[] | undefined) {
+  constructor(
+    finalityStatus: string | string[] | undefined,
+    executionStatus: string | string[] | undefined,
+  ) {
     if (finalityStatus) {
       this.finalityStatus = Array.isArray(finalityStatus)
         ? finalityStatus.map((status) => status.toLowerCase())
@@ -99,22 +105,36 @@ export class StatusFilter implements ITransactionFilter {
 
       if (txn[TransactionStatusType.DEPRECATION]) {
         deprecationStatusCond =
-          this.finalityStatus.includes(txn[TransactionStatusType.DEPRECATION].toLowerCase()) ||
-          this.executionStatus.includes(txn[TransactionStatusType.DEPRECATION].toLowerCase());
+          this.finalityStatus.includes(
+            txn[TransactionStatusType.DEPRECATION].toLowerCase(),
+          ) ||
+          this.executionStatus.includes(
+            txn[TransactionStatusType.DEPRECATION].toLowerCase(),
+          );
       }
 
       if (this.finalityStatus) {
         finalityStatusCond =
-          Object.prototype.hasOwnProperty.call(txn, TransactionStatusType.FINALITY) &&
+          Object.prototype.hasOwnProperty.call(
+            txn,
+            TransactionStatusType.FINALITY,
+          ) &&
           txn[TransactionStatusType.FINALITY] &&
-          this.finalityStatus.includes(txn[TransactionStatusType.FINALITY].toLowerCase());
+          this.finalityStatus.includes(
+            txn[TransactionStatusType.FINALITY].toLowerCase(),
+          );
       }
 
       if (this.executionStatus) {
         executionStatusCond =
-          Object.prototype.hasOwnProperty.call(txn, TransactionStatusType.EXECUTION) &&
+          Object.prototype.hasOwnProperty.call(
+            txn,
+            TransactionStatusType.EXECUTION,
+          ) &&
           txn[TransactionStatusType.EXECUTION] &&
-          this.executionStatus.includes(txn[TransactionStatusType.EXECUTION].toLowerCase());
+          this.executionStatus.includes(
+            txn[TransactionStatusType.EXECUTION].toLowerCase(),
+          );
       }
       return deprecationStatusCond || finalityStatusCond || executionStatusCond;
     }
@@ -143,7 +163,10 @@ export class ChainIdFilter implements ITransactionFilter {
  * @param txns
  * @param filters
  */
-export function filterTransactions(txns: Transaction[], filters: ITransactionFilter[]) {
+export function filterTransactions(
+  txns: Transaction[],
+  filters: ITransactionFilter[],
+) {
   return txns.filter((txn) => {
     return filters.every((filter) => filter.apply(txn));
   });

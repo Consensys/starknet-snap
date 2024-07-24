@@ -1,7 +1,10 @@
 import type { BIP44AddressKeyDeriver } from '@metamask/key-tree';
 import type { EstimateFee } from 'starknet';
 
-import type { ApiParams, EstimateAccountDeployFeeRequestParams } from './types/snapApi';
+import type {
+  ApiParams,
+  EstimateAccountDeployFeeRequestParams,
+} from './types/snapApi';
 import { logger } from './utils/logger';
 import { toJson } from './utils/serializer';
 import { getNetworkFromChainId, getValidNumber } from './utils/snapUtils';
@@ -18,7 +21,8 @@ import {
 export async function estimateAccDeployFee(params: ApiParams) {
   try {
     const { state, keyDeriver, requestParams } = params;
-    const requestParamsObj = requestParams as EstimateAccountDeployFeeRequestParams;
+    const requestParamsObj =
+      requestParams as EstimateAccountDeployFeeRequestParams;
 
     const addressIndex = getValidNumber(requestParamsObj.addressIndex, -1, 0);
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
@@ -33,7 +37,8 @@ export async function estimateAccDeployFee(params: ApiParams) {
       state,
       addressIndex,
     );
-    const { address: contractAddress, callData: contractCallData } = getAccContractAddressAndCallData(publicKey);
+    const { address: contractAddress, callData: contractCallData } =
+      getAccContractAddressAndCallData(publicKey);
     logger.log(
       `estimateAccountDeployFee:\ncontractAddress = ${contractAddress}\npublicKey = ${publicKey}\naddressIndex = ${addressIndexInUsed}`,
     );
@@ -45,7 +50,11 @@ export async function estimateAccDeployFee(params: ApiParams) {
       publicKey,
       privateKey,
     );
-    logger.log(`estimateAccountDeployFee:\nestimateDeployFee: ${toJson(estimateDeployFee)}`);
+    logger.log(
+      `estimateAccountDeployFee:\nestimateDeployFee: ${toJson(
+        estimateDeployFee,
+      )}`,
+    );
 
     const resp = {
       suggestedMaxFee: estimateDeployFee.suggestedMaxFee.toString(10),

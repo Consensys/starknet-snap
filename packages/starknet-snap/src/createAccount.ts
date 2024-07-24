@@ -79,8 +79,14 @@ export async function createAccount(
           privateKey,
           cairoVersion,
         );
-        logger.log(`estimateAccountDeployFee:\nestimateDeployFee: ${toJson(estimateDeployFee)}`);
-        const maxFee = numUtils.toBigInt(estimateDeployFee.suggestedMaxFee.toString(10) ?? '0');
+        logger.log(
+          `estimateAccountDeployFee:\nestimateDeployFee: ${toJson(
+            estimateDeployFee,
+          )}`,
+        );
+        const maxFee = numUtils.toBigInt(
+          estimateDeployFee.suggestedMaxFee.toString(10) ?? '0',
+        );
         const dialogComponents = getSendTxnText(
           state,
           contractAddress,
@@ -95,7 +101,10 @@ export async function createAccount(
           method: 'snap_dialog',
           params: {
             type: DialogType.Confirmation,
-            content: panel([heading('Do you want to sign this deploy transaction ?'), ...dialogComponents]),
+            content: panel([
+              heading('Do you want to sign this deploy transaction ?'),
+              ...dialogComponents,
+            ]),
           },
         });
         if (!response) {
@@ -152,7 +161,12 @@ export async function createAccount(
       logger.log(`createAccount:\ndeployResp: ${toJson(deployResp)}`);
 
       if (waitMode) {
-        await waitForTransaction(network, deployResp.contract_address, privateKey, deployResp.transaction_hash);
+        await waitForTransaction(
+          network,
+          deployResp.contract_address,
+          privateKey,
+          deployResp.transaction_hash,
+        );
       }
 
       return {

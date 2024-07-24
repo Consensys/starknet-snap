@@ -25,7 +25,10 @@ import {
 } from '../constants.test';
 import { getAddressKeyDeriver } from '../../src/utils/keyPair';
 import { Mutex } from 'async-mutex';
-import { ApiParams, SendTransactionRequestParams } from '../../src/types/snapApi';
+import {
+  ApiParams,
+  SendTransactionRequestParams,
+} from '../../src/types/snapApi';
 import { GetTransactionReceiptResponse } from 'starknet';
 
 chai.use(sinonChai);
@@ -49,9 +52,11 @@ describe('Test function: sendTransaction', function () {
   };
 
   const requestObject: SendTransactionRequestParams = {
-    contractAddress: '0x07394cbe418daa16e42b87ba67372d4ab4a5df0b05c6e554d158458ce245bc10',
+    contractAddress:
+      '0x07394cbe418daa16e42b87ba67372d4ab4a5df0b05c6e554d158458ce245bc10',
     contractFuncName: 'transfer',
-    contractCallData: '0x0256d8f49882cc9366037415f48fa9fd2b5b7344ded7573ebfcef7c90e3e6b75,100000000000000000000,0',
+    contractCallData:
+      '0x0256d8f49882cc9366037415f48fa9fd2b5b7344ded7573ebfcef7c90e3e6b75,100000000000000000000,0',
     senderAddress: account1.address,
     chainId: STARKNET_SEPOLIA_TESTNET_NETWORK.chainId,
   };
@@ -67,7 +72,10 @@ describe('Test function: sendTransaction', function () {
   });
 
   describe('when request param validation fail', function () {
-    let invalidRequest: SendTransactionRequestParams = Object.assign({}, requestObject);
+    let invalidRequest: SendTransactionRequestParams = Object.assign(
+      {},
+      requestObject,
+    );
 
     afterEach(function () {
       invalidRequest = Object.assign({}, requestObject);
@@ -100,7 +108,9 @@ describe('Test function: sendTransaction', function () {
         result = err;
       } finally {
         expect(result).to.be.an('Error');
-        expect(result.message).to.be.include('The given contract address is invalid');
+        expect(result.message).to.be.include(
+          'The given contract address is invalid',
+        );
       }
     });
 
@@ -130,7 +140,9 @@ describe('Test function: sendTransaction', function () {
         result = err;
       } finally {
         expect(result).to.be.an('Error');
-        expect(result.message).to.be.include('The given sender address is invalid');
+        expect(result.message).to.be.include(
+          'The given sender address is invalid',
+        );
       }
     });
 
@@ -175,14 +187,19 @@ describe('Test function: sendTransaction', function () {
 
     describe('when require upgrade checking fail', function () {
       it('should throw error', async function () {
-        const isUpgradeRequiredStub = sandbox.stub(utils, 'isUpgradeRequired').throws('network error');
+        const isUpgradeRequiredStub = sandbox
+          .stub(utils, 'isUpgradeRequired')
+          .throws('network error');
         let result;
         try {
           result = await sendTransaction(apiParams);
         } catch (err) {
           result = err;
         } finally {
-          expect(isUpgradeRequiredStub).to.have.been.calledOnceWith(STARKNET_SEPOLIA_TESTNET_NETWORK, account1.address);
+          expect(isUpgradeRequiredStub).to.have.been.calledOnceWith(
+            STARKNET_SEPOLIA_TESTNET_NETWORK,
+            account1.address,
+          );
           expect(result).to.be.an('Error');
         }
       });
@@ -191,7 +208,9 @@ describe('Test function: sendTransaction', function () {
     describe('when account require upgrade', function () {
       let isUpgradeRequiredStub: sinon.SinonStub;
       beforeEach(async function () {
-        isUpgradeRequiredStub = sandbox.stub(utils, 'isUpgradeRequired').resolves(true);
+        isUpgradeRequiredStub = sandbox
+          .stub(utils, 'isUpgradeRequired')
+          .resolves(true);
       });
 
       it('should throw error if upgrade required', async function () {
@@ -201,7 +220,10 @@ describe('Test function: sendTransaction', function () {
         } catch (err) {
           result = err;
         } finally {
-          expect(isUpgradeRequiredStub).to.have.been.calledOnceWith(STARKNET_SEPOLIA_TESTNET_NETWORK, account1.address);
+          expect(isUpgradeRequiredStub).to.have.been.calledOnceWith(
+            STARKNET_SEPOLIA_TESTNET_NETWORK,
+            account1.address,
+          );
           expect(result).to.be.an('Error');
         }
       });
@@ -225,10 +247,14 @@ describe('Test function: sendTransaction', function () {
           includeDeploy: true,
         });
         executeTxnResp = sendTransactionResp;
-        executeTxnStub = sandbox.stub(utils, 'executeTxn').resolves(executeTxnResp);
+        executeTxnStub = sandbox
+          .stub(utils, 'executeTxn')
+          .resolves(executeTxnResp);
         walletStub.rpcStubs.snap_manageState.resolves(state);
         walletStub.rpcStubs.snap_dialog.resolves(true);
-        sandbox.stub(utils, 'waitForTransaction').resolves({} as unknown as GetTransactionReceiptResponse);
+        sandbox
+          .stub(utils, 'waitForTransaction')
+          .resolves({} as unknown as GetTransactionReceiptResponse);
       });
 
       describe('when account is deployed', function () {
@@ -245,7 +271,9 @@ describe('Test function: sendTransaction', function () {
 
         it('should send a transaction for transferring 10 tokens but not update snap state if transaction_hash is missing from response', async function () {
           executeTxnStub.restore();
-          executeTxnStub = sandbox.stub(utils, 'executeTxn').resolves(sendTransactionFailedResp);
+          executeTxnStub = sandbox
+            .stub(utils, 'executeTxn')
+            .resolves(sendTransactionFailedResp);
           const result = await sendTransaction(apiParams);
           expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledOnce;
           expect(walletStub.rpcStubs.snap_manageState).not.to.have.been.called;
@@ -253,7 +281,8 @@ describe('Test function: sendTransaction', function () {
         });
 
         it('should send a transaction with given max fee for transferring 10 tokens correctly', async function () {
-          const apiRequest = apiParams.requestParams as SendTransactionRequestParams;
+          const apiRequest =
+            apiParams.requestParams as SendTransactionRequestParams;
           apiRequest.maxFee = '15135825227039';
           const result = await sendTransaction(apiParams);
           expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledOnce;
@@ -262,7 +291,8 @@ describe('Test function: sendTransaction', function () {
         });
 
         it('should send a transfer transaction for empty call data', async function () {
-          const apiRequest = apiParams.requestParams as SendTransactionRequestParams;
+          const apiRequest =
+            apiParams.requestParams as SendTransactionRequestParams;
           apiRequest.contractCallData = undefined;
           const result = await sendTransaction(apiParams);
           expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledOnce;
@@ -271,7 +301,8 @@ describe('Test function: sendTransaction', function () {
         });
 
         it('should send a transaction for empty call data', async function () {
-          const apiRequest = apiParams.requestParams as SendTransactionRequestParams;
+          const apiRequest =
+            apiParams.requestParams as SendTransactionRequestParams;
           apiRequest.contractCallData = undefined;
           apiRequest.contractFuncName = 'get_signer';
           const result = await sendTransaction(apiParams);
@@ -281,7 +312,8 @@ describe('Test function: sendTransaction', function () {
         });
 
         it('should send a transaction for transferring 10 tokens from an unfound user correctly', async function () {
-          const apiRequest = apiParams.requestParams as SendTransactionRequestParams;
+          const apiRequest =
+            apiParams.requestParams as SendTransactionRequestParams;
           apiRequest.senderAddress = unfoundUserAddress;
           const result = await sendTransaction(apiParams);
           expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledOnce;
@@ -327,14 +359,18 @@ describe('Test function: sendTransaction', function () {
             content: {
               type: 'panel',
               children: [
-                { type: 'heading', value: 'Do you want to sign this transaction ?' },
+                {
+                  type: 'heading',
+                  value: 'Do you want to sign this transaction ?',
+                },
                 {
                   type: 'text',
                   value: `**Signer Address:**`,
                 },
                 {
                   type: 'copyable',
-                  value: '0x04882a372da3dfe1c53170ad75893832469bf87b62b13e84662565c4a88f25cd',
+                  value:
+                    '0x04882a372da3dfe1c53170ad75893832469bf87b62b13e84662565c4a88f25cd',
                 },
                 {
                   type: 'text',
@@ -342,7 +378,8 @@ describe('Test function: sendTransaction', function () {
                 },
                 {
                   type: 'copyable',
-                  value: '0x04882a372da3dfe1c53170ad75893832469bf87b62b13e84662565c4a88f25cd',
+                  value:
+                    '0x04882a372da3dfe1c53170ad75893832469bf87b62b13e84662565c4a88f25cd',
                 },
                 {
                   type: 'text',
@@ -372,7 +409,9 @@ describe('Test function: sendTransaction', function () {
             },
           };
           expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledOnce;
-          expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledWith(expectedDialogParams);
+          expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledWith(
+            expectedDialogParams,
+          );
         });
       });
 
@@ -388,11 +427,14 @@ describe('Test function: sendTransaction', function () {
           sandbox.stub(utils, 'getBalance').callsFake(async () => {
             return getBalanceResp[0];
           });
-          sandbox.stub(utils, 'estimateAccountDeployFee').callsFake(async () => {
-            return estimateDeployFeeResp;
-          });
+          sandbox
+            .stub(utils, 'estimateAccountDeployFee')
+            .callsFake(async () => {
+              return estimateDeployFeeResp;
+            });
           const requestObject: SendTransactionRequestParams = {
-            contractAddress: '0x07394cbe418daa16e42b87ba67372d4ab4a5df0b05c6e554d158458ce245bc10',
+            contractAddress:
+              '0x07394cbe418daa16e42b87ba67372d4ab4a5df0b05c6e554d158458ce245bc10',
             contractFuncName: 'transfer',
             contractCallData:
               '0x0256d8f49882cc9366037415f48fa9fd2b5b7344ded7573ebfcef7c90e3e6b75,100000000000000000000,0',

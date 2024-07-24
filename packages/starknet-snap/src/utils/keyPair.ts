@@ -33,7 +33,9 @@ export function grindKey(keySeed: string, keyValueLimit = ec.ec.n): string {
     '1 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000',
     16,
   );
-  const maxAllowedVal = sha256EcMaxDigest.sub(sha256EcMaxDigest.mod(keyValueLimit));
+  const maxAllowedVal = sha256EcMaxDigest.sub(
+    sha256EcMaxDigest.mod(keyValueLimit),
+  );
 
   // Make sure the produced key is derived by the Stark EC order,
   // and falls within the range [0, maxAllowedVal).
@@ -63,7 +65,10 @@ function hashKeyWithIndex(key: string, index: number) {
  * @param keyDeriver
  * @param addressIndex
  */
-export async function getAddressKey(keyDeriver: BIP44AddressKeyDeriver, addressIndex = 0) {
+export async function getAddressKey(
+  keyDeriver: BIP44AddressKeyDeriver,
+  addressIndex = 0,
+) {
   const { privateKey } = await keyDeriver(addressIndex);
   const addressKey = grindKey(privateKey as unknown as string);
   return {

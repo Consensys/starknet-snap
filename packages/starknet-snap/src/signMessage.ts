@@ -3,7 +3,11 @@ import { heading, panel, DialogType } from '@metamask/snaps-sdk';
 import type { ApiParams, SignMessageRequestParams } from './types/snapApi';
 import { logger } from './utils/logger';
 import { toJson } from './utils/serializer';
-import { getNetworkFromChainId, addDialogTxt, showAccountRequireUpgradeOrDeployModal } from './utils/snapUtils';
+import {
+  getNetworkFromChainId,
+  addDialogTxt,
+  showAccountRequireUpgradeOrDeployModal,
+} from './utils/snapUtils';
 import {
   signMessage as signMessageUtil,
   getKeysFromAddress,
@@ -23,7 +27,11 @@ export async function signMessage(params: ApiParams) {
     const { typedDataMessage } = requestParamsObj;
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
 
-    logger.log(`signMessage:\nsignerAddress: ${signerAddress}\ntypedDataMessage: ${toJson(typedDataMessage)}`);
+    logger.log(
+      `signMessage:\nsignerAddress: ${signerAddress}\ntypedDataMessage: ${toJson(
+        typedDataMessage,
+      )}`,
+    );
 
     try {
       validateAndParseAddress(signerAddress);
@@ -31,18 +39,22 @@ export async function signMessage(params: ApiParams) {
       throw new Error(`The given signer address is invalid: ${signerAddress}`);
     }
 
-    const { privateKey: signerPrivateKey, publicKey } = await getKeysFromAddress(
-      keyDeriver,
-      network,
-      state,
-      signerAddress,
-    );
+    const { privateKey: signerPrivateKey, publicKey } =
+      await getKeysFromAddress(keyDeriver, network, state, signerAddress);
     if (!signerAddress) {
-      throw new Error(`The given signer address need to be non-empty string, got: ${toJson(signerAddress)}`);
+      throw new Error(
+        `The given signer address need to be non-empty string, got: ${toJson(
+          signerAddress,
+        )}`,
+      );
     }
 
     try {
-      await validateAccountRequireUpgradeOrDeploy(network, signerAddress, publicKey);
+      await validateAccountRequireUpgradeOrDeploy(
+        network,
+        signerAddress,
+        publicKey,
+      );
     } catch (validateError) {
       await showAccountRequireUpgradeOrDeployModal(wallet, validateError);
       throw validateError;
@@ -57,7 +69,10 @@ export async function signMessage(params: ApiParams) {
         method: 'snap_dialog',
         params: {
           type: DialogType.Confirmation,
-          content: panel([heading('Do you want to sign this message?'), ...components]),
+          content: panel([
+            heading('Do you want to sign this message?'),
+            ...components,
+          ]),
         },
       });
 
@@ -66,9 +81,15 @@ export async function signMessage(params: ApiParams) {
       }
     }
 
-    const typedDataSignature = signMessageUtil(signerPrivateKey, typedDataMessage, signerAddress);
+    const typedDataSignature = signMessageUtil(
+      signerPrivateKey,
+      typedDataMessage,
+      signerAddress,
+    );
 
-    logger.log(`signMessage:\ntypedDataSignature: ${toJson(typedDataSignature)}`);
+    logger.log(
+      `signMessage:\ntypedDataSignature: ${toJson(typedDataSignature)}`,
+    );
 
     return typedDataSignature;
   } catch (error) {

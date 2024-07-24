@@ -1,11 +1,8 @@
-// https://prettier.io/docs/en/options.html
+// All of these are defaults except singleQuote, but we specify them
+// for explicitness
 module.exports = {
+  quoteProps: 'as-needed',
   singleQuote: true,
-  printWidth: 120,
   tabWidth: 2,
-  useTabs: false,
-  semi: true,
   trailingComma: 'all',
-  bracketSpacing: true,
-  arrowParens: 'always',
 };

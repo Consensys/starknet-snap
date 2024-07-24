@@ -25,12 +25,18 @@ export async function addErc20Token(params: ApiParams) {
 
     if (!tokenAddress || !tokenName || !tokenSymbol) {
       throw new Error(
-        `The given token address, name, and symbol need to be non-empty string, got: ${toJson(requestParamsObj)}`,
+        `The given token address, name, and symbol need to be non-empty string, got: ${toJson(
+          requestParamsObj,
+        )}`,
       );
     }
 
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
-    const tokenDecimals = getValidNumber(requestParamsObj.tokenDecimals, DEFAULT_DECIMAL_PLACES, 0);
+    const tokenDecimals = getValidNumber(
+      requestParamsObj.tokenDecimals,
+      DEFAULT_DECIMAL_PLACES,
+      0,
+    );
 
     validateAddErc20TokenParams(requestParamsObj, network);
 
@@ -40,7 +46,13 @@ export async function addErc20Token(params: ApiParams) {
         type: DialogType.Confirmation,
         content: panel([
           heading('Do you want to add this token?'),
-          ...getAddTokenText(tokenAddress, tokenName, tokenSymbol, tokenDecimals, network),
+          ...getAddTokenText(
+            tokenAddress,
+            tokenName,
+            tokenSymbol,
+            tokenDecimals,
+            network,
+          ),
         ]),
       },
     });

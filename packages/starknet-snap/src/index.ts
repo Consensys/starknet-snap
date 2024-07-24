@@ -5,7 +5,14 @@ import type {
   OnUpdateHandler,
   Component,
 } from '@metamask/snaps-sdk';
-import { InternalError, panel, row, divider, text, copyable } from '@metamask/snaps-sdk';
+import {
+  InternalError,
+  panel,
+  row,
+  divider,
+  text,
+  copyable,
+} from '@metamask/snaps-sdk';
 import { Mutex } from 'async-mutex';
 import { ethers } from 'ethers';
 
@@ -52,8 +59,17 @@ import {
 import { getAddressKeyDeriver } from './utils/keyPair';
 import { logger } from './utils/logger';
 import { toJson } from './utils/serializer';
-import { dappUrl, upsertErc20Token, upsertNetwork, removeNetwork } from './utils/snapUtils';
-import { getBalance, getCorrectContractAddress, getKeysFromAddressIndex } from './utils/starknetUtils';
+import {
+  dappUrl,
+  upsertErc20Token,
+  upsertNetwork,
+  removeNetwork,
+} from './utils/snapUtils';
+import {
+  getBalance,
+  getCorrectContractAddress,
+  getKeysFromAddressIndex,
+} from './utils/starknetUtils';
 import { verifySignedMessage } from './verifySignedMessage';
 
 declare const snap;
@@ -103,7 +119,12 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
     if (isDev) {
       await upsertNetwork(STARKNET_INTEGRATION_NETWORK, snap, saveMutex, state);
     } else {
-      await upsertNetwork(STARKNET_SEPOLIA_TESTNET_NETWORK, snap, saveMutex, state);
+      await upsertNetwork(
+        STARKNET_SEPOLIA_TESTNET_NETWORK,
+        snap,
+        saveMutex,
+        state,
+      );
     }
 
     // remove the testnet network (migration)
@@ -257,7 +278,10 @@ export const onInstall: OnInstallHandler = async () => {
 };
 
 export const onUpdate: OnUpdateHandler = async () => {
-  const component = panel([text('Features released with this update:'), text('Cairo contract upgrade support.')]);
+  const component = panel([
+    text('Features released with this update:'),
+    text('Cairo contract upgrade support.'),
+  ]);
 
   await snap.request({
     method: 'snap_dialog',
@@ -284,19 +308,34 @@ export const onHomePage: OnHomePageHandler = async () => {
     // default network is testnet
     let network = STARKNET_SEPOLIA_TESTNET_NETWORK;
 
-    if (state.currentNetwork && state.currentNetwork.chainId !== STARKNET_TESTNET_NETWORK.chainId) {
+    if (
+      state.currentNetwork &&
+      state.currentNetwork.chainId !== STARKNET_TESTNET_NETWORK.chainId
+    ) {
       network = state.currentNetwork;
     }
 
     // we only support 1 address at this moment
     const idx = 0;
     const keyDeriver = await getAddressKeyDeriver(snap);
-    const { publicKey } = await getKeysFromAddressIndex(keyDeriver, network.chainId, state, idx);
+    const { publicKey } = await getKeysFromAddressIndex(
+      keyDeriver,
+      network.chainId,
+      state,
+      idx,
+    );
     const { address } = await getCorrectContractAddress(network, publicKey);
 
-    const ethToken = network.chainId === ETHER_SEPOLIA_TESTNET.chainId ? ETHER_SEPOLIA_TESTNET : ETHER_MAINNET;
-    const balance = (await getBalance(address, ethToken.address, network)) ?? BigInt(0);
-    const displayBalance = ethers.utils.formatUnits(ethers.BigNumber.from(balance), ethToken.decimals);
+    const ethToken =
+      network.chainId === ETHER_SEPOLIA_TESTNET.chainId
+        ? ETHER_SEPOLIA_TESTNET
+        : ETHER_MAINNET;
+    const balance =
+      (await getBalance(address, ethToken.address, network)) ?? BigInt(0);
+    const displayBalance = ethers.utils.formatUnits(
+      ethers.BigNumber.from(balance),
+      ethToken.decimals,
+    );
 
     const panelItems: Component[] = [];
     panelItems.push(text('Address'));
@@ -305,8 +344,12 @@ export const onHomePage: OnHomePageHandler = async () => {
     panelItems.push(row('Balance', text(`${displayBalance} ETH`)));
     panelItems.push(divider());
     panelItems.push(
-      // eslint-disable-next-line no-restricted-globals
-      text(`Visit the [companion dapp for Starknet](${dappUrl(process.env.SNAP_ENV)}) to manage your account.`),
+      text(
+        `Visit the [companion dapp for Starknet](${dappUrl(
+          // eslint-disable-next-line no-restricted-globals
+          process.env.SNAP_ENV,
+        )}) to manage your account.`,
+      ),
     );
 
     return {

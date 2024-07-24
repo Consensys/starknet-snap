@@ -17,7 +17,12 @@ export async function estimateFees(params: ApiParams) {
 
     const { senderAddress } = requestParamsObj;
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
-    const { privateKey: senderPrivateKey } = await getKeysFromAddress(keyDeriver, network, state, senderAddress);
+    const { privateKey: senderPrivateKey } = await getKeysFromAddress(
+      keyDeriver,
+      network,
+      state,
+      senderAddress,
+    );
 
     const fees = await estimateFeeBulk(
       network,
