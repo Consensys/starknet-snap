@@ -20,8 +20,19 @@ const asset = {
 
 export const Default = () => <AmountInputView label="Amount" asset={asset} />;
 
-export const Error = () => <AmountInputView error label="Amount" asset={asset} />;
+export const Error = () => (
+  <AmountInputView error label="Amount" asset={asset} />
+);
 
-export const Disabled = () => <AmountInputView disabled label="Amount" asset={asset} />;
+export const Disabled = () => (
+  <AmountInputView disabled label="Amount" asset={asset} />
+);
 
-export const WithHelperText = () => <AmountInputView error helperText="Helper text" label="Amount" asset={asset} />;
+export const WithHelperText = () => (
+  <AmountInputView
+    error
+    helperText="Helper text"
+    label="Amount"
+    asset={asset}
+  />
+);

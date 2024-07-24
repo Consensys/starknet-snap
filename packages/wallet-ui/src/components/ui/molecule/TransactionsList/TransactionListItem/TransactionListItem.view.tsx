@@ -39,10 +39,16 @@ export const TransactionListItemView = ({ transaction }: Props) => {
   useEffect(() => {
     const fetchData = async () => {
       const foundToken = wallet.erc20TokenBalances.find((token) =>
-        ethers.BigNumber.from(token.address).eq(ethers.BigNumber.from(transaction.contractAddress)),
+        ethers.BigNumber.from(token.address).eq(
+          ethers.BigNumber.from(transaction.contractAddress),
+        ),
       );
       if (foundToken) {
-        const txnValues = getTxnValues(transaction, foundToken.decimals, foundToken.usdPrice);
+        const txnValues = getTxnValues(
+          transaction,
+          foundToken.decimals,
+          foundToken.usdPrice,
+        );
         setTxnValue(getHumanReadableAmount(foundToken, txnValues.txnValue));
         setTxnUsdValue(txnValues.txnUsdValue);
         setCurrencySymbol(foundToken.symbol);
@@ -58,7 +64,11 @@ export const TransactionListItemView = ({ transaction }: Props) => {
   const txnToFromLabel = getTxnToFromLabel(transaction);
   const txnFailureReason = getTxnFailureReason(transaction);
   return (
-    <Wrapper onClick={() => openExplorerTab(transaction.txnHash, 'tx', transaction.chainId)}>
+    <Wrapper
+      onClick={() =>
+        openExplorerTab(transaction.txnHash, 'tx', transaction.chainId)
+      }
+    >
       <Left>
         <LeftIcon>
           <IconStyled transactionname={txnName} icon={getIcon(txnName)} />
@@ -78,7 +88,11 @@ export const TransactionListItemView = ({ transaction }: Props) => {
       <Middle>{txnToFromLabel} </Middle>
       <Right>
         {txnName === 'Send' && (
-          <AssetQuantity currency={currencySymbol} currencyValue={txnValue} USDValue={txnUsdValue} />
+          <AssetQuantity
+            currency={currencySymbol}
+            currencyValue={txnValue}
+            USDValue={txnUsdValue}
+          />
         )}
       </Right>
     </Wrapper>

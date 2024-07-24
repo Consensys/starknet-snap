@@ -15,7 +15,12 @@ declare global {
 }
 
 function isMetaMaskProvider(obj: unknown): obj is MetaMaskProvider {
-  return obj !== null && typeof obj === 'object' && obj.hasOwnProperty('isMetaMask') && obj.hasOwnProperty('request');
+  return (
+    obj !== null &&
+    typeof obj === 'object' &&
+    obj.hasOwnProperty('isMetaMask') &&
+    obj.hasOwnProperty('request')
+  );
 }
 
 function detectMetaMaskProvider(
@@ -26,16 +31,22 @@ function detectMetaMaskProvider(
   return new Promise<MetaMaskProvider | null>((resolve) => {
     const handleEIP6963Provider = (event: CustomEvent) => {
       const { info, provider } = event.detail;
-      if (['io.metamask', 'io.metamask.flask'].includes(info.rdns) && isMetaMaskProvider(provider)) {
+      if (
+        ['io.metamask', 'io.metamask.flask'].includes(info.rdns) &&
+        isMetaMaskProvider(provider)
+      ) {
         resolve(provider);
         handled = true;
       }
     };
 
     if (typeof windowObject.addEventListener === 'function') {
-      windowObject.addEventListener('eip6963:announceProvider', (event: Event) => {
-        handleEIP6963Provider(event as CustomEvent);
-      });
+      windowObject.addEventListener(
+        'eip6963:announceProvider',
+        (event: Event) => {
+          handleEIP6963Provider(event as CustomEvent);
+        },
+      );
     }
 
     setTimeout(() => {

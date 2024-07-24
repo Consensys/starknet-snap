@@ -10,17 +10,38 @@ interface Props {
   starkName?: string;
 }
 
-export const AccountAddressView = ({ address, full, placement, starkName }: Props) => {
+export const AccountAddressView = ({
+  address,
+  full,
+  placement,
+  starkName,
+}: Props) => {
   const handleAddressClick = () => {
     navigator.clipboard.writeText(address);
   };
 
   return (
     <>
-      <PopperTooltip content="Copied!" closeTrigger="click" placement={placement}>
-        <PopperTooltip content="Copy to clipboard" closeTrigger="hover" placement={placement}>
-          <Wrapper iconRight="clone" onClick={handleAddressClick} backgroundTransparent>
-            {full ? starkName ?? address : starkName ? shortenDomain(starkName) : shortenAddress(address)}
+      <PopperTooltip
+        content="Copied!"
+        closeTrigger="click"
+        placement={placement}
+      >
+        <PopperTooltip
+          content="Copy to clipboard"
+          closeTrigger="hover"
+          placement={placement}
+        >
+          <Wrapper
+            iconRight="clone"
+            onClick={handleAddressClick}
+            backgroundTransparent
+          >
+            {full
+              ? starkName ?? address
+              : starkName
+              ? shortenDomain(starkName)
+              : shortenAddress(address)}
           </Wrapper>
         </PopperTooltip>
       </PopperTooltip>

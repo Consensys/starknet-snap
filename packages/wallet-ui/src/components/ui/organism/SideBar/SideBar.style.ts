@@ -50,7 +50,8 @@ export const AddTokenButton = styled(Button).attrs((props) => ({
   justify-content: left;
   padding-left: 20px;
   border-radius: 0px 0px 0px 8px;
-  box-shadow: ${(props) => (props.shadowVisible ? '0px -4px 12px -8px rgba(0, 0, 0, 0.25)' : 'initial')};
+  box-shadow: ${(props) =>
+    props.shadowVisible ? '0px -4px 12px -8px rgba(0, 0, 0, 0.25)' : 'initial'};
   margin-top: auto;
 
   &:hover {

@@ -21,13 +21,26 @@ export function AlertView({ text, variant, ...otherProps }: Props) {
   return (
     <Wrapper isMultiline={isMultiline} variant={variant} {...otherProps}>
       <>
-        {variant === VariantOptions.SUCCESS && <LeftIcon icon={['fas', 'check-circle']} />}
-        {variant === VariantOptions.INFO && <LeftIcon icon={['fas', 'info-circle']} color={theme.palette.info.dark} />}
+        {variant === VariantOptions.SUCCESS && (
+          <LeftIcon icon={['fas', 'check-circle']} />
+        )}
+        {variant === VariantOptions.INFO && (
+          <LeftIcon
+            icon={['fas', 'info-circle']}
+            color={theme.palette.info.dark}
+          />
+        )}
         {variant === VariantOptions.ERROR && (
-          <LeftIcon icon={['fas', 'exclamation-circle']} color={theme.palette.error.main} />
+          <LeftIcon
+            icon={['fas', 'exclamation-circle']}
+            color={theme.palette.error.main}
+          />
         )}
         {variant === VariantOptions.WARNING && (
-          <LeftIcon icon={['fas', 'exclamation-triangle']} color={theme.palette.warning.main} />
+          <LeftIcon
+            icon={['fas', 'exclamation-triangle']}
+            color={theme.palette.warning.main}
+          />
         )}
         <Parag ref={paragraph} color={variant}>
           {text}

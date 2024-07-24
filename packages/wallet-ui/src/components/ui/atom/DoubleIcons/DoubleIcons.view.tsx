@@ -8,11 +8,19 @@ interface Props {
   tokenName?: string;
 }
 
-export const DoubleIconsView = ({ tokenName, icon1, icon2, iconSize = '24px', cornerIconSize = '10px' }: Props) => {
+export const DoubleIconsView = ({
+  tokenName,
+  icon1,
+  icon2,
+  iconSize = '24px',
+  cornerIconSize = '10px',
+}: Props) => {
   return (
     <Wrapper iconBackground={icon1} size={iconSize}>
       {!icon1 && tokenName && (
-        <IconPlaceHolder>{tokenName.charAt(0) + tokenName.charAt(tokenName.length - 1)}</IconPlaceHolder>
+        <IconPlaceHolder>
+          {tokenName.charAt(0) + tokenName.charAt(tokenName.length - 1)}
+        </IconPlaceHolder>
       )}
       <CornerIcon src={icon2} alt={icon2} size={cornerIconSize} />
     </Wrapper>
