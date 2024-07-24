@@ -1,14 +1,13 @@
 module.exports = {
+  extends: ['../../.eslintrc.js'],
+
   parserOptions: {
-    sourceType: 'module',
     tsconfigRootDir: __dirname,
   },
 
-  extends: ['@metamask/eslint-config'],
-
   overrides: [
     {
-      files: ['*.js'],
+      files: ['snap.config.ts'],
       extends: ['@metamask/eslint-config-nodejs'],
     },
     {
@@ -23,13 +22,14 @@ module.exports = {
       },
     },
     {
-      files: ['*.test.ts', '*.test.js'],
+      files: ['*.test.ts'],
       extends: ['@metamask/eslint-config-jest'],
       rules: {
         '@typescript-eslint/no-shadow': ['error', { allow: ['describe', 'expect', 'it'] }],
         '@typescript-eslint/unbound-method': 'off',
       },
     },
+
     {
       files: ['*.ts'],
       rules: {
@@ -37,15 +37,6 @@ module.exports = {
       },
     },
   ],
-  ignorePatterns: [
-    '!.prettierrc.js',
-    '**/!.eslintrc.js',
-    '**/dist*/',
-    '**/*__GENERATED__*',
-    '**/build',
-    '**/public',
-    '**/.cache',
-    '**/test',
-    '**/webpack.*.js',
-  ],
+
+  ignorePatterns: ['!.eslintrc.js', 'dist/', '**/test', '.nyc_output/', 'coverage/'],
 };
