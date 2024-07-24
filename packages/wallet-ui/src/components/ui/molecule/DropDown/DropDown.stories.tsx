@@ -14,7 +14,7 @@ const label = 'Label';
 
 export const Default = () => <DropDownView options={options2} label={label} />;
 
-export const Error = () => (
+export const ErrorView = () => (
   <DropDownView error options={options} label={label} />
 );
 

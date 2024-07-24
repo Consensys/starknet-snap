@@ -10,7 +10,7 @@ export const Default = () => (
   <InputWithLabelView placeholder="Placeholder" label="Label" />
 );
 
-export const Error = () => (
+export const ErrorView = () => (
   <InputWithLabelView error placeholder="Placeholder" label="Label" />
 );
 

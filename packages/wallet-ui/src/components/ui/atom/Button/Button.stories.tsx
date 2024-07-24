@@ -16,7 +16,7 @@ export const Warning = () => (
   <ButtonView variant="warning">Warning Button</ButtonView>
 );
 
-export const Error = () => (
+export const ErrorButton = () => (
   <ButtonView variant="error">Error Button</ButtonView>
 );
 
