@@ -23,7 +23,6 @@ import {
   ETHER_MAINNET,
   ETHER_SEPOLIA_TESTNET,
   PRELOADED_TOKENS,
-  STARKNET_INTEGRATION_NETWORK,
   STARKNET_MAINNET_NETWORK,
   STARKNET_SEPOLIA_TESTNET_NETWORK,
   STARKNET_TESTNET_NETWORK,
@@ -56,7 +55,6 @@ const saveMutex = new Mutex();
 export const onRpcRequest: OnRpcRequestHandler = async ({ origin, request }) => {
   try {
     const requestParams = request?.params as unknown as ApiRequestParams;
-    const isDev = !!requestParams?.isDev;
     const debugLevel = requestParams?.debugLevel;
 
     logger.init(debugLevel);
@@ -94,11 +92,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ origin, request }) => 
 
     // pre-inserted the default networks and tokens
     await upsertNetwork(STARKNET_MAINNET_NETWORK, snap, saveMutex, state);
-    if (isDev) {
-      await upsertNetwork(STARKNET_INTEGRATION_NETWORK, snap, saveMutex, state);
-    } else {
-      await upsertNetwork(STARKNET_SEPOLIA_TESTNET_NETWORK, snap, saveMutex, state);
-    }
+    await upsertNetwork(STARKNET_SEPOLIA_TESTNET_NETWORK, snap, saveMutex, state);
 
     // remove the testnet network (migration)
     await removeNetwork(STARKNET_TESTNET_NETWORK, snap, saveMutex, state);

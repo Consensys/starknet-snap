@@ -30,10 +30,8 @@
     <button class="connect">Connect</button>
     <button class="sendPing">Send Ping</button>
     <br />
-    <label for="targetChainId">Target Chain Id in Hex (optional, default Goerli testnet)</label>
+    <label for="targetChainId">Target Chain Id in Hex (optional, default Sepolia testnet)</label>
     <input type="text" id="targetChainId" name="targetChainId" /><br />
-    <label for="isDev">Use Starknet Integration network for Goerli testnet</label>
-    <input type="checkbox" id="isDev" name="isDev" /><br />
     <label for="debugLevel">Log Level</label>
     <select id="debugLevel">
       <option value="ALL" selected="selected">All</option>
@@ -501,7 +499,6 @@
 
     function getReqFlagsFromCheckbox() {
       return {
-        isDev: document.getElementById('isDev').checked,
         debugLevel: document.getElementById('debugLevel').value,
       };
     }
