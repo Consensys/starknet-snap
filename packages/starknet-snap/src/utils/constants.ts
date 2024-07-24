@@ -38,8 +38,7 @@ export const STARKNET_MAINNET_NETWORK: Network = {
   name: 'Starknet Mainnet',
   chainId: constants.StarknetChainId.SN_MAIN,
   baseUrl: 'https://alpha-mainnet.starknet.io',
-  nodeUrl:
-    'https://starknet-mainnet.infura.io/v3/60c7253fb48147658095fe0460ac9ee9',
+  nodeUrl: '',
   voyagerUrl: 'https://voyager.online',
   accountClassHash: '',
 };
@@ -59,8 +58,7 @@ const SN_SEPOLIA = {
   name: 'Sepolia Testnet',
   baseUrl: 'https://alpha-sepolia.starknet.io',
   chainId: '0x534e5f5345504f4c4941',
-  nodeUrl:
-    'https://starknet-sepolia.infura.io/v3/60c7253fb48147658095fe0460ac9ee9',
+  nodeUrl: '',
   voyagerUrl: 'https://sepolia.voyager.online',
 };
 
