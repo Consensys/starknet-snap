@@ -59,17 +59,11 @@ export type CreateAccountRequestParams = {
   deploy?: boolean;
 } & BaseRequestParams;
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export type GetStoredUserAccountsRequestParams = {} & BaseRequestParams;
+export type GetStoredUserAccountsRequestParams = BaseRequestParams;
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export type GetStoredErc20TokensRequestParams = {} & BaseRequestParams;
+export type GetStoredErc20TokensRequestParams = BaseRequestParams;
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export type GetStoredNetworksRequestParams = {} & Omit<
-  BaseRequestParams,
-  'chainId'
->;
+export type GetStoredNetworksRequestParams = Omit<BaseRequestParams, 'chainId'>;
 
 export type ExtractPrivateKeyRequestParams = {
   userAddress: string;
@@ -80,7 +74,7 @@ export type ExtractPublicKeyRequestParams = {
 } & BaseRequestParams;
 
 export type SignMessageRequestParams = {
-  typedDataMessage: typedData.TypedData;
+  typedDataMessage: typeof typedData.TypedData;
 } & Authorizable &
   SignRequestParams &
   BaseRequestParams;
