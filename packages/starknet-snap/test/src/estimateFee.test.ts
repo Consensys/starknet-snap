@@ -171,7 +171,7 @@ describe('Test function: estimateFee', function () {
           estimateFeeBulkStub = sandbox.stub(utils, 'estimateFeeBulk');
           sandbox
             .stub(utils, 'validateAccountRequireUpgradeOrDeploy')
-            .resolves(null);
+            .resolvesThis();
         });
 
         it('should estimate the fee correctly', async function () {
@@ -192,7 +192,7 @@ describe('Test function: estimateFee', function () {
           estimateFeeStub = sandbox.stub(utils, 'estimateFee');
           sandbox
             .stub(utils, 'validateAccountRequireUpgradeOrDeploy')
-            .resolves(null);
+            .resolvesThis();
           sandbox.stub(utils, 'isAccountDeployed').resolves(false);
         });
 

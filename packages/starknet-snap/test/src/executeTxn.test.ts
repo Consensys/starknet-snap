@@ -141,7 +141,7 @@ describe('Test function: executeTxn', function () {
   });
 
   it('should executeTxn correctly and deploy an account', async function () {
-    sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolves(null);
+    sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolvesThis();
     sandbox.stub(utils, 'isAccountDeployed').resolves(false);
     const createAccountStub = sandbox
       .stub(createAccountUtils, 'createAccount')
@@ -179,7 +179,7 @@ describe('Test function: executeTxn', function () {
   });
 
   it('should executeTxn multiple and deploy an account', async function () {
-    sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolves(null);
+    sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolvesThis();
     sandbox.stub(utils, 'isAccountDeployed').resolves(false);
     const createAccountStub = sandbox
       .stub(createAccountUtils, 'createAccount')
@@ -246,7 +246,7 @@ describe('Test function: executeTxn', function () {
 
   it('should executeTxn and not deploy an account', async function () {
     const createAccountStub = sandbox.stub(createAccountUtils, 'createAccount');
-    sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolves(null);
+    sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolvesThis();
     sandbox.stub(utils, 'isAccountDeployed').resolves(true);
     const stub = sandbox.stub(utils, 'executeTxn').resolves({
       transaction_hash: 'transaction_hash',
@@ -280,7 +280,7 @@ describe('Test function: executeTxn', function () {
 
   it('should executeTxn multiple and not deploy an account', async function () {
     const createAccountStub = sandbox.stub(createAccountUtils, 'createAccount');
-    sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolves(null);
+    sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolvesThis();
     sandbox.stub(utils, 'isAccountDeployed').resolves(true);
     const stub = sandbox.stub(utils, 'executeTxn').resolves({
       transaction_hash: 'transaction_hash',
@@ -339,7 +339,7 @@ describe('Test function: executeTxn', function () {
   });
 
   it('should throw error if executeTxn fail', async function () {
-    sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolves(null);
+    sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolvesThis();
     sandbox.stub(utils, 'isAccountDeployed').resolves(true);
     const stub = sandbox.stub(utils, 'executeTxn').rejects('error');
     const { privateKey } = await utils.getKeysFromAddress(
@@ -372,7 +372,7 @@ describe('Test function: executeTxn', function () {
   });
 
   it('should return false if user rejected to sign the transaction', async function () {
-    sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolves(null);
+    sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolvesThis();
     sandbox.stub(utils, 'isAccountDeployed').resolves(true);
     walletStub.rpcStubs.snap_dialog.resolves(false);
     const stub = sandbox.stub(utils, 'executeTxn').resolves({

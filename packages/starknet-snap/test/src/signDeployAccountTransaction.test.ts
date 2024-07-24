@@ -92,7 +92,7 @@ describe('Test function: signDeployAccountTransaction', function () {
   });
 
   it('should sign a transaction from an user account correctly', async function () {
-    sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolves(null);
+    sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolvesThis();
     sandbox.stub(utils, 'signDeployAccountTransaction').resolves(signature3);
     const result = await signDeployAccountTransaction(apiParams);
     expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledOnce;
@@ -155,7 +155,7 @@ describe('Test function: signDeployAccountTransaction', function () {
   });
 
   it('should throw error if signDeployAccountTransaction fail', async function () {
-    sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolves(null);
+    sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolvesThis();
     sandbox.stub(utils, 'signDeployAccountTransaction').throws(new Error());
     let result;
     try {
@@ -169,7 +169,7 @@ describe('Test function: signDeployAccountTransaction', function () {
   });
 
   it('should return false if user deny to sign the transaction', async function () {
-    sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolves(null);
+    sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolvesThis();
     const stub = sandbox.stub(utils, 'signDeployAccountTransaction');
     walletStub.rpcStubs.snap_dialog.resolves(false);
 
@@ -180,7 +180,7 @@ describe('Test function: signDeployAccountTransaction', function () {
   });
 
   it('should skip dialog if enableAuthorize is false', async function () {
-    sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolves(null);
+    sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolvesThis();
     sandbox.stub(utils, 'signDeployAccountTransaction').resolves(signature3);
     const paramsObject =
       apiParams.requestParams as SignDeployAccountTransactionRequestParams;
@@ -192,7 +192,7 @@ describe('Test function: signDeployAccountTransaction', function () {
   });
 
   it('should skip dialog if enableAuthorize is omit', async function () {
-    sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolves(null);
+    sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolvesThis();
     sandbox.stub(utils, 'signDeployAccountTransaction').resolves(signature3);
     const paramsObject =
       apiParams.requestParams as SignDeployAccountTransactionRequestParams;

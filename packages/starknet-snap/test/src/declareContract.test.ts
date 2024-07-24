@@ -135,7 +135,7 @@ describe('Test function: declareContract', function () {
   });
 
   it('should declareContract correctly', async function () {
-    sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolves(null);
+    sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolvesThis();
     const declareContractStub = sandbox
       .stub(utils, 'declareContract')
       .resolves({
@@ -165,7 +165,7 @@ describe('Test function: declareContract', function () {
   });
 
   it('should throw error if declareContract fail', async function () {
-    sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolves(null);
+    sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolvesThis();
     const declareContractStub = sandbox
       .stub(utils, 'declareContract')
       .rejects('error');
@@ -194,7 +194,7 @@ describe('Test function: declareContract', function () {
   });
 
   it('should return false if user rejected to sign the transaction', async function () {
-    sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolves(null);
+    sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolvesThis();
     walletStub.rpcStubs.snap_dialog.resolves(false);
     const declareContractStub = sandbox
       .stub(utils, 'declareContract')

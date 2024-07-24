@@ -22,6 +22,7 @@ import {
   getAccContractAddressAndCallData,
   deployAccount,
   waitForTransaction,
+  estimateAccountDeployFee,
 } from './utils/starknetUtils';
 
 /**

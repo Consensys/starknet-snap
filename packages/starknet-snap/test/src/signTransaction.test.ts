@@ -99,7 +99,7 @@ describe('Test function: signTransaction', function () {
   });
 
   it('should sign a transaction from an user account correctly', async function () {
-    sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolves(null);
+    sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolvesThis();
     const result = await signTransaction(apiParams);
     expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledOnce;
     expect(result).to.be.eql(signature3);
@@ -161,7 +161,7 @@ describe('Test function: signTransaction', function () {
   });
 
   it('should throw error if signTransaction fail', async function () {
-    sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolves(null);
+    sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolvesThis();
     sandbox.stub(utils, 'signTransactions').throws(new Error());
     let result;
     try {
@@ -175,7 +175,7 @@ describe('Test function: signTransaction', function () {
   });
 
   it('should return false if user deny to sign the transaction', async function () {
-    sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolves(null);
+    sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolvesThis();
     const stub = sandbox.stub(utils, 'signTransactions');
     walletStub.rpcStubs.snap_dialog.resolves(false);
 
@@ -186,7 +186,7 @@ describe('Test function: signTransaction', function () {
   });
 
   it('should skip dialog if enableAuthorize is false', async function () {
-    sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolves(null);
+    sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolvesThis();
     const paramsObject =
       apiParams.requestParams as SignTransactionRequestParams;
     paramsObject.enableAuthorize = false;
@@ -197,7 +197,7 @@ describe('Test function: signTransaction', function () {
   });
 
   it('should skip dialog if enableAuthorize is omit', async function () {
-    sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolves(null);
+    sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolvesThis();
     const paramsObject =
       apiParams.requestParams as SignTransactionRequestParams;
     paramsObject.enableAuthorize = undefined;

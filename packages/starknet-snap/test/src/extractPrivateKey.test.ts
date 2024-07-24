@@ -149,7 +149,7 @@ describe('Test function: extractPrivateKey', function () {
       beforeEach(async function () {
         sandbox
           .stub(utils, 'validateAccountRequireUpgradeOrDeploy')
-          .resolves(null);
+          .resolvesThis();
       });
 
       it('should get the private key of the specified user account correctly', async function () {

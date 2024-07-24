@@ -8,7 +8,6 @@ import type {
   RawCalldata,
   CallContractResponse,
   ProviderOptions,
-  GetTransactionResponse,
   Invocations,
   DeclareContractPayload,
   DeclareContractResponse,
@@ -42,7 +41,10 @@ import {
 import type { RpcV4GetTransactionReceiptResponse } from '../types/snapApi';
 import type { Network, SnapState, Transaction } from '../types/snapState';
 import { TransactionType } from '../types/snapState';
-import type { TransactionStatuses } from '../types/starknet';
+import type {
+  TransactionResponse,
+  TransactionStatuses,
+} from '../types/starknet';
 import type {
   VoyagerTransactions,
   VoyagerTransactionItem,
@@ -512,7 +514,7 @@ export const getMassagedTransactions = async (
     txns.map(async (txn) => {
       logger.log(`getMassagedTransactions: txn:\n${toJson(txn)}`);
 
-      let txnResp: GetTransactionResponse | undefined;
+      let txnResp: TransactionResponse | undefined;
       let statusResp: TransactionStatuses | undefined;
       try {
         txnResp = await getTransaction(txn.hash, network);
@@ -533,41 +535,38 @@ export const getMassagedTransactions = async (
         );
       }
 
+      const txCallData = txnResp?.calldata;
+      const txSenderAddress =
+        txnResp?.sender_address ??
+        txnResp?.contract_address ??
+        txn.contractAddress ??
+        '';
+      const txContractAddress =
+        txCallData?.[1] ??
+        txnResp?.contract_address ??
+        txn.contractAddress ??
+        '';
+      const txFuncSelector = numUtils.toBigInt(txCallData?.[2] ?? '');
+      let txContractFuncName = '';
+      switch (txFuncSelector) {
+        case bigIntTransferSelectorHex:
+          txContractFuncName = 'transfer';
+          break;
+        case bigIntUpgradeSelectorHex:
+          txContractFuncName = 'upgrade';
+          break;
+        default:
+          txContractFuncName = '';
+      }
       /* eslint-disable */
       const massagedTxn: Transaction = {
         txnHash: txnResp?.transaction_hash ?? txn.hash,
         txnType: txn.type?.toLowerCase(),
         chainId: network.chainId,
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        senderAddress:
-          txnResp.sender_address ??
-          txnResp.contract_address ??
-          txn.contract_address ??
-          '',
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        contractAddress:
-          txnResp.calldata?.[1] ??
-          txnResp.contract_address ??
-          txn.contract_address ??
-          '',
-
-        contractFuncName:
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore
-          numUtils.toBigInt(txnResp.calldata?.[2] ?? '') ===
-          bigIntTransferSelectorHex
-            ? 'transfer'
-            : // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
-            numUtils.toBigInt(txnResp.calldata?.[2] ?? '') ===
-              bigIntUpgradeSelectorHex
-            ? 'upgrade'
-            : '',
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        contractCallData: txnResp.calldata ?? [],
+        senderAddress: txSenderAddress,
+        contractAddress: txContractAddress,
+        contractFuncName: txContractFuncName,
+        contractCallData: txCallData ?? [],
         timestamp: txn.timestamp,
         status: '', // DEPRECATION
         finalityStatus: statusResp?.finalityStatus ?? '',
@@ -991,7 +990,7 @@ export async function estimateAccountUpgradeFee(
       txnInvocation,
       CAIRO_VERSION_LEGACY,
     );
-    return num.toBigInt(estFeeResp.suggestedMaxFee.toString(10) ?? '0');
+    return numUtils.toBigInt(estFeeResp.suggestedMaxFee.toString(10) ?? '0');
   }
   return maxFee;
 }

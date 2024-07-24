@@ -347,7 +347,7 @@ export const onHomePage: OnHomePageHandler = async () => {
       text(
         `Visit the [companion dapp for Starknet](${dappUrl(
           // eslint-disable-next-line no-restricted-globals
-          process.env.SNAP_ENV,
+          process.env.SNAP_ENV as unknown as string,
         )}) to manage your account.`,
       ),
     );

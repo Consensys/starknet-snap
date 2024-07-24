@@ -108,7 +108,7 @@ describe('Test function: signMessage', function () {
     it('skip dialog if enableAuthorize is false or omit', async function () {
       sandbox
         .stub(utils, 'validateAccountRequireUpgradeOrDeploy')
-        .resolves(null);
+        .resolvesThis();
       const paramsObject = apiParams.requestParams as SignMessageRequestParams;
 
       paramsObject.enableAuthorize = false;
@@ -215,7 +215,7 @@ describe('Test function: signMessage', function () {
         };
         sandbox
           .stub(utils, 'validateAccountRequireUpgradeOrDeploy')
-          .resolves(null);
+          .resolvesThis();
       });
 
       it('should sign a message from an user account correctly', async function () {

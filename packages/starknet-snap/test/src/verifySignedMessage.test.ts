@@ -149,7 +149,7 @@ describe('Test function: verifySignedMessage', function () {
       beforeEach(async function () {
         sandbox
           .stub(utils, 'validateAccountRequireUpgradeOrDeploy')
-          .resolves(null);
+          .resolvesThis();
       });
 
       it('should verify a signed message from an user account correctly', async function () {
