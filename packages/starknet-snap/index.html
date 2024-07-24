@@ -4,6 +4,123 @@
     <meta charset="utf-8" />
     <title>Hello, Snaps!</title>
     <link rel="icon" type="image/svg" href="./images/icon.svg" />
+    <style>
+      /* Basic Reset */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Arial', sans-serif;
+      }
+
+      body {
+        background-color: #f4f4f4;
+        color: #333;
+        padding: 20px;
+      }
+
+      h1 {
+        text-align: center;
+        color: #4caf50;
+        margin-bottom: 20px;
+      }
+
+      details {
+        background-color: #fff;
+        border: 1px solid #ccc;
+        padding: 10px;
+        margin-bottom: 20px;
+        border-radius: 4px;
+      }
+
+      details summary {
+        font-weight: bold;
+        cursor: pointer;
+      }
+
+      ul,
+      ul ul {
+        list-style: disc;
+        margin-left: 20px;
+      }
+
+      ul ul {
+        list-style: circle;
+      }
+
+      code {
+        background-color: #f4f4f4;
+        padding: 2px 4px;
+        border-radius: 3px;
+      }
+
+      button {
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        margin: 5px 2px;
+        cursor: pointer;
+        border-radius: 5px;
+        transition: background-color 0.3s ease;
+      }
+
+      button:hover {
+        background-color: #45a049;
+      }
+
+      input[type='text'],
+      input[type='checkbox'],
+      select {
+        padding: 10px;
+        margin: 5px 0 15px 0;
+        display: inline-block;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+      }
+
+      input[type='submit'] {
+        background-color: #4caf50;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+      }
+
+      input[type='submit']:hover {
+        background-color: #45a049;
+      }
+
+      form {
+        background-color: #fff;
+        padding: 20px;
+        margin-bottom: 20px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+
+      form fieldset {
+        border: none;
+      }
+
+      form legend {
+        font-size: 1.2em;
+        margin-bottom: 10px;
+      }
+
+      label {
+        font-weight: bold;
+        display: block;
+        margin-bottom: 5px;
+      }
+    </style>
   </head>
 
   <body>
@@ -365,7 +482,6 @@
         <input type="submit" id="upgrade" value="Upgrade" />
       </fieldset>
     </form>
-    
   </body>
 
   <script type="module">
@@ -769,7 +885,7 @@
       e.preventDefault(); // to prevent default form behavior
 
       const networkChainId = document.getElementById('switchNetwork_ChainId').value;
-      
+
       await callSnap('starkNet_switchNetwork', {
         chainId: networkChainId,
       });
@@ -892,7 +1008,7 @@
       const contractAddress = document.getElementById('upgrade_contractAddress').value;
 
       await callSnap('starkNet_upgradeAccContract', {
-        contractAddress
+        contractAddress,
       });
     }
 
@@ -900,7 +1016,7 @@
       try {
         const chainId = document.getElementById('targetChainId').value;
         //0x534e5f474f45524c42
-        console.log(params)
+        console.log(params);
         const response = await ethereum.request({
           method: 'wallet_invokeSnap',
           params: {
@@ -921,8 +1037,5 @@
         alert(`${method} problem happened: ${err.message || err}`);
       }
     }
-
   </script>
-
-  
 </html>
