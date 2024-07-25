@@ -45,8 +45,7 @@ export async function estimateFees(params: ApiParamsWithKeyDeriver) {
       suggestedMaxFee: fee.suggestedMaxFee.toString(10) || '0',
     }));
   } catch (error) {
-    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-    logger.error(`Problem found: ${error}`);
+    logger.error(`Problem found:`, error);
     throw error;
   }
 }

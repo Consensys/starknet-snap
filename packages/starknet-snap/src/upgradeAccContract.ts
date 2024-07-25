@@ -165,8 +165,7 @@ export async function upgradeAccContract(params: ApiParamsWithKeyDeriver) {
 
     return txnResp;
   } catch (error) {
-    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-    logger.error(`Problem found: ${error}`);
+    logger.error(`Problem found:`, error);
     throw error;
   }
 }

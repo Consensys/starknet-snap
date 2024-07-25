@@ -56,8 +56,7 @@ export async function getValue(params: ApiParams) {
 
     return resp;
   } catch (error) {
-    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-    logger.error(`Problem found: ${error}`);
+    logger.error(`Problem found:`, error);
     throw error;
   }
 }

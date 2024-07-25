@@ -28,8 +28,7 @@ export async function getStoredUserAccounts(params: ApiParams) {
 
     return userAccounts;
   } catch (error) {
-    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-    logger.error(`Problem found: ${error}`);
+    logger.error(`Problem found:`, error);
     throw error;
   }
 }

@@ -73,8 +73,7 @@ export async function addErc20Token(params: ApiParams) {
     logger.log(`addErc20Token:\nerc20Token: ${toJson(erc20Token)}`);
     return erc20Token;
   } catch (error) {
-    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-    logger.error(`Problem found: ${error}`);
+    logger.error(`Problem found:`, error);
     throw error;
   }
 }
