@@ -172,20 +172,28 @@ describe('Test function: estimateFee', function () {
 
       describe('when account is deployed', function () {
         beforeEach(async function () {
-          estimateFeeBulkStub = sandbox.stub(utils, 'estimateFeeBulk').resolves([estimateFeeResp]);
-          sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolvesThis();
+          estimateFeeBulkStub = sandbox
+            .stub(utils, 'estimateFeeBulk')
+            .resolves([estimateFeeResp]);
+          sandbox
+            .stub(utils, 'validateAccountRequireUpgradeOrDeploy')
+            .resolvesThis();
         });
 
         it('should estimate the fee correctly', async function () {
           const result = await estimateFee(apiParams);
-          expect(result.suggestedMaxFee).to.be.eq(estimateFeeResp.suggestedMaxFee.toString(10));
+          expect(result.suggestedMaxFee).to.be.eq(
+            estimateFeeResp.suggestedMaxFee.toString(10),
+          );
           expect(estimateFeeBulkStub).callCount(1);
         });
       });
 
       describe('when account is not deployed', function () {
         beforeEach(async function () {
-          sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolvesThis();
+          sandbox
+            .stub(utils, 'validateAccountRequireUpgradeOrDeploy')
+            .resolvesThis();
           sandbox.stub(utils, 'isAccountDeployed').resolves(false);
         });
 

@@ -192,7 +192,12 @@ export const getAccountNonce = async (
   privateKey: string | Uint8Array,
   cairoVersion?: CairoVersion,
 ): Promise<BigNumberish> => {
-  const nonceString = await getAccountInstance(network, senderAddress, privateKey, cairoVersion).getNonce('latest');
+  const nonceString = await getAccountInstance(
+    network,
+    senderAddress,
+    privateKey,
+    cairoVersion,
+  ).getNonce('latest');
   return parseInt(nonceString.toLowerCase(), 16);
 };
 
@@ -204,11 +209,16 @@ export const estimateFee = async (
   cairoVersion?: CairoVersion,
   invocationsDetails?: UniversalDetails,
 ): Promise<EstimateFee> => {
-  let nonce = invocationsDetails && invocationsDetails.nonce;
+  let nonce = invocationsDetails?.nonce;
   if (!nonce) {
     nonce = await getAccountNonce(network, senderAddress, privateKey);
   }
-  return await getAccountInstance(network, senderAddress, privateKey, cairoVersion).estimateInvokeFee(txnInvocation, {
+  return await getAccountInstance(
+    network,
+    senderAddress,
+    privateKey,
+    cairoVersion,
+  ).estimateInvokeFee(txnInvocation, {
     ...invocationsDetails,
     nonce,
     skipValidate: false,
@@ -224,11 +234,16 @@ export const estimateFeeBulk = async (
   invocationsDetails?: UniversalDetails,
   cairoVersion?: CairoVersion,
 ): Promise<EstimateFee[]> => {
-  let nonce = invocationsDetails && invocationsDetails.nonce;
+  let nonce = invocationsDetails?.nonce;
   if (!nonce) {
     nonce = await getAccountNonce(network, senderAddress, privateKey);
   }
-  return await getAccountInstance(network, senderAddress, privateKey, cairoVersion).estimateFeeBulk(txnInvocation, {
+  return await getAccountInstance(
+    network,
+    senderAddress,
+    privateKey,
+    cairoVersion,
+  ).estimateFeeBulk(txnInvocation, {
     ...invocationsDetails,
     nonce,
     skipValidate: false,

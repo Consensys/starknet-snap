@@ -107,9 +107,22 @@ export async function estimateFee(params: ApiParamsWithKeyDeriver) {
       ];
     }
 
-    const estimateBulkFeeResp = await estimateFeeBulk(network, senderAddress, senderPrivateKey, bulkTransactions);
-    logger.log(`estimateFee:\nestimateFeeBulk estimateBulkFeeResp: ${toJson(estimateBulkFeeResp)}`);
+    const estimateBulkFeeResp = await estimateFeeBulk(
+      network,
+      senderAddress,
+      senderPrivateKey,
+      bulkTransactions,
+    );
+    logger.log(
+      `estimateFee:\nestimateFeeBulk estimateBulkFeeResp: ${toJson(
+        estimateBulkFeeResp,
+      )}`,
+    );
     const estimateFeeResp = addFeesFromAllTransactions(estimateBulkFeeResp);
+
+    if (!estimateFeeResp.suggestedMaxFee || !estimateFeeResp.overall_fee) {
+      throw new Error(`Bulk Fee estimation failed`);
+    }
 
     logger.log(`estimateFee:\nestimateFeeResp: ${toJson(estimateFeeResp)}`);
 
