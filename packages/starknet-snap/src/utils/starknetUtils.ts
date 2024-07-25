@@ -95,12 +95,9 @@ export const callContract = async (
   contractAddress: string,
   contractFuncName: string,
   contractCallData: RawCalldata = [],
-  blockIdentifier?: BlockIdentifier,
+  blockIdentifier: BlockIdentifier = 'latest',
 ): Promise<CallContractResponse> => {
   const provider = getProvider(network);
-  if (!blockIdentifier) {
-    blockIdentifier = 'latest';
-  }
   return provider.callContract(
     {
       contractAddress,
