@@ -43,7 +43,11 @@ import { signDeployAccountTransaction } from './signDeployAccountTransaction';
 import { signMessage } from './signMessage';
 import { signTransaction } from './signTransaction';
 import { switchNetwork } from './switchNetwork';
-import type { ApiParams, ApiRequestParams } from './types/snapApi';
+import type {
+  ApiParams,
+  ApiParamsWithKeyDeriver,
+  ApiRequestParams,
+} from './types/snapApi';
 import type { SnapState } from './types/snapState';
 import { upgradeAccContract } from './upgradeAccContract';
 import {
@@ -144,22 +148,31 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
     switch (request.method) {
       case 'starkNet_createAccount':
         apiParams.keyDeriver = await getAddressKeyDeriver(snap);
-        return createAccount(apiParams);
+        return createAccount(apiParams as unknown as ApiParamsWithKeyDeriver);
 
       case 'starkNet_createAccountLegacy':
         apiParams.keyDeriver = await getAddressKeyDeriver(snap);
-        return createAccount(apiParams, false, true, CAIRO_VERSION_LEGACY);
+        return createAccount(
+          apiParams as unknown as ApiParamsWithKeyDeriver,
+          false,
+          true,
+          CAIRO_VERSION_LEGACY,
+        );
 
       case 'starkNet_getStoredUserAccounts':
         return await getStoredUserAccounts(apiParams);
 
       case 'starkNet_extractPrivateKey':
         apiParams.keyDeriver = await getAddressKeyDeriver(snap);
-        return await extractPrivateKey(apiParams);
+        return await extractPrivateKey(
+          apiParams as unknown as ApiParamsWithKeyDeriver,
+        );
 
       case 'starkNet_extractPublicKey':
         apiParams.keyDeriver = await getAddressKeyDeriver(snap);
-        return await extractPublicKey(apiParams);
+        return await extractPublicKey(
+          apiParams as unknown as ApiParamsWithKeyDeriver,
+        );
 
       case 'starkNet_signMessage':
         apiParams.keyDeriver = await getAddressKeyDeriver(snap);
@@ -167,15 +180,21 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
 
       case 'starkNet_signTransaction':
         apiParams.keyDeriver = await getAddressKeyDeriver(snap);
-        return await signTransaction(apiParams);
+        return await signTransaction(
+          apiParams as unknown as ApiParamsWithKeyDeriver,
+        );
 
       case 'starkNet_signDeclareTransaction':
         apiParams.keyDeriver = await getAddressKeyDeriver(snap);
-        return await signDeclareTransaction(apiParams);
+        return await signDeclareTransaction(
+          apiParams as unknown as ApiParamsWithKeyDeriver,
+        );
 
       case 'starkNet_signDeployAccountTransaction':
         apiParams.keyDeriver = await getAddressKeyDeriver(snap);
-        return await signDeployAccountTransaction(apiParams);
+        return await signDeployAccountTransaction(
+          apiParams as unknown as ApiParamsWithKeyDeriver,
+        );
 
       case 'starkNet_verifySignedMessage':
         apiParams.keyDeriver = await getAddressKeyDeriver(snap);
@@ -189,18 +208,24 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
 
       case 'starkNet_sendTransaction':
         apiParams.keyDeriver = await getAddressKeyDeriver(snap);
-        return await sendTransaction(apiParams);
+        return await sendTransaction(
+          apiParams as unknown as ApiParamsWithKeyDeriver,
+        );
 
       case 'starkNet_getValue':
         return await getValue(apiParams);
 
       case 'starkNet_estimateFee':
         apiParams.keyDeriver = await getAddressKeyDeriver(snap);
-        return await estimateFee(apiParams);
+        return await estimateFee(
+          apiParams as unknown as ApiParamsWithKeyDeriver,
+        );
 
       case 'starkNet_estimateAccountDeployFee':
         apiParams.keyDeriver = await getAddressKeyDeriver(snap);
-        return await estimateAccDeployFee(apiParams);
+        return await estimateAccDeployFee(
+          apiParams as unknown as ApiParamsWithKeyDeriver,
+        );
 
       case 'starkNet_addErc20Token':
         return await addErc20Token(apiParams);
@@ -228,23 +253,33 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
 
       case 'starkNet_recoverAccounts':
         apiParams.keyDeriver = await getAddressKeyDeriver(snap);
-        return await recoverAccounts(apiParams);
+        return await recoverAccounts(
+          apiParams as unknown as ApiParamsWithKeyDeriver,
+        );
 
       case 'starkNet_executeTxn':
         apiParams.keyDeriver = await getAddressKeyDeriver(snap);
-        return await executeTxn(apiParams);
+        return await executeTxn(
+          apiParams as unknown as ApiParamsWithKeyDeriver,
+        );
 
       case 'starkNet_estimateFees':
         apiParams.keyDeriver = await getAddressKeyDeriver(snap);
-        return await estimateFees(apiParams);
+        return await estimateFees(
+          apiParams as unknown as ApiParamsWithKeyDeriver,
+        );
 
       case 'starkNet_upgradeAccContract':
         apiParams.keyDeriver = await getAddressKeyDeriver(snap);
-        return upgradeAccContract(apiParams);
+        return upgradeAccContract(
+          apiParams as unknown as ApiParamsWithKeyDeriver,
+        );
 
       case 'starkNet_declareContract':
         apiParams.keyDeriver = await getAddressKeyDeriver(snap);
-        return await declareContract(apiParams);
+        return await declareContract(
+          apiParams as unknown as ApiParamsWithKeyDeriver,
+        );
 
       case 'starkNet_getStarkName':
         return await getStarkName(apiParams);
