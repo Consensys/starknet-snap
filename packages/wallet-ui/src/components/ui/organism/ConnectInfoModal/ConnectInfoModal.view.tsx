@@ -23,7 +23,10 @@ export const ConnectInfoModalView = ({ address, onButtonClick }: Props) => {
           <Normal>Starknet account</Normal>
           <Bold>{address}</Bold>
         </div>
-        <Alert variant="info" text="This account was generated with your MetaMask Secret Recovery Phrase." />
+        <Alert
+          variant="info"
+          text="This account was generated with your MetaMask Secret Recovery Phrase."
+        />
       </Wrapper>
       <ButtonDiv>
         <Button

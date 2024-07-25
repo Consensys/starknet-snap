@@ -5,7 +5,14 @@ import Toastr from 'toastr2';
 
 import { setDeployModalVisible } from 'slices/modalSlice';
 import { openExplorerTab, shortenAddress } from '../../../../utils/utils';
-import { DeployButton, StarknetLogo, Title, Wrapper, DescriptionCentered, Txnlink } from './DeployModal.style';
+import {
+  DeployButton,
+  StarknetLogo,
+  Title,
+  Wrapper,
+  DescriptionCentered,
+  Txnlink,
+} from './DeployModal.style';
 import { AccountAddressView } from 'components/ui/molecule/AccountAddress/AccountAddress.view';
 
 interface Props {
@@ -83,7 +90,8 @@ export const DeployModalView = ({ address }: Props) => {
                 <AccountAddressView address={address}></AccountAddressView>
               </center>
               <br />
-              A deployment of your address is necessary to proceed with the Snap.
+              A deployment of your address is necessary to proceed with the
+              Snap.
               <br />
               <br />
               Click on the "Deploy" button to proceed.
@@ -94,16 +102,27 @@ export const DeployModalView = ({ address }: Props) => {
           </>
         );
       case Stage.WAITING_FOR_TXN:
-        return <DescriptionCentered>Waiting for transaction to be complete.</DescriptionCentered>;
+        return (
+          <DescriptionCentered>
+            Waiting for transaction to be complete.
+          </DescriptionCentered>
+        );
       case Stage.SUCCESS:
-        return <DescriptionCentered>Account deployd successfully.</DescriptionCentered>;
+        return (
+          <DescriptionCentered>
+            Account deployd successfully.
+          </DescriptionCentered>
+        );
       default:
         return (
           <DescriptionCentered>
             Transaction Hash: <br />{' '}
-            <Txnlink onClick={() => openExplorerTab(txnHash, 'tx', chainId)}>{shortenAddress(txnHash)} </Txnlink>
+            <Txnlink onClick={() => openExplorerTab(txnHash, 'tx', chainId)}>
+              {shortenAddress(txnHash)}{' '}
+            </Txnlink>
             <br />
-            Unfortunately, you reached the maximum number of deploy tentatives allowed.
+            Unfortunately, you reached the maximum number of deploy tentatives
+            allowed.
             <br />
             <br />
             Please try again in a couple of hours.

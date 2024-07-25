@@ -2,7 +2,16 @@ import { KeyboardEvent, useEffect } from 'react';
 import { InputHTMLAttributes, useRef, useState } from 'react';
 import { HelperText } from '../../atom/HelperText';
 import { Label } from '../../atom/Label';
-import { IconRight, Input, InputContainer, Left, MaxButton, RowWrapper, USDDiv, Wrapper } from './AmountInput.style';
+import {
+  IconRight,
+  Input,
+  InputContainer,
+  Left,
+  MaxButton,
+  RowWrapper,
+  USDDiv,
+  Wrapper,
+} from './AmountInput.style';
 import { Erc20TokenBalance } from 'types';
 import { ethers } from 'ethers';
 import { getAmountPrice, isSpecialInputKey } from 'utils/utils';
@@ -42,14 +51,21 @@ export const AmountInputView = ({
   };
 
   const resizeInput = () => {
-    if (inputRef.current !== null) inputRef.current.style.width = inputRef.current.value.length * 8 + 6 + 'px';
+    if (inputRef.current !== null)
+      inputRef.current.style.width =
+        inputRef.current.value.length * 8 + 6 + 'px';
   };
 
   const triggerOnChange = () => {
     //If we are in USD mode we sent the eth amount as the value
     let valueToSend = inputRef.current?.value || '';
     if (onChangeCustom) {
-      if (usdMode && asset.usdPrice && inputRef.current?.value && inputRef.current?.value !== '.') {
+      if (
+        usdMode &&
+        asset.usdPrice &&
+        inputRef.current?.value &&
+        inputRef.current?.value !== '.'
+      ) {
         const inputFloat = parseFloat(inputRef.current.value);
         valueToSend = getAmountPrice(asset, inputFloat, usdMode);
       }
@@ -67,7 +83,9 @@ export const AmountInputView = ({
     //Only accept numeric and decimals
     if (
       (!/[0-9]|\./.test(event.key) ||
-        (event.key === '.' && inputRef.current && inputRef.current.value.includes('.'))) &&
+        (event.key === '.' &&
+          inputRef.current &&
+          inputRef.current.value.includes('.'))) &&
       !isSpecialInputKey(event)
     ) {
       event.preventDefault();
@@ -93,9 +111,13 @@ export const AmountInputView = ({
 
   const handleMaxClick = () => {
     if (inputRef.current && asset.usdPrice) {
-      const amountStr = ethers.utils.formatUnits(asset.amount, asset.decimals).toString();
+      const amountStr = ethers.utils
+        .formatUnits(asset.amount, asset.decimals)
+        .toString();
       const amountFloat = parseFloat(amountStr);
-      inputRef.current.value = usdMode ? getAmountPrice(asset, amountFloat, false) : amountStr;
+      inputRef.current.value = usdMode
+        ? getAmountPrice(asset, amountFloat, false)
+        : amountStr;
       fetchTotalPrice();
       resizeInput();
       triggerOnChange();
@@ -119,7 +141,12 @@ export const AmountInputView = ({
         <MaxButton onClick={handleMaxClick}>Max</MaxButton>
       </RowWrapper>
 
-      <InputContainer error={error} disabled={disabled} focused={focused} onClick={() => handleContainerClick()}>
+      <InputContainer
+        error={error}
+        disabled={disabled}
+        focused={focused}
+        onClick={() => handleContainerClick()}
+      >
         <Left>
           <Input
             error={error}
@@ -148,7 +175,10 @@ export const AmountInputView = ({
             </>
           )}
         </Left>
-        <IconRight icon={['fas', 'exchange-alt']} onClick={() => setUsdMode(!usdMode)} />
+        <IconRight
+          icon={['fas', 'exchange-alt']}
+          onClick={() => setUsdMode(!usdMode)}
+        />
       </InputContainer>
       {helperText && <HelperText>{helperText}</HelperText>}
     </Wrapper>

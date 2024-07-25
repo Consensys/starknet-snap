@@ -17,8 +17,14 @@ import {
 import { getAddressKeyDeriver } from '../../src/utils/keyPair';
 import * as utils from '../../src/utils/starknetUtils';
 import { Mutex } from 'async-mutex';
-import { ApiParams, SignMessageRequestParams } from '../../src/types/snapApi';
-import { DeployRequiredError, UpgradeRequiredError } from '../../src/utils/exceptions';
+import {
+  ApiParamsWithKeyDeriver,
+  SignMessageRequestParams,
+} from '../../src/types/snapApi';
+import {
+  DeployRequiredError,
+  UpgradeRequiredError,
+} from '../../src/utils/exceptions';
 
 chai.use(sinonChai);
 const sandbox = sinon.createSandbox();
@@ -32,12 +38,7 @@ describe('Test function: signMessage', function () {
     networks: [STARKNET_SEPOLIA_TESTNET_NETWORK],
     transactions: [],
   };
-  const apiParams: ApiParams = {
-    state,
-    requestParams: {},
-    wallet: walletStub,
-    saveMutex: new Mutex(),
-  };
+  let apiParams: ApiParamsWithKeyDeriver;
 
   const requestObject: SignMessageRequestParams = {
     chainId: STARKNET_SEPOLIA_TESTNET_NETWORK.chainId,
@@ -48,8 +49,13 @@ describe('Test function: signMessage', function () {
 
   beforeEach(async function () {
     walletStub.rpcStubs.snap_getBip44Entropy.callsFake(getBip44EntropyStub);
-    apiParams.keyDeriver = await getAddressKeyDeriver(walletStub);
-    apiParams.requestParams = requestObject;
+    apiParams = {
+      state,
+      requestParams: requestObject,
+      wallet: walletStub,
+      saveMutex: new Mutex(),
+      keyDeriver: await getAddressKeyDeriver(walletStub),
+    };
     walletStub.rpcStubs.snap_dialog.resolves(true);
   });
 
@@ -67,7 +73,7 @@ describe('Test function: signMessage', function () {
     });
 
     it('should throw an error if the signerAddress is undefined', async function () {
-      invalidRequest.signerAddress = undefined;
+      invalidRequest.signerAddress = undefined as unknown as string;
       apiParams.requestParams = invalidRequest;
       let result;
       try {
@@ -103,7 +109,9 @@ describe('Test function: signMessage', function () {
     });
 
     it('skip dialog if enableAuthorize is false or omit', async function () {
-      sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolves(null);
+      sandbox
+        .stub(utils, 'validateAccountRequireUpgradeOrDeploy')
+        .resolvesThis();
       const paramsObject = apiParams.requestParams as SignMessageRequestParams;
 
       paramsObject.enableAuthorize = false;
@@ -128,7 +136,9 @@ describe('Test function: signMessage', function () {
         } catch (err) {
           result = err;
         } finally {
-          expect(validateAccountRequireUpgradeOrDeployStub).to.have.been.calledOnceWith(
+          expect(
+            validateAccountRequireUpgradeOrDeployStub,
+          ).to.have.been.calledOnceWith(
             STARKNET_SEPOLIA_TESTNET_NETWORK,
             account1.address,
             account1.publicKey,
@@ -153,7 +163,9 @@ describe('Test function: signMessage', function () {
         } catch (err) {
           result = err;
         } finally {
-          expect(validateAccountRequireUpgradeOrDeployStub).to.have.been.calledOnceWith(
+          expect(
+            validateAccountRequireUpgradeOrDeployStub,
+          ).to.have.been.calledOnceWith(
             STARKNET_SEPOLIA_TESTNET_NETWORK,
             account1.address,
             account1.publicKey,
@@ -183,7 +195,9 @@ describe('Test function: signMessage', function () {
         } catch (err) {
           result = err;
         } finally {
-          expect(validateAccountRequireUpgradeOrDeployStub).to.have.been.calledOnceWith(
+          expect(
+            validateAccountRequireUpgradeOrDeployStub,
+          ).to.have.been.calledOnceWith(
             STARKNET_SEPOLIA_TESTNET_NETWORK,
             account1.address,
             account1.publicKey,
@@ -202,7 +216,9 @@ describe('Test function: signMessage', function () {
           ...apiParams.requestParams,
           signerAddress: Cairo1Account1.address,
         };
-        sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolves(null);
+        sandbox
+          .stub(utils, 'validateAccountRequireUpgradeOrDeploy')
+          .resolvesThis();
       });
 
       it('should sign a message from an user account correctly', async function () {
@@ -213,7 +229,8 @@ describe('Test function: signMessage', function () {
       });
 
       it('should sign a message from an unfound user account correctly', async function () {
-        const paramsObject = apiParams.requestParams as SignMessageRequestParams;
+        const paramsObject =
+          apiParams.requestParams as SignMessageRequestParams;
         paramsObject.signerAddress = unfoundUserAddress;
         const result = await signMessage(apiParams);
         expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledOnce;
@@ -245,7 +262,7 @@ describe('Test function: signMessage', function () {
 
       it('should throw an error if the signerAddress is undefined', async function () {
         const requestObject: SignMessageRequestParams = {
-          signerAddress: undefined,
+          signerAddress: undefined as unknown as string,
           typedDataMessage: typedDataExample,
         };
         apiParams.requestParams = requestObject;
@@ -277,7 +294,8 @@ describe('Test function: signMessage', function () {
       });
 
       it('should skip dialog if enableAuthorize is false', async function () {
-        const paramsObject = apiParams.requestParams as SignMessageRequestParams;
+        const paramsObject =
+          apiParams.requestParams as SignMessageRequestParams;
         paramsObject.enableAuthorize = false;
         const result = await signMessage(apiParams);
         expect(walletStub.rpcStubs.snap_dialog).to.have.been.callCount(0);
@@ -286,7 +304,8 @@ describe('Test function: signMessage', function () {
       });
 
       it('should skip dialog if enableAuthorize is omit', async function () {
-        const paramsObject = apiParams.requestParams as SignMessageRequestParams;
+        const paramsObject =
+          apiParams.requestParams as SignMessageRequestParams;
         paramsObject.enableAuthorize = undefined;
         const result = await signMessage(apiParams);
         expect(walletStub.rpcStubs.snap_dialog).to.have.been.callCount(0);

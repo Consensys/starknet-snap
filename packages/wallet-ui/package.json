@@ -1,9 +1,48 @@
 {
   "name": "wallet-ui",
-  "version": "1.22.0",
+  "version": "1.23.0",
   "private": true,
-  "license": "(Apache-2.0 OR MIT)",
   "homepage": "/starknet",
+  "license": "(Apache-2.0 OR MIT)",
+  "scripts": {
+    "allow-scripts": "yarn workspace root allow-scripts",
+    "build": "react-scripts build",
+    "build-storybook": "build-storybook",
+    "build:clean": "yarn clean && yarn build",
+    "clean": "rimraf dist",
+    "eject": "react-scripts eject",
+    "lint": "yarn lint:eslint && yarn lint:misc --check",
+    "lint:eslint": "eslint . --cache --ext js,ts,tsx",
+    "lint:fix": "yarn lint:eslint --fix && yarn lint:misc --write",
+    "lint:misc": "prettier '**/*.ts' '**/*.json' '**/*.tsx' '**/*.md' '!CHANGELOG.md' --ignore-path .gitignore",
+    "serve": "react-scripts serve",
+    "start": "react-scripts start",
+    "storybook": "start-storybook -p 6006",
+    "test": "react-scripts test --coverage --passWithNoTests"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "resolutions": {
+    "@storybook/{app}/webpack": "^4",
+    "nth-check": "^2.0.1",
+    "terser": "^5.14.2"
+  },
   "dependencies": {
     "@consensys/starknet-snap": "file:../starknet-snap",
     "@emotion/react": "^11.9.0",
@@ -32,6 +71,11 @@
     "web-vitals": "^2.1.4"
   },
   "devDependencies": {
+    "@metamask/eslint-config": "^12.2.0",
+    "@metamask/eslint-config-browser": "^12.1.0",
+    "@metamask/eslint-config-jest": "^12.1.0",
+    "@metamask/eslint-config-nodejs": "^12.1.0",
+    "@metamask/eslint-config-typescript": "^12.1.0",
     "@storybook/addon-actions": "^6.5.3",
     "@storybook/addon-essentials": "^6.5.3",
     "@storybook/addon-interactions": "^6.5.3",
@@ -52,8 +96,15 @@
     "@types/semver": "^7.3.10",
     "@types/styled-components": "^5.1.25",
     "@types/testing-library__jest-dom": "^5.14.4",
-    "@typescript-eslint/parser": "^5.29.0",
-    "eslint": "^8.18.0",
+    "@typescript-eslint/parser": "^5.42.1",
+    "eslint": "^8.45.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-import": "~2.26.0",
+    "eslint-plugin-jest": "^27.1.5",
+    "eslint-plugin-jsdoc": "^41.1.2",
+    "eslint-plugin-n": "^15.7.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "eslint-plugin-promise": "^6.1.1",
     "eslint-plugin-react": "^7.30.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "prettier": "^2.6.2",
@@ -61,44 +112,5 @@
     "rimraf": "^3.0.2",
     "typescript": "^4.7.4",
     "webpack": "^5.76.0"
-  },
-  "resolutions": {
-    "@storybook/{app}/webpack": "^4",
-    "nth-check": "^2.0.1",
-    "terser": "^5.14.2"
-  },
-  "scripts": {
-    "allow-scripts": "yarn workspace root allow-scripts",
-    "build:clean": "yarn clean && yarn build",
-    "build": "react-scripts build",
-    "serve": "react-scripts serve",
-    "clean": "rimraf dist",
-    "start": "react-scripts start",
-    "test": "react-scripts test --coverage --passWithNoTests",
-    "lint": "yarn lint:eslint && yarn lint:misc --check",
-    "lint:eslint": "eslint . --cache --ext js,ts,tsx",
-    "lint:fix": "yarn lint:eslint --fix && yarn lint:misc --write",
-    "lint:misc": "prettier '**/*.ts' '**/*.json' '**/*.tsx' '**/*.md' '!CHANGELOG.md' --ignore-path .gitignore",
-    "eject": "react-scripts eject",
-    "storybook": "start-storybook -p 6006",
-    "build-storybook": "build-storybook"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
   }
 }

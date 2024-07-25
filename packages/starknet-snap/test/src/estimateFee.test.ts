@@ -5,7 +5,10 @@ import { WalletMock } from '../wallet.mock.test';
 import * as utils from '../../src/utils/starknetUtils';
 import { estimateFee } from '../../src/estimateFee';
 import { SnapState } from '../../src/types/snapState';
-import { ACCOUNT_CLASS_HASH, STARKNET_SEPOLIA_TESTNET_NETWORK } from '../../src/utils/constants';
+import {
+  ACCOUNT_CLASS_HASH,
+  STARKNET_SEPOLIA_TESTNET_NETWORK,
+} from '../../src/utils/constants';
 import { getAddressKeyDeriver } from '../../src/utils/keyPair';
 import {
   account2,
@@ -16,7 +19,10 @@ import {
   getBalanceResp,
 } from '../constants.test';
 import { Mutex } from 'async-mutex';
-import { ApiParams, EstimateFeeRequestParams } from '../../src/types/snapApi';
+import {
+  ApiParamsWithKeyDeriver,
+  EstimateFeeRequestParams,
+} from '../../src/types/snapApi';
 import { TransactionType } from 'starknet';
 import { UpgradeRequiredError } from '../../src/utils/exceptions';
 
@@ -33,23 +39,29 @@ describe('Test function: estimateFee', function () {
     transactions: [],
   };
   const requestObject: EstimateFeeRequestParams = {
-    contractAddress: '0x07394cbe418daa16e42b87ba67372d4ab4a5df0b05c6e554d158458ce245bc10',
+    contractAddress:
+      '0x07394cbe418daa16e42b87ba67372d4ab4a5df0b05c6e554d158458ce245bc10',
     contractFuncName: 'balanceOf',
-    contractCallData: '0x7426b2da7a8978e0d472d64f15f984d658226cb55a4fd8aa7689688a7eab37b',
+    contractCallData:
+      '0x7426b2da7a8978e0d472d64f15f984d658226cb55a4fd8aa7689688a7eab37b',
     senderAddress: account2.address,
   };
-  const apiParams: ApiParams = {
-    state,
-    requestParams: requestObject,
-    wallet: walletStub,
-    saveMutex: new Mutex(),
-  };
+  let apiParams: ApiParamsWithKeyDeriver;
 
   beforeEach(async function () {
     walletStub.rpcStubs.snap_getBip44Entropy.callsFake(getBip44EntropyStub);
-    apiParams.keyDeriver = await getAddressKeyDeriver(walletStub);
+    apiParams = {
+      state,
+      requestParams: requestObject,
+      wallet: walletStub,
+      saveMutex: new Mutex(),
+      keyDeriver: await getAddressKeyDeriver(walletStub),
+    };
+
     sandbox.stub(utils, 'callContract').resolves(getBalanceResp);
-    sandbox.stub(utils, 'getAccContractAddressAndCallDataLegacy').resolves(account2.address);
+    sandbox
+      .stub(utils, 'getAccContractAddressAndCallDataLegacy')
+      .resolves(account2.address);
   });
 
   afterEach(function () {
@@ -65,7 +77,7 @@ describe('Test function: estimateFee', function () {
     });
 
     it('should throw an error if the function name is undefined', async function () {
-      invalidRequest.contractFuncName = undefined;
+      invalidRequest.contractFuncName = undefined as unknown as string;
       apiParams.requestParams = invalidRequest;
       let result;
       try {
@@ -134,7 +146,9 @@ describe('Test function: estimateFee', function () {
         } catch (err) {
           result = err;
         } finally {
-          expect(validateAccountRequireUpgradeOrDeployStub).to.have.been.calledOnceWith(
+          expect(
+            validateAccountRequireUpgradeOrDeployStub,
+          ).to.have.been.calledOnceWith(
             STARKNET_SEPOLIA_TESTNET_NETWORK,
             account2.address,
             account2.publicKey,
@@ -159,7 +173,7 @@ describe('Test function: estimateFee', function () {
       describe('when account is deployed', function () {
         beforeEach(async function () {
           estimateFeeBulkStub = sandbox.stub(utils, 'estimateFeeBulk').resolves([estimateFeeResp]);
-          sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolves(null);
+          sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolvesThis();
         });
 
         it('should estimate the fee correctly', async function () {
@@ -171,7 +185,7 @@ describe('Test function: estimateFee', function () {
 
       describe('when account is not deployed', function () {
         beforeEach(async function () {
-          sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolves(null);
+          sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolvesThis();
           sandbox.stub(utils, 'isAccountDeployed').resolves(false);
         });
 
@@ -179,7 +193,9 @@ describe('Test function: estimateFee', function () {
           estimateFeeBulkStub = sandbox
             .stub(utils, 'estimateFeeBulk')
             .resolves([estimateFeeResp, estimateDeployFeeResp4]);
-          const expectedSuggestedMaxFee = estimateDeployFeeResp4.suggestedMaxFee + estimateFeeResp.suggestedMaxFee;
+          const expectedSuggestedMaxFee =
+            estimateDeployFeeResp4.suggestedMaxFee +
+            estimateFeeResp.suggestedMaxFee;
           const result = await estimateFee(apiParams);
 
           const { privateKey, publicKey } = await utils.getKeysFromAddress(
@@ -188,8 +204,10 @@ describe('Test function: estimateFee', function () {
             state,
             Cairo1Account1.address,
           );
-          const { callData } = utils.getAccContractAddressAndCallData(publicKey);
-          const apiRequest = apiParams.requestParams as EstimateFeeRequestParams;
+          const { callData } =
+            utils.getAccContractAddressAndCallData(publicKey);
+          const apiRequest =
+            apiParams.requestParams as EstimateFeeRequestParams;
 
           const expectedBulkTransaction = [
             {
@@ -206,12 +224,16 @@ describe('Test function: estimateFee', function () {
               payload: {
                 contractAddress: apiRequest.contractAddress,
                 entrypoint: apiRequest.contractFuncName,
-                calldata: utils.getCallDataArray(apiRequest.contractCallData),
+                calldata: utils.getCallDataArray(
+                  apiRequest.contractCallData as unknown as string,
+                ),
               },
             },
           ];
 
-          expect(result.suggestedMaxFee).to.be.eq(expectedSuggestedMaxFee.toString(10));
+          expect(result.suggestedMaxFee).to.be.eq(
+            expectedSuggestedMaxFee.toString(10),
+          );
           expect(estimateFeeBulkStub).callCount(1);
           expect(estimateFeeBulkStub).to.be.calledWith(
             STARKNET_SEPOLIA_TESTNET_NETWORK,
@@ -222,7 +244,9 @@ describe('Test function: estimateFee', function () {
         });
 
         it('should throw error if estimateFee failed', async function () {
-          estimateFeeBulkStub = sandbox.stub(utils, 'estimateFeeBulk').throws('Error');
+          estimateFeeBulkStub = sandbox
+            .stub(utils, 'estimateFeeBulk')
+            .throws('Error');
           apiParams.requestParams = requestObject;
 
           let result;

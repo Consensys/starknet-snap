@@ -8,8 +8,15 @@ export default {
   component: DoubleIconsView,
 } as Meta;
 
-export const Default = () => <DoubleIconsView icon1={ethIcon} icon2={starknetIcon} />;
+export const Default = () => (
+  <DoubleIconsView icon1={ethIcon} icon2={starknetIcon} />
+);
 
 export const Bigger = () => (
-  <DoubleIconsView icon1={ethIcon} icon2={starknetIcon} iconSize="48px" cornerIconSize="24px" />
+  <DoubleIconsView
+    icon1={ethIcon}
+    icon2={starknetIcon}
+    iconSize="48px"
+    cornerIconSize="24px"
+  />
 );

@@ -10,7 +10,6 @@ import {
   STARKNET_MAINNET_NETWORK,
   STARKNET_SEPOLIA_TESTNET_NETWORK,
 } from '../../src/utils/constants';
-
 import * as starknetUtils from '../../src/utils/starknetUtils';
 import { onHomePage } from '../../src';
 
@@ -19,8 +18,8 @@ const sandbox = sinon.createSandbox();
 
 describe('Test function: onHomePage', function () {
   const walletStub = new WalletMock();
-  // eslint-disable-next-line no-restricted-globals
-  const globalAny = global as unknown as { snap: WalletMock };
+  // eslint-disable-next-line no-restricted-globals, @typescript-eslint/no-explicit-any
+  const globalAny: any = global;
   const state: SnapState = {
     accContracts: [],
     erc20Tokens: [ETHER_MAINNET, ETHER_SEPOLIA_TESTNET],
@@ -41,8 +40,14 @@ describe('Test function: onHomePage', function () {
   });
 
   const prepareAccountDiscovery = () => {
-    const getKeysFromAddressIndexSpy = sandbox.stub(starknetUtils, 'getKeysFromAddressIndex');
-    const getCorrectContractAddressSpy = sandbox.stub(starknetUtils, 'getCorrectContractAddress');
+    const getKeysFromAddressIndexSpy = sandbox.stub(
+      starknetUtils,
+      'getKeysFromAddressIndex',
+    );
+    const getCorrectContractAddressSpy = sandbox.stub(
+      starknetUtils,
+      'getCorrectContractAddress',
+    );
     const getBalanceSpy = sandbox.stub(starknetUtils, 'getBalance');
 
     getKeysFromAddressIndexSpy.resolves({

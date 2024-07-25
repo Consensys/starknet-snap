@@ -23,7 +23,16 @@ export const TransactionsListView = ({ transactions }: Props) => {
     if (chain && address) {
       clearTimeout(timeoutHandle.current); // cancel the timeout that was in-flight
       timeoutHandle.current = setTimeout(
-        () => getTransactions(address, wallet.erc20TokenBalanceSelected.address, 10, 10, chain, false, true),
+        () =>
+          getTransactions(
+            address,
+            wallet.erc20TokenBalanceSelected.address,
+            10,
+            10,
+            chain,
+            false,
+            true,
+          ),
         TRANSACTIONS_REFRESH_FREQUENCY,
       );
       return () => clearTimeout(timeoutHandle.current);
@@ -31,20 +40,38 @@ export const TransactionsListView = ({ transactions }: Props) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [wallet.transactions]);
 
-  useEffect(() => {
-    const chain = networks.items[networks.activeNetwork]?.chainId;
-    const address = wallet.accounts?.[0] as unknown as string;
-    if (chain && address) {
-      clearTimeout(timeoutHandle.current); // cancel the timeout that was in-flight
-      getTransactions(address, wallet.erc20TokenBalanceSelected.address, 10, 10, chain);
-    }
+  useEffect(
+    () => {
+      const chain = networks.items[networks.activeNetwork]?.chainId;
+      const address = wallet.accounts?.[0] as unknown as string;
+      if (chain && address) {
+        clearTimeout(timeoutHandle.current); // cancel the timeout that was in-flight
+        getTransactions(
+          address,
+          wallet.erc20TokenBalanceSelected.address,
+          10,
+          10,
+          chain,
+        );
+      }
+    },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [wallet.erc20TokenBalanceSelected.address, wallet.erc20TokenBalanceSelected.chainId, wallet.accounts?.[0]]);
+    [
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      wallet.erc20TokenBalanceSelected.address,
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      wallet.erc20TokenBalanceSelected.chainId,
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      wallet.accounts?.[0],
+    ],
+  );
 
   return (
     <Wrapper<FC<IListProps<Transaction>>>
       data={transactions.length > 0 ? transactions : wallet.transactions}
-      render={(transaction) => <TransactionListItem transaction={transaction} />}
+      render={(transaction) => (
+        <TransactionListItem transaction={transaction} />
+      )}
       keyExtractor={(transaction) => transaction.txnHash.toString()}
     />
   );

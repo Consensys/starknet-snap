@@ -16,8 +16,14 @@ describe('Test function: toJson', function () {
     const result = toJson({
       r: 1,
       s: '2',
-      t: BigInt('0x05a98ec74a40383cf99896bfea2ec5e6aad16c7eed50025a5f569d585ebb13a2'),
-      v: { t: BigInt('0x05a98ec74a40383cf99896bfea2ec5e6aad16c7eed50025a5f569d585ebb13a2') },
+      t: BigInt(
+        '0x05a98ec74a40383cf99896bfea2ec5e6aad16c7eed50025a5f569d585ebb13a2',
+      ),
+      v: {
+        t: BigInt(
+          '0x05a98ec74a40383cf99896bfea2ec5e6aad16c7eed50025a5f569d585ebb13a2',
+        ),
+      },
     });
     expect(result).to.be.eql(expectedResult);
   });

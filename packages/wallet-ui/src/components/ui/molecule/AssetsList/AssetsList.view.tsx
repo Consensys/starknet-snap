@@ -15,7 +15,10 @@ export const AssetsListView = () => {
   useEffect(() => {
     if (wallet.erc20TokenBalances?.length > 0) {
       clearTimeout(timeoutHandle.current); // cancel the timeout that was in-flight
-      timeoutHandle.current = setTimeout(() => refreshTokensUSDPrice(), ASSETS_PRICE_REFRESH_FREQUENCY);
+      timeoutHandle.current = setTimeout(
+        () => refreshTokensUSDPrice(),
+        ASSETS_PRICE_REFRESH_FREQUENCY,
+      );
       return () => clearTimeout(timeoutHandle.current);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

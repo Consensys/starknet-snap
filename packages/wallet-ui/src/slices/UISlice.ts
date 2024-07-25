@@ -29,6 +29,7 @@ export const networkSlice = createSlice({
   },
 });
 
-export const { enableLoadingWithMessage, disableLoading } = networkSlice.actions;
+export const { enableLoadingWithMessage, disableLoading } =
+  networkSlice.actions;
 
 export default networkSlice.reducer;

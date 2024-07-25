@@ -8,4 +8,4 @@ export default {
 
 export const Default = () => <LabelView>Label</LabelView>;
 
-export const Error = () => <LabelView error>Label</LabelView>;
+export const ErrorView = () => <LabelView error>Label</LabelView>;

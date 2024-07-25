@@ -60,7 +60,8 @@ export const LeftIcon = styled(RoundedIcon)`
 export const IconStyled = styled(FontAwesomeIcon)<IIconeStyled>`
   font-size: ${(props) => props.theme.typography.i2.fontSize};
   color: ${(props) => props.theme.palette.grey.grey1};
-  transform: ${(props) => (props.transactionname === 'Send' ? 'rotate(45deg)' : 'initial')};
+  transform: ${(props) =>
+    props.transactionname === 'Send' ? 'rotate(45deg)' : 'initial'};
 `;
 
 export const Label = styled.span`
