@@ -1,0 +1,5 @@
+dist/
+coverage/
+snap.manifest.json
+.nyc_output/
+node_modules/

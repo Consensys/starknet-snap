@@ -1,30 +1,52 @@
+import { heading, panel, DialogType } from '@metamask/snaps-sdk';
+
+import type {
+  ApiParamsWithKeyDeriver,
+  DeclareContractRequestParams,
+} from './types/snapApi';
+import { logger } from './utils/logger';
 import { toJson } from './utils/serializer';
-import { ApiParams, DeclareContractRequestParams } from './types/snapApi';
-import { getNetworkFromChainId, getDeclareSnapTxt, showAccountRequireUpgradeOrDeployModal } from './utils/snapUtils';
+import {
+  getNetworkFromChainId,
+  getDeclareSnapTxt,
+  showAccountRequireUpgradeOrDeployModal,
+} from './utils/snapUtils';
 import {
   getKeysFromAddress,
   declareContract as declareContractUtil,
   validateAccountRequireUpgradeOrDeploy,
 } from './utils/starknetUtils';
-import { heading, panel, DialogType } from '@metamask/snaps-sdk';
-import { logger } from './utils/logger';
 
-export async function declareContract(params: ApiParams) {
+/**
+ *
+ * @param params
+ */
+export async function declareContract(params: ApiParamsWithKeyDeriver) {
   try {
     const { state, keyDeriver, requestParams, wallet } = params;
+
     const requestParamsObj = requestParams as DeclareContractRequestParams;
 
     logger.log(`executeTxn params: ${toJson(requestParamsObj, 2)}}`);
 
-    const senderAddress = requestParamsObj.senderAddress;
+    const { senderAddress } = requestParamsObj;
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
-    const { privateKey, publicKey } = await getKeysFromAddress(keyDeriver, network, state, senderAddress);
+    const { privateKey, publicKey } = await getKeysFromAddress(
+      keyDeriver,
+      network,
+      state,
+      senderAddress,
+    );
 
     try {
-      await validateAccountRequireUpgradeOrDeploy(network, senderAddress, publicKey);
-    } catch (e) {
-      await showAccountRequireUpgradeOrDeployModal(wallet, e);
-      throw e;
+      await validateAccountRequireUpgradeOrDeploy(
+        network,
+        senderAddress,
+        publicKey,
+      );
+    } catch (validateError) {
+      await showAccountRequireUpgradeOrDeployModal(wallet, validateError);
+      throw validateError;
     }
 
     const snapComponents = getDeclareSnapTxt(
@@ -38,11 +60,16 @@ export async function declareContract(params: ApiParams) {
       method: 'snap_dialog',
       params: {
         type: DialogType.Confirmation,
-        content: panel([heading('Do you want to sign this transaction?'), ...snapComponents]),
+        content: panel([
+          heading('Do you want to sign this transaction?'),
+          ...snapComponents,
+        ]),
       },
     });
 
-    if (!response) return false;
+    if (!response) {
+      return false;
+    }
 
     return await declareContractUtil(
       network,
@@ -51,8 +78,8 @@ export async function declareContract(params: ApiParams) {
       requestParamsObj.contractPayload,
       requestParamsObj.invocationsDetails,
     );
-  } catch (err) {
-    logger.error(`Problem found: ${err}`);
-    throw err;
+  } catch (error) {
+    logger.error(`Problem found:`, error);
+    throw error;
   }
 }

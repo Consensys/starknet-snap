@@ -1,71 +1,102 @@
+import { heading, panel, DialogType } from '@metamask/snaps-sdk';
+
+import type {
+  ApiParamsWithKeyDeriver,
+  SignMessageRequestParams,
+} from './types/snapApi';
+import { logger } from './utils/logger';
 import { toJson } from './utils/serializer';
+import {
+  getNetworkFromChainId,
+  addDialogTxt,
+  showAccountRequireUpgradeOrDeployModal,
+} from './utils/snapUtils';
 import {
   signMessage as signMessageUtil,
   getKeysFromAddress,
   validateAndParseAddress,
   validateAccountRequireUpgradeOrDeploy,
 } from './utils/starknetUtils';
-import { getNetworkFromChainId, addDialogTxt, showAccountRequireUpgradeOrDeployModal } from './utils/snapUtils';
-import { ApiParams, SignMessageRequestParams } from './types/snapApi';
-import { heading, panel, DialogType } from '@metamask/snaps-sdk';
-import { logger } from './utils/logger';
 
-export async function signMessage(params: ApiParams) {
+/**
+ *
+ * @param params
+ */
+export async function signMessage(params: ApiParamsWithKeyDeriver) {
   try {
     const { state, wallet, keyDeriver, requestParams } = params;
     const requestParamsObj = requestParams as SignMessageRequestParams;
-    const signerAddress = requestParamsObj.signerAddress;
-    const typedDataMessage = requestParamsObj.typedDataMessage;
+    const { signerAddress } = requestParamsObj;
+    const { typedDataMessage } = requestParamsObj;
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
 
-    logger.log(`signMessage:\nsignerAddress: ${signerAddress}\ntypedDataMessage: ${toJson(typedDataMessage)}`);
+    logger.log(
+      `signMessage:\nsignerAddress: ${signerAddress}\ntypedDataMessage: ${toJson(
+        typedDataMessage,
+      )}`,
+    );
 
     try {
       validateAndParseAddress(signerAddress);
-    } catch (err) {
+    } catch (error) {
       throw new Error(`The given signer address is invalid: ${signerAddress}`);
     }
 
-    const { privateKey: signerPrivateKey, publicKey } = await getKeysFromAddress(
-      keyDeriver,
-      network,
-      state,
-      signerAddress,
-    );
+    const { privateKey: signerPrivateKey, publicKey } =
+      await getKeysFromAddress(keyDeriver, network, state, signerAddress);
     if (!signerAddress) {
-      throw new Error(`The given signer address need to be non-empty string, got: ${toJson(signerAddress)}`);
+      throw new Error(
+        `The given signer address need to be non-empty string, got: ${toJson(
+          signerAddress,
+        )}`,
+      );
     }
 
     try {
-      await validateAccountRequireUpgradeOrDeploy(network, signerAddress, publicKey);
-    } catch (e) {
-      await showAccountRequireUpgradeOrDeployModal(wallet, e);
-      throw e;
+      await validateAccountRequireUpgradeOrDeploy(
+        network,
+        signerAddress,
+        publicKey,
+      );
+    } catch (validateError) {
+      await showAccountRequireUpgradeOrDeployModal(wallet, validateError);
+      throw validateError;
     }
 
     const components = [];
     addDialogTxt(components, 'Message', toJson(typedDataMessage));
     addDialogTxt(components, 'Signer Address', signerAddress);
 
-    if (requestParamsObj.enableAuthorize === true) {
+    if (requestParamsObj.enableAuthorize) {
       const response = await wallet.request({
         method: 'snap_dialog',
         params: {
           type: DialogType.Confirmation,
-          content: panel([heading('Do you want to sign this message?'), ...components]),
+          content: panel([
+            heading('Do you want to sign this message?'),
+            ...components,
+          ]),
         },
       });
 
-      if (!response) return false;
+      if (!response) {
+        return false;
+      }
     }
 
-    const typedDataSignature = signMessageUtil(signerPrivateKey, typedDataMessage, signerAddress);
+    const typedDataSignature = signMessageUtil(
+      signerPrivateKey,
+      typedDataMessage,
+      signerAddress,
+    );
 
-    logger.log(`signMessage:\ntypedDataSignature: ${toJson(typedDataSignature)}`);
+    logger.log(
+      `signMessage:\ntypedDataSignature: ${toJson(typedDataSignature)}`,
+    );
 
     return typedDataSignature;
-  } catch (err) {
-    logger.error(`Problem found: ${err}`);
-    throw err;
+  } catch (error) {
+    logger.error(`Problem found:`, error);
+    throw error;
   }
 }

@@ -7,9 +7,16 @@ import { estimateAccDeployFee } from '../../src/estimateAccountDeployFee';
 import { SnapState } from '../../src/types/snapState';
 import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../../src/utils/constants';
 import { getAddressKeyDeriver } from '../../src/utils/keyPair';
-import { estimateDeployFeeResp3, estimateDeployFeeResp4, getBip44EntropyStub } from '../constants.test';
+import {
+  estimateDeployFeeResp3,
+  estimateDeployFeeResp4,
+  getBip44EntropyStub,
+} from '../constants.test';
 import { Mutex } from 'async-mutex';
-import { ApiParams, EstimateAccountDeployFeeRequestParams } from '../../src/types/snapApi';
+import {
+  ApiParamsWithKeyDeriver,
+  EstimateAccountDeployFeeRequestParams,
+} from '../../src/types/snapApi';
 
 chai.use(sinonChai);
 const sandbox = sinon.createSandbox();
@@ -26,16 +33,17 @@ describe('Test function: estimateAccountDeployFee', function () {
   const requestObject: EstimateAccountDeployFeeRequestParams = {
     chainId: STARKNET_SEPOLIA_TESTNET_NETWORK.chainId,
   };
-  const apiParams: ApiParams = {
-    state,
-    requestParams: requestObject,
-    wallet: walletStub,
-    saveMutex: new Mutex(),
-  };
+  let apiParams: ApiParamsWithKeyDeriver;
 
   beforeEach(async function () {
     walletStub.rpcStubs.snap_getBip44Entropy.callsFake(getBip44EntropyStub);
-    apiParams.keyDeriver = await getAddressKeyDeriver(walletStub);
+    apiParams = {
+      state,
+      requestParams: requestObject,
+      wallet: walletStub,
+      saveMutex: new Mutex(),
+      keyDeriver: await getAddressKeyDeriver(walletStub),
+    };
     walletStub.rpcStubs.snap_manageState.resolves(state);
   });
 
@@ -49,7 +57,9 @@ describe('Test function: estimateAccountDeployFee', function () {
       return estimateDeployFeeResp3;
     });
     const result = await estimateAccDeployFee(apiParams);
-    expect(result.suggestedMaxFee).to.be.eq(estimateDeployFeeResp3.suggestedMaxFee.toString(10));
+    expect(result.suggestedMaxFee).to.be.eq(
+      estimateDeployFeeResp3.suggestedMaxFee.toString(10),
+    );
   });
 
   it('should estimate the account deploy fee correctly if addressIndex is given', async function () {
@@ -61,7 +71,9 @@ describe('Test function: estimateAccountDeployFee', function () {
       addressIndex: 2,
     };
     const result = await estimateAccDeployFee(apiParams);
-    expect(result.suggestedMaxFee).to.be.eq(estimateDeployFeeResp4.suggestedMaxFee.toString(10));
+    expect(result.suggestedMaxFee).to.be.eq(
+      estimateDeployFeeResp4.suggestedMaxFee.toString(10),
+    );
   });
 
   it('should throw error if estimateAccountDeployFee failed', async function () {

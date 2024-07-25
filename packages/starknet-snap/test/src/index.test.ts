@@ -40,8 +40,14 @@ describe('Test function: onHomePage', function () {
   });
 
   const prepareAccountDiscovery = () => {
-    const getKeysFromAddressIndexSpy = sandbox.stub(starknetUtils, 'getKeysFromAddressIndex');
-    const getCorrectContractAddressSpy = sandbox.stub(starknetUtils, 'getCorrectContractAddress');
+    const getKeysFromAddressIndexSpy = sandbox.stub(
+      starknetUtils,
+      'getKeysFromAddressIndex',
+    );
+    const getCorrectContractAddressSpy = sandbox.stub(
+      starknetUtils,
+      'getCorrectContractAddress',
+    );
     const getBalanceSpy = sandbox.stub(starknetUtils, 'getBalance');
 
     getKeysFromAddressIndexSpy.resolves({

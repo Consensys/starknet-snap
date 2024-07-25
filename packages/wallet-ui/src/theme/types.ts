@@ -7,4 +7,10 @@ export enum VariantOptions {
   INFO = 'info',
 }
 
-export type Variant = 'primary' | 'secondary' | 'success' | 'error' | 'warning' | 'info';
+export type Variant =
+  | 'primary'
+  | 'secondary'
+  | 'success'
+  | 'error'
+  | 'warning'
+  | 'info';

@@ -1,9 +1,16 @@
-import { toJson } from './utils/serializer';
-import { getBalance, validateAndParseAddress } from '../src/utils/starknetUtils';
-import { ApiParams, GetErc20TokenBalanceRequestParams } from './types/snapApi';
-import { getNetworkFromChainId } from './utils/snapUtils';
+import type {
+  ApiParams,
+  GetErc20TokenBalanceRequestParams,
+} from './types/snapApi';
 import { logger } from './utils/logger';
+import { toJson } from './utils/serializer';
+import { getNetworkFromChainId } from './utils/snapUtils';
+import { getBalance, validateAndParseAddress } from './utils/starknetUtils';
 
+/**
+ *
+ * @param params
+ */
 export async function getErc20TokenBalance(params: ApiParams) {
   try {
     const { state, requestParams } = params;
@@ -11,35 +18,43 @@ export async function getErc20TokenBalance(params: ApiParams) {
 
     if (!requestParamsObj.tokenAddress || !requestParamsObj.userAddress) {
       throw new Error(
-        `The given token address and user address need to be non-empty string, got: ${toJson(requestParamsObj)}`,
+        `The given token address and user address need to be non-empty string, got: ${toJson(
+          requestParamsObj,
+        )}`,
       );
     }
 
     try {
       validateAndParseAddress(requestParamsObj.tokenAddress);
-    } catch (err) {
-      throw new Error(`The given token address is invalid: ${requestParamsObj.tokenAddress}`);
+    } catch (error) {
+      throw new Error(
+        `The given token address is invalid: ${requestParamsObj.tokenAddress}`,
+      );
     }
     try {
       validateAndParseAddress(requestParamsObj.userAddress);
-    } catch (err) {
-      throw new Error(`The given user address is invalid: ${requestParamsObj.userAddress}`);
+    } catch (error) {
+      throw new Error(
+        `The given user address is invalid: ${requestParamsObj.userAddress}`,
+      );
     }
 
     // Get the erc20 and user account contract addresses
     const erc20Address = requestParamsObj.tokenAddress;
-    const userAddress = requestParamsObj.userAddress;
+    const { userAddress } = requestParamsObj;
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
 
-    logger.log(`getErc20Balance:\nerc20Address: ${erc20Address}\nuserAddress: ${userAddress}`);
+    logger.log(
+      `getErc20Balance:\nerc20Address: ${erc20Address}\nuserAddress: ${userAddress}`,
+    );
 
     const balance = await getBalance(userAddress, erc20Address, network);
 
     logger.log(`getErc20Balance:\nresp: ${toJson(balance)}`);
 
     return balance;
-  } catch (err) {
-    logger.error(`Problem found: ${err}`);
-    throw err;
+  } catch (error) {
+    logger.error(`Problem found:`, error);
+    throw error;
   }
 }

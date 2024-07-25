@@ -4,7 +4,10 @@ import sinonChai from 'sinon-chai';
 import { WalletMock } from '../wallet.mock.test';
 import { SnapState } from '../../src/types/snapState';
 import * as snapUtils from '../../src/utils/snapUtils';
-import { STARKNET_MAINNET_NETWORK, STARKNET_SEPOLIA_TESTNET_NETWORK } from '../../src/utils/constants';
+import {
+  STARKNET_MAINNET_NETWORK,
+  STARKNET_SEPOLIA_TESTNET_NETWORK,
+} from '../../src/utils/constants';
 import { Mutex } from 'async-mutex';
 import { SwitchNetworkRequestParams, ApiParams } from '../../src/types/snapApi';
 import { switchNetwork } from '../../src/switchNetwork';

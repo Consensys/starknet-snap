@@ -8,7 +8,13 @@ interface Props {
   size?: Size;
 }
 
-export const AssetQuantityView = ({ currency = 'ETH', currencyValue, USDValue, centered, size = 'normal' }: Props) => {
+export const AssetQuantityView = ({
+  currency = 'ETH',
+  currencyValue,
+  USDValue,
+  centered,
+  size = 'normal',
+}: Props) => {
   return (
     <Wrapper centered={centered}>
       <Currency size={size}>

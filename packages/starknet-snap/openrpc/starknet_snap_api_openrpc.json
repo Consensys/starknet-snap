@@ -1452,7 +1452,14 @@
       },
       "TXN_STATUS": {
         "type": "string",
-        "enum": ["UNKNOWN", "RECEIVED", "PENDING", "ACCEPTED_ON_L2", "ACCEPTED_ON_L1", "REJECTED"],
+        "enum": [
+          "UNKNOWN",
+          "RECEIVED",
+          "PENDING",
+          "ACCEPTED_ON_L2",
+          "ACCEPTED_ON_L1",
+          "REJECTED"
+        ],
         "description": "The status of the transaction. May be unknown in case node is not aware of it"
       },
       "VOYAGER_TXN_TYPE": {

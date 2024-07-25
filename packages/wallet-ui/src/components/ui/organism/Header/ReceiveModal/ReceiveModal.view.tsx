@@ -1,4 +1,9 @@
-import { AddressCopy, AddressQrCode, Title, Wrapper } from './ReceiveModal.style';
+import {
+  AddressCopy,
+  AddressQrCode,
+  Title,
+  Wrapper,
+} from './ReceiveModal.style';
 
 interface Props {
   address: string;

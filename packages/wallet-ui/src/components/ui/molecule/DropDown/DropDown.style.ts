@@ -8,7 +8,11 @@ interface IDropDown {
   disabled?: boolean;
 }
 
-const getInputTextColorByState = (focused?: boolean, disabled?: boolean, error?: boolean) => {
+const getInputTextColorByState = (
+  focused?: boolean,
+  disabled?: boolean,
+  error?: boolean,
+) => {
   if ((!focused && !error) || disabled) {
     return theme.palette.grey.grey1;
   }
@@ -16,7 +20,11 @@ const getInputTextColorByState = (focused?: boolean, disabled?: boolean, error?:
   return theme.palette.grey.black;
 };
 
-const getInputBorderColorByState = (focused?: boolean, disabled?: boolean, error?: boolean) => {
+const getInputBorderColorByState = (
+  focused?: boolean,
+  disabled?: boolean,
+  error?: boolean,
+) => {
   if (error) {
     return theme.palette.error.main;
   }
@@ -33,8 +41,10 @@ export const Wrapper = styled.div<IDropDown>`
   flex-direction: column;
 
   .is-open .Dropdown-control {
-    color: ${(props) => getInputTextColorByState(true, props.disabled, props.error)};
-    border-color: ${(props) => getInputBorderColorByState(true, props.disabled, props.error)};
+    color: ${(props) =>
+      getInputTextColorByState(true, props.disabled, props.error)};
+    border-color: ${(props) =>
+      getInputBorderColorByState(true, props.disabled, props.error)};
   }
 `;
 
@@ -48,8 +58,10 @@ export const DropdownStyled = styled(Dropdown)<IDropDown>`
     border: 1px solid ${(props) => props.theme.palette.grey.grey3};
     font-size: ${(props) => props.theme.typography.p2.fontSize};
     font-family: ${(props) => props.theme.typography.p2.fontFamily};
-    color: ${(props) => getInputTextColorByState(false, props.disabled, props.error)};
-    border-color: ${(props) => getInputBorderColorByState(false, props.disabled, props.error)};
+    color: ${(props) =>
+      getInputTextColorByState(false, props.disabled, props.error)};
+    border-color: ${(props) =>
+      getInputBorderColorByState(false, props.disabled, props.error)};
     border-style: ${(props) => (props.disabled ? 'dashed' : 'solid')};
     :focus {
       outline: none;

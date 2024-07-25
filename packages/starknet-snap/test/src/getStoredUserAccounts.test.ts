@@ -8,7 +8,10 @@ import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../../src/utils/constants';
 import { account1, account2, account3, account4 } from '../constants.test';
 import * as snapUtils from '../../src/utils/snapUtils';
 import { Mutex } from 'async-mutex';
-import { ApiParams, GetStoredUserAccountsRequestParams } from '../../src/types/snapApi';
+import {
+  ApiParams,
+  GetStoredUserAccountsRequestParams,
+} from '../../src/types/snapApi';
 
 chai.use(sinonChai);
 const sandbox = sinon.createSandbox();

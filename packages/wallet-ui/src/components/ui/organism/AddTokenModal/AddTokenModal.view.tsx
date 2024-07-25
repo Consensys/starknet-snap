@@ -4,7 +4,14 @@ import { useStarkNetSnap } from 'services';
 import { Alert } from 'components/ui/atom/Alert';
 import { AddressInput } from 'components/ui/molecule/AddressInput';
 import { InputWithLabel } from 'components/ui/molecule/InputWithLabel';
-import { ButtonStyled, ButtonsWrapper, FormGroup, Space, Title, Wrapper } from './AddToken.style';
+import {
+  ButtonStyled,
+  ButtonsWrapper,
+  FormGroup,
+  Space,
+  Title,
+  Wrapper,
+} from './AddToken.style';
 import Toastr from 'toastr2';
 const toastr = new Toastr({
   closeDuration: 10000000,
@@ -22,7 +29,12 @@ export const AddTokenModalView = ({ closeModal }: Props) => {
   const { accounts } = useAppSelector((state) => state.wallet);
   const chain = networks && networks.items[networks.activeNetwork].chainId;
   const [isValidAddress, setIsValidAddress] = useState(false);
-  const [fields, setFields] = useState({ address: '', name: '', symbol: '', decimal: '' });
+  const [fields, setFields] = useState({
+    address: '',
+    name: '',
+    symbol: '',
+    decimal: '',
+  });
   const handleChange = (fieldName: string, fieldValue: string) => {
     setFields((prevFields) => ({
       ...prevFields,
@@ -55,17 +67,28 @@ export const AddTokenModalView = ({ closeModal }: Props) => {
           />
         </FormGroup>
         <FormGroup>
-          <InputWithLabel label="Name" onChange={(event) => handleChange('name', event.target.value)} />
+          <InputWithLabel
+            label="Name"
+            onChange={(event) => handleChange('name', event.target.value)}
+          />
         </FormGroup>
         <FormGroup>
-          <InputWithLabel label="Symbol" onChange={(event) => handleChange('symbol', event.target.value)} />
+          <InputWithLabel
+            label="Symbol"
+            onChange={(event) => handleChange('symbol', event.target.value)}
+          />
         </FormGroup>
         <FormGroup>
           <InputWithLabel
             label="Decimal"
             placeholder="0"
             type="number"
-            onChange={(event) => handleChange('decimal', isNaN(Number(event.target.value)) ? '' : event.target.value)}
+            onChange={(event) =>
+              handleChange(
+                'decimal',
+                isNaN(Number(event.target.value)) ? '' : event.target.value,
+              )
+            }
           />
         </FormGroup>
       </Wrapper>
