@@ -252,7 +252,7 @@ export const getContractOwner = async (
 };
 
 export const getBalance = async (address: string, tokenAddress: string, network: Network) => {
-  const resp = await callContract(network, tokenAddress, 'balanceOf', [num.toBigInt(address).toString(10)]);
+  const resp = await callContract(network, tokenAddress, 'balanceOf', [num.toBigInt(address).toString(10)], 'pending');
   return resp[0];
 };
 
