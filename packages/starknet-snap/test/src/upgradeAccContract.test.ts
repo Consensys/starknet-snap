@@ -21,7 +21,7 @@ import {
 import { getAddressKeyDeriver } from '../../src/utils/keyPair';
 import { Mutex } from 'async-mutex';
 import {
-  ApiParams,
+  ApiParamsWithKeyDeriver,
   UpgradeTransactionRequestParams,
 } from '../../src/types/snapApi';
 import {
@@ -37,7 +37,7 @@ const sandbox = sinon.createSandbox();
 describe('Test function: upgradeAccContract', function () {
   this.timeout(5000);
   let walletStub: WalletMock;
-  let apiParams: ApiParams;
+  let apiParams: ApiParamsWithKeyDeriver;
   let state: SnapState;
 
   beforeEach(async function () {

@@ -14,7 +14,7 @@ import { getAddressKeyDeriver } from '../../src/utils/keyPair';
 import * as utils from '../../src/utils/starknetUtils';
 import { Mutex } from 'async-mutex';
 import {
-  ApiParams,
+  ApiParamsWithKeyDeriver,
   ExtractPrivateKeyRequestParams,
 } from '../../src/types/snapApi';
 import { UpgradeRequiredError } from '../../src/utils/exceptions';
@@ -31,12 +31,7 @@ describe('Test function: extractPrivateKey', function () {
     transactions: [],
   };
 
-  const apiParams: ApiParams = {
-    state,
-    requestParams: {},
-    wallet: walletStub,
-    saveMutex: new Mutex(),
-  };
+  let apiParams: ApiParamsWithKeyDeriver;
 
   const requestObject: ExtractPrivateKeyRequestParams = {
     userAddress: account1.address,
@@ -44,7 +39,13 @@ describe('Test function: extractPrivateKey', function () {
 
   beforeEach(async function () {
     walletStub.rpcStubs.snap_getBip44Entropy.callsFake(getBip44EntropyStub);
-    apiParams.keyDeriver = await getAddressKeyDeriver(walletStub);
+    apiParams = {
+      state,
+      requestParams: {},
+      wallet: walletStub,
+      saveMutex: new Mutex(),
+      keyDeriver: await getAddressKeyDeriver(walletStub),
+    };
   });
 
   afterEach(function () {

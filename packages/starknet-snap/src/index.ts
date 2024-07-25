@@ -176,7 +176,9 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
 
       case 'starkNet_signMessage':
         apiParams.keyDeriver = await getAddressKeyDeriver(snap);
-        return await signMessage(apiParams);
+        return await signMessage(
+          apiParams as unknown as ApiParamsWithKeyDeriver,
+        );
 
       case 'starkNet_signTransaction':
         apiParams.keyDeriver = await getAddressKeyDeriver(snap);
@@ -198,7 +200,9 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
 
       case 'starkNet_verifySignedMessage':
         apiParams.keyDeriver = await getAddressKeyDeriver(snap);
-        return await verifySignedMessage(apiParams);
+        return await verifySignedMessage(
+          apiParams as unknown as ApiParamsWithKeyDeriver,
+        );
 
       case 'starkNet_getErc20TokenBalance':
         return await getErc20TokenBalance(apiParams);

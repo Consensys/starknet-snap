@@ -17,7 +17,7 @@ import {
 import { getAddressKeyDeriver } from '../../src/utils/keyPair';
 import { Mutex } from 'async-mutex';
 import {
-  ApiParams,
+  ApiParamsWithKeyDeriver,
   SignDeclareTransactionRequestParams,
 } from '../../src/types/snapApi';
 import { DeclareSignerDetails, constants } from 'starknet';
@@ -40,12 +40,7 @@ describe('Test function: signDeclareTransaction', function () {
     networks: [STARKNET_MAINNET_NETWORK, STARKNET_SEPOLIA_TESTNET_NETWORK],
     transactions: [],
   };
-  const apiParams: ApiParams = {
-    state,
-    requestParams: {},
-    wallet: walletStub,
-    saveMutex: new Mutex(),
-  };
+  let apiParams: ApiParamsWithKeyDeriver;
 
   const declarePayload = {
     classHash:
@@ -66,8 +61,13 @@ describe('Test function: signDeclareTransaction', function () {
 
   beforeEach(async function () {
     walletStub.rpcStubs.snap_getBip44Entropy.callsFake(getBip44EntropyStub);
-    apiParams.keyDeriver = await getAddressKeyDeriver(walletStub);
-    apiParams.requestParams = requestObject;
+    apiParams = {
+      state,
+      requestParams: requestObject,
+      wallet: walletStub,
+      saveMutex: new Mutex(),
+      keyDeriver: await getAddressKeyDeriver(walletStub),
+    };
     sandbox.useFakeTimers(createAccountProxyTxn.timestamp);
     walletStub.rpcStubs.snap_dialog.resolves(true);
     walletStub.rpcStubs.snap_manageState.resolves(state);

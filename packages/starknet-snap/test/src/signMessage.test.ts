@@ -17,7 +17,10 @@ import {
 import { getAddressKeyDeriver } from '../../src/utils/keyPair';
 import * as utils from '../../src/utils/starknetUtils';
 import { Mutex } from 'async-mutex';
-import { ApiParams, SignMessageRequestParams } from '../../src/types/snapApi';
+import {
+  ApiParamsWithKeyDeriver,
+  SignMessageRequestParams,
+} from '../../src/types/snapApi';
 import {
   DeployRequiredError,
   UpgradeRequiredError,
@@ -35,12 +38,7 @@ describe('Test function: signMessage', function () {
     networks: [STARKNET_SEPOLIA_TESTNET_NETWORK],
     transactions: [],
   };
-  const apiParams: ApiParams = {
-    state,
-    requestParams: {},
-    wallet: walletStub,
-    saveMutex: new Mutex(),
-  };
+  let apiParams: ApiParamsWithKeyDeriver;
 
   const requestObject: SignMessageRequestParams = {
     chainId: STARKNET_SEPOLIA_TESTNET_NETWORK.chainId,
@@ -51,8 +49,13 @@ describe('Test function: signMessage', function () {
 
   beforeEach(async function () {
     walletStub.rpcStubs.snap_getBip44Entropy.callsFake(getBip44EntropyStub);
-    apiParams.keyDeriver = await getAddressKeyDeriver(walletStub);
-    apiParams.requestParams = requestObject;
+    apiParams = {
+      state,
+      requestParams: requestObject,
+      wallet: walletStub,
+      saveMutex: new Mutex(),
+      keyDeriver: await getAddressKeyDeriver(walletStub),
+    };
     walletStub.rpcStubs.snap_dialog.resolves(true);
   });
 

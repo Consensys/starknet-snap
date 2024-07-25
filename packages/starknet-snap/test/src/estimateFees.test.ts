@@ -14,7 +14,7 @@ import {
 import { getAddressKeyDeriver } from '../../src/utils/keyPair';
 import * as utils from '../../src/utils/starknetUtils';
 import { Mutex } from 'async-mutex';
-import { ApiParams } from '../../src/types/snapApi';
+import { ApiParamsWithKeyDeriver } from '../../src/types/snapApi';
 import { TransactionType } from 'starknet';
 chai.use(sinonChai);
 const sandbox = sinon.createSandbox();
@@ -28,16 +28,17 @@ describe('Test function: estimateFees', function () {
     networks: [STARKNET_SEPOLIA_TESTNET_NETWORK],
     transactions: [],
   };
-  const apiParams: ApiParams = {
-    state,
-    requestParams: {},
-    wallet: walletStub,
-    saveMutex: new Mutex(),
-  };
+  let apiParams: ApiParamsWithKeyDeriver;
 
   beforeEach(async function () {
     walletStub.rpcStubs.snap_getBip44Entropy.callsFake(getBip44EntropyStub);
-    apiParams.keyDeriver = await getAddressKeyDeriver(walletStub);
+    apiParams = {
+      state,
+      requestParams: {},
+      wallet: walletStub,
+      saveMutex: new Mutex(),
+      keyDeriver: await getAddressKeyDeriver(walletStub),
+    };
   });
 
   afterEach(function () {

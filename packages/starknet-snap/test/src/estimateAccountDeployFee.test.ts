@@ -14,7 +14,7 @@ import {
 } from '../constants.test';
 import { Mutex } from 'async-mutex';
 import {
-  ApiParams,
+  ApiParamsWithKeyDeriver,
   EstimateAccountDeployFeeRequestParams,
 } from '../../src/types/snapApi';
 
@@ -33,16 +33,17 @@ describe('Test function: estimateAccountDeployFee', function () {
   const requestObject: EstimateAccountDeployFeeRequestParams = {
     chainId: STARKNET_SEPOLIA_TESTNET_NETWORK.chainId,
   };
-  const apiParams: ApiParams = {
-    state,
-    requestParams: requestObject,
-    wallet: walletStub,
-    saveMutex: new Mutex(),
-  };
+  let apiParams: ApiParamsWithKeyDeriver;
 
   beforeEach(async function () {
     walletStub.rpcStubs.snap_getBip44Entropy.callsFake(getBip44EntropyStub);
-    apiParams.keyDeriver = await getAddressKeyDeriver(walletStub);
+    apiParams = {
+      state,
+      requestParams: requestObject,
+      wallet: walletStub,
+      saveMutex: new Mutex(),
+      keyDeriver: await getAddressKeyDeriver(walletStub),
+    };
     walletStub.rpcStubs.snap_manageState.resolves(state);
   });
 

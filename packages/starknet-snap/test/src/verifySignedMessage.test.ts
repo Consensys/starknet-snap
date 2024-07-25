@@ -10,7 +10,7 @@ import { getAddressKeyDeriver } from '../../src/utils/keyPair';
 import * as utils from '../../src/utils/starknetUtils';
 import { Mutex } from 'async-mutex';
 import {
-  ApiParams,
+  ApiParamsWithKeyDeriver,
   VerifySignedMessageRequestParams,
 } from '../../src/types/snapApi';
 import { UpgradeRequiredError } from '../../src/utils/exceptions';
@@ -28,12 +28,7 @@ describe('Test function: verifySignedMessage', function () {
     transactions: [],
   };
 
-  const apiParams: ApiParams = {
-    state,
-    requestParams: {},
-    wallet: walletStub,
-    saveMutex: new Mutex(),
-  };
+  let apiParams: ApiParamsWithKeyDeriver;
 
   const requestObject: VerifySignedMessageRequestParams = {
     signerAddress: account1.address,
@@ -43,7 +38,13 @@ describe('Test function: verifySignedMessage', function () {
 
   beforeEach(async function () {
     walletStub.rpcStubs.snap_getBip44Entropy.callsFake(getBip44EntropyStub);
-    apiParams.keyDeriver = await getAddressKeyDeriver(walletStub);
+    apiParams = {
+      state,
+      requestParams: {},
+      wallet: walletStub,
+      saveMutex: new Mutex(),
+      keyDeriver: await getAddressKeyDeriver(walletStub),
+    };
   });
 
   afterEach(function () {

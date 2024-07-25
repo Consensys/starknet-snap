@@ -1,6 +1,9 @@
 import { heading, panel, DialogType } from '@metamask/snaps-sdk';
 
-import type { ApiParams, SignMessageRequestParams } from './types/snapApi';
+import type {
+  ApiParamsWithKeyDeriver,
+  SignMessageRequestParams,
+} from './types/snapApi';
 import { logger } from './utils/logger';
 import { toJson } from './utils/serializer';
 import {
@@ -19,7 +22,7 @@ import {
  *
  * @param params
  */
-export async function signMessage(params: ApiParams) {
+export async function signMessage(params: ApiParamsWithKeyDeriver) {
   try {
     const { state, wallet, keyDeriver, requestParams } = params;
     const requestParamsObj = requestParams as SignMessageRequestParams;

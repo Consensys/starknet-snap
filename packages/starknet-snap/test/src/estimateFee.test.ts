@@ -19,7 +19,10 @@ import {
   getBalanceResp,
 } from '../constants.test';
 import { Mutex } from 'async-mutex';
-import { ApiParams, EstimateFeeRequestParams } from '../../src/types/snapApi';
+import {
+  ApiParamsWithKeyDeriver,
+  EstimateFeeRequestParams,
+} from '../../src/types/snapApi';
 import { TransactionType } from 'starknet';
 import { UpgradeRequiredError } from '../../src/utils/exceptions';
 
@@ -43,16 +46,18 @@ describe('Test function: estimateFee', function () {
       '0x7426b2da7a8978e0d472d64f15f984d658226cb55a4fd8aa7689688a7eab37b',
     senderAddress: account2.address,
   };
-  const apiParams: ApiParams = {
-    state,
-    requestParams: requestObject,
-    wallet: walletStub,
-    saveMutex: new Mutex(),
-  };
+  let apiParams: ApiParamsWithKeyDeriver;
 
   beforeEach(async function () {
     walletStub.rpcStubs.snap_getBip44Entropy.callsFake(getBip44EntropyStub);
-    apiParams.keyDeriver = await getAddressKeyDeriver(walletStub);
+    apiParams = {
+      state,
+      requestParams: requestObject,
+      wallet: walletStub,
+      saveMutex: new Mutex(),
+      keyDeriver: await getAddressKeyDeriver(walletStub),
+    };
+
     sandbox.stub(utils, 'callContract').resolves(getBalanceResp);
     sandbox
       .stub(utils, 'getAccContractAddressAndCallDataLegacy')

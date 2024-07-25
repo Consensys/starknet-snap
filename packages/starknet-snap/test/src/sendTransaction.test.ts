@@ -26,7 +26,7 @@ import {
 import { getAddressKeyDeriver } from '../../src/utils/keyPair';
 import { Mutex } from 'async-mutex';
 import {
-  ApiParams,
+  ApiParamsWithKeyDeriver,
   SendTransactionRequestParams,
 } from '../../src/types/snapApi';
 import { GetTransactionReceiptResponse } from 'starknet';
@@ -44,12 +44,7 @@ describe('Test function: sendTransaction', function () {
     networks: [STARKNET_SEPOLIA_TESTNET_NETWORK],
     transactions: [],
   };
-  const apiParams: ApiParams = {
-    state,
-    requestParams: {},
-    wallet: walletStub,
-    saveMutex: new Mutex(),
-  };
+  let apiParams: ApiParamsWithKeyDeriver;
 
   const requestObject: SendTransactionRequestParams = {
     contractAddress:
@@ -63,7 +58,13 @@ describe('Test function: sendTransaction', function () {
 
   beforeEach(async function () {
     walletStub.rpcStubs.snap_getBip44Entropy.callsFake(getBip44EntropyStub);
-    apiParams.keyDeriver = await getAddressKeyDeriver(walletStub);
+    apiParams = {
+      state,
+      requestParams: {},
+      wallet: walletStub,
+      saveMutex: new Mutex(),
+      keyDeriver: await getAddressKeyDeriver(walletStub),
+    };
   });
 
   afterEach(function () {

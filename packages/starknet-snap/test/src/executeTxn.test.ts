@@ -20,7 +20,10 @@ import * as createAccountUtils from '../../src/createAccount';
 import * as snapsUtil from '../../src/utils/snapUtils';
 import { getAddressKeyDeriver } from '../../src/utils/keyPair';
 import { Mutex } from 'async-mutex';
-import { ApiParams, ExecuteTxnRequestParams } from '../../src/types/snapApi';
+import {
+  ApiParamsWithKeyDeriver,
+  ExecuteTxnRequestParams,
+} from '../../src/types/snapApi';
 import { GetTransactionReceiptResponse } from 'starknet';
 import {
   DeployRequiredError,
@@ -39,12 +42,7 @@ describe('Test function: executeTxn', function () {
     networks: [STARKNET_MAINNET_NETWORK, STARKNET_SEPOLIA_TESTNET_NETWORK],
     transactions: [],
   };
-  const apiParams: ApiParams = {
-    state,
-    requestParams: {},
-    wallet: walletStub,
-    saveMutex: new Mutex(),
-  };
+  let apiParams: ApiParamsWithKeyDeriver;
 
   const requestObject: ExecuteTxnRequestParams = {
     chainId: STARKNET_MAINNET_NETWORK.chainId,
@@ -61,8 +59,13 @@ describe('Test function: executeTxn', function () {
 
   beforeEach(async function () {
     walletStub.rpcStubs.snap_getBip44Entropy.callsFake(getBip44EntropyStub);
-    apiParams.keyDeriver = await getAddressKeyDeriver(walletStub);
-    apiParams.requestParams = requestObject;
+    apiParams = {
+      state,
+      requestParams: requestObject,
+      wallet: walletStub,
+      saveMutex: new Mutex(),
+      keyDeriver: await getAddressKeyDeriver(walletStub),
+    };
     sandbox.stub(utils, 'estimateFeeBulk').callsFake(async () => {
       return [estimateFeeResp];
     });
