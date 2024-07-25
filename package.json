@@ -18,16 +18,14 @@
     "lint:fix": "yarn workspaces foreach --parallel --interlaced --verbose run lint:fix",
     "start": "yarn workspaces foreach --parallel --interlaced --verbose run start",
     "test": "yarn workspaces foreach --parallel --interlaced --verbose run test",
-    "prepare": "husky install",
-    "start-debug-ui": "http-server packages/starknet-snap"
+    "prepare": "husky install"
   },
   "devDependencies": {
     "@commitlint/cli": "^17.0.3",
     "@commitlint/config-conventional": "^17.0.3",
     "@lavamoat/allow-scripts": "^3.0.0",
     "@lavamoat/preinstall-always-fail": "^2.0.0",
-    "husky": "^8.0.0",
-    "http-server": "^14.1.1"
+    "husky": "^8.0.0"
   },
   "packageManager": "yarn@3.2.1",
   "engines": {
