@@ -2077,7 +2077,7 @@ __metadata:
 
 "@consensys/starknet-snap@file:../starknet-snap::locator=wallet-ui%40workspace%3Apackages%2Fwallet-ui":
   version: 2.9.0
-  resolution: "@consensys/starknet-snap@file:../starknet-snap#../starknet-snap::hash=0f6718&locator=wallet-ui%40workspace%3Apackages%2Fwallet-ui"
+  resolution: "@consensys/starknet-snap@file:../starknet-snap#../starknet-snap::hash=4d9aa6&locator=wallet-ui%40workspace%3Apackages%2Fwallet-ui"
   dependencies:
     "@metamask/key-tree": 9.0.0
     "@metamask/snaps-sdk": ^4.0.0
@@ -2086,7 +2086,7 @@ __metadata:
     ethers: ^5.5.1
     starknet: 6.7.0
     starknet_v4.22.0: "npm:starknet@4.22.0"
-  checksum: 2eeb4ec98a2177838da49aacc1cb1fd0233de0bd381213d8358327808fe5f6faa9950921b33102bfdba6171ed34a9245a51fbe39b5d53f5839b439987f735b1a
+  checksum: d8e8b23b3553a1c526205aa7ead79bbafa8274edd8c1a1624148bd6b126d002891816abc36c2639e5fbb02319fb58c97757773fdfb268524a8704d095df6ddf5
   languageName: node
   linkType: hard
 
@@ -2109,7 +2109,6 @@ __metadata:
     "@typescript-eslint/eslint-plugin": ^5.42.1
     "@typescript-eslint/parser": ^5.42.1
     async-mutex: ^0.3.2
-    bip174: ^2.1.1
     chai: ^4.3.6
     chai-as-promised: ^7.1.1
     cross-env: ^7.0.3
@@ -9818,13 +9817,6 @@ __metadata:
   dependencies:
     file-uri-to-path: 1.0.0
   checksum: 65b6b48095717c2e6105a021a7da4ea435aa8d3d3cd085cb9e85bcb6e5773cf318c4745c3f7c504412855940b585bdf9b918236612a1c7a7942491de176f1ae7
-  languageName: node
-  linkType: hard
-
-"bip174@npm:^2.1.1":
-  version: 2.1.1
-  resolution: "bip174@npm:2.1.1"
-  checksum: bc5b99e7d1acd9484aec117dc4d931a8b6d3a77ffb84e9672a9e8be2e41c22a3d41b4dad307cbe84091c6a30ee2ceaf8e1b3036b91201d4767d0772485ecb225
   languageName: node
   linkType: hard
 

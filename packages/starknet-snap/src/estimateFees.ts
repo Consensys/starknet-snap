@@ -1,4 +1,7 @@
-import type { ApiParams, EstimateFeesRequestParams } from './types/snapApi';
+import type {
+  ApiParamsWithKeyDeriver,
+  EstimateFeesRequestParams,
+} from './types/snapApi';
 import { logger } from './utils/logger';
 import { toJson } from './utils/serializer';
 import { getNetworkFromChainId } from './utils/snapUtils';
@@ -8,7 +11,7 @@ import { getKeysFromAddress, estimateFeeBulk } from './utils/starknetUtils';
  *
  * @param params
  */
-export async function estimateFees(params: ApiParams) {
+export async function estimateFees(params: ApiParamsWithKeyDeriver) {
   try {
     const { state, keyDeriver, requestParams } = params;
     const requestParamsObj = requestParams as EstimateFeesRequestParams;

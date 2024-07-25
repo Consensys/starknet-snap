@@ -3,7 +3,10 @@ import { num as numUtils, constants } from 'starknet';
 
 import { createAccount } from './createAccount';
 import { estimateFee } from './estimateFee';
-import type { ApiParams, SendTransactionRequestParams } from './types/snapApi';
+import type {
+  ApiParamsWithKeyDeriver,
+  SendTransactionRequestParams,
+} from './types/snapApi';
 import type { Transaction } from './types/snapState';
 import { TransactionStatus, VoyagerTransactionType } from './types/snapState';
 import { logger } from './utils/logger';
@@ -26,7 +29,7 @@ import {
  *
  * @param params
  */
-export async function sendTransaction(params: ApiParams) {
+export async function sendTransaction(params: ApiParamsWithKeyDeriver) {
   try {
     const { state, wallet, saveMutex, keyDeriver, requestParams } = params;
     const requestParamsObj = requestParams as SendTransactionRequestParams;

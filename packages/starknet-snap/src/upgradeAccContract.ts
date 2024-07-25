@@ -2,7 +2,7 @@ import { heading, panel, DialogType } from '@metamask/snaps-sdk';
 import { num as numUtils, constants, CallData } from 'starknet';
 
 import type {
-  ApiParams,
+  ApiParamsWithKeyDeriver,
   UpgradeTransactionRequestParams,
 } from './types/snapApi';
 import type { Transaction } from './types/snapState';
@@ -28,7 +28,7 @@ import {
  *
  * @param params
  */
-export async function upgradeAccContract(params: ApiParams) {
+export async function upgradeAccContract(params: ApiParamsWithKeyDeriver) {
   try {
     const { state, wallet, saveMutex, keyDeriver, requestParams } = params;
     const requestParamsObj = requestParams as UpgradeTransactionRequestParams;

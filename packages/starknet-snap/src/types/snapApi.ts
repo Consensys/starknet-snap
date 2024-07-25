@@ -23,6 +23,10 @@ export type ApiParams = {
   keyDeriver?: BIP44AddressKeyDeriver;
 };
 
+export type ApiParamsWithKeyDeriver = ApiParams & {
+  keyDeriver: BIP44AddressKeyDeriver;
+};
+
 export type ApiRequestParams =
   | CreateAccountRequestParams
   | GetStoredUserAccountsRequestParams

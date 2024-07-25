@@ -1,8 +1,7 @@
-import type { BIP44AddressKeyDeriver } from '@metamask/key-tree';
 import type { EstimateFee } from 'starknet';
 
 import type {
-  ApiParams,
+  ApiParamsWithKeyDeriver,
   EstimateAccountDeployFeeRequestParams,
 } from './types/snapApi';
 import { logger } from './utils/logger';
@@ -18,7 +17,7 @@ import {
  *
  * @param params
  */
-export async function estimateAccDeployFee(params: ApiParams) {
+export async function estimateAccDeployFee(params: ApiParamsWithKeyDeriver) {
   try {
     const { state, keyDeriver, requestParams } = params;
     const requestParamsObj =
@@ -32,7 +31,7 @@ export async function estimateAccDeployFee(params: ApiParams) {
       addressIndex: addressIndexInUsed,
       privateKey,
     } = await getKeysFromAddressIndex(
-      keyDeriver as unknown as BIP44AddressKeyDeriver,
+      keyDeriver,
       network.chainId,
       state,
       addressIndex,

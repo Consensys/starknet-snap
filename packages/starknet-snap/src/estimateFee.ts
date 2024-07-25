@@ -1,7 +1,10 @@
 import type { Invocations } from 'starknet';
 import { TransactionType } from 'starknet';
 
-import type { ApiParams, EstimateFeeRequestParams } from './types/snapApi';
+import type {
+  ApiParamsWithKeyDeriver,
+  EstimateFeeRequestParams,
+} from './types/snapApi';
 import { ACCOUNT_CLASS_HASH } from './utils/constants';
 import { logger } from './utils/logger';
 import { toJson } from './utils/serializer';
@@ -22,7 +25,7 @@ import {
  *
  * @param params
  */
-export async function estimateFee(params: ApiParams) {
+export async function estimateFee(params: ApiParamsWithKeyDeriver) {
   try {
     const { state, keyDeriver, requestParams } = params;
     const requestParamsObj = requestParams as EstimateFeeRequestParams;

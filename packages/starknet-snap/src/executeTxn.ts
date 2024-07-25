@@ -4,7 +4,10 @@ import type { Invocations } from 'starknet';
 import { TransactionType } from 'starknet';
 
 import { createAccount } from './createAccount';
-import type { ApiParams, ExecuteTxnRequestParams } from './types/snapApi';
+import type {
+  ApiParamsWithKeyDeriver,
+  ExecuteTxnRequestParams,
+} from './types/snapApi';
 import { ACCOUNT_CLASS_HASH } from './utils/constants';
 import { logger } from './utils/logger';
 import {
@@ -27,7 +30,7 @@ import {
  *
  * @param params
  */
-export async function executeTxn(params: ApiParams) {
+export async function executeTxn(params: ApiParamsWithKeyDeriver) {
   try {
     const { state, keyDeriver, requestParams, wallet } = params;
     const requestParamsObj = requestParams as ExecuteTxnRequestParams;
@@ -95,7 +98,7 @@ export async function executeTxn(params: ApiParams) {
     logger.log(`MaxFee: ${maxFee}`);
 
     let snapComponents: Component[] = [];
-    let createAccountApiParams = {} as ApiParams;
+    let createAccountApiParams = {} as ApiParamsWithKeyDeriver;
     if (!accountDeployed) {
       snapComponents.push(heading(`The account will be deployed`));
       addDialogTxt(snapComponents, 'Address', senderAddress);

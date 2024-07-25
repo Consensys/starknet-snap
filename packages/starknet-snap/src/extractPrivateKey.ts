@@ -1,7 +1,7 @@
 import { copyable, panel, text, DialogType } from '@metamask/snaps-sdk';
 
 import type {
-  ApiParams,
+  ApiParamsWithKeyDeriver,
   ExtractPrivateKeyRequestParams,
 } from './types/snapApi';
 import { logger } from './utils/logger';
@@ -17,7 +17,7 @@ import {
  *
  * @param params
  */
-export async function extractPrivateKey(params: ApiParams) {
+export async function extractPrivateKey(params: ApiParamsWithKeyDeriver) {
   try {
     const { state, wallet, keyDeriver, requestParams } = params;
     const requestParamsObj = requestParams as ExtractPrivateKeyRequestParams;

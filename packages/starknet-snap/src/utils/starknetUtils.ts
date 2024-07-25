@@ -801,7 +801,7 @@ export const findAddressIndex = async (
 };
 
 export const getKeysFromAddress = async (
-  keyDeriver,
+  keyDeriver: BIP44AddressKeyDeriver,
   network: Network,
   state: SnapState,
   address: string,

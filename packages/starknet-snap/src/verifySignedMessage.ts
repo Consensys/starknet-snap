@@ -1,6 +1,6 @@
 import typedDataExample from './typedData/typedDataExample.json';
 import type {
-  ApiParams,
+  ApiParamsWithKeyDeriver,
   VerifySignedMessageRequestParams,
 } from './types/snapApi';
 import { logger } from './utils/logger';
@@ -18,7 +18,7 @@ import {
  *
  * @param params
  */
-export async function verifySignedMessage(params: ApiParams) {
+export async function verifySignedMessage(params: ApiParamsWithKeyDeriver) {
   try {
     const { state, keyDeriver, requestParams } = params;
     const requestParamsObj = requestParams as VerifySignedMessageRequestParams;

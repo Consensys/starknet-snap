@@ -1,6 +1,9 @@
 import { heading, panel, DialogType } from '@metamask/snaps-sdk';
 
-import type { ApiParams, DeclareContractRequestParams } from './types/snapApi';
+import type {
+  ApiParamsWithKeyDeriver,
+  DeclareContractRequestParams,
+} from './types/snapApi';
 import { logger } from './utils/logger';
 import { toJson } from './utils/serializer';
 import {
@@ -18,9 +21,10 @@ import {
  *
  * @param params
  */
-export async function declareContract(params: ApiParams) {
+export async function declareContract(params: ApiParamsWithKeyDeriver) {
   try {
     const { state, keyDeriver, requestParams, wallet } = params;
+
     const requestParamsObj = requestParams as DeclareContractRequestParams;
 
     logger.log(`executeTxn params: ${toJson(requestParamsObj, 2)}}`);

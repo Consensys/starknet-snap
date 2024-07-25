@@ -1,7 +1,10 @@
 import type { BIP44AddressKeyDeriver } from '@metamask/key-tree';
 import { num as numUtils } from 'starknet';
 
-import type { ApiParams, RecoverAccountsRequestParams } from './types/snapApi';
+import type {
+  ApiParamsWithKeyDeriver,
+  RecoverAccountsRequestParams,
+} from './types/snapApi';
 import type { AccContract } from './types/snapState';
 import { logger } from './utils/logger';
 import { toJson } from './utils/serializer';
@@ -19,7 +22,7 @@ import {
  *
  * @param params
  */
-export async function recoverAccounts(params: ApiParams) {
+export async function recoverAccounts(params: ApiParamsWithKeyDeriver) {
   try {
     const { state, wallet, saveMutex, keyDeriver, requestParams } = params;
     const requestParamsObj = requestParams as RecoverAccountsRequestParams;

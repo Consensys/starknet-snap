@@ -1,9 +1,11 @@
-import type { BIP44AddressKeyDeriver } from '@metamask/key-tree';
 import { heading, panel, DialogType } from '@metamask/snaps-sdk';
 import type { CairoVersion, EstimateFee } from 'starknet';
 import { num as numUtils } from 'starknet';
 
-import type { ApiParams, CreateAccountRequestParams } from './types/snapApi';
+import type {
+  ApiParamsWithKeyDeriver,
+  CreateAccountRequestParams,
+} from './types/snapApi';
 import type { AccContract, Transaction } from './types/snapState';
 import { VoyagerTransactionType, TransactionStatus } from './types/snapState';
 import { CAIRO_VERSION_LEGACY, CAIRO_VERSION } from './utils/constants';
@@ -34,7 +36,7 @@ import {
  * @param cairoVersion - The cairo version to use, default use constant CAIRO_VERSION.
  */
 export async function createAccount(
-  params: ApiParams,
+  params: ApiParamsWithKeyDeriver,
   silentMode = false,
   waitMode = false,
   cairoVersion: CairoVersion = CAIRO_VERSION,
@@ -52,7 +54,7 @@ export async function createAccount(
       addressIndex: addressIndexInUsed,
       derivationPath,
     } = await getKeysFromAddressIndex(
-      keyDeriver as unknown as BIP44AddressKeyDeriver,
+      keyDeriver,
       network.chainId,
       state,
       addressIndex,

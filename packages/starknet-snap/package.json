@@ -58,7 +58,6 @@
     "@types/sinon-chai": "^3.2.8",
     "@typescript-eslint/eslint-plugin": "^5.42.1",
     "@typescript-eslint/parser": "^5.42.1",
-    "bip174": "^2.1.1",
     "chai": "^4.3.6",
     "chai-as-promised": "^7.1.1",
     "cross-env": "^7.0.3",

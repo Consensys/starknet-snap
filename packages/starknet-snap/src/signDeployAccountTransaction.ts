@@ -2,7 +2,7 @@ import { heading, panel, DialogType } from '@metamask/snaps-sdk';
 import type { Signature } from 'starknet';
 
 import type {
-  ApiParams,
+  ApiParamsWithKeyDeriver,
   SignDeployAccountTransactionRequestParams,
 } from './types/snapApi';
 import { logger } from './utils/logger';
@@ -23,7 +23,7 @@ import {
  * @param params
  */
 export async function signDeployAccountTransaction(
-  params: ApiParams,
+  params: ApiParamsWithKeyDeriver,
 ): Promise<Signature | boolean> {
   try {
     const { state, keyDeriver, requestParams, wallet } = params;

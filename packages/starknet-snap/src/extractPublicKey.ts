@@ -1,6 +1,9 @@
 import { constants, num as numUtils } from 'starknet';
 
-import type { ApiParams, ExtractPublicKeyRequestParams } from './types/snapApi';
+import type {
+  ApiParamsWithKeyDeriver,
+  ExtractPublicKeyRequestParams,
+} from './types/snapApi';
 import { logger } from './utils/logger';
 import { toJson } from './utils/serializer';
 import { getAccount, getNetworkFromChainId } from './utils/snapUtils';
@@ -14,7 +17,7 @@ import {
  *
  * @param params
  */
-export async function extractPublicKey(params: ApiParams) {
+export async function extractPublicKey(params: ApiParamsWithKeyDeriver) {
   try {
     const { state, keyDeriver, requestParams } = params;
     const requestParamsObj = requestParams as ExtractPublicKeyRequestParams;

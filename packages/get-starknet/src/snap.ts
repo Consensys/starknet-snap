@@ -305,7 +305,7 @@ export class MetaMaskSnap {
       providers = ethereum.providers as unknown as MetaMaskProvider[];
     }
 
-    // delect provider by sending request
+    // detect provider by sending request
     for (const provider of providers) {
       if (provider && (await MetaMaskSnap.isSupportSnap(provider))) {
         return provider;
