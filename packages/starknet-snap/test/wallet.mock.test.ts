@@ -1,7 +1,10 @@
 import sinon from 'sinon';
 export interface Wallet {
   registerRpcMessageHandler: (fn) => unknown;
-  request(options: { method: string; params?: { [key: string]: unknown } | unknown[] }): unknown;
+  request(options: {
+    method: string;
+    params?: { [key: string]: unknown } | unknown[];
+  }): unknown;
 }
 
 export class WalletMock implements Wallet {
@@ -19,7 +22,10 @@ export class WalletMock implements Wallet {
    * Calls this.requestStub or this.rpcStubs[req.method], if the method has
    * a dedicated stub.
    */
-  public request(args: { method: string; params: { [key: string]: unknown } | unknown[] }): unknown {
+  public request(args: {
+    method: string;
+    params: { [key: string]: unknown } | unknown[];
+  }): unknown {
     const { method, params } = args;
     if (Object.hasOwnProperty.call(this.rpcStubs, method)) {
       if (Array.isArray(params)) {
@@ -34,6 +40,8 @@ export class WalletMock implements Wallet {
   public reset(): void {
     this.registerRpcMessageHandler.reset();
     this.requestStub.reset();
-    Object.values(this.rpcStubs).forEach((stub: ReturnType<typeof sinon.stub>) => stub.reset());
+    Object.values(this.rpcStubs).forEach(
+      (stub: ReturnType<typeof sinon.stub>) => stub.reset(),
+    );
   }
 }

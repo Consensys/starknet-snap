@@ -1,12 +1,16 @@
+import { heading, panel, DialogType } from '@metamask/snaps-sdk';
+import type { CairoVersion, EstimateFee } from 'starknet';
+import { num as numUtils } from 'starknet';
+
+import type {
+  ApiParamsWithKeyDeriver,
+  CreateAccountRequestParams,
+} from './types/snapApi';
+import type { AccContract, Transaction } from './types/snapState';
+import { VoyagerTransactionType, TransactionStatus } from './types/snapState';
+import { CAIRO_VERSION_LEGACY, CAIRO_VERSION } from './utils/constants';
+import { logger } from './utils/logger';
 import { toJson } from './utils/serializer';
-import {
-  getKeysFromAddressIndex,
-  getAccContractAddressAndCallData,
-  deployAccount,
-  waitForTransaction,
-  getAccContractAddressAndCallDataLegacy,
-  estimateAccountDeployFee,
-} from './utils/starknetUtils';
 import {
   getNetworkFromChainId,
   getValidNumber,
@@ -14,22 +18,25 @@ import {
   upsertTransaction,
   getSendTxnText,
 } from './utils/snapUtils';
-import { AccContract, VoyagerTransactionType, Transaction, TransactionStatus } from './types/snapState';
-import { ApiParams, CreateAccountRequestParams } from './types/snapApi';
-import { heading, panel, DialogType } from '@metamask/snaps-sdk';
-import { logger } from './utils/logger';
-import { CAIRO_VERSION, CAIRO_VERSION_LEGACY } from './utils/constants';
-import { CairoVersion, EstimateFee, num } from 'starknet';
+import {
+  getKeysFromAddressIndex,
+  getAccContractAddressAndCallDataLegacy,
+  getAccContractAddressAndCallData,
+  deployAccount,
+  waitForTransaction,
+  estimateAccountDeployFee,
+} from './utils/starknetUtils';
 
 /**
  * Create an starknet account.
  *
- * @template Params - The ApiParams of the request.
+ * @param params - The ApiParams of the request.
  * @param silentMode - The flag to disable the confirmation dialog from snap.
  * @param waitMode - The flag to enable an determination by doing an recursive fetch to check if the deploy account status is on L2 or not. The wait mode is only useful when it compose with other txn together, it can make sure the deploy txn execute complete, avoiding the latter txn failed.
+ * @param cairoVersion - The cairo version to use, default use constant CAIRO_VERSION.
  */
 export async function createAccount(
-  params: ApiParams,
+  params: ApiParamsWithKeyDeriver,
   silentMode = false,
   waitMode = false,
   cairoVersion: CairoVersion = CAIRO_VERSION,
@@ -39,19 +46,24 @@ export async function createAccount(
     const requestParamsObj = requestParams as CreateAccountRequestParams;
     const addressIndex = getValidNumber(requestParamsObj.addressIndex, -1, 0);
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
-    const deploy = !!requestParamsObj.deploy;
+    const deploy = Boolean(requestParamsObj.deploy);
 
     const {
       privateKey,
       publicKey,
       addressIndex: addressIndexInUsed,
       derivationPath,
-    } = await getKeysFromAddressIndex(keyDeriver, network.chainId, state, addressIndex);
-
+    } = await getKeysFromAddressIndex(
+      keyDeriver,
+      network.chainId,
+      state,
+      addressIndex,
+    );
     const { address: contractAddress, callData: contractCallData } =
-      cairoVersion == CAIRO_VERSION_LEGACY
+      cairoVersion === CAIRO_VERSION_LEGACY
         ? getAccContractAddressAndCallDataLegacy(publicKey)
         : getAccContractAddressAndCallData(publicKey);
+
     logger.log(
       `createAccount:\ncontractAddress = ${contractAddress}\npublicKey = ${publicKey}\naddressIndex = ${addressIndexInUsed}`,
     );
@@ -70,8 +82,14 @@ export async function createAccount(
           privateKey,
           cairoVersion,
         );
-        logger.log(`estimateAccountDeployFee:\nestimateDeployFee: ${toJson(estimateDeployFee)}`);
-        const maxFee = num.toBigInt(estimateDeployFee.suggestedMaxFee.toString(10) ?? '0');
+        logger.log(
+          `estimateAccountDeployFee:\nestimateDeployFee: ${toJson(
+            estimateDeployFee,
+          )}`,
+        );
+        const maxFee = numUtils.toBigInt(
+          estimateDeployFee.suggestedMaxFee.toString(10) ?? '0',
+        );
         const dialogComponents = getSendTxnText(
           state,
           contractAddress,
@@ -86,14 +104,17 @@ export async function createAccount(
           method: 'snap_dialog',
           params: {
             type: DialogType.Confirmation,
-            content: panel([heading('Do you want to sign this deploy transaction ?'), ...dialogComponents]),
+            content: panel([
+              heading('Do you want to sign this deploy transaction ?'),
+              ...dialogComponents,
+            ]),
           },
         });
-
-        if (!response)
+        if (!response) {
           return {
             address: contractAddress,
           };
+        }
       }
 
       // Deploy account will auto estimate the fee from the network if not provided
@@ -143,19 +164,25 @@ export async function createAccount(
       logger.log(`createAccount:\ndeployResp: ${toJson(deployResp)}`);
 
       if (waitMode) {
-        await waitForTransaction(network, deployResp.contract_address, privateKey, deployResp.transaction_hash);
+        await waitForTransaction(
+          network,
+          deployResp.contract_address,
+          privateKey,
+          deployResp.transaction_hash,
+        );
       }
 
       return {
         address: deployResp.contract_address,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         transaction_hash: deployResp.transaction_hash,
       };
     }
     return {
       address: contractAddress,
     };
-  } catch (err) {
-    logger.error(`Problem found: ${err}`);
-    throw err;
+  } catch (error) {
+    logger.error(`Problem found:`, error);
+    throw error;
   }
 }

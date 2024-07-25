@@ -37,7 +37,8 @@ describe('Test function: getStarkName', function () {
       return 'testName.stark';
     });
     const requestObject: GetStarkNameRequestParam = {
-      userAddress: '0x01c744953f1d671673f46a9179a58a7e58d9299499b1e076cdb908e7abffe69f',
+      userAddress:
+        '0x01c744953f1d671673f46a9179a58a7e58d9299499b1e076cdb908e7abffe69f',
     };
     apiParams.requestParams = requestObject;
     const result = await getStarkName(apiParams);
@@ -47,7 +48,8 @@ describe('Test function: getStarkName', function () {
   it('should throw error if getStarkNameUtil failed', async function () {
     sandbox.stub(utils, 'getStarkNameUtil').throws(new Error());
     const requestObject: GetStarkNameRequestParam = {
-      userAddress: '0x01c744953f1d671673f46a9179a58a7e58d9299499b1e076cdb908e7abffe69f',
+      userAddress:
+        '0x01c744953f1d671673f46a9179a58a7e58d9299499b1e076cdb908e7abffe69f',
     };
     apiParams.requestParams = requestObject;
 

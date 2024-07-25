@@ -6,7 +6,10 @@ import * as utils from '../../src/utils/starknetUtils';
 import * as snapUtils from '../../src/utils/snapUtils';
 import { createAccount } from '../../src/createAccount';
 import { SnapState } from '../../src/types/snapState';
-import { STARKNET_MAINNET_NETWORK, STARKNET_SEPOLIA_TESTNET_NETWORK } from '../../src/utils/constants';
+import {
+  STARKNET_MAINNET_NETWORK,
+  STARKNET_SEPOLIA_TESTNET_NETWORK,
+} from '../../src/utils/constants';
 import {
   createAccountProxyTxn,
   createAccountProxyResp,
@@ -20,8 +23,12 @@ import {
 } from '../constants.test';
 import { getAddressKeyDeriver } from '../../src/utils/keyPair';
 import { Mutex } from 'async-mutex';
-import { ApiParams, CreateAccountRequestParams } from '../../src/types/snapApi';
+import {
+  ApiParamsWithKeyDeriver,
+  CreateAccountRequestParams,
+} from '../../src/types/snapApi';
 import { GetTransactionReceiptResponse } from 'starknet';
+import { BIP44AddressKeyDeriver } from '@metamask/key-tree';
 
 chai.use(sinonChai);
 const sandbox = sinon.createSandbox();
@@ -36,21 +43,24 @@ describe('Test function: createAccount', function () {
     networks: [STARKNET_MAINNET_NETWORK, STARKNET_SEPOLIA_TESTNET_NETWORK],
     transactions: [],
   };
-  const apiParams: ApiParams = {
-    state,
-    requestParams: {},
-    wallet: walletStub,
-    saveMutex: new Mutex(),
-  };
+  let apiParams: ApiParamsWithKeyDeriver;
 
   beforeEach(async function () {
     walletStub.rpcStubs.snap_getBip44Entropy.callsFake(getBip44EntropyStub);
-    apiParams.keyDeriver = await getAddressKeyDeriver(walletStub);
+    apiParams = {
+      state,
+      requestParams: {},
+      wallet: walletStub,
+      saveMutex: new Mutex(),
+      keyDeriver: await getAddressKeyDeriver(walletStub),
+    };
     sandbox.useFakeTimers(createAccountProxyTxn.timestamp);
     walletStub.rpcStubs.snap_dialog.resolves(true);
     walletStub.rpcStubs.snap_manageState.resolves(state);
     waitForTransactionStub = sandbox.stub(utils, 'waitForTransaction');
-    waitForTransactionStub.resolves({} as unknown as GetTransactionReceiptResponse);
+    waitForTransactionStub.resolves(
+      {} as unknown as GetTransactionReceiptResponse,
+    );
     sandbox.stub(utils, 'estimateAccountDeployFee').callsFake(async () => {
       return estimateDeployFeeResp;
     });
@@ -74,12 +84,13 @@ describe('Test function: createAccount', function () {
     apiParams.requestParams = requestObject;
     const result = await createAccount(apiParams);
     const { publicKey } = await utils.getKeysFromAddressIndex(
-      apiParams.keyDeriver,
+      apiParams.keyDeriver as unknown as BIP44AddressKeyDeriver,
       STARKNET_MAINNET_NETWORK.chainId,
       state,
       -1,
     );
-    const { address: contractAddress } = utils.getAccContractAddressAndCallData(publicKey);
+    const { address: contractAddress } =
+      utils.getAccContractAddressAndCallData(publicKey);
     expect(walletStub.rpcStubs.snap_manageState).to.have.been.callCount(0);
     expect(result.address).to.be.eq(contractAddress);
     expect(state.accContracts.length).to.be.eq(0);
@@ -122,11 +133,19 @@ describe('Test function: createAccount', function () {
       state,
       createAccountProxyMainnetResp.contract_address,
     );
-    expect(result.address).to.be.eq(createAccountProxyMainnetResp.contract_address);
-    expect(result.transaction_hash).to.be.eq(createAccountProxyMainnetResp.transaction_hash);
+    expect(result.address).to.be.eq(
+      createAccountProxyMainnetResp.contract_address,
+    );
+    expect(result.transaction_hash).to.be.eq(
+      createAccountProxyMainnetResp.transaction_hash,
+    );
     expect(state.accContracts.length).to.be.eq(1);
-    expect(state.accContracts[0].address).to.be.eq(createAccountProxyMainnetResp.contract_address);
-    expect(state.accContracts[0].deployTxnHash).to.be.eq(createAccountProxyMainnetResp.transaction_hash);
+    expect(state.accContracts[0].address).to.be.eq(
+      createAccountProxyMainnetResp.contract_address,
+    );
+    expect(state.accContracts[0].deployTxnHash).to.be.eq(
+      createAccountProxyMainnetResp.transaction_hash,
+    );
     expect(state.accContracts[0].publicKey).to.be.eq(expectedPublicKey);
     expect(state.accContracts[0].addressSalt).to.be.eq(expectedPublicKey);
     expect(state.transactions.length).to.be.eq(1);
@@ -153,11 +172,19 @@ describe('Test function: createAccount', function () {
       createAccountProxyMainnetResp2.contract_address,
     );
     expect(walletStub.rpcStubs.snap_manageState).to.have.been.callCount(4);
-    expect(result.address).to.be.eq(createAccountProxyMainnetResp2.contract_address);
-    expect(result.transaction_hash).to.be.eq(createAccountProxyMainnetResp2.transaction_hash);
+    expect(result.address).to.be.eq(
+      createAccountProxyMainnetResp2.contract_address,
+    );
+    expect(result.transaction_hash).to.be.eq(
+      createAccountProxyMainnetResp2.transaction_hash,
+    );
     expect(state.accContracts.length).to.be.eq(2);
-    expect(state.accContracts[1].address).to.be.eq(createAccountProxyMainnetResp2.contract_address);
-    expect(state.accContracts[1].deployTxnHash).to.be.eq(createAccountProxyMainnetResp2.transaction_hash);
+    expect(state.accContracts[1].address).to.be.eq(
+      createAccountProxyMainnetResp2.contract_address,
+    );
+    expect(state.accContracts[1].deployTxnHash).to.be.eq(
+      createAccountProxyMainnetResp2.transaction_hash,
+    );
     expect(state.accContracts[1].publicKey).to.be.eq(expectedPublicKey);
     expect(state.accContracts[1].addressSalt).to.be.eq(expectedPublicKey);
     expect(state.transactions.length).to.be.eq(2);
@@ -179,10 +206,16 @@ describe('Test function: createAccount', function () {
     );
     expect(walletStub.rpcStubs.snap_manageState).to.have.been.callCount(4);
     expect(result.address).to.be.eq(createAccountProxyResp.contract_address);
-    expect(result.transaction_hash).to.be.eq(createAccountProxyResp.transaction_hash);
+    expect(result.transaction_hash).to.be.eq(
+      createAccountProxyResp.transaction_hash,
+    );
     expect(state.accContracts.length).to.be.eq(1);
-    expect(state.accContracts[0].address).to.be.eq(createAccountProxyResp.contract_address);
-    expect(state.accContracts[0].deployTxnHash).to.be.eq(createAccountProxyResp.transaction_hash);
+    expect(state.accContracts[0].address).to.be.eq(
+      createAccountProxyResp.contract_address,
+    );
+    expect(state.accContracts[0].deployTxnHash).to.be.eq(
+      createAccountProxyResp.transaction_hash,
+    );
     expect(state.accContracts[0].publicKey).to.be.eq(expectedPublicKey);
     expect(state.accContracts[0].addressSalt).to.be.eq(expectedPublicKey);
     expect(state.transactions.length).to.be.eq(1);
@@ -215,8 +248,12 @@ describe('Test function: createAccount', function () {
     apiParams.requestParams = requestObject;
     const result = await createAccount(apiParams);
     expect(walletStub.rpcStubs.snap_manageState).to.have.been.callCount(0);
-    expect(result.address).to.be.eq(createAccountFailedProxyResp.contract_address);
-    expect(result.transaction_hash).to.be.eq(createAccountFailedProxyResp.transaction_hash);
+    expect(result.address).to.be.eq(
+      createAccountFailedProxyResp.contract_address,
+    );
+    expect(result.transaction_hash).to.be.eq(
+      createAccountFailedProxyResp.transaction_hash,
+    );
     expect(state.accContracts.length).to.be.eq(0);
     expect(state.transactions.length).to.be.eq(0);
   });

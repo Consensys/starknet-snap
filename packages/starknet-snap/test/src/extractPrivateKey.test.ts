@@ -5,11 +5,18 @@ import { WalletMock } from '../wallet.mock.test';
 import { SnapState } from '../../src/types/snapState';
 import { extractPrivateKey } from '../../src/extractPrivateKey';
 import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../../src/utils/constants';
-import { account1, getBip44EntropyStub, unfoundUserAddress } from '../constants.test';
+import {
+  account1,
+  getBip44EntropyStub,
+  unfoundUserAddress,
+} from '../constants.test';
 import { getAddressKeyDeriver } from '../../src/utils/keyPair';
 import * as utils from '../../src/utils/starknetUtils';
 import { Mutex } from 'async-mutex';
-import { ApiParams, ExtractPrivateKeyRequestParams } from '../../src/types/snapApi';
+import {
+  ApiParamsWithKeyDeriver,
+  ExtractPrivateKeyRequestParams,
+} from '../../src/types/snapApi';
 import { UpgradeRequiredError } from '../../src/utils/exceptions';
 
 chai.use(sinonChai);
@@ -24,12 +31,7 @@ describe('Test function: extractPrivateKey', function () {
     transactions: [],
   };
 
-  const apiParams: ApiParams = {
-    state,
-    requestParams: {},
-    wallet: walletStub,
-    saveMutex: new Mutex(),
-  };
+  let apiParams: ApiParamsWithKeyDeriver;
 
   const requestObject: ExtractPrivateKeyRequestParams = {
     userAddress: account1.address,
@@ -37,7 +39,13 @@ describe('Test function: extractPrivateKey', function () {
 
   beforeEach(async function () {
     walletStub.rpcStubs.snap_getBip44Entropy.callsFake(getBip44EntropyStub);
-    apiParams.keyDeriver = await getAddressKeyDeriver(walletStub);
+    apiParams = {
+      state,
+      requestParams: {},
+      wallet: walletStub,
+      saveMutex: new Mutex(),
+      keyDeriver: await getAddressKeyDeriver(walletStub),
+    };
   });
 
   afterEach(function () {
@@ -53,7 +61,7 @@ describe('Test function: extractPrivateKey', function () {
     });
 
     it('should throw an error if the user address is undefined', async function () {
-      invalidRequest.userAddress = undefined;
+      invalidRequest.userAddress = undefined as unknown as string;
       apiParams.requestParams = invalidRequest;
       let result;
       try {
@@ -99,7 +107,9 @@ describe('Test function: extractPrivateKey', function () {
         } catch (err) {
           result = err;
         } finally {
-          expect(validateAccountRequireUpgradeOrDeployStub).to.have.been.calledOnceWith(
+          expect(
+            validateAccountRequireUpgradeOrDeployStub,
+          ).to.have.been.calledOnceWith(
             STARKNET_SEPOLIA_TESTNET_NETWORK,
             account1.address,
             account1.publicKey,
@@ -124,7 +134,9 @@ describe('Test function: extractPrivateKey', function () {
         } catch (err) {
           result = err;
         } finally {
-          expect(validateAccountRequireUpgradeOrDeployStub).to.have.been.calledOnceWith(
+          expect(
+            validateAccountRequireUpgradeOrDeployStub,
+          ).to.have.been.calledOnceWith(
             STARKNET_SEPOLIA_TESTNET_NETWORK,
             account1.address,
             account1.publicKey,
@@ -136,7 +148,9 @@ describe('Test function: extractPrivateKey', function () {
 
     describe('when account is not require upgrade', function () {
       beforeEach(async function () {
-        sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolves(null);
+        sandbox
+          .stub(utils, 'validateAccountRequireUpgradeOrDeploy')
+          .resolvesThis();
       });
 
       it('should get the private key of the specified user account correctly', async function () {

@@ -14,8 +14,19 @@ const label = 'Label';
 
 export const Default = () => <DropDownView options={options2} label={label} />;
 
-export const Error = () => <DropDownView error options={options} label={label} />;
+export const ErrorView = () => (
+  <DropDownView error options={options} label={label} />
+);
 
-export const Disabled = () => <DropDownView disabled options={options} label={label} />;
+export const Disabled = () => (
+  <DropDownView disabled options={options} label={label} />
+);
 
-export const WithHelperText = () => <DropDownView error options={options} helperText="Helper text" label={label} />;
+export const WithHelperText = () => (
+  <DropDownView
+    error
+    options={options}
+    helperText="Helper text"
+    label={label}
+  />
+);

@@ -23,7 +23,9 @@ export const ListView = <T extends unknown>({
       {data.length > 0 ? (
         <List style={listStyle}>
           {data.map((item, index) => (
-            <ListItem key={keyExtractor(item, index)}>{render(item, index)}</ListItem>
+            <ListItem key={keyExtractor(item, index)}>
+              {render(item, index)}
+            </ListItem>
           ))}
         </List>
       ) : (

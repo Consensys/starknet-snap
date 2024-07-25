@@ -1,10 +1,19 @@
-import { toJson } from './utils/serializer';
-import { AddNetworkRequestParams, ApiParams } from './types/snapApi';
-import { validateAddNetworkParams, upsertNetwork, getNetworkTxt } from './utils/snapUtils';
-import { logger } from './utils/logger';
-import { Network } from './types/snapState';
 import { panel, heading, DialogType } from '@metamask/snaps-sdk';
 
+import type { AddNetworkRequestParams, ApiParams } from './types/snapApi';
+import type { Network } from './types/snapState';
+import { logger } from './utils/logger';
+import { toJson } from './utils/serializer';
+import {
+  validateAddNetworkParams,
+  upsertNetwork,
+  getNetworkTxt,
+} from './utils/snapUtils';
+
+/**
+ *
+ * @param params
+ */
 export async function addNetwork(params: ApiParams) {
   try {
     const { state, wallet, saveMutex, requestParams } = params;
@@ -38,16 +47,21 @@ export async function addNetwork(params: ApiParams) {
       method: 'snap_dialog',
       params: {
         type: DialogType.Confirmation,
-        content: panel([heading('Do you want to add this network?'), ...components]),
+        content: panel([
+          heading('Do you want to add this network?'),
+          ...components,
+        ]),
       },
     });
-    if (!response) return false;
+    if (!response) {
+      return false;
+    }
 
     await upsertNetwork(network, wallet, saveMutex, state);
 
     return true;
-  } catch (err) {
-    logger.error(`Problem found: ${err}`);
-    throw err;
+  } catch (error) {
+    logger.error(`Problem found:`, error);
+    throw error;
   }
 }

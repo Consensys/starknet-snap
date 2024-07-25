@@ -9,7 +9,10 @@ export const Wrapper = styled.div<IDiv>`
   display: flex;
   flex-direction: row;
   box-shadow: ${(props) => props.theme.shadow.dividerBottom.boxShadow};
-  background: ${(props) => (!props.selected ? props.theme.palette.grey.white : props.theme.palette.grey.grey4)};
+  background: ${(props) =>
+    !props.selected
+      ? props.theme.palette.grey.white
+      : props.theme.palette.grey.grey4};
   height: 64px;
   padding-left: 20px;
   align-items: center;

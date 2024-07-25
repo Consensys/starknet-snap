@@ -1,49 +1,78 @@
-import { toJson } from './utils/serializer';
-import { constants, num } from 'starknet';
-import { validateAndParseAddress, validateAccountRequireUpgradeOrDeploy } from '../src/utils/starknetUtils';
-import { ApiParams, ExtractPublicKeyRequestParams } from './types/snapApi';
-import { getAccount, getNetworkFromChainId } from './utils/snapUtils';
-import { getKeysFromAddress } from './utils/starknetUtils';
-import { logger } from './utils/logger';
+import { constants, num as numUtils } from 'starknet';
 
-export async function extractPublicKey(params: ApiParams) {
+import type {
+  ApiParamsWithKeyDeriver,
+  ExtractPublicKeyRequestParams,
+} from './types/snapApi';
+import { logger } from './utils/logger';
+import { toJson } from './utils/serializer';
+import { getAccount, getNetworkFromChainId } from './utils/snapUtils';
+import {
+  validateAndParseAddress,
+  validateAccountRequireUpgradeOrDeploy,
+  getKeysFromAddress,
+} from './utils/starknetUtils';
+
+/**
+ *
+ * @param params
+ */
+export async function extractPublicKey(params: ApiParamsWithKeyDeriver) {
   try {
     const { state, keyDeriver, requestParams } = params;
     const requestParamsObj = requestParams as ExtractPublicKeyRequestParams;
 
-    const userAddress = requestParamsObj.userAddress;
+    const { userAddress } = requestParamsObj;
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
 
     if (!requestParamsObj.userAddress) {
       throw new Error(
-        `The given user address need to be non-empty string, got: ${toJson(requestParamsObj.userAddress)}`,
+        `The given user address need to be non-empty string, got: ${toJson(
+          requestParamsObj.userAddress,
+        )}`,
       );
     }
 
     try {
       validateAndParseAddress(requestParamsObj.userAddress);
-    } catch (err) {
-      throw new Error(`The given user address is invalid: ${requestParamsObj.userAddress}`);
+    } catch (error) {
+      throw new Error(
+        `The given user address is invalid: ${requestParamsObj.userAddress}`,
+      );
     }
 
     // [TODO] logic below is redundant, getKeysFromAddress is doing the same
-    const { publicKey } = await getKeysFromAddress(keyDeriver, network, state, userAddress);
-    await validateAccountRequireUpgradeOrDeploy(network, userAddress, publicKey);
+    const { publicKey } = await getKeysFromAddress(
+      keyDeriver,
+      network,
+      state,
+      userAddress,
+    );
+    await validateAccountRequireUpgradeOrDeploy(
+      network,
+      userAddress,
+      publicKey,
+    );
 
     let userPublicKey;
     const accContract = getAccount(state, userAddress, network.chainId);
-    if (!accContract?.publicKey || num.toBigInt(accContract.publicKey) === constants.ZERO) {
-      logger.log(`extractPublicKey: User address cannot be found or the signer public key is 0x0: ${userAddress}`);
+    if (
+      !accContract?.publicKey ||
+      numUtils.toBigInt(accContract.publicKey) === constants.ZERO
+    ) {
+      logger.log(
+        `extractPublicKey: User address cannot be found or the signer public key is 0x0: ${userAddress}`,
+      );
       userPublicKey = publicKey;
     } else {
       userPublicKey = accContract.publicKey;
     }
-
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     logger.log(`extractPublicKey:\nuserPublicKey: ${userPublicKey}`);
 
     return userPublicKey;
-  } catch (err) {
-    logger.error(`Problem found: ${err}`);
-    throw err;
+  } catch (error) {
+    logger.error(`Problem found:`, error);
+    throw error;
   }
 }

@@ -1,18 +1,27 @@
+import type { EstimateFee } from 'starknet';
+
+import type {
+  ApiParamsWithKeyDeriver,
+  EstimateAccountDeployFeeRequestParams,
+} from './types/snapApi';
+import { logger } from './utils/logger';
 import { toJson } from './utils/serializer';
-import { EstimateFee } from 'starknet';
-import { ApiParams, EstimateAccountDeployFeeRequestParams } from './types/snapApi';
 import { getNetworkFromChainId, getValidNumber } from './utils/snapUtils';
 import {
   estimateAccountDeployFee,
   getKeysFromAddressIndex,
   getAccContractAddressAndCallData,
 } from './utils/starknetUtils';
-import { logger } from './utils/logger';
 
-export async function estimateAccDeployFee(params: ApiParams) {
+/**
+ *
+ * @param params
+ */
+export async function estimateAccDeployFee(params: ApiParamsWithKeyDeriver) {
   try {
     const { state, keyDeriver, requestParams } = params;
-    const requestParamsObj = requestParams as EstimateAccountDeployFeeRequestParams;
+    const requestParamsObj =
+      requestParams as EstimateAccountDeployFeeRequestParams;
 
     const addressIndex = getValidNumber(requestParamsObj.addressIndex, -1, 0);
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
@@ -21,8 +30,14 @@ export async function estimateAccDeployFee(params: ApiParams) {
       publicKey,
       addressIndex: addressIndexInUsed,
       privateKey,
-    } = await getKeysFromAddressIndex(keyDeriver, network.chainId, state, addressIndex);
-    const { address: contractAddress, callData: contractCallData } = getAccContractAddressAndCallData(publicKey);
+    } = await getKeysFromAddressIndex(
+      keyDeriver,
+      network.chainId,
+      state,
+      addressIndex,
+    );
+    const { address: contractAddress, callData: contractCallData } =
+      getAccContractAddressAndCallData(publicKey);
     logger.log(
       `estimateAccountDeployFee:\ncontractAddress = ${contractAddress}\npublicKey = ${publicKey}\naddressIndex = ${addressIndexInUsed}`,
     );
@@ -34,7 +49,11 @@ export async function estimateAccDeployFee(params: ApiParams) {
       publicKey,
       privateKey,
     );
-    logger.log(`estimateAccountDeployFee:\nestimateDeployFee: ${toJson(estimateDeployFee)}`);
+    logger.log(
+      `estimateAccountDeployFee:\nestimateDeployFee: ${toJson(
+        estimateDeployFee,
+      )}`,
+    );
 
     const resp = {
       suggestedMaxFee: estimateDeployFee.suggestedMaxFee.toString(10),
@@ -46,8 +65,8 @@ export async function estimateAccDeployFee(params: ApiParams) {
     logger.log(`estimateAccountDeployFee:\nresp: ${toJson(resp)}`);
 
     return resp;
-  } catch (err) {
-    logger.error(`Problem found: ${err}`);
-    throw err;
+  } catch (error) {
+    logger.error(`Problem found:`, error);
+    throw error;
   }
 }

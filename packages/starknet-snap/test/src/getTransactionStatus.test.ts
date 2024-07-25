@@ -8,7 +8,10 @@ import { SnapState } from '../../src/types/snapState';
 import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../../src/utils/constants';
 import { getTxnStatusResp } from '../constants.test';
 import { Mutex } from 'async-mutex';
-import { ApiParams, GetTransactionStatusRequestParams } from '../../src/types/snapApi';
+import {
+  ApiParams,
+  GetTransactionStatusRequestParams,
+} from '../../src/types/snapApi';
 
 chai.use(sinonChai);
 const sandbox = sinon.createSandbox();
@@ -38,7 +41,8 @@ describe('Test function: getTransactionStatus', function () {
       return getTxnStatusResp;
     });
     const requestObject: GetTransactionStatusRequestParams = {
-      transactionHash: '0x27f204588cadd08a7914f6a9808b34de0cbfc4cb53aa053663e7fd3a34dbc26',
+      transactionHash:
+        '0x27f204588cadd08a7914f6a9808b34de0cbfc4cb53aa053663e7fd3a34dbc26',
     };
     apiParams.requestParams = requestObject;
     const result = await getTransactionStatus(apiParams);
@@ -48,7 +52,8 @@ describe('Test function: getTransactionStatus', function () {
   it('should throw error if getTransactionStatus failed', async function () {
     sandbox.stub(utils, 'getTransactionStatus').throws(new Error());
     const requestObject: GetTransactionStatusRequestParams = {
-      transactionHash: '0x27f204588cadd08a7914f6a9808b34de0cbfc4cb53aa053663e7fd3a34dbc26',
+      transactionHash:
+        '0x27f204588cadd08a7914f6a9808b34de0cbfc4cb53aa053663e7fd3a34dbc26',
     };
     apiParams.requestParams = requestObject;
 
