@@ -2077,16 +2077,16 @@ __metadata:
 
 "@consensys/starknet-snap@file:../starknet-snap::locator=wallet-ui%40workspace%3Apackages%2Fwallet-ui":
   version: 2.9.0
-  resolution: "@consensys/starknet-snap@file:../starknet-snap#../starknet-snap::hash=4d9aa6&locator=wallet-ui%40workspace%3Apackages%2Fwallet-ui"
+  resolution: "@consensys/starknet-snap@file:../starknet-snap#../starknet-snap::hash=ca876a&locator=wallet-ui%40workspace%3Apackages%2Fwallet-ui"
   dependencies:
     "@metamask/key-tree": 9.0.0
     "@metamask/snaps-sdk": ^4.0.0
     async-mutex: ^0.3.2
     ethereum-unit-converter: ^0.0.17
     ethers: ^5.5.1
-    starknet: 6.7.0
+    starknet: ^6.11.0
     starknet_v4.22.0: "npm:starknet@4.22.0"
-  checksum: d8e8b23b3553a1c526205aa7ead79bbafa8274edd8c1a1624148bd6b126d002891816abc36c2639e5fbb02319fb58c97757773fdfb268524a8704d095df6ddf5
+  checksum: 086202292978f8df348593b0f8a843a289d618801e6bf748a34be5e86b210311145d9db6f6830bdef00165bb5cd384487928f4d69454c7500723a4124af733ac
   languageName: node
   linkType: hard
 
@@ -2130,12 +2130,31 @@ __metadata:
     rimraf: ^3.0.2
     sinon: ^13.0.2
     sinon-chai: ^3.7.0
-    starknet: 6.7.0
+    starknet: ^6.11.0
     starknet_v4.22.0: "npm:starknet@4.22.0"
     ts-node: ^10.9.2
     typescript: ^4.7.4
   languageName: unknown
   linkType: soft
+
+"@craco/craco@npm:^7.1.0":
+  version: 7.1.0
+  resolution: "@craco/craco@npm:7.1.0"
+  dependencies:
+    autoprefixer: ^10.4.12
+    cosmiconfig: ^7.0.1
+    cosmiconfig-typescript-loader: ^1.0.0
+    cross-spawn: ^7.0.3
+    lodash: ^4.17.21
+    semver: ^7.3.7
+    webpack-merge: ^5.8.0
+  peerDependencies:
+    react-scripts: ^5.0.0
+  bin:
+    craco: dist/bin/craco.js
+  checksum: d534d1ea7814e7bd9f2e2aef17821fcdb1d9cac8308e8eb04809f8f3371180086b8f673dedce1ffbefba9ded566e91e4c9663464e488bf6291461091cbd95c4e
+  languageName: node
+  linkType: hard
 
 "@cspotcode/source-map-support@npm:^0.8.0":
   version: 0.8.1
@@ -4744,7 +4763,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@noble/hashes@npm:1.4.0, @noble/hashes@npm:^1.0.0, @noble/hashes@npm:^1.1.2, @noble/hashes@npm:^1.3.1, @noble/hashes@npm:^1.3.2, @noble/hashes@npm:~1.4.0":
+"@noble/hashes@npm:1.4.0, @noble/hashes@npm:^1.0.0, @noble/hashes@npm:^1.1.2, @noble/hashes@npm:^1.3.1, @noble/hashes@npm:^1.3.2, @noble/hashes@npm:^1.4.0, @noble/hashes@npm:~1.4.0":
   version: 1.4.0
   resolution: "@noble/hashes@npm:1.4.0"
   checksum: 8ba816ae26c90764b8c42493eea383716396096c5f7ba6bea559993194f49d80a73c081f315f4c367e51bd2d5891700bcdfa816b421d24ab45b41cb03e4f3342
@@ -5288,6 +5307,13 @@ __metadata:
     uri-js: ^4.4.1
     valid-url: ^1.0.9
   checksum: 99365956bd5e35127568e7ee69246cfc79cc26d83f6fbc5e3a9ed6f0693f7da6f2ee67cf8b93b65761da3c3ce8cc156858bab85e24b2eadd49ec8ae07cb8826e
+  languageName: node
+  linkType: hard
+
+"@starknet-io/types-js@npm:^0.7.7, starknet-types-07@npm:@starknet-io/types-js@^0.7.7":
+  version: 0.7.7
+  resolution: "@starknet-io/types-js@npm:0.7.7"
+  checksum: e5355042b06f96a19ee02a07cc12e321a636d0c7eaa605f85363775b036303a82896e6bcb2b244f97b125c83ae691f0fc162a5167e9866152a3b2108a9e28402
   languageName: node
   linkType: hard
 
@@ -9350,7 +9376,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"autoprefixer@npm:^10.4.13":
+"autoprefixer@npm:^10.4.12, autoprefixer@npm:^10.4.13":
   version: 10.4.19
   resolution: "autoprefixer@npm:10.4.19"
   dependencies:
@@ -11437,6 +11463,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"cosmiconfig-typescript-loader@npm:^1.0.0":
+  version: 1.0.9
+  resolution: "cosmiconfig-typescript-loader@npm:1.0.9"
+  dependencies:
+    cosmiconfig: ^7
+    ts-node: ^10.7.0
+  peerDependencies:
+    "@types/node": "*"
+    cosmiconfig: ">=7"
+    typescript: ">=3"
+  checksum: 26a0198e03e81a9e7e1a6ce880d7309fdd056c7a3a23b587253e6d1d1224154d3f9edf727d9c0310628e89752353211b75de151b705298b4d0741fa1740c661e
+  languageName: node
+  linkType: hard
+
 "cosmiconfig-typescript-loader@npm:^4.0.0":
   version: 4.4.0
   resolution: "cosmiconfig-typescript-loader@npm:4.4.0"
@@ -11462,7 +11502,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cosmiconfig@npm:^7.0.0":
+"cosmiconfig@npm:^7, cosmiconfig@npm:^7.0.0, cosmiconfig@npm:^7.0.1":
   version: 7.1.0
   resolution: "cosmiconfig@npm:7.1.0"
   dependencies:
@@ -12862,7 +12902,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"elliptic@npm:^6.5.3, elliptic@npm:^6.5.4, elliptic@npm:^6.5.5":
+"elliptic@npm:^6.5.3, elliptic@npm:^6.5.5":
   version: 6.5.5
   resolution: "elliptic@npm:6.5.5"
   dependencies:
@@ -12874,6 +12914,21 @@ __metadata:
     minimalistic-assert: ^1.0.1
     minimalistic-crypto-utils: ^1.0.1
   checksum: ec9105e4469eb3b32b0ee2579756c888ddf3f99d259aa0d65fccb906ee877768aaf8880caae73e3e669c9a4adeb3eb1945703aa974ec5000d2d33a239f4567eb
+  languageName: node
+  linkType: hard
+
+"elliptic@npm:^6.5.4":
+  version: 6.5.6
+  resolution: "elliptic@npm:6.5.6"
+  dependencies:
+    bn.js: ^4.11.9
+    brorand: ^1.1.0
+    hash.js: ^1.0.0
+    hmac-drbg: ^1.0.1
+    inherits: ^2.0.4
+    minimalistic-assert: ^1.0.1
+    minimalistic-crypto-utils: ^1.0.1
+  checksum: 213d778ccfe99ec8f0f871b1cc96a10ac3763d9175215d0a9dc026f291e5f50fea6f635e4e47b4506f9ada25aeb703bd807d8737b880dbb24d092a3001c6d97d
   languageName: node
   linkType: hard
 
@@ -14925,6 +14980,15 @@ __metadata:
     starknet:
       optional: false
   checksum: d8dd7a905170adffa7cde712a34a99f1e8231858366ef3b3117e109aed2cb3031b16156e285daeecf8466cd4523deeb95b6b1d26245d7ab14607c45851ac9ecd
+  languageName: node
+  linkType: hard
+
+"get-starknet-core@npm:^4.0.0-next.3":
+  version: 4.0.0
+  resolution: "get-starknet-core@npm:4.0.0"
+  dependencies:
+    "@starknet-io/types-js": ^0.7.7
+  checksum: 06e4be1be945d8fb7ad3f0d77a5e92c2854ce43cae8091a9f9b5f3cc74d42cf7188de9e544d497f92c0cad316d6d0abc110520629987815be2aed26d0b9ab871
   languageName: node
   linkType: hard
 
@@ -24406,33 +24470,45 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"starknet-types@npm:^0.0.4":
-  version: 0.0.4
-  resolution: "starknet-types@npm:0.0.4"
-  checksum: a83d306830696ea875b8b07541db47e515a4ddb7bfce0cf5555cce12c8ce0e697b984762720c7f27761dc4114b4e5d3f81006e82fc45e52b052afe8fc86240fa
+"starknet@npm:^5.14.0":
+  version: 5.29.0
+  resolution: "starknet@npm:5.29.0"
+  dependencies:
+    "@noble/curves": ~1.3.0
+    "@scure/base": ~1.1.3
+    "@scure/starknet": ~1.0.0
+    abi-wan-kanabi-v1: "npm:abi-wan-kanabi@^1.0.3"
+    abi-wan-kanabi-v2: "npm:abi-wan-kanabi@^2.1.1"
+    isomorphic-fetch: ^3.0.0
+    lossless-json: ^2.0.8
+    pako: ^2.0.4
+    url-join: ^4.0.1
+  checksum: ea44bcc7f7db76ef878a557658e289bd25383b6fbcc9d59153dcf1bd0e014f41484fa5faa95e09ce0bd3c5933833fc867fb5be325f5b55ae1531a2cd29915594
   languageName: node
   linkType: hard
 
-"starknet@npm:6.7.0":
-  version: 6.7.0
-  resolution: "starknet@npm:6.7.0"
+"starknet@npm:^6.11.0":
+  version: 6.11.0
+  resolution: "starknet@npm:6.11.0"
   dependencies:
     "@noble/curves": ~1.4.0
+    "@noble/hashes": ^1.4.0
     "@scure/base": ~1.1.3
     "@scure/starknet": ~1.0.0
     abi-wan-kanabi: ^2.2.2
     fetch-cookie: ^3.0.0
+    get-starknet-core: ^4.0.0-next.3
     isomorphic-fetch: ^3.0.0
     lossless-json: ^4.0.1
     pako: ^2.0.4
-    starknet-types: ^0.0.4
+    starknet-types-07: "npm:@starknet-io/types-js@^0.7.7"
     ts-mixer: ^6.0.3
     url-join: ^4.0.1
-  checksum: 3c4abda7bab3008c8f98728c4b23a47a2dc97b876c6a33a824da77907b63611fde2df22298aa4c512e3c81e3fe005dd7e288969f18b00299e6eae450a147769d
+  checksum: 997c4a9efad53b0c25d0402c2dcd4e334b83865389ea29791f72ac757e0d9a216cf4634c6fbd5d33154e26389d499d39d893cf52302ec6b4eb9d7f04c034b579
   languageName: node
   linkType: hard
 
-"starknet@npm:^4.22.0, starknet_v4.22.0@npm:starknet@4.22.0":
+"starknet_v4.22.0@npm:starknet@4.22.0":
   version: 4.22.0
   resolution: "starknet@npm:4.22.0"
   dependencies:
@@ -24448,23 +24524,6 @@ __metadata:
     ts-custom-error: ^3.3.1
     url-join: ^4.0.1
   checksum: b30548120bca77168f5f5921e557b0b741348e8b7cbf86abd718bcea01e46ae408e51cc50a683ed2daa02041cd7804f3b75bd4d475e9e2db011d59c1f15a07de
-  languageName: node
-  linkType: hard
-
-"starknet@npm:^5.14.0":
-  version: 5.29.0
-  resolution: "starknet@npm:5.29.0"
-  dependencies:
-    "@noble/curves": ~1.3.0
-    "@scure/base": ~1.1.3
-    "@scure/starknet": ~1.0.0
-    abi-wan-kanabi-v1: "npm:abi-wan-kanabi@^1.0.3"
-    abi-wan-kanabi-v2: "npm:abi-wan-kanabi@^2.1.1"
-    isomorphic-fetch: ^3.0.0
-    lossless-json: ^2.0.8
-    pako: ^2.0.4
-    url-join: ^4.0.1
-  checksum: ea44bcc7f7db76ef878a557658e289bd25383b6fbcc9d59153dcf1bd0e014f41484fa5faa95e09ce0bd3c5933833fc867fb5be325f5b55ae1531a2cd29915594
   languageName: node
   linkType: hard
 
@@ -25723,7 +25782,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ts-node@npm:^10.8.1, ts-node@npm:^10.9.2":
+"ts-node@npm:^10.7.0, ts-node@npm:^10.8.1, ts-node@npm:^10.9.2":
   version: 10.9.2
   resolution: "ts-node@npm:10.9.2"
   dependencies:
@@ -26690,6 +26749,7 @@ __metadata:
   resolution: "wallet-ui@workspace:packages/wallet-ui"
   dependencies:
     "@consensys/starknet-snap": "file:../starknet-snap"
+    "@craco/craco": ^7.1.0
     "@emotion/react": ^11.9.0
     "@emotion/styled": ^11.8.1
     "@fortawesome/fontawesome-svg-core": ^6.1.1
@@ -26749,7 +26809,7 @@ __metadata:
     redux-persist: ^6.0.0
     rimraf: ^3.0.2
     semver: ^7.5.2
-    starknet: ^4.22.0
+    starknet: ^6.11.0
     styled-components: ^5.3.5
     toastr2: ^3.0.0-alpha.18
     typescript: ^4.7.4
@@ -27110,7 +27170,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"webpack-merge@npm:^5.7.3, webpack-merge@npm:^5.9.0":
+"webpack-merge@npm:^5.7.3, webpack-merge@npm:^5.8.0, webpack-merge@npm:^5.9.0":
   version: 5.10.0
   resolution: "webpack-merge@npm:5.10.0"
   dependencies:
