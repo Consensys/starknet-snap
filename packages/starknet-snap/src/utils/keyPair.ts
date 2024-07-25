@@ -1,7 +1,7 @@
 import type { BIP44AddressKeyDeriver } from '@metamask/key-tree';
 import { getBIP44AddressKeyDeriver } from '@metamask/key-tree';
 import { utils } from 'ethers';
-import { number, ec } from 'starknet_v4.22.0';
+import { num as numUtils, ec } from 'starknet';
 
 /**
  *
@@ -25,17 +25,17 @@ export async function getAddressKeyDeriver(wallet) {
  * @param keySeed
  * @param keyValueLimit
  */
-export function grindKey(keySeed: string, keyValueLimit = ec.ec.n): string {
+export function grindKey(
+  keySeed: string,
+  keyValueLimit: bigint | undefined | null = ec.starkCurve.CURVE.n,
+): string {
   if (!keyValueLimit) {
     return keySeed;
   }
-  const sha256EcMaxDigest = number.toBN(
-    '1 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000',
-    16,
+  const sha256EcMaxDigest = BigInt(
+    '0x10000000000000000000000000000000000000000000000000000000000000000',
   );
-  const maxAllowedVal = sha256EcMaxDigest.sub(
-    sha256EcMaxDigest.mod(keyValueLimit),
-  );
+  const maxAllowedVal = sha256EcMaxDigest - (sha256EcMaxDigest % keyValueLimit);
 
   // Make sure the produced key is derived by the Stark EC order,
   // and falls within the range [0, maxAllowedVal).
@@ -44,9 +44,9 @@ export function grindKey(keySeed: string, keyValueLimit = ec.ec.n): string {
   do {
     key = hashKeyWithIndex(keySeed, i);
     i += 1;
-  } while (!key.lt(maxAllowedVal));
+  } while (key >= maxAllowedVal);
   // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-  return `0x${key.umod(keyValueLimit).toString('hex')}`;
+  return `0x${(key % keyValueLimit).toString(16)}`;
 }
 
 /**
@@ -57,7 +57,7 @@ export function grindKey(keySeed: string, keyValueLimit = ec.ec.n): string {
 function hashKeyWithIndex(key: string, index: number) {
   const payload = utils.concat([utils.arrayify(key), utils.arrayify(index)]);
   const hash = utils.sha256(payload);
-  return number.toBN(hash);
+  return numUtils.toBigInt(hash);
 }
 
 /**

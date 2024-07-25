@@ -118,7 +118,12 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
     }
     // pre-inserted the default networks and tokens
     await upsertNetwork(STARKNET_MAINNET_NETWORK, snap, saveMutex, state);
-    await upsertNetwork(STARKNET_SEPOLIA_TESTNET_NETWORK, snap, saveMutex, state);
+    await upsertNetwork(
+      STARKNET_SEPOLIA_TESTNET_NETWORK,
+      snap,
+      saveMutex,
+      state,
+    );
 
     // remove the testnet network (migration)
     await removeNetwork(STARKNET_TESTNET_NETWORK, snap, saveMutex, state);
