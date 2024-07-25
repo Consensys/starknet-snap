@@ -51,7 +51,7 @@ class Logger implements ILogger {
     this.init(LogLevel.OFF.toString());
   }
 
-  readonly #setLogLevel = function (level: string): void {
+  #setLogLevel = function (level: string): void {
     if (level && Object.values(LogLevel).includes(level.toUpperCase())) {
       this.#logLevel = LogLevel[level.toUpperCase()];
     } else {
