@@ -1,4 +1,11 @@
-import { MetamaskSnaps, PoweredBy, Wrapper, TandCWrapper, TandCLink, CopyText } from './Footer.style';
+import {
+  MetamaskSnaps,
+  PoweredBy,
+  Wrapper,
+  TandCWrapper,
+  TandCLink,
+  CopyText,
+} from './Footer.style';
 
 export const FooterView = () => {
   const currentYr = new Date().getFullYear();

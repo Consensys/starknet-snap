@@ -1,9 +1,22 @@
 import { KeyboardEvent, ChangeEvent } from 'react';
-import { InputHTMLAttributes, useRef, useState, Dispatch, SetStateAction } from 'react';
+import {
+  InputHTMLAttributes,
+  useRef,
+  useState,
+  Dispatch,
+  SetStateAction,
+} from 'react';
 import { isSpecialInputKey, isValidAddress } from 'utils/utils';
 import { HelperText } from 'components/ui/atom/HelperText';
 import { Label } from 'components/ui/atom/Label';
-import { Icon, Input, InputContainer, Left, RowWrapper, Wrapper } from './AddressInput.style';
+import {
+  Icon,
+  Input,
+  InputContainer,
+  Left,
+  RowWrapper,
+  Wrapper,
+} from './AddressInput.style';
 import { STARKNET_ADDRESS_LENGTH } from 'utils/constants';
 
 interface Props extends InputHTMLAttributes<HTMLInputElement> {
@@ -11,7 +24,13 @@ interface Props extends InputHTMLAttributes<HTMLInputElement> {
   setIsValidAddress?: Dispatch<SetStateAction<boolean>>;
 }
 
-export const AddressInputView = ({ disabled, onChange, label, setIsValidAddress, ...otherProps }: Props) => {
+export const AddressInputView = ({
+  disabled,
+  onChange,
+  label,
+  setIsValidAddress,
+  ...otherProps
+}: Props) => {
   const [focused, setFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState('');
@@ -22,7 +41,11 @@ export const AddressInputView = ({ disabled, onChange, label, setIsValidAddress,
   };
 
   const handleOnKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
-    if (inputRef.current && inputRef.current.value.length >= STARKNET_ADDRESS_LENGTH && !isSpecialInputKey(event)) {
+    if (
+      inputRef.current &&
+      inputRef.current.value.length >= STARKNET_ADDRESS_LENGTH &&
+      !isSpecialInputKey(event)
+    ) {
       event.preventDefault();
     }
   };
@@ -34,7 +57,8 @@ export const AddressInputView = ({ disabled, onChange, label, setIsValidAddress,
     if (!inputRef.current) {
       return;
     }
-    const isValid = inputRef.current.value !== '' && isValidAddress(inputRef.current.value);
+    const isValid =
+      inputRef.current.value !== '' && isValidAddress(inputRef.current.value);
     if (isValid) {
       setValid(true);
       setError('');
@@ -54,9 +78,19 @@ export const AddressInputView = ({ disabled, onChange, label, setIsValidAddress,
         <Label error={!!error}>{label}</Label>
       </RowWrapper>
 
-      <InputContainer error={!!error} disabled={disabled} focused={focused} withIcon={displayIcon()}>
+      <InputContainer
+        error={!!error}
+        disabled={disabled}
+        focused={focused}
+        withIcon={displayIcon()}
+      >
         <Left>
-          {displayIcon() && <Icon icon={error ? ['fas', 'times-circle'] : ['fas', 'check-circle']} error={error} />}
+          {displayIcon() && (
+            <Icon
+              icon={error ? ['fas', 'times-circle'] : ['fas', 'check-circle']}
+              error={error}
+            />
+          )}
           <Input
             error={!!error}
             disabled={disabled}

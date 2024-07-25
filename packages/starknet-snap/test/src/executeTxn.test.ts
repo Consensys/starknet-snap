@@ -5,7 +5,10 @@ import { WalletMock } from '../wallet.mock.test';
 import * as utils from '../../src/utils/starknetUtils';
 import { executeTxn } from '../../src/executeTxn';
 import { SnapState } from '../../src/types/snapState';
-import { STARKNET_MAINNET_NETWORK, STARKNET_SEPOLIA_TESTNET_NETWORK } from '../../src/utils/constants';
+import {
+  STARKNET_MAINNET_NETWORK,
+  STARKNET_SEPOLIA_TESTNET_NETWORK,
+} from '../../src/utils/constants';
 import {
   createAccountProxyTxn,
   estimateDeployFeeResp,
@@ -17,9 +20,15 @@ import * as createAccountUtils from '../../src/createAccount';
 import * as snapsUtil from '../../src/utils/snapUtils';
 import { getAddressKeyDeriver } from '../../src/utils/keyPair';
 import { Mutex } from 'async-mutex';
-import { ApiParams, ExecuteTxnRequestParams } from '../../src/types/snapApi';
+import {
+  ApiParamsWithKeyDeriver,
+  ExecuteTxnRequestParams,
+} from '../../src/types/snapApi';
 import { GetTransactionReceiptResponse } from 'starknet';
-import { DeployRequiredError, UpgradeRequiredError } from '../../src/utils/exceptions';
+import {
+  DeployRequiredError,
+  UpgradeRequiredError,
+} from '../../src/utils/exceptions';
 
 chai.use(sinonChai);
 const sandbox = sinon.createSandbox();
@@ -33,12 +42,7 @@ describe('Test function: executeTxn', function () {
     networks: [STARKNET_MAINNET_NETWORK, STARKNET_SEPOLIA_TESTNET_NETWORK],
     transactions: [],
   };
-  const apiParams: ApiParams = {
-    state,
-    requestParams: {},
-    wallet: walletStub,
-    saveMutex: new Mutex(),
-  };
+  let apiParams: ApiParamsWithKeyDeriver;
 
   const requestObject: ExecuteTxnRequestParams = {
     chainId: STARKNET_MAINNET_NETWORK.chainId,
@@ -55,8 +59,13 @@ describe('Test function: executeTxn', function () {
 
   beforeEach(async function () {
     walletStub.rpcStubs.snap_getBip44Entropy.callsFake(getBip44EntropyStub);
-    apiParams.keyDeriver = await getAddressKeyDeriver(walletStub);
-    apiParams.requestParams = requestObject;
+    apiParams = {
+      state,
+      requestParams: requestObject,
+      wallet: walletStub,
+      saveMutex: new Mutex(),
+      keyDeriver: await getAddressKeyDeriver(walletStub),
+    };
     sandbox.stub(utils, 'estimateFeeBulk').callsFake(async () => {
       return [estimateFeeResp];
     });
@@ -72,14 +81,18 @@ describe('Test function: executeTxn', function () {
     sandbox.useFakeTimers(createAccountProxyTxn.timestamp);
     walletStub.rpcStubs.snap_dialog.resolves(true);
     walletStub.rpcStubs.snap_manageState.resolves(state);
-    sandbox.stub(utils, 'waitForTransaction').resolves({} as unknown as GetTransactionReceiptResponse);
-    sandbox.stub(snapsUtil, 'showAccountRequireUpgradeOrDeployModal').callsFake(async (wallet, e) => {
-      if (e instanceof DeployRequiredError) {
-        await snapsUtil.showDeployRequestModal(wallet);
-      } else if (e instanceof UpgradeRequiredError) {
-        await snapsUtil.showUpgradeRequestModal(wallet);
-      }
-    });
+    sandbox
+      .stub(utils, 'waitForTransaction')
+      .resolves({} as unknown as GetTransactionReceiptResponse);
+    sandbox
+      .stub(snapsUtil, 'showAccountRequireUpgradeOrDeployModal')
+      .callsFake(async (wallet, e) => {
+        if (e instanceof DeployRequiredError) {
+          await snapsUtil.showDeployRequestModal(wallet);
+        } else if (e instanceof UpgradeRequiredError) {
+          await snapsUtil.showUpgradeRequestModal(wallet);
+        }
+      });
   });
 
   afterEach(function () {
@@ -92,7 +105,9 @@ describe('Test function: executeTxn', function () {
     const validateAccountRequireUpgradeOrDeployStub = sandbox
       .stub(utils, 'validateAccountRequireUpgradeOrDeploy')
       .throws(new UpgradeRequiredError('Upgrade Required'));
-    const showUpgradeRequestModalStub = sandbox.stub(snapsUtil, 'showUpgradeRequestModal').resolves();
+    const showUpgradeRequestModalStub = sandbox
+      .stub(snapsUtil, 'showUpgradeRequestModal')
+      .resolves();
     let result;
     try {
       result = await executeTxn(apiParams);
@@ -109,9 +124,13 @@ describe('Test function: executeTxn', function () {
     const validateAccountRequireUpgradeOrDeployStub = sandbox
       .stub(utils, 'validateAccountRequireUpgradeOrDeploy')
       .throws(
-        new DeployRequiredError(`Cairo 0 contract address ${account1.address} balance is not empty, deploy required`),
+        new DeployRequiredError(
+          `Cairo 0 contract address ${account1.address} balance is not empty, deploy required`,
+        ),
       );
-    const showDeployRequestModalStub = sandbox.stub(snapsUtil, 'showDeployRequestModal').resolves();
+    const showDeployRequestModalStub = sandbox
+      .stub(snapsUtil, 'showDeployRequestModal')
+      .resolves();
     let result;
     try {
       result = await executeTxn(apiParams);
@@ -125,9 +144,11 @@ describe('Test function: executeTxn', function () {
   });
 
   it('should executeTxn correctly and deploy an account', async function () {
-    sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolves(null);
+    sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolvesThis();
     sandbox.stub(utils, 'isAccountDeployed').resolves(false);
-    const createAccountStub = sandbox.stub(createAccountUtils, 'createAccount').resolvesThis();
+    const createAccountStub = sandbox
+      .stub(createAccountUtils, 'createAccount')
+      .resolvesThis();
     const stub = sandbox.stub(utils, 'executeTxn').resolves({
       transaction_hash: 'transaction_hash',
     });
@@ -153,13 +174,19 @@ describe('Test function: executeTxn', function () {
       undefined,
       { maxFee: '22702500105945', nonce: 1 },
     );
-    expect(createAccountStub).to.have.been.calledOnceWith(sinon.match.any, true, true);
+    expect(createAccountStub).to.have.been.calledOnceWith(
+      sinon.match.any,
+      true,
+      true,
+    );
   });
 
   it('should executeTxn multiple and deploy an account', async function () {
-    sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolves(null);
+    sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolvesThis();
     sandbox.stub(utils, 'isAccountDeployed').resolves(false);
-    const createAccountStub = sandbox.stub(createAccountUtils, 'createAccount').resolvesThis();
+    const createAccountStub = sandbox
+      .stub(createAccountUtils, 'createAccount')
+      .resolvesThis();
     const stub = sandbox.stub(utils, 'executeTxn').resolves({
       transaction_hash: 'transaction_hash',
     });
@@ -213,12 +240,16 @@ describe('Test function: executeTxn', function () {
       undefined,
       { maxFee: '22702500105945', nonce: 1 },
     );
-    expect(createAccountStub).to.have.been.calledOnceWith(sinon.match.any, true, true);
+    expect(createAccountStub).to.have.been.calledOnceWith(
+      sinon.match.any,
+      true,
+      true,
+    );
   });
 
   it('should executeTxn and not deploy an account', async function () {
     const createAccountStub = sandbox.stub(createAccountUtils, 'createAccount');
-    sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolves(null);
+    sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolvesThis();
     sandbox.stub(utils, 'isAccountDeployed').resolves(true);
     const stub = sandbox.stub(utils, 'executeTxn').resolves({
       transaction_hash: 'transaction_hash',
@@ -252,7 +283,7 @@ describe('Test function: executeTxn', function () {
 
   it('should executeTxn multiple and not deploy an account', async function () {
     const createAccountStub = sandbox.stub(createAccountUtils, 'createAccount');
-    sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolves(null);
+    sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolvesThis();
     sandbox.stub(utils, 'isAccountDeployed').resolves(true);
     const stub = sandbox.stub(utils, 'executeTxn').resolves({
       transaction_hash: 'transaction_hash',
@@ -311,7 +342,7 @@ describe('Test function: executeTxn', function () {
   });
 
   it('should throw error if executeTxn fail', async function () {
-    sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolves(null);
+    sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolvesThis();
     sandbox.stub(utils, 'isAccountDeployed').resolves(true);
     const stub = sandbox.stub(utils, 'executeTxn').rejects('error');
     const { privateKey } = await utils.getKeysFromAddress(
@@ -344,7 +375,7 @@ describe('Test function: executeTxn', function () {
   });
 
   it('should return false if user rejected to sign the transaction', async function () {
-    sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolves(null);
+    sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolvesThis();
     sandbox.stub(utils, 'isAccountDeployed').resolves(true);
     walletStub.rpcStubs.snap_dialog.resolves(false);
     const stub = sandbox.stub(utils, 'executeTxn').resolves({

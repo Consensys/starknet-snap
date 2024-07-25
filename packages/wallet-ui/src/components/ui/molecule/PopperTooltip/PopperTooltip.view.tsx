@@ -3,7 +3,11 @@ import { ReactNode, useState } from 'react';
 import { usePopperTooltip } from 'react-popper-tooltip';
 import { CSSProperties } from 'styled-components';
 import { POPOVER_DURATION } from 'utils/constants';
-import { PopperContainer, ToolTipContent, Wrapper } from './PopperTooltip.style';
+import {
+  PopperContainer,
+  ToolTipContent,
+  Wrapper,
+} from './PopperTooltip.style';
 
 type CloseTriggers = 'timeout' | 'click' | 'hover';
 
@@ -51,7 +55,13 @@ export const PopperTooltipView = ({
     if (closeTrigger === 'hover') setPopperVisible(false);
   };
 
-  const { getArrowProps, getTooltipProps, setTooltipRef, setTriggerRef, visible } = usePopperTooltip({
+  const {
+    getArrowProps,
+    getTooltipProps,
+    setTooltipRef,
+    setTriggerRef,
+    visible,
+  } = usePopperTooltip({
     trigger: 'click',
     offset: offSet || [0, 23],
     visible: popperVisible,
@@ -72,7 +82,11 @@ export const PopperTooltipView = ({
       </Wrapper>
 
       {visible && (
-        <PopperContainer ref={setTooltipRef} {...getTooltipProps({})} arrowVisible={arrowVisible}>
+        <PopperContainer
+          ref={setTooltipRef}
+          {...getTooltipProps({})}
+          arrowVisible={arrowVisible}
+        >
           {arrowVisible && <div {...getArrowProps({ className: 'arrow' })} />}
           <ToolTipContent style={contentStyle}>{content}</ToolTipContent>
         </PopperContainer>

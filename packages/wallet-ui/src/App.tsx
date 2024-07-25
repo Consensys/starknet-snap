@@ -26,16 +26,22 @@ library.add(fas, far);
 
 function App() {
   const { initSnap, getWalletData, checkConnection } = useStarkNetSnap();
-  const { connected, forceReconnect, provider } = useAppSelector((state) => state.wallet);
-  const { infoModalVisible, minVersionModalVisible, upgradeModalVisible, deployModalVisible } = useAppSelector(
-    (state) => state.modals,
+  const { connected, forceReconnect, provider } = useAppSelector(
+    (state) => state.wallet,
   );
+  const {
+    infoModalVisible,
+    minVersionModalVisible,
+    upgradeModalVisible,
+    deployModalVisible,
+  } = useAppSelector((state) => state.modals);
   const { loader } = useAppSelector((state) => state.UI);
   const networks = useAppSelector((state) => state.networks);
   const { accounts } = useAppSelector((state) => state.wallet);
   const { hasMetamask } = useHasMetamask();
 
-  const address = accounts?.length > 0 ? (accounts[0] as unknown as string) : DUMMY_ADDRESS;
+  const address =
+    accounts?.length > 0 ? (accounts[0] as unknown as string) : DUMMY_ADDRESS;
 
   useEffect(() => {
     if (!provider) {
@@ -69,20 +75,33 @@ function App() {
         <PopIn isOpen={minVersionModalVisible} showClose={false}>
           <MinVersionModal />
         </PopIn>
-        <PopIn isOpen={!loading && !!hasMetamask && !connected} showClose={false}>
+        <PopIn
+          isOpen={!loading && !!hasMetamask && !connected}
+          showClose={false}
+        >
           <ConnectModal />
         </PopIn>
         <PopIn isOpen={infoModalVisible} showClose={false}>
           <ConnectInfoModal address={address} />
         </PopIn>
-        <PopIn isOpen={!minVersionModalVisible && upgradeModalVisible} showClose={false}>
+        <PopIn
+          isOpen={!minVersionModalVisible && upgradeModalVisible}
+          showClose={false}
+        >
           <UpgradeModel address={address} />
         </PopIn>
-        <PopIn isOpen={!minVersionModalVisible && deployModalVisible} showClose={false}>
+        <PopIn
+          isOpen={!minVersionModalVisible && deployModalVisible}
+          showClose={false}
+        >
           <DeployModal address={address} />
         </PopIn>
         <Home address={address} />
-        <PopIn isOpen={loading}>{loading && <LoadingBackdrop>{loader.loadingMessage}</LoadingBackdrop>}</PopIn>
+        <PopIn isOpen={loading}>
+          {loading && (
+            <LoadingBackdrop>{loader.loadingMessage}</LoadingBackdrop>
+          )}
+        </PopIn>
       </FrameworkView>
     </ThemeProvider>
   );

@@ -1,27 +1,44 @@
-import { toJson } from './utils/serializer';
-import { num, constants } from 'starknet';
-import { validateAndParseAddress } from '../src/utils/starknetUtils';
+import { heading, panel, DialogType } from '@metamask/snaps-sdk';
+import { num as numUtils, constants } from 'starknet';
+
+import { createAccount } from './createAccount';
 import { estimateFee } from './estimateFee';
-import { Transaction, TransactionStatus, VoyagerTransactionType } from './types/snapState';
-import { getNetworkFromChainId, getSendTxnText, upsertTransaction } from './utils/snapUtils';
+import type {
+  ApiParamsWithKeyDeriver,
+  SendTransactionRequestParams,
+} from './types/snapApi';
+import type { Transaction } from './types/snapState';
+import { TransactionStatus, VoyagerTransactionType } from './types/snapState';
+import { logger } from './utils/logger';
+import { toJson } from './utils/serializer';
 import {
+  getNetworkFromChainId,
+  getSendTxnText,
+  upsertTransaction,
+} from './utils/snapUtils';
+import {
+  validateAndParseAddress,
   getKeysFromAddress,
   getCallDataArray,
   executeTxn,
   isAccountDeployed,
   isUpgradeRequired,
 } from './utils/starknetUtils';
-import { ApiParams, SendTransactionRequestParams } from './types/snapApi';
-import { createAccount } from './createAccount';
-import { heading, panel, DialogType } from '@metamask/snaps-sdk';
-import { logger } from './utils/logger';
 
-export async function sendTransaction(params: ApiParams) {
+/**
+ *
+ * @param params
+ */
+export async function sendTransaction(params: ApiParamsWithKeyDeriver) {
   try {
     const { state, wallet, saveMutex, keyDeriver, requestParams } = params;
     const requestParamsObj = requestParams as SendTransactionRequestParams;
 
-    if (!requestParamsObj.contractAddress || !requestParamsObj.senderAddress || !requestParamsObj.contractFuncName) {
+    if (
+      !requestParamsObj.contractAddress ||
+      !requestParamsObj.senderAddress ||
+      !requestParamsObj.contractFuncName
+    ) {
       throw new Error(
         `The given contract address, sender address, and function name need to be non-empty string, got: ${toJson(
           requestParamsObj,
@@ -31,35 +48,39 @@ export async function sendTransaction(params: ApiParams) {
 
     try {
       validateAndParseAddress(requestParamsObj.contractAddress);
-    } catch (err) {
-      throw new Error(`The given contract address is invalid: ${requestParamsObj.contractAddress}`);
+    } catch (error) {
+      throw new Error(
+        `The given contract address is invalid: ${requestParamsObj.contractAddress}`,
+      );
     }
     try {
       validateAndParseAddress(requestParamsObj.senderAddress);
-    } catch (err) {
-      throw new Error(`The given sender address is invalid: ${requestParamsObj.senderAddress}`);
+    } catch (error) {
+      throw new Error(
+        `The given sender address is invalid: ${requestParamsObj.senderAddress}`,
+      );
     }
 
-    const contractAddress = requestParamsObj.contractAddress;
-    const contractFuncName = requestParamsObj.contractFuncName;
-    const contractCallData = getCallDataArray(requestParamsObj.contractCallData);
-    const senderAddress = requestParamsObj.senderAddress;
+    const { contractAddress } = requestParamsObj;
+    const { contractFuncName } = requestParamsObj;
+    const contractCallData = getCallDataArray(
+      requestParamsObj.contractCallData as unknown as string,
+    );
+    const { senderAddress } = requestParamsObj;
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
 
     if (await isUpgradeRequired(network, senderAddress)) {
       throw new Error('Upgrade required');
     }
 
-    const { privateKey: senderPrivateKey, addressIndex } = await getKeysFromAddress(
-      keyDeriver,
-      network,
-      state,
-      senderAddress,
-    );
-    let maxFee = requestParamsObj.maxFee ? num.toBigInt(requestParamsObj.maxFee) : constants.ZERO;
+    const { privateKey: senderPrivateKey, addressIndex } =
+      await getKeysFromAddress(keyDeriver, network, state, senderAddress);
+    let maxFee = requestParamsObj.maxFee
+      ? numUtils.toBigInt(requestParamsObj.maxFee)
+      : constants.ZERO;
     if (maxFee === constants.ZERO) {
       const { suggestedMaxFee } = await estimateFee(params);
-      maxFee = num.toBigInt(suggestedMaxFee);
+      maxFee = numUtils.toBigInt(suggestedMaxFee);
     }
 
     const signingTxnComponents = getSendTxnText(
@@ -75,10 +96,15 @@ export async function sendTransaction(params: ApiParams) {
       method: 'snap_dialog',
       params: {
         type: DialogType.Confirmation,
-        content: panel([heading('Do you want to sign this transaction ?'), ...signingTxnComponents]),
+        content: panel([
+          heading('Do you want to sign this transaction ?'),
+          ...signingTxnComponents,
+        ]),
       },
     });
-    if (!response) return false;
+    if (!response) {
+      return false;
+    }
 
     const txnInvocation = {
       contractAddress,
@@ -86,12 +112,18 @@ export async function sendTransaction(params: ApiParams) {
       calldata: contractCallData,
     };
 
-    logger.log(`sendTransaction:\ntxnInvocation: ${toJson(txnInvocation)}\nmaxFee: ${maxFee.toString()}}`);
+    logger.log(
+      `sendTransaction:\ntxnInvocation: ${toJson(
+        txnInvocation,
+      )}\nmaxFee: ${maxFee.toString()}}`,
+    );
 
     const accountDeployed = await isAccountDeployed(network, senderAddress);
     if (!accountDeployed) {
-      //Deploy account before sending the transaction
-      logger.log('sendTransaction:\nFirst transaction : send deploy transaction');
+      // Deploy account before sending the transaction
+      logger.log(
+        'sendTransaction:\nFirst transaction : send deploy transaction',
+      );
       const createAccountApiParams = {
         state,
         wallet: params.wallet,
@@ -106,12 +138,19 @@ export async function sendTransaction(params: ApiParams) {
       await createAccount(createAccountApiParams, true, true);
     }
 
-    //In case this is the first transaction we assign a nonce of 1 to make sure it does after the deploy transaction
+    // In case this is the first transaction we assign a nonce of 1 to make sure it does after the deploy transaction
     const nonceSendTransaction = accountDeployed ? undefined : 1;
-    const txnResp = await executeTxn(network, senderAddress, senderPrivateKey, txnInvocation, undefined, {
-      maxFee,
-      nonce: nonceSendTransaction,
-    });
+    const txnResp = await executeTxn(
+      network,
+      senderAddress,
+      senderPrivateKey,
+      txnInvocation,
+      undefined,
+      {
+        maxFee,
+        nonce: nonceSendTransaction,
+      },
+    );
 
     logger.log(`sendTransaction:\ntxnResp: ${toJson(txnResp)}`);
 
@@ -123,17 +162,19 @@ export async function sendTransaction(params: ApiParams) {
         senderAddress,
         contractAddress,
         contractFuncName,
-        contractCallData: contractCallData.map((data: num.BigNumberish) => {
-          try {
-            return num.toHex(num.toBigInt(data));
-          } catch (e) {
-            //data is already send to chain, hence we should not throw error
-            return '0x0';
-          }
-        }),
+        contractCallData: contractCallData.map(
+          (data: numUtils.BigNumberish) => {
+            try {
+              return numUtils.toHex(numUtils.toBigInt(data));
+            } catch (error) {
+              // data is already send to chain, hence we should not throw error
+              return '0x0';
+            }
+          },
+        ),
         finalityStatus: TransactionStatus.RECEIVED,
         executionStatus: TransactionStatus.RECEIVED,
-        status: '', //DEPRECATED LATER
+        status: '', // DEPRECATED LATER
         failureReason: '',
         eventIds: [],
         timestamp: Math.floor(Date.now() / 1000),
@@ -143,8 +184,8 @@ export async function sendTransaction(params: ApiParams) {
     }
 
     return txnResp;
-  } catch (err) {
-    logger.error(`Problem found: ${err}`);
-    throw err;
+  } catch (error) {
+    logger.error(`Problem found:`, error);
+    throw error;
   }
 }

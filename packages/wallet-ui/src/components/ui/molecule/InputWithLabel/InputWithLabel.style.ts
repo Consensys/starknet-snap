@@ -11,7 +11,11 @@ interface IInput {
   placeholder?: string;
 }
 
-const getInputTextColorByState = (focused?: boolean, disabled?: boolean, error?: boolean) => {
+const getInputTextColorByState = (
+  focused?: boolean,
+  disabled?: boolean,
+  error?: boolean,
+) => {
   if ((!focused && !error) || disabled) {
     return theme.palette.grey.grey1;
   }
@@ -19,7 +23,11 @@ const getInputTextColorByState = (focused?: boolean, disabled?: boolean, error?:
   return theme.palette.grey.black;
 };
 
-const getInputBorderColorByState = (focused?: boolean, disabled?: boolean, error?: boolean) => {
+const getInputBorderColorByState = (
+  focused?: boolean,
+  disabled?: boolean,
+  error?: boolean,
+) => {
   if (disabled) {
     return 'transparent';
   }
@@ -55,7 +63,8 @@ export const Input = styled.input.attrs((props) => ({
   width: ${(props) => (props.amountInputMode ? '8px' : '100%')};
   font-size: ${(props) => props.theme.typography.p2.fontSize};
   font-family: ${(props) => props.theme.typography.p2.fontFamily};
-  color: ${(props) => getInputTextColorByState(props.focused, props.disabled, props.error)};
+  color: ${(props) =>
+    getInputTextColorByState(props.focused, props.disabled, props.error)};
   :focus {
     outline: none;
   }
@@ -71,7 +80,8 @@ export const InputContainer = styled.div<IInput>`
   border-radius: ${(props) => props.theme.corner.small};
   box-sizing: border-box;
   border: 1px solid ${(props) => props.theme.palette.grey.grey3};
-  border-color: ${(props) => getInputBorderColorByState(props.focused, props.disabled, props.error)};
+  border-color: ${(props) =>
+    getInputBorderColorByState(props.focused, props.disabled, props.error)};
   background-color: ${(props) => props.theme.palette.grey.white};
   padding-left: ${(props) => props.theme.spacing.small};
   padding-right: ${(props) => props.theme.spacing.small};
@@ -88,6 +98,8 @@ export const Left = styled.div`
 `;
 
 export const Icon = styled(FontAwesomeIcon).attrs<IInput>((props) => ({
-  color: props.error ? props.theme.palette.error.main : props.theme.palette.success.main,
+  color: props.error
+    ? props.theme.palette.error.main
+    : props.theme.palette.success.main,
   size: props.theme.typography.i2.fontSize,
 }))<IInput>``;

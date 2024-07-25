@@ -68,11 +68,21 @@ export const SideBarView = ({ address }: Props) => {
 
   return (
     <Wrapper>
-      <PopInStyled isOpen={accountDetailsOpen} setIsOpen={setAccountDetailsOpen}>
+      <PopInStyled
+        isOpen={accountDetailsOpen}
+        setIsOpen={setAccountDetailsOpen}
+      >
         <AccountDetailsModal address={address} />
       </PopInStyled>
-      <PopIn isOpen={infoModalOpen} setIsOpen={setInfoModalOpen} showClose={false}>
-        <ConnectInfoModal onButtonClick={() => setInfoModalOpen(false)} address={address} />
+      <PopIn
+        isOpen={infoModalOpen}
+        setIsOpen={setInfoModalOpen}
+        showClose={false}
+      >
+        <ConnectInfoModal
+          onButtonClick={() => setInfoModalOpen(false)}
+          address={address}
+        />
       </PopIn>
       <AccountDetails
         arrowVisible={false}
@@ -80,7 +90,11 @@ export const SideBarView = ({ address }: Props) => {
         offSet={[60, 0]}
         content={
           <AccountDetailsContent>
-            <AccountDetailButton backgroundTransparent iconLeft="qrcode" onClick={() => setAccountDetailsOpen(true)}>
+            <AccountDetailButton
+              backgroundTransparent
+              iconLeft="qrcode"
+              onClick={() => setAccountDetailsOpen(true)}
+            >
               Account details
             </AccountDetailButton>
             <AccountDetailButton
