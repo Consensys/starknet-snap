@@ -12,6 +12,7 @@ import type {
   Signature,
   SignerInterface,
   TypedData,
+  UniversalDetails,
 } from 'starknet';
 import { Account } from 'starknet';
 
@@ -36,10 +37,13 @@ export class MetaMaskAccount extends Account {
 
   async execute(
     calls: AllowArray<Call>,
-    abis?: Abi[] | undefined,
-    transactionsDetail?: InvocationsDetails,
+    abisOrTransactionsDetail?: Abi[] | UniversalDetails,
+    transactionsDetail?: UniversalDetails,
   ): Promise<InvokeFunctionResponse> {
-    return this.#snap.execute(this.#address, calls, abis, transactionsDetail);
+    if (!transactionsDetail) {
+      return this.#snap.execute(this.#address, calls, undefined, abisOrTransactionsDetail as UniversalDetails);
+    }
+    return this.#snap.execute(this.#address, calls, abisOrTransactionsDetail as Abi[], transactionsDetail);
   }
 
   async signMessage(typedData: TypedData): Promise<Signature> {
