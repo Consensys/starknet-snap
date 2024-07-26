@@ -345,13 +345,14 @@ export const getBalance = async (
   address: string,
   tokenAddress: string,
   network: Network,
+  blockIdentifier: BlockIdentifier = 'latest',
 ) => {
   const resp = await callContract(
     network,
     tokenAddress,
     'balanceOf',
     [numUtils.toBigInt(address).toString(10)],
-    'pending',
+    blockIdentifier,
   );
   return resp[0];
 };

@@ -5,7 +5,11 @@ import type {
 import { logger } from './utils/logger';
 import { toJson } from './utils/serializer';
 import { getNetworkFromChainId } from './utils/snapUtils';
-import { getBalance, validateAndParseAddress } from './utils/starknetUtils';
+import {
+  getBalance,
+  isAccountDeployed,
+  validateAndParseAddress,
+} from './utils/starknetUtils';
 
 /**
  *
@@ -48,7 +52,15 @@ export async function getErc20TokenBalance(params: ApiParams) {
       `getErc20Balance:\nerc20Address: ${erc20Address}\nuserAddress: ${userAddress}`,
     );
 
-    const balance = await getBalance(userAddress, erc20Address, network);
+    const blockIdentifier = (await isAccountDeployed(network, userAddress))
+      ? 'pending'
+      : 'latest';
+    const balance = await getBalance(
+      userAddress,
+      erc20Address,
+      network,
+      blockIdentifier,
+    );
 
     logger.log(`getErc20Balance:\nresp: ${toJson(balance)}`);
 
