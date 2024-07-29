@@ -88,7 +88,6 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
   logger.log(`${request.method}:\nrequestParams: ${toJson(requestParams)}`);
 
   try {
-
     if (request.method === 'ping') {
       logger.log('pong');
       return 'pong';
