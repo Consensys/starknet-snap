@@ -270,6 +270,9 @@ export const deployAccount = async (
   contractCallData: RawCalldata,
   addressSalt: numUtils.BigNumberish,
   privateKey: string | Uint8Array,
+  transactionVersion?:
+    | constants.TRANSACTION_VERSION.V2
+    | constants.TRANSACTION_VERSION.V3,
   cairoVersion?: CairoVersion,
   invocationsDetails?: UniversalDetails,
 ): Promise<DeployContractResponse> => {
@@ -286,6 +289,7 @@ export const deployAccount = async (
     contractAddress,
     privateKey,
     cairoVersion,
+    transactionVersion,
   ).deployAccount(deployAccountPayload, {
     ...invocationsDetails,
     skipValidate: false,

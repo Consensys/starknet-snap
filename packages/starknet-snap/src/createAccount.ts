@@ -1,6 +1,6 @@
 import { heading, panel, DialogType } from '@metamask/snaps-sdk';
 import type { CairoVersion, EstimateFee } from 'starknet';
-import { num as numUtils } from 'starknet';
+import { num as numUtils, constants } from 'starknet';
 
 import type {
   ApiParamsWithKeyDeriver,
@@ -51,6 +51,12 @@ export async function createAccount(
     const addressIndex = getValidNumber(requestParamsObj.addressIndex, -1, 0);
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
     const deploy = Boolean(requestParamsObj.deploy);
+    const transactionVersion =
+      requestParamsObj.transactionVersion ?? TRANSACTION_VERSION;
+    const feeToken =
+      requestParamsObj.transactionVersion === constants.TRANSACTION_VERSION.V3
+        ? 'STRK'
+        : 'ETH';
 
     const {
       privateKey,
@@ -84,7 +90,7 @@ export async function createAccount(
           contractCallData,
           publicKey,
           privateKey,
-          TRANSACTION_VERSION,
+          transactionVersion,
           cairoVersion,
         );
         logger.log(
@@ -103,6 +109,7 @@ export async function createAccount(
           contractAddress,
           maxFee,
           network,
+          feeToken,
         );
 
         const response = await wallet.request({
@@ -129,6 +136,7 @@ export async function createAccount(
         contractCallData,
         publicKey,
         privateKey,
+        transactionVersion,
         cairoVersion,
       );
 

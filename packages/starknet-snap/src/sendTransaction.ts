@@ -142,6 +142,8 @@ export async function sendTransaction(params: ApiParamsWithKeyDeriver) {
           addressIndex,
           deploy: true,
           chainId: requestParamsObj.chainId,
+          transactionVersion:
+            requestParamsObj.transactionVersion ?? TRANSACTION_VERSION,
         },
       };
       await createAccount(createAccountApiParams, true, true);
