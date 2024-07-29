@@ -1,4 +1,4 @@
 # Lines starting with '#' are comments.
 # Each line is a file pattern followed by one or more owners.
 
-* @ConsenSys/snaps-factory-reviewers @Consensys/starknet-engineer-team
+* @ConsenSys/snaps-factory-reviewers @ConsenSys/starknet-engineer-team
