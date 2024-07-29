@@ -1,123 +1,130 @@
+import { heading, panel, DialogType } from '@metamask/snaps-sdk';
+import type { CairoVersion, EstimateFee } from 'starknet';
+import { num as numUtils } from 'starknet';
+
+import type {
+  ApiParamsWithKeyDeriver,
+  CreateAccountRequestParams,
+} from './types/snapApi';
+import type { AccContract, Transaction } from './types/snapState';
+import { VoyagerTransactionType, TransactionStatus } from './types/snapState';
+import { CAIRO_VERSION_LEGACY, CAIRO_VERSION } from './utils/constants';
+import { logger } from './utils/logger';
 import { toJson } from './utils/serializer';
 import {
-  getKeysFromAddressIndex,
-  getAccContractAddressAndCallData,
-  deployAccount,
-  getBalance,
-  estimateAccountDeployFee,
-  isAccountDeployed,
-  waitForTransaction,
-} from './utils/starknetUtils';
-import {
-  getEtherErc20Token,
   getNetworkFromChainId,
   getValidNumber,
   upsertAccount,
   upsertTransaction,
-  addDialogTxt,
+  getSendTxnText,
 } from './utils/snapUtils';
-import { AccContract, VoyagerTransactionType, Transaction, TransactionStatus } from './types/snapState';
-import { ApiParams, CreateAccountRequestParams } from './types/snapApi';
-import { EstimateFee, num } from 'starknet';
-import { ethers } from 'ethers';
-import { DialogType } from '@metamask/rpc-methods';
-import { heading, panel, text } from '@metamask/snaps-sdk';
-import { logger } from './utils/logger';
+import {
+  getKeysFromAddressIndex,
+  getAccContractAddressAndCallDataLegacy,
+  getAccContractAddressAndCallData,
+  deployAccount,
+  waitForTransaction,
+  estimateAccountDeployFee,
+} from './utils/starknetUtils';
 
 /**
  * Create an starknet account.
  *
- * @template Params - The ApiParams of the request.
+ * @param params - The ApiParams of the request.
  * @param silentMode - The flag to disable the confirmation dialog from snap.
  * @param waitMode - The flag to enable an determination by doing an recursive fetch to check if the deploy account status is on L2 or not. The wait mode is only useful when it compose with other txn together, it can make sure the deploy txn execute complete, avoiding the latter txn failed.
+ * @param cairoVersion - The cairo version to use, default use constant CAIRO_VERSION.
  */
-export async function createAccount(params: ApiParams, silentMode = false, waitMode = false) {
+export async function createAccount(
+  params: ApiParamsWithKeyDeriver,
+  silentMode = false,
+  waitMode = false,
+  cairoVersion: CairoVersion = CAIRO_VERSION,
+) {
   try {
     const { state, wallet, saveMutex, keyDeriver, requestParams } = params;
     const requestParamsObj = requestParams as CreateAccountRequestParams;
-
     const addressIndex = getValidNumber(requestParamsObj.addressIndex, -1, 0);
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
-    const deploy = !!requestParamsObj.deploy;
+    const deploy = Boolean(requestParamsObj.deploy);
 
     const {
       privateKey,
       publicKey,
       addressIndex: addressIndexInUsed,
       derivationPath,
-    } = await getKeysFromAddressIndex(keyDeriver, network.chainId, state, addressIndex);
-    const { address: contractAddress, callData: contractCallData } = getAccContractAddressAndCallData(publicKey);
+    } = await getKeysFromAddressIndex(
+      keyDeriver,
+      network.chainId,
+      state,
+      addressIndex,
+    );
+    const { address: contractAddress, callData: contractCallData } =
+      cairoVersion === CAIRO_VERSION_LEGACY
+        ? getAccContractAddressAndCallDataLegacy(publicKey)
+        : getAccContractAddressAndCallData(publicKey);
+
     logger.log(
       `createAccount:\ncontractAddress = ${contractAddress}\npublicKey = ${publicKey}\naddressIndex = ${addressIndexInUsed}`,
     );
 
-    let failureReason = '';
-    let estimateDeployFee: EstimateFee;
-
     if (deploy) {
       if (!silentMode) {
-        const components = [];
-        addDialogTxt(components, 'Address', contractAddress);
-        addDialogTxt(components, 'Public Key', publicKey);
-        addDialogTxt(components, 'Address Index', addressIndex.toString());
+        logger.log(
+          `estimateAccountDeployFee:\ncontractAddress = ${contractAddress}\npublicKey = ${publicKey}\naddressIndex = ${addressIndexInUsed}`,
+        );
+
+        const estimateDeployFee: EstimateFee = await estimateAccountDeployFee(
+          network,
+          contractAddress,
+          contractCallData,
+          publicKey,
+          privateKey,
+          cairoVersion,
+        );
+        logger.log(
+          `estimateAccountDeployFee:\nestimateDeployFee: ${toJson(
+            estimateDeployFee,
+          )}`,
+        );
+        const maxFee = numUtils.toBigInt(
+          estimateDeployFee.suggestedMaxFee.toString(10) ?? '0',
+        );
+        const dialogComponents = getSendTxnText(
+          state,
+          contractAddress,
+          'deploy',
+          contractCallData,
+          contractAddress,
+          maxFee,
+          network,
+        );
 
         const response = await wallet.request({
           method: 'snap_dialog',
           params: {
             type: DialogType.Confirmation,
             content: panel([
-              heading('Do you want to sign this deploy account transaction ?'),
-              text(`It will be signed with address: ${contractAddress}`),
-              ...components,
+              heading('Do you want to sign this deploy transaction ?'),
+              ...dialogComponents,
             ]),
           },
         });
-        if (!response)
+        if (!response) {
           return {
             address: contractAddress,
           };
-      }
-
-      const signerAssigned = await isAccountDeployed(network, contractAddress);
-
-      if (!signerAssigned) {
-        try {
-          const balance = await getBalance(
-            getEtherErc20Token(state, network.chainId)?.address,
-            num.toBigInt(contractAddress).toString(10),
-            network,
-          );
-          logger.log(`createAccount:\ngetBalanceResp: ${balance}`);
-          estimateDeployFee = await estimateAccountDeployFee(
-            network,
-            contractAddress,
-            contractCallData,
-            publicKey,
-            privateKey,
-          );
-          logger.log(`createAccount:\nestimateDeployFee: ${toJson(estimateDeployFee)}`);
-          if (Number(balance) < Number(estimateDeployFee.suggestedMaxFee)) {
-            const gasFeeStr = ethers.utils.formatUnits(estimateDeployFee.suggestedMaxFee.toString(10), 18);
-            const gasFeeFloat = parseFloat(gasFeeStr).toFixed(6); // 6 decimal places for ether
-            const gasFeeInEther = Number(gasFeeFloat) === 0 ? '0.000001' : gasFeeFloat;
-            failureReason = `The account address needs to hold at least ${gasFeeInEther} ETH for deploy fee`;
-          }
-        } catch (err) {
-          failureReason = 'The account address ETH balance cannot be read';
-          logger.error(`createAccount: failed to read the ETH balance of ${contractAddress}: ${err}`);
         }
       }
 
+      // Deploy account will auto estimate the fee from the network if not provided
       const deployResp = await deployAccount(
         network,
         contractAddress,
         contractCallData,
         publicKey,
         privateKey,
-        undefined,
-        {
-          maxFee: estimateDeployFee?.suggestedMaxFee,
-        },
+        cairoVersion,
       );
 
       if (deployResp.contract_address && deployResp.transaction_hash) {
@@ -129,6 +136,8 @@ export async function createAccount(params: ApiParams, silentMode = false, waitM
           derivationPath,
           deployTxnHash: deployResp.transaction_hash,
           chainId: network.chainId,
+          upgradeRequired: cairoVersion === CAIRO_VERSION_LEGACY,
+          deployRequired: false,
         };
 
         await upsertAccount(userAccount, wallet, saveMutex);
@@ -144,7 +153,7 @@ export async function createAccount(params: ApiParams, silentMode = false, waitM
           finalityStatus: TransactionStatus.RECEIVED,
           executionStatus: TransactionStatus.RECEIVED,
           status: '',
-          failureReason,
+          failureReason: '',
           eventIds: [],
           timestamp: Math.floor(Date.now() / 1000),
         };
@@ -155,19 +164,25 @@ export async function createAccount(params: ApiParams, silentMode = false, waitM
       logger.log(`createAccount:\ndeployResp: ${toJson(deployResp)}`);
 
       if (waitMode) {
-        await waitForTransaction(network, deployResp.contract_address, privateKey, deployResp.transaction_hash);
+        await waitForTransaction(
+          network,
+          deployResp.contract_address,
+          privateKey,
+          deployResp.transaction_hash,
+        );
       }
 
       return {
         address: deployResp.contract_address,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         transaction_hash: deployResp.transaction_hash,
       };
     }
     return {
       address: contractAddress,
     };
-  } catch (err) {
-    logger.error(`Problem found: ${err}`);
-    throw err;
+  } catch (error) {
+    logger.error(`Problem found:`, error);
+    throw error;
   }
 }

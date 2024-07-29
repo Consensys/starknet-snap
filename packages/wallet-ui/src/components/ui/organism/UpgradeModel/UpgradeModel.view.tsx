@@ -5,7 +5,14 @@ import Toastr from 'toastr2';
 
 import { setUpgradeModalVisible } from 'slices/modalSlice';
 import { openExplorerTab, shortenAddress } from '../../../../utils/utils';
-import { UpgradeButton, StarknetLogo, Title, Wrapper, DescriptionCentered, Txnlink } from './UpgradeModel.style';
+import {
+  UpgradeButton,
+  StarknetLogo,
+  Title,
+  Wrapper,
+  DescriptionCentered,
+  Txnlink,
+} from './UpgradeModel.style';
 
 interface Props {
   address: string;
@@ -91,16 +98,28 @@ export const UpgradeModelView = ({ address }: Props) => {
           </>
         );
       case Stage.WAITING_FOR_TXN:
-        return <DescriptionCentered>Waiting for transaction to be complete.</DescriptionCentered>;
+        return (
+          <DescriptionCentered>
+            Waiting for transaction to be complete.
+          </DescriptionCentered>
+        );
       case Stage.SUCCESS:
-        return <DescriptionCentered>Account upgraded successfully.</DescriptionCentered>;
+        return (
+          <DescriptionCentered>
+            Account upgraded successfully.
+          </DescriptionCentered>
+        );
       default:
         return (
           <DescriptionCentered>
             Transaction Hash: <br />{' '}
-            <Txnlink onClick={() => openExplorerTab(txnHash, 'tx', chainId)}>{shortenAddress(txnHash)} </Txnlink>
+            <Txnlink onClick={() => openExplorerTab(txnHash, 'tx', chainId)}>
+              {shortenAddress(txnHash)}{' '}
+            </Txnlink>
             <br />
-            Unfortunately, you reached the maximum number of upgrade tentatives allowed.
+            Your upgrade transaction is still pending and has reached the
+            maximum retry limit for status checks. Please wait for the
+            transaction to complete.
             <br />
             <br />
             Please try again in a couple of hours.

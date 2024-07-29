@@ -28,13 +28,15 @@ export const ConnectModalView = () => {
         Connect to MetaMask<br></br> Starknet Snap
       </Title>
       <DescriptionCentered>
-        If you do not have the Starknet snap installed you will be prompted to install it.
+        If you do not have the Starknet snap installed you will be prompted to
+        install it.
       </DescriptionCentered>
       <WhatIsSnapDiv>
         <WhatIsSnap>What is a snap?</WhatIsSnap>
         <Description>
-          Snaps extend the capabilities of MetaMask by adding new functionalities. This Snap allows MetaMask to be
-          compatible with Starknet and manage your keys.
+          Snaps extend the capabilities of MetaMask by adding new
+          functionalities. This Snap allows MetaMask to be compatible with
+          Starknet and manage your keys.
         </Description>
         <ReadMore onClick={handleReadMoreClick}>Read more</ReadMore>
       </WhatIsSnapDiv>

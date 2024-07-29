@@ -29,6 +29,7 @@ export const networkSlice = createSlice({
   },
 });
 
-export const { setNetworks, setActiveNetwork, resetNetwork } = networkSlice.actions;
+export const { setNetworks, setActiveNetwork, resetNetwork } =
+  networkSlice.actions;
 
 export default networkSlice.reducer;

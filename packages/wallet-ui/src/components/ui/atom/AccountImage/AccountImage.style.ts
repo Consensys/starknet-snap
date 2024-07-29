@@ -7,7 +7,10 @@ interface IDiv {
 
 export const Wrapper = styled.div<IDiv>`
   width: fit-content;
-  border: ${(props) => (props.connected ? '2px solid ' + props.theme.palette.secondary.main : 'none')};
+  border: ${(props) =>
+    props.connected
+      ? '2px solid ' + props.theme.palette.secondary.main
+      : 'none'};
   height: ${(props) => (props.size ? props.size + 'px' : '40px')};
   border-radius: 50px;
   padding: 2px;

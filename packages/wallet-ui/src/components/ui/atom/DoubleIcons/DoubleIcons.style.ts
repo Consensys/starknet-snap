@@ -11,7 +11,9 @@ interface ICornerIcon {
 
 export const Wrapper = styled.div<IDivProps>`
   background: ${(props) =>
-    props.iconBackground ? `url(${props.iconBackground})` : props.theme.palette.secondary.main};
+    props.iconBackground
+      ? `url(${props.iconBackground})`
+      : props.theme.palette.secondary.main};
   background-repeat: no-repeat;
   width: ${(props) => props.size};
   height: ${(props) => props.size};

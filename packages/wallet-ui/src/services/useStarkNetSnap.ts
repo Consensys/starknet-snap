@@ -1,4 +1,9 @@
-import { setInfoModalVisible, setMinVersionModalVisible, setUpgradeModalVisible } from 'slices/modalSlice';
+import {
+  setInfoModalVisible,
+  setMinVersionModalVisible,
+  setUpgradeModalVisible,
+  setDeployModalVisible,
+} from 'slices/modalSlice';
 import { setNetworks } from 'slices/networkSlice';
 import { useAppDispatch, useAppSelector } from 'hooks/redux';
 import {
@@ -11,7 +16,12 @@ import {
   setForceReconnect,
 } from '../slices/walletSlice';
 import Toastr from 'toastr2';
-import { addMissingPropertiesToToken, hexToString, retry, isGTEMinVersion } from '../utils/utils';
+import {
+  addMissingPropertiesToToken,
+  hexToString,
+  retry,
+  isGTEMinVersion,
+} from '../utils/utils';
 import { setWalletConnection } from '../slices/walletSlice';
 import { Network, VoyagerTransactionType } from '../types';
 import { Account } from '../types';
@@ -26,11 +36,22 @@ import { setActiveNetwork } from 'slices/networkSlice';
 export const useStarkNetSnap = () => {
   const dispatch = useAppDispatch();
   const { loader } = useAppSelector((state) => state.UI);
-  const { transactions, erc20TokenBalances, provider } = useAppSelector((state) => state.wallet);
-  const snapId = process.env.REACT_APP_SNAP_ID ? process.env.REACT_APP_SNAP_ID : 'local:http://localhost:8081/';
-  const snapVersion = process.env.REACT_APP_SNAP_VERSION ? process.env.REACT_APP_SNAP_VERSION : '*';
-  const minSnapVersion = process.env.REACT_APP_MIN_SNAP_VERSION ? process.env.REACT_APP_MIN_SNAP_VERSION : '2.0.1';
-  const debugLevel = process.env.REACT_APP_DEBUG_LEVEL !== undefined ? process.env.REACT_APP_DEBUG_LEVEL : 'all';
+  const { transactions, erc20TokenBalances, provider } = useAppSelector(
+    (state) => state.wallet,
+  );
+  const snapId = process.env.REACT_APP_SNAP_ID
+    ? process.env.REACT_APP_SNAP_ID
+    : 'local:http://localhost:8081/';
+  const snapVersion = process.env.REACT_APP_SNAP_VERSION
+    ? process.env.REACT_APP_SNAP_VERSION
+    : '*';
+  const minSnapVersion = process.env.REACT_APP_MIN_SNAP_VERSION
+    ? process.env.REACT_APP_MIN_SNAP_VERSION
+    : '2.0.1';
+  const debugLevel =
+    process.env.REACT_APP_DEBUG_LEVEL !== undefined
+      ? process.env.REACT_APP_DEBUG_LEVEL
+      : 'all';
   const START_SCAN_INDEX = 0;
   const MAX_SCANNED = 1;
   const MAX_MISSED = 1;
@@ -235,11 +256,18 @@ export const useStarkNetSnap = () => {
     const tokens = await getTokens(chainId);
     let acc: Account[] | Account = await recoverAccounts(chainId);
     let upgradeRequired = false;
-
-    if (!acc || acc.length === 0 || !acc[0].publicKey) {
+    let deployRequired = false;
+    deployRequired =
+      (Array.isArray(acc)
+        ? acc[0].deployRequired
+        : (acc as Account).deployRequired) ?? false;
+    if (!acc || acc.length === 0 || (!acc[0].publicKey && !deployRequired)) {
       acc = await addAccount(chainId);
     } else {
-      upgradeRequired = (Array.isArray(acc) ? acc[0].upgradeRequired : (acc as Account).upgradeRequired) ?? false;
+      upgradeRequired =
+        (Array.isArray(acc)
+          ? acc[0].upgradeRequired
+          : (acc as Account).upgradeRequired) ?? false;
     }
 
     const tokenBalances = await Promise.all(
@@ -256,7 +284,11 @@ export const useStarkNetSnap = () => {
     );
 
     const tokensWithBalances = tokens.map((token, index): Erc20TokenBalance => {
-      return addMissingPropertiesToToken(token, tokenBalances[index], tokenUSDPrices[index]);
+      return addMissingPropertiesToToken(
+        token,
+        tokenBalances[index],
+        tokenUSDPrices[index],
+      );
     });
     if (networks) {
       dispatch(setNetworks(networks));
@@ -269,7 +301,8 @@ export const useStarkNetSnap = () => {
     if (!Array.isArray(acc)) {
       dispatch(setInfoModalVisible(true));
     }
-    dispatch(setUpgradeModalVisible(upgradeRequired));
+    dispatch(setUpgradeModalVisible(upgradeRequired && !deployRequired));
+    dispatch(setDeployModalVisible(deployRequired));
     dispatch(disableLoading());
   };
 
@@ -369,7 +402,10 @@ export const useStarkNetSnap = () => {
     }
   }
 
-  const getTransactionStatus = async (transactionHash: string, chainId: string) => {
+  const getTransactionStatus = async (
+    transactionHash: string,
+    chainId: string,
+  ) => {
     try {
       const response = await provider.request({
         method: 'wallet_invokeSnap',
@@ -392,7 +428,10 @@ export const useStarkNetSnap = () => {
     }
   };
 
-  const readContract = async (contractAddress: string, contractFuncName: string) => {
+  const readContract = async (
+    contractAddress: string,
+    contractFuncName: string,
+  ) => {
     try {
       const response = await provider.request({
         method: 'wallet_invokeSnap',
@@ -415,7 +454,44 @@ export const useStarkNetSnap = () => {
     }
   };
 
-  const upgradeAccount = async (contractAddress: string, maxFee: string, chainId: string) => {
+  const deployAccount = async (
+    contractAddress: string,
+    maxFee: string,
+    chainId: string,
+  ) => {
+    dispatch(enableLoadingWithMessage('Deploying account...'));
+    try {
+      const response = await provider.request({
+        method: 'wallet_invokeSnap',
+        params: {
+          snapId,
+          request: {
+            method: 'starkNet_createAccountLegacy',
+            params: {
+              ...defaultParam,
+              contractAddress,
+              maxFee,
+              chainId,
+              deploy: true,
+            },
+          },
+        },
+      });
+      dispatch(disableLoading());
+      return response;
+    } catch (err) {
+      dispatch(disableLoading());
+      //eslint-disable-next-line no-console
+      console.error(err);
+      throw err;
+    }
+  };
+
+  const upgradeAccount = async (
+    contractAddress: string,
+    maxFee: string,
+    chainId: string,
+  ) => {
     dispatch(enableLoadingWithMessage('Upgrading account...'));
     try {
       const response = await provider.request({
@@ -482,7 +558,9 @@ export const useStarkNetSnap = () => {
         // Filter out stored txns that are not found in the retrieved txns
         const filteredTxns = transactions.filter((txn: Transaction) => {
           return !storedTxns.find((storedTxn: Transaction) =>
-            ethers.BigNumber.from(storedTxn.txnHash).eq(ethers.BigNumber.from(txn.txnHash)),
+            ethers.BigNumber.from(storedTxn.txnHash).eq(
+              ethers.BigNumber.from(txn.txnHash),
+            ),
           );
         });
 
@@ -541,9 +619,17 @@ export const useStarkNetSnap = () => {
         },
       });
       if (token) {
-        const tokenBalance = await getTokenBalance(tokenAddress, accountAddress, chainId);
+        const tokenBalance = await getTokenBalance(
+          tokenAddress,
+          accountAddress,
+          chainId,
+        );
         const usdPrice = await getAssetPriceUSD(token);
-        const tokenWithBalance: Erc20TokenBalance = addMissingPropertiesToToken(token, tokenBalance, usdPrice);
+        const tokenWithBalance: Erc20TokenBalance = addMissingPropertiesToToken(
+          token,
+          tokenBalance,
+          usdPrice,
+        );
         dispatch(upsertErc20TokenBalance(tokenWithBalance));
         dispatch(disableLoading());
         return tokenWithBalance;
@@ -557,14 +643,26 @@ export const useStarkNetSnap = () => {
     }
   };
 
-  const updateTokenBalance = async (tokenAddress: string, accountAddress: string, chainId: string) => {
+  const updateTokenBalance = async (
+    tokenAddress: string,
+    accountAddress: string,
+    chainId: string,
+  ) => {
     const foundTokenWithBalance = erc20TokenBalances.find(
       (tokenBalance) =>
-        ethers.BigNumber.from(tokenBalance.address).eq(ethers.BigNumber.from(tokenAddress)) &&
-        ethers.BigNumber.from(tokenBalance.chainId).eq(ethers.BigNumber.from(chainId)),
+        ethers.BigNumber.from(tokenBalance.address).eq(
+          ethers.BigNumber.from(tokenAddress),
+        ) &&
+        ethers.BigNumber.from(tokenBalance.chainId).eq(
+          ethers.BigNumber.from(chainId),
+        ),
     );
     if (foundTokenWithBalance) {
-      const tokenBalance = await getTokenBalance(tokenAddress, accountAddress, chainId);
+      const tokenBalance = await getTokenBalance(
+        tokenAddress,
+        accountAddress,
+        chainId,
+      );
       const usdPrice = await getAssetPriceUSD(foundTokenWithBalance);
       const tokenWithBalance: Erc20TokenBalance = addMissingPropertiesToToken(
         foundTokenWithBalance,
@@ -575,7 +673,11 @@ export const useStarkNetSnap = () => {
     }
   };
 
-  const getTokenBalance = async (tokenAddress: string, userAddress: string, chainId: string) => {
+  const getTokenBalance = async (
+    tokenAddress: string,
+    userAddress: string,
+    chainId: string,
+  ) => {
     try {
       const response = await provider.request({
         method: 'wallet_invokeSnap',
@@ -607,17 +709,22 @@ export const useStarkNetSnap = () => {
         }),
       );
 
-      const tokensRefreshed = erc20TokenBalances.map((token, index): Erc20TokenBalance => {
-        return {
-          ...token,
-          usdPrice: tokenUSDPrices[index],
-        };
-      });
+      const tokensRefreshed = erc20TokenBalances.map(
+        (token, index): Erc20TokenBalance => {
+          return {
+            ...token,
+            usdPrice: tokenUSDPrices[index],
+          };
+        },
+      );
       dispatch(setErc20TokenBalances(tokensRefreshed));
     }
   };
 
-  const waitForTransaction = async (transactionHash: string, chainId: string) => {
+  const waitForTransaction = async (
+    transactionHash: string,
+    chainId: string,
+  ) => {
     let txStatus;
     const successStates = ['ACCEPTED_ON_L2', 'ACCEPTED_ON_L1'];
     const errorStates = ['REJECTED', 'NOT_RECEIVED'];
@@ -625,13 +732,23 @@ export const useStarkNetSnap = () => {
     const executeFn = async () => {
       txStatus = await getTransactionStatus(transactionHash, chainId);
 
-      if (!txStatus || !('executionStatus' in txStatus) || !('finalityStatus' in txStatus)) {
+      if (
+        !txStatus ||
+        !('executionStatus' in txStatus) ||
+        !('finalityStatus' in txStatus)
+      ) {
         return false;
       }
 
-      if (txStatus.finalityStatus && successStates.includes(txStatus.finalityStatus)) {
+      if (
+        txStatus.finalityStatus &&
+        successStates.includes(txStatus.finalityStatus)
+      ) {
         return true;
-      } else if (txStatus.executionStatus && errorStates.includes(txStatus.executionStatus)) {
+      } else if (
+        txStatus.executionStatus &&
+        errorStates.includes(txStatus.executionStatus)
+      ) {
         const message = txStatus.executionStatus;
         throw new Error(message);
       }
@@ -644,8 +761,60 @@ export const useStarkNetSnap = () => {
     return txStatus;
   };
 
-  const waitForAccountUpdate = async (transactionHash: string, accountAddress: string, chainId: string) => {
-    dispatch(enableLoadingWithMessage('Waiting for transaction to be finalised.'));
+  const waitForAccountCreation = async (
+    transactionHash: string,
+    accountAddress: string,
+    chainId: string,
+  ) => {
+    dispatch(
+      enableLoadingWithMessage('Waiting for transaction to be finalised.'),
+    );
+    const toastr = new Toastr();
+    let result = false;
+
+    try {
+      // read transaction to check if the txn is ready
+      await waitForTransaction(transactionHash, chainId);
+    } catch (e) {
+      //eslint-disable-next-line no-console
+      console.log(`error while wait for transaction: ${e}`);
+    }
+
+    try {
+      const executeFn = async (): Promise<boolean> => {
+        // read contract to check if upgrade is required
+        const resp = await readContract(accountAddress, 'getVersion');
+        if (!resp || !resp[0]) {
+          return false;
+        }
+
+        // recover accounts to update snap state
+        await recoverAccounts(chainId);
+        return true;
+      };
+
+      result = await retry(executeFn, {
+        maxAttempts: 20,
+      });
+    } catch (e: any) {
+      //eslint-disable-next-line no-console
+      console.log(`error while processing waitForAccountDeploy: ${e}`);
+      toastr.error('Snap is unable to verify the contract deploy process');
+    }
+
+    dispatch(disableLoading());
+
+    return result;
+  };
+
+  const waitForAccountUpdate = async (
+    transactionHash: string,
+    accountAddress: string,
+    chainId: string,
+  ) => {
+    dispatch(
+      enableLoadingWithMessage('Waiting for transaction to be finalised.'),
+    );
     const toastr = new Toastr();
     let result = false;
 
@@ -762,11 +931,13 @@ export const useStarkNetSnap = () => {
     estimateFees,
     sendTransaction,
     upgradeAccount,
+    deployAccount,
     getTransactions,
     getTransactionStatus,
     recoverAccounts,
     waitForTransaction,
     waitForAccountUpdate,
+    waitForAccountCreation,
     updateTokenBalance,
     getTokenBalance,
     addErc20Token,

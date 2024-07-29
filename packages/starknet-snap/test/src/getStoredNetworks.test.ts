@@ -3,11 +3,17 @@ import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import { WalletMock } from '../wallet.mock.test';
 import { SnapState } from '../../src/types/snapState';
-import { STARKNET_MAINNET_NETWORK, STARKNET_SEPOLIA_TESTNET_NETWORK } from '../../src/utils/constants';
+import {
+  STARKNET_MAINNET_NETWORK,
+  STARKNET_SEPOLIA_TESTNET_NETWORK,
+} from '../../src/utils/constants';
 import { getStoredNetworks } from '../../src/getStoredNetworks';
 import * as snapUtils from '../../src/utils/snapUtils';
 import { Mutex } from 'async-mutex';
-import { ApiParams, GetStoredNetworksRequestParams } from '../../src/types/snapApi';
+import {
+  ApiParams,
+  GetStoredNetworksRequestParams,
+} from '../../src/types/snapApi';
 
 chai.use(sinonChai);
 const sandbox = sinon.createSandbox();

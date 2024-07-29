@@ -9,7 +9,11 @@ import { account1, getBip44EntropyStub, signature1 } from '../constants.test';
 import { getAddressKeyDeriver } from '../../src/utils/keyPair';
 import * as utils from '../../src/utils/starknetUtils';
 import { Mutex } from 'async-mutex';
-import { ApiParams, VerifySignedMessageRequestParams } from '../../src/types/snapApi';
+import {
+  ApiParamsWithKeyDeriver,
+  VerifySignedMessageRequestParams,
+} from '../../src/types/snapApi';
+import { UpgradeRequiredError } from '../../src/utils/exceptions';
 
 chai.use(sinonChai);
 const sandbox = sinon.createSandbox();
@@ -24,12 +28,7 @@ describe('Test function: verifySignedMessage', function () {
     transactions: [],
   };
 
-  const apiParams: ApiParams = {
-    state,
-    requestParams: {},
-    wallet: walletStub,
-    saveMutex: new Mutex(),
-  };
+  let apiParams: ApiParamsWithKeyDeriver;
 
   const requestObject: VerifySignedMessageRequestParams = {
     signerAddress: account1.address,
@@ -39,7 +38,13 @@ describe('Test function: verifySignedMessage', function () {
 
   beforeEach(async function () {
     walletStub.rpcStubs.snap_getBip44Entropy.callsFake(getBip44EntropyStub);
-    apiParams.keyDeriver = await getAddressKeyDeriver(walletStub);
+    apiParams = {
+      state,
+      requestParams: {},
+      wallet: walletStub,
+      saveMutex: new Mutex(),
+      keyDeriver: await getAddressKeyDeriver(walletStub),
+    };
   });
 
   afterEach(function () {
@@ -69,7 +74,7 @@ describe('Test function: verifySignedMessage', function () {
     });
 
     it('should throw an error if the signature is undefined', async function () {
-      invalidRequest.signature = undefined;
+      invalidRequest.signature = undefined as unknown as string;
       apiParams.requestParams = invalidRequest;
       let result;
       try {
@@ -91,25 +96,35 @@ describe('Test function: verifySignedMessage', function () {
       apiParams.requestParams = Object.assign({}, requestObject);
     });
 
-    describe('when require upgrade checking fail', function () {
+    describe('when validateAccountRequireUpgradeOrDeploy fail', function () {
       it('should throw error', async function () {
-        const isUpgradeRequiredStub = sandbox.stub(utils, 'isUpgradeRequired').throws('network error');
+        const validateAccountRequireUpgradeOrDeployStub = sandbox
+          .stub(utils, 'validateAccountRequireUpgradeOrDeploy')
+          .throws('network error');
         let result;
         try {
           result = await verifySignedMessage(apiParams);
         } catch (err) {
           result = err;
         } finally {
-          expect(isUpgradeRequiredStub).to.have.been.calledOnceWith(STARKNET_SEPOLIA_TESTNET_NETWORK, account1.address);
+          expect(
+            validateAccountRequireUpgradeOrDeployStub,
+          ).to.have.been.calledOnceWith(
+            STARKNET_SEPOLIA_TESTNET_NETWORK,
+            account1.address,
+            account1.publicKey,
+          );
           expect(result).to.be.an('Error');
         }
       });
     });
 
     describe('when account require upgrade', function () {
-      let isUpgradeRequiredStub: sinon.SinonStub;
+      let validateAccountRequireUpgradeOrDeployStub: sinon.SinonStub;
       beforeEach(async function () {
-        isUpgradeRequiredStub = sandbox.stub(utils, 'isUpgradeRequired').resolves(true);
+        validateAccountRequireUpgradeOrDeployStub = sandbox
+          .stub(utils, 'validateAccountRequireUpgradeOrDeploy')
+          .throws(new UpgradeRequiredError('Upgrade Required'));
       });
 
       it('should throw error if upgrade required', async function () {
@@ -119,7 +134,13 @@ describe('Test function: verifySignedMessage', function () {
         } catch (err) {
           result = err;
         } finally {
-          expect(isUpgradeRequiredStub).to.have.been.calledOnceWith(STARKNET_SEPOLIA_TESTNET_NETWORK, account1.address);
+          expect(
+            validateAccountRequireUpgradeOrDeployStub,
+          ).to.have.been.calledOnceWith(
+            STARKNET_SEPOLIA_TESTNET_NETWORK,
+            account1.address,
+            account1.publicKey,
+          );
           expect(result).to.be.an('Error');
         }
       });
@@ -127,7 +148,9 @@ describe('Test function: verifySignedMessage', function () {
 
     describe('when account is not require upgrade', function () {
       beforeEach(async function () {
-        sandbox.stub(utils, 'isUpgradeRequired').resolves(false);
+        sandbox
+          .stub(utils, 'validateAccountRequireUpgradeOrDeploy')
+          .resolvesThis();
       });
 
       it('should verify a signed message from an user account correctly', async function () {
