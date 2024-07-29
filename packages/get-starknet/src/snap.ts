@@ -11,7 +11,6 @@ import type {
   InvokeFunctionResponse,
   Signature,
   TypedData,
-  UniversalDetails,
 } from 'starknet';
 
 import type { AccContract, MetaMaskProvider, Network, RequestSnapResponse } from './type';
@@ -110,7 +109,7 @@ export class MetaMaskSnap {
     senderAddress: string,
     txnInvocation: AllowArray<Call>,
     abis?: Abi[],
-    invocationsDetails?: UniversalDetails,
+    invocationsDetails?: InvocationsDetails,
   ): Promise<InvokeFunctionResponse> {
     return (await this.#provider.request({
       method: 'wallet_invokeSnap',
