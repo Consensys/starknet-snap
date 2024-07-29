@@ -1,4 +1,4 @@
-import type { Invocations } from 'starknet';
+import type { EstimateFee, Invocations } from 'starknet';
 import { TransactionType } from 'starknet';
 
 import type {
@@ -118,19 +118,15 @@ export async function estimateFee(params: ApiParamsWithKeyDeriver) {
         estimateBulkFeeResp,
       )}`,
     );
-    const estimateFeeResp = addFeesFromAllTransactions(estimateBulkFeeResp);
-
-    if (!estimateFeeResp.suggestedMaxFee || !estimateFeeResp.overall_fee) {
-      throw new Error(`Bulk Fee estimation failed`);
-    }
+    const estimateFeeResp = addFeesFromAllTransactions(
+      estimateBulkFeeResp,
+    ) as EstimateFee;
 
     logger.log(`estimateFee:\nestimateFeeResp: ${toJson(estimateFeeResp)}`);
 
     const resp = {
       suggestedMaxFee: estimateFeeResp.suggestedMaxFee.toString(10),
       overallFee: estimateFeeResp.overall_fee.toString(10),
-      gasConsumed: estimateFeeResp.gas_consumed?.toString(10) ?? '0',
-      gasPrice: estimateFeeResp.gas_price?.toString(10) ?? '0',
       unit: 'wei',
       includeDeploy: !accountDeployed,
     };
