@@ -121,9 +121,9 @@ export const DeployModalView = ({ address }: Props) => {
               {shortenAddress(txnHash)}{' '}
             </Txnlink>
             <br />
-            Your upgrade/deploy transaction is still pending and has reached the
-            maximum retry limit for status checks. Please wait for the
-            transaction to complete.
+            Your deploy transaction is still pending and has reached the maximum
+            retry limit for status checks. Please wait for the transaction to
+            complete.
             <br />
             <br />
             Please try again in a couple of hours.
