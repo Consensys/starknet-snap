@@ -15,6 +15,7 @@ import {
 import * as starknetUtils from '../../src/utils/starknetUtils';
 import * as createAccountApi from '../../src/createAccount';
 import * as keyPairUtils from '../../src/utils/keyPair';
+import * as logger from '../../src/utils/logger';
 import { onHomePage, onRpcRequest } from '../../src';
 
 chai.use(sinonChai);
@@ -31,6 +32,8 @@ describe('onRpcRequest', function () {
   afterEach(function () {
     walletStub.reset();
     sandbox.restore();
+    // Temp solution: Switch off logger after each test
+    logger.logger.init('off');
   });
 
   it('processes request successfully', async function () {
