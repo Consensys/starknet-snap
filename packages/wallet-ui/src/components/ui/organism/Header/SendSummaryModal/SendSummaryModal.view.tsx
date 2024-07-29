@@ -31,12 +31,14 @@ import { useEffect, useState } from 'react';
 import { useStarkNetSnap } from 'services';
 import { ethers } from 'ethers';
 import Toastr from 'toastr2';
+import { constants } from 'starknet';
 
 interface Props {
   address: string;
   amount: string;
   chainId: string;
   closeModal?: () => void;
+  selectedFeeToken: string;
 }
 
 export const SendSummaryModalView = ({
@@ -44,6 +46,7 @@ export const SendSummaryModalView = ({
   amount,
   chainId,
   closeModal,
+  selectedFeeToken,
 }: Props) => {
   const wallet = useAppSelector((state) => state.wallet);
   const [estimatingGas, setEstimatingGas] = useState(true);
@@ -83,6 +86,9 @@ export const SendSummaryModalView = ({
           callData,
           wallet.accounts[0] as unknown as string,
           chainId,
+          selectedFeeToken === 'ETH'
+            ? constants.TRANSACTION_VERSION.V2
+            : constants.TRANSACTION_VERSION.V3,
         )
           .then((response) => {
             if (response.message && response.message.includes('Error')) {
@@ -105,47 +111,63 @@ export const SendSummaryModalView = ({
     if (gasFees?.suggestedMaxFee) {
       //We assume the first token for the user will always be ETH
       const ethToken = wallet.erc20TokenBalances[0];
+      const strkToken = wallet.erc20TokenBalances.find(
+        (token) => token.symbol === 'STRK',
+      );
+      const feeToken =
+        selectedFeeToken === 'ETH' || strkToken === undefined
+          ? ethToken
+          : strkToken;
       const gasFeesBN = ethers.utils.parseUnits(
         gasFees.suggestedMaxFee,
         gasFees.unit,
       );
       let totalToCheck = gasFeesBN;
-      const gasFeesStr = ethers.utils.formatUnits(gasFeesBN, ethToken.decimals);
-      const gasFeesFloat = parseFloat(gasFeesStr);
-      setGasFeesAmount(getMaxDecimalsReadable(ethToken, gasFeesStr));
-      if (ethToken.usdPrice) {
-        setGasFeesAmountUSD(getAmountPrice(ethToken, gasFeesFloat, false));
-      }
-      const amountBN = ethers.utils.parseUnits(
-        amount,
-        wallet.erc20TokenBalanceSelected.decimals,
-      );
-      if (wallet.erc20TokenBalanceSelected.address === ethToken.address) {
-        //We add the fees with the amount if the current token is ETH
-        const totalAmountBN = gasFeesBN.add(amountBN);
-        totalToCheck = totalAmountBN;
-        const totalAmount = ethers.utils.formatUnits(
-          totalAmountBN,
-          ethToken.decimals,
+
+      if (feeToken) {
+        const gasFeesStr = ethers.utils.formatUnits(
+          gasFeesBN,
+          feeToken.decimals,
         );
-        setTotalAmount(getMaxDecimalsReadable(ethToken, totalAmount));
-        const totalAmountFloat = parseFloat(totalAmount);
-        if (ethToken.usdPrice) {
-          setTotalAmountUSD(getAmountPrice(ethToken, totalAmountFloat, false));
+        const gasFeesFloat = parseFloat(gasFeesStr);
+        setGasFeesAmount(getMaxDecimalsReadable(feeToken, gasFeesStr));
+        if (feeToken.usdPrice) {
+          setGasFeesAmountUSD(getAmountPrice(feeToken, gasFeesFloat, false));
         }
-      } else if (amountUsdPrice) {
-        const amountGasFeeUSDFloat = parseFloat(
-          getAmountPrice(ethToken, gasFeesFloat, false),
+        const amountBN = ethers.utils.parseUnits(
+          amount,
+          wallet.erc20TokenBalanceSelected.decimals,
         );
-        const amountUSDFloat = parseFloat(amountUsdPrice);
-        const totalUSDAmount = amountUSDFloat + amountGasFeeUSDFloat;
-        setTotalAmountUSD(totalUSDAmount.toFixed(2));
-      }
-      //Check if total amount exceeds or gasFees exceeds ETH balance
-      if (totalToCheck.gt(ethToken.amount)) {
-        setTotalExceedsBalance(true);
+        if (wallet.erc20TokenBalanceSelected.address === feeToken.address) {
+          const totalAmountBN = gasFeesBN.add(amountBN);
+          totalToCheck = totalAmountBN;
+          const totalAmount = ethers.utils.formatUnits(
+            totalAmountBN,
+            feeToken.decimals,
+          );
+          setTotalAmount(getMaxDecimalsReadable(feeToken, totalAmount));
+          const totalAmountFloat = parseFloat(totalAmount);
+          if (feeToken.usdPrice) {
+            setTotalAmountUSD(
+              getAmountPrice(feeToken, totalAmountFloat, false),
+            );
+          }
+        } else if (amountUsdPrice) {
+          const amountGasFeeUSDFloat = parseFloat(
+            getAmountPrice(feeToken, gasFeesFloat, false),
+          );
+          const amountUSDFloat = parseFloat(amountUsdPrice);
+          const totalUSDAmount = amountUSDFloat + amountGasFeeUSDFloat;
+          setTotalAmountUSD(totalUSDAmount.toFixed(2));
+        }
+
+        if (totalToCheck.gt(feeToken.amount)) {
+          setTotalExceedsBalance(true);
+        } else {
+          setTotalExceedsBalance(false);
+        }
       } else {
-        setTotalExceedsBalance(false);
+        setTotalExceedsBalance(true);
       }
     }
   }, [gasFees]);
@@ -203,12 +225,14 @@ export const SendSummaryModalView = ({
 
   const totalAmountDisplay = () => {
     if (wallet.erc20TokenBalances.length > 0) {
-      if (
-        wallet.erc20TokenBalanceSelected.address ===
-        wallet.erc20TokenBalances[0].address
-      ) {
-        //ETH selected
-        return totalAmount + ' ETH';
+      const feeToken =
+        selectedFeeToken === 'ETH'
+          ? wallet.erc20TokenBalances[0]
+          : wallet.erc20TokenBalances.find(
+              (token) => token.symbol === 'STRK',
+            ) ?? wallet.erc20TokenBalances[0];
+      if (wallet.erc20TokenBalanceSelected.address === feeToken.address) {
+        return totalAmount + ` ${feeToken.symbol}`;
       } else {
         return (
           getHumanReadableAmount(wallet.erc20TokenBalanceSelected, amount) +
@@ -216,7 +240,7 @@ export const SendSummaryModalView = ({
           wallet.erc20TokenBalanceSelected.symbol +
           ' + ' +
           gasFeesAmount +
-          ' ETH'
+          ` ${feeToken.symbol}`
         );
       }
     }
@@ -261,14 +285,18 @@ export const SendSummaryModalView = ({
             {estimatingGas && <LoadingWrapper />}
             {!estimatingGas && (
               <>
-                <CurrencyAmount>{gasFeesAmount} ETH</CurrencyAmount>
+                <CurrencyAmount>
+                  {gasFeesAmount} {selectedFeeToken}
+                </CurrencyAmount>
                 <USDAmount>{gasFeesAmountUSD} USD</USDAmount>
               </>
             )}
           </RightSummary>
         </Summary>
         {!estimatingGas && (
-          <TotalAmount>Maximum fees: {gasFeesAmount} ETH</TotalAmount>
+          <TotalAmount>
+            Maximum fees: {gasFeesAmount} {selectedFeeToken}
+          </TotalAmount>
         )}
         {gasFees.includeDeploy && (
           <IncludeDeploy>*Fees include a one-time deployment fee</IncludeDeploy>
@@ -289,7 +317,9 @@ export const SendSummaryModalView = ({
           </RightSummary>
         </Summary>
         {totalAmount && (
-          <TotalAmount>Maximum amount: {totalAmount} ETH</TotalAmount>
+          <TotalAmount>
+            Maximum amount: {totalAmount} {selectedFeeToken}
+          </TotalAmount>
         )}
         {totalExceedsBalance && (
           <AlertTotalExceedsAmount
