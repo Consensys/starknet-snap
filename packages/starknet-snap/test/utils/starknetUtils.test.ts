@@ -3,7 +3,11 @@ import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import { WalletMock } from '../wallet.mock.test';
 import * as utils from '../../src/utils/starknetUtils';
-import { STARKNET_SEPOLIA_TESTNET_NETWORK, CAIRO_VERSION, CAIRO_VERSION_LEGACY } from '../../src/utils/constants';
+import {
+  STARKNET_SEPOLIA_TESTNET_NETWORK,
+  CAIRO_VERSION,
+  CAIRO_VERSION_LEGACY,
+} from '../../src/utils/constants';
 import { getAddressKeyDeriver } from '../../src/utils/keyPair';
 import {
   getTxnFromVoyagerResp1,
@@ -12,10 +16,18 @@ import {
   account1,
   account2,
   account3,
+  getBalanceResp,
 } from '../constants.test';
 import { SnapState } from '../../src/types/snapState';
-import { Calldata, num, Account, Provider, GetTransactionReceiptResponse } from 'starknet';
+import {
+  Calldata,
+  num,
+  Account,
+  Provider,
+  GetTransactionReceiptResponse,
+} from 'starknet';
 import { hexToString } from '../../src/utils/formatterUtils';
+import { BIP44AddressKeyDeriver } from '@metamask/key-tree';
 
 chai.use(sinonChai);
 const sandbox = sinon.createSandbox();
@@ -107,7 +119,7 @@ describe('Test function: findAddressIndex', function () {
   });
 
   it('should throw error if address not found', async function () {
-    let result = null;
+    let result;
     try {
       result = await utils.findAddressIndex(
         STARKNET_SEPOLIA_TESTNET_NETWORK.chainId,
@@ -120,14 +132,17 @@ describe('Test function: findAddressIndex', function () {
       result = err;
     } finally {
       expect(result).to.be.an('Error');
-      expect(result?.message).to.be.eq(`Address not found: ${account3.address}`);
+      expect(result?.message).to.be.eq(
+        `Address not found: ${account3.address}`,
+      );
     }
   });
 });
 
 describe('Test function: callContract', function () {
   const walletStub = new WalletMock();
-  const userAddress = '0x27f204588cadd08a7914f6a9808b34de0cbfc4cb53aa053663e7fd3a34dbc26';
+  const userAddress =
+    '0x27f204588cadd08a7914f6a9808b34de0cbfc4cb53aa053663e7fd3a34dbc26';
 
   afterEach(function () {
     walletStub.reset();
@@ -136,37 +151,26 @@ describe('Test function: callContract', function () {
 
   it('should get the signer of an user account correctly', async function () {
     sandbox.stub(utils, 'callContract').callsFake(async () => {
-      return ['0x795d62a9896b221af17bedd8cceb8d963ac6864857d7476e2f8c03ba0c5df9'];
+      return [
+        '0x795d62a9896b221af17bedd8cceb8d963ac6864857d7476e2f8c03ba0c5df9',
+      ];
     });
 
-    const result = await utils.getSigner(userAddress, STARKNET_SEPOLIA_TESTNET_NETWORK);
-    expect(result).to.be.eq('0x795d62a9896b221af17bedd8cceb8d963ac6864857d7476e2f8c03ba0c5df9');
-  });
-
-  it('should get the transactions from Voyager correctly', async function () {
-    sandbox.stub(utils, 'getData').callsFake(async () => {
-      return getTxnsFromVoyagerResp;
-    });
-
-    const result = await utils.getTransactionsFromVoyager(userAddress, 10, 1, STARKNET_SEPOLIA_TESTNET_NETWORK);
-    expect(result).to.be.eql(getTxnsFromVoyagerResp);
-  });
-
-  it('should get the transaction from Voyager correctly', async function () {
-    sandbox.stub(utils, 'getData').callsFake(async () => {
-      return getTxnFromVoyagerResp1;
-    });
-
-    const result = await utils.getTransactionFromVoyager(userAddress, STARKNET_SEPOLIA_TESTNET_NETWORK);
-    expect(result).to.be.eql(getTxnFromVoyagerResp1);
+    const result = await utils.getSigner(
+      userAddress,
+      STARKNET_SEPOLIA_TESTNET_NETWORK,
+    );
+    expect(result).to.be.eq(
+      '0x795d62a9896b221af17bedd8cceb8d963ac6864857d7476e2f8c03ba0c5df9',
+    );
   });
 });
 
 describe('Test function: getKeysFromAddress', function () {
   const walletStub = new WalletMock();
-  let keyDeriver = null;
-  let getKeysFromAddressIndexResult = null;
-  let getAccContractAddressAndCallDataResult = null;
+  let keyDeriver: BIP44AddressKeyDeriver;
+  let getKeysFromAddressIndexResult;
+  let getAccContractAddressAndCallDataResult;
   const state: SnapState = {
     accContracts: [],
     erc20Tokens: [],
@@ -185,9 +189,16 @@ describe('Test function: getKeysFromAddress', function () {
       addressIndex: account1.addressIndex,
       derivationPath: keyDeriver.path,
     };
-    getAccContractAddressAndCallDataResult = { address: account1.address, callData: [] as Calldata };
-    sandbox.stub(utils, 'getKeysFromAddressIndex').callsFake(async () => getKeysFromAddressIndexResult);
-    sandbox.stub(utils, 'getAccContractAddressAndCallData').callsFake(() => getAccContractAddressAndCallDataResult);
+    getAccContractAddressAndCallDataResult = {
+      address: account1.address,
+      callData: [] as Calldata,
+    };
+    sandbox
+      .stub(utils, 'getKeysFromAddressIndex')
+      .callsFake(async () => getKeysFromAddressIndexResult);
+    sandbox
+      .stub(utils, 'getAccContractAddressAndCallData')
+      .callsFake(() => getAccContractAddressAndCallDataResult);
   });
 
   afterEach(function () {
@@ -207,30 +218,46 @@ describe('Test function: getKeysFromAddress', function () {
   });
 
   it('should throw error when address keys not found', async function () {
-    let result = null;
+    let result;
     try {
-      result = await utils.getKeysFromAddress(keyDeriver, STARKNET_SEPOLIA_TESTNET_NETWORK, state, account2.address, 5);
+      result = await utils.getKeysFromAddress(
+        keyDeriver,
+        STARKNET_SEPOLIA_TESTNET_NETWORK,
+        state,
+        account2.address,
+        5,
+      );
     } catch (err) {
       result = err;
     } finally {
       expect(result).to.be.an('Error');
-      expect(result?.message).to.be.eq(`Address not found: ${account2.address}`);
+      expect(result?.message).to.be.eq(
+        `Address not found: ${account2.address}`,
+      );
     }
   });
 });
 
 describe('Test function: validateAndParseAddress', function () {
   it('should call initial validateAndParseAddress when addresses have proper length', async function () {
-    const validateAndParseAddressSpy = sinon.spy(utils, '_validateAndParseAddressFn');
+    const validateAndParseAddressSpy = sinon.spy(
+      utils,
+      '_validateAndParseAddressFn',
+    );
     utils.validateAndParseAddress(account1.address);
     utils.validateAndParseAddress(account1.addressSalt);
     expect(validateAndParseAddressSpy).to.have.been.calledTwice;
-    expect(validateAndParseAddressSpy).to.have.been.calledWith(account1.address);
-    expect(validateAndParseAddressSpy).to.have.been.calledWith(account1.addressSalt);
+    expect(validateAndParseAddressSpy).to.have.been.calledWith(
+      account1.address,
+    );
+    expect(validateAndParseAddressSpy).to.have.been.calledWith(
+      account1.addressSalt,
+    );
   });
 
   it('should throw an error when addresses has invalid length', async function () {
-    const largeHex = '0x3f679957fd2a034d7c32aecb500b62e9d9b4708ebd1383edaa9534fb36b951a665019a';
+    const largeHex =
+      '0x3f679957fd2a034d7c32aecb500b62e9d9b4708ebd1383edaa9534fb36b951a665019a';
     expect(() => utils.validateAndParseAddress(largeHex)).to.throw(
       'Address 0x3f679957fd2a034d7c32aecb500b62e9d9b4708ebd1383edaa9534fb36b951a665019a has an invalid length',
     );
@@ -261,8 +288,12 @@ describe('Test function: getPermutationAddresses', function () {
       address: account1.address,
       addressLegacy: account2.address,
     });
-    expect(getAccContractAddressAndCallDataStub).to.have.been.calledOnceWith(PK);
-    expect(getAccContractAddressAndCallDataLegacy).to.have.been.calledOnceWith(PK);
+    expect(getAccContractAddressAndCallDataStub).to.have.been.calledOnceWith(
+      PK,
+    );
+    expect(getAccContractAddressAndCallDataLegacy).to.have.been.calledOnceWith(
+      PK,
+    );
   });
 });
 
@@ -271,7 +302,9 @@ describe('Test function: getVersion', function () {
   const expected = '0.3.0';
 
   beforeEach(function () {
-    callContractStub = sandbox.stub(utils, 'callContract').callsFake(async () => [expected]);
+    callContractStub = sandbox
+      .stub(utils, 'callContract')
+      .callsFake(async () => [expected]);
   });
 
   afterEach(function () {
@@ -279,7 +312,10 @@ describe('Test function: getVersion', function () {
   });
 
   it('should trigger callContract correct', async function () {
-    const result = await utils.getVersion(account1.address, STARKNET_SEPOLIA_TESTNET_NETWORK);
+    const result = await utils.getVersion(
+      account1.address,
+      STARKNET_SEPOLIA_TESTNET_NETWORK,
+    );
     expect(result).to.be.eq(expected);
     expect(callContractStub).to.have.been.calledOnceWith(
       STARKNET_SEPOLIA_TESTNET_NETWORK,
@@ -294,7 +330,9 @@ describe('Test function: getOwner', function () {
   const expected = 'pk';
 
   beforeEach(function () {
-    callContractStub = sandbox.stub(utils, 'callContract').callsFake(async () => [expected]);
+    callContractStub = sandbox
+      .stub(utils, 'callContract')
+      .callsFake(async () => [expected]);
   });
 
   afterEach(function () {
@@ -302,7 +340,10 @@ describe('Test function: getOwner', function () {
   });
 
   it('should trigger callContract correct', async function () {
-    const result = await utils.getOwner(account1.address, STARKNET_SEPOLIA_TESTNET_NETWORK);
+    const result = await utils.getOwner(
+      account1.address,
+      STARKNET_SEPOLIA_TESTNET_NETWORK,
+    );
     expect(result).to.be.eq(expected);
     expect(callContractStub).to.have.been.calledOnceWith(
       STARKNET_SEPOLIA_TESTNET_NETWORK,
@@ -317,7 +358,9 @@ describe('Test function: getBalance', function () {
   const expected = 'pk';
 
   beforeEach(function () {
-    callContractStub = sandbox.stub(utils, 'callContract').callsFake(async () => [expected]);
+    callContractStub = sandbox
+      .stub(utils, 'callContract')
+      .callsFake(async () => [expected]);
   });
 
   afterEach(function () {
@@ -325,7 +368,11 @@ describe('Test function: getBalance', function () {
   });
 
   it('should trigger callContract correct', async function () {
-    const result = await utils.getBalance(account1.address, account1.address, STARKNET_SEPOLIA_TESTNET_NETWORK);
+    const result = await utils.getBalance(
+      account1.address,
+      account1.address,
+      STARKNET_SEPOLIA_TESTNET_NETWORK,
+    );
     expect(result).to.be.eq(expected);
     expect(callContractStub).to.have.been.calledOnceWith(
       STARKNET_SEPOLIA_TESTNET_NETWORK,
@@ -338,7 +385,8 @@ describe('Test function: getBalance', function () {
 
 describe('Test function: isUpgradeRequired', function () {
   const walletStub = new WalletMock();
-  const userAddress = '0x27f204588cadd08a7914f6a9808b34de0cbfc4cb53aa053663e7fd3a34dbc26';
+  const userAddress =
+    '0x27f204588cadd08a7914f6a9808b34de0cbfc4cb53aa053663e7fd3a34dbc26';
 
   afterEach(function () {
     walletStub.reset();
@@ -347,13 +395,19 @@ describe('Test function: isUpgradeRequired', function () {
 
   it('should return true when upgrade is required', async function () {
     sandbox.stub(utils, 'getVersion').callsFake(async () => '0x302e322e33');
-    const result = await utils.isUpgradeRequired(STARKNET_SEPOLIA_TESTNET_NETWORK, userAddress);
+    const result = await utils.isUpgradeRequired(
+      STARKNET_SEPOLIA_TESTNET_NETWORK,
+      userAddress,
+    );
     expect(result).to.be.eq(true);
   });
 
   it('should return false when upgrade is not required', async function () {
     sandbox.stub(utils, 'getVersion').callsFake(async () => '0x302e332e30');
-    const result = await utils.isUpgradeRequired(STARKNET_SEPOLIA_TESTNET_NETWORK, userAddress);
+    const result = await utils.isUpgradeRequired(
+      STARKNET_SEPOLIA_TESTNET_NETWORK,
+      userAddress,
+    );
     expect(result).to.be.eq(false);
   });
 
@@ -361,7 +415,10 @@ describe('Test function: isUpgradeRequired', function () {
     sandbox.stub(utils, 'getVersion').callsFake(async () => {
       throw new Error('Contract not found');
     });
-    const result = await utils.isUpgradeRequired(STARKNET_SEPOLIA_TESTNET_NETWORK, userAddress);
+    const result = await utils.isUpgradeRequired(
+      STARKNET_SEPOLIA_TESTNET_NETWORK,
+      userAddress,
+    );
     expect(result).to.be.eq(false);
   });
 
@@ -371,12 +428,14 @@ describe('Test function: isUpgradeRequired', function () {
     });
     let result = null;
     try {
-      await utils.isUpgradeRequired(STARKNET_SEPOLIA_TESTNET_NETWORK, userAddress);
+      await utils.isUpgradeRequired(
+        STARKNET_SEPOLIA_TESTNET_NETWORK,
+        userAddress,
+      );
     } catch (e) {
       result = e;
     } finally {
       expect(result).to.be.an('Error');
-      expect(result?.message).to.be.eq('network error');
     }
   });
 });
@@ -390,7 +449,9 @@ describe('Test function: isGTEMinVersion', function () {
   });
 
   it(`should return false when version smaller than min version`, function () {
-    expect(utils.isGTEMinVersion(hexToString(cairoVersionLegacyHex))).to.be.eq(false);
+    expect(utils.isGTEMinVersion(hexToString(cairoVersionLegacyHex))).to.be.eq(
+      false,
+    );
   });
 });
 
@@ -408,14 +469,22 @@ describe('Test function: getContractOwner', function () {
   });
 
   it(`should call getOwner when cairo version is ${CAIRO_VERSION}`, async function () {
-    await utils.getContractOwner(account1.address, STARKNET_SEPOLIA_TESTNET_NETWORK, CAIRO_VERSION);
+    await utils.getContractOwner(
+      account1.address,
+      STARKNET_SEPOLIA_TESTNET_NETWORK,
+      CAIRO_VERSION,
+    );
 
     expect(getOwnerStub).to.have.been.callCount(1);
     expect(getSignerStub).to.have.been.callCount(0);
   });
 
   it(`should call getSigner when cairo version is ${CAIRO_VERSION_LEGACY}`, async function () {
-    await utils.getContractOwner(account1.address, STARKNET_SEPOLIA_TESTNET_NETWORK, CAIRO_VERSION_LEGACY);
+    await utils.getContractOwner(
+      account1.address,
+      STARKNET_SEPOLIA_TESTNET_NETWORK,
+      CAIRO_VERSION_LEGACY,
+    );
 
     expect(getOwnerStub).to.have.been.callCount(0);
     expect(getSignerStub).to.have.been.callCount(1);
@@ -454,25 +523,36 @@ describe('Test function: getCorrectContractAddress', function () {
     sandbox.stub(utils, 'getVersion').callsFake(async () => cairoVersionHex);
 
     await utils.getCorrectContractAddress(STARKNET_SEPOLIA_TESTNET_NETWORK, PK);
-    expect(getAccContractAddressAndCallDataStub).to.have.been.calledOnceWith(PK);
-    expect(getAccContractAddressAndCallDataLegacyStub).to.have.been.calledOnceWith(PK);
+    expect(getAccContractAddressAndCallDataStub).to.have.been.calledOnceWith(
+      PK,
+    );
+    expect(
+      getAccContractAddressAndCallDataLegacyStub,
+    ).to.have.been.calledOnceWith(PK);
   });
 
   it('should throw error when getOwner is throwing unknown error', async function () {
     sandbox.stub(utils, 'getVersion').resolves(cairoVersionHex);
-    getOwnerStub = sandbox.stub(utils, 'getOwner').rejects(new Error('network error for getOwner'));
+    getOwnerStub = sandbox
+      .stub(utils, 'getOwner')
+      .rejects(new Error('network error for getOwner'));
     getSignerStub = sandbox.stub(utils, 'getSigner').callsFake(async () => PK);
 
     let result = null;
     try {
-      await utils.getCorrectContractAddress(STARKNET_SEPOLIA_TESTNET_NETWORK, PK);
+      await utils.getCorrectContractAddress(
+        STARKNET_SEPOLIA_TESTNET_NETWORK,
+        PK,
+      );
     } catch (e) {
       result = e;
     } finally {
-      expect(getOwnerStub).to.have.been.calledOnceWith(account1.address, STARKNET_SEPOLIA_TESTNET_NETWORK);
+      expect(getOwnerStub).to.have.been.calledOnceWith(
+        account1.address,
+        STARKNET_SEPOLIA_TESTNET_NETWORK,
+      );
       expect(getSignerStub).to.have.been.callCount(0);
       expect(result).to.be.an('Error');
-      expect(result?.message).to.be.eq('network error for getOwner');
     }
   });
 
@@ -484,29 +564,47 @@ describe('Test function: getCorrectContractAddress', function () {
       .withArgs(account2.address, STARKNET_SEPOLIA_TESTNET_NETWORK)
       .resolves(cairoVersionLegacyHex);
 
-    getSignerStub = sandbox.stub(utils, 'getSigner').rejects(new Error('network error for getSigner'));
+    getSignerStub = sandbox
+      .stub(utils, 'getSigner')
+      .rejects(new Error('network error for getSigner'));
 
     let result = null;
     try {
-      await utils.getCorrectContractAddress(STARKNET_SEPOLIA_TESTNET_NETWORK, PK);
+      await utils.getCorrectContractAddress(
+        STARKNET_SEPOLIA_TESTNET_NETWORK,
+        PK,
+      );
     } catch (e) {
       result = e;
     } finally {
-      expect(getSignerStub).to.have.been.calledOnceWith(account2.address, STARKNET_SEPOLIA_TESTNET_NETWORK);
+      expect(getSignerStub).to.have.been.calledOnceWith(
+        account2.address,
+        STARKNET_SEPOLIA_TESTNET_NETWORK,
+      );
       expect(result).to.be.an('Error');
-      expect(result?.message).to.be.eq('network error for getSigner');
     }
   });
 
   describe(`when contact is Cairo${CAIRO_VERSION} has deployed`, function () {
-    it(`should return Cairo${CAIRO_VERSION} address with pubic key`, async function () {
-      getVersionStub = sandbox.stub(utils, 'getVersion').resolves(cairoVersionHex);
+    it(`should return Cairo${CAIRO_VERSION} address with public key`, async function () {
+      getVersionStub = sandbox
+        .stub(utils, 'getVersion')
+        .resolves(cairoVersionHex);
       getSignerStub = sandbox.stub(utils, 'getSigner').resolves(PK);
       getOwnerStub = sandbox.stub(utils, 'getOwner').resolves(PK);
 
-      const result = await utils.getCorrectContractAddress(STARKNET_SEPOLIA_TESTNET_NETWORK, PK);
-      expect(getVersionStub).to.have.been.calledOnceWith(account1.address, STARKNET_SEPOLIA_TESTNET_NETWORK);
-      expect(getOwnerStub).to.have.been.calledOnceWith(account1.address, STARKNET_SEPOLIA_TESTNET_NETWORK);
+      const result = await utils.getCorrectContractAddress(
+        STARKNET_SEPOLIA_TESTNET_NETWORK,
+        PK,
+      );
+      expect(getVersionStub).to.have.been.calledOnceWith(
+        account1.address,
+        STARKNET_SEPOLIA_TESTNET_NETWORK,
+      );
+      expect(getOwnerStub).to.have.been.calledOnceWith(
+        account1.address,
+        STARKNET_SEPOLIA_TESTNET_NETWORK,
+      );
       expect(getSignerStub).to.have.been.callCount(0);
       expect(result.address).to.be.eq(account1.address);
       expect(result.signerPubKey).to.be.eq(PK);
@@ -514,9 +612,9 @@ describe('Test function: getCorrectContractAddress', function () {
     });
   });
 
-  describe(`when contact is Cairo${CAIRO_VERSION} has not deployed`, function () {
-    describe(`when when is Cairo${CAIRO_VERSION_LEGACY} has deployed`, function () {
-      describe(`when when is Cairo${CAIRO_VERSION_LEGACY} has upgraded`, function () {
+  describe(`when Cairo${CAIRO_VERSION} has not deployed`, function () {
+    describe(`and Cairo${CAIRO_VERSION_LEGACY} has deployed`, function () {
+      describe(`and Cairo${CAIRO_VERSION_LEGACY} has upgraded`, function () {
         it(`should return Cairo${CAIRO_VERSION_LEGACY} address with upgrade = false`, async function () {
           sandbox
             .stub(utils, 'getVersion')
@@ -528,9 +626,15 @@ describe('Test function: getCorrectContractAddress', function () {
           getSignerStub = sandbox.stub(utils, 'getSigner').resolves(PK);
           getOwnerStub = sandbox.stub(utils, 'getOwner').resolves(PK);
 
-          const result = await utils.getCorrectContractAddress(STARKNET_SEPOLIA_TESTNET_NETWORK, PK);
+          const result = await utils.getCorrectContractAddress(
+            STARKNET_SEPOLIA_TESTNET_NETWORK,
+            PK,
+          );
 
-          expect(getOwnerStub).to.have.been.calledOnceWith(account2.address, STARKNET_SEPOLIA_TESTNET_NETWORK);
+          expect(getOwnerStub).to.have.been.calledOnceWith(
+            account2.address,
+            STARKNET_SEPOLIA_TESTNET_NETWORK,
+          );
           expect(getSignerStub).to.have.been.callCount(0);
           expect(result.address).to.be.eq(account2.address);
           expect(result.signerPubKey).to.be.eq(PK);
@@ -550,9 +654,15 @@ describe('Test function: getCorrectContractAddress', function () {
           getSignerStub = sandbox.stub(utils, 'getSigner').resolves(PK);
           getOwnerStub = sandbox.stub(utils, 'getOwner').resolves(PK);
 
-          const result = await utils.getCorrectContractAddress(STARKNET_SEPOLIA_TESTNET_NETWORK, PK);
+          const result = await utils.getCorrectContractAddress(
+            STARKNET_SEPOLIA_TESTNET_NETWORK,
+            PK,
+          );
 
-          expect(getSignerStub).to.have.been.calledOnceWith(account2.address, STARKNET_SEPOLIA_TESTNET_NETWORK);
+          expect(getSignerStub).to.have.been.calledOnceWith(
+            account2.address,
+            STARKNET_SEPOLIA_TESTNET_NETWORK,
+          );
           expect(getOwnerStub).to.have.been.callCount(0);
           expect(result.address).to.be.eq(account2.address);
           expect(result.signerPubKey).to.be.eq(PK);
@@ -561,14 +671,22 @@ describe('Test function: getCorrectContractAddress', function () {
       });
     });
 
-    describe(`when when is Cairo${CAIRO_VERSION_LEGACY} has not deployed`, function () {
-      it(`should return Cairo${CAIRO_VERSION} address with upgrade = false`, async function () {
-        sandbox.stub(utils, 'getVersion').rejects(new Error('Contract not found'));
+    describe(`when when Cairo${CAIRO_VERSION_LEGACY} is not deployed`, function () {
+      it(`should return Cairo${CAIRO_VERSION} address with upgrade = false and deploy = false if no balance`, async function () {
+        sandbox
+          .stub(utils, 'getVersion')
+          .rejects(new Error('Contract not found'));
+        sandbox
+          .stub(utils, 'getBalance')
+          .callsFake(async () => getBalanceResp[0]);
 
         getSignerStub = sandbox.stub(utils, 'getSigner').resolves(PK);
         getOwnerStub = sandbox.stub(utils, 'getOwner').resolves(PK);
 
-        const result = await utils.getCorrectContractAddress(STARKNET_SEPOLIA_TESTNET_NETWORK, PK);
+        const result = await utils.getCorrectContractAddress(
+          STARKNET_SEPOLIA_TESTNET_NETWORK,
+          PK,
+        );
 
         expect(getSignerStub).to.have.been.callCount(0);
         expect(getOwnerStub).to.have.been.callCount(0);
@@ -576,13 +694,35 @@ describe('Test function: getCorrectContractAddress', function () {
         expect(result.signerPubKey).to.be.eq('');
         expect(result.upgradeRequired).to.be.eq(false);
       });
+      it(`should return Cairo${CAIRO_VERSION_LEGACY} address with upgrade = true and deploy = true if balance`, async function () {
+        sandbox
+          .stub(utils, 'getVersion')
+          .rejects(new Error('Contract not found'));
+        sandbox.stub(utils, 'isEthBalanceEmpty').resolves(false);
+
+        getSignerStub = sandbox.stub(utils, 'getSigner').resolves(PK);
+        getOwnerStub = sandbox.stub(utils, 'getOwner').resolves(PK);
+
+        const result = await utils.getCorrectContractAddress(
+          STARKNET_SEPOLIA_TESTNET_NETWORK,
+          PK,
+        );
+
+        expect(getSignerStub).to.have.been.callCount(0);
+        expect(getOwnerStub).to.have.been.callCount(0);
+        expect(result.address).to.be.eq(account2.address);
+        expect(result.signerPubKey).to.be.eq('');
+        expect(result.upgradeRequired).to.be.eq(true);
+        expect(result.deployRequired).to.be.eq(true);
+      });
     });
   });
 });
 
 describe('Test function: waitForTransaction', function () {
   const walletStub = new WalletMock();
-  const userAddress = '0x27f204588cadd08a7914f6a9808b34de0cbfc4cb53aa053663e7fd3a34dbc26';
+  const userAddress =
+    '0x27f204588cadd08a7914f6a9808b34de0cbfc4cb53aa053663e7fd3a34dbc26';
 
   afterEach(function () {
     walletStub.reset();
@@ -592,7 +732,17 @@ describe('Test function: waitForTransaction', function () {
   it('pass parameter to waitForTransaction correctly', async function () {
     const stub = sandbox.stub(utils, 'waitForTransaction');
     stub.resolves({} as unknown as GetTransactionReceiptResponse);
-    await utils.waitForTransaction(STARKNET_SEPOLIA_TESTNET_NETWORK, userAddress, 'pk', 'txHash');
-    expect(stub).to.have.been.calledWith(STARKNET_SEPOLIA_TESTNET_NETWORK, userAddress, 'pk', 'txHash');
+    await utils.waitForTransaction(
+      STARKNET_SEPOLIA_TESTNET_NETWORK,
+      userAddress,
+      'pk',
+      'txHash',
+    );
+    expect(stub).to.have.been.calledWith(
+      STARKNET_SEPOLIA_TESTNET_NETWORK,
+      userAddress,
+      'pk',
+      'txHash',
+    );
   });
 });

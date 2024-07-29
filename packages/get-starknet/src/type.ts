@@ -1,6 +1,6 @@
-export interface MetaMaskProvider {
+export type MetaMaskProvider = {
   request(args: { method: string; params?: unknown[] | Record<string, unknown> }): Promise<unknown>;
-}
+};
 
 export type AccContract = {
   addressSalt: string;

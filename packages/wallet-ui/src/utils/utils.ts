@@ -13,10 +13,19 @@ import { constants } from 'starknet';
 
 export const shortenAddress = (address: string, num = 3) => {
   if (!address) return '';
-  return !!address && `${address.substring(0, num + 2)}...${address.substring(address.length - num - 1)}`;
+  return (
+    !!address &&
+    `${address.substring(0, num + 2)}...${address.substring(
+      address.length - num - 1,
+    )}`
+  );
 };
 
-export const openExplorerTab = (address: string, type = 'contract', chainId = SEPOLIA_CHAINID) => {
+export const openExplorerTab = (
+  address: string,
+  type = 'contract',
+  chainId = SEPOLIA_CHAINID,
+) => {
   let explorerUrl = STARKNET_SEPOLIA_TESTNET_EXPLORER;
   switch (chainId) {
     case constants.StarknetChainId.SN_MAIN:
@@ -45,11 +54,19 @@ export const addMissingPropertiesToToken = (
   };
 };
 
-export const getHumanReadableAmount = (asset: Erc20TokenBalance, assetAmount?: string) => {
-  const amountStr = assetAmount ? assetAmount : ethers.utils.formatUnits(asset.amount, asset.decimals);
+export const getHumanReadableAmount = (
+  asset: Erc20TokenBalance,
+  assetAmount?: string,
+) => {
+  const amountStr = assetAmount
+    ? assetAmount
+    : ethers.utils.formatUnits(asset.amount, asset.decimals);
   const indexDecimal = amountStr.indexOf('.');
   const integerPart = amountStr.substring(0, indexDecimal);
-  let decimalPart = amountStr.substring(indexDecimal + 1, indexDecimal + 5 - integerPart.length);
+  let decimalPart = amountStr.substring(
+    indexDecimal + 1,
+    indexDecimal + 5 - integerPart.length,
+  );
   if (integerPart === '0') {
     decimalPart = amountStr.substring(indexDecimal + 1);
   }
@@ -62,11 +79,18 @@ export const getHumanReadableAmount = (asset: Erc20TokenBalance, assetAmount?: s
   return amountStr.substring(0, indexDecimal + firstNonZeroIndex + 3);
 };
 
-export const getMaxDecimalsReadable = (asset: Erc20TokenBalance, assetAmount?: string) => {
-  const amountStr = assetAmount ? assetAmount : ethers.utils.formatUnits(asset.amount, asset.decimals);
+export const getMaxDecimalsReadable = (
+  asset: Erc20TokenBalance,
+  assetAmount?: string,
+) => {
+  const amountStr = assetAmount
+    ? assetAmount
+    : ethers.utils.formatUnits(asset.amount, asset.decimals);
   const indexDecimal = amountStr.indexOf('.');
   const decimalPart = amountStr.substring(indexDecimal + 1).split('');
-  const firstNonZeroIndexReverse = decimalPart.reverse().findIndex((char) => char !== '0');
+  const firstNonZeroIndexReverse = decimalPart
+    .reverse()
+    .findIndex((char) => char !== '0');
   if (firstNonZeroIndexReverse !== -1) {
     let lastNonZeroIndex = amountStr.length - firstNonZeroIndexReverse;
     if (lastNonZeroIndex - indexDecimal > DECIMALS_DISPLAYED_MAX_LENGTH) {
@@ -77,7 +101,11 @@ export const getMaxDecimalsReadable = (asset: Erc20TokenBalance, assetAmount?: s
   return amountStr.substring(0, indexDecimal);
 };
 
-export const getAmountPrice = (asset: Erc20TokenBalance, assetAmount: number, usdMode: boolean) => {
+export const getAmountPrice = (
+  asset: Erc20TokenBalance,
+  assetAmount: number,
+  usdMode: boolean,
+) => {
   if (asset.usdPrice) {
     if (!usdMode) {
       const result = asset.usdPrice * assetAmount;
@@ -108,7 +136,10 @@ export const isSpecialInputKey = (event: KeyboardEvent<HTMLInputElement>) => {
   );
 };
 
-export const fetchWithTimeout = async (resource: string, options = { timeout: TIMEOUT_DURATION }) => {
+export const fetchWithTimeout = async (
+  resource: string,
+  options = { timeout: TIMEOUT_DURATION },
+) => {
   const controller = new AbortController();
   const id = setTimeout(() => controller.abort(), options.timeout);
   const response = await fetch(resource, {
@@ -142,7 +173,11 @@ export const wait = (delay: number) => {
 
 export const retry = async (
   fn: () => Promise<boolean>,
-  options?: { delay?: number; maxAttempts?: number; onFailedAttempt?: CallableFunction },
+  options?: {
+    delay?: number;
+    maxAttempts?: number;
+    onFailedAttempt?: CallableFunction;
+  },
 ): Promise<boolean> => {
   let retry = options?.maxAttempts ?? 10;
   const delay = options?.delay ?? 1000;
@@ -155,7 +190,10 @@ export const retry = async (
         return result;
       }
     } catch (e) {
-      if (options?.onFailedAttempt && typeof options?.onFailedAttempt === 'function') {
+      if (
+        options?.onFailedAttempt &&
+        typeof options?.onFailedAttempt === 'function'
+      ) {
         options.onFailedAttempt(e);
       } else {
         //eslint-disable-next-line no-console

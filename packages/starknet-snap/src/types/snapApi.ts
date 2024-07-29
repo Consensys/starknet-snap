@@ -1,7 +1,6 @@
-import { BIP44AddressKeyDeriver } from '@metamask/key-tree';
-import Mutex from 'async-mutex/lib/Mutex';
-import { SnapState, VoyagerTransactionType } from './snapState';
-import {
+import type { BIP44AddressKeyDeriver } from '@metamask/key-tree';
+import type Mutex from 'async-mutex/lib/Mutex';
+import type {
   Abi,
   Call,
   InvocationsSignerDetails,
@@ -15,13 +14,19 @@ import {
   constants,
 } from 'starknet';
 
-export interface ApiParams {
+import type { SnapState, VoyagerTransactionType } from './snapState';
+/* eslint-disable */
+export type ApiParams = {
   state: SnapState;
   requestParams: ApiRequestParams;
   saveMutex: Mutex;
   wallet;
   keyDeriver?: BIP44AddressKeyDeriver;
-}
+};
+
+export type ApiParamsWithKeyDeriver = ApiParams & {
+  keyDeriver: BIP44AddressKeyDeriver;
+};
 
 export type ApiRequestParams =
   | CreateAccountRequestParams
@@ -48,171 +53,181 @@ export type ApiRequestParams =
   | DeclareContractRequestParams
   | SignTransactionRequestParams;
 
-export interface BaseRequestParams {
+export type BaseRequestParams = {
   chainId?: string;
   isDev?: boolean;
   debugLevel?: string;
-  transactionVersion?: constants.TRANSACTION_VERSION.V2 | constants.TRANSACTION_VERSION.V3;
-}
+  transactionVersion?:
+    | typeof constants.TRANSACTION_VERSION.V2
+    | typeof constants.TRANSACTION_VERSION.V3;
+};
 
-export interface CreateAccountRequestParams extends BaseRequestParams {
+export type CreateAccountRequestParams = {
   addressIndex?: string | number;
   deploy?: boolean;
-}
+} & BaseRequestParams;
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface GetStoredUserAccountsRequestParams extends BaseRequestParams {}
+export type GetStoredUserAccountsRequestParams = BaseRequestParams;
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface GetStoredErc20TokensRequestParams extends BaseRequestParams {}
+export type GetStoredErc20TokensRequestParams = BaseRequestParams;
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface GetStoredNetworksRequestParams extends Omit<BaseRequestParams, 'chainId'> {}
+export type GetStoredNetworksRequestParams = Omit<BaseRequestParams, 'chainId'>;
 
-export interface ExtractPrivateKeyRequestParams extends BaseRequestParams {
+export type ExtractPrivateKeyRequestParams = {
   userAddress: string;
-}
+} & BaseRequestParams;
 
-export interface ExtractPublicKeyRequestParams extends BaseRequestParams {
+export type ExtractPublicKeyRequestParams = {
   userAddress: string;
-}
+} & BaseRequestParams;
 
-export interface SignMessageRequestParams extends Authorizable, SignRequestParams, BaseRequestParams {
-  typedDataMessage: typedData.TypedData;
-}
+export type SignMessageRequestParams = {
+  typedDataMessage: typeof typedData.TypedData;
+} & Authorizable &
+  SignRequestParams &
+  BaseRequestParams;
 
-export interface VerifySignedMessageRequestParams extends BaseRequestParams {
+export type VerifySignedMessageRequestParams = {
   signerAddress: string;
   signature: string;
   typedDataMessage?: string;
-}
+} & BaseRequestParams;
 
-export interface GetErc20TokenBalanceRequestParams extends BaseRequestParams {
+export type GetErc20TokenBalanceRequestParams = {
   tokenAddress: string;
   userAddress: string;
-}
+} & BaseRequestParams;
 
-export interface GetTransactionStatusRequestParams extends BaseRequestParams {
+export type GetTransactionStatusRequestParams = {
   transactionHash: string;
-}
+} & BaseRequestParams;
 
-export interface SendTransactionRequestParams extends BaseRequestParams {
+export type SendTransactionRequestParams = {
   contractAddress: string;
   contractFuncName: string;
   contractCallData?: string;
   senderAddress: string;
   maxFee?: string;
-}
+} & BaseRequestParams;
 
-export interface UpgradeTransactionRequestParams extends BaseRequestParams {
+export type UpgradeTransactionRequestParams = {
   contractAddress: string;
   maxFee?: string;
-}
+} & BaseRequestParams;
 
-export interface GetValueRequestParams extends BaseRequestParams {
+export type GetValueRequestParams = {
   contractAddress: string;
   contractFuncName: string;
   contractCallData?: string;
-}
+} & BaseRequestParams;
 
-export interface EstimateFeeRequestParams extends BaseRequestParams {
+export type EstimateFeeRequestParams = {
   contractAddress: string;
   contractFuncName: string;
   contractCallData?: string;
   senderAddress: string;
-}
+} & BaseRequestParams;
 
-export interface EstimateAccountDeployFeeRequestParams extends BaseRequestParams {
+export type EstimateAccountDeployFeeRequestParams = {
   addressIndex?: string | number;
-}
+} & BaseRequestParams;
 
-export interface AddErc20TokenRequestParams extends BaseRequestParams {
+export type AddErc20TokenRequestParams = {
   tokenAddress: string;
   tokenName: string;
   tokenSymbol: string;
   tokenDecimals?: string | number;
-}
+} & BaseRequestParams;
 
-export interface AddNetworkRequestParams extends BaseRequestParams {
+export type AddNetworkRequestParams = {
   networkName: string;
   networkChainId: string;
   networkBaseUrl: string;
   networkNodeUrl: string;
   networkVoyagerUrl?: string;
   accountClassHash?: string;
-}
+} & BaseRequestParams;
 
-export interface GetStoredTransactionsRequestParams extends BaseRequestParams {
+export type GetStoredTransactionsRequestParams = {
   senderAddress?: string;
   contractAddress?: string;
   txnType?: VoyagerTransactionType | string;
   txnsInLastNumOfDays?: string | number;
-}
+} & BaseRequestParams;
 
-export interface GetTransactionsRequestParams extends BaseRequestParams {
+export type GetTransactionsRequestParams = {
   senderAddress?: string;
   contractAddress?: string;
   pageSize?: string | number;
   txnsInLastNumOfDays?: string | number;
   onlyFromState?: boolean;
   withDeployTxn?: boolean;
-}
+} & BaseRequestParams;
 
-export interface RecoverAccountsRequestParams extends BaseRequestParams {
+export type RecoverAccountsRequestParams = {
   startScanIndex?: string | number;
   maxScanned?: string | number;
   maxMissed?: string | number;
-}
+} & BaseRequestParams;
 
-export interface ExecuteTxnRequestParams extends BaseRequestParams {
+export type ExecuteTxnRequestParams = {
   senderAddress: string;
   txnInvocation: Call | Call[];
   abis?: Abi[];
   invocationsDetails?: InvocationsDetails;
-}
+} & BaseRequestParams;
 
-export interface EstimateFeesRequestParams extends BaseRequestParams {
+export type EstimateFeesRequestParams = {
   senderAddress: string;
   invocations: Invocations;
   invocationDetails?: EstimateFeeDetails;
-}
+} & BaseRequestParams;
 
-export interface DeclareContractRequestParams extends BaseRequestParams {
+export type DeclareContractRequestParams = {
   senderAddress: string;
   contractPayload: DeclareContractPayload;
   invocationsDetails?: InvocationsDetails;
-}
+} & BaseRequestParams;
 
-export interface RpcV4GetTransactionReceiptResponse {
+export type RpcV4GetTransactionReceiptResponse = {
   execution_status?: string;
   finality_status?: string;
-}
+};
 
-export interface Authorizable {
+export type Authorizable = {
   enableAuthorize?: boolean;
-}
+};
 
-export interface SignRequestParams {
+export type SignRequestParams = {
   signerAddress: string;
-}
+};
 
-export interface SignTransactionRequestParams extends Authorizable, SignRequestParams, BaseRequestParams {
+export type SignTransactionRequestParams = {
   transactions: Call[];
   transactionsDetail: InvocationsSignerDetails;
-}
+} & Authorizable &
+  SignRequestParams &
+  BaseRequestParams;
 
-export interface SignDeployAccountTransactionRequestParams extends Authorizable, SignRequestParams, BaseRequestParams {
+export type SignDeployAccountTransactionRequestParams = {
   transaction: DeployAccountSignerDetails;
-}
+} & Authorizable &
+  SignRequestParams &
+  BaseRequestParams;
 
-export interface SignDeclareTransactionRequestParams extends Authorizable, SignRequestParams, BaseRequestParams {
+export type SignDeclareTransactionRequestParams = {
   transaction: DeclareSignerDetails;
-}
+} & Authorizable &
+  SignRequestParams &
+  BaseRequestParams;
 
-export interface SwitchNetworkRequestParams extends Authorizable, BaseRequestParams {
+export type SwitchNetworkRequestParams = {
   chainId: string;
-}
+} & Authorizable &
+  BaseRequestParams;
 
-export interface GetStarkNameRequestParam extends BaseRequestParams {
+export type GetStarkNameRequestParam = {
   userAddress: string;
-}
+} & BaseRequestParams;
+
+/* eslint-disable */

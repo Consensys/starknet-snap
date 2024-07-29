@@ -12,7 +12,14 @@ interface Props extends HTMLAttributes<HTMLDivElement> {
   children?: ReactNode;
 }
 
-export const PopInView = ({ isOpen, setIsOpen, showClose = true, initialFocus, children, ...otherProps }: Props) => {
+export const PopInView = ({
+  isOpen,
+  setIsOpen,
+  showClose = true,
+  initialFocus,
+  children,
+  ...otherProps
+}: Props) => {
   return (
     <Dialog
       style={{ position: 'relative', zIndex: 50 }}

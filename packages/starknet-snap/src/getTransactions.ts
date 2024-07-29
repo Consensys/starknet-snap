@@ -1,47 +1,71 @@
+import { num as numUtils } from 'starknet';
+
+import type { ApiParams, GetTransactionsRequestParams } from './types/snapApi';
+import type { Transaction, Network } from './types/snapState';
+import {
+  ExecutionStatus,
+  TransactionStatus,
+  VoyagerTransactionType,
+} from './types/snapState';
+import {
+  DEFAULT_GET_TXNS_LAST_NUM_OF_DAYS,
+  DEFAULT_GET_TXNS_PAGE_SIZE,
+} from './utils/constants';
+import { logger } from './utils/logger';
 import { toJson } from './utils/serializer';
-import { num } from 'starknet';
-import { validateAndParseAddress } from '../src/utils/starknetUtils';
-import { ApiParams, GetTransactionsRequestParams } from './types/snapApi';
-import { ExecutionStatus, Transaction, TransactionStatus, VoyagerTransactionType, Network } from './types/snapState';
-import { DEFAULT_GET_TXNS_LAST_NUM_OF_DAYS, DEFAULT_GET_TXNS_PAGE_SIZE } from './utils/constants';
 import * as snapUtils from './utils/snapUtils';
 import * as utils from './utils/starknetUtils';
-import { logger } from './utils/logger';
+import { validateAndParseAddress } from './utils/starknetUtils';
 
+/**
+ *
+ * @param params
+ */
 export async function getTransactions(params: ApiParams) {
   try {
     const { state, wallet, saveMutex, requestParams } = params;
     const requestParamsObj = requestParams as GetTransactionsRequestParams;
+    const { senderAddress, contractAddress } = requestParamsObj;
+
     try {
-      validateAndParseAddress(requestParamsObj.senderAddress);
-    } catch (err) {
-      throw new Error(`The given sender address is invalid: ${requestParamsObj.senderAddress}`);
+      validateAndParseAddress(senderAddress as unknown as string);
+    } catch (error) {
+      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+      throw new Error(`The given sender address is invalid: ${senderAddress}`);
     }
     try {
-      if (requestParamsObj.contractAddress) {
-        validateAndParseAddress(requestParamsObj.contractAddress);
+      if (contractAddress) {
+        validateAndParseAddress(contractAddress);
       }
-    } catch (err) {
-      throw new Error(`The given contract address is invalid: ${requestParamsObj.contractAddress}`);
+    } catch (error) {
+      throw new Error(
+        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+        `The given contract address is invalid: ${contractAddress}`,
+      );
     }
 
-    const senderAddress = requestParamsObj.senderAddress;
-    const contractAddress = requestParamsObj.contractAddress;
-    const pageSize = snapUtils.getValidNumber(requestParamsObj.pageSize, DEFAULT_GET_TXNS_PAGE_SIZE, 1);
+    const pageSize = snapUtils.getValidNumber(
+      requestParamsObj.pageSize,
+      DEFAULT_GET_TXNS_PAGE_SIZE,
+      1,
+    );
     const txnsInLastNumOfDays = snapUtils.getValidNumber(
       requestParamsObj.txnsInLastNumOfDays,
       DEFAULT_GET_TXNS_LAST_NUM_OF_DAYS,
       1,
     );
     const minTimeStamp = Date.now() - txnsInLastNumOfDays * 24 * 60 * 60 * 1000; // in ms
-    const onlyFromState = !!requestParamsObj.onlyFromState;
-    const withDeployTxn = !!requestParamsObj.withDeployTxn;
-    const network = snapUtils.getNetworkFromChainId(state, requestParamsObj.chainId);
+    const onlyFromState = Boolean(requestParamsObj.onlyFromState);
+    const withDeployTxn = Boolean(requestParamsObj.withDeployTxn);
+    const network = snapUtils.getNetworkFromChainId(
+      state,
+      requestParamsObj.chainId,
+    );
 
     let massagedTxns: Transaction[] = [];
     if (!onlyFromState) {
       massagedTxns = await utils.getMassagedTransactions(
-        senderAddress,
+        senderAddress as unknown as string,
         contractAddress,
         pageSize,
         minTimeStamp,
@@ -49,7 +73,9 @@ export async function getTransactions(params: ApiParams) {
         network,
       );
     }
-    logger.log(`getTransactions\nmassagedTxns initial total: ${massagedTxns.length}`);
+    logger.log(
+      `getTransactions\nmassagedTxns initial total: ${massagedTxns.length}`,
+    );
 
     // Retrieve the Finaility Status: RECEIVED, PENDING, and ACCEPTED_ON_L2 txns from snap state
     // Retrieve the Execution Status: REJECTED txns from snap state
@@ -69,7 +95,9 @@ export async function getTransactions(params: ApiParams) {
       minTimeStamp,
     );
 
-    logger.log(`getTransactions\storedUnsettledTxns:\n${toJson(storedUnsettledTxns)}`);
+    logger.log(
+      `getTransactions\nstoredUnsettledTxns:\n${toJson(storedUnsettledTxns)}`,
+    );
 
     // Retrieve the Finaility Status: RECEIVED, PENDING, and ACCEPTED_ON_L2 txns from snap state
     // Retrieve the Execution Status: REJECTED txns from snap state
@@ -89,16 +117,28 @@ export async function getTransactions(params: ApiParams) {
         ExecutionStatus.REJECTED,
         undefined,
       );
-      logger.log(`getTransactions\nstoredUnsettledDeployTxns:\n${toJson(storedUnsettledDeployTxns)}`);
-      storedUnsettledTxns = storedUnsettledTxns.concat(storedUnsettledDeployTxns);
+      logger.log(
+        `getTransactions\nstoredUnsettledDeployTxns:\n${toJson(
+          storedUnsettledDeployTxns,
+        )}`,
+      );
+      storedUnsettledTxns = storedUnsettledTxns.concat(
+        storedUnsettledDeployTxns,
+      );
     }
 
-    const updateStatusPromises = [];
-    const massagedTxnsMap = snapUtils.toMap<bigint, Transaction, string>(massagedTxns, 'txnHash', num.toBigInt);
+    const updateStatusPromises: Promise<void>[] = [];
+    const massagedTxnsMap = snapUtils.toMap<bigint, Transaction, string>(
+      massagedTxns,
+      'txnHash',
+      numUtils.toBigInt,
+    );
 
     storedUnsettledTxns.forEach((txn: Transaction) => {
-      const foundMassagedTxn = massagedTxnsMap.get(num.toBigInt(txn.txnHash));
-      if (!foundMassagedTxn) {
+      const foundMassagedTxn = massagedTxnsMap.get(
+        numUtils.toBigInt(txn.txnHash),
+      );
+      if (foundMassagedTxn === undefined) {
         // For each "unsettled" txn, fetch the status when the txn not found in massagedTxns and push to massagedTxns
         updateStatusPromises.push(updateStatus(txn, network));
         massagedTxns.push(txn);
@@ -111,12 +151,18 @@ export async function getTransactions(params: ApiParams) {
       }
     });
 
-    logger.log(`getTransactions\nstoredUnsettledTxns:\n${toJson(storedUnsettledTxns)}`);
+    logger.log(
+      `getTransactions\nstoredUnsettledTxns:\n${toJson(storedUnsettledTxns)}`,
+    );
 
     // For each "unsettled" txn, get the latest status from the provider (RPC)
     if (updateStatusPromises) {
       await Promise.allSettled(updateStatusPromises);
-      logger.log(`getTransactions\nstoredUnsettledTxns after updated status:\n${toJson(storedUnsettledTxns)}`);
+      logger.log(
+        `getTransactions\nstoredUnsettledTxns after updated status:\n${toJson(
+          storedUnsettledTxns,
+        )}`,
+      );
     }
 
     // Update the transactions in state in a single call
@@ -126,23 +172,37 @@ export async function getTransactions(params: ApiParams) {
     await snapUtils.removeAcceptedTransaction(minTimeStamp, wallet, saveMutex);
 
     // Sort in timestamp descending order
-    massagedTxns = massagedTxns.sort((a: Transaction, b: Transaction) => b.timestamp - a.timestamp);
+    massagedTxns = massagedTxns.sort(
+      (a: Transaction, b: Transaction) => b.timestamp - a.timestamp,
+    );
     logger.log(`getTransactions\nmassagedTxns:\n${toJson(massagedTxns)}`);
 
     return massagedTxns;
-  } catch (err) {
-    logger.error(`Problem found: ${err}`);
-    throw err;
+  } catch (error) {
+    logger.error(`Problem found:`, error);
+    throw error;
   }
 }
 
+/**
+ *
+ * @param txn
+ * @param network
+ */
 export async function updateStatus(txn: Transaction, network: Network) {
   try {
-    const { finalityStatus, executionStatus } = await utils.getTransactionStatus(txn.txnHash, network);
+    const { finalityStatus, executionStatus } =
+      await utils.getTransactionStatus(txn.txnHash, network);
+    // eslint-disable-next-line require-atomic-updates
     txn.finalityStatus = finalityStatus;
+    // eslint-disable-next-line require-atomic-updates
     txn.executionStatus = executionStatus;
+    // eslint-disable-next-line require-atomic-updates
     txn.status = ''; // DEPRECATION
-  } catch (e) {
-    logger.error(`Problem found in updateStatus:\n txn: ${txn.txnHash}, err: \n${e.message}`);
+  } catch (error) {
+    logger.error(
+      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+      `Problem found in updateStatus:\n txn: ${txn.txnHash}, error: \n${error.message}`,
+    );
   }
 }

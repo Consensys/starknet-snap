@@ -8,7 +8,9 @@ interface Props {
 }
 
 export const HomeView = ({ address }: Props) => {
-  const { erc20TokenBalanceSelected, transactions } = useAppSelector((state) => state.wallet);
+  const { erc20TokenBalanceSelected, transactions } = useAppSelector(
+    (state) => state.wallet,
+  );
   const loader = useAppSelector((state) => state.UI.loader);
   const { upgradeModalVisible } = useAppSelector((state) => state.modals);
 
@@ -16,11 +18,16 @@ export const HomeView = ({ address }: Props) => {
     <Wrapper>
       <SideBar address={address} />
       <RightPart>
-        {!upgradeModalVisible && Object.keys(erc20TokenBalanceSelected).length > 0 && <Header address={address} />}
+        {!upgradeModalVisible &&
+          Object.keys(erc20TokenBalanceSelected).length > 0 && (
+            <Header address={address} />
+          )}
         {!upgradeModalVisible && <TransactionsList transactions={[]} />}
-        {!upgradeModalVisible && Object.keys(transactions).length === 0 && !loader.isLoading && (
-          <NoTransactions> You have no transactions</NoTransactions>
-        )}
+        {!upgradeModalVisible &&
+          Object.keys(transactions).length === 0 &&
+          !loader.isLoading && (
+            <NoTransactions> You have no transactions</NoTransactions>
+          )}
       </RightPart>
     </Wrapper>
   );

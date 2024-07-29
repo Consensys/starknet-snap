@@ -12,7 +12,15 @@ interface Props extends ReactDropdownProps {
   value?: string | Option;
 }
 
-export const DropDownView = ({ disabled, error, options, helperText, label, value, ...otherProps }: Props) => {
+export const DropDownView = ({
+  disabled,
+  error,
+  options,
+  helperText,
+  label,
+  value,
+  ...otherProps
+}: Props) => {
   return (
     <Wrapper>
       <Label error={error}>{label}</Label>

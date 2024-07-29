@@ -56,8 +56,12 @@ export const walletSlice = createSlice({
       if (state.erc20TokenBalanceSelected.chainId === payload.chainId) {
         const foundIndex = state.erc20TokenBalances.findIndex(
           (token) =>
-            ethers.BigNumber.from(token.address).eq(ethers.BigNumber.from(payload.address)) &&
-            ethers.BigNumber.from(token.chainId).eq(ethers.BigNumber.from(payload.chainId)),
+            ethers.BigNumber.from(token.address).eq(
+              ethers.BigNumber.from(payload.address),
+            ) &&
+            ethers.BigNumber.from(token.chainId).eq(
+              ethers.BigNumber.from(payload.chainId),
+            ),
         );
         if (foundIndex < 0) {
           state.erc20TokenBalances.push(payload);
@@ -66,11 +70,15 @@ export const walletSlice = createSlice({
           state.erc20TokenBalances[foundIndex].usdPrice = payload.usdPrice;
 
           if (
-            state.erc20TokenBalanceSelected.address === state.erc20TokenBalances[foundIndex].address &&
-            state.erc20TokenBalanceSelected.chainId === state.erc20TokenBalances[foundIndex].chainId
+            state.erc20TokenBalanceSelected.address ===
+              state.erc20TokenBalances[foundIndex].address &&
+            state.erc20TokenBalanceSelected.chainId ===
+              state.erc20TokenBalances[foundIndex].chainId
           ) {
-            state.erc20TokenBalanceSelected.amount = state.erc20TokenBalances[foundIndex].amount;
-            state.erc20TokenBalanceSelected.usdPrice = state.erc20TokenBalances[foundIndex].usdPrice;
+            state.erc20TokenBalanceSelected.amount =
+              state.erc20TokenBalances[foundIndex].amount;
+            state.erc20TokenBalanceSelected.usdPrice =
+              state.erc20TokenBalances[foundIndex].usdPrice;
           }
         }
       }
