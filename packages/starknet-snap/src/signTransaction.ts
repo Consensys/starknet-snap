@@ -1,39 +1,78 @@
-import { toJson } from './utils/serializer';
-import { Signature } from 'starknet';
-import { ApiParams, SignTransactionRequestParams } from './types/snapApi';
-import { getKeysFromAddress, signTransactions, isUpgradeRequired } from './utils/starknetUtils';
-import { getNetworkFromChainId, getSignTxnTxt, showUpgradeRequestModal } from './utils/snapUtils';
-import { DialogType } from '@metamask/rpc-methods';
-import { heading, panel } from '@metamask/snaps-sdk';
-import { logger } from '../src/utils/logger';
+import { heading, panel, DialogType } from '@metamask/snaps-sdk';
+import type { Signature } from 'starknet';
 
-export async function signTransaction(params: ApiParams): Promise<Signature | boolean> {
+import type {
+  ApiParamsWithKeyDeriver,
+  SignTransactionRequestParams,
+} from './types/snapApi';
+import { logger } from './utils/logger';
+import { toJson } from './utils/serializer';
+import {
+  getNetworkFromChainId,
+  getSignTxnTxt,
+  showAccountRequireUpgradeOrDeployModal,
+} from './utils/snapUtils';
+import {
+  getKeysFromAddress,
+  signTransactions,
+  validateAccountRequireUpgradeOrDeploy,
+} from './utils/starknetUtils';
+
+/**
+ *
+ * @param params
+ */
+export async function signTransaction(
+  params: ApiParamsWithKeyDeriver,
+): Promise<Signature | boolean> {
   try {
     const { state, keyDeriver, requestParams, wallet } = params;
     const requestParamsObj = requestParams as SignTransactionRequestParams;
-    const signerAddress = requestParamsObj.signerAddress;
+    const { signerAddress } = requestParamsObj;
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
-    const { privateKey } = await getKeysFromAddress(keyDeriver, network, state, signerAddress);
+    const { privateKey, publicKey } = await getKeysFromAddress(
+      keyDeriver,
+      network,
+      state,
+      signerAddress,
+    );
 
-    if (await isUpgradeRequired(network, signerAddress)) {
-      await showUpgradeRequestModal(wallet);
-      throw new Error('Upgrade required');
+    try {
+      await validateAccountRequireUpgradeOrDeploy(
+        network,
+        signerAddress,
+        publicKey,
+      );
+    } catch (validateError) {
+      await showAccountRequireUpgradeOrDeployModal(wallet, validateError);
+      throw validateError;
     }
 
-    logger.log(`signTransaction params: ${toJson(requestParamsObj.transactions, 2)}}`);
+    logger.log(
+      `signTransaction params: ${toJson(requestParamsObj.transactions, 2)}}`,
+    );
 
-    const snapComponents = getSignTxnTxt(signerAddress, network, requestParamsObj.transactions);
+    const snapComponents = getSignTxnTxt(
+      signerAddress,
+      network,
+      requestParamsObj.transactions,
+    );
 
-    if (requestParamsObj.enableAuthorize === true) {
+    if (requestParamsObj.enableAuthorize) {
       const response = await wallet.request({
         method: 'snap_dialog',
         params: {
           type: DialogType.Confirmation,
-          content: panel([heading('Do you want to sign this transaction?'), ...snapComponents]),
+          content: panel([
+            heading('Do you want to sign this transaction?'),
+            ...snapComponents,
+          ]),
         },
       });
 
-      if (!response) return false;
+      if (!response) {
+        return false;
+      }
     }
 
     const signatures = await signTransactions(
@@ -44,7 +83,7 @@ export async function signTransaction(params: ApiParams): Promise<Signature | bo
 
     return signatures;
   } catch (error) {
-    logger.error(`Problem found: ${error}`);
+    logger.error(`Problem found:`, error);
     throw error;
   }
 }

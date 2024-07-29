@@ -8,7 +8,10 @@ import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../../src/utils/constants';
 import { token1, token2 } from '../constants.test';
 import * as snapUtils from '../../src/utils/snapUtils';
 import { Mutex } from 'async-mutex';
-import { ApiParams, GetStoredErc20TokensRequestParams } from '../../src/types/snapApi';
+import {
+  ApiParams,
+  GetStoredErc20TokensRequestParams,
+} from '../../src/types/snapApi';
 
 chai.use(sinonChai);
 const sandbox = sinon.createSandbox();

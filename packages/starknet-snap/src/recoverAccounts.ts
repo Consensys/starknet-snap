@@ -1,12 +1,28 @@
-import { toJson } from './utils/serializer';
-import { num } from 'starknet';
-import { getKeysFromAddressIndex, getCorrectContractAddress } from './utils/starknetUtils';
-import { getNetworkFromChainId, getValidNumber, upsertAccount } from './utils/snapUtils';
-import { AccContract } from './types/snapState';
-import { ApiParams, RecoverAccountsRequestParams } from './types/snapApi';
-import { logger } from './utils/logger';
+import type { BIP44AddressKeyDeriver } from '@metamask/key-tree';
+import { num as numUtils } from 'starknet';
 
-export async function recoverAccounts(params: ApiParams) {
+import type {
+  ApiParamsWithKeyDeriver,
+  RecoverAccountsRequestParams,
+} from './types/snapApi';
+import type { AccContract } from './types/snapState';
+import { logger } from './utils/logger';
+import { toJson } from './utils/serializer';
+import {
+  getNetworkFromChainId,
+  getValidNumber,
+  upsertAccount,
+} from './utils/snapUtils';
+import {
+  getKeysFromAddressIndex,
+  getCorrectContractAddress,
+} from './utils/starknetUtils';
+
+/**
+ *
+ * @param params
+ */
+export async function recoverAccounts(params: ApiParamsWithKeyDeriver) {
   try {
     const { state, wallet, saveMutex, keyDeriver, requestParams } = params;
     const requestParamsObj = requestParams as RecoverAccountsRequestParams;
@@ -16,36 +32,46 @@ export async function recoverAccounts(params: ApiParams) {
     const maxMissed = getValidNumber(requestParamsObj.maxMissed, 1, 1);
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
 
-    logger.log(`recoverAccounts:\nstartIndex: ${startIndex}, maxScanned: ${maxScanned}, maxMissed: ${maxMissed}`);
+    logger.log(
+      `recoverAccounts:\nstartIndex: ${startIndex}, maxScanned: ${maxScanned}, maxMissed: ${maxMissed}`,
+    );
 
-    let i = startIndex,
-      j = 0;
+    let i = startIndex;
+    let j = 0;
     const scannedAccounts: AccContract[] = [];
 
     while (i < startIndex + maxScanned && j < maxMissed) {
-      const { publicKey, addressIndex, derivationPath } = await getKeysFromAddressIndex(
-        keyDeriver,
-        network.chainId,
-        state,
-        i,
-      );
+      const { publicKey, addressIndex, derivationPath } =
+        await getKeysFromAddressIndex(
+          keyDeriver as unknown as BIP44AddressKeyDeriver,
+          network.chainId,
+          state,
+          i,
+        );
       const {
         address: contractAddress,
         signerPubKey: signerPublicKey,
         upgradeRequired,
+        deployRequired,
       } = await getCorrectContractAddress(network, publicKey);
       logger.log(
         `recoverAccounts: index ${i}:\ncontractAddress = ${contractAddress}\npublicKey = ${publicKey}\nisUpgradeRequired = ${upgradeRequired}`,
       );
 
       if (signerPublicKey) {
-        logger.log(`recoverAccounts: index ${i}:\ncontractAddress = ${contractAddress}\n`);
-        if (num.toBigInt(signerPublicKey) === num.toBigInt(publicKey)) {
-          logger.log(`recoverAccounts: index ${i} matched\npublicKey: ${publicKey}`);
+        logger.log(
+          `recoverAccounts: index ${i}:\ncontractAddress = ${contractAddress}\n`,
+        );
+        if (
+          numUtils.toBigInt(signerPublicKey) === numUtils.toBigInt(publicKey)
+        ) {
+          logger.log(
+            `recoverAccounts: index ${i} matched\npublicKey: ${publicKey}`,
+          );
         }
         j = 0;
       } else {
-        j++;
+        j += 1;
       }
 
       const userAccount: AccContract = {
@@ -56,22 +82,27 @@ export async function recoverAccounts(params: ApiParams) {
         derivationPath,
         deployTxnHash: '',
         chainId: network.chainId,
-        upgradeRequired: upgradeRequired,
+        upgradeRequired,
+        deployRequired,
       };
 
-      logger.log(`recoverAccounts: index ${i}\nuserAccount: ${toJson(userAccount)}`);
+      logger.log(
+        `recoverAccounts: index ${i}\nuserAccount: ${toJson(userAccount)}`,
+      );
 
       await upsertAccount(userAccount, wallet, saveMutex);
 
       scannedAccounts.push(userAccount);
-      i++;
+      i += 1;
     }
 
-    logger.log(`recoverAccounts:\nscannedAccounts: ${toJson(scannedAccounts, 2)}`);
+    logger.log(
+      `recoverAccounts:\nscannedAccounts: ${toJson(scannedAccounts, 2)}`,
+    );
 
     return scannedAccounts;
-  } catch (err) {
-    logger.error(`Problem found: ${err}`);
-    throw err;
+  } catch (error) {
+    logger.error(`Problem found:`, error);
+    throw error;
   }
 }

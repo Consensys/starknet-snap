@@ -5,14 +5,29 @@ import sinonChai from 'sinon-chai';
 import { WalletMock } from '../wallet.mock.test';
 import * as utils from '../../src/utils/starknetUtils';
 import * as snapUtils from '../../src/utils/snapUtils';
-import { SnapState, VoyagerTransactionType, TransactionStatus } from '../../src/types/snapState';
+import {
+  SnapState,
+  VoyagerTransactionType,
+  TransactionStatus,
+} from '../../src/types/snapState';
 import { upgradeAccContract } from '../../src/upgradeAccContract';
 import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../../src/utils/constants';
-import { account1, estimateFeeResp, getBip44EntropyStub, sendTransactionResp } from '../constants.test';
+import {
+  account1,
+  estimateFeeResp,
+  getBip44EntropyStub,
+  sendTransactionResp,
+} from '../constants.test';
 import { getAddressKeyDeriver } from '../../src/utils/keyPair';
 import { Mutex } from 'async-mutex';
-import { ApiParams, UpgradeTransactionRequestParams } from '../../src/types/snapApi';
-import { CAIRO_VERSION_LEGACY, ACCOUNT_CLASS_HASH } from '../../src/utils/constants';
+import {
+  ApiParamsWithKeyDeriver,
+  UpgradeTransactionRequestParams,
+} from '../../src/types/snapApi';
+import {
+  CAIRO_VERSION_LEGACY,
+  ACCOUNT_CLASS_HASH,
+} from '../../src/utils/constants';
 import { CallData, num } from 'starknet';
 
 chai.use(sinonChai);
@@ -22,7 +37,7 @@ const sandbox = sinon.createSandbox();
 describe('Test function: upgradeAccContract', function () {
   this.timeout(5000);
   let walletStub: WalletMock;
-  let apiParams: ApiParams;
+  let apiParams: ApiParamsWithKeyDeriver;
   let state: SnapState;
 
   beforeEach(async function () {
@@ -57,7 +72,9 @@ describe('Test function: upgradeAccContract', function () {
 
   describe('when validation fail', function () {
     it('should show error when request contractAddress is not given', async function () {
-      (apiParams.requestParams as UpgradeTransactionRequestParams).contractAddress = undefined;
+      (
+        apiParams.requestParams as UpgradeTransactionRequestParams
+      ).contractAddress = undefined as unknown as string;
 
       let result;
       try {
@@ -66,12 +83,16 @@ describe('Test function: upgradeAccContract', function () {
         result = err;
       } finally {
         expect(result).to.be.an('Error');
-        expect(result.message).to.be.include('The given contract address need to be non-empty string');
+        expect(result.message).to.be.include(
+          'The given contract address need to be non-empty string',
+        );
       }
     });
 
     it('should show error when request contractAddress is invalid', async function () {
-      (apiParams.requestParams as UpgradeTransactionRequestParams).contractAddress = '0x0';
+      (
+        apiParams.requestParams as UpgradeTransactionRequestParams
+      ).contractAddress = '0x0';
 
       let result;
       try {
@@ -80,7 +101,9 @@ describe('Test function: upgradeAccContract', function () {
         result = err;
       } finally {
         expect(result).to.be.an('Error');
-        expect(result.message).to.be.include('The given contract address is invalid');
+        expect(result.message).to.be.include(
+          'The given contract address is invalid',
+        );
       }
     });
 
@@ -134,11 +157,14 @@ describe('Test function: upgradeAccContract', function () {
     });
 
     it('should use provided max fee to execute txn when max fee provided', async function () {
-      (apiParams.requestParams as UpgradeTransactionRequestParams).maxFee = '10000';
+      (apiParams.requestParams as UpgradeTransactionRequestParams).maxFee =
+        '10000';
       walletStub.rpcStubs.snap_dialog.resolves(true);
       executeTxnStub.resolves(sendTransactionResp);
 
-      const address = (apiParams.requestParams as UpgradeTransactionRequestParams).contractAddress;
+      const address = (
+        apiParams.requestParams as UpgradeTransactionRequestParams
+      ).contractAddress;
       const calldata = CallData.compile({
         implementation: ACCOUNT_CLASS_HASH,
         calldata: [0],
@@ -172,7 +198,9 @@ describe('Test function: upgradeAccContract', function () {
       executeTxnStub.resolves(sendTransactionResp);
       estimateFeeStub.resolves(estimateFeeResp);
 
-      const address = (apiParams.requestParams as UpgradeTransactionRequestParams).contractAddress;
+      const address = (
+        apiParams.requestParams as UpgradeTransactionRequestParams
+      ).contractAddress;
       const calldata = CallData.compile({
         implementation: ACCOUNT_CLASS_HASH,
         calldata: [0],
@@ -257,7 +285,9 @@ describe('Test function: upgradeAccContract', function () {
       executeTxnStub.resolves(sendTransactionResp);
       estimateFeeStub.resolves(estimateFeeResp);
       walletStub.rpcStubs.snap_dialog.resolves(true);
-      const address = (apiParams.requestParams as UpgradeTransactionRequestParams).contractAddress;
+      const address = (
+        apiParams.requestParams as UpgradeTransactionRequestParams
+      ).contractAddress;
       const calldata = CallData.compile({
         implementation: ACCOUNT_CLASS_HASH,
         calldata: [0],

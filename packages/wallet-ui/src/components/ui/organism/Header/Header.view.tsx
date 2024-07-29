@@ -26,10 +26,17 @@ export const HeaderView = ({ address }: Props) => {
 
   const getUSDValue = () => {
     const amountFloat = parseFloat(
-      ethers.utils.formatUnits(wallet.erc20TokenBalanceSelected.amount, wallet.erc20TokenBalanceSelected.decimals),
+      ethers.utils.formatUnits(
+        wallet.erc20TokenBalanceSelected.amount,
+        wallet.erc20TokenBalanceSelected.decimals,
+      ),
     );
     if (wallet.erc20TokenBalanceSelected.usdPrice)
-      return getAmountPrice(wallet.erc20TokenBalanceSelected, amountFloat, false);
+      return getAmountPrice(
+        wallet.erc20TokenBalanceSelected,
+        amountFloat,
+        false,
+      );
     return '';
   };
 
@@ -38,7 +45,11 @@ export const HeaderView = ({ address }: Props) => {
     if (chain && address) {
       clearTimeout(timeoutHandle.current); // cancel the timeout that was in-flight
       timeoutHandle.current = setTimeout(async () => {
-        await updateTokenBalance(wallet.erc20TokenBalanceSelected.address, address, chain);
+        await updateTokenBalance(
+          wallet.erc20TokenBalanceSelected.address,
+          address,
+          chain,
+        );
       }, TOKEN_BALANCE_REFRESH_FREQUENCY);
       return () => clearTimeout(timeoutHandle.current);
     }
@@ -59,8 +70,14 @@ export const HeaderView = ({ address }: Props) => {
         centered
       />
       <Buttons>
-        <HeaderButton onClick={() => setReceiveOpen(true)}>Receive</HeaderButton>
-        <Button onClick={() => handleSendClick()} backgroundTransparent borderVisible>
+        <HeaderButton onClick={() => setReceiveOpen(true)}>
+          Receive
+        </HeaderButton>
+        <Button
+          onClick={() => handleSendClick()}
+          backgroundTransparent
+          borderVisible
+        >
           Send
         </Button>
       </Buttons>

@@ -50,7 +50,12 @@ export const ButtonView = ({
     >
       {customIconLeft}
       {iconLeft && <LeftIcon icon={['fas', iconLeft]} style={iconStyle} />}
-      <TextWrapper hasIcons={hasIcons} fontSize={fontSize} upperCaseOnly={upperCaseOnly} style={textStyle}>
+      <TextWrapper
+        hasIcons={hasIcons}
+        fontSize={fontSize}
+        upperCaseOnly={upperCaseOnly}
+        style={textStyle}
+      >
         {children}
       </TextWrapper>
       {iconRight && <RightIcon icon={['fas', iconRight]} style={iconStyle} />}

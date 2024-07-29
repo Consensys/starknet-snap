@@ -20,7 +20,12 @@ import { theme } from 'theme/default';
 import { Radio, Skeleton } from '@mui/material';
 import { useAppDispatch, useAppSelector } from 'hooks/redux';
 import { useStarkNetSnap } from 'services';
-import { setWalletConnection, setForceReconnect, resetWallet, clearAccounts } from 'slices/walletSlice';
+import {
+  setWalletConnection,
+  setForceReconnect,
+  resetWallet,
+  clearAccounts,
+} from 'slices/walletSlice';
 import { resetNetwork, setActiveNetwork } from 'slices/networkSlice';
 
 interface IProps extends HTMLAttributes<HTMLElement> {
@@ -57,7 +62,14 @@ export const MenuView = ({ connected, ...otherProps }: IProps) => {
         <img src={logo} alt="logo" />
       </Left>
       <Right>
-        <Menu as="div" style={{ display: 'inline-block', position: 'relative', textAlign: 'left' }}>
+        <Menu
+          as="div"
+          style={{
+            display: 'inline-block',
+            position: 'relative',
+            textAlign: 'left',
+          }}
+        >
           <Menu.Button
             as="div"
             style={{
@@ -85,7 +97,9 @@ export const MenuView = ({ connected, ...otherProps }: IProps) => {
             <MenuSection>
               {networks.items.map((network, index) => (
                 <Menu.Item key={network.chainId + '_' + index}>
-                  <NetworkMenuItem onClick={() => changeNetwork(index, network.chainId)}>
+                  <NetworkMenuItem
+                    onClick={() => changeNetwork(index, network.chainId)}
+                  >
                     <Radio
                       checked={Number(networks.activeNetwork) === index}
                       name="radio-buttons"
@@ -104,7 +118,14 @@ export const MenuView = ({ connected, ...otherProps }: IProps) => {
             </MenuSection>
           </MenuItems>
         </Menu>
-        <Menu as="div" style={{ display: 'inline-block', position: 'relative', textAlign: 'left' }}>
+        <Menu
+          as="div"
+          style={{
+            display: 'inline-block',
+            position: 'relative',
+            textAlign: 'left',
+          }}
+        >
           <Menu.Button
             disabled={!connected}
             style={{
@@ -116,9 +137,16 @@ export const MenuView = ({ connected, ...otherProps }: IProps) => {
             <MenuIcon>
               <FontAwesomeIcon icon={['fas', 'bars']} />
               {connected ? (
-                <Badge style={{ background: theme.palette.success.main }}></Badge>
+                <Badge
+                  style={{ background: theme.palette.success.main }}
+                ></Badge>
               ) : (
-                <Badge style={{ background: theme.palette.grey.grey4, border: '1px solid #ffffff' }}></Badge>
+                <Badge
+                  style={{
+                    background: theme.palette.grey.grey4,
+                    border: '1px solid #ffffff',
+                  }}
+                ></Badge>
               )}
             </MenuIcon>
           </Menu.Button>
@@ -129,7 +157,11 @@ export const MenuView = ({ connected, ...otherProps }: IProps) => {
                   <FontAwesomeIcon
                     icon="circle"
                     color={theme.palette.success.main}
-                    style={{ fontSize: '12px', lineHeight: '12px', padding: '0px 10px' }}
+                    style={{
+                      fontSize: '12px',
+                      lineHeight: '12px',
+                      padding: '0px 10px',
+                    }}
                   />
                   <MenuItemText>Connected to Starknet Snap</MenuItemText>
                 </div>
@@ -142,7 +174,9 @@ export const MenuView = ({ connected, ...otherProps }: IProps) => {
                   <div
                     style={{
                       padding: '8px 0px',
-                      background: active ? theme.palette.grey.grey4 : theme.palette.grey.white,
+                      background: active
+                        ? theme.palette.grey.grey4
+                        : theme.palette.grey.white,
                       cursor: 'pointer',
                     }}
                   >
@@ -171,14 +205,20 @@ export const MenuView = ({ connected, ...otherProps }: IProps) => {
                     onClick={disconnect}
                     style={{
                       padding: '8px 0px',
-                      background: active ? theme.palette.grey.grey4 : theme.palette.grey.white,
+                      background: active
+                        ? theme.palette.grey.grey4
+                        : theme.palette.grey.white,
                       cursor: 'pointer',
                     }}
                   >
                     <FontAwesomeIcon
                       icon="sign-out"
                       color={theme.palette.grey.grey1}
-                      style={{ fontSize: '12px', lineHeight: '12px', padding: '0px 10px' }}
+                      style={{
+                        fontSize: '12px',
+                        lineHeight: '12px',
+                        padding: '0px 10px',
+                      }}
                     />
                     <MenuItemText>Disconnect</MenuItemText>
                   </div>

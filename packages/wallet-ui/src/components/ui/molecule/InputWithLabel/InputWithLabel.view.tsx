@@ -2,7 +2,14 @@ import { HelperText } from 'components/ui/atom/HelperText';
 import { Label } from 'components/ui/atom/Label';
 import { InputHTMLAttributes, useRef, useState } from 'react';
 import { INPUT_MAX_LENGTH } from 'utils/constants';
-import { Icon, Input, InputContainer, Left, RowWrapper, Wrapper } from './InputWithLabel.style';
+import {
+  Icon,
+  Input,
+  InputContainer,
+  Left,
+  RowWrapper,
+  Wrapper,
+} from './InputWithLabel.style';
 
 interface Props extends InputHTMLAttributes<HTMLInputElement> {
   error?: boolean;
@@ -30,9 +37,19 @@ export const InputWithLabelView = ({
         <Label error={error}>{label}</Label>
       </RowWrapper>
 
-      <InputContainer error={error} disabled={disabled} focused={focused} withIcon={withIcon}>
+      <InputContainer
+        error={error}
+        disabled={disabled}
+        focused={focused}
+        withIcon={withIcon}
+      >
         <Left>
-          {withIcon && <Icon icon={error ? ['fas', 'times-circle'] : ['fas', 'check-circle']} error={error} />}
+          {withIcon && (
+            <Icon
+              icon={error ? ['fas', 'times-circle'] : ['fas', 'check-circle']}
+              error={error}
+            />
+          )}
           <Input
             error={error}
             disabled={disabled}

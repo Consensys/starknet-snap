@@ -24,22 +24,32 @@ export const getTxnName = (transaction: Transaction): string => {
     } else if (transaction.contractFuncName.toLowerCase() === 'upgrade') {
       return 'Upgrade Account';
     }
-  } else if (transaction.txnType.toLowerCase() === VoyagerTransactionType.DEPLOY) {
+  } else if (
+    transaction.txnType.toLowerCase() === VoyagerTransactionType.DEPLOY
+  ) {
     return 'Deploy';
-  } else if (transaction.txnType.toLowerCase() === VoyagerTransactionType.DEPLOY_ACCOUNT) {
+  } else if (
+    transaction.txnType.toLowerCase() === VoyagerTransactionType.DEPLOY_ACCOUNT
+  ) {
     return 'Deploy Account';
   }
   return 'Unknown';
 };
 
 export const getTxnDate = (transaction: Transaction): string => {
-  return new Date(transaction.timestamp * 1000).toDateString().split(' ').slice(1, 3).join(' ');
+  return new Date(transaction.timestamp * 1000)
+    .toDateString()
+    .split(' ')
+    .slice(1, 3)
+    .join(' ');
 };
 
 export const getTxnStatus = (transaction: Transaction): string => {
   let statusStr = [];
   if (transaction.finalityStatus === transaction.executionStatus) {
-    return transaction.finalityStatus ? formatStatus(transaction.finalityStatus) : '';
+    return transaction.finalityStatus
+      ? formatStatus(transaction.finalityStatus)
+      : '';
   }
   if (transaction.finalityStatus) {
     statusStr.push(formatStatus(transaction.finalityStatus));
@@ -80,13 +90,18 @@ export const getTxnToFromLabel = (transaction: Transaction): string => {
 
 export const getTxnFailureReason = (transaction: Transaction): string => {
   return transaction.executionStatus &&
-    transaction.executionStatus.toLowerCase() === TransactionStatus.REJECTED.toLowerCase() &&
+    transaction.executionStatus.toLowerCase() ===
+      TransactionStatus.REJECTED.toLowerCase() &&
     transaction?.failureReason
     ? ` (${transaction.failureReason})`
     : '';
 };
 
-export const getTxnValues = (transaction: Transaction, decimals: number = 18, toUsdRate: number = 0) => {
+export const getTxnValues = (
+  transaction: Transaction,
+  decimals: number = 18,
+  toUsdRate: number = 0,
+) => {
   let txnValue = '0';
   let txnUsdValue = '0';
 
@@ -95,7 +110,9 @@ export const getTxnValues = (transaction: Transaction, decimals: number = 18, to
     case 'Send':
     case 'Receive':
       txnValue = ethers.utils.formatUnits(
-        transaction.contractCallData[transaction.contractCallData.length - 2].toString(),
+        transaction.contractCallData[
+          transaction.contractCallData.length - 2
+        ].toString(),
         decimals,
       );
       txnUsdValue = (parseFloat(txnValue) * toUsdRate).toFixed(2);

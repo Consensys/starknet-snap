@@ -1,33 +1,46 @@
+import type { IStarknetWindowObject } from 'get-starknet-core';
 import {
   type AddStarknetChainParameters,
-  IStarknetWindowObject,
   type RpcMessage,
   type SwitchStarknetChainParameter,
   type WalletEvents,
   type WatchAssetParameters,
 } from 'get-starknet-core';
+import type { AccountInterface, ProviderInterface } from 'starknet';
+import { Provider } from 'starknet';
+
 import { MetaMaskAccount } from './accounts';
 import { MetaMaskSigner } from './signer';
 import { MetaMaskSnap } from './snap';
-import { MetaMaskProvider } from './type';
-import { AccountInterface, Provider, ProviderInterface } from 'starknet';
+import type { MetaMaskProvider } from './type';
 
 export class MetaMaskSnapWallet implements IStarknetWindowObject {
   id: string;
+
   name: string;
+
   version: string;
+
   icon: string;
+
   account?: AccountInterface | undefined;
+
   provider?: ProviderInterface | undefined;
+
   selectedAddress?: string | undefined;
+
   chainId?: string | undefined;
-  isConnected?: boolean;
+
+  isConnected: boolean;
 
   snap: MetaMaskSnap;
+
   metamaskProvider: MetaMaskProvider;
 
-  private static readonly cairoVersion = '0';
-  private static readonly SNAPI_ID =  process.env.SNAP_ID ?? "npm:@consensys/starknet-snap";
+  static readonly #cairoVersion = '0';
+
+  // eslint-disable-next-line @typescript-eslint/naming-convention, no-restricted-globals
+  static readonly #SNAPI_ID = process.env.SNAP_ID ?? 'npm:@consensys/starknet-snap';
 
   constructor(metamaskProvider: MetaMaskProvider, snapVersion = '*') {
     this.id = 'metamask';
@@ -40,24 +53,24 @@ export class MetaMaskSnapWallet implements IStarknetWindowObject {
     this.account = undefined;
     this.selectedAddress = undefined;
     this.isConnected = false;
-    this.snap = new MetaMaskSnap(MetaMaskSnapWallet.SNAPI_ID, snapVersion, this.metamaskProvider);
+    this.snap = new MetaMaskSnap(MetaMaskSnapWallet.#SNAPI_ID, snapVersion, this.metamaskProvider);
   }
 
-  async request<T extends RpcMessage>(call: Omit<T, 'result'>): Promise<T['result']> {
+  async request<Data extends RpcMessage>(call: Omit<Data, 'result'>): Promise<Data['result']> {
     if (call.type === 'wallet_switchStarknetChain') {
       const params = call.params as SwitchStarknetChainParameter;
       const result = await this.snap.switchNetwork(params.chainId);
-      if (result === true) {
+      if (result) {
         await this.enable();
       }
-      return result as unknown as T['result'];
+      return result as unknown as Data['result'];
     }
 
     if (call.type === 'wallet_addStarknetChain') {
       const params = call.params as AddStarknetChainParameters;
       const currentNetwork = await this.#getNetwork();
       if (currentNetwork?.chainId === params.chainId) {
-        return true as unknown as T['result'];
+        return true as unknown as Data['result'];
       }
       const result = await this.snap.addStarknetChain(
         params.chainName,
@@ -65,7 +78,7 @@ export class MetaMaskSnapWallet implements IStarknetWindowObject {
         params.rpcUrls ? params.rpcUrls[0] : '',
         params.blockExplorerUrls ? params.blockExplorerUrls[0] : '',
       );
-      return result as unknown as T['result'];
+      return result as unknown as Data['result'];
     }
 
     if (call.type === 'wallet_watchAsset') {
@@ -73,11 +86,11 @@ export class MetaMaskSnapWallet implements IStarknetWindowObject {
       const result =
         (await this.snap.watchAsset(
           params.options.address,
-          params.options.name,
-          params.options.symbol,
-          params.options.decimals,
+          params.options.name as unknown as string,
+          params.options.symbol as unknown as string,
+          params.options.decimals as unknown as number,
         )) ?? false;
-      return result as unknown as T['result'];
+      return result as unknown as Data['result'];
     }
 
     throw new Error(`Method ${call.type} not implemented`);
@@ -88,14 +101,14 @@ export class MetaMaskSnapWallet implements IStarknetWindowObject {
   }
 
   async #getWalletAddress(chainId: string) {
-    //address always same regardless network, only single address provided
+    // address always same regardless network, only single address provided
     if (this.selectedAddress) {
       return this.selectedAddress;
     }
 
     const accountResponse = await this.snap.recoverDefaultAccount(chainId);
 
-    if (!accountResponse || !accountResponse.address) {
+    if (!accountResponse?.address) {
       throw new Error('Unable to recover accounts');
     }
 
@@ -113,7 +126,7 @@ export class MetaMaskSnapWallet implements IStarknetWindowObject {
   async #getAccountInstance(address: string, provider: ProviderInterface) {
     const signer = new MetaMaskSigner(this.snap, address);
 
-    return new MetaMaskAccount(this.snap, provider, address, signer, MetaMaskSnapWallet.cairoVersion);
+    return new MetaMaskAccount(this.snap, provider, address, signer, MetaMaskSnapWallet.#cairoVersion);
   }
 
   async enable() {
@@ -139,12 +152,12 @@ export class MetaMaskSnapWallet implements IStarknetWindowObject {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  on<E extends WalletEvents>() {
+  on<Event extends WalletEvents>() {
     throw new Error('Method not supported');
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  off<E extends WalletEvents>() {
+  off<Event extends WalletEvents>() {
     throw new Error('Method not supported');
   }
 }

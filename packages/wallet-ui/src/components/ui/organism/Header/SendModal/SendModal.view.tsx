@@ -30,7 +30,10 @@ export const SendModalView = ({ closeModal }: Props) => {
   const [fields, setFields] = useState({
     amount: '',
     address: '',
-    chainId: networks.items.length > 0 ? networks.items[networks.activeNetwork].chainId : '',
+    chainId:
+      networks.items.length > 0
+        ? networks.items[networks.activeNetwork].chainId
+        : '',
     feeToken: 'ETH', // Default fee token
   });
   const [errors, setErrors] = useState({ amount: '', address: '' });
@@ -44,7 +47,10 @@ export const SendModalView = ({ closeModal }: Props) => {
     switch (fieldName) {
       case 'amount':
         if (fieldValue !== '' && fieldValue !== '.') {
-          const inputAmount = ethers.utils.parseUnits(fieldValue, wallet.erc20TokenBalanceSelected.decimals);
+          const inputAmount = ethers.utils.parseUnits(
+            fieldValue,
+            wallet.erc20TokenBalanceSelected.decimals,
+          );
           const userBalance = wallet.erc20TokenBalanceSelected.amount;
           if (inputAmount.gt(userBalance)) {
             setErrors((prevErrors) => ({
@@ -78,7 +84,12 @@ export const SendModalView = ({ closeModal }: Props) => {
   };
 
   const confirmEnabled = () => {
-    return !errors.address && !errors.amount && fields.amount.length > 0 && fields.address.length > 0;
+    return (
+      !errors.address &&
+      !errors.amount &&
+      fields.amount.length > 0 &&
+      fields.address.length > 0
+    );
   };
 
   return (
@@ -126,10 +137,17 @@ export const SendModalView = ({ closeModal }: Props) => {
             </div>
           </Wrapper>
           <Buttons>
-            <ButtonStyled onClick={closeModal} backgroundTransparent borderVisible>
+            <ButtonStyled
+              onClick={closeModal}
+              backgroundTransparent
+              borderVisible
+            >
               CANCEL
             </ButtonStyled>
-            <ButtonStyled onClick={() => setSummaryModalOpen(true)} enabled={confirmEnabled()}>
+            <ButtonStyled
+              onClick={() => setSummaryModalOpen(true)}
+              enabled={confirmEnabled()}
+            >
               CONFIRM
             </ButtonStyled>
           </Buttons>

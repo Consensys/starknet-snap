@@ -1,7 +1,5 @@
-import { MetaMaskSnap } from './snap';
-import {
+import type {
   Abi,
-  Account,
   AllowArray,
   CairoVersion,
   Call,
@@ -15,9 +13,13 @@ import {
   SignerInterface,
   TypedData,
 } from 'starknet';
+import { Account } from 'starknet';
+
+import type { MetaMaskSnap } from './snap';
 
 export class MetaMaskAccount extends Account {
   #snap: MetaMaskSnap;
+
   #address: string;
 
   constructor(
