@@ -186,7 +186,7 @@ export const declareContract = async (
   });
 };
 
-export const getAccountNonce = async (
+export const getAccountNonceOnLatest = async (
   network: Network,
   senderAddress: string,
   privateKey: string | Uint8Array,
@@ -211,7 +211,7 @@ export const estimateFee = async (
 ): Promise<EstimateFee> => {
   let nonce = invocationsDetails?.nonce;
   if (!nonce) {
-    nonce = await getAccountNonce(network, senderAddress, privateKey);
+    nonce = await getAccountNonceOnLatest(network, senderAddress, privateKey);
   }
   return await getAccountInstance(
     network,
@@ -236,7 +236,7 @@ export const estimateFeeBulk = async (
 ): Promise<EstimateFee[]> => {
   let nonce = invocationsDetails?.nonce;
   if (!nonce) {
-    nonce = await getAccountNonce(network, senderAddress, privateKey);
+    nonce = await getAccountNonceOnLatest(network, senderAddress, privateKey);
   }
   return await getAccountInstance(
     network,
