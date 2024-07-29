@@ -2066,7 +2066,7 @@ __metadata:
     prettier: ^2.7.1
     rimraf: ^3.0.2
     serve: 14.2.1
-    starknet: ^5.14.0
+    starknet: ^6.11.0
     ts-loader: ^9.5.1
     typescript: ^4.6.3
     webpack: ^5.91.0
@@ -2077,7 +2077,7 @@ __metadata:
 
 "@consensys/starknet-snap@file:../starknet-snap::locator=wallet-ui%40workspace%3Apackages%2Fwallet-ui":
   version: 2.9.0
-  resolution: "@consensys/starknet-snap@file:../starknet-snap#../starknet-snap::hash=ca876a&locator=wallet-ui%40workspace%3Apackages%2Fwallet-ui"
+  resolution: "@consensys/starknet-snap@file:../starknet-snap#../starknet-snap::hash=09c368&locator=wallet-ui%40workspace%3Apackages%2Fwallet-ui"
   dependencies:
     "@metamask/key-tree": 9.0.0
     "@metamask/snaps-sdk": ^4.0.0
@@ -2086,7 +2086,7 @@ __metadata:
     ethers: ^5.5.1
     starknet: ^6.11.0
     starknet_v4.22.0: "npm:starknet@4.22.0"
-  checksum: 086202292978f8df348593b0f8a843a289d618801e6bf748a34be5e86b210311145d9db6f6830bdef00165bb5cd384487928f4d69454c7500723a4124af733ac
+  checksum: 4f9d1d6fb5df3d3e23aafed475bb3fac70f38cfbbb0fff15d5cecceb3a521c3cd7c61cb93cc99f5cc03c6fac51e63a2d9032c1c371d954097b9446968e18eaa9
   languageName: node
   linkType: hard
 
@@ -2136,25 +2136,6 @@ __metadata:
     typescript: ^4.7.4
   languageName: unknown
   linkType: soft
-
-"@craco/craco@npm:^7.1.0":
-  version: 7.1.0
-  resolution: "@craco/craco@npm:7.1.0"
-  dependencies:
-    autoprefixer: ^10.4.12
-    cosmiconfig: ^7.0.1
-    cosmiconfig-typescript-loader: ^1.0.0
-    cross-spawn: ^7.0.3
-    lodash: ^4.17.21
-    semver: ^7.3.7
-    webpack-merge: ^5.8.0
-  peerDependencies:
-    react-scripts: ^5.0.0
-  bin:
-    craco: dist/bin/craco.js
-  checksum: d534d1ea7814e7bd9f2e2aef17821fcdb1d9cac8308e8eb04809f8f3371180086b8f673dedce1ffbefba9ded566e91e4c9663464e488bf6291461091cbd95c4e
-  languageName: node
-  linkType: hard
 
 "@cspotcode/source-map-support@npm:^0.8.0":
   version: 0.8.1
@@ -5101,48 +5082,6 @@ __metadata:
   peerDependencies:
     rollup: ^1.20.0||^2.0.0
   checksum: 8be16e27863c219edbb25a4e6ec2fe0e1e451d9e917b6a43cf2ae5bc025a6b8faaa40f82a6e53b66d0de37b58ff472c6c3d57a83037ae635041f8df959d6d9aa
-  languageName: node
-  linkType: hard
-
-"@rometools/cli-darwin-arm64@npm:12.1.3":
-  version: 12.1.3
-  resolution: "@rometools/cli-darwin-arm64@npm:12.1.3"
-  conditions: os=darwin & cpu=arm64
-  languageName: node
-  linkType: hard
-
-"@rometools/cli-darwin-x64@npm:12.1.3":
-  version: 12.1.3
-  resolution: "@rometools/cli-darwin-x64@npm:12.1.3"
-  conditions: os=darwin & cpu=x64
-  languageName: node
-  linkType: hard
-
-"@rometools/cli-linux-arm64@npm:12.1.3":
-  version: 12.1.3
-  resolution: "@rometools/cli-linux-arm64@npm:12.1.3"
-  conditions: os=linux & cpu=arm64
-  languageName: node
-  linkType: hard
-
-"@rometools/cli-linux-x64@npm:12.1.3":
-  version: 12.1.3
-  resolution: "@rometools/cli-linux-x64@npm:12.1.3"
-  conditions: os=linux & cpu=x64
-  languageName: node
-  linkType: hard
-
-"@rometools/cli-win32-arm64@npm:12.1.3":
-  version: 12.1.3
-  resolution: "@rometools/cli-win32-arm64@npm:12.1.3"
-  conditions: os=win32 & cpu=arm64
-  languageName: node
-  linkType: hard
-
-"@rometools/cli-win32-x64@npm:12.1.3":
-  version: 12.1.3
-  resolution: "@rometools/cli-win32-x64@npm:12.1.3"
-  conditions: os=win32 & cpu=x64
   languageName: node
   linkType: hard
 
@@ -8477,22 +8416,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"abi-wan-kanabi-v1@npm:abi-wan-kanabi@^1.0.3, abi-wan-kanabi@npm:^1.0.1":
-  version: 1.0.3
-  resolution: "abi-wan-kanabi@npm:1.0.3"
-  dependencies:
-    abi-wan-kanabi: ^1.0.1
-    fs-extra: ^10.0.0
-    rome: ^12.1.3
-    typescript: ^4.9.5
-    yargs: ^17.7.2
-  bin:
-    generate: dist/generate.js
-  checksum: 03b03c507424f239a7832e310ffbb35568448f0eebbe19e8caf56b03962ad6c047db8c84c3e7487d1ff9c97b0b00733ac9579c3cc640179d2eeacc5558316237
-  languageName: node
-  linkType: hard
-
-"abi-wan-kanabi-v2@npm:abi-wan-kanabi@^2.1.1, abi-wan-kanabi@npm:^2.2.2":
+"abi-wan-kanabi@npm:^2.2.2":
   version: 2.2.2
   resolution: "abi-wan-kanabi@npm:2.2.2"
   dependencies:
@@ -9376,7 +9300,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"autoprefixer@npm:^10.4.12, autoprefixer@npm:^10.4.13":
+"autoprefixer@npm:^10.4.13":
   version: 10.4.19
   resolution: "autoprefixer@npm:10.4.19"
   dependencies:
@@ -11463,20 +11387,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cosmiconfig-typescript-loader@npm:^1.0.0":
-  version: 1.0.9
-  resolution: "cosmiconfig-typescript-loader@npm:1.0.9"
-  dependencies:
-    cosmiconfig: ^7
-    ts-node: ^10.7.0
-  peerDependencies:
-    "@types/node": "*"
-    cosmiconfig: ">=7"
-    typescript: ">=3"
-  checksum: 26a0198e03e81a9e7e1a6ce880d7309fdd056c7a3a23b587253e6d1d1224154d3f9edf727d9c0310628e89752353211b75de151b705298b4d0741fa1740c661e
-  languageName: node
-  linkType: hard
-
 "cosmiconfig-typescript-loader@npm:^4.0.0":
   version: 4.4.0
   resolution: "cosmiconfig-typescript-loader@npm:4.4.0"
@@ -11502,7 +11412,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cosmiconfig@npm:^7, cosmiconfig@npm:^7.0.0, cosmiconfig@npm:^7.0.1":
+"cosmiconfig@npm:^7.0.0":
   version: 7.1.0
   resolution: "cosmiconfig@npm:7.1.0"
   dependencies:
@@ -18609,13 +18519,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lossless-json@npm:^2.0.8":
-  version: 2.0.11
-  resolution: "lossless-json@npm:2.0.11"
-  checksum: 0282cf40658c844c9c7983dad26b7134538ba30fd5a992c932790228e3c9131b48d2cc89d65b31ced247a4eeedf33676bf187849ba3635d659c7812f106b42a7
-  languageName: node
-  linkType: hard
-
 "lossless-json@npm:^4.0.1":
   version: 4.0.1
   resolution: "lossless-json@npm:4.0.1"
@@ -23401,35 +23304,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rome@npm:^12.1.3":
-  version: 12.1.3
-  resolution: "rome@npm:12.1.3"
-  dependencies:
-    "@rometools/cli-darwin-arm64": 12.1.3
-    "@rometools/cli-darwin-x64": 12.1.3
-    "@rometools/cli-linux-arm64": 12.1.3
-    "@rometools/cli-linux-x64": 12.1.3
-    "@rometools/cli-win32-arm64": 12.1.3
-    "@rometools/cli-win32-x64": 12.1.3
-  dependenciesMeta:
-    "@rometools/cli-darwin-arm64":
-      optional: true
-    "@rometools/cli-darwin-x64":
-      optional: true
-    "@rometools/cli-linux-arm64":
-      optional: true
-    "@rometools/cli-linux-x64":
-      optional: true
-    "@rometools/cli-win32-arm64":
-      optional: true
-    "@rometools/cli-win32-x64":
-      optional: true
-  bin:
-    rome: bin/rome
-  checksum: 341e5520a23277bdc2571db279e72fe9427a95f4e3025cd215a989d381fe6690f6aa1c0fb9abbd318a8bfd85ff1cec2304e92b732329c8a46c69e259eeb080cc
-  languageName: node
-  linkType: hard
-
 "rsvp@npm:^4.8.4":
   version: 4.8.5
   resolution: "rsvp@npm:4.8.5"
@@ -24469,23 +24343,6 @@ __metadata:
     husky: ^8.0.0
   languageName: unknown
   linkType: soft
-
-"starknet@npm:^5.14.0":
-  version: 5.29.0
-  resolution: "starknet@npm:5.29.0"
-  dependencies:
-    "@noble/curves": ~1.3.0
-    "@scure/base": ~1.1.3
-    "@scure/starknet": ~1.0.0
-    abi-wan-kanabi-v1: "npm:abi-wan-kanabi@^1.0.3"
-    abi-wan-kanabi-v2: "npm:abi-wan-kanabi@^2.1.1"
-    isomorphic-fetch: ^3.0.0
-    lossless-json: ^2.0.8
-    pako: ^2.0.4
-    url-join: ^4.0.1
-  checksum: ea44bcc7f7db76ef878a557658e289bd25383b6fbcc9d59153dcf1bd0e014f41484fa5faa95e09ce0bd3c5933833fc867fb5be325f5b55ae1531a2cd29915594
-  languageName: node
-  linkType: hard
 
 "starknet@npm:^6.11.0":
   version: 6.11.0
@@ -25782,7 +25639,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ts-node@npm:^10.7.0, ts-node@npm:^10.8.1, ts-node@npm:^10.9.2":
+"ts-node@npm:^10.8.1, ts-node@npm:^10.9.2":
   version: 10.9.2
   resolution: "ts-node@npm:10.9.2"
   dependencies:
@@ -26065,7 +25922,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@npm:^4.6.3, typescript@npm:^4.7.4, typescript@npm:^4.9.5":
+"typescript@npm:^4.6.3, typescript@npm:^4.7.4":
   version: 4.9.5
   resolution: "typescript@npm:4.9.5"
   bin:
@@ -26085,7 +25942,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@^4.6.3#~builtin<compat/typescript>, typescript@patch:typescript@^4.7.4#~builtin<compat/typescript>, typescript@patch:typescript@^4.9.5#~builtin<compat/typescript>":
+"typescript@patch:typescript@^4.6.3#~builtin<compat/typescript>, typescript@patch:typescript@^4.7.4#~builtin<compat/typescript>":
   version: 4.9.5
   resolution: "typescript@patch:typescript@npm%3A4.9.5#~builtin<compat/typescript>::version=4.9.5&hash=7ad353"
   bin:
@@ -26749,7 +26606,6 @@ __metadata:
   resolution: "wallet-ui@workspace:packages/wallet-ui"
   dependencies:
     "@consensys/starknet-snap": "file:../starknet-snap"
-    "@craco/craco": ^7.1.0
     "@emotion/react": ^11.9.0
     "@emotion/styled": ^11.8.1
     "@fortawesome/fontawesome-svg-core": ^6.1.1
@@ -27170,7 +27026,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"webpack-merge@npm:^5.7.3, webpack-merge@npm:^5.8.0, webpack-merge@npm:^5.9.0":
+"webpack-merge@npm:^5.7.3, webpack-merge@npm:^5.9.0":
   version: 5.10.0
   resolution: "webpack-merge@npm:5.10.0"
   dependencies:
