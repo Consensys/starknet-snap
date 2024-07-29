@@ -141,6 +141,7 @@ export async function upgradeAccContract(params: ApiParamsWithKeyDeriver) {
       {
         maxFee,
       },
+      TRANSACTION_VERSION,
       CAIRO_VERSION_LEGACY,
     );
 

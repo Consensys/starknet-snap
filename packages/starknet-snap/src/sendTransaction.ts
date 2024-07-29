@@ -9,6 +9,7 @@ import type {
 } from './types/snapApi';
 import type { Transaction } from './types/snapState';
 import { TransactionStatus, VoyagerTransactionType } from './types/snapState';
+import { TRANSACTION_VERSION } from './utils/constants';
 import { logger } from './utils/logger';
 import { toJson } from './utils/serializer';
 import {
@@ -24,6 +25,11 @@ import {
   isAccountDeployed,
   isUpgradeRequired,
 } from './utils/starknetUtils';
+
+/**
+ *
+ * @param params
+ */
 
 /**
  *
@@ -91,6 +97,9 @@ export async function sendTransaction(params: ApiParamsWithKeyDeriver) {
       senderAddress,
       maxFee,
       network,
+      requestParamsObj.transactionVersion === constants.TRANSACTION_VERSION.V3
+        ? 'STRK'
+        : 'ETH',
     );
     const response = await wallet.request({
       method: 'snap_dialog',
@@ -150,6 +159,7 @@ export async function sendTransaction(params: ApiParamsWithKeyDeriver) {
         maxFee,
         nonce: nonceSendTransaction,
       },
+      requestParamsObj.transactionVersion ?? TRANSACTION_VERSION,
     );
 
     logger.log(`sendTransaction:\ntxnResp: ${toJson(txnResp)}`);

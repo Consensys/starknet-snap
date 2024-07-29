@@ -246,6 +246,9 @@ export const executeTxn = async (
   txnInvocation: Call | Call[],
   abis?: Abi[],
   invocationsDetails?: UniversalDetails,
+  transactionVersion?:
+    | constants.TRANSACTION_VERSION.V2
+    | constants.TRANSACTION_VERSION.V3,
   cairoVersion?: CairoVersion,
 ): Promise<InvokeFunctionResponse> => {
   return getAccountInstance(
@@ -253,6 +256,7 @@ export const executeTxn = async (
     senderAddress,
     privateKey,
     cairoVersion,
+    transactionVersion,
   ).execute(txnInvocation, abis, {
     ...invocationsDetails,
     skipValidate: false,
@@ -295,6 +299,9 @@ export const estimateAccountDeployFee = async (
   contractCallData: RawCalldata,
   addressSalt: numUtils.BigNumberish,
   privateKey: string | Uint8Array,
+  transactionVersion?:
+    | constants.TRANSACTION_VERSION.V2
+    | constants.TRANSACTION_VERSION.V3,
   cairoVersion?: CairoVersion,
   invocationsDetails?: UniversalDetails,
 ): Promise<EstimateFee> => {
@@ -311,6 +318,7 @@ export const estimateAccountDeployFee = async (
     contractAddress,
     privateKey,
     cairoVersion,
+    transactionVersion,
   ).estimateAccountDeployFee(deployAccountPayload, {
     ...invocationsDetails,
     skipValidate: false,

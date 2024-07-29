@@ -376,6 +376,7 @@ export const useStarkNetSnap = () => {
     senderAddress: string,
     maxFee: string,
     chainId: string,
+    feeToken: string,
   ) {
     dispatch(enableLoadingWithMessage('Sending transaction...'));
     try {
@@ -393,6 +394,10 @@ export const useStarkNetSnap = () => {
               senderAddress,
               maxFee,
               chainId,
+              transactionVersion:
+                feeToken === 'ETH'
+                  ? constants.TRANSACTION_VERSION.V2
+                  : constants.TRANSACTION_VERSION.V3,
             },
           },
         },
