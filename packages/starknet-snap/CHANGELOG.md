@@ -1,6 +1,35 @@
 # Changelog
 
 
+## [2.9.0](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v2.8.0...starknet-snap-v2.9.0) (2024-07-16)
+
+
+### Features
+
+* clean up and update dependency ([#259](https://github.com/Consensys/starknet-snap/issues/259)) ([fcb83e1](https://github.com/Consensys/starknet-snap/commit/fcb83e128fd4e483cdf9f4670e4e70e1d3876f7a))
+
+
+### Bug Fixes
+
+* non zero balance on non deployed cairo 0 account ([#276](https://github.com/Consensys/starknet-snap/issues/276)) ([d9beafe](https://github.com/Consensys/starknet-snap/commit/d9beafe45b304685581162ef9247a31919eb7556))
+* remove get balance from createAccount ([#272](https://github.com/Consensys/starknet-snap/issues/272)) ([02b92f9](https://github.com/Consensys/starknet-snap/commit/02b92f988476dd621e2c48c4b3f1733e55a5878c))
+* validateAccountRequireUpgradeOrDeploy condition check ([#288](https://github.com/Consensys/starknet-snap/issues/288)) ([0f49ab0](https://github.com/Consensys/starknet-snap/commit/0f49ab09b57735158a74eed715cc6665c372ee6d))
+
+## [2.8.0](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v2.7.0...starknet-snap-v2.8.0) (2024-06-21)
+
+
+### Features
+
+* add waiting mode for create account ([#251](https://github.com/Consensys/starknet-snap/issues/251)) ([0c91142](https://github.com/Consensys/starknet-snap/commit/0c911420595193672885d97d12769570a96316ce))
+* cairo 1 support ([#202](https://github.com/Consensys/starknet-snap/issues/202)) ([c5e36e9](https://github.com/Consensys/starknet-snap/commit/c5e36e9a6f3c63155d990bf519cd6af6eb3cd006))
+* sf-640 revamp cicd workflow ([#255](https://github.com/Consensys/starknet-snap/issues/255)) ([6faaf02](https://github.com/Consensys/starknet-snap/commit/6faaf024bd0b8112e5cea930a2bf8aad564a9454))
+* show upgrade dialog on get-starknet calls ([#247](https://github.com/Consensys/starknet-snap/issues/247)) ([4d8a2d7](https://github.com/Consensys/starknet-snap/commit/4d8a2d7948459033c91991c357f3fe2f620fe46b))
+
+
+### Bug Fixes
+
+* ensure account deployment for executTxn in get-starknet  ([#250](https://github.com/Consensys/starknet-snap/issues/250)) ([c98f2c7](https://github.com/Consensys/starknet-snap/commit/c98f2c74f5983736dedb960a5bf2ce57d9a3f99c))
+
 ## [2.7.0](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v2.6.2...starknet-snap-v2.7.0) (2024-05-01)
 
 

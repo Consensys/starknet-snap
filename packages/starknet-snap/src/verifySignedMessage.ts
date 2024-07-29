@@ -1,17 +1,24 @@
-import { toJson } from './utils/serializer';
 import typedDataExample from './typedData/typedDataExample.json';
+import type {
+  ApiParamsWithKeyDeriver,
+  VerifySignedMessageRequestParams,
+} from './types/snapApi';
+import { logger } from './utils/logger';
+import { toJson } from './utils/serializer';
+import { getNetworkFromChainId } from './utils/snapUtils';
 import {
   verifyTypedDataMessageSignature,
   getFullPublicKeyPairFromPrivateKey,
   getKeysFromAddress,
-  isUpgradeRequired,
+  validateAccountRequireUpgradeOrDeploy,
+  validateAndParseAddress,
 } from './utils/starknetUtils';
-import { getNetworkFromChainId } from './utils/snapUtils';
-import { ApiParams, VerifySignedMessageRequestParams } from './types/snapApi';
-import { logger } from './utils/logger';
-import { validateAndParseAddress } from '../src/utils/starknetUtils';
 
-export async function verifySignedMessage(params: ApiParams) {
+/**
+ *
+ * @param params
+ */
+export async function verifySignedMessage(params: ApiParamsWithKeyDeriver) {
   try {
     const { state, keyDeriver, requestParams } = params;
     const requestParamsObj = requestParams as VerifySignedMessageRequestParams;
@@ -30,21 +37,27 @@ export async function verifySignedMessage(params: ApiParams) {
 
     if (!verifySignerAddress || !verifySignature) {
       throw new Error(
-        `The given signer address and signature need to be non-empty string, got: ${toJson(requestParamsObj)}`,
+        `The given signer address and signature need to be non-empty string, got: ${toJson(
+          requestParamsObj,
+        )}`,
       );
     }
 
     try {
       validateAndParseAddress(verifySignerAddress);
-    } catch (err) {
-      throw new Error(`The given signer address is invalid: ${verifySignerAddress}`);
+    } catch (error) {
+      throw new Error(
+        `The given signer address is invalid: ${verifySignerAddress}`,
+      );
     }
 
-    if (await isUpgradeRequired(network, verifySignerAddress)) {
-      throw new Error('Upgrade required');
-    }
-
-    const { privateKey: signerPrivateKey } = await getKeysFromAddress(keyDeriver, network, state, verifySignerAddress);
+    const { privateKey: signerPrivateKey, publicKey } =
+      await getKeysFromAddress(keyDeriver, network, state, verifySignerAddress);
+    await validateAccountRequireUpgradeOrDeploy(
+      network,
+      verifySignerAddress,
+      publicKey,
+    );
 
     const fullPublicKey = getFullPublicKeyPairFromPrivateKey(signerPrivateKey);
 
@@ -57,8 +70,8 @@ export async function verifySignedMessage(params: ApiParams) {
 
     logger.log(`verifySignedMessage:\nisVerified: ${isVerified}`);
     return isVerified;
-  } catch (err) {
-    logger.error(`Problem found: ${err}`);
-    throw err;
+  } catch (error) {
+    logger.error(`Problem found:`, error);
+    throw error;
   }
 }

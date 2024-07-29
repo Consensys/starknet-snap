@@ -41,18 +41,21 @@ jobs:
               echo "VERSION=${BASE}-dev-${HASH}-${DATE}"
               echo "TAG=dev"
               echo "ENV=dev"
+              echo "LOG_LEVEL=all"
             } >> "$GITHUB_OUTPUT"
           elif [[ $ENV  == "staging" ]]; then
             {
               echo "VERSION=${BASE}-staging"
               echo "TAG=staging"
               echo "ENV=staging"
+              echo "LOG_LEVEL=off"
             } >> "$GITHUB_OUTPUT"
           elif [[ $ENV  == "production" ]]; then
             {
               echo "VERSION=${BASE}"
               echo "TAG=latest"
               echo "ENV=prod"
+              echo "LOG_LEVEL=off"
             } >> "$GITHUB_OUTPUT"
           else
             echo "Invalid environment"
@@ -66,6 +69,8 @@ jobs:
       AWS_CLOUDFRONT_DISTRIBUTIONS_ID: ${{ steps.prepare_parameters.outputs.AWS_CLOUDFRONT_DISTRIBUTIONS_ID }}
       AWS_S3_URL: ${{ steps.prepare_parameters.outputs.AWS_S3_URL }}
       GET_STARKNET_PUBLIC_PATH: ${{ steps.prepare_parameters.outputs.GET_STARKNET_PUBLIC_PATH }}
+      CACHE_KEY: ${{ github.sha }}-${{ steps.prepare_parameters.outputs.ENV }}
+      LOG_LEVEL: ${{ steps.prepare_parameters.outputs.LOG_LEVEL }}
 
   install-build:
     needs: 
@@ -102,7 +107,7 @@ jobs:
 
           echo "Building UI with version $VERSION"
           
-          REACT_APP_SNAP_VERSION="$VERSION" yarn workspace wallet-ui build
+          REACT_APP_DEBUG_LEVEL="${LOG_LEVEL}" REACT_APP_SNAP_VERSION="${VERSION}" yarn workspace wallet-ui build
 
           echo "Building Get Starknet with GET_STARKNET_PUBLIC_PATH=$GET_STARKNET_PUBLIC_PATH" 
 
@@ -113,9 +118,10 @@ jobs:
           VOYAGER_API_KEY: ${{ secrets.VOYAGER_API_KEY }}
           ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
           GET_STARKNET_PUBLIC_PATH: ${{ needs.prepare-deployment.outputs.GET_STARKNET_PUBLIC_PATH }}
+          LOG_LEVEL: ${{ needs.prepare-deployment.outputs.LOG_LEVEL }}
       - name: Cache Build
         uses: actions/cache@v3
-        id: restore-build
+        id: cache
         with:
           path: |
             ./packages/get-starknet/dist/webpack
@@ -124,7 +130,7 @@ jobs:
             ./packages/starknet-snap/dist
             ./packages/starknet-snap/snap.manifest.json
             ./node_modules/.yarn-state.yml
-          key: ${{ github.sha }}
+          key: ${{ needs.prepare-deployment.outputs.CACHE_KEY }}
 
   publish-npm-dry-run:
     runs-on: ubuntu-latest
@@ -151,7 +157,7 @@ jobs:
             ./packages/starknet-snap/dist
             ./packages/starknet-snap/snap.manifest.json
             ./node_modules/.yarn-state.yml
-          key: ${{ github.sha }}
+          key: ${{ needs.prepare-deployment.outputs.CACHE_KEY }}
       - name: Dry Run Publish
         run: |
           npm pack ./packages/starknet-snap --tag "$TAG" --access public
@@ -183,7 +189,7 @@ jobs:
             ./packages/starknet-snap/dist
             ./packages/starknet-snap/snap.manifest.json
             ./node_modules/.yarn-state.yml
-          key: ${{ github.sha }}
+          key: ${{ needs.prepare-deployment.outputs.CACHE_KEY }}
       - name: Run Publish
         run: |
           npm publish ./packages/starknet-snap --tag "$TAG" --access public
@@ -217,7 +223,7 @@ jobs:
             ./packages/starknet-snap/dist
             ./packages/starknet-snap/snap.manifest.json
             ./node_modules/.yarn-state.yml
-          key: ${{ github.sha }}
+          key: ${{ needs.prepare-deployment.outputs.CACHE_KEY }}
       - name: Deploy to AWS
         run: | 
           echo "Deployed Dapp to : $AWS_S3_URL"
@@ -251,7 +257,7 @@ jobs:
             ./packages/starknet-snap/dist
             ./packages/starknet-snap/snap.manifest.json
             ./node_modules/.yarn-state.yml
-          key: ${{ github.sha }}
+          key: ${{ needs.prepare-deployment.outputs.CACHE_KEY }}
       - name: Deploy to AWS
         run: | 
           echo "Deployed get Starknet to : $AWS_S3_GET_STARKNET_URL"

@@ -1,4 +1,11 @@
-import { ConnectButton, DescriptionCentered, FlaskIcon, StarknetLogo, Title, Wrapper } from './NoFlaskModal.style';
+import {
+  ConnectButton,
+  DescriptionCentered,
+  FlaskIcon,
+  StarknetLogo,
+  Title,
+  Wrapper,
+} from './NoFlaskModal.style';
 import { AlertView } from '../../atom/Alert/Alert.view';
 
 export const NoFlaskModalView = () => {
@@ -7,7 +14,8 @@ export const NoFlaskModalView = () => {
       <StarknetLogo />
       <Title>You don't have the MetaMask Flask extension</Title>
       <DescriptionCentered>
-        You need to install MetaMask Flask extension in order to use the Starknet Snap.
+        You need to install MetaMask Flask extension in order to use the
+        Starknet Snap.
         <br />
         <br />
         <AlertView
@@ -15,7 +23,11 @@ export const NoFlaskModalView = () => {
           variant="warning"
         />
       </DescriptionCentered>
-      <a href="https://metamask.io/flask" target="_blank" rel="noreferrer noopener">
+      <a
+        href="https://metamask.io/flask"
+        target="_blank"
+        rel="noreferrer noopener"
+      >
         <ConnectButton customIconLeft={<FlaskIcon />} onClick={() => {}}>
           Download MetaMask Flask
         </ConnectButton>

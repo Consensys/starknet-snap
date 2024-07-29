@@ -40,7 +40,8 @@ export const COINGECKO_API = 'https://api.coingecko.com/api/v3/';
 
 export const STARKNET_MAINNET_EXPLORER = 'https://voyager.online/';
 
-export const STARKNET_SEPOLIA_TESTNET_EXPLORER = 'https://sepolia.voyager.online/';
+export const STARKNET_SEPOLIA_TESTNET_EXPLORER =
+  'https://sepolia.voyager.online/';
 
 export const SNAPS_DOC_URL = 'https://docs.metamask.io/guide/snaps.html';
 
