@@ -6,12 +6,12 @@ import type {
   Component,
 } from '@metamask/snaps-sdk';
 import {
-  InternalError,
   panel,
   row,
   divider,
   text,
   copyable,
+  SnapError,
 } from '@metamask/snaps-sdk';
 import { Mutex } from 'async-mutex';
 import { ethers } from 'ethers';
@@ -55,13 +55,12 @@ import {
   ETHER_MAINNET,
   ETHER_SEPOLIA_TESTNET,
   PRELOADED_TOKENS,
-  STARKNET_INTEGRATION_NETWORK,
   STARKNET_MAINNET_NETWORK,
   STARKNET_SEPOLIA_TESTNET_NETWORK,
   STARKNET_TESTNET_NETWORK,
 } from './utils/constants';
 import { getAddressKeyDeriver } from './utils/keyPair';
-import { logger } from './utils/logger';
+import { logger, LogLevel } from './utils/logger';
 import { toJson } from './utils/serializer';
 import {
   dappUrl,
@@ -80,17 +79,15 @@ declare const snap;
 const saveMutex = new Mutex();
 
 export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
+  const requestParams = request?.params as unknown as ApiRequestParams;
+  const debugLevel = requestParams?.debugLevel;
+  logger.init(debugLevel as unknown as string);
+  // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+  console.log(`debugLevel: ${logger.getLogLevel()}`);
+
+  logger.log(`${request.method}:\nrequestParams: ${toJson(requestParams)}`);
+
   try {
-    const requestParams = request?.params as unknown as ApiRequestParams;
-    const isDev = Boolean(requestParams?.isDev);
-    const debugLevel = requestParams?.debugLevel;
-
-    logger.init(debugLevel as unknown as string);
-    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-    console.log(`debugLevel: ${logger.getLogLevel()}`);
-
-    logger.log(`${request.method}:\nrequestParams: ${toJson(requestParams)}`);
-    // Switch statement for methods not requiring state to speed things up a bit
     if (request.method === 'ping') {
       logger.log('pong');
       return 'pong';
@@ -120,16 +117,12 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
     }
     // pre-inserted the default networks and tokens
     await upsertNetwork(STARKNET_MAINNET_NETWORK, snap, saveMutex, state);
-    if (isDev) {
-      await upsertNetwork(STARKNET_INTEGRATION_NETWORK, snap, saveMutex, state);
-    } else {
-      await upsertNetwork(
-        STARKNET_SEPOLIA_TESTNET_NETWORK,
-        snap,
-        saveMutex,
-        state,
-      );
-    }
+    await upsertNetwork(
+      STARKNET_SEPOLIA_TESTNET_NETWORK,
+      snap,
+      saveMutex,
+      state,
+    );
 
     // remove the testnet network (migration)
     await removeNetwork(STARKNET_TESTNET_NETWORK, snap, saveMutex, state);
@@ -148,11 +141,13 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
     switch (request.method) {
       case 'starkNet_createAccount':
         apiParams.keyDeriver = await getAddressKeyDeriver(snap);
-        return createAccount(apiParams as unknown as ApiParamsWithKeyDeriver);
+        return await createAccount(
+          apiParams as unknown as ApiParamsWithKeyDeriver,
+        );
 
       case 'starkNet_createAccountLegacy':
         apiParams.keyDeriver = await getAddressKeyDeriver(snap);
-        return createAccount(
+        return await createAccount(
           apiParams as unknown as ApiParamsWithKeyDeriver,
           false,
           true,
@@ -292,7 +287,16 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
         throw new Error('Method not found.');
     }
   } catch (error) {
-    throw new InternalError(error) as unknown as Error;
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+    logger.error(`Error: ${error}`);
+    // We don't want to expose the error message to the user when it is a production build
+    if (logger.getLogLevel() === LogLevel.OFF) {
+      throw new SnapError(
+        'Unable to execute the rpc request',
+      ) as unknown as Error;
+    } else {
+      throw new SnapError(error.message) as unknown as Error;
+    }
   }
 };
 
@@ -395,6 +399,10 @@ export const onHomePage: OnHomePageHandler = async () => {
       content: panel(panelItems),
     };
   } catch (error) {
-    throw new InternalError(error) as unknown as Error;
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+    logger.error(`Error: ${error}`);
+    throw new SnapError(
+      'Unable to initialize Snap HomePage',
+    ) as unknown as Error;
   }
 };

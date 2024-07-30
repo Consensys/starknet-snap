@@ -60,6 +60,7 @@ import {
   CAIRO_VERSION_LEGACY,
   ETHER_MAINNET,
   ETHER_SEPOLIA_TESTNET,
+  BlockIdentifierEnum,
 } from './constants';
 import { DeployRequiredError, UpgradeRequiredError } from './exceptions';
 import { hexToString } from './formatterUtils';
@@ -139,6 +140,7 @@ export const callContract = async (
   contractAddress: string,
   contractFuncName: string,
   contractCallData: RawCalldata = [],
+  blockIdentifier: BlockIdentifierEnum = BlockIdentifierEnum.Latest,
 ): Promise<CallContractResponse> => {
   const provider = getProvider(network);
   return provider.callContract(
@@ -147,7 +149,7 @@ export const callContract = async (
       entrypoint: contractFuncName,
       calldata: contractCallData,
     },
-    'latest',
+    blockIdentifier,
   );
 };
 
@@ -182,7 +184,7 @@ export const declareContract = async (
   ).declare(contractPayload, {
     ...invocationsDetails,
     skipValidate: false,
-    blockIdentifier: 'latest',
+    blockIdentifier: BlockIdentifierEnum.Latest,
   });
 };
 
@@ -223,7 +225,7 @@ export const estimateFee = async (
     ...invocationsDetails,
     nonce,
     skipValidate: false,
-    blockIdentifier: 'latest',
+    blockIdentifier: BlockIdentifierEnum.Latest,
   });
 };
 
@@ -249,7 +251,7 @@ export const estimateFeeBulk = async (
     ...invocationsDetails,
     nonce,
     skipValidate: false,
-    blockIdentifier: 'latest',
+    blockIdentifier: BlockIdentifierEnum.Latest,
   });
 };
 
@@ -270,7 +272,7 @@ export const executeTxn = async (
   ).execute(txnInvocation, abis, {
     ...invocationsDetails,
     skipValidate: false,
-    blockIdentifier: 'latest',
+    blockIdentifier: BlockIdentifierEnum.Latest,
   });
 };
 
@@ -299,7 +301,7 @@ export const deployAccount = async (
   ).deployAccount(deployAccountPayload, {
     ...invocationsDetails,
     skipValidate: false,
-    blockIdentifier: 'latest',
+    blockIdentifier: BlockIdentifierEnum.Latest,
   });
 };
 
@@ -328,7 +330,7 @@ export const estimateAccountDeployFee = async (
   ).estimateAccountDeployFee(deployAccountPayload, {
     ...invocationsDetails,
     skipValidate: false,
-    blockIdentifier: 'latest',
+    blockIdentifier: BlockIdentifierEnum.Latest,
   });
 };
 
@@ -370,10 +372,15 @@ export const getBalance = async (
   address: string,
   tokenAddress: string,
   network: Network,
+  blockIdentifier: BlockIdentifierEnum = BlockIdentifierEnum.Latest,
 ) => {
-  const resp = await callContract(network, tokenAddress, 'balanceOf', [
-    numUtils.toBigInt(address).toString(10),
-  ]);
+  const resp = await callContract(
+    network,
+    tokenAddress,
+    'balanceOf',
+    [numUtils.toBigInt(address).toString(10)],
+    blockIdentifier,
+  );
   return resp[0];
 };
 

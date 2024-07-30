@@ -94,4 +94,5 @@ export type Transaction = {
   eventIds: string[];
   timestamp: number;
 };
+
 /* eslint-disable */
