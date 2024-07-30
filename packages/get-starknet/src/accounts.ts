@@ -36,10 +36,13 @@ export class MetaMaskAccount extends Account {
 
   async execute(
     calls: AllowArray<Call>,
-    abis?: Abi[] | undefined,
+    abisOrTransactionsDetail?: Abi[] | InvocationsDetails,
     transactionsDetail?: InvocationsDetails,
   ): Promise<InvokeFunctionResponse> {
-    return this.#snap.execute(this.#address, calls, abis, transactionsDetail);
+    if (!transactionsDetail) {
+      return this.#snap.execute(this.#address, calls, undefined, abisOrTransactionsDetail as InvocationsDetails);
+    }
+    return this.#snap.execute(this.#address, calls, abisOrTransactionsDetail as Abi[], transactionsDetail);
   }
 
   async signMessage(typedData: TypedData): Promise<Signature> {

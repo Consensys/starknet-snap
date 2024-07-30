@@ -117,8 +117,9 @@ export const UpgradeModelView = ({ address }: Props) => {
               {shortenAddress(txnHash)}{' '}
             </Txnlink>
             <br />
-            Unfortunately, you reached the maximum number of upgrade tentatives
-            allowed.
+            Your upgrade transaction is still pending and has reached the
+            maximum retry limit for status checks. Please wait for the
+            transaction to complete.
             <br />
             <br />
             Please try again in a couple of hours.

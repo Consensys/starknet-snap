@@ -1,6 +1,8 @@
 import chai, { expect } from 'chai';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
+import { SnapError } from '@metamask/snaps-sdk';
+
 import { WalletMock } from '../wallet.mock.test';
 import { getBip44EntropyStub, account1 } from '../constants.test';
 import { SnapState } from '../../src/types/snapState';
@@ -11,12 +13,113 @@ import {
   STARKNET_SEPOLIA_TESTNET_NETWORK,
 } from '../../src/utils/constants';
 import * as starknetUtils from '../../src/utils/starknetUtils';
-import { onHomePage } from '../../src';
+import * as createAccountApi from '../../src/createAccount';
+import * as keyPairUtils from '../../src/utils/keyPair';
+import * as logger from '../../src/utils/logger';
+import { onHomePage, onRpcRequest } from '../../src';
 
 chai.use(sinonChai);
 const sandbox = sinon.createSandbox();
 
-describe('Test function: onHomePage', function () {
+describe('onRpcRequest', function () {
+  const walletStub = new WalletMock();
+
+  const mockSnap = () => {
+    const globalAny: any = global;
+    globalAny.snap = walletStub;
+  };
+
+  afterEach(function () {
+    walletStub.reset();
+    sandbox.restore();
+    // Temp solution: Switch off logger after each test
+    logger.logger.init('off');
+  });
+
+  it('processes request successfully', async function () {
+    mockSnap();
+    const createAccountSpy = sandbox.stub(createAccountApi, 'createAccount');
+    const keyPairSpy = sandbox.stub(keyPairUtils, 'getAddressKeyDeriver');
+
+    createAccountSpy.resolvesThis();
+    keyPairSpy.resolvesThis();
+
+    await onRpcRequest({
+      origin: 'http://localhost:3000',
+      request: {
+        method: 'starkNet_createAccount',
+        params: [],
+        jsonrpc: '2.0',
+        id: 1,
+      },
+    });
+
+    expect(keyPairSpy).to.have.been.calledOnce;
+    expect(createAccountSpy).to.have.been.calledOnce;
+  });
+
+  it('throws `Unable to execute the rpc request` error if an error has thrown and `LogLevel` is `OFF`', async function () {
+    mockSnap();
+    const createAccountSpy = sandbox.stub(createAccountApi, 'createAccount');
+    const keyPairSpy = sandbox.stub(keyPairUtils, 'getAddressKeyDeriver');
+
+    createAccountSpy.rejects(new Error('Custom Error'));
+    keyPairSpy.resolvesThis();
+
+    let expectedError;
+
+    try {
+      await onRpcRequest({
+        origin: 'http://localhost:3000',
+        request: {
+          method: 'starkNet_createAccount',
+          params: [],
+          jsonrpc: '2.0',
+          id: 1,
+        },
+      });
+    } catch (error) {
+      expectedError = error;
+    } finally {
+      expect(expectedError).to.be.instanceOf(SnapError);
+      expect(expectedError.message).to.equal(
+        'Unable to execute the rpc request',
+      );
+    }
+  });
+
+  it('does not hide the error message if an error is thrown and `LogLevel` is not `OFF`', async function () {
+    mockSnap();
+    const createAccountSpy = sandbox.stub(createAccountApi, 'createAccount');
+    const keyPairSpy = sandbox.stub(keyPairUtils, 'getAddressKeyDeriver');
+
+    createAccountSpy.rejects(new Error('Custom Error'));
+    keyPairSpy.resolvesThis();
+
+    let expectedError;
+
+    try {
+      await onRpcRequest({
+        origin: 'http://localhost:3000',
+        request: {
+          method: 'starkNet_createAccount',
+          params: {
+            debugLevel: 'DEBUG',
+          },
+          jsonrpc: '2.0',
+          id: 1,
+        },
+      });
+    } catch (error) {
+      expectedError = error;
+    } finally {
+      expect(expectedError).to.be.instanceOf(SnapError);
+      expect(expectedError.message).to.equal('Custom Error');
+    }
+  });
+});
+
+describe('onHomePage', function () {
   const walletStub = new WalletMock();
   // eslint-disable-next-line no-restricted-globals, @typescript-eslint/no-explicit-any
   const globalAny: any = global;
@@ -152,14 +255,15 @@ describe('Test function: onHomePage', function () {
     });
   });
 
-  it('throws error when state not found', async function () {
+  it('throws `Unable to initialize Snap HomePage` error when state not found', async function () {
     let error;
     try {
       await onHomePage();
     } catch (err) {
       error = err;
     } finally {
-      expect(error).to.be.an('error');
+      expect(error).to.be.instanceOf(SnapError);
+      expect(error.message).to.equal('Unable to initialize Snap HomePage');
     }
   });
 });
