@@ -41,7 +41,7 @@ import {
 
 import type { RpcV4GetTransactionReceiptResponse } from '../types/snapApi';
 import type { Network, SnapState, Transaction } from '../types/snapState';
-import { TransactionType } from '../types/snapState';
+import { BlockIdentifierEnum, TransactionType } from '../types/snapState';
 import type {
   TransactionResponse,
   TransactionStatuses,
@@ -345,14 +345,14 @@ export const getBalance = async (
   address: string,
   tokenAddress: string,
   network: Network,
-  blockIdentifier: BlockIdentifier = 'latest',
+  blockIdentifier: BlockIdentifierEnum = BlockIdentifierEnum.LATEST,
 ) => {
   const resp = await callContract(
     network,
     tokenAddress,
     'balanceOf',
     [numUtils.toBigInt(address).toString(10)],
-    blockIdentifier,
+    blockIdentifier as BlockIdentifier,
   );
   return resp[0];
 };

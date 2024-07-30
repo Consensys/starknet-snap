@@ -94,4 +94,9 @@ export type Transaction = {
   eventIds: string[];
   timestamp: number;
 };
+
+export enum BlockIdentifierEnum {
+  LATEST = 'latest',
+  PENDING = 'pending',
+}
 /* eslint-disable */

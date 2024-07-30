@@ -2,6 +2,7 @@ import type {
   ApiParams,
   GetErc20TokenBalanceRequestParams,
 } from './types/snapApi';
+import { BlockIdentifierEnum } from './types/snapState';
 import { logger } from './utils/logger';
 import { toJson } from './utils/serializer';
 import { getNetworkFromChainId } from './utils/snapUtils';
@@ -52,9 +53,11 @@ export async function getErc20TokenBalance(params: ApiParams) {
       `getErc20Balance:\nerc20Address: ${erc20Address}\nuserAddress: ${userAddress}`,
     );
 
+    // Use LATEST block for non-deployed accounts to avoid showing non-zero balances
+    // from pending transactions, as deployment requires a confirmed non-zero balance.
     const blockIdentifier = (await isAccountDeployed(network, userAddress))
-      ? 'pending'
-      : 'latest';
+      ? BlockIdentifierEnum.PENDING
+      : BlockIdentifierEnum.LATEST;
     const balance = await getBalance(
       userAddress,
       erc20Address,
