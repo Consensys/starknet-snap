@@ -21,7 +21,6 @@ import type {
   ProviderInterface,
   GetTransactionReceiptResponse,
   BigNumberish,
-  BlockIdentifier,
 } from 'starknet';
 import {
   ec,
@@ -41,7 +40,7 @@ import {
 
 import type { RpcV4GetTransactionReceiptResponse } from '../types/snapApi';
 import type { Network, SnapState, Transaction } from '../types/snapState';
-import { BlockIdentifierEnum, TransactionType } from '../types/snapState';
+import { TransactionType } from '../types/snapState';
 import type {
   TransactionResponse,
   TransactionStatuses,
@@ -61,6 +60,7 @@ import {
   CAIRO_VERSION_LEGACY,
   ETHER_MAINNET,
   ETHER_SEPOLIA_TESTNET,
+  BlockIdentifierEnum,
 } from './constants';
 import { DeployRequiredError, UpgradeRequiredError } from './exceptions';
 import { hexToString } from './formatterUtils';
@@ -140,7 +140,7 @@ export const callContract = async (
   contractAddress: string,
   contractFuncName: string,
   contractCallData: RawCalldata = [],
-  blockIdentifier: BlockIdentifier = 'latest',
+  blockIdentifier: BlockIdentifierEnum = BlockIdentifierEnum.Latest,
 ): Promise<CallContractResponse> => {
   const provider = getProvider(network);
   return provider.callContract(
@@ -184,7 +184,7 @@ export const declareContract = async (
   ).declare(contractPayload, {
     ...invocationsDetails,
     skipValidate: false,
-    blockIdentifier: 'latest',
+    blockIdentifier: BlockIdentifierEnum.Latest,
   });
 };
 
@@ -204,7 +204,7 @@ export const estimateFee = async (
   ).estimateInvokeFee(txnInvocation, {
     ...invocationsDetails,
     skipValidate: false,
-    blockIdentifier: 'latest',
+    blockIdentifier: BlockIdentifierEnum.Latest,
   });
 };
 
@@ -224,7 +224,7 @@ export const estimateFeeBulk = async (
   ).estimateFeeBulk(txnInvocation, {
     ...invocationsDetails,
     skipValidate: false,
-    blockIdentifier: 'latest',
+    blockIdentifier: BlockIdentifierEnum.Latest,
   });
 };
 
@@ -245,7 +245,7 @@ export const executeTxn = async (
   ).execute(txnInvocation, abis, {
     ...invocationsDetails,
     skipValidate: false,
-    blockIdentifier: 'latest',
+    blockIdentifier: BlockIdentifierEnum.Latest,
   });
 };
 
@@ -274,7 +274,7 @@ export const deployAccount = async (
   ).deployAccount(deployAccountPayload, {
     ...invocationsDetails,
     skipValidate: false,
-    blockIdentifier: 'latest',
+    blockIdentifier: BlockIdentifierEnum.Latest,
   });
 };
 
@@ -303,7 +303,7 @@ export const estimateAccountDeployFee = async (
   ).estimateAccountDeployFee(deployAccountPayload, {
     ...invocationsDetails,
     skipValidate: false,
-    blockIdentifier: 'latest',
+    blockIdentifier: BlockIdentifierEnum.Latest,
   });
 };
 
@@ -345,14 +345,14 @@ export const getBalance = async (
   address: string,
   tokenAddress: string,
   network: Network,
-  blockIdentifier: BlockIdentifierEnum = BlockIdentifierEnum.LATEST,
+  blockIdentifier: BlockIdentifierEnum = BlockIdentifierEnum.Latest,
 ) => {
   const resp = await callContract(
     network,
     tokenAddress,
     'balanceOf',
     [numUtils.toBigInt(address).toString(10)],
-    blockIdentifier as BlockIdentifier,
+    blockIdentifier,
   );
   return resp[0];
 };

@@ -95,8 +95,4 @@ export type Transaction = {
   timestamp: number;
 };
 
-export enum BlockIdentifierEnum {
-  LATEST = 'latest',
-  PENDING = 'pending',
-}
 /* eslint-disable */

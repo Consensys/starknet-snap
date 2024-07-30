@@ -4,8 +4,11 @@ import sinonChai from 'sinon-chai';
 import { WalletMock } from '../wallet.mock.test';
 import * as utils from '../../src/utils/starknetUtils';
 import { getErc20TokenBalance } from '../../src/getErc20TokenBalance';
-import { BlockIdentifierEnum, SnapState } from '../../src/types/snapState';
-import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../../src/utils/constants';
+import { SnapState } from '../../src/types/snapState';
+import {
+  BlockIdentifierEnum,
+  STARKNET_SEPOLIA_TESTNET_NETWORK,
+} from '../../src/utils/constants';
 import { Mutex } from 'async-mutex';
 import {
   ApiParams,
@@ -55,7 +58,7 @@ describe('Test function: getErc20TokenBalance', function () {
       requestObject.userAddress,
       requestObject.tokenAddress,
       state.networks[0],
-      BlockIdentifierEnum.PENDING,
+      BlockIdentifierEnum.Pending,
     );
   });
 
@@ -79,7 +82,7 @@ describe('Test function: getErc20TokenBalance', function () {
       requestObject.userAddress,
       requestObject.tokenAddress,
       state.networks[0],
-      BlockIdentifierEnum.LATEST,
+      BlockIdentifierEnum.Latest,
     );
   });
 
