@@ -42,7 +42,7 @@ describe('onRpcRequest', function () {
     expect(createAccountSpy).toHaveBeenCalledTimes(1);
   });
 
-  it('throws `Unable to execute the rpc request` error if an error has thrown and `LogLevel` is `OFF`', async function () {
+  it('throws `Unable to execute the rpc request` error if an error has thrown and LogLevel is 0', async function () {
     const { createAccountSpy, keyPairSpy, getLogLevelSpy } = createMockSpy();
 
     createAccountSpy.mockRejectedValue(new Error('Custom Error'));
