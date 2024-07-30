@@ -211,8 +211,9 @@ export const estimateFee = async (
   cairoVersion?: CairoVersion,
   invocationsDetails?: UniversalDetails,
 ): Promise<EstimateFee> => {
-  // Use nonce from invocationsDetails or get it from the account nonce on the latest accepted block to avoid issues with pending transactions.
-  // as estimating fees on the pending block can fail if there are already transactions in the pending state.
+  // Although estimateInvokeFee will get the nonce automatically, but it will using the pending blockIdentifier as default. Therefore it will fail if there are transactions in the pending state
+  // To unblock the issue, either caller pass in the nonce at invocationsDetails or we get the latest accepted block
+
   const nonce =
     invocationsDetails?.nonce ??
     (await getAccountNonceOnLatest(network, senderAddress, privateKey));
