@@ -112,11 +112,14 @@ export const getCallDataArray = (callDataStr: string): string[] => {
     .filter((data) => data.length > 0);
 };
 
-export const getProvider = (network: Network): ProviderInterface => {
+export const getProvider = (network: Network, blockIdentifier?: BlockIdentifierEnum): ProviderInterface => {
   let providerParam: ProviderOptions = {};
   providerParam = {
     nodeUrl: getRPCUrl(network.chainId),
   };
+  if (blockIdentifier) {
+    providerParam.blockIdentifier = blockIdentifier
+  }
   return new Provider(providerParam);
 };
 
@@ -125,8 +128,9 @@ export const getAccountInstance = (
   userAddress: string,
   privateKey: string | Uint8Array,
   cairoVersion?: CairoVersion,
+  blockIdentifier?: BlockIdentifierEnum,
 ): Account => {
-  const provider = getProvider(network);
+  const provider = getProvider(network, blockIdentifier);
   return new Account(
     provider,
     userAddress,
@@ -188,21 +192,6 @@ export const declareContract = async (
   });
 };
 
-export const getAccountNonceOnLatest = async (
-  network: Network,
-  senderAddress: string,
-  privateKey: string | Uint8Array,
-  cairoVersion?: CairoVersion,
-): Promise<BigNumberish> => {
-  const nonceString = await getAccountInstance(
-    network,
-    senderAddress,
-    privateKey,
-    cairoVersion,
-  ).getNonce(BlockIdentifierEnum.Latest);
-  return parseInt(nonceString.toLowerCase(), 16);
-};
-
 export const estimateFee = async (
   network: Network,
   senderAddress: string,
@@ -211,20 +200,16 @@ export const estimateFee = async (
   cairoVersion?: CairoVersion,
   invocationsDetails?: UniversalDetails,
 ): Promise<EstimateFee> => {
-  // Although estimateInvokeFee will get the nonce automatically, but it will using the pending blockIdentifier as default. Therefore it will fail if there are transactions in the pending state
-  // To unblock the issue, either caller pass in the nonce at invocationsDetails or we get the latest accepted block
-
-  const nonce =
-    invocationsDetails?.nonce ??
-    (await getAccountNonceOnLatest(network, senderAddress, privateKey));
+  // We force block identifier to latest to avoid issues estimating fees on 
+  // the pending block, that can fail if there are already transactions in the pending state.
   return await getAccountInstance(
     network,
     senderAddress,
     privateKey,
     cairoVersion,
+    BlockIdentifierEnum.Latest,
   ).estimateInvokeFee(txnInvocation, {
     ...invocationsDetails,
-    nonce,
     skipValidate: false,
     blockIdentifier: BlockIdentifierEnum.Latest,
   });
@@ -238,19 +223,16 @@ export const estimateFeeBulk = async (
   invocationsDetails?: UniversalDetails,
   cairoVersion?: CairoVersion,
 ): Promise<EstimateFee[]> => {
-  // Use nonce from invocationsDetails or get it from the account nonce on the latest accepted block to avoid issues with pending transactions.
-  // as estimating fees on the pending block can fail if there are already transactions in the pending state.
-  const nonce =
-    invocationsDetails?.nonce ??
-    (await getAccountNonceOnLatest(network, senderAddress, privateKey));
+  // We force block identifier to latest to avoid issues estimating fees on 
+  // the pending block, that can fail if there are already transactions in the pending state.
   return await getAccountInstance(
     network,
     senderAddress,
     privateKey,
     cairoVersion,
+    BlockIdentifierEnum.Latest,
   ).estimateFeeBulk(txnInvocation, {
     ...invocationsDetails,
-    nonce,
     skipValidate: false,
     blockIdentifier: BlockIdentifierEnum.Latest,
   });
