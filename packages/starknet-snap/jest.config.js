@@ -9,6 +9,7 @@ module.exports = {
   verbose: true,
   testPathIgnorePatterns: ['/node_modules/', '/__mocks__/'],
   testMatch: ['<rootDir>/src/**/?(*.)+(spec|test).[tj]s?(x)'],
+  // Switch off the collectCoverage until jest replace mocha
   collectCoverage: false,
   // An array of glob patterns indicating a set of files for which coverage information should be collected
   collectCoverageFrom: [
@@ -28,7 +29,6 @@ module.exports = {
   coverageDirectory: 'coverage',
   // Indicates which provider should be used to instrument code for coverage
   coverageProvider: 'babel',
-
   // A list of reporter names that Jest uses when writing coverage reports
   coverageReporters: ['html', 'json-summary', 'text'],
 };
