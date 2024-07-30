@@ -209,10 +209,11 @@ export const estimateFee = async (
   cairoVersion?: CairoVersion,
   invocationsDetails?: UniversalDetails,
 ): Promise<EstimateFee> => {
-  let nonce = invocationsDetails?.nonce;
-  if (!nonce) {
-    nonce = await getAccountNonceOnLatest(network, senderAddress, privateKey);
-  }
+  // Use nonce from invocationsDetails or get it from the account nonce on the latest accepted block to avoid issues with pending transactions.
+  // as estimating fees on the pending block can fail if there are already transactions in the pending state.
+  const nonce =
+    invocationsDetails?.nonce ??
+    (await getAccountNonceOnLatest(network, senderAddress, privateKey));
   return await getAccountInstance(
     network,
     senderAddress,
@@ -234,10 +235,11 @@ export const estimateFeeBulk = async (
   invocationsDetails?: UniversalDetails,
   cairoVersion?: CairoVersion,
 ): Promise<EstimateFee[]> => {
-  let nonce = invocationsDetails?.nonce;
-  if (!nonce) {
-    nonce = await getAccountNonceOnLatest(network, senderAddress, privateKey);
-  }
+  // Use nonce from invocationsDetails or get it from the account nonce on the latest accepted block to avoid issues with pending transactions.
+  // as estimating fees on the pending block can fail if there are already transactions in the pending state.
+  const nonce =
+    invocationsDetails?.nonce ??
+    (await getAccountNonceOnLatest(network, senderAddress, privateKey));
   return await getAccountInstance(
     network,
     senderAddress,
