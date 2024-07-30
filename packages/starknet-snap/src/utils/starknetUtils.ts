@@ -199,7 +199,7 @@ export const getAccountNonceOnLatest = async (
     senderAddress,
     privateKey,
     cairoVersion,
-  ).getNonce('latest');
+  ).getNonce(BlockIdentifierEnum.Latest);
   return parseInt(nonceString.toLowerCase(), 16);
 };
 
