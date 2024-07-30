@@ -53,8 +53,10 @@ export async function getErc20TokenBalance(params: ApiParams) {
       `getErc20Balance:\nerc20Address: ${erc20Address}\nuserAddress: ${userAddress}`,
     );
 
-    // Use LATEST block for non-deployed accounts to avoid showing non-zero balances
-    // from pending transactions, as deployment requires a confirmed non-zero balance.
+    // For deployed accounts, use the PENDING block to show balance updates as soon as possible,
+    // facilitating concurrent transactions without delays.
+    // For non-deployed accounts, use the LATEST block to avoid displaying non-zero balances
+    // from pending transactions, because confirmed non-zero balance is required for deployment.
     const blockIdentifier = (await isAccountDeployed(network, userAddress))
       ? BlockIdentifierEnum.Pending
       : BlockIdentifierEnum.Latest;
