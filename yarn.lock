@@ -2066,7 +2066,7 @@ __metadata:
     prettier: ^2.7.1
     rimraf: ^3.0.2
     serve: 14.2.1
-    starknet: ^6.11.0
+    starknet: 6.11.0
     ts-loader: ^9.5.1
     typescript: ^4.6.3
     webpack: ^5.91.0
@@ -2077,7 +2077,7 @@ __metadata:
 
 "@consensys/starknet-snap@file:../starknet-snap::locator=wallet-ui%40workspace%3Apackages%2Fwallet-ui":
   version: 2.9.0
-  resolution: "@consensys/starknet-snap@file:../starknet-snap#../starknet-snap::hash=77e692&locator=wallet-ui%40workspace%3Apackages%2Fwallet-ui"
+  resolution: "@consensys/starknet-snap@file:../starknet-snap#../starknet-snap::hash=53fbce&locator=wallet-ui%40workspace%3Apackages%2Fwallet-ui"
   dependencies:
     "@metamask/key-tree": 9.0.0
     "@metamask/snaps-sdk": ^4.0.0
@@ -2086,7 +2086,7 @@ __metadata:
     ethers: ^5.5.1
     starknet: 6.11.0
     starknet_v4.22.0: "npm:starknet@4.22.0"
-  checksum: e7113b81b09c23ee0ace9df98f3be1a16d77f9f552bb6f31e37b404dcdfde1eab19f9222c0e6093e9dadbb7821c842af0151a156c9245406dc1323419cdbc69f
+  checksum: 7983ea41668ddeba8733dd5bc53bfdd97cc3ad44b619c70d13a13466c2974894454befb26e7bb11adae3df723a51264d5ff9db14362ac0c0fe2b588b5535b2a7
   languageName: node
   linkType: hard
 
@@ -24344,7 +24344,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"starknet@npm:6.11.0, starknet@npm:^6.11.0":
+"starknet@npm:6.11.0":
   version: 6.11.0
   resolution: "starknet@npm:6.11.0"
   dependencies:
@@ -26665,7 +26665,7 @@ __metadata:
     redux-persist: ^6.0.0
     rimraf: ^3.0.2
     semver: ^7.5.2
-    starknet: ^6.11.0
+    starknet: 6.11.0
     styled-components: ^5.3.5
     toastr2: ^3.0.0-alpha.18
     typescript: ^4.7.4

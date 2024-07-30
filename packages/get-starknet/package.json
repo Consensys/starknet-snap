@@ -53,6 +53,6 @@
     "registry": "https://registry.npmjs.org/"
   },
   "dependencies": {
-    "starknet": "^6.11.0"
+    "starknet": "6.11.0"
   }
 }
