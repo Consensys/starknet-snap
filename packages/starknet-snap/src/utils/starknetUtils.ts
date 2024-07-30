@@ -112,13 +112,16 @@ export const getCallDataArray = (callDataStr: string): string[] => {
     .filter((data) => data.length > 0);
 };
 
-export const getProvider = (network: Network, blockIdentifier?: BlockIdentifierEnum): ProviderInterface => {
+export const getProvider = (
+  network: Network,
+  blockIdentifier?: BlockIdentifierEnum,
+): ProviderInterface => {
   let providerParam: ProviderOptions = {};
   providerParam = {
     nodeUrl: getRPCUrl(network.chainId),
   };
   if (blockIdentifier) {
-    providerParam.blockIdentifier = blockIdentifier
+    providerParam.blockIdentifier = blockIdentifier;
   }
   return new Provider(providerParam);
 };
@@ -200,7 +203,7 @@ export const estimateFee = async (
   cairoVersion?: CairoVersion,
   invocationsDetails?: UniversalDetails,
 ): Promise<EstimateFee> => {
-  // We force block identifier to latest to avoid issues estimating fees on 
+  // We force block identifier to latest to avoid issues estimating fees on
   // the pending block, that can fail if there are already transactions in the pending state.
   return await getAccountInstance(
     network,
@@ -223,7 +226,7 @@ export const estimateFeeBulk = async (
   invocationsDetails?: UniversalDetails,
   cairoVersion?: CairoVersion,
 ): Promise<EstimateFee[]> => {
-  // We force block identifier to latest to avoid issues estimating fees on 
+  // We force block identifier to latest to avoid issues estimating fees on
   // the pending block, that can fail if there are already transactions in the pending state.
   return await getAccountInstance(
     network,
