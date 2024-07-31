@@ -2216,7 +2216,7 @@ __metadata:
 
 "@consensys/starknet-snap@file:../starknet-snap::locator=wallet-ui%40workspace%3Apackages%2Fwallet-ui":
   version: 2.9.0
-  resolution: "@consensys/starknet-snap@file:../starknet-snap#../starknet-snap::hash=bdb700&locator=wallet-ui%40workspace%3Apackages%2Fwallet-ui"
+  resolution: "@consensys/starknet-snap@file:../starknet-snap#../starknet-snap::hash=005785&locator=wallet-ui%40workspace%3Apackages%2Fwallet-ui"
   dependencies:
     "@metamask/key-tree": 9.0.0
     "@metamask/snaps-sdk": ^4.0.0
@@ -2225,7 +2225,8 @@ __metadata:
     ethers: ^5.5.1
     starknet: 6.11.0
     starknet_v4.22.0: "npm:starknet@4.22.0"
-  checksum: f3c17dee4fca9fc6e7826279be325900be78e13207ee0fb6230d5d15091e6f9189f01972f17fff7f4ec15a6d86fb08c23fec5589c7ce1992fb0fefdfb2c085ce
+    superstruct: ^2.0.2
+  checksum: e4229e0f795d36f5dd85f138c723ae76ecf124a9eaea4f2ee2c1629ee8b01925a3135c51e5ac29ce8d5620f5383a383d829d0ef7540f873516a6641465a003fa
   languageName: node
   linkType: hard
 
@@ -14581,13 +14582,13 @@ __metadata:
   linkType: hard
 
 "fast-xml-parser@npm:^4.3.4":
-  version: 4.4.0
-  resolution: "fast-xml-parser@npm:4.4.0"
+  version: 4.4.1
+  resolution: "fast-xml-parser@npm:4.4.1"
   dependencies:
     strnum: ^1.0.5
   bin:
     fxparser: src/cli/cli.js
-  checksum: ad33a4b5165a0ffcb6e17ae78825bd4619a8298844a8a8408f2ea141a0d2d9439d18865dc5254162f09fe54d510ff18e5d5c0a190869cab21fc745ee66be816b
+  checksum: f440c01cd141b98789ae777503bcb6727393296094cc82924ae9f88a5b971baa4eec7e65306c7e07746534caa661fc83694ff437d9012dc84dee39dfbfaab947
   languageName: node
   linkType: hard
 
