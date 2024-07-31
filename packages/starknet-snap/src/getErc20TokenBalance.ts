@@ -6,11 +6,7 @@ import { BlockIdentifierEnum } from './utils/constants';
 import { logger } from './utils/logger';
 import { toJson } from './utils/serializer';
 import { getNetworkFromChainId } from './utils/snapUtils';
-import {
-  getBalance,
-  isAccountDeployed,
-  validateAndParseAddress,
-} from './utils/starknetUtils';
+import { getBalance, validateAndParseAddress } from './utils/starknetUtils';
 
 /**
  *
@@ -53,20 +49,30 @@ export async function getErc20TokenBalance(params: ApiParams) {
       `getErc20Balance:\nerc20Address: ${erc20Address}\nuserAddress: ${userAddress}`,
     );
 
-    // For deployed accounts, use the PENDING block to show balance updates as soon as possible,
-    // facilitating concurrent transactions without delays.
-    // For non-deployed accounts, use the LATEST block to avoid displaying non-zero balances
-    // from pending transactions, because confirmed non-zero balance is required for deployment.
-    const blockIdentifier = (await isAccountDeployed(network, userAddress))
-      ? BlockIdentifierEnum.Pending
-      : BlockIdentifierEnum.Latest;
-    const balance = await getBalance(
-      userAddress,
-      erc20Address,
-      network,
-      blockIdentifier,
+    // Always get both balance from pending and latest
+    // Always show the smallest balance of the two.
+    // If user is getting token it can't spend them until they are latest
+    // If user is sending token it can't spend them even if they are on pending.
+    const balanceLatest = BigInt(
+      await getBalance(
+        userAddress,
+        erc20Address,
+        network,
+        BlockIdentifierEnum.Latest,
+      ),
+    );
+    const balancePending = BigInt(
+      await getBalance(
+        userAddress,
+        erc20Address,
+        network,
+        BlockIdentifierEnum.Pending,
+      ),
     );
 
+    const balanceBigInt =
+      balancePending < balanceLatest ? balancePending : balanceLatest;
+    const balance = `0x${balanceBigInt.toString(16)}`;
     logger.log(`getErc20Balance:\nresp: ${toJson(balance)}`);
 
     return balance;
