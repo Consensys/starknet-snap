@@ -1,5 +1,6 @@
 import { BIP44CoinTypeNode } from '@metamask/key-tree';
 import { generateMnemonic } from 'bip39';
+import { generateBip44Entropy } from './utils';
 
 export type SnapProvider = {
   registerRpcMessageHandler: (fn) => unknown;
@@ -21,13 +22,7 @@ export class MockSnapProvider implements SnapProvider {
   /* eslint-disable */
 
   async getBip44Entropy() {
-    const mnemonic = generateMnemonic();
-    const node = await BIP44CoinTypeNode.fromDerivationPath([
-      `bip39:${mnemonic}`,
-      "bip32:44'",
-      "bip32:9004'",
-    ]);
-    return node;
+    return await generateBip44Entropy(generateMnemonic());
   }
 
   public readonly rpcSpys = {
