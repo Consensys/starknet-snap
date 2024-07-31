@@ -66,6 +66,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@babel/compat-data@npm:^7.25.2":
+  version: 7.25.2
+  resolution: "@babel/compat-data@npm:7.25.2"
+  checksum: b61bc9da7cfe249f19d08da00f4f0c20550cd9ad5bffcde787c2bf61a8a6fa5b66d92bbd89031f3a6e5495a799a2a2499f2947b6cc7964be41979377473ab132
+  languageName: node
+  linkType: hard
+
 "@babel/core@npm:7.12.9":
   version: 7.12.9
   resolution: "@babel/core@npm:7.12.9"
@@ -2205,7 +2212,7 @@ __metadata:
     prettier: ^2.7.1
     rimraf: ^3.0.2
     serve: 14.2.1
-    starknet: ^5.14.0
+    starknet: 6.11.0
     ts-loader: ^9.5.1
     typescript: ^4.6.3
     webpack: ^5.91.0
@@ -2216,7 +2223,7 @@ __metadata:
 
 "@consensys/starknet-snap@file:../starknet-snap::locator=wallet-ui%40workspace%3Apackages%2Fwallet-ui":
   version: 2.9.0
-  resolution: "@consensys/starknet-snap@file:../starknet-snap#../starknet-snap::hash=286d0b&locator=wallet-ui%40workspace%3Apackages%2Fwallet-ui"
+  resolution: "@consensys/starknet-snap@file:../starknet-snap#../starknet-snap::hash=4d9aa6&locator=wallet-ui%40workspace%3Apackages%2Fwallet-ui"
   dependencies:
     "@metamask/key-tree": 9.0.0
     "@metamask/snaps-sdk": ^4.0.0
@@ -2224,10 +2231,9 @@ __metadata:
     bip39: ^3.1.0
     ethereum-unit-converter: ^0.0.17
     ethers: ^5.5.1
-    hdkey: ^2.1.0
     starknet: 6.7.0
     starknet_v4.22.0: "npm:starknet@4.22.0"
-  checksum: 0e230ea1fdbae0cc4041c686806bdc1a046ed1bc2834fb0c26ab42ade18915337e7efeec834f46721b9a25f7687612e7f963e42df210e133256835617111599c
+  checksum: d8e8b23b3553a1c526205aa7ead79bbafa8274edd8c1a1624148bd6b126d002891816abc36c2639e5fbb02319fb58c97757773fdfb268524a8704d095df6ddf5
   languageName: node
   linkType: hard
 
@@ -2274,7 +2280,7 @@ __metadata:
     rimraf: ^3.0.2
     sinon: ^13.0.2
     sinon-chai: ^3.7.0
-    starknet: 6.7.0
+    starknet: 6.11.0
     starknet_v4.22.0: "npm:starknet@4.22.0"
     ts-jest: ^29.1.0
     ts-node: ^10.9.2
@@ -5016,7 +5022,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@noble/hashes@npm:1.4.0, @noble/hashes@npm:^1.0.0, @noble/hashes@npm:^1.1.2, @noble/hashes@npm:^1.2.0, @noble/hashes@npm:^1.3.1, @noble/hashes@npm:^1.3.2, @noble/hashes@npm:~1.4.0":
+"@noble/hashes@npm:1.4.0, @noble/hashes@npm:^1.0.0, @noble/hashes@npm:^1.1.2, @noble/hashes@npm:^1.3.1, @noble/hashes@npm:^1.3.2, @noble/hashes@npm:~1.4.0":
   version: 1.4.0
   resolution: "@noble/hashes@npm:1.4.0"
   checksum: 8ba816ae26c90764b8c42493eea383716396096c5f7ba6bea559993194f49d80a73c081f315f4c367e51bd2d5891700bcdfa816b421d24ab45b41cb03e4f3342
@@ -5357,48 +5363,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rometools/cli-darwin-arm64@npm:12.1.3":
-  version: 12.1.3
-  resolution: "@rometools/cli-darwin-arm64@npm:12.1.3"
-  conditions: os=darwin & cpu=arm64
-  languageName: node
-  linkType: hard
-
-"@rometools/cli-darwin-x64@npm:12.1.3":
-  version: 12.1.3
-  resolution: "@rometools/cli-darwin-x64@npm:12.1.3"
-  conditions: os=darwin & cpu=x64
-  languageName: node
-  linkType: hard
-
-"@rometools/cli-linux-arm64@npm:12.1.3":
-  version: 12.1.3
-  resolution: "@rometools/cli-linux-arm64@npm:12.1.3"
-  conditions: os=linux & cpu=arm64
-  languageName: node
-  linkType: hard
-
-"@rometools/cli-linux-x64@npm:12.1.3":
-  version: 12.1.3
-  resolution: "@rometools/cli-linux-x64@npm:12.1.3"
-  conditions: os=linux & cpu=x64
-  languageName: node
-  linkType: hard
-
-"@rometools/cli-win32-arm64@npm:12.1.3":
-  version: 12.1.3
-  resolution: "@rometools/cli-win32-arm64@npm:12.1.3"
-  conditions: os=win32 & cpu=arm64
-  languageName: node
-  linkType: hard
-
-"@rometools/cli-win32-x64@npm:12.1.3":
-  version: 12.1.3
-  resolution: "@rometools/cli-win32-x64@npm:12.1.3"
-  conditions: os=win32 & cpu=x64
-  languageName: node
-  linkType: hard
-
 "@rushstack/eslint-patch@npm:^1.1.0":
   version: 1.10.3
   resolution: "@rushstack/eslint-patch@npm:1.10.3"
@@ -5560,6 +5524,13 @@ __metadata:
     uri-js: ^4.4.1
     valid-url: ^1.0.9
   checksum: 99365956bd5e35127568e7ee69246cfc79cc26d83f6fbc5e3a9ed6f0693f7da6f2ee67cf8b93b65761da3c3ce8cc156858bab85e24b2eadd49ec8ae07cb8826e
+  languageName: node
+  linkType: hard
+
+"@starknet-io/types-js@npm:^0.7.7, starknet-types-07@npm:@starknet-io/types-js@^0.7.7":
+  version: 0.7.7
+  resolution: "@starknet-io/types-js@npm:0.7.7"
+  checksum: e5355042b06f96a19ee02a07cc12e321a636d0c7eaa605f85363775b036303a82896e6bcb2b244f97b125c83ae691f0fc162a5167e9866152a3b2108a9e28402
   languageName: node
   linkType: hard
 
@@ -8723,22 +8694,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"abi-wan-kanabi-v1@npm:abi-wan-kanabi@^1.0.3, abi-wan-kanabi@npm:^1.0.1":
-  version: 1.0.3
-  resolution: "abi-wan-kanabi@npm:1.0.3"
-  dependencies:
-    abi-wan-kanabi: ^1.0.1
-    fs-extra: ^10.0.0
-    rome: ^12.1.3
-    typescript: ^4.9.5
-    yargs: ^17.7.2
-  bin:
-    generate: dist/generate.js
-  checksum: 03b03c507424f239a7832e310ffbb35568448f0eebbe19e8caf56b03962ad6c047db8c84c3e7487d1ff9c97b0b00733ac9579c3cc640179d2eeacc5558316237
-  languageName: node
-  linkType: hard
-
-"abi-wan-kanabi-v2@npm:abi-wan-kanabi@^2.1.1, abi-wan-kanabi@npm:^2.2.2":
+"abi-wan-kanabi@npm:^2.2.2":
   version: 2.2.2
   resolution: "abi-wan-kanabi@npm:2.2.2"
   dependencies:
@@ -10503,49 +10459,6 @@ __metadata:
   bin:
     browserslist: cli.js
   checksum: 06189e2d6666a203ce097cc0e713a40477d08420927b79af139211e5712f3cf676fdc4dd6af3aa493d47c09206a344b3420a8315577dbe88c58903132de9b0f5
-  languageName: node
-  linkType: hard
-
-"browserslist@npm:^4.23.1":
-  version: 4.23.2
-  resolution: "browserslist@npm:4.23.2"
-  dependencies:
-    caniuse-lite: ^1.0.30001640
-    electron-to-chromium: ^1.4.820
-    node-releases: ^2.0.14
-    update-browserslist-db: ^1.1.0
-  bin:
-    browserslist: cli.js
-  checksum: 8212af37f6ca6355da191cf2d4ad49bd0b82854888b9a7e103638fada70d38cbe36d28feeeaa98344cb15d9128f9f74bcc8ce1bfc9011b5fd14381c1c6fb542c
-  languageName: node
-  linkType: hard
-
-"bs-logger@npm:0.x":
-  version: 0.2.6
-  resolution: "bs-logger@npm:0.2.6"
-  dependencies:
-    fast-json-stable-stringify: 2.x
-  checksum: d34bdaf68c64bd099ab97c3ea608c9ae7d3f5faa1178b3f3f345acd94e852e608b2d4f9103fb2e503f5e69780e98293df41691b84be909b41cf5045374d54606
-  languageName: node
-  linkType: hard
-
-"bs58@npm:^4.0.0":
-  version: 4.0.1
-  resolution: "bs58@npm:4.0.1"
-  dependencies:
-    base-x: ^3.0.2
-  checksum: b3c5365bb9e0c561e1a82f1a2d809a1a692059fae016be233a6127ad2f50a6b986467c3a50669ce4c18929dcccb297c5909314dd347a25a68c21b68eb3e95ac2
-  languageName: node
-  linkType: hard
-
-"bs58check@npm:^2.1.2":
-  version: 2.1.2
-  resolution: "bs58check@npm:2.1.2"
-  dependencies:
-    bs58: ^4.0.0
-    create-hash: ^1.1.0
-    safe-buffer: ^5.1.2
-  checksum: 43bdf08a5dd04581b78f040bc4169480e17008da482ffe2a6507327bbc4fc5c28de0501f7faf22901cfe57fbca79cbb202ca529003fedb4cb8dccd265b38e54d
   languageName: node
   linkType: hard
 
@@ -15352,6 +15265,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"get-starknet-core@npm:^4.0.0-next.3":
+  version: 4.0.0
+  resolution: "get-starknet-core@npm:4.0.0"
+  dependencies:
+    "@starknet-io/types-js": ^0.7.7
+  checksum: 06e4be1be945d8fb7ad3f0d77a5e92c2854ce43cae8091a9f9b5f3cc74d42cf7188de9e544d497f92c0cad316d6d0abc110520629987815be2aed26d0b9ab871
+  languageName: node
+  linkType: hard
+
 "get-stdin@npm:^4.0.1":
   version: 4.0.1
   resolution: "get-stdin@npm:4.0.1"
@@ -19261,13 +19183,6 @@ __metadata:
   bin:
     loose-envify: cli.js
   checksum: 6517e24e0cad87ec9888f500c5b5947032cdfe6ef65e1c1936a0c48a524b81e65542c9c3edc91c97d5bddc806ee2a985dbc79be89215d613b1de5db6d1cfe6f4
-  languageName: node
-  linkType: hard
-
-"lossless-json@npm:^2.0.8":
-  version: 2.0.11
-  resolution: "lossless-json@npm:2.0.11"
-  checksum: 0282cf40658c844c9c7983dad26b7134538ba30fd5a992c932790228e3c9131b48d2cc89d65b31ced247a4eeedf33676bf187849ba3635d659c7812f106b42a7
   languageName: node
   linkType: hard
 
@@ -24090,35 +24005,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rome@npm:^12.1.3":
-  version: 12.1.3
-  resolution: "rome@npm:12.1.3"
-  dependencies:
-    "@rometools/cli-darwin-arm64": 12.1.3
-    "@rometools/cli-darwin-x64": 12.1.3
-    "@rometools/cli-linux-arm64": 12.1.3
-    "@rometools/cli-linux-x64": 12.1.3
-    "@rometools/cli-win32-arm64": 12.1.3
-    "@rometools/cli-win32-x64": 12.1.3
-  dependenciesMeta:
-    "@rometools/cli-darwin-arm64":
-      optional: true
-    "@rometools/cli-darwin-x64":
-      optional: true
-    "@rometools/cli-linux-arm64":
-      optional: true
-    "@rometools/cli-linux-x64":
-      optional: true
-    "@rometools/cli-win32-arm64":
-      optional: true
-    "@rometools/cli-win32-x64":
-      optional: true
-  bin:
-    rome: bin/rome
-  checksum: 341e5520a23277bdc2571db279e72fe9427a95f4e3025cd215a989d381fe6690f6aa1c0fb9abbd318a8bfd85ff1cec2304e92b732329c8a46c69e259eeb080cc
-  languageName: node
-  linkType: hard
-
 "rsvp@npm:^4.8.4":
   version: 4.8.5
   resolution: "rsvp@npm:4.8.5"
@@ -25181,33 +25067,28 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"starknet-types@npm:^0.0.4":
-  version: 0.0.4
-  resolution: "starknet-types@npm:0.0.4"
-  checksum: a83d306830696ea875b8b07541db47e515a4ddb7bfce0cf5555cce12c8ce0e697b984762720c7f27761dc4114b4e5d3f81006e82fc45e52b052afe8fc86240fa
-  languageName: node
-  linkType: hard
-
-"starknet@npm:6.7.0":
-  version: 6.7.0
-  resolution: "starknet@npm:6.7.0"
+"starknet@npm:6.11.0":
+  version: 6.11.0
+  resolution: "starknet@npm:6.11.0"
   dependencies:
     "@noble/curves": ~1.4.0
+    "@noble/hashes": ^1.4.0
     "@scure/base": ~1.1.3
     "@scure/starknet": ~1.0.0
     abi-wan-kanabi: ^2.2.2
     fetch-cookie: ^3.0.0
+    get-starknet-core: ^4.0.0-next.3
     isomorphic-fetch: ^3.0.0
     lossless-json: ^4.0.1
     pako: ^2.0.4
-    starknet-types: ^0.0.4
+    starknet-types-07: "npm:@starknet-io/types-js@^0.7.7"
     ts-mixer: ^6.0.3
     url-join: ^4.0.1
-  checksum: 3c4abda7bab3008c8f98728c4b23a47a2dc97b876c6a33a824da77907b63611fde2df22298aa4c512e3c81e3fe005dd7e288969f18b00299e6eae450a147769d
+  checksum: 997c4a9efad53b0c25d0402c2dcd4e334b83865389ea29791f72ac757e0d9a216cf4634c6fbd5d33154e26389d499d39d893cf52302ec6b4eb9d7f04c034b579
   languageName: node
   linkType: hard
 
-"starknet@npm:^4.22.0, starknet_v4.22.0@npm:starknet@4.22.0":
+"starknet_v4.22.0@npm:starknet@4.22.0":
   version: 4.22.0
   resolution: "starknet@npm:4.22.0"
   dependencies:
@@ -25223,23 +25104,6 @@ __metadata:
     ts-custom-error: ^3.3.1
     url-join: ^4.0.1
   checksum: b30548120bca77168f5f5921e557b0b741348e8b7cbf86abd718bcea01e46ae408e51cc50a683ed2daa02041cd7804f3b75bd4d475e9e2db011d59c1f15a07de
-  languageName: node
-  linkType: hard
-
-"starknet@npm:^5.14.0":
-  version: 5.29.0
-  resolution: "starknet@npm:5.29.0"
-  dependencies:
-    "@noble/curves": ~1.3.0
-    "@scure/base": ~1.1.3
-    "@scure/starknet": ~1.0.0
-    abi-wan-kanabi-v1: "npm:abi-wan-kanabi@^1.0.3"
-    abi-wan-kanabi-v2: "npm:abi-wan-kanabi@^2.1.1"
-    isomorphic-fetch: ^3.0.0
-    lossless-json: ^2.0.8
-    pako: ^2.0.4
-    url-join: ^4.0.1
-  checksum: ea44bcc7f7db76ef878a557658e289bd25383b6fbcc9d59153dcf1bd0e014f41484fa5faa95e09ce0bd3c5933833fc867fb5be325f5b55ae1531a2cd29915594
   languageName: node
   linkType: hard
 
@@ -26818,7 +26682,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@npm:^4.6.3, typescript@npm:^4.7.4, typescript@npm:^4.9.5":
+"typescript@npm:^4.6.3, typescript@npm:^4.7.4":
   version: 4.9.5
   resolution: "typescript@npm:4.9.5"
   bin:
@@ -26838,7 +26702,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@^4.6.3#~builtin<compat/typescript>, typescript@patch:typescript@^4.7.4#~builtin<compat/typescript>, typescript@patch:typescript@^4.9.5#~builtin<compat/typescript>":
+"typescript@patch:typescript@^4.6.3#~builtin<compat/typescript>, typescript@patch:typescript@^4.7.4#~builtin<compat/typescript>":
   version: 4.9.5
   resolution: "typescript@patch:typescript@npm%3A4.9.5#~builtin<compat/typescript>::version=4.9.5&hash=7ad353"
   bin:
@@ -27575,7 +27439,7 @@ __metadata:
     redux-persist: ^6.0.0
     rimraf: ^3.0.2
     semver: ^7.5.2
-    starknet: ^4.22.0
+    starknet: 6.11.0
     styled-components: ^5.3.5
     toastr2: ^3.0.0-alpha.18
     typescript: ^4.7.4

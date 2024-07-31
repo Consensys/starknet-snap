@@ -71,15 +71,6 @@ export const STARKNET_SEPOLIA_TESTNET_NETWORK: Network = {
   accountClassHash: '', // from argent-x repo
 };
 
-export const STARKNET_INTEGRATION_NETWORK: Network = {
-  name: 'Goerli Integration',
-  chainId: constants.StarknetChainId.SN_GOERLI,
-  baseUrl: 'https://external.integration.starknet.io',
-  nodeUrl: '',
-  voyagerUrl: '',
-  accountClassHash: '',
-};
-
 export const ETHER_MAINNET: Erc20Token = {
   address: '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
   name: 'Ether',
@@ -182,7 +173,6 @@ export const PRELOADED_TOKENS = [
 export const PRELOADED_NETWORKS = [
   STARKNET_MAINNET_NETWORK,
   STARKNET_SEPOLIA_TESTNET_NETWORK,
-  STARKNET_INTEGRATION_NETWORK,
 ];
 
 export const PROXY_CONTRACT_HASH =
@@ -194,5 +184,7 @@ export const CAIRO_VERSION = '1';
 
 export const CAIRO_VERSION_LEGACY = '0';
 
-// Cairo 1 : 0x07874b73bbf01b78eafd0d96061d47aafc9c5c15bd58c290d7ddacdd10f1f84b
-// Cairo 0 : 0x07fffa2dd979c33b5fe6e3129bea0fcc9a7492e6404cae53a8d40c890c9512d3
+export enum BlockIdentifierEnum {
+  Latest = 'latest',
+  Pending = 'pending',
+}

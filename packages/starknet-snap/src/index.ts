@@ -55,7 +55,6 @@ import {
   ETHER_MAINNET,
   ETHER_SEPOLIA_TESTNET,
   PRELOADED_TOKENS,
-  STARKNET_INTEGRATION_NETWORK,
   STARKNET_MAINNET_NETWORK,
   STARKNET_SEPOLIA_TESTNET_NETWORK,
   STARKNET_TESTNET_NETWORK,
@@ -89,8 +88,6 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
   logger.log(`${request.method}:\nrequestParams: ${toJson(requestParams)}`);
 
   try {
-    const isDev = Boolean(requestParams?.isDev);
-
     if (request.method === 'ping') {
       logger.log('pong');
       return 'pong';
@@ -120,16 +117,12 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
     }
     // pre-inserted the default networks and tokens
     await upsertNetwork(STARKNET_MAINNET_NETWORK, snap, saveMutex, state);
-    if (isDev) {
-      await upsertNetwork(STARKNET_INTEGRATION_NETWORK, snap, saveMutex, state);
-    } else {
-      await upsertNetwork(
-        STARKNET_SEPOLIA_TESTNET_NETWORK,
-        snap,
-        saveMutex,
-        state,
-      );
-    }
+    await upsertNetwork(
+      STARKNET_SEPOLIA_TESTNET_NETWORK,
+      snap,
+      saveMutex,
+      state,
+    );
 
     // remove the testnet network (migration)
     await removeNetwork(STARKNET_TESTNET_NETWORK, snap, saveMutex, state);
