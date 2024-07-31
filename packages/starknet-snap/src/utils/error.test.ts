@@ -18,17 +18,7 @@ import {
   SnapError,
 } from '@metamask/snaps-sdk';
 
-import { CustomError, isSnapRpcError } from './error';
-
-describe('CustomError', () => {
-  it('creates a custom error', () => {
-    const customError = new CustomError('custom error message');
-    expect(customError).toBeInstanceOf(Error);
-    expect(customError).toBeInstanceOf(CustomError);
-    expect(customError.message).toBe('custom error message');
-    expect(customError.name).toBe('CustomError');
-  });
-});
+import { isSnapRpcError } from './error';
 
 describe('isSnapRpcError', () => {
   it('returns true for a Snap RPC error', () => {
