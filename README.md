@@ -5,13 +5,13 @@
 
 # Starknet Snap &middot; [![npm version](https://img.shields.io/npm/v/@consensys/starknet-snap.svg?style=flat)](https://www.npmjs.com/package/@consensys/starknet-snap)
 
-The Starknet snap allows developers to **deploy Starknet accounts, make transactions on Starknet, and interact with Starknet smart contracts.** It can be connected with any dapp to access Starknet and developers can experiment integrating their dapp with this snap today. 
+The Starknet snap allows users / developers to **deploy Starknet accounts, make transactions on Starknet, and interact with Starknet smart contracts.** It can be connected with any dapp to access Starknet and developers can experiment integrating their dapp with this snap today. 
 
 [Starknet Snap](https://snaps.metamask.io/snap/npm/consensys/starknet-snap)
 
 [Starknet Dapp](https://snaps.consensys.io/starknet)
 
-[Blog Post](https://consensys.io/blog/metamask/metamask-integrates-starkware-into-first-of-its-kind-zk-rollup-snap/)
+[Blog Post](https://consensys.io/blog/metamask-integrates-starkware-into-first-of-its-kind-zk-rollup-snap/)
 
 # Development
 ### Prerequisites

@@ -117,9 +117,7 @@ export class MetaMaskSnapWallet implements IStarknetWindowObject {
 
   async #getRPCProvider(network: { chainId: string; nodeUrl: string }) {
     return new Provider({
-      rpc: {
-        nodeUrl: network.nodeUrl,
-      },
+      nodeUrl: network.nodeUrl,
     });
   }
 
