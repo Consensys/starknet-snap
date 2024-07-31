@@ -41,6 +41,7 @@
     "@metamask/key-tree": "9.0.0",
     "@metamask/snaps-sdk": "^4.0.0",
     "async-mutex": "^0.3.2",
+    "bip39": "^3.1.0",
     "ethereum-unit-converter": "^0.0.17",
     "ethers": "^5.5.1",
     "starknet": "6.7.0",
