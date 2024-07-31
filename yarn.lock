@@ -2274,6 +2274,7 @@ __metadata:
     sinon-chai: ^3.7.0
     starknet: 6.11.0
     starknet_v4.22.0: "npm:starknet@4.22.0"
+    superstruct: ^2.0.2
     ts-jest: ^29.1.0
     ts-node: ^10.9.2
     typescript: ^4.7.4
@@ -25623,6 +25624,13 @@ __metadata:
   version: 1.0.4
   resolution: "superstruct@npm:1.0.4"
   checksum: 2e070994cc4998a753c3f0215449d6de01ffb8180e4f46527f559ffbc2ebcc40fcf428f545ccd355921ef2920db7d138a96258ae35c788e6c24b2aa8bb1695cb
+  languageName: node
+  linkType: hard
+
+"superstruct@npm:^2.0.2":
+  version: 2.0.2
+  resolution: "superstruct@npm:2.0.2"
+  checksum: a5f75b72cb8b14b86f4f7f750dae8c5ab0e4e1d92414b55e7625bae07bbcafad81c92486e7e32ccacd6ae1f553caff2b92a50ff42ad5093fd35b9cb7f4e5ec86
   languageName: node
   linkType: hard
 
