@@ -112,11 +112,17 @@ export const getCallDataArray = (callDataStr: string): string[] => {
     .filter((data) => data.length > 0);
 };
 
-export const getProvider = (network: Network): ProviderInterface => {
+export const getProvider = (
+  network: Network,
+  blockIdentifier?: BlockIdentifierEnum,
+): ProviderInterface => {
   let providerParam: ProviderOptions = {};
   providerParam = {
     nodeUrl: getRPCUrl(network.chainId),
   };
+  if (blockIdentifier) {
+    providerParam.blockIdentifier = blockIdentifier;
+  }
   return new Provider(providerParam);
 };
 
@@ -125,8 +131,9 @@ export const getAccountInstance = (
   userAddress: string,
   privateKey: string | Uint8Array,
   cairoVersion?: CairoVersion,
+  blockIdentifier?: BlockIdentifierEnum,
 ): Account => {
-  const provider = getProvider(network);
+  const provider = getProvider(network, blockIdentifier);
   return new Account(
     provider,
     userAddress,
@@ -196,11 +203,14 @@ export const estimateFee = async (
   cairoVersion?: CairoVersion,
   invocationsDetails?: UniversalDetails,
 ): Promise<EstimateFee> => {
-  return getAccountInstance(
+  // We force block identifier to latest to avoid issues estimating fees on
+  // the pending block, that can fail if there are already transactions in the pending state.
+  return await getAccountInstance(
     network,
     senderAddress,
     privateKey,
     cairoVersion,
+    BlockIdentifierEnum.Latest,
   ).estimateInvokeFee(txnInvocation, {
     ...invocationsDetails,
     skipValidate: false,
@@ -216,11 +226,14 @@ export const estimateFeeBulk = async (
   invocationsDetails?: UniversalDetails,
   cairoVersion?: CairoVersion,
 ): Promise<EstimateFee[]> => {
-  return getAccountInstance(
+  // We force block identifier to latest to avoid issues estimating fees on
+  // the pending block, that can fail if there are already transactions in the pending state.
+  return await getAccountInstance(
     network,
     senderAddress,
     privateKey,
     cairoVersion,
+    BlockIdentifierEnum.Latest,
   ).estimateFeeBulk(txnInvocation, {
     ...invocationsDetails,
     skipValidate: false,
