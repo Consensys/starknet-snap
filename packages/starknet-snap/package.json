@@ -44,7 +44,8 @@
     "ethereum-unit-converter": "^0.0.17",
     "ethers": "^5.5.1",
     "starknet": "6.11.0",
-    "starknet_v4.22.0": "npm:starknet@4.22.0"
+    "starknet_v4.22.0": "npm:starknet@4.22.0",
+    "superstruct": "^2.0.2"
   },
   "devDependencies": {
     "@babel/preset-typescript": "^7.23.3",
