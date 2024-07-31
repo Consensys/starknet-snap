@@ -60,6 +60,7 @@ import {
   CAIRO_VERSION_LEGACY,
   ETHER_MAINNET,
   ETHER_SEPOLIA_TESTNET,
+  TRANSACTION_VERSION,
   BlockIdentifierEnum,
 } from './constants';
 import { DeployRequiredError, UpgradeRequiredError } from './exceptions';
@@ -125,6 +126,9 @@ export const getAccountInstance = (
   userAddress: string,
   privateKey: string | Uint8Array,
   cairoVersion?: CairoVersion,
+  transactionVersion?:
+    | typeof constants.TRANSACTION_VERSION.V2
+    | typeof constants.TRANSACTION_VERSION.V3,
 ): Account => {
   const provider = getProvider(network);
   return new Account(
@@ -132,6 +136,7 @@ export const getAccountInstance = (
     userAddress,
     privateKey,
     cairoVersion ?? CAIRO_VERSION,
+    transactionVersion ?? TRANSACTION_VERSION,
   );
 };
 
@@ -193,6 +198,9 @@ export const estimateFee = async (
   senderAddress: string,
   privateKey: string | Uint8Array,
   txnInvocation: Call | Call[],
+  transactionVersion?:
+    | typeof constants.TRANSACTION_VERSION.V2
+    | typeof constants.TRANSACTION_VERSION.V3,
   cairoVersion?: CairoVersion,
   invocationsDetails?: UniversalDetails,
 ): Promise<EstimateFee> => {
@@ -201,6 +209,7 @@ export const estimateFee = async (
     senderAddress,
     privateKey,
     cairoVersion,
+    transactionVersion,
   ).estimateInvokeFee(txnInvocation, {
     ...invocationsDetails,
     skipValidate: false,
@@ -213,6 +222,9 @@ export const estimateFeeBulk = async (
   senderAddress: string,
   privateKey: string | Uint8Array,
   txnInvocation: Invocations,
+  transactionVersion?:
+    | typeof constants.TRANSACTION_VERSION.V2
+    | typeof constants.TRANSACTION_VERSION.V3,
   invocationsDetails?: UniversalDetails,
   cairoVersion?: CairoVersion,
 ): Promise<EstimateFee[]> => {
@@ -221,6 +233,7 @@ export const estimateFeeBulk = async (
     senderAddress,
     privateKey,
     cairoVersion,
+    transactionVersion,
   ).estimateFeeBulk(txnInvocation, {
     ...invocationsDetails,
     skipValidate: false,
@@ -987,6 +1000,10 @@ export async function estimateAccountUpgradeFee(
   contractAddress: string,
   privateKey: string,
   maxFee: BigNumberish = constants.ZERO,
+  transactionVersion:
+    | typeof constants.TRANSACTION_VERSION.V2
+    | typeof constants.TRANSACTION_VERSION.V3 = constants.TRANSACTION_VERSION
+    .V2,
 ) {
   if (maxFee === constants.ZERO) {
     const txnInvocation = getUpgradeTxnInvocation(contractAddress);
@@ -995,6 +1012,7 @@ export async function estimateAccountUpgradeFee(
       contractAddress,
       privateKey,
       txnInvocation,
+      transactionVersion,
       CAIRO_VERSION_LEGACY,
     );
     return numUtils.toBigInt(estFeeResp.suggestedMaxFee.toString(10) ?? '0');

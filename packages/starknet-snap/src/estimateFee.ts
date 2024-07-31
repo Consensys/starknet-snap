@@ -5,7 +5,7 @@ import type {
   ApiParamsWithKeyDeriver,
   EstimateFeeRequestParams,
 } from './types/snapApi';
-import { ACCOUNT_CLASS_HASH } from './utils/constants';
+import { ACCOUNT_CLASS_HASH, TRANSACTION_VERSION } from './utils/constants';
 import { logger } from './utils/logger';
 import { toJson } from './utils/serializer';
 import { getNetworkFromChainId } from './utils/snapUtils';
@@ -36,6 +36,8 @@ export async function estimateFee(params: ApiParamsWithKeyDeriver) {
     );
     const { senderAddress } = requestParamsObj;
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
+    const transactionVersion =
+      requestParamsObj.transactionVersion ?? TRANSACTION_VERSION;
 
     if (
       !contractAddress ||
@@ -118,6 +120,7 @@ export async function estimateFee(params: ApiParamsWithKeyDeriver) {
         senderAddress,
         senderPrivateKey,
         txnInvocation,
+        transactionVersion,
       );
       logger.log(
         `estimateFee:\nestimateFeeUtil estimateFeeResp: ${toJson(
@@ -130,6 +133,7 @@ export async function estimateFee(params: ApiParamsWithKeyDeriver) {
         senderAddress,
         senderPrivateKey,
         bulkTransactions,
+        transactionVersion,
       );
       logger.log(
         `estimateFee:\nestimateFeeBulk estimateBulkFeeResp: ${toJson(

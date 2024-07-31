@@ -11,6 +11,7 @@ import type {
   DeployAccountSignerDetails,
   DeclareSignerDetails,
   typedData,
+  constants,
 } from 'starknet';
 
 import type { SnapState, VoyagerTransactionType } from './snapState';
@@ -55,6 +56,9 @@ export type ApiRequestParams =
 export type BaseRequestParams = {
   chainId?: string;
   debugLevel?: string;
+  transactionVersion?:
+    | typeof constants.TRANSACTION_VERSION.V2
+    | typeof constants.TRANSACTION_VERSION.V3;
 };
 
 export type CreateAccountRequestParams = {
