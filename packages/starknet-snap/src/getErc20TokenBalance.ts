@@ -70,12 +70,22 @@ export async function getErc20TokenBalance(params: ApiParams) {
       ),
     );
 
+    // Use cases : 
+    // - X token balance, initiate a transaction of 0.1X 
+    // ==> pending balance 0.9 X, Latest balance X, spendable is 0.9 X
+    // - X token balance, receives 0.1X 
+    // ==> pending balance 1.1 X, Latest balance X, spendable is X
     const balanceBigInt =
       balancePending < balanceLatest ? balancePending : balanceLatest;
-    const balance = `0x${balanceBigInt.toString(16)}`;
-    logger.log(`getErc20Balance:\nresp: ${toJson(balance)}`);
+    const spendableBalance = `0x${balanceBigInt.toString(16)}`;
+    const totalBalance = `0x${balancePending.toString(16)}`;
+    const resp = {
+      spendableBalance,
+      totalBalance,
+    }
+    logger.log(`getErc20Balance:\nresp: ${toJson(resp)}`);
 
-    return balance;
+    return resp;
   } catch (error) {
     logger.error(`Problem found:`, error);
     throw error;
