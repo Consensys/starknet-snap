@@ -5,7 +5,7 @@ import { getAmountPrice } from 'utils/utils';
 import { Button } from 'components/ui/atom/Button';
 import { AssetQuantity } from 'components/ui/molecule/AssetQuantity';
 import { PopIn } from 'components/ui/molecule/PopIn';
-import { getSpendableTotalBalance } from 'utils/utils';
+import { getHumanReadableAmount } from 'utils/utils';
 import { Buttons, HeaderButton, Wrapper } from './Header.style';
 import { ReceiveModal } from './ReceiveModal';
 import { SendModal } from './SendModal';
@@ -64,9 +64,7 @@ export const HeaderView = ({ address }: Props) => {
     <Wrapper>
       <AssetQuantity
         USDValue={getUSDValue()}
-        currencyValue={getSpendableTotalBalance(
-          wallet.erc20TokenBalanceSelected,
-        )}
+        currencyValue={getHumanReadableAmount(wallet.erc20TokenBalanceSelected)}
         currency={wallet.erc20TokenBalanceSelected.symbol}
         size="big"
         centered
