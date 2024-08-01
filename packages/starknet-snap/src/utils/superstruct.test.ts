@@ -1,8 +1,14 @@
-import { StructError, assert } from 'superstruct';
 import { constants } from 'starknet';
+import { StructError, assert } from 'superstruct';
 
 import typedDataExample from '../__test__/fixture/typedDataExample.json';
-import { AddressStruct, AuthorizableStruct, BaseRequestStruct, ChainIdStruct, TypeDataStruct } from './superstruct';
+import {
+  AddressStruct,
+  AuthorizableStruct,
+  BaseRequestStruct,
+  ChainIdStruct,
+  TypeDataStruct,
+} from './superstruct';
 
 describe('AddressStruct', () => {
   it.each([
@@ -23,9 +29,12 @@ describe('AddressStruct', () => {
 });
 
 describe('ChainIdStruct', () => {
-  it.each(Object.values(constants.StarknetChainId))('does not throw error if the chain id is valid - %s', (chainId) => {
-    expect(() => assert(chainId, ChainIdStruct)).not.toThrow();
-  });
+  it.each(Object.values(constants.StarknetChainId))(
+    'does not throw error if the chain id is valid - %s',
+    (chainId) => {
+      expect(() => assert(chainId, ChainIdStruct)).not.toThrow();
+    },
+  );
 
   it('throws error if the chain id is invalid', () => {
     expect(() => assert('0x', ChainIdStruct)).toThrow(StructError);
@@ -38,20 +47,30 @@ describe('TypeDataStruct', () => {
   });
 
   it('throws error if the type data is invalid', () => {
-    expect(() => assert({
-      ...typedDataExample,
-      domain: {
-        name: 1
-      },
-    }, TypeDataStruct)).toThrow(StructError);
+    expect(() =>
+      assert(
+        {
+          ...typedDataExample,
+          domain: {
+            name: 1,
+          },
+        },
+        TypeDataStruct,
+      ),
+    ).toThrow(StructError);
   });
 });
 
 describe('AuthorizableStruct', () => {
   it('does not throw error if `enableAuthorize` is true', () => {
-    expect(() => assert({
-      enableAuthorize: true,
-    }, AuthorizableStruct)).not.toThrow();
+    expect(() =>
+      assert(
+        {
+          enableAuthorize: true,
+        },
+        AuthorizableStruct,
+      ),
+    ).not.toThrow();
   });
 
   it('does not throw error if `enableAuthorize` is omit', () => {
@@ -59,30 +78,50 @@ describe('AuthorizableStruct', () => {
   });
 
   it('throws error if the type data is invalid', () => {
-    expect(() => assert({
-      enable: true
-    }, AuthorizableStruct)).toThrow(StructError);
+    expect(() =>
+      assert(
+        {
+          enable: true,
+        },
+        AuthorizableStruct,
+      ),
+    ).toThrow(StructError);
   });
 });
 
 describe('BaseRequestStruct', () => {
   it('does not throw error if data is valid', () => {
-    expect(() => assert({
-      chainId: constants.StarknetChainId.SN_SEPOLIA.toString(),
-      debugLevel: 'ALL',
-    }, BaseRequestStruct)).not.toThrow();
+    expect(() =>
+      assert(
+        {
+          chainId: constants.StarknetChainId.SN_SEPOLIA.toString(),
+          debugLevel: 'ALL',
+        },
+        BaseRequestStruct,
+      ),
+    ).not.toThrow();
   });
 
   it('does not throw error if `debugLevel` is omit', () => {
-    expect(() => assert({
-      chainId: constants.StarknetChainId.SN_SEPOLIA.toString(),
-    }, BaseRequestStruct)).not.toThrow();
+    expect(() =>
+      assert(
+        {
+          chainId: constants.StarknetChainId.SN_SEPOLIA.toString(),
+        },
+        BaseRequestStruct,
+      ),
+    ).not.toThrow();
   });
 
   it('throws error if `debugLevel` is invalid', () => {
-    expect(() => assert({
-      chainId: constants.StarknetChainId.SN_SEPOLIA.toString(),
-      debugLevel: 'Invalid-Debug-Level',
-    }, BaseRequestStruct)).toThrow(StructError);
+    expect(() =>
+      assert(
+        {
+          chainId: constants.StarknetChainId.SN_SEPOLIA.toString(),
+          debugLevel: 'Invalid-Debug-Level',
+        },
+        BaseRequestStruct,
+      ),
+    ).toThrow(StructError);
   });
 });
