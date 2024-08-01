@@ -19,17 +19,17 @@ import * as starknetUtils from './utils/starknetUtils';
 jest.mock('./utils/snap');
 jest.mock('./utils/logger');
 
-const mockAccount = async (network: constants.StarknetChainId) => {
-  const accounts = await generateAccounts(network, 1);
-  return accounts[0];
-};
-
 describe('signMessage', function () {
   const state: SnapState = {
     accContracts: [],
     erc20Tokens: [],
     networks: [STARKNET_SEPOLIA_TESTNET_NETWORK],
     transactions: [],
+  };
+
+  const mockAccount = async (network: constants.StarknetChainId) => {
+    const accounts = await generateAccounts(network, 1);
+    return accounts[0];
   };
 
   const prepareSignMessageMock = async (account: StarknetAccount) => {
