@@ -1,102 +1,139 @@
-import { heading, panel, DialogType } from '@metamask/snaps-sdk';
+import type { Component } from '@metamask/snaps-sdk';
+import {
+  heading,
+  row,
+  text,
+  UserRejectedRequestError,
+} from '@metamask/snaps-sdk';
+import type { Infer } from 'superstruct';
+import { array, object, string, assign } from 'superstruct';
 
-import type {
-  ApiParamsWithKeyDeriver,
-  SignMessageRequestParams,
-} from './types/snapApi';
-import { logger } from './utils/logger';
-import { toJson } from './utils/serializer';
+import type { SnapState } from './types/snapState';
+import {
+  confirmDialog,
+  getBip44Deriver,
+  isSnapRpcError,
+  AddressStruct,
+  logger,
+  toJson,
+  validateRequest,
+  validateResponse,
+  TypeDataStruct,
+  AuthorizableStruct,
+  BaseRequestStruct,
+} from './utils';
 import {
   getNetworkFromChainId,
-  addDialogTxt,
-  showAccountRequireUpgradeOrDeployModal,
+  verifyIfAccountNeedUpgradeOrDeploy,
 } from './utils/snapUtils';
 import {
   signMessage as signMessageUtil,
   getKeysFromAddress,
-  validateAndParseAddress,
-  validateAccountRequireUpgradeOrDeploy,
 } from './utils/starknetUtils';
 
-/**
- *
- * @param params
- */
-export async function signMessage(params: ApiParamsWithKeyDeriver) {
-  try {
-    const { state, wallet, keyDeriver, requestParams } = params;
-    const requestParamsObj = requestParams as SignMessageRequestParams;
-    const { signerAddress } = requestParamsObj;
-    const { typedDataMessage } = requestParamsObj;
-    const network = getNetworkFromChainId(state, requestParamsObj.chainId);
+export const SignMessageRequestStruct = assign(
+  object({
+    signerAddress: AddressStruct,
+    typedDataMessage: TypeDataStruct,
+  }),
+  AuthorizableStruct,
+  BaseRequestStruct,
+);
 
-    logger.log(
-      `signMessage:\nsignerAddress: ${signerAddress}\ntypedDataMessage: ${toJson(
-        typedDataMessage,
-      )}`,
+export const SignMessageResponseStruct = array(string());
+
+export type SignMessageParams = Infer<typeof SignMessageRequestStruct>;
+
+export type SignMessageResponse = Infer<typeof SignMessageResponseStruct>;
+
+/**
+ * Signs a message.
+ *
+ * @param requestParams - The request parameters of the sign message request.
+ * @param state - The current state of the snap.
+ */
+export async function signMessage(
+  requestParams: SignMessageParams,
+  // TODO: the state should be re-fetching in the rpc, rather than pass in to avoid object mutation. we will refactor it with a proper state management.
+  state: SnapState,
+) {
+  try {
+    validateRequest(requestParams, SignMessageRequestStruct);
+
+    const deriver = await getBip44Deriver();
+    const { signerAddress, typedDataMessage, chainId, enableAuthorize } =
+      requestParams;
+    // TODO: getNetworkFromChainId is not needed, as the network doesnt need to fetch from state
+    const network = getNetworkFromChainId(state, chainId);
+
+    const { privateKey, publicKey } = await getKeysFromAddress(
+      deriver,
+      network,
+      state,
+      signerAddress,
     );
 
-    try {
-      validateAndParseAddress(signerAddress);
-    } catch (error) {
-      throw new Error(`The given signer address is invalid: ${signerAddress}`);
+    await verifyIfAccountNeedUpgradeOrDeploy(network, signerAddress, publicKey);
+
+    if (
+      // Get Starknet expected not to show the confirm dialog, therefore, `enableAuthorize` will set to false to bypass the confirmation
+      // TODO: enableAuthorize should set default to true
+      enableAuthorize &&
+      !(await getSignMessageConsensus(typedDataMessage, signerAddress))
+    ) {
+      throw new UserRejectedRequestError() as unknown as Error;
     }
 
-    const { privateKey: signerPrivateKey, publicKey } =
-      await getKeysFromAddress(keyDeriver, network, state, signerAddress);
-    if (!signerAddress) {
-      throw new Error(
-        `The given signer address need to be non-empty string, got: ${toJson(
-          signerAddress,
-        )}`,
-      );
-    }
-
-    try {
-      await validateAccountRequireUpgradeOrDeploy(
-        network,
-        signerAddress,
-        publicKey,
-      );
-    } catch (validateError) {
-      await showAccountRequireUpgradeOrDeployModal(wallet, validateError);
-      throw validateError;
-    }
-
-    const components = [];
-    addDialogTxt(components, 'Message', toJson(typedDataMessage));
-    addDialogTxt(components, 'Signer Address', signerAddress);
-
-    if (requestParamsObj.enableAuthorize) {
-      const response = await wallet.request({
-        method: 'snap_dialog',
-        params: {
-          type: DialogType.Confirmation,
-          content: panel([
-            heading('Do you want to sign this message?'),
-            ...components,
-          ]),
-        },
-      });
-
-      if (!response) {
-        return false;
-      }
-    }
-
-    const typedDataSignature = signMessageUtil(
-      signerPrivateKey,
+    const response = await signMessageUtil(
+      privateKey,
       typedDataMessage,
       signerAddress,
     );
 
-    logger.log(
-      `signMessage:\ntypedDataSignature: ${toJson(typedDataSignature)}`,
-    );
+    validateResponse(response, SignMessageResponseStruct);
 
-    return typedDataSignature;
+    return response;
   } catch (error) {
-    logger.error(`Problem found:`, error);
-    throw error;
+    logger.error('Failed to sign the message', error);
+
+    if (isSnapRpcError(error)) {
+      throw error as unknown as Error;
+    }
+
+    throw new Error('Failed to sign the message');
   }
+}
+
+/**
+ * Gets the consensus to sign a message.
+ *
+ * @param typedDataMessage - The type data to sign.
+ * @param signerAddress - The address of the signer.
+ */
+export async function getSignMessageConsensus(
+  typedDataMessage: Infer<typeof TypeDataStruct>,
+  signerAddress: string,
+) {
+  const components: Component[] = [];
+  components.push(heading('Do you want to sign this message?'));
+  components.push(
+    row(
+      'Message',
+      text({
+        value: toJson(typedDataMessage),
+        markdown: false,
+      }),
+    ),
+  );
+  components.push(
+    row(
+      'Signer Address',
+      text({
+        value: signerAddress,
+        markdown: false,
+      }),
+    ),
+  );
+
+  return await confirmDialog(components);
 }
