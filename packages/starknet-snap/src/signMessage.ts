@@ -9,13 +9,12 @@ import { toJson } from './utils/serializer';
 import {
   getNetworkFromChainId,
   addDialogTxt,
-  showAccountRequireUpgradeOrDeployModal,
+  verifyIfAccountNeedUpgradeOrDeploy,
 } from './utils/snapUtils';
 import {
   signMessage as signMessageUtil,
   getKeysFromAddress,
   validateAndParseAddress,
-  validateAccountRequireUpgradeOrDeploy,
 } from './utils/starknetUtils';
 
 /**
@@ -52,16 +51,7 @@ export async function signMessage(params: ApiParamsWithKeyDeriver) {
       );
     }
 
-    try {
-      await validateAccountRequireUpgradeOrDeploy(
-        network,
-        signerAddress,
-        publicKey,
-      );
-    } catch (validateError) {
-      await showAccountRequireUpgradeOrDeployModal(wallet, validateError);
-      throw validateError;
-    }
+    await verifyIfAccountNeedUpgradeOrDeploy(network, signerAddress, publicKey);
 
     const components = [];
     addDialogTxt(components, 'Message', toJson(typedDataMessage));

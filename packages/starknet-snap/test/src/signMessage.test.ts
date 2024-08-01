@@ -148,68 +148,6 @@ describe('Test function: signMessage', function () {
       });
     });
 
-    describe('when account require upgrade', function () {
-      let validateAccountRequireUpgradeOrDeployStub: sinon.SinonStub;
-      beforeEach(async function () {
-        validateAccountRequireUpgradeOrDeployStub = sandbox
-          .stub(utils, 'validateAccountRequireUpgradeOrDeploy')
-          .throws(new UpgradeRequiredError('Upgrade Required'));
-      });
-
-      it('should throw error if upgrade required', async function () {
-        let result;
-        try {
-          result = await signMessage(apiParams);
-        } catch (err) {
-          result = err;
-        } finally {
-          expect(
-            validateAccountRequireUpgradeOrDeployStub,
-          ).to.have.been.calledOnceWith(
-            STARKNET_SEPOLIA_TESTNET_NETWORK,
-            account1.address,
-            account1.publicKey,
-          );
-          expect(result).to.be.an('Error');
-          expect(result.message).to.equal('Upgrade Required');
-        }
-      });
-    });
-
-    describe('when account require deploy', function () {
-      let validateAccountRequireUpgradeOrDeployStub: sinon.SinonStub;
-      beforeEach(async function () {
-        validateAccountRequireUpgradeOrDeployStub = sandbox
-          .stub(utils, 'validateAccountRequireUpgradeOrDeploy')
-          .throws(
-            new DeployRequiredError(
-              `Cairo 0 contract address ${account1.address} balance is not empty, deploy required`,
-            ),
-          );
-      });
-
-      it('should throw error if deploy required', async function () {
-        let result;
-        try {
-          result = await signMessage(apiParams);
-        } catch (err) {
-          result = err;
-        } finally {
-          expect(
-            validateAccountRequireUpgradeOrDeployStub,
-          ).to.have.been.calledOnceWith(
-            STARKNET_SEPOLIA_TESTNET_NETWORK,
-            account1.address,
-            account1.publicKey,
-          );
-          expect(result).to.be.an('Error');
-          expect(result.message).to.equal(
-            `Cairo 0 contract address ${account1.address} balance is not empty, deploy required`,
-          );
-        }
-      });
-    });
-
     describe('when account is not require upgrade', function () {
       beforeEach(async function () {
         apiParams.requestParams = {

@@ -6,13 +6,14 @@ import type {
 } from './types/snapApi';
 import { logger } from './utils/logger';
 import { toJson } from './utils/serializer';
-import { getNetworkFromChainId } from './utils/snapUtils';
+import {
+  getNetworkFromChainId,
+  verifyIfAccountNeedUpgradeOrDeploy,
+} from './utils/snapUtils';
 import {
   validateAndParseAddress,
   getKeysFromAddress,
-  validateAccountRequireUpgradeOrDeploy,
 } from './utils/starknetUtils';
-
 /**
  *
  * @param params
@@ -43,10 +44,12 @@ export async function extractPrivateKey(params: ApiParamsWithKeyDeriver) {
       state,
       userAddress,
     );
-    await validateAccountRequireUpgradeOrDeploy(
+
+    await verifyIfAccountNeedUpgradeOrDeploy(
       network,
       userAddress,
       publicKey,
+      false,
     );
 
     const response = await wallet.request({
