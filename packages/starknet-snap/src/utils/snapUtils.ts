@@ -43,7 +43,11 @@ import {
 import { DeployRequiredError, UpgradeRequiredError } from './exceptions';
 import { logger } from './logger';
 import { toJson } from './serializer';
-import { validateAndParseAddress } from './starknetUtils';
+import { getProvider } from './snap';
+import {
+  validateAccountRequireUpgradeOrDeploy,
+  validateAndParseAddress,
+} from './starknetUtils';
 import {
   filterTransactions,
   TimestampFilter,
@@ -1240,5 +1244,36 @@ export async function showAccountRequireUpgradeOrDeployModal(
     await showDeployRequestModal(wallet);
   } else if (error instanceof UpgradeRequiredError) {
     await showUpgradeRequestModal(wallet);
+  }
+}
+
+/**
+ * Verifies whether the account needs to be upgraded or deployed and throws an error if necessary.
+ *
+ * @param network - The network object.
+ * @param address - The account address.
+ * @param publicKey - The public key of the account address.
+ * @param [showAlert] - The flag to show an alert modal; true will show the modal, false will not.
+ * @throws {DeployRequiredError} If the account needs to be deployed.
+ * @throws {UpgradeRequiredError} If the account needs to be upgraded.
+ */
+export async function verifyIfAccountNeedUpgradeOrDeploy(
+  network: Network,
+  address: string,
+  publicKey: string,
+  showAlert = true,
+) {
+  try {
+    await validateAccountRequireUpgradeOrDeploy(network, address, publicKey);
+  } catch (validateError) {
+    // TODO: getProvider() will move to showDeployRequestModal / showUpgradeRequestModal
+    if (showAlert) {
+      await showAccountRequireUpgradeOrDeployModal(
+        getProvider(),
+        validateError,
+      );
+    }
+
+    throw validateError;
   }
 }
