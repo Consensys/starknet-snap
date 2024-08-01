@@ -1,11 +1,5 @@
 import type { Component, Json, SnapsProvider } from '@metamask/snaps-sdk';
-import {
-  text,
-  copyable,
-  panel,
-  heading,
-  DialogType,
-} from '@metamask/snaps-sdk';
+import { text, copyable, heading } from '@metamask/snaps-sdk';
 import type { Mutex } from 'async-mutex';
 import convert from 'ethereum-unit-converter';
 import { num as numUtils, constants } from 'starknet';
@@ -43,7 +37,7 @@ import {
 import { DeployRequiredError, UpgradeRequiredError } from './exceptions';
 import { logger } from './logger';
 import { toJson } from './serializer';
-import { getProvider } from './snap';
+import { alertDialog } from './snap';
 import {
   validateAccountRequireUpgradeOrDeploy,
   validateAndParseAddress,
@@ -1188,63 +1182,33 @@ export function dappUrl(envt: string) {
 }
 
 /**
- *
- * @param wallet
+ * Displays a modal to the user requesting them to upgrade their account.
  */
-export async function showUpgradeRequestModal(wallet) {
-  await wallet.request({
-    method: 'snap_dialog',
-    params: {
-      type: DialogType.Alert,
-      content: panel([
-        heading('Account Upgrade Mandatory!'),
-        text(
-          `Visit the [companion dapp for Starknet](${dappUrl(
-            // eslint-disable-next-line no-restricted-globals
-            process.env.SNAP_ENV as unknown as string,
-          )}) and click “Upgrade”.\nThank you!`,
-        ),
-      ]),
-    },
-  });
+export async function showUpgradeRequestModal() {
+  await alertDialog([
+    heading('Account Upgrade Mandatory!'),
+    text(
+      `Visit the [companion dapp for Starknet](${dappUrl(
+        // eslint-disable-next-line no-restricted-globals
+        process.env.SNAP_ENV as unknown as string,
+      )}) and click “Upgrade”.\nThank you!`,
+    ),
+  ]);
 }
 
 /**
- *
- * @param wallet
+ * Displays a modal to the user requesting them to deploy their account.
  */
-export async function showDeployRequestModal(wallet) {
-  await wallet.request({
-    method: 'snap_dialog',
-    params: {
-      type: DialogType.Alert,
-      content: panel([
-        heading('Account Deployment Mandatory!'),
-        text(
-          `Visit the [companion dapp for Starknet](${dappUrl(
-            // eslint-disable-next-line no-restricted-globals
-            process.env.SNAP_ENV as unknown as string,
-          )}) to deploy your account.\nThank you!`,
-        ),
-      ]),
-    },
-  });
-}
-
-/**
- *
- * @param wallet
- * @param error
- */
-export async function showAccountRequireUpgradeOrDeployModal(
-  wallet,
-  error: DeployRequiredError | UpgradeRequiredError,
-) {
-  if (error instanceof DeployRequiredError) {
-    await showDeployRequestModal(wallet);
-  } else if (error instanceof UpgradeRequiredError) {
-    await showUpgradeRequestModal(wallet);
-  }
+export async function showDeployRequestModal() {
+  await alertDialog([
+    heading('Account Deployment Mandatory!'),
+    text(
+      `Visit the [companion dapp for Starknet](${dappUrl(
+        // eslint-disable-next-line no-restricted-globals
+        process.env.SNAP_ENV as unknown as string,
+      )}) to deploy your account.\nThank you!`,
+    ),
+  ]);
 }
 
 /**
@@ -1265,15 +1229,18 @@ export async function verifyIfAccountNeedUpgradeOrDeploy(
 ) {
   try {
     await validateAccountRequireUpgradeOrDeploy(network, address, publicKey);
-  } catch (validateError) {
-    // TODO: getProvider() will move to showDeployRequestModal / showUpgradeRequestModal
-    if (showAlert) {
-      await showAccountRequireUpgradeOrDeployModal(
-        getProvider(),
-        validateError,
+  } catch (error) {
+    if (error instanceof DeployRequiredError) {
+      showAlert && (await showDeployRequestModal());
+    } else if (error instanceof UpgradeRequiredError) {
+      showAlert && (await showUpgradeRequestModal());
+    } else {
+      logger.warn(
+        'Unexpected Error, neither DeployRequiredError or UpgradeRequiredError',
+        error,
       );
     }
 
-    throw validateError;
+    throw error;
   }
 }
