@@ -1,7 +1,7 @@
 import type { BIP44AddressKeyDeriver } from '@metamask/key-tree';
 import { getBIP44AddressKeyDeriver } from '@metamask/key-tree';
 import type { Component, DialogResult, Json } from '@metamask/snaps-sdk';
-import { panel, type SnapsProvider } from '@metamask/snaps-sdk';
+import { DialogType, panel, type SnapsProvider } from '@metamask/snaps-sdk';
 
 declare const snap: SnapsProvider;
 
@@ -41,7 +41,25 @@ export async function confirmDialog(
   return snap.request({
     method: 'snap_dialog',
     params: {
-      type: 'confirmation',
+      type: DialogType.Confirmation,
+      content: panel(components),
+    },
+  });
+}
+
+/**
+ * Displays a alert dialog with the specified components.
+ *
+ * @param components - An array of components to display in the dialog.
+ * @returns A Promise that resolves to the result of the dialog.
+ */
+export async function alertDialog(
+  components: Component[],
+): Promise<DialogResult> {
+  return snap.request({
+    method: 'snap_dialog',
+    params: {
+      type: DialogType.Alert,
       content: panel(components),
     },
   });

@@ -46,6 +46,30 @@ describe('confirmDialog', () => {
   });
 });
 
+describe('alertDialog', () => {
+  it('calls snap_dialog', async () => {
+    const spy = jest.spyOn(snapUtil.getProvider(), 'request');
+    const components: Component[] = [
+      heading('header'),
+      text('subHeader'),
+      divider(),
+      row('Label1', text('Value1')),
+      text('**Label2**:'),
+      row('SubLabel1', text('SubValue1')),
+    ];
+
+    await snapUtil.alertDialog(components);
+
+    expect(spy).toHaveBeenCalledWith({
+      method: 'snap_dialog',
+      params: {
+        type: 'alert',
+        content: panel(components),
+      },
+    });
+  });
+});
+
 describe('getStateData', () => {
   it('gets state data', async () => {
     const spy = jest.spyOn(snapUtil.getProvider(), 'request');

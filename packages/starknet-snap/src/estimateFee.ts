@@ -8,9 +8,11 @@ import type {
 import { ACCOUNT_CLASS_HASH } from './utils/constants';
 import { logger } from './utils/logger';
 import { toJson } from './utils/serializer';
-import { getNetworkFromChainId } from './utils/snapUtils';
 import {
-  validateAccountRequireUpgradeOrDeploy,
+  getNetworkFromChainId,
+  verifyIfAccountNeedUpgradeOrDeploy,
+} from './utils/snapUtils';
+import {
   validateAndParseAddress,
   getKeysFromAddress,
   getCallDataArray,
@@ -64,10 +66,11 @@ export async function estimateFee(params: ApiParamsWithKeyDeriver) {
     const { privateKey: senderPrivateKey, publicKey } =
       await getKeysFromAddress(keyDeriver, network, state, senderAddress);
 
-    await validateAccountRequireUpgradeOrDeploy(
+    await verifyIfAccountNeedUpgradeOrDeploy(
       network,
       senderAddress,
       publicKey,
+      false,
     );
 
     const txnInvocation = {
