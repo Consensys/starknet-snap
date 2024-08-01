@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
 
+## [1.24.0](https://github.com/Consensys/starknet-snap/compare/wallet-ui-v1.23.0...wallet-ui-v1.24.0) (2024-08-01)
+
+
+### Features
+
+* upgrade to sarknet.js v6.11.0 ([#296](https://github.com/Consensys/starknet-snap/issues/296)) ([e298244](https://github.com/Consensys/starknet-snap/commit/e298244a5e68e2809ab6367330e104c53ca5c861))
+
+
+### Bug Fixes
+
+* update message for waiting deploy/upgrade txn complete ([#297](https://github.com/Consensys/starknet-snap/issues/297)) ([141fa20](https://github.com/Consensys/starknet-snap/commit/141fa2023911e8c6f2d1b495a2d78bec79a3e5d7))
+
 ## [1.23.0](https://github.com/Consensys/starknet-snap/compare/wallet-ui-v1.22.0...wallet-ui-v1.23.0) (2024-07-16)
 
 

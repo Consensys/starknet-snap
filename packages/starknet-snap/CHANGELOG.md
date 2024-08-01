@@ -1,6 +1,19 @@
 # Changelog
 
 
+## [2.10.0](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v2.9.0...starknet-snap-v2.10.0) (2024-08-01)
+
+
+### Features
+
+* upgrade to sarknet.js v6.11.0 ([#296](https://github.com/Consensys/starknet-snap/issues/296)) ([e298244](https://github.com/Consensys/starknet-snap/commit/e298244a5e68e2809ab6367330e104c53ca5c861))
+
+
+### Bug Fixes
+
+* allow multiple consecutive transactions in estimateFee(Bulk) ([#289](https://github.com/Consensys/starknet-snap/issues/289)) ([5a501f9](https://github.com/Consensys/starknet-snap/commit/5a501f9aae7c3cdf041f479eac38f4a1e82855e9))
+* get balance should check on pending block ([#293](https://github.com/Consensys/starknet-snap/issues/293)) ([6df26d8](https://github.com/Consensys/starknet-snap/commit/6df26d8374da6161a9677a172bef93a826e8401f))
+
 ## [2.9.0](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v2.8.0...starknet-snap-v2.9.0) (2024-07-16)
 
 
