@@ -77,6 +77,7 @@ export const TypeDataStruct = object({
 });
 
 export const AuthorizableStruct = object({
+  // TODO: the enableAuthorize should default to true
   enableAuthorize: optional(boolean()),
 });
 
