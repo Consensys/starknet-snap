@@ -49,39 +49,24 @@ export async function getErc20TokenBalance(params: ApiParams) {
       `getErc20Balance:\nerc20Address: ${erc20Address}\nuserAddress: ${userAddress}`,
     );
 
-    // Always get both balance from pending and latest
-    // Always show the smallest balance of the two.
-    // If user is getting token it can't spend them until they are latest
-    // If user is sending token it can't spend them even if they are on pending.
-    const balanceLatest = BigInt(
+    const balanceLatest = 
       await getBalance(
         userAddress,
         erc20Address,
         network,
         BlockIdentifierEnum.Latest,
-      ),
-    );
-    const balancePending = BigInt(
+      );
+    const balancePending = 
       await getBalance(
         userAddress,
         erc20Address,
         network,
         BlockIdentifierEnum.Pending,
-      ),
-    );
+      );
 
-    // Use cases :
-    // - X token balance, initiate a transaction of 0.1X
-    // ==> pending balance 0.9 X, Latest balance X, spendable is 0.9 X
-    // - X token balance, receives 0.1X
-    // ==> pending balance 1.1 X, Latest balance X, spendable is X
-    const balanceBigInt =
-      balancePending < balanceLatest ? balancePending : balanceLatest;
-    const spendableBalance = `0x${balanceBigInt.toString(16)}`;
-    const totalBalance = `0x${balancePending.toString(16)}`;
     const resp = {
-      spendableBalance,
-      totalBalance,
+      balancePending,
+      balanceLatest,
     };
     logger.log(`getErc20Balance:\nresp: ${toJson(resp)}`);
 
