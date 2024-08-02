@@ -8,8 +8,14 @@ import {
   TIMEOUT_DURATION,
   MIN_ACC_CONTRACT_VERSION,
 } from './constants';
-import { BalanceType, Erc20Token, Erc20TokenBalance } from 'types';
+import {
+  BalanceType,
+  Erc20Token,
+  Erc20TokenBalance,
+  TokenBalance,
+} from 'types';
 import { constants } from 'starknet';
+import { getAssetPriceUSD } from 'services/coinGecko';
 
 export const shortenAddress = (address: string, num = 3) => {
   if (!address) return '';
@@ -242,3 +248,39 @@ export const shortenDomain = (domain: string, maxLength = 18) => {
   const shortenedPartLength = maxLength - ellipsis.length;
   return `${domain.substring(0, shortenedPartLength)}${ellipsis}`;
 };
+
+export function getTokenBalanceWithDetails(
+  tokenBalance: TokenBalance,
+  token: Erc20Token,
+  tokenUSDPrice: any,
+): Erc20TokenBalance {
+  const { balancePending, balanceLatest } = tokenBalance;
+  const tokenTotalBalance =
+    balancePending >= balanceLatest ? balancePending : balanceLatest;
+  const spendableBalance =
+    balancePending < balanceLatest ? balancePending : balanceLatest;
+  return addMissingPropertiesToToken(
+    token,
+    tokenTotalBalance,
+    spendableBalance,
+    tokenUSDPrice,
+  );
+}
+
+export async function getTokenBalancesWithDetails(
+  tokenBalances: TokenBalance[],
+  tokens: Erc20Token[],
+): Promise<Erc20TokenBalance[]> {
+  const tokensWithBalances = await Promise.all(
+    tokens.map(async (token, index): Promise<Erc20TokenBalance> => {
+      const tokenUSDPrice = await getAssetPriceUSD(token);
+      return getTokenBalanceWithDetails(
+        tokenBalances[index],
+        token,
+        tokenUSDPrice,
+      );
+    }),
+  );
+
+  return tokensWithBalances;
+}

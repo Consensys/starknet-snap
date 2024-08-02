@@ -47,3 +47,9 @@ export type {
   Erc20Token,
   Transaction,
 } from '@consensys/starknet-snap/src/types/snapState';
+
+// Define the type for your token balances
+export interface TokenBalance {
+  balancePending: string;
+  balanceLatest: string;
+}
