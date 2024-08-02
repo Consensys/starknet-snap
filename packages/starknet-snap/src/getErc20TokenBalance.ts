@@ -49,20 +49,18 @@ export async function getErc20TokenBalance(params: ApiParams) {
       `getErc20Balance:\nerc20Address: ${erc20Address}\nuserAddress: ${userAddress}`,
     );
 
-    const balanceLatest = 
-      await getBalance(
-        userAddress,
-        erc20Address,
-        network,
-        BlockIdentifierEnum.Latest,
-      );
-    const balancePending = 
-      await getBalance(
-        userAddress,
-        erc20Address,
-        network,
-        BlockIdentifierEnum.Pending,
-      );
+    const balanceLatest = await getBalance(
+      userAddress,
+      erc20Address,
+      network,
+      BlockIdentifierEnum.Latest,
+    );
+    const balancePending = await getBalance(
+      userAddress,
+      erc20Address,
+      network,
+      BlockIdentifierEnum.Pending,
+    );
 
     const resp = {
       balancePending,
