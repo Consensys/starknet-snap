@@ -1,5 +1,5 @@
 import { KeyboardEvent } from 'react';
-import { ethers } from 'ethers';
+import { BigNumber, ethers } from 'ethers';
 import {
   DECIMALS_DISPLAYED_MAX_LENGTH,
   STARKNET_MAINNET_EXPLORER,
@@ -8,8 +8,14 @@ import {
   TIMEOUT_DURATION,
   MIN_ACC_CONTRACT_VERSION,
 } from './constants';
-import { Erc20Token, Erc20TokenBalance } from 'types';
+import {
+  BalanceType,
+  Erc20Token,
+  Erc20TokenBalance,
+  TokenBalance,
+} from 'types';
 import { constants } from 'starknet';
+import { getAssetPriceUSD } from 'services/coinGecko';
 
 export const shortenAddress = (address: string, num = 3) => {
   if (!address) return '';
@@ -45,11 +51,15 @@ export const isValidAddress = (toCheck: string) => {
 export const addMissingPropertiesToToken = (
   token: Erc20Token,
   balance?: string,
+  balanceSpendable?: string,
   usdPrice?: number,
 ): Erc20TokenBalance => {
   return {
     ...token,
     amount: ethers.BigNumber.from(balance ? balance : '0x0'),
+    spendableAmount: ethers.BigNumber.from(
+      balanceSpendable ? balanceSpendable : '0x0',
+    ),
     usdPrice: usdPrice,
   };
 };
@@ -57,10 +67,15 @@ export const addMissingPropertiesToToken = (
 export const getHumanReadableAmount = (
   asset: Erc20TokenBalance,
   assetAmount?: string,
+  balanceType?: BalanceType,
 ) => {
+  const amount =
+    balanceType === BalanceType.Spendable
+      ? asset.spendableAmount
+      : asset.amount;
   const amountStr = assetAmount
     ? assetAmount
-    : ethers.utils.formatUnits(asset.amount, asset.decimals);
+    : ethers.utils.formatUnits(amount as BigNumber, asset.decimals);
   const indexDecimal = amountStr.indexOf('.');
   const integerPart = amountStr.substring(0, indexDecimal);
   let decimalPart = amountStr.substring(
@@ -77,6 +92,21 @@ export const getHumanReadableAmount = (
   }
 
   return amountStr.substring(0, indexDecimal + firstNonZeroIndex + 3);
+};
+
+export const getSpendableTotalBalance = (
+  asset: Erc20TokenBalance,
+  assetAmount?: string,
+): string => {
+  const spendableAmount = getHumanReadableAmount(
+    asset,
+    assetAmount,
+    BalanceType.Spendable,
+  );
+  const totalAmount = getHumanReadableAmount(asset);
+  return spendableAmount === totalAmount
+    ? `${spendableAmount}`
+    : `${spendableAmount} (${totalAmount})`;
 };
 
 export const getMaxDecimalsReadable = (
@@ -218,3 +248,39 @@ export const shortenDomain = (domain: string, maxLength = 18) => {
   const shortenedPartLength = maxLength - ellipsis.length;
   return `${domain.substring(0, shortenedPartLength)}${ellipsis}`;
 };
+
+export function getTokenBalanceWithDetails(
+  tokenBalance: TokenBalance,
+  token: Erc20Token,
+  tokenUSDPrice: any,
+): Erc20TokenBalance {
+  const { balancePending, balanceLatest } = tokenBalance;
+  const tokenTotalBalance =
+    balancePending >= balanceLatest ? balancePending : balanceLatest;
+  const spendableBalance =
+    balancePending < balanceLatest ? balancePending : balanceLatest;
+  return addMissingPropertiesToToken(
+    token,
+    tokenTotalBalance,
+    spendableBalance,
+    tokenUSDPrice,
+  );
+}
+
+export async function getTokenBalancesWithDetails(
+  tokenBalances: TokenBalance[],
+  tokens: Erc20Token[],
+): Promise<Erc20TokenBalance[]> {
+  const tokensWithBalances = await Promise.all(
+    tokens.map(async (token, index): Promise<Erc20TokenBalance> => {
+      const tokenUSDPrice = await getAssetPriceUSD(token);
+      return getTokenBalanceWithDetails(
+        tokenBalances[index],
+        token,
+        tokenUSDPrice,
+      );
+    }),
+  );
+
+  return tokensWithBalances;
+}

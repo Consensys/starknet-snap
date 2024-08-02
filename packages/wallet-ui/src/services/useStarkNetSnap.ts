@@ -17,13 +17,14 @@ import {
 } from '../slices/walletSlice';
 import Toastr from 'toastr2';
 import {
-  addMissingPropertiesToToken,
   hexToString,
   retry,
   isGTEMinVersion,
+  getTokenBalancesWithDetails,
+  getTokenBalanceWithDetails,
 } from '../utils/utils';
 import { setWalletConnection } from '../slices/walletSlice';
-import { Network, VoyagerTransactionType } from '../types';
+import { Network, TokenBalance, VoyagerTransactionType } from '../types';
 import { Account } from '../types';
 import { Erc20TokenBalance, Erc20Token } from '../types';
 import { disableLoading, enableLoadingWithMessage } from '../slices/UISlice';
@@ -270,26 +271,16 @@ export const useStarkNetSnap = () => {
           : (acc as Account).upgradeRequired) ?? false;
     }
 
-    const tokenBalances = await Promise.all(
+    const tokenBalances: TokenBalance[] = await Promise.all(
       tokens.map(async (token) => {
         const accountAddr = Array.isArray(acc) ? acc[0].address : acc.address;
         return await getTokenBalance(token.address, accountAddr, chainId);
       }),
     );
-
-    const tokenUSDPrices = await Promise.all(
-      tokens.map(async (token) => {
-        return await getAssetPriceUSD(token);
-      }),
+    const tokensWithBalances = await getTokenBalancesWithDetails(
+      tokenBalances,
+      tokens,
     );
-
-    const tokensWithBalances = tokens.map((token, index): Erc20TokenBalance => {
-      return addMissingPropertiesToToken(
-        token,
-        tokenBalances[index],
-        tokenUSDPrices[index],
-      );
-    });
     if (networks) {
       dispatch(setNetworks(networks));
     }
@@ -625,9 +616,9 @@ export const useStarkNetSnap = () => {
           chainId,
         );
         const usdPrice = await getAssetPriceUSD(token);
-        const tokenWithBalance: Erc20TokenBalance = addMissingPropertiesToToken(
-          token,
+        const tokenWithBalance: Erc20TokenBalance = getTokenBalanceWithDetails(
           tokenBalance,
+          token,
           usdPrice,
         );
         dispatch(upsertErc20TokenBalance(tokenWithBalance));
@@ -664,9 +655,9 @@ export const useStarkNetSnap = () => {
         chainId,
       );
       const usdPrice = await getAssetPriceUSD(foundTokenWithBalance);
-      const tokenWithBalance: Erc20TokenBalance = addMissingPropertiesToToken(
-        foundTokenWithBalance,
+      const tokenWithBalance: Erc20TokenBalance = getTokenBalanceWithDetails(
         tokenBalance,
+        foundTokenWithBalance,
         usdPrice,
       );
       dispatch(upsertErc20TokenBalance(tokenWithBalance));
@@ -695,9 +686,18 @@ export const useStarkNetSnap = () => {
         },
       });
       return response;
+      // if (balanceType === BalanceType.Spendable) {
+      //   return response.balanceLatest <= response.balancePending ? response.balanceLatest: response.balancePending;
+      // } else {
+      //   return response.balanceLatest > response.balancePending ? response.balanceLatest: response.balancePending;
+      // }
     } catch (err) {
       //eslint-disable-next-line no-console
       console.error(err);
+      return {
+        balanceLatest: '0x0',
+        balancePending: '0x0',
+      };
     }
   };
 
