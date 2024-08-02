@@ -51,7 +51,10 @@ describe('Test function: getErc20TokenBalance', function () {
     };
     apiParams.requestParams = requestObject;
     const result = await getErc20TokenBalance(apiParams);
-    expect(result).to.be.eq('0x64a');
+    expect(result).to.be.eql({
+      balanceLatest: hexAmount,
+      balancePending: hexAmount,
+    });
   });
 
   it('should get ERC-20 token balance with BlockIdentifier pending if the account is deployed', async function () {
@@ -69,7 +72,10 @@ describe('Test function: getErc20TokenBalance', function () {
     };
     apiParams.requestParams = requestObject;
     const result = await getErc20TokenBalance(apiParams);
-    expect(result).to.be.eq('0x64a');
+    expect(result).to.be.eql({
+      balanceLatest: hexAmount,
+      balancePending: hexAmount,
+    });
     expect(stub).to.have.been.calledWith(
       requestObject.userAddress,
       requestObject.tokenAddress,
@@ -93,7 +99,10 @@ describe('Test function: getErc20TokenBalance', function () {
     };
     apiParams.requestParams = requestObject;
     const result = await getErc20TokenBalance(apiParams);
-    expect(result).to.be.eq('0x64a');
+    expect(result).to.be.eql({
+      balanceLatest: hexAmount,
+      balancePending: hexAmount,
+    });
     expect(stub).to.have.been.calledWith(
       requestObject.userAddress,
       requestObject.tokenAddress,
