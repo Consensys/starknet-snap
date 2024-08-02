@@ -723,9 +723,9 @@ export const useStarkNetSnap = () => {
         },
       });
       if (balanceType === BalanceType.Spendable) {
-        return response.spendableBalance;
+        return response.balanceLatest <= response.balancePending ? response.balanceLatest: response.balancePending;
       } else {
-        return response.totalBalance;
+        return response.balanceLatest > response.balancePending ? response.balanceLatest: response.balancePending;
       }
     } catch (err) {
       //eslint-disable-next-line no-console

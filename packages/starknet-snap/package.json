@@ -44,7 +44,8 @@
     "ethereum-unit-converter": "^0.0.17",
     "ethers": "^5.5.1",
     "starknet": "6.11.0",
-    "starknet_v4.22.0": "npm:starknet@4.22.0"
+    "starknet_v4.22.0": "npm:starknet@4.22.0",
+    "superstruct": "^2.0.2"
   },
   "devDependencies": {
     "@babel/preset-typescript": "^7.23.3",
@@ -60,6 +61,7 @@
     "@types/sinon-chai": "^3.2.8",
     "@typescript-eslint/eslint-plugin": "^5.42.1",
     "@typescript-eslint/parser": "^5.42.1",
+    "bip39": "^3.1.0",
     "chai": "^4.3.6",
     "chai-as-promised": "^7.1.1",
     "cross-env": "^7.0.3",

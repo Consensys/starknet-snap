@@ -52,8 +52,8 @@ describe('Test function: getErc20TokenBalance', function () {
     apiParams.requestParams = requestObject;
     const result = await getErc20TokenBalance(apiParams);
     expect(result).to.be.eql({
-      spendableBalance: hexAmount,
-      totalBalance: hexAmount,
+      balanceLatest: hexAmount,
+      balancePending: hexAmount,
     });
   });
 
@@ -73,8 +73,8 @@ describe('Test function: getErc20TokenBalance', function () {
     apiParams.requestParams = requestObject;
     const result = await getErc20TokenBalance(apiParams);
     expect(result).to.be.eql({
-      spendableBalance: hexAmount,
-      totalBalance: hexAmount,
+      balanceLatest: hexAmount,
+      balancePending: hexAmount,
     });
     expect(stub).to.have.been.calledWith(
       requestObject.userAddress,
@@ -100,8 +100,8 @@ describe('Test function: getErc20TokenBalance', function () {
     apiParams.requestParams = requestObject;
     const result = await getErc20TokenBalance(apiParams);
     expect(result).to.be.eql({
-      spendableBalance: hexAmount,
-      totalBalance: hexAmount,
+      balanceLatest: hexAmount,
+      balancePending: hexAmount,
     });
     expect(stub).to.have.been.calledWith(
       requestObject.userAddress,
