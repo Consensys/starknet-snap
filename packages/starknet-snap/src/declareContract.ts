@@ -9,12 +9,11 @@ import { toJson } from './utils/serializer';
 import {
   getNetworkFromChainId,
   getDeclareSnapTxt,
-  showAccountRequireUpgradeOrDeployModal,
+  verifyIfAccountNeedUpgradeOrDeploy,
 } from './utils/snapUtils';
 import {
   getKeysFromAddress,
   declareContract as declareContractUtil,
-  validateAccountRequireUpgradeOrDeploy,
 } from './utils/starknetUtils';
 
 /**
@@ -38,16 +37,7 @@ export async function declareContract(params: ApiParamsWithKeyDeriver) {
       senderAddress,
     );
 
-    try {
-      await validateAccountRequireUpgradeOrDeploy(
-        network,
-        senderAddress,
-        publicKey,
-      );
-    } catch (validateError) {
-      await showAccountRequireUpgradeOrDeployModal(wallet, validateError);
-      throw validateError;
-    }
+    await verifyIfAccountNeedUpgradeOrDeploy(network, senderAddress, publicKey);
 
     const snapComponents = getDeclareSnapTxt(
       senderAddress,
