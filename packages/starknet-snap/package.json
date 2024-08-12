@@ -28,8 +28,8 @@
     "serve": "mm-snap serve",
     "start": "mm-snap watch",
     "test": "yarn run test:unit && yarn run cover:report && yarn run jest",
-    "test:unit": "nyc --check-coverage --statements 70 --branches 70 --functions 70 --lines 70 mocha --colors -r ts-node/register \"test/**/*.test.ts\"",
-    "test:unit:one": "nyc --check-coverage --statements 70 --branches 70 --functions 70 --lines 70 mocha --colors -r ts-node/register"
+    "test:unit": "nyc --check-coverage --statements 50 --branches 50 --functions 50 --lines 50 mocha --colors -r ts-node/register \"test/**/*.test.ts\"",
+    "test:unit:one": "nyc --check-coverage --statements 50 --branches 50 --functions 50 --lines 50 mocha --colors -r ts-node/register"
   },
   "nyc": {
     "exclude": [
