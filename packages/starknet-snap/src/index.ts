@@ -40,6 +40,7 @@ import { recoverAccounts } from './recoverAccounts';
 import { sendTransaction } from './sendTransaction';
 import { signDeclareTransaction } from './signDeclareTransaction';
 import { signDeployAccountTransaction } from './signDeployAccountTransaction';
+import type { SignMessageParams } from './signMessage';
 import { signMessage } from './signMessage';
 import { signTransaction } from './signTransaction';
 import { switchNetwork } from './switchNetwork';
@@ -170,9 +171,9 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
         );
 
       case 'starkNet_signMessage':
-        apiParams.keyDeriver = await getAddressKeyDeriver(snap);
         return await signMessage(
-          apiParams as unknown as ApiParamsWithKeyDeriver,
+          apiParams.requestParams as unknown as SignMessageParams,
+          state,
         );
 
       case 'starkNet_signTransaction':
