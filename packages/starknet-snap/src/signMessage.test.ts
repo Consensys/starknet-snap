@@ -6,7 +6,7 @@ import { constants } from 'starknet';
 
 import type { StarknetAccount } from '../test/utils';
 import { generateAccounts } from '../test/utils';
-import typedDataExample from './__test__/fixture/typedDataExample.json';
+import typedDataExample from './__tests__/fixture/typedDataExample.json';
 import type { SignMessageParams } from './signMessage';
 import { signMessage } from './signMessage';
 import type { SnapState } from './types/snapState';
