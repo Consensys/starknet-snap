@@ -20,11 +20,10 @@ import {
   hexToString,
   retry,
   isGTEMinVersion,
-  getTokenBalancesWithDetails,
   getTokenBalanceWithDetails,
 } from '../utils/utils';
 import { setWalletConnection } from '../slices/walletSlice';
-import { Network, TokenBalance, VoyagerTransactionType } from '../types';
+import { Network, VoyagerTransactionType } from '../types';
 import { Account } from '../types';
 import { Erc20TokenBalance, Erc20Token } from '../types';
 import { disableLoading, enableLoadingWithMessage } from '../slices/UISlice';
@@ -271,15 +270,19 @@ export const useStarkNetSnap = () => {
           : (acc as Account).upgradeRequired) ?? false;
     }
 
-    const tokenBalances: TokenBalance[] = await Promise.all(
+    const accountAddr = Array.isArray(acc) ? acc[0].address : acc.address;
+
+    // Get all tokens balance, USD value, and format them into Erc20TokenBalance type
+    const tokensWithBalances: Erc20TokenBalance[] = await Promise.all(
       tokens.map(async (token) => {
-        const accountAddr = Array.isArray(acc) ? acc[0].address : acc.address;
-        return await getTokenBalance(token.address, accountAddr, chainId);
+        const balance = await getTokenBalance(
+          token.address,
+          accountAddr,
+          chainId,
+        );
+        const usdPrice = await getAssetPriceUSD(token);
+        return await getTokenBalanceWithDetails(balance, token, usdPrice);
       }),
-    );
-    const tokensWithBalances = await getTokenBalancesWithDetails(
-      tokenBalances,
-      tokens,
     );
     if (networks) {
       dispatch(setNetworks(networks));

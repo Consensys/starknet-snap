@@ -1,5 +1,5 @@
 import { KeyboardEvent } from 'react';
-import { BigNumber, ethers } from 'ethers';
+import { ethers } from 'ethers';
 import {
   DECIMALS_DISPLAYED_MAX_LENGTH,
   STARKNET_MAINNET_EXPLORER,
@@ -15,7 +15,6 @@ import {
   TokenBalance,
 } from 'types';
 import { constants } from 'starknet';
-import { getAssetPriceUSD } from 'services/coinGecko';
 
 export const shortenAddress = (address: string, num = 3) => {
   if (!address) return '';
@@ -71,11 +70,11 @@ export const getHumanReadableAmount = (
 ) => {
   const amount =
     balanceType === BalanceType.Spendable
-      ? asset.spendableAmount
+      ? asset.spendableAmount ?? asset.amount
       : asset.amount;
   const amountStr = assetAmount
     ? assetAmount
-    : ethers.utils.formatUnits(amount as BigNumber, asset.decimals);
+    : ethers.utils.formatUnits(amount, asset.decimals);
   const indexDecimal = amountStr.indexOf('.');
   const integerPart = amountStr.substring(0, indexDecimal);
   let decimalPart = amountStr.substring(
@@ -252,35 +251,15 @@ export const shortenDomain = (domain: string, maxLength = 18) => {
 export function getTokenBalanceWithDetails(
   tokenBalance: TokenBalance,
   token: Erc20Token,
-  tokenUSDPrice: any,
+  tokenUSDPrice?: number,
 ): Erc20TokenBalance {
   const { balancePending, balanceLatest } = tokenBalance;
-  const tokenTotalBalance =
-    balancePending >= balanceLatest ? balancePending : balanceLatest;
   const spendableBalance =
     balancePending < balanceLatest ? balancePending : balanceLatest;
   return addMissingPropertiesToToken(
     token,
-    tokenTotalBalance,
+    balanceLatest,
     spendableBalance,
     tokenUSDPrice,
   );
-}
-
-export async function getTokenBalancesWithDetails(
-  tokenBalances: TokenBalance[],
-  tokens: Erc20Token[],
-): Promise<Erc20TokenBalance[]> {
-  const tokensWithBalances = await Promise.all(
-    tokens.map(async (token, index): Promise<Erc20TokenBalance> => {
-      const tokenUSDPrice = await getAssetPriceUSD(token);
-      return getTokenBalanceWithDetails(
-        tokenBalances[index],
-        token,
-        tokenUSDPrice,
-      );
-    }),
-  );
-
-  return tokensWithBalances;
 }
