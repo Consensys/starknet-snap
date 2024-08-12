@@ -694,7 +694,7 @@ export const useStarkNetSnap = () => {
           },
         },
       });
-      return response;
+      return response.balanceLatest;
     } catch (err) {
       //eslint-disable-next-line no-console
       console.error(err);
