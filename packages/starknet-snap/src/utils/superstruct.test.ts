@@ -1,7 +1,7 @@
 import { constants } from 'starknet';
 import { StructError, assert } from 'superstruct';
 
-import typedDataExample from '../__test__/fixture/typedDataExample.json';
+import typedDataExample from '../__tests__/fixture/typedDataExample.json';
 import {
   AddressStruct,
   AuthorizableStruct,
