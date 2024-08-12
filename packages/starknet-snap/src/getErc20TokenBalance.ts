@@ -6,11 +6,7 @@ import { BlockIdentifierEnum } from './utils/constants';
 import { logger } from './utils/logger';
 import { toJson } from './utils/serializer';
 import { getNetworkFromChainId } from './utils/snapUtils';
-import {
-  getBalance,
-  isAccountDeployed,
-  validateAndParseAddress,
-} from './utils/starknetUtils';
+import { getBalance, validateAndParseAddress } from './utils/starknetUtils';
 
 /**
  *
@@ -53,23 +49,26 @@ export async function getErc20TokenBalance(params: ApiParams) {
       `getErc20Balance:\nerc20Address: ${erc20Address}\nuserAddress: ${userAddress}`,
     );
 
-    // For deployed accounts, use the PENDING block to show balance updates as soon as possible,
-    // facilitating concurrent transactions without delays.
-    // For non-deployed accounts, use the LATEST block to avoid displaying non-zero balances
-    // from pending transactions, because confirmed non-zero balance is required for deployment.
-    const blockIdentifier = (await isAccountDeployed(network, userAddress))
-      ? BlockIdentifierEnum.Pending
-      : BlockIdentifierEnum.Latest;
-    const balance = await getBalance(
+    const balanceLatest = await getBalance(
       userAddress,
       erc20Address,
       network,
-      blockIdentifier,
+      BlockIdentifierEnum.Latest,
+    );
+    const balancePending = await getBalance(
+      userAddress,
+      erc20Address,
+      network,
+      BlockIdentifierEnum.Pending,
     );
 
-    logger.log(`getErc20Balance:\nresp: ${toJson(balance)}`);
+    const resp = {
+      balancePending,
+      balanceLatest,
+    };
+    logger.log(`getErc20Balance:\nresp: ${toJson(resp)}`);
 
-    return balance;
+    return resp;
   } catch (error) {
     logger.error(`Problem found:`, error);
     throw error;
