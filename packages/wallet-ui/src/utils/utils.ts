@@ -258,8 +258,8 @@ export function getTokenBalanceWithDetails(
     balancePending < balanceLatest ? balancePending : balanceLatest;
   return addMissingPropertiesToToken(
     token,
-    balanceLatest,
-    spendableBalance,
+    balanceLatest.toString(),
+    spendableBalance.toString(),
     tokenUSDPrice,
   );
 }

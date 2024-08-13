@@ -50,6 +50,6 @@ export type {
 
 // Define the type for your token balances
 export interface TokenBalance {
-  balancePending: string;
-  balanceLatest: string;
+  balancePending: BigNumber;
+  balanceLatest: BigNumber;
 }
