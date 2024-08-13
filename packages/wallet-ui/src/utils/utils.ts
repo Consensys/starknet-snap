@@ -8,12 +8,7 @@ import {
   TIMEOUT_DURATION,
   MIN_ACC_CONTRACT_VERSION,
 } from './constants';
-import {
-  BalanceType,
-  Erc20Token,
-  Erc20TokenBalance,
-  TokenBalance,
-} from 'types';
+import { Erc20Token, Erc20TokenBalance, TokenBalance } from 'types';
 import { constants } from 'starknet';
 
 export const shortenAddress = (address: string, num = 3) => {
@@ -66,15 +61,10 @@ export const addMissingPropertiesToToken = (
 export const getHumanReadableAmount = (
   asset: Erc20TokenBalance,
   assetAmount?: string,
-  balanceType?: BalanceType,
-) => {
-  const amount =
-    balanceType === BalanceType.Spendable
-      ? asset.spendableAmount ?? asset.amount
-      : asset.amount;
+): string => {
   const amountStr = assetAmount
     ? assetAmount
-    : ethers.utils.formatUnits(amount, asset.decimals);
+    : ethers.utils.formatUnits(asset.amount, asset.decimals);
   const indexDecimal = amountStr.indexOf('.');
   const integerPart = amountStr.substring(0, indexDecimal);
   let decimalPart = amountStr.substring(
@@ -93,19 +83,17 @@ export const getHumanReadableAmount = (
   return amountStr.substring(0, indexDecimal + firstNonZeroIndex + 3);
 };
 
-export const getSpendableTotalBalance = (
-  asset: Erc20TokenBalance,
-  assetAmount?: string,
-): string => {
-  const spendableAmount = getHumanReadableAmount(
-    asset,
-    assetAmount,
-    BalanceType.Spendable,
-  );
-  const totalAmount = getHumanReadableAmount(asset);
-  return spendableAmount === totalAmount
-    ? `${spendableAmount}`
-    : `${spendableAmount} (${totalAmount})`;
+export const getSpendableTotalBalance = (asset: Erc20TokenBalance): string => {
+  const amount = asset.spendableAmount ?? asset.amount;
+  const spendableAmount = getHumanReadableAmount(asset, amount.toString());
+
+  if (asset.spendableAmount === asset.amount) {
+    return `${spendableAmount}`;
+  }
+
+  const totalAmount = getHumanReadableAmount(asset, asset.amount.toString());
+
+  return `${spendableAmount} (${totalAmount})`;
 };
 
 export const getMaxDecimalsReadable = (
