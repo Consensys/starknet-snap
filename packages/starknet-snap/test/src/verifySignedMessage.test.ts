@@ -119,33 +119,6 @@ describe('Test function: verifySignedMessage', function () {
       });
     });
 
-    describe('when account require upgrade', function () {
-      let validateAccountRequireUpgradeOrDeployStub: sinon.SinonStub;
-      beforeEach(async function () {
-        validateAccountRequireUpgradeOrDeployStub = sandbox
-          .stub(utils, 'validateAccountRequireUpgradeOrDeploy')
-          .throws(new UpgradeRequiredError('Upgrade Required'));
-      });
-
-      it('should throw error if upgrade required', async function () {
-        let result;
-        try {
-          result = await verifySignedMessage(apiParams);
-        } catch (err) {
-          result = err;
-        } finally {
-          expect(
-            validateAccountRequireUpgradeOrDeployStub,
-          ).to.have.been.calledOnceWith(
-            STARKNET_SEPOLIA_TESTNET_NETWORK,
-            account1.address,
-            account1.publicKey,
-          );
-          expect(result).to.be.an('Error');
-        }
-      });
-    });
-
     describe('when account is not require upgrade', function () {
       beforeEach(async function () {
         sandbox

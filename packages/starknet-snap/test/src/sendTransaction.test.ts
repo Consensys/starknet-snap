@@ -242,8 +242,6 @@ describe('Test function: sendTransaction', function () {
         sandbox.stub(estimateFeeSnap, 'estimateFee').resolves({
           suggestedMaxFee: estimateFeeResp.suggestedMaxFee.toString(10),
           overallFee: estimateFeeResp.overall_fee.toString(10),
-          gasConsumed: '0',
-          gasPrice: '0',
           unit: 'wei',
           includeDeploy: true,
         });

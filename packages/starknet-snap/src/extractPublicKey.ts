@@ -6,10 +6,13 @@ import type {
 } from './types/snapApi';
 import { logger } from './utils/logger';
 import { toJson } from './utils/serializer';
-import { getAccount, getNetworkFromChainId } from './utils/snapUtils';
+import {
+  getAccount,
+  getNetworkFromChainId,
+  verifyIfAccountNeedUpgradeOrDeploy,
+} from './utils/snapUtils';
 import {
   validateAndParseAddress,
-  validateAccountRequireUpgradeOrDeploy,
   getKeysFromAddress,
 } from './utils/starknetUtils';
 
@@ -48,10 +51,12 @@ export async function extractPublicKey(params: ApiParamsWithKeyDeriver) {
       state,
       userAddress,
     );
-    await validateAccountRequireUpgradeOrDeploy(
+
+    await verifyIfAccountNeedUpgradeOrDeploy(
       network,
       userAddress,
       publicKey,
+      false,
     );
 
     let userPublicKey;

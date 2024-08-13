@@ -11,7 +11,7 @@ import {
   Wrapper,
 } from './AssetListItem.style';
 import { DoubleIcons } from 'components/ui/atom/DoubleIcons';
-import { getHumanReadableAmount } from 'utils/utils';
+import { getSpendableTotalBalance } from 'utils/utils';
 
 interface Props extends HTMLAttributes<HTMLDivElement> {
   asset: Erc20TokenBalance;
@@ -34,7 +34,7 @@ export const AssetListItemView = ({
         <Column>
           <Label>{asset.name}</Label>
           <Description>
-            {getHumanReadableAmount(asset)} {asset.symbol}
+            {getSpendableTotalBalance(asset)} {asset.symbol}
           </Description>
         </Column>
       </Left>

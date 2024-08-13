@@ -8,7 +8,7 @@ import {
   TIMEOUT_DURATION,
   MIN_ACC_CONTRACT_VERSION,
 } from './constants';
-import { Erc20Token, Erc20TokenBalance } from 'types';
+import { Erc20Token, Erc20TokenBalance, TokenBalance } from 'types';
 import { constants } from 'starknet';
 
 export const shortenAddress = (address: string, num = 3) => {
@@ -45,11 +45,15 @@ export const isValidAddress = (toCheck: string) => {
 export const addMissingPropertiesToToken = (
   token: Erc20Token,
   balance?: string,
+  balanceSpendable?: string,
   usdPrice?: number,
 ): Erc20TokenBalance => {
   return {
     ...token,
     amount: ethers.BigNumber.from(balance ? balance : '0x0'),
+    spendableAmount: ethers.BigNumber.from(
+      balanceSpendable ? balanceSpendable : '0x0',
+    ),
     usdPrice: usdPrice,
   };
 };
@@ -57,7 +61,7 @@ export const addMissingPropertiesToToken = (
 export const getHumanReadableAmount = (
   asset: Erc20TokenBalance,
   assetAmount?: string,
-) => {
+): string => {
   const amountStr = assetAmount
     ? assetAmount
     : ethers.utils.formatUnits(asset.amount, asset.decimals);
@@ -77,6 +81,23 @@ export const getHumanReadableAmount = (
   }
 
   return amountStr.substring(0, indexDecimal + firstNonZeroIndex + 3);
+};
+
+export const getSpendableTotalBalance = (asset: Erc20TokenBalance): string => {
+  if (asset.spendableAmount === undefined) {
+    throw new Error('Spendable amount can not be undefined');
+  }
+  const spendableAmount = getHumanReadableAmount(
+    asset,
+    ethers.utils.formatUnits(asset.spendableAmount, asset.decimals),
+  );
+  if (asset.spendableAmount.eq(asset.amount)) {
+    return `${spendableAmount}`;
+  }
+
+  const totalAmount = getHumanReadableAmount(asset);
+
+  return `${spendableAmount} (${totalAmount})`;
 };
 
 export const getMaxDecimalsReadable = (
@@ -218,3 +239,19 @@ export const shortenDomain = (domain: string, maxLength = 18) => {
   const shortenedPartLength = maxLength - ellipsis.length;
   return `${domain.substring(0, shortenedPartLength)}${ellipsis}`;
 };
+
+export function getTokenBalanceWithDetails(
+  tokenBalance: TokenBalance,
+  token: Erc20Token,
+  tokenUSDPrice?: number,
+): Erc20TokenBalance {
+  const { balancePending, balanceLatest } = tokenBalance;
+  const spendableBalance =
+    balancePending < balanceLatest ? balancePending : balanceLatest;
+  return addMissingPropertiesToToken(
+    token,
+    balanceLatest.toString(),
+    spendableBalance.toString(),
+    tokenUSDPrice,
+  );
+}

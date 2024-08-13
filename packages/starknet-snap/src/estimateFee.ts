@@ -1,4 +1,4 @@
-import type { Invocations } from 'starknet';
+import type { EstimateFee, Invocations } from 'starknet';
 import { TransactionType } from 'starknet';
 
 import type {
@@ -8,13 +8,14 @@ import type {
 import { ACCOUNT_CLASS_HASH } from './utils/constants';
 import { logger } from './utils/logger';
 import { toJson } from './utils/serializer';
-import { getNetworkFromChainId } from './utils/snapUtils';
 import {
-  validateAccountRequireUpgradeOrDeploy,
+  getNetworkFromChainId,
+  verifyIfAccountNeedUpgradeOrDeploy,
+} from './utils/snapUtils';
+import {
   validateAndParseAddress,
   getKeysFromAddress,
   getCallDataArray,
-  estimateFee as estimateFeeUtil,
   getAccContractAddressAndCallData,
   estimateFeeBulk,
   addFeesFromAllTransactions,
@@ -65,10 +66,11 @@ export async function estimateFee(params: ApiParamsWithKeyDeriver) {
     const { privateKey: senderPrivateKey, publicKey } =
       await getKeysFromAddress(keyDeriver, network, state, senderAddress);
 
-    await validateAccountRequireUpgradeOrDeploy(
+    await verifyIfAccountNeedUpgradeOrDeploy(
       network,
       senderAddress,
       publicKey,
+      false,
     );
 
     const txnInvocation = {
@@ -108,44 +110,26 @@ export async function estimateFee(params: ApiParamsWithKeyDeriver) {
       ];
     }
 
-    let estimateFeeResp;
-
-    if (accountDeployed) {
-      // This condition branch will be removed later when starknet.js
-      // supports estimateFeeBulk in rpc mode
-      estimateFeeResp = await estimateFeeUtil(
-        network,
-        senderAddress,
-        senderPrivateKey,
-        txnInvocation,
-      );
-      logger.log(
-        `estimateFee:\nestimateFeeUtil estimateFeeResp: ${toJson(
-          estimateFeeResp,
-        )}`,
-      );
-    } else {
-      const estimateBulkFeeResp = await estimateFeeBulk(
-        network,
-        senderAddress,
-        senderPrivateKey,
-        bulkTransactions,
-      );
-      logger.log(
-        `estimateFee:\nestimateFeeBulk estimateBulkFeeResp: ${toJson(
-          estimateBulkFeeResp,
-        )}`,
-      );
-      estimateFeeResp = addFeesFromAllTransactions(estimateBulkFeeResp);
-    }
+    const estimateBulkFeeResp = await estimateFeeBulk(
+      network,
+      senderAddress,
+      senderPrivateKey,
+      bulkTransactions,
+    );
+    logger.log(
+      `estimateFee:\nestimateFeeBulk estimateBulkFeeResp: ${toJson(
+        estimateBulkFeeResp,
+      )}`,
+    );
+    const estimateFeeResp = addFeesFromAllTransactions(
+      estimateBulkFeeResp,
+    ) as EstimateFee;
 
     logger.log(`estimateFee:\nestimateFeeResp: ${toJson(estimateFeeResp)}`);
 
     const resp = {
       suggestedMaxFee: estimateFeeResp.suggestedMaxFee.toString(10),
       overallFee: estimateFeeResp.overall_fee.toString(10),
-      gasConsumed: estimateFeeResp.gas_consumed?.toString(10) ?? '0',
-      gasPrice: estimateFeeResp.gas_price?.toString(10) ?? '0',
       unit: 'wei',
       includeDeploy: !accountDeployed,
     };
