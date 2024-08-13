@@ -60,6 +60,7 @@ import {
   STARKNET_TESTNET_NETWORK,
 } from './utils/constants';
 import { getAddressKeyDeriver } from './utils/keyPair';
+import { acquireLock } from './utils/lock';
 import { logger, LogLevel } from './utils/logger';
 import { toJson } from './utils/serializer';
 import {
@@ -74,7 +75,6 @@ import {
   getKeysFromAddressIndex,
 } from './utils/starknetUtils';
 import { verifySignedMessage } from './verifySignedMessage';
-import { acquireLock } from './utils/lock';
 
 declare const snap;
 
@@ -118,7 +118,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
     }
 
     // TODO: this can be remove, after state manager is implemented
-    const saveMutex = acquireLock()
+    const saveMutex = acquireLock();
 
     // pre-inserted the default networks and tokens
     await upsertNetwork(STARKNET_MAINNET_NETWORK, snap, saveMutex, state);

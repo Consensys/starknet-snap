@@ -44,6 +44,7 @@ export abstract class SnapStateManager<State> {
       if (this.#transaction.current) {
         logger.info(
           `SnapStateManager.update [${
+            // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
             this.#transaction.id
           }]: transaction is processing, use existing state`,
         );
@@ -133,6 +134,7 @@ export abstract class SnapStateManager<State> {
       ) {
         logger.info(
           `SnapStateManager.rollback [${
+            // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
             this.#transaction.id
           }]: attempt to rollback state`,
         );
@@ -140,9 +142,9 @@ export abstract class SnapStateManager<State> {
         await this.set(this.#transaction.orgState);
       }
     } catch (error) {
-      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
       logger.info(
         `SnapStateManager.rollback [${
+          // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
           this.#transaction.id
         }]: error : ${JSON.stringify(error)}`,
       );
