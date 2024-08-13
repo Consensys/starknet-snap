@@ -84,8 +84,13 @@ export const getHumanReadableAmount = (
 };
 
 export const getSpendableTotalBalance = (asset: Erc20TokenBalance): string => {
-  const amount = asset.spendableAmount ?? asset.amount;
-  const spendableAmount = getHumanReadableAmount(asset, amount.toString());
+  if (asset.spendableAmount === undefined) {
+    throw new Error('Spendable amount can not be undefined');
+  }
+  const spendableAmount = getHumanReadableAmount(
+    asset,
+    asset.spendableAmount.toString(),
+  );
 
   if (asset.spendableAmount === asset.amount) {
     return `${spendableAmount}`;
