@@ -1154,10 +1154,8 @@ export const validateAccountRequireUpgradeOrDeploy = async (
   pubKey: string,
 ) => {
   if (await isUpgradeRequired(network, address)) {
-    throw new UpgradeRequiredError('Upgrade required');
+    throw new UpgradeRequiredError();
   } else if (await isDeployRequired(network, address, pubKey)) {
-    throw new DeployRequiredError(
-      `Cairo 0 contract address ${address} balance is not empty, deploy required`,
-    );
+    throw new DeployRequiredError();
   }
 };

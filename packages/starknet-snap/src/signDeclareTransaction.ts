@@ -10,12 +10,11 @@ import { toJson } from './utils/serializer';
 import {
   getNetworkFromChainId,
   getSignTxnTxt,
-  showAccountRequireUpgradeOrDeployModal,
+  verifyIfAccountNeedUpgradeOrDeploy,
 } from './utils/snapUtils';
 import {
   getKeysFromAddress,
   signDeclareTransaction as signDeclareTransactionUtil,
-  validateAccountRequireUpgradeOrDeploy,
 } from './utils/starknetUtils';
 
 /**
@@ -38,16 +37,7 @@ export async function signDeclareTransaction(
       signerAddress,
     );
 
-    try {
-      await validateAccountRequireUpgradeOrDeploy(
-        network,
-        signerAddress,
-        publicKey,
-      );
-    } catch (validateError) {
-      await showAccountRequireUpgradeOrDeployModal(wallet, validateError);
-      throw validateError;
-    }
+    await verifyIfAccountNeedUpgradeOrDeploy(network, signerAddress, publicKey);
 
     logger.log(
       `signDeclareTransaction params: ${toJson(

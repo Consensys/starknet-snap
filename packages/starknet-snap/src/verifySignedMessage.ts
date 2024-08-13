@@ -5,12 +5,14 @@ import type {
 } from './types/snapApi';
 import { logger } from './utils/logger';
 import { toJson } from './utils/serializer';
-import { getNetworkFromChainId } from './utils/snapUtils';
+import {
+  getNetworkFromChainId,
+  verifyIfAccountNeedUpgradeOrDeploy,
+} from './utils/snapUtils';
 import {
   verifyTypedDataMessageSignature,
   getFullPublicKeyPairFromPrivateKey,
   getKeysFromAddress,
-  validateAccountRequireUpgradeOrDeploy,
   validateAndParseAddress,
 } from './utils/starknetUtils';
 
@@ -53,10 +55,12 @@ export async function verifySignedMessage(params: ApiParamsWithKeyDeriver) {
 
     const { privateKey: signerPrivateKey, publicKey } =
       await getKeysFromAddress(keyDeriver, network, state, verifySignerAddress);
-    await validateAccountRequireUpgradeOrDeploy(
+
+    await verifyIfAccountNeedUpgradeOrDeploy(
       network,
       verifySignerAddress,
       publicKey,
+      false,
     );
 
     const fullPublicKey = getFullPublicKeyPairFromPrivateKey(signerPrivateKey);
