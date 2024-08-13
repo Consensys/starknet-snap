@@ -2216,7 +2216,7 @@ __metadata:
 
 "@consensys/starknet-snap@file:../starknet-snap::locator=wallet-ui%40workspace%3Apackages%2Fwallet-ui":
   version: 2.9.0
-  resolution: "@consensys/starknet-snap@file:../starknet-snap#../starknet-snap::hash=bdb700&locator=wallet-ui%40workspace%3Apackages%2Fwallet-ui"
+  resolution: "@consensys/starknet-snap@file:../starknet-snap#../starknet-snap::hash=4fe643&locator=wallet-ui%40workspace%3Apackages%2Fwallet-ui"
   dependencies:
     "@metamask/key-tree": 9.0.0
     "@metamask/snaps-sdk": ^4.0.0
@@ -2225,7 +2225,8 @@ __metadata:
     ethers: ^5.5.1
     starknet: 6.11.0
     starknet_v4.22.0: "npm:starknet@4.22.0"
-  checksum: f3c17dee4fca9fc6e7826279be325900be78e13207ee0fb6230d5d15091e6f9189f01972f17fff7f4ec15a6d86fb08c23fec5589c7ce1992fb0fefdfb2c085ce
+    superstruct: ^2.0.2
+  checksum: 56f4ffe23e87c7893827e7207b299e37bd5c46635082172413fdcf0c4d5803dbbe7ea770879ec32a825a125952b386ca29f41df69b50da2032616589722877a8
   languageName: node
   linkType: hard
 
@@ -2278,6 +2279,7 @@ __metadata:
     ts-jest: ^29.1.0
     ts-node: ^10.9.2
     typescript: ^4.7.4
+    uuid: ^10.0.0
   languageName: unknown
   linkType: soft
 
@@ -27192,6 +27194,15 @@ __metadata:
   version: 3.1.0
   resolution: "uuid-browser@npm:3.1.0"
   checksum: 951ec47593865c7cc746df671f7b0f0ff48fcab583fcdaeab6c517a5222af0f5e144a6fcea5fa9620a5b3be047e2f9412a80267ea5c45050e07d51774197d49e
+  languageName: node
+  linkType: hard
+
+"uuid@npm:^10.0.0":
+  version: 10.0.0
+  resolution: "uuid@npm:10.0.0"
+  bin:
+    uuid: dist/bin/uuid
+  checksum: 4b81611ade2885d2313ddd8dc865d93d8dccc13ddf901745edca8f86d99bc46d7a330d678e7532e7ebf93ce616679fb19b2e3568873ac0c14c999032acb25869
   languageName: node
   linkType: hard
 
