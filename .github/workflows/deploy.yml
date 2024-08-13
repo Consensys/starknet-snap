@@ -45,7 +45,7 @@ jobs:
             } >> "$GITHUB_OUTPUT"
           elif [[ $ENV  == "staging" ]]; then
             {
-              echo "VERSION=${BASE}-staging"
+              echo "VERSION=${BASE}"
               echo "TAG=staging"
               echo "ENV=staging"
               echo "LOG_LEVEL=off"
