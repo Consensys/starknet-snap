@@ -334,8 +334,8 @@ export const useStarkNetSnap = () => {
     senderAddress: string,
     chainId: string,
     transactionVersion?:
-      | constants.TRANSACTION_VERSION.V2
-      | constants.TRANSACTION_VERSION.V3,
+      | typeof constants.TRANSACTION_VERSION.V2
+      | typeof constants.TRANSACTION_VERSION.V3,
   ) {
     try {
       const response = await provider.request({
