@@ -18,7 +18,7 @@ import {
  *
  * @param params
  */
-export async function extractPrivateKey(params: ApiParamsWithKeyDeriver) {
+export async function displayPrivateKey(params: ApiParamsWithKeyDeriver) {
   try {
     const { state, wallet, keyDeriver, requestParams } = params;
     const requestParamsObj = requestParams as ExtractPrivateKeyRequestParams;

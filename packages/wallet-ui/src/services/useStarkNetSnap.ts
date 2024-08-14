@@ -311,7 +311,7 @@ export const useStarkNetSnap = () => {
         params: {
           snapId,
           request: {
-            method: 'starkNet_extractPrivateKey',
+            method: 'starkNet_displayPrivateKey',
             params: {
               ...defaultParam,
               userAddress: address,

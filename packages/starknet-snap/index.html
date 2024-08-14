@@ -612,13 +612,13 @@
       await callSnap('starkNet_createAccount', { addressIndex, deploy });
     }
 
-    // here we call the snap's "starkNet_extractPrivateKey" method
+    // here we call the snap's "starkNet_displayPrivateKey" method
     async function retrievePrivateKeyFromAddress(e) {
       e.preventDefault(); // to prevent default form behavior
 
       const userAddress = document.getElementById('userAddress').value;
 
-      await callSnap('starkNet_extractPrivateKey', { userAddress });
+      await callSnap('starkNet_displayPrivateKey', { userAddress });
     }
 
     // here we call the snap's "starkNet_extractPublicKey" method

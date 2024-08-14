@@ -3,7 +3,7 @@ import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import { WalletMock } from '../wallet.mock.test';
 import { SnapState } from '../../src/types/snapState';
-import { extractPrivateKey } from '../../src/extractPrivateKey';
+import { displayPrivateKey } from '../../src/displayPrivateKey';
 import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../../src/utils/constants';
 import {
   account1,
@@ -22,7 +22,7 @@ import { UpgradeRequiredError } from '../../src/utils/exceptions';
 chai.use(sinonChai);
 const sandbox = sinon.createSandbox();
 
-describe('Test function: extractPrivateKey', function () {
+describe('Test function: displayPrivateKey', function () {
   const walletStub = new WalletMock();
   const state: SnapState = {
     accContracts: [account1],
@@ -65,7 +65,7 @@ describe('Test function: extractPrivateKey', function () {
       apiParams.requestParams = invalidRequest;
       let result;
       try {
-        result = await extractPrivateKey(apiParams);
+        result = await displayPrivateKey(apiParams);
       } catch (err) {
         result = err;
       } finally {
@@ -78,7 +78,7 @@ describe('Test function: extractPrivateKey', function () {
       apiParams.requestParams = invalidRequest;
       let result;
       try {
-        result = await extractPrivateKey(apiParams);
+        result = await displayPrivateKey(apiParams);
       } catch (err) {
         result = err;
       } finally {
@@ -103,7 +103,7 @@ describe('Test function: extractPrivateKey', function () {
           .throws('network error');
         let result;
         try {
-          result = await extractPrivateKey(apiParams);
+          result = await displayPrivateKey(apiParams);
         } catch (err) {
           result = err;
         } finally {
@@ -130,7 +130,7 @@ describe('Test function: extractPrivateKey', function () {
       it('should throw error if upgrade required', async function () {
         let result;
         try {
-          result = await extractPrivateKey(apiParams);
+          result = await displayPrivateKey(apiParams);
         } catch (err) {
           result = err;
         } finally {
@@ -159,7 +159,7 @@ describe('Test function: extractPrivateKey', function () {
           userAddress: account1.address,
         };
         apiParams.requestParams = requestObject;
-        const result = await extractPrivateKey(apiParams);
+        const result = await displayPrivateKey(apiParams);
         expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledTwice;
         expect(walletStub.rpcStubs.snap_manageState).not.to.have.been.called;
         expect(result).to.be.equal(null);
@@ -171,7 +171,7 @@ describe('Test function: extractPrivateKey', function () {
           userAddress: unfoundUserAddress,
         };
         apiParams.requestParams = requestObject;
-        const result = await extractPrivateKey(apiParams);
+        const result = await displayPrivateKey(apiParams);
         expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledTwice;
         expect(walletStub.rpcStubs.snap_manageState).not.to.have.been.called;
         expect(result).to.be.eql(null);
@@ -183,7 +183,7 @@ describe('Test function: extractPrivateKey', function () {
           userAddress: account1.address,
         };
         apiParams.requestParams = requestObject;
-        const result = await extractPrivateKey(apiParams);
+        const result = await displayPrivateKey(apiParams);
         expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledOnce;
         expect(walletStub.rpcStubs.snap_manageState).not.to.have.been.called;
         expect(result).to.be.equal(null);
@@ -199,7 +199,7 @@ describe('Test function: extractPrivateKey', function () {
 
         let result;
         try {
-          await extractPrivateKey(apiParams);
+          await displayPrivateKey(apiParams);
         } catch (err) {
           result = err;
         } finally {

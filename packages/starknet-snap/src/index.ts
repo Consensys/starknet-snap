@@ -19,11 +19,11 @@ import { addErc20Token } from './addErc20Token';
 import { addNetwork } from './addNetwork';
 import { createAccount } from './createAccount';
 import { declareContract } from './declareContract';
+import { displayPrivateKey } from './displayPrivateKey';
 import { estimateAccDeployFee } from './estimateAccountDeployFee';
 import { estimateFee } from './estimateFee';
 import { estimateFees } from './estimateFees';
 import { executeTxn } from './executeTxn';
-import { extractPrivateKey } from './extractPrivateKey';
 import { extractPublicKey } from './extractPublicKey';
 import { getCurrentNetwork } from './getCurrentNetwork';
 import { getErc20TokenBalance } from './getErc20TokenBalance';
@@ -162,9 +162,9 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
       case 'starkNet_getStoredUserAccounts':
         return await getStoredUserAccounts(apiParams);
 
-      case 'starkNet_extractPrivateKey':
+      case 'starkNet_displayPrivateKey':
         apiParams.keyDeriver = await getAddressKeyDeriver(snap);
-        return await extractPrivateKey(
+        return await displayPrivateKey(
           apiParams as unknown as ApiParamsWithKeyDeriver,
         );
 
