@@ -82,7 +82,6 @@ export abstract class RpcController<
   }
 }
 
-
 // TODO: the Type should be moved to a common place
 export type AccountRpcParams = Json & {
   chainId: string;
@@ -108,7 +107,7 @@ export abstract class AccountRpcController<
     await super.preExecute(params);
 
     const deriver = await getBip44Deriver();
-    // TODO: Instead of having the get on the state directly, we should should implement state management to consolidate the state fetching
+    // TODO: Instead of getting the state directly, we should implement state management to consolidate the state fetching
     const state = await getStateData<SnapState>();
 
     // TODO: getNetworkFromChainId from state is still needed, due to it is supporting in get-starknet at this moment
