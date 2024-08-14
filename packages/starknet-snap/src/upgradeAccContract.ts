@@ -7,11 +7,7 @@ import type {
 } from './types/snapApi';
 import type { Transaction } from './types/snapState';
 import { TransactionStatus, VoyagerTransactionType } from './types/snapState';
-import {
-  ACCOUNT_CLASS_HASH,
-  CAIRO_VERSION_LEGACY,
-  TRANSACTION_VERSION,
-} from './utils/constants';
+import { ACCOUNT_CLASS_HASH, CAIRO_VERSION_LEGACY } from './utils/constants';
 import { logger } from './utils/logger';
 import { toJson } from './utils/serializer';
 import {
@@ -93,7 +89,7 @@ export async function upgradeAccContract(params: ApiParamsWithKeyDeriver) {
         contractAddress,
         privateKey,
         txnInvocation,
-        TRANSACTION_VERSION,
+        constants.TRANSACTION_VERSION.V2,
         CAIRO_VERSION_LEGACY,
       );
       maxFee = numUtils.toBigInt(
