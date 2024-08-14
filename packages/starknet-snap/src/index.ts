@@ -13,7 +13,6 @@ import {
   copyable,
   SnapError,
 } from '@metamask/snaps-sdk';
-import { Mutex } from 'async-mutex';
 import { ethers } from 'ethers';
 
 import { addErc20Token } from './addErc20Token';
@@ -40,6 +39,7 @@ import { recoverAccounts } from './recoverAccounts';
 import { sendTransaction } from './sendTransaction';
 import { signDeclareTransaction } from './signDeclareTransaction';
 import { signDeployAccountTransaction } from './signDeployAccountTransaction';
+import type { SignMessageParams } from './signMessage';
 import { signMessage } from './signMessage';
 import { signTransaction } from './signTransaction';
 import { switchNetwork } from './switchNetwork';
@@ -55,12 +55,12 @@ import {
   ETHER_MAINNET,
   ETHER_SEPOLIA_TESTNET,
   PRELOADED_TOKENS,
-  STARKNET_INTEGRATION_NETWORK,
   STARKNET_MAINNET_NETWORK,
   STARKNET_SEPOLIA_TESTNET_NETWORK,
   STARKNET_TESTNET_NETWORK,
 } from './utils/constants';
 import { getAddressKeyDeriver } from './utils/keyPair';
+import { acquireLock } from './utils/lock';
 import { logger, LogLevel } from './utils/logger';
 import { toJson } from './utils/serializer';
 import {
@@ -77,7 +77,6 @@ import {
 import { verifySignedMessage } from './verifySignedMessage';
 
 declare const snap;
-const saveMutex = new Mutex();
 
 export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
   const requestParams = request?.params as unknown as ApiRequestParams;
@@ -89,13 +88,12 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
   logger.log(`${request.method}:\nrequestParams: ${toJson(requestParams)}`);
 
   try {
-    const isDev = Boolean(requestParams?.isDev);
-
     if (request.method === 'ping') {
       logger.log('pong');
       return 'pong';
     }
 
+    // TODO: this will causing racing condition, need to be fixed
     let state: SnapState = await snap.request({
       method: 'snap_manageState',
       params: {
@@ -118,18 +116,18 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
         },
       });
     }
+
+    // TODO: this can be remove, after state manager is implemented
+    const saveMutex = acquireLock();
+
     // pre-inserted the default networks and tokens
     await upsertNetwork(STARKNET_MAINNET_NETWORK, snap, saveMutex, state);
-    if (isDev) {
-      await upsertNetwork(STARKNET_INTEGRATION_NETWORK, snap, saveMutex, state);
-    } else {
-      await upsertNetwork(
-        STARKNET_SEPOLIA_TESTNET_NETWORK,
-        snap,
-        saveMutex,
-        state,
-      );
-    }
+    await upsertNetwork(
+      STARKNET_SEPOLIA_TESTNET_NETWORK,
+      snap,
+      saveMutex,
+      state,
+    );
 
     // remove the testnet network (migration)
     await removeNetwork(STARKNET_TESTNET_NETWORK, snap, saveMutex, state);
@@ -177,9 +175,9 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
         );
 
       case 'starkNet_signMessage':
-        apiParams.keyDeriver = await getAddressKeyDeriver(snap);
         return await signMessage(
-          apiParams as unknown as ApiParamsWithKeyDeriver,
+          apiParams.requestParams as unknown as SignMessageParams,
+          state,
         );
 
       case 'starkNet_signTransaction':

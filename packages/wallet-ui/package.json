@@ -6,19 +6,19 @@
   "license": "(Apache-2.0 OR MIT)",
   "scripts": {
     "allow-scripts": "yarn workspace root allow-scripts",
-    "build": "react-scripts build",
+    "build": "craco build",
     "build-storybook": "build-storybook",
     "build:clean": "yarn clean && yarn build",
     "clean": "rimraf dist",
-    "eject": "react-scripts eject",
+    "eject": "craco eject",
     "lint": "yarn lint:eslint && yarn lint:misc --check",
     "lint:eslint": "eslint . --cache --ext js,ts,tsx",
     "lint:fix": "yarn lint:eslint --fix && yarn lint:misc --write",
     "lint:misc": "prettier '**/*.ts' '**/*.json' '**/*.tsx' '**/*.md' '!CHANGELOG.md' --ignore-path .gitignore",
-    "serve": "react-scripts serve",
-    "start": "react-scripts start",
+    "serve": "craco serve",
+    "start": "craco start",
     "storybook": "start-storybook -p 6006",
-    "test": "react-scripts test --coverage --passWithNoTests"
+    "test": "craco test --coverage --passWithNoTests"
   },
   "browserslist": {
     "production": [
@@ -65,12 +65,13 @@
     "react-redux": "^8.0.1",
     "redux-persist": "^6.0.0",
     "semver": "^7.5.2",
-    "starknet": "6.7.0",
+    "starknet": "6.11.0",
     "styled-components": "^5.3.5",
     "toastr2": "^3.0.0-alpha.18",
     "web-vitals": "^2.1.4"
   },
   "devDependencies": {
+    "@craco/craco": "^7.1.0",
     "@metamask/eslint-config": "^12.2.0",
     "@metamask/eslint-config-browser": "^12.1.0",
     "@metamask/eslint-config-jest": "^12.1.0",

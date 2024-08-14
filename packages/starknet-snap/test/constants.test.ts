@@ -83,7 +83,7 @@ export const Cairo1Account1: AccContract = {
     '0x5bc00132b8f2fc0f673dc232594b26727e712b204a2716f9dc28a8c5f607b5e',
   publicKey:
     '0x019e59f349e1aa813ab4556c5836d0472e5e1ae82d1e5c3b3e8aabfeb290befd',
-  chainId: constants.StarknetChainId.SN_GOERLI,
+  chainId: constants.StarknetChainId.SN_SEPOLIA,
 };
 
 export const token0: Erc20Token = {

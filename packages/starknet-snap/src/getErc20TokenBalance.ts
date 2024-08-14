@@ -1,13 +1,12 @@
-import { num as numUtils } from 'starknet';
-
 import type {
   ApiParams,
   GetErc20TokenBalanceRequestParams,
 } from './types/snapApi';
+import { BlockIdentifierEnum } from './utils/constants';
 import { logger } from './utils/logger';
 import { toJson } from './utils/serializer';
 import { getNetworkFromChainId } from './utils/snapUtils';
-import { validateAndParseAddress, callContract } from './utils/starknetUtils';
+import { getBalance, validateAndParseAddress } from './utils/starknetUtils';
 
 /**
  *
@@ -50,13 +49,26 @@ export async function getErc20TokenBalance(params: ApiParams) {
       `getErc20Balance:\nerc20Address: ${erc20Address}\nuserAddress: ${userAddress}`,
     );
 
-    const resp = await callContract(network, erc20Address, 'balanceOf', [
-      numUtils.toBigInt(userAddress).toString(10),
-    ]);
+    const balanceLatest = await getBalance(
+      userAddress,
+      erc20Address,
+      network,
+      BlockIdentifierEnum.Latest,
+    );
+    const balancePending = await getBalance(
+      userAddress,
+      erc20Address,
+      network,
+      BlockIdentifierEnum.Pending,
+    );
 
+    const resp = {
+      balancePending,
+      balanceLatest,
+    };
     logger.log(`getErc20Balance:\nresp: ${toJson(resp)}`);
 
-    return resp[0];
+    return resp;
   } catch (error) {
     logger.error(`Problem found:`, error);
     throw error;

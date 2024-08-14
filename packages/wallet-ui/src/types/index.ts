@@ -13,6 +13,7 @@ export type Network = Pick<
 export interface Erc20TokenBalance extends Types.Erc20Token {
   amount: BigNumber;
   usdPrice?: number;
+  spendableAmount?: BigNumber;
 }
 export type TransactionStatusOptions =
   | 'Received'
@@ -37,7 +38,18 @@ export enum TransactionStatus { // for retrieving txn from Starknet feeder gatew
   REJECTED = 'REJECTED',
 }
 
+export enum BalanceType {
+  Spendable = 'spendable',
+  Total = 'total',
+}
+
 export type {
   Erc20Token,
   Transaction,
 } from '@consensys/starknet-snap/src/types/snapState';
+
+// Define the type for your token balances
+export interface TokenBalance {
+  balancePending: BigNumber;
+  balanceLatest: BigNumber;
+}

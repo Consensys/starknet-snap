@@ -61,6 +61,7 @@ import {
   ETHER_MAINNET,
   ETHER_SEPOLIA_TESTNET,
   TRANSACTION_VERSION,
+  BlockIdentifierEnum,
 } from './constants';
 import { DeployRequiredError, UpgradeRequiredError } from './exceptions';
 import { hexToString } from './formatterUtils';
@@ -112,11 +113,17 @@ export const getCallDataArray = (callDataStr: string): string[] => {
     .filter((data) => data.length > 0);
 };
 
-export const getProvider = (network: Network): ProviderInterface => {
+export const getProvider = (
+  network: Network,
+  blockIdentifier?: BlockIdentifierEnum,
+): ProviderInterface => {
   let providerParam: ProviderOptions = {};
   providerParam = {
     nodeUrl: getRPCUrl(network.chainId),
   };
+  if (blockIdentifier) {
+    providerParam.blockIdentifier = blockIdentifier;
+  }
   return new Provider(providerParam);
 };
 
@@ -128,8 +135,9 @@ export const getAccountInstance = (
   transactionVersion?:
     | typeof constants.TRANSACTION_VERSION.V2
     | typeof constants.TRANSACTION_VERSION.V3,
+  blockIdentifier?: BlockIdentifierEnum,
 ): Account => {
-  const provider = getProvider(network);
+  const provider = getProvider(network, blockIdentifier);
   return new Account(
     provider,
     userAddress,
@@ -144,6 +152,7 @@ export const callContract = async (
   contractAddress: string,
   contractFuncName: string,
   contractCallData: RawCalldata = [],
+  blockIdentifier: BlockIdentifierEnum = BlockIdentifierEnum.Latest,
 ): Promise<CallContractResponse> => {
   const provider = getProvider(network);
   return provider.callContract(
@@ -152,7 +161,7 @@ export const callContract = async (
       entrypoint: contractFuncName,
       calldata: contractCallData,
     },
-    'latest',
+    blockIdentifier,
   );
 };
 
@@ -187,7 +196,7 @@ export const declareContract = async (
   ).declare(contractPayload, {
     ...invocationsDetails,
     skipValidate: false,
-    blockIdentifier: 'latest',
+    blockIdentifier: BlockIdentifierEnum.Latest,
   });
 };
 
@@ -202,16 +211,19 @@ export const estimateFee = async (
   cairoVersion?: CairoVersion,
   invocationsDetails?: UniversalDetails,
 ): Promise<EstimateFee> => {
-  return getAccountInstance(
+  // We force block identifier to latest to avoid issues estimating fees on
+  // the pending block, that can fail if there are already transactions in the pending state.
+  return await getAccountInstance(
     network,
     senderAddress,
     privateKey,
     cairoVersion,
     transactionVersion,
+    BlockIdentifierEnum.Latest,
   ).estimateInvokeFee(txnInvocation, {
     ...invocationsDetails,
     skipValidate: false,
-    blockIdentifier: 'latest',
+    blockIdentifier: BlockIdentifierEnum.Latest,
   });
 };
 
@@ -226,16 +238,19 @@ export const estimateFeeBulk = async (
   invocationsDetails?: UniversalDetails,
   cairoVersion?: CairoVersion,
 ): Promise<EstimateFee[]> => {
-  return getAccountInstance(
+  // We force block identifier to latest to avoid issues estimating fees on
+  // the pending block, that can fail if there are already transactions in the pending state.
+  return await getAccountInstance(
     network,
     senderAddress,
     privateKey,
     cairoVersion,
     transactionVersion,
+    BlockIdentifierEnum.Latest,
   ).estimateFeeBulk(txnInvocation, {
     ...invocationsDetails,
     skipValidate: false,
-    blockIdentifier: 'latest',
+    blockIdentifier: BlockIdentifierEnum.Latest,
   });
 };
 
@@ -256,7 +271,7 @@ export const executeTxn = async (
   ).execute(txnInvocation, abis, {
     ...invocationsDetails,
     skipValidate: false,
-    blockIdentifier: 'latest',
+    blockIdentifier: BlockIdentifierEnum.Latest,
   });
 };
 
@@ -285,7 +300,7 @@ export const deployAccount = async (
   ).deployAccount(deployAccountPayload, {
     ...invocationsDetails,
     skipValidate: false,
-    blockIdentifier: 'latest',
+    blockIdentifier: BlockIdentifierEnum.Latest,
   });
 };
 
@@ -314,7 +329,7 @@ export const estimateAccountDeployFee = async (
   ).estimateAccountDeployFee(deployAccountPayload, {
     ...invocationsDetails,
     skipValidate: false,
-    blockIdentifier: 'latest',
+    blockIdentifier: BlockIdentifierEnum.Latest,
   });
 };
 
@@ -356,10 +371,15 @@ export const getBalance = async (
   address: string,
   tokenAddress: string,
   network: Network,
+  blockIdentifier: BlockIdentifierEnum = BlockIdentifierEnum.Latest,
 ) => {
-  const resp = await callContract(network, tokenAddress, 'balanceOf', [
-    numUtils.toBigInt(address).toString(10),
-  ]);
+  const resp = await callContract(
+    network,
+    tokenAddress,
+    'balanceOf',
+    [numUtils.toBigInt(address).toString(10)],
+    blockIdentifier,
+  );
   return resp[0];
 };
 
@@ -867,7 +887,7 @@ export const isAccountDeployed = async (network: Network, address: string) => {
 
 export const addFeesFromAllTransactions = (
   fees: EstimateFee[],
-): Partial<EstimateFee> => {
+): Pick<EstimateFee, 'suggestedMaxFee' | 'overall_fee'> => {
   let overallFee = numUtils.toBigInt(0);
   let suggestedMaxFee = numUtils.toBigInt(0);
 
@@ -1152,10 +1172,8 @@ export const validateAccountRequireUpgradeOrDeploy = async (
   pubKey: string,
 ) => {
   if (await isUpgradeRequired(network, address)) {
-    throw new UpgradeRequiredError('Upgrade required');
+    throw new UpgradeRequiredError();
   } else if (await isDeployRequired(network, address, pubKey)) {
-    throw new DeployRequiredError(
-      `Cairo 0 contract address ${address} balance is not empty, deploy required`,
-    );
+    throw new DeployRequiredError();
   }
 };
