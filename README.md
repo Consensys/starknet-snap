@@ -90,6 +90,7 @@ If you want more control, see the next section
 yarn workspace @consensys/starknet-snap watch
 ```
 
+
 Alternatively, you can build and serve the snap manually. This can sometimes be more stable than watch mode but requires a manual rebuild and serve anytime there is a change on the snap.
 
 ```bash
@@ -100,19 +101,16 @@ yarn workspace @consensys/starknet-snap serve
 
 #### UI
 
+You can run the UI alone by running
+
 ```bash
 # Running Wallet UI
 yarn workspace wallet-ui start
 ```
 
-```bash
-# Running Storybook
-yarn workspace wallet-ui storybook
-```
+This will launch the following: 
 
-- Snap server and debug page: http://localhost:8081/
 - Wallet UI dapp: http://localhost:3000/
-- Storybook: http://localhost:6006/
 
 ## Dapp Integration Guide
 
