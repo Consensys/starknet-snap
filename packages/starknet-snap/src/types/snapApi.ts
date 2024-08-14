@@ -128,7 +128,8 @@ export type EstimateFeeRequestParams = {
   contractFuncName: string;
   contractCallData?: string;
   senderAddress: string;
-} & BaseRequestParams;
+} & BaseRequestParams &
+  TransactionVersionParams;
 
 export type EstimateAccountDeployFeeRequestParams = {
   addressIndex?: string | number;
