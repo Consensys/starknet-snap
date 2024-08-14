@@ -89,14 +89,13 @@ export const getSpendableTotalBalance = (asset: Erc20TokenBalance): string => {
   }
   const spendableAmount = getHumanReadableAmount(
     asset,
-    asset.spendableAmount.toString(),
+    ethers.utils.formatUnits(asset.spendableAmount, asset.decimals),
   );
-
-  if (asset.spendableAmount === asset.amount) {
+  if (asset.spendableAmount.eq(asset.amount)) {
     return `${spendableAmount}`;
   }
 
-  const totalAmount = getHumanReadableAmount(asset, asset.amount.toString());
+  const totalAmount = getHumanReadableAmount(asset);
 
   return `${spendableAmount} (${totalAmount})`;
 };
