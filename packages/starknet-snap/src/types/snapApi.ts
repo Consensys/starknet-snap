@@ -56,6 +56,9 @@ export type ApiRequestParams =
 export type BaseRequestParams = {
   chainId?: string;
   debugLevel?: string;
+};
+
+export type TransactionVersionParams = {
   transactionVersion?:
     | typeof constants.TRANSACTION_VERSION.V2
     | typeof constants.TRANSACTION_VERSION.V3;
@@ -180,7 +183,8 @@ export type EstimateFeesRequestParams = {
   senderAddress: string;
   invocations: Invocations;
   invocationDetails?: EstimateFeeDetails;
-} & BaseRequestParams;
+} & BaseRequestParams &
+  TransactionVersionParams;
 
 export type DeclareContractRequestParams = {
   senderAddress: string;

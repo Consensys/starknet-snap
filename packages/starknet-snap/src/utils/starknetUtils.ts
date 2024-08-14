@@ -1013,10 +1013,6 @@ export async function estimateAccountUpgradeFee(
   contractAddress: string,
   privateKey: string,
   maxFee: BigNumberish = constants.ZERO,
-  transactionVersion:
-    | typeof constants.TRANSACTION_VERSION.V2
-    | typeof constants.TRANSACTION_VERSION.V3 = constants.TRANSACTION_VERSION
-    .V2,
 ) {
   if (maxFee === constants.ZERO) {
     const txnInvocation = getUpgradeTxnInvocation(contractAddress);
@@ -1025,7 +1021,7 @@ export async function estimateAccountUpgradeFee(
       contractAddress,
       privateKey,
       txnInvocation,
-      transactionVersion,
+      constants.TRANSACTION_VERSION.V2,
       CAIRO_VERSION_LEGACY,
     );
     return numUtils.toBigInt(estFeeResp.suggestedMaxFee.toString(10) ?? '0');
