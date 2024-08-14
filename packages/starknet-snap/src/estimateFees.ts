@@ -2,7 +2,6 @@ import type {
   ApiParamsWithKeyDeriver,
   EstimateFeesRequestParams,
 } from './types/snapApi';
-import { TRANSACTION_VERSION } from './utils/constants';
 import { logger } from './utils/logger';
 import { toJson } from './utils/serializer';
 import { getNetworkFromChainId } from './utils/snapUtils';
@@ -33,7 +32,7 @@ export async function estimateFees(params: ApiParamsWithKeyDeriver) {
       senderAddress,
       senderPrivateKey,
       requestParamsObj.invocations,
-      requestParamsObj.transactionVersion ?? TRANSACTION_VERSION,
+      requestParamsObj.transactionVersion,
       requestParamsObj.invocationDetails,
     );
 
