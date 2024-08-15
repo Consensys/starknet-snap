@@ -1021,7 +1021,7 @@ export async function estimateAccountUpgradeFee(
       contractAddress,
       privateKey,
       txnInvocation,
-      constants.TRANSACTION_VERSION.V2,
+      TRANSACTION_VERSION,
       CAIRO_VERSION_LEGACY,
     );
     return numUtils.toBigInt(estFeeResp.suggestedMaxFee.toString(10) ?? '0');
