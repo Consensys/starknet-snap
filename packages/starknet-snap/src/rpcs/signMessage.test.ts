@@ -16,8 +16,8 @@ import * as starknetUtils from '../utils/starknetUtils';
 import { signMessage } from './signMessage';
 import type { SignMessageParams } from './signMessage';
 
-jest.mock('./utils/snap');
-jest.mock('./utils/logger');
+jest.mock('../utils/snap');
+jest.mock('../utils/logger');
 
 describe('signMessage', () => {
   const state: SnapState = {

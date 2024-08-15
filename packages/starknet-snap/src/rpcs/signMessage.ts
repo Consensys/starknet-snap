@@ -34,6 +34,9 @@ export type SignMessageParams = Infer<typeof SignMessageRequestStruct>;
 
 export type SignMessageResponse = Infer<typeof SignMessageResponseStruct>;
 
+/**
+ * The RPC handler to sign a message.
+ */
 export class SignMessageRpc extends AccountRpcController<
   SignMessageParams,
   SignMessageResponse
@@ -41,6 +44,21 @@ export class SignMessageRpc extends AccountRpcController<
   protected requestStruct = SignMessageRequestStruct;
 
   protected responseStruct = SignMessageResponseStruct;
+
+  /**
+   * Execute the sign message request handler.
+   * It will show a confirmation dialog to the user before signing the message.
+   *
+   * @param params - The parameters of the request.
+   * @param params.address - The address of the signer.
+   * @param params.typedDataMessage - The Starknet type data message to sign.
+   * @param [params.enableAuthorize] - Optional, a flag to enable or display the confirmation dialog to the user.
+   * @param params.chainId - The chain id of the network.
+   * @returns the signature of the message in string array.
+   */
+  async execute(params: SignMessageParams): Promise<SignMessageResponse> {
+    return super.execute(params);
+  }
 
   protected async handleRequest(
     params: SignMessageParams,
