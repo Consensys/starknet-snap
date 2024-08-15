@@ -4,10 +4,13 @@ import { InvalidParamsError, SnapError } from '@metamask/snaps-sdk';
 import type { Struct } from 'superstruct';
 import { assert } from 'superstruct';
 
-import type { SnapState } from '../types/snapState';
+import type { Network, SnapState } from '../types/snapState';
 import { logger } from './logger';
 import { getBip44Deriver, getStateData } from './snap';
-import { getNetworkFromChainId } from './snapUtils';
+import {
+  getNetworkFromChainId,
+  verifyIfAccountNeedUpgradeOrDeploy,
+} from './snapUtils';
 import { getKeysFromAddress } from './starknetUtils';
 
 /**
@@ -49,12 +52,12 @@ export abstract class RpcController<
   /**
    * Superstruct for the request.
    */
-  abstract requestStruct: Struct;
+  protected abstract requestStruct: Struct;
 
   /**
    * Superstruct for the response.
    */
-  abstract responseStruct: Struct;
+  protected abstract responseStruct: Struct;
 
   abstract handleRequest(params: Request): Promise<Response>;
 
@@ -97,28 +100,56 @@ export type Account = {
   derivationPath: ReturnType<typeof getBIP44ChangePathString>;
 };
 
+export type AccountRpcControllerOptions = Json & {
+  showInvalidAccountAlert: boolean;
+};
+
 export abstract class AccountRpcController<
   Request extends AccountRpcParams,
   Response extends Json,
 > extends RpcController<Request, Response> {
-  account: Account;
+  protected account: Account;
+
+  protected network: Network;
+
+  protected options: AccountRpcControllerOptions;
+
+  protected defaultOptions: AccountRpcControllerOptions = {
+    showInvalidAccountAlert: true,
+  };
+
+  constructor(options?: AccountRpcControllerOptions) {
+    super();
+    this.options = Object.assign({}, this.defaultOptions, options);
+  }
 
   protected async preExecute(params: Request): Promise<void> {
     await super.preExecute(params);
+
+    const { chainId, address } = params;
+    const { showInvalidAccountAlert } = this.options;
 
     const deriver = await getBip44Deriver();
     // TODO: Instead of getting the state directly, we should implement state management to consolidate the state fetching
     const state = await getStateData<SnapState>();
 
     // TODO: getNetworkFromChainId from state is still needed, due to it is supporting in get-starknet at this moment
-    const network = getNetworkFromChainId(state, params.chainId);
+    this.network = getNetworkFromChainId(state, chainId);
 
     // TODO: This method should be refactored to get the account from an account manager
     this.account = await getKeysFromAddress(
       deriver,
-      network,
+      this.network,
       state,
-      params.address,
+      address,
+    );
+
+    // TODO: rename this method to verifyAccount
+    await verifyIfAccountNeedUpgradeOrDeploy(
+      this.network,
+      address,
+      this.account.publicKey,
+      showInvalidAccountAlert,
     );
   }
 }
