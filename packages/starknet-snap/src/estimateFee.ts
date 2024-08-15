@@ -1,4 +1,4 @@
-import type { EstimateFee, Invocations } from 'starknet';
+import type { Invocations } from 'starknet';
 import { TransactionType } from 'starknet';
 
 import type {
@@ -37,6 +37,7 @@ export async function estimateFee(params: ApiParamsWithKeyDeriver) {
     );
     const { senderAddress } = requestParamsObj;
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
+    const { transactionVersion } = requestParamsObj;
 
     if (
       !contractAddress ||
@@ -115,15 +116,14 @@ export async function estimateFee(params: ApiParamsWithKeyDeriver) {
       senderAddress,
       senderPrivateKey,
       bulkTransactions,
+      transactionVersion,
     );
     logger.log(
       `estimateFee:\nestimateFeeBulk estimateBulkFeeResp: ${toJson(
         estimateBulkFeeResp,
       )}`,
     );
-    const estimateFeeResp = addFeesFromAllTransactions(
-      estimateBulkFeeResp,
-    ) as EstimateFee;
+    const estimateFeeResp = addFeesFromAllTransactions(estimateBulkFeeResp);
 
     logger.log(`estimateFee:\nestimateFeeResp: ${toJson(estimateFeeResp)}`);
 
