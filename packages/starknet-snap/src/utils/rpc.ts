@@ -59,15 +59,15 @@ export abstract class RpcController<
    */
   protected abstract responseStruct: Struct;
 
-  abstract handleRequest(params: Request): Promise<Response>;
+  protected abstract handleRequest(params: Request): Promise<Response>;
 
   protected async preExecute(params: Request): Promise<void> {
-    logger.info(`[SnapRpc.preExecute] Request: ${JSON.stringify(params)}`);
+    logger.info(`Request: ${JSON.stringify(params)}`);
     validateRequest(params, this.requestStruct);
   }
 
   protected async postExecute(response: Response): Promise<void> {
-    logger.info(`[SnapRpc.postExecute] Response: ${JSON.stringify(response)}`);
+    logger.info(`Response: ${JSON.stringify(response)}`);
     validateResponse(response, this.responseStruct);
   }
 
@@ -78,10 +78,20 @@ export abstract class RpcController<
    * @returns A promise that resolves to an json.
    */
   async execute(params: Request): Promise<Response> {
-    await this.preExecute(params);
-    const resp = await this.handleRequest(params);
-    await this.postExecute(resp);
-    return resp;
+    try {
+      await this.preExecute(params);
+      const resp = await this.handleRequest(params);
+      await this.postExecute(resp);
+      return resp;
+    } catch (error) {
+      logger.error('Failed to execute the rpc method', error);
+
+      if (error instanceof SnapError) {
+        throw error as unknown as Error;
+      }
+
+      throw new Error('Failed to execute the rpc method');
+    }
   }
 }
 
