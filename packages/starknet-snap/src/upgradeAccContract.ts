@@ -89,6 +89,7 @@ export async function upgradeAccContract(params: ApiParamsWithKeyDeriver) {
         contractAddress,
         privateKey,
         txnInvocation,
+        constants.TRANSACTION_VERSION.V2,
         CAIRO_VERSION_LEGACY,
       );
       maxFee = numUtils.toBigInt(

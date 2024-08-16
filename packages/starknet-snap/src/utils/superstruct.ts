@@ -9,7 +9,7 @@ import {
   record,
   refine,
   string,
-  unknown,
+  any,
   number,
   array,
 } from 'superstruct';
@@ -73,7 +73,7 @@ export const TypeDataStruct = object({
   types: record(string(), array(TypeDataStarknetTypeStruct)),
   primaryType: string(),
   domain: TypeDataStarknetDomainStruct,
-  message: record(string(), unknown()),
+  message: record(string(), any()),
 });
 
 export const AuthorizableStruct = object({

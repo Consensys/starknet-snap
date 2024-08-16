@@ -4,22 +4,22 @@ import {
 } from '@metamask/snaps-sdk';
 import { constants } from 'starknet';
 
-import type { StarknetAccount } from '../test/utils';
-import { generateAccounts } from '../test/utils';
-import typedDataExample from './__tests__/fixture/typedDataExample.json';
-import type { SignMessageParams } from './signMessage';
+import type { StarknetAccount } from '../../test/utils';
+import { generateAccounts } from '../../test/utils';
+import typedDataExample from '../__tests__/fixture/typedDataExample.json';
+import type { SnapState } from '../types/snapState';
+import { toJson } from '../utils';
+import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../utils/constants';
+import * as snapHelper from '../utils/snap';
+import * as snapUtils from '../utils/snapUtils';
+import * as starknetUtils from '../utils/starknetUtils';
 import { signMessage } from './signMessage';
-import type { SnapState } from './types/snapState';
-import { toJson } from './utils';
-import { STARKNET_SEPOLIA_TESTNET_NETWORK } from './utils/constants';
-import * as snapHelper from './utils/snap';
-import * as snapUtils from './utils/snapUtils';
-import * as starknetUtils from './utils/starknetUtils';
+import type { SignMessageParams } from './signMessage';
 
-jest.mock('./utils/snap');
-jest.mock('./utils/logger');
+jest.mock('../utils/snap');
+jest.mock('../utils/logger');
 
-describe('signMessage', function () {
+describe('signMessage', () => {
   const state: SnapState = {
     accContracts: [],
     erc20Tokens: [],
@@ -33,6 +33,7 @@ describe('signMessage', function () {
   };
 
   const prepareSignMessageMock = async (account: StarknetAccount) => {
+    const getStateDataSpy = jest.spyOn(snapHelper, 'getStateData');
     const verifyIfAccountNeedUpgradeOrDeploySpy = jest.spyOn(
       snapUtils,
       'verifyIfAccountNeedUpgradeOrDeploy',
@@ -52,6 +53,7 @@ describe('signMessage', function () {
 
     verifyIfAccountNeedUpgradeOrDeploySpy.mockReturnThis();
     confirmDialogSpy.mockResolvedValue(true);
+    getStateDataSpy.mockResolvedValue(state);
 
     return {
       getKeysFromAddressSpy,
@@ -60,7 +62,7 @@ describe('signMessage', function () {
     };
   };
 
-  it('signs message correctly', async function () {
+  it('signs message correctly', async () => {
     const account = await mockAccount(constants.StarknetChainId.SN_SEPOLIA);
 
     await prepareSignMessageMock(account);
@@ -73,27 +75,27 @@ describe('signMessage', function () {
 
     const request = {
       chainId: constants.StarknetChainId.SN_SEPOLIA,
-      signerAddress: account.address,
+      address: account.address,
       typedDataMessage: typedDataExample,
     };
-    const result = await signMessage(request, state);
+    const result = await signMessage.execute(request);
 
     expect(result).toStrictEqual(expectedResult);
   });
 
-  it('renders confirmation dialog', async function () {
+  it('renders confirmation dialog', async () => {
     const account = await mockAccount(constants.StarknetChainId.SN_SEPOLIA);
 
     const { confirmDialogSpy } = await prepareSignMessageMock(account);
 
     const request = {
       chainId: constants.StarknetChainId.SN_SEPOLIA,
-      signerAddress: account.address,
+      address: account.address,
       typedDataMessage: typedDataExample,
       enableAuthorize: true,
     };
 
-    await signMessage(request, state);
+    await signMessage.execute(request);
 
     const calls = confirmDialogSpy.mock.calls[0][0];
     expect(calls).toStrictEqual([
@@ -119,7 +121,7 @@ describe('signMessage', function () {
     ]);
   });
 
-  it('throws `UserRejectedRequestError` if user denied the operation', async function () {
+  it('throws `UserRejectedRequestError` if user denied the operation', async () => {
     const account = await mockAccount(constants.StarknetChainId.SN_SEPOLIA);
 
     const { confirmDialogSpy } = await prepareSignMessageMock(account);
@@ -128,40 +130,19 @@ describe('signMessage', function () {
 
     const request = {
       chainId: constants.StarknetChainId.SN_SEPOLIA,
-      signerAddress: account.address,
+      address: account.address,
       typedDataMessage: typedDataExample,
       enableAuthorize: true,
     };
 
-    await expect(signMessage(request, state)).rejects.toThrow(
+    await expect(signMessage.execute(request)).rejects.toThrow(
       UserRejectedRequestError,
     );
   });
 
-  it('throws `InvalidParamsError` when request parameter is not correct', async function () {
-    const request = {
-      chainId: STARKNET_SEPOLIA_TESTNET_NETWORK.chainId,
-    };
+  it('throws `InvalidParamsError` when request parameter is not correct', async () => {
     await expect(
-      signMessage(request as unknown as SignMessageParams, state),
+      signMessage.execute({} as unknown as SignMessageParams),
     ).rejects.toThrow(InvalidParamsError);
-  });
-
-  it('throws `Failed to sign the message` if another error was thrown', async function () {
-    const account = await mockAccount(constants.StarknetChainId.SN_SEPOLIA);
-
-    const { getKeysFromAddressSpy } = await prepareSignMessageMock(account);
-
-    getKeysFromAddressSpy.mockRejectedValue(new Error('some error'));
-
-    const request = {
-      chainId: constants.StarknetChainId.SN_SEPOLIA,
-      signerAddress: account.address,
-      typedDataMessage: typedDataExample,
-    };
-
-    await expect(signMessage(request, state)).rejects.toThrow(
-      'Failed to sign the message',
-    );
   });
 });

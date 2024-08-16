@@ -11,6 +11,7 @@ import type {
   DeployAccountSignerDetails,
   DeclareSignerDetails,
   typedData,
+  constants,
 } from 'starknet';
 
 import type { SnapState, VoyagerTransactionType } from './snapState';
@@ -55,6 +56,12 @@ export type ApiRequestParams =
 export type BaseRequestParams = {
   chainId?: string;
   debugLevel?: string;
+};
+
+export type TransactionVersionParams = {
+  transactionVersion?:
+    | typeof constants.TRANSACTION_VERSION.V2
+    | typeof constants.TRANSACTION_VERSION.V3;
 };
 
 export type CreateAccountRequestParams = {
@@ -121,7 +128,8 @@ export type EstimateFeeRequestParams = {
   contractFuncName: string;
   contractCallData?: string;
   senderAddress: string;
-} & BaseRequestParams;
+} & BaseRequestParams &
+  TransactionVersionParams;
 
 export type EstimateAccountDeployFeeRequestParams = {
   addressIndex?: string | number;
@@ -176,7 +184,8 @@ export type EstimateFeesRequestParams = {
   senderAddress: string;
   invocations: Invocations;
   invocationDetails?: EstimateFeeDetails;
-} & BaseRequestParams;
+} & BaseRequestParams &
+  TransactionVersionParams;
 
 export type DeclareContractRequestParams = {
   senderAddress: string;
