@@ -51,7 +51,7 @@ export const useStarkNetSnap = () => {
   const debugLevel =
     process.env.REACT_APP_DEBUG_LEVEL !== undefined
       ? process.env.REACT_APP_DEBUG_LEVEL
-      : 'all';
+      : 'ALL';
   const START_SCAN_INDEX = 0;
   const MAX_SCANNED = 1;
   const MAX_MISSED = 1;
@@ -314,7 +314,7 @@ export const useStarkNetSnap = () => {
             method: 'starkNet_displayPrivateKey',
             params: {
               ...defaultParam,
-              userAddress: address,
+              address: address,
               chainId,
             },
           },
