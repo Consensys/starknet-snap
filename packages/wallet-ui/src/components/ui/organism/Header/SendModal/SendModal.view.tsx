@@ -18,6 +18,8 @@ import { AddressInput } from 'components/ui/molecule/AddressInput';
 import { isValidAddress } from 'utils/utils';
 import { Bold, Normal } from '../../ConnectInfoModal/ConnectInfoModal.style';
 import { DropDown } from 'components/ui/molecule/DropDown';
+import { DEFAULT_FEE_TOKEN } from 'utils/constants';
+import { FeeToken } from 'types';
 
 interface Props {
   closeModal?: () => void;
@@ -34,7 +36,7 @@ export const SendModalView = ({ closeModal }: Props) => {
       networks.items.length > 0
         ? networks.items[networks.activeNetwork].chainId
         : '',
-    feeToken: 'ETH', // Default fee token
+    feeToken: DEFAULT_FEE_TOKEN, // Default fee token
   });
   const [errors, setErrors] = useState({ amount: '', address: '' });
 
@@ -73,7 +75,7 @@ export const SendModalView = ({ closeModal }: Props) => {
       case 'feeToken':
         setFields((prevFields) => ({
           ...prevFields,
-          feeToken: fieldValue,
+          feeToken: fieldValue as FeeToken,
         }));
         break;
     }
@@ -125,13 +127,15 @@ export const SendModalView = ({ closeModal }: Props) => {
             />
             <SeparatorSmall />
             <div>
-              <label htmlFor="feeToken">Fee Token</label>
+              <label htmlFor="feeToken">
+                Select Token for Transaction Fees
+              </label>
               <DropDown
                 value={fields.feeToken}
-                options={[
-                  { label: 'ETH', value: 'ETH' },
-                  { label: 'STRK', value: 'STRK' },
-                ]}
+                options={Object.values(FeeToken).map((token) => ({
+                  label: token,
+                  value: token,
+                }))}
                 onChange={(e) => handleChange('feeToken', e.value)}
               />
             </div>

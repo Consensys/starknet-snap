@@ -32,13 +32,14 @@ import { useStarkNetSnap } from 'services';
 import { ethers } from 'ethers';
 import Toastr from 'toastr2';
 import { constants } from 'starknet';
+import { FeeToken } from 'types';
 
 interface Props {
   address: string;
   amount: string;
   chainId: string;
   closeModal?: () => void;
-  selectedFeeToken: string;
+  selectedFeeToken: FeeToken;
 }
 
 export const SendSummaryModalView = ({
@@ -86,7 +87,7 @@ export const SendSummaryModalView = ({
           callData,
           wallet.accounts[0] as unknown as string,
           chainId,
-          selectedFeeToken === 'ETH'
+          selectedFeeToken === FeeToken.ETH
             ? constants.TRANSACTION_VERSION.V2
             : constants.TRANSACTION_VERSION.V3,
         )
@@ -112,10 +113,10 @@ export const SendSummaryModalView = ({
       //We assume the first token for the user will always be ETH
       const ethToken = wallet.erc20TokenBalances[0];
       const strkToken = wallet.erc20TokenBalances.find(
-        (token) => token.symbol === 'STRK',
+        (token) => token.symbol === FeeToken.STRK,
       );
       const feeToken =
-        selectedFeeToken === 'ETH' || strkToken === undefined
+        selectedFeeToken === FeeToken.ETH || strkToken === undefined
           ? ethToken
           : strkToken;
       const gasFeesBN = ethers.utils.parseUnits(
@@ -226,10 +227,10 @@ export const SendSummaryModalView = ({
   const totalAmountDisplay = () => {
     if (wallet.erc20TokenBalances.length > 0) {
       const feeToken =
-        selectedFeeToken === 'ETH'
+        selectedFeeToken === FeeToken.ETH
           ? wallet.erc20TokenBalances[0]
           : wallet.erc20TokenBalances.find(
-              (token) => token.symbol === 'STRK',
+              (token) => token.symbol === FeeToken.STRK,
             ) ?? wallet.erc20TokenBalances[0];
       if (wallet.erc20TokenBalanceSelected.address === feeToken.address) {
         return totalAmount + ` ${feeToken.symbol}`;
