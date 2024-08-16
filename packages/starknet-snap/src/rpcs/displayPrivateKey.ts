@@ -17,8 +17,6 @@ export const DisplayPrivateKeyRequestStruct = assign(
   object({
     address: AddressStruct,
   }),
-  AuthorizableStruct,
-  BaseRequestStruct,
 );
 
 export const DisplayPrivateKeyResponseStruct = literal(null);
@@ -44,9 +42,10 @@ export class DisplayPrivateKeyRpc extends AccountRpcController<
 
   /**
    * Execute the display private key request handler.
+   * The private key will be display via a confirmation dialog.
    *
    * @param params - The parameters of the request.
-   * @returns null.
+   * @param params.address - The account address.
    */
   async execute(
     params: DisplayPrivateKeyParams,
@@ -57,14 +56,6 @@ export class DisplayPrivateKeyRpc extends AccountRpcController<
   protected async handleRequest(
     params: DisplayPrivateKeyParams,
   ): Promise<DisplayPrivateKeyResponse> {
-    const { address } = params;
-    const keyDeriver = await getAddressKeyDeriver(snap);
-    const { privateKey: userPrivateKey } = await getKeysFromAddress(
-      keyDeriver,
-      this.network,
-      await getStateData(),
-      address,
-    );
 
     const components = [text('Do you want to export your private key?')];
 
@@ -74,7 +65,7 @@ export class DisplayPrivateKeyRpc extends AccountRpcController<
 
     const alertComponents = [
       text('Starknet Account Private Key'),
-      copyable(userPrivateKey),
+      copyable(this.account.privateKey),
     ];
 
     await alertDialog(alertComponents);
