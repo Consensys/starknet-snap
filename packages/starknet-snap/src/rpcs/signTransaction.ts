@@ -54,7 +54,10 @@ export class SignTransactionRpc extends AccountRpcController<
    * It will show a confirmation dialog to the user before signing the transaction.
    *
    * @param params - The parameters of the request.
-   * @returns the signature of the transaction in string array.
+   * @param params.address - The address of the signer.
+   * @param params.transactions - The list of transactions to be signed.
+   * @param [params.enableAuthorize] - Optional, a flag to enable or bypass the confirmation dialog.
+   * @returns the signature of the transaction in a string array.
    */
   async execute(
     params: SignTransactionParams,
@@ -85,6 +88,12 @@ export class SignTransactionRpc extends AccountRpcController<
     )) as SignTransactionResponse;
   }
 
+  /**
+   * Displays a confirmation dialog to the user for transaction approval.
+   *
+   * @param snapComponents - The components to display in the confirmation dialog.
+   * @returns A boolean indicating whether the user has approved the transaction.
+   */
   protected async getSignTransactionConsensus(snapComponents: Component[]) {
     return await confirmDialog([
       heading('Do you want to sign this transaction?'),
