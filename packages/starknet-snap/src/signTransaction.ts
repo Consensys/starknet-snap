@@ -1,10 +1,11 @@
-import { heading, panel, DialogType } from '@metamask/snaps-sdk';
+import { heading } from '@metamask/snaps-sdk';
 import type { Signature } from 'starknet';
 
 import type {
   ApiParamsWithKeyDeriver,
   SignTransactionRequestParams,
 } from './types/snapApi';
+import { confirmDialog } from './utils';
 import { logger } from './utils/logger';
 import { toJson } from './utils/serializer';
 import {
@@ -22,7 +23,7 @@ export async function signTransaction(
   params: ApiParamsWithKeyDeriver,
 ): Promise<Signature | boolean> {
   try {
-    const { state, keyDeriver, requestParams, wallet } = params;
+    const { state, keyDeriver, requestParams } = params;
     const requestParamsObj = requestParams as SignTransactionRequestParams;
     const { signerAddress } = requestParamsObj;
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
@@ -46,20 +47,10 @@ export async function signTransaction(
     );
 
     if (requestParamsObj.enableAuthorize) {
-      const response = await wallet.request({
-        method: 'snap_dialog',
-        params: {
-          type: DialogType.Confirmation,
-          content: panel([
-            heading('Do you want to sign this transaction?'),
-            ...snapComponents,
-          ]),
-        },
-      });
-
-      if (!response) {
-        return false;
-      }
+      await confirmDialog([
+        heading('Do you want to sign this transaction?'),
+        ...snapComponents,
+      ]);
     }
 
     const signatures = await signTransactions(
