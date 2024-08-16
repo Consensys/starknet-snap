@@ -17,6 +17,9 @@ import { ethers } from 'ethers';
 import { AddressInput } from 'components/ui/molecule/AddressInput';
 import { isValidAddress } from 'utils/utils';
 import { Bold, Normal } from '../../ConnectInfoModal/ConnectInfoModal.style';
+import { DropDown } from 'components/ui/molecule/DropDown';
+import { DEFAULT_FEE_TOKEN } from 'utils/constants';
+import { FeeToken } from 'types';
 
 interface Props {
   closeModal?: () => void;
@@ -33,6 +36,7 @@ export const SendModalView = ({ closeModal }: Props) => {
       networks.items.length > 0
         ? networks.items[networks.activeNetwork].chainId
         : '',
+    feeToken: DEFAULT_FEE_TOKEN, // Default fee token
   });
   const [errors, setErrors] = useState({ amount: '', address: '' });
 
@@ -68,8 +72,13 @@ export const SendModalView = ({ closeModal }: Props) => {
           }
         }
         break;
+      case 'feeToken':
+        setFields((prevFields) => ({
+          ...prevFields,
+          feeToken: fieldValue as FeeToken,
+        }));
+        break;
     }
-
     setFields((prevFields) => ({
       ...prevFields,
       [fieldName]: fieldValue,
@@ -116,6 +125,20 @@ export const SendModalView = ({ closeModal }: Props) => {
               decimalsMax={wallet.erc20TokenBalanceSelected.decimals}
               asset={wallet.erc20TokenBalanceSelected}
             />
+            <SeparatorSmall />
+            <div>
+              <label htmlFor="feeToken">
+                Select Token for Transaction Fees
+              </label>
+              <DropDown
+                value={fields.feeToken}
+                options={Object.values(FeeToken).map((token) => ({
+                  label: token,
+                  value: token,
+                }))}
+                onChange={(e) => handleChange('feeToken', e.value)}
+              />
+            </div>
           </Wrapper>
           <Buttons>
             <ButtonStyled
@@ -141,6 +164,7 @@ export const SendModalView = ({ closeModal }: Props) => {
           address={fields.address}
           amount={fields.amount}
           chainId={fields.chainId}
+          selectedFeeToken={fields.feeToken} // Pass the selected fee token
         />
       )}
     </>
