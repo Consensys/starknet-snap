@@ -18,9 +18,6 @@ import {
 import { signTransaction } from './signTransaction';
 import type { SignTransactionParams } from './signTransaction';
 
-jest.mock('../utils/snap');
-jest.mock('../utils/logger');
-
 describe('signTransaction', () => {
   const state: SnapState = {
     accContracts: [],
