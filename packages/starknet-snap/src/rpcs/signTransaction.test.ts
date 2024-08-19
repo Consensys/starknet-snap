@@ -101,7 +101,7 @@ describe('signTransaction', () => {
     ]);
   });
 
-  it('skips the dialog if enableAuthorize is false', async () => {
+  it('does not render the confirmation dialog if enableAuthorize is false', async () => {
     const chainId = constants.StarknetChainId.SN_SEPOLIA;
     const account = await mockAccount(chainId);
     prepareMockAccount(account, state);
