@@ -1,6 +1,11 @@
-import type { Component } from '@metamask/snaps-sdk';
-import { heading, UserRejectedRequestError } from '@metamask/snaps-sdk';
-import type { InvocationsSignerDetails } from 'starknet';
+import type { DialogResult } from '@metamask/snaps-sdk';
+import {
+  heading,
+  row,
+  text,
+  UserRejectedRequestError,
+} from '@metamask/snaps-sdk';
+import type { Call, InvocationsSignerDetails } from 'starknet';
 import type { Infer } from 'superstruct';
 import { array, object, string, assign, any } from 'superstruct';
 
@@ -10,21 +15,16 @@ import {
   AuthorizableStruct,
   BaseRequestStruct,
   AccountRpcController,
+  CallDataStruct,
+  toJson,
 } from '../utils';
-import { getSignTxnTxt } from '../utils/snapUtils';
 import { signTransactions } from '../utils/starknetUtils';
-
-export const CallStruct = object({
-  contractAddress: string(),
-  calldata: array(any()), // Adjust this as needed for `RawArgs` or `Calldata`
-  entrypoint: string(),
-});
 
 export const SignTransactionRequestStruct = assign(
   object({
     address: AddressStruct,
-    transactions: array(CallStruct),
-    transactionsDetail: any(),
+    transactions: array(CallDataStruct),
+    transactionsDetail: any(), // TODO: refine this to InvocationsSignerDetails
   }),
   AuthorizableStruct,
   BaseRequestStruct,
@@ -55,7 +55,8 @@ export class SignTransactionRpc extends AccountRpcController<
    *
    * @param params - The parameters of the request.
    * @param params.address - The address of the signer.
-   * @param params.transactions - The list of transactions to be signed.
+   * @param params.transactions - The list of transactions to be signed. Reference: https://www.starknetjs.com/docs/API/namespaces/types#call
+   * @param params.transactionsDetail - The InvocationsSignerDetails of the transactions to be signed. Reference: https://www.starknetjs.com/docs/API/namespaces/types#invocationssignerdetails
    * @param [params.enableAuthorize] - Optional, a flag to enable or bypass the confirmation dialog.
    * @returns the signature of the transaction in a string array.
    */
@@ -69,14 +70,14 @@ export class SignTransactionRpc extends AccountRpcController<
     params: SignTransactionParams,
   ): Promise<SignTransactionResponse> {
     const { enableAuthorize, transactions, address } = params;
-
-    const snapComponents = getSignTxnTxt(address, this.network, transactions);
-
     if (
       // Get Starknet expected not to show the confirm dialog, therefore, `enableAuthorize` will set to false to bypass the confirmation
       // TODO: enableAuthorize should set default to true
       enableAuthorize &&
-      !(await this.getSignTransactionConsensus(snapComponents))
+      !(await this.getSignTransactionConsensus(
+        address,
+        transactions as unknown as Call[],
+      ))
     ) {
       throw new UserRejectedRequestError() as unknown as Error;
     }
@@ -84,20 +85,37 @@ export class SignTransactionRpc extends AccountRpcController<
     return (await signTransactions(
       this.account.privateKey,
       transactions,
-      params.transactionsDetail as InvocationsSignerDetails,
+      params.transactionsDetail as unknown as InvocationsSignerDetails,
     )) as SignTransactionResponse;
   }
 
-  /**
-   * Displays a confirmation dialog to the user for transaction approval.
-   *
-   * @param snapComponents - The components to display in the confirmation dialog.
-   * @returns A boolean indicating whether the user has approved the transaction.
-   */
-  protected async getSignTransactionConsensus(snapComponents: Component[]) {
+  protected async getSignTransactionConsensus(
+    address: string,
+    transactions: Call[],
+  ): Promise<DialogResult> {
     return await confirmDialog([
       heading('Do you want to sign this transaction?'),
-      ...snapComponents,
+      row(
+        'Network',
+        text({
+          value: this.network.name,
+          markdown: false,
+        }),
+      ),
+      row(
+        'Signer Address',
+        text({
+          value: address,
+          markdown: false,
+        }),
+      ),
+      row(
+        'Transactions',
+        text({
+          value: toJson(transactions),
+          markdown: false,
+        }),
+      ),
     ]);
   }
 }

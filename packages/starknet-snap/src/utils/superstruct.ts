@@ -1,7 +1,6 @@
 import { union } from '@metamask/snaps-sdk';
 import { constants, validateAndParseAddress } from 'starknet';
 import {
-  assert,
   boolean,
   enums,
   object,
@@ -14,6 +13,7 @@ import {
   array,
 } from 'superstruct';
 
+import { CAIRO_VERSION_LEGACY, CAIRO_VERSION } from './constants';
 import { LogLevel } from './logger';
 
 export const AddressStruct = refine(
@@ -36,14 +36,7 @@ export const AddressStruct = refine(
   },
 );
 
-export const ChainIdStruct = refine(
-  string(),
-  'ChainIdStruct',
-  (value: string) => {
-    assert(value, enums(Object.values(constants.StarknetChainId)));
-    return true;
-  },
-);
+export const ChainIdStruct = enums(Object.values(constants.StarknetChainId));
 
 export const TypeDataStarknetTypeStruct = union([
   object({
@@ -86,3 +79,15 @@ export const BaseRequestStruct = object({
   // TODO: the debug level should be set by snap rather than pass in from request.
   debugLevel: optional(enums(Object.keys(LogLevel))),
 });
+
+export const CallDataStruct = object({
+  entrypoint: string(),
+  contractAddress: string(),
+  calldata: union([array(string()), record(string(), any())]), // TODO: refine this to calldata
+});
+
+export const CairoVersionStruct = enums([CAIRO_VERSION, CAIRO_VERSION_LEGACY]);
+
+export const TxVersionStruct = enums(
+  Object.values(constants.TRANSACTION_VERSION),
+);
