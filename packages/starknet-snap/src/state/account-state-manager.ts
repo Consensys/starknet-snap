@@ -17,11 +17,11 @@ export class ChainIdFilter
   implements IAccountFilter {}
 
 export class AccountStateManager extends StateManager<AccContract> {
-  getCollection(state: SnapState): AccContract[] {
+  protected getCollection(state: SnapState): AccContract[] {
     return state.accContracts;
   }
 
-  updateEntity(dataInState: AccContract, data: AccContract): void {
+  protected updateEntity(dataInState: AccContract, data: AccContract): void {
     dataInState.deployTxnHash = data.deployTxnHash;
 
     if (data.upgradeRequired !== undefined) {
@@ -32,6 +32,15 @@ export class AccountStateManager extends StateManager<AccContract> {
     }
   }
 
+  /**
+   * Finds an account in the state that matches the given address and chain ID.
+   *
+   * @param param - An object containing the address and chain ID to search for.
+   * @param param.address - The address of the account to search for.
+   * @param param.chainId - The chain ID of the account to search for.
+   * @param [state] - The optional SnapState object.
+   * @returns A Promise that resolves with the matching AccContract object if found, or null if not found.
+   */
   async findAccount(
     {
       address,
@@ -48,6 +57,14 @@ export class AccountStateManager extends StateManager<AccContract> {
     );
   }
 
+  /**
+   * Updates an account in the state with the given data.
+   *
+   * @param data - The AccContract object to update.
+   * @returns A Promise that resolves when the update is complete.
+   * @throws {StateManagerError} If there is an error updating the account, such as:
+   * If the account to be updated does not exist in the state.
+   */
   async updateAccount(data: AccContract): Promise<void> {
     try {
       await this.update(async (state: SnapState) => {
@@ -60,7 +77,7 @@ export class AccountStateManager extends StateManager<AccContract> {
         );
 
         if (!accountInState) {
-          throw new Error(`Account does not exist`);
+          throw new StateManagerError(`Account does not exist`);
         }
 
         this.updateEntity(accountInState, data);
@@ -70,13 +87,21 @@ export class AccountStateManager extends StateManager<AccContract> {
     }
   }
 
-  async addAccount(acc: AccContract): Promise<void> {
+  /**
+   * Adds a new account to the state with the given data.
+   *
+   * @param data - The AccContract object to add.
+   * @returns A Promise that resolves when the add is complete.
+   * @throws {StateManagerError} If there is an error adding the account, such as:
+   * If the account to be added already exists in the state.
+   */
+  async addAccount(data: AccContract): Promise<void> {
     try {
       await this.update(async (state: SnapState) => {
         const accountInState = await this.findAccount(
           {
-            address: acc.address,
-            chainId: acc.chainId,
+            address: data.address,
+            chainId: data.chainId,
           },
           state,
         );
@@ -84,7 +109,7 @@ export class AccountStateManager extends StateManager<AccContract> {
         if (accountInState) {
           throw new Error(`Account already exist`);
         }
-        state.accContracts.push(acc);
+        state.accContracts.push(data);
       });
     } catch (error) {
       throw new StateManagerError(error.message);
