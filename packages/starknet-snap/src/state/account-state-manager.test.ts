@@ -165,7 +165,7 @@ describe('AccountStateManager', () => {
       const stateManager = new AccountStateManager();
       await stateManager.addAccount(accountNotExist);
 
-      expect(state.accContracts?.length).toStrictEqual(5);
+      expect(state.accContracts?.length).toBe(5);
       expect(
         state.accContracts?.[state.accContracts?.length - 1],
       ).toStrictEqual(accountNotExist);
