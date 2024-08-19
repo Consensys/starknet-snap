@@ -23,6 +23,14 @@ export class NetworkStateManager extends StateManager<Network> {
     dataInState.nodeUrl = data.nodeUrl;
   }
 
+  /**
+   * Add default network by the given chainId.
+   * If the network object not exist, it will be added.
+   * If the network object exist, it will be updated.
+   *
+   * @param networks - An array of the networks object.
+   * @returns A Promise that resolves when the operation is complete.
+   */
   async addDefaultNetworks(networks: Network[]): Promise<void> {
     try {
       await this.update(async (state: SnapState) => {

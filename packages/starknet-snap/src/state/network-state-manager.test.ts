@@ -11,7 +11,7 @@ import { StateManagerError } from './state-manager';
 
 describe('NetworkStateManager', () => {
   describe('findNetwork', () => {
-    it('returns the token', async () => {
+    it('returns the network', async () => {
       const chainId = constants.StarknetChainId.SN_SEPOLIA;
       await mockState({
         networks: [STARKNET_MAINNET_NETWORK, STARKNET_SEPOLIA_TESTNET_NETWORK],
@@ -25,7 +25,7 @@ describe('NetworkStateManager', () => {
       expect(result).toStrictEqual(STARKNET_SEPOLIA_TESTNET_NETWORK);
     });
 
-    it('returns null if the token can not be found', async () => {
+    it('returns null if the network can not be found', async () => {
       const chainId = constants.StarknetChainId.SN_SEPOLIA;
       await mockState({
         networks: [STARKNET_MAINNET_NETWORK],
@@ -112,7 +112,7 @@ describe('NetworkStateManager', () => {
       expect(result).toStrictEqual([STARKNET_SEPOLIA_TESTNET_NETWORK]);
     });
 
-    it('returns empty array if the account address can not be found', async () => {
+    it('returns empty array if a network with the given chainId cannot be found', async () => {
       const chainId = constants.StarknetChainId.SN_SEPOLIA;
       await mockState({
         networks: [STARKNET_MAINNET_NETWORK],
