@@ -37,10 +37,18 @@ export abstract class StateManager<Entity> extends SnapStateManager<SnapState> {
     });
   }
 
-  abstract getCollection(state: SnapState): Entity[] | undefined;
+  protected abstract getCollection(state: SnapState): Entity[] | undefined;
 
-  abstract updateEntity(dataInState: Entity, data: Entity): void;
+  protected abstract updateEntity(dataInState: Entity, data: Entity): void;
 
+  /**
+   *
+   * Finds an entity in the state that matches the given filters.
+   *
+   * @param filters - An array of filters to apply to the entities.
+   * @param [state] - The optional SnapState object.
+   * @returns A Promise that resolves with the matching Entity object if found, or null if not found.
+   */
   async find(
     filters: IFilter<Entity>[],
     state?: SnapState,
@@ -53,6 +61,15 @@ export abstract class StateManager<Entity> extends SnapStateManager<SnapState> {
     );
   }
 
+  /**
+   *
+   * Lists all entities in the state that match the given filters, optionally sorted.
+   *
+   * @param filters - An array of filters to apply to the entities.
+   * @param [sort] - An optional sorting function.
+   * @param [state] - The optional SnapState object.
+   * @returns A Promise that resolves with an array of matching Entity objects.
+   */
   async list(
     filters: IFilter<Entity>[],
     sort?: (entityA: Entity, entityB: Entity) => number,
