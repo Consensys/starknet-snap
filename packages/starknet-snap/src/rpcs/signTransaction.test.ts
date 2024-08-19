@@ -26,24 +26,37 @@ describe('signTransaction', () => {
     transactions: [],
   };
 
+  const createRequestParam = (
+    chainId: constants.StarknetChainId,
+    address: string,
+    enableAuthorize?: boolean,
+  ): SignTransactionParams => {
+    const request: SignTransactionParams = {
+      chainId,
+      address,
+      transactions: transactionExample.transactions,
+      transactionsDetail:
+        transactionExample.transactionsDetail as unknown as InvocationsSignerDetails,
+    };
+    if (enableAuthorize) {
+      request.enableAuthorize = enableAuthorize;
+    }
+    return request;
+  };
+
   it('signs a transaction correctly', async () => {
     const chainId = constants.StarknetChainId.SN_SEPOLIA;
     const account = await mockAccount(chainId);
     prepareMockAccount(account, state);
     prepareSignConfirmDialog();
+    const request = createRequestParam(chainId, account.address);
 
     const expectedResult = await starknetUtils.signTransactions(
       account.privateKey,
-      transactionExample.transactions,
-      transactionExample.transactionsDetail as InvocationsSignerDetails,
+      request.transactions,
+      request.transactionsDetail,
     );
 
-    const request: SignTransactionParams = {
-      chainId,
-      address: account.address,
-      transactions: transactionExample.transactions,
-      transactionsDetail: transactionExample.transactionsDetail,
-    };
     const result = await signTransaction.execute(request);
 
     expect(result).toStrictEqual(expectedResult);
@@ -54,14 +67,7 @@ describe('signTransaction', () => {
     const account = await mockAccount(chainId);
     prepareMockAccount(account, state);
     const { confirmDialogSpy } = prepareSignConfirmDialog();
-
-    const request = {
-      chainId,
-      address: account.address,
-      transactions: transactionExample.transactions,
-      transactionsDetail: transactionExample.transactionsDetail,
-      enableAuthorize: true,
-    };
+    const request = createRequestParam(chainId, account.address, true);
 
     await signTransaction.execute(request);
 
@@ -103,25 +109,11 @@ describe('signTransaction', () => {
     const account = await mockAccount(chainId);
     prepareMockAccount(account, state);
     const { confirmDialogSpy } = prepareSignConfirmDialog();
+    const request = createRequestParam(chainId, account.address, false);
 
-    const expectedResult = await starknetUtils.signTransactions(
-      account.privateKey,
-      transactionExample.transactions,
-      transactionExample.transactionsDetail as InvocationsSignerDetails,
-    );
-
-    const request: SignTransactionParams = {
-      chainId,
-      address: account.address,
-      transactions: transactionExample.transactions,
-      transactionsDetail: transactionExample.transactionsDetail,
-      enableAuthorize: false,
-    };
-
-    const result = await signTransaction.execute(request);
+    await signTransaction.execute(request);
 
     expect(confirmDialogSpy).not.toHaveBeenCalled();
-    expect(result).toStrictEqual(expectedResult);
   });
 
   it('throws `UserRejectedRequestError` if user denied the operation', async () => {
@@ -129,16 +121,8 @@ describe('signTransaction', () => {
     const account = await mockAccount(chainId);
     prepareMockAccount(account, state);
     const { confirmDialogSpy } = prepareSignConfirmDialog();
-
     confirmDialogSpy.mockResolvedValue(false);
-
-    const request: SignTransactionParams = {
-      chainId,
-      address: account.address,
-      transactions: transactionExample.transactions,
-      transactionsDetail: transactionExample.transactionsDetail,
-      enableAuthorize: true,
-    };
+    const request = createRequestParam(chainId, account.address, true);
 
     await expect(signTransaction.execute(request)).rejects.toThrow(
       UserRejectedRequestError,
