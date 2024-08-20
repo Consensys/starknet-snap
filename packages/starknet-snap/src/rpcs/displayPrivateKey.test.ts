@@ -15,9 +15,6 @@ import {
 import { displayPrivateKey } from './displayPrivateKey';
 import type { DisplayPrivateKeyParams } from './displayPrivateKey';
 
-jest.mock('../utils/snap');
-jest.mock('../utils/logger');
-
 describe('displayPrivateKey', () => {
   const state: SnapState = {
     accContracts: [],
@@ -108,9 +105,12 @@ describe('displayPrivateKey', () => {
         address: 'invalid_address',
       },
     },
-  ])('throws `InvalidParamsError` when $case', async (request) => {
-    await expect(
-      displayPrivateKey.execute(request as unknown as DisplayPrivateKeyParams),
-    ).rejects.toThrow(InvalidParamsError);
-  });
+  ])(
+    'throws `InvalidParamsError` when $case',
+    async ({ request }: { request: unknown }) => {
+      await expect(
+        displayPrivateKey.execute(request as DisplayPrivateKeyParams),
+      ).rejects.toThrow(InvalidParamsError);
+    },
+  );
 });
