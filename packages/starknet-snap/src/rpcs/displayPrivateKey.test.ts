@@ -4,13 +4,14 @@ import {
 } from '@metamask/snaps-sdk';
 import { constants } from 'starknet';
 
-import type { StarknetAccount } from '../../test/utils';
-import { generateAccounts } from '../../test/utils';
 import type { SnapState } from '../types/snapState';
 import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../utils/constants';
-import * as snapHelper from '../utils/snap';
-import * as snapUtils from '../utils/snapUtils';
-import * as starknetUtils from '../utils/starknetUtils';
+import {
+  mockAccount,
+  prepareAlertDialog,
+  prepareMockAccount,
+  prepareConfirmDialog,
+} from './__tests__/helper';
 import { displayPrivateKey } from './displayPrivateKey';
 import type { DisplayPrivateKeyParams } from './displayPrivateKey';
 
@@ -23,57 +24,6 @@ describe('displayPrivateKey', () => {
     erc20Tokens: [],
     networks: [STARKNET_SEPOLIA_TESTNET_NETWORK],
     transactions: [],
-  };
-
-  const mockAccount = async (network: constants.StarknetChainId) => {
-    const accounts = await generateAccounts(network, 1);
-    return accounts[0];
-  };
-
-  const prepareMockAccount = (
-    account: StarknetAccount,
-    snapState: SnapState,
-  ) => {
-    const getStateDataSpy = jest.spyOn(snapHelper, 'getStateData');
-    const verifyIfAccountNeedUpgradeOrDeploySpy = jest.spyOn(
-      snapUtils,
-      'verifyIfAccountNeedUpgradeOrDeploy',
-    );
-    const getKeysFromAddressSpy = jest.spyOn(
-      starknetUtils,
-      'getKeysFromAddress',
-    );
-
-    getKeysFromAddressSpy.mockResolvedValue({
-      privateKey: account.privateKey,
-      publicKey: account.publicKey,
-      addressIndex: account.addressIndex,
-      derivationPath: account.derivationPath as unknown as any,
-    });
-
-    verifyIfAccountNeedUpgradeOrDeploySpy.mockReturnThis();
-    getStateDataSpy.mockResolvedValue(snapState);
-
-    return {
-      getKeysFromAddressSpy,
-      verifyIfAccountNeedUpgradeOrDeploySpy,
-    };
-  };
-
-  const prepareConfirmDialog = () => {
-    const confirmDialogSpy = jest.spyOn(snapHelper, 'confirmDialog');
-    confirmDialogSpy.mockResolvedValue(true);
-    return {
-      confirmDialogSpy,
-    };
-  };
-
-  const prepareAlertDialog = () => {
-    const alertDialogSpy = jest.spyOn(snapHelper, 'alertDialog');
-    alertDialogSpy.mockResolvedValue(true);
-    return {
-      alertDialogSpy,
-    };
   };
 
   const createRequestParam = (

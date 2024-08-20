@@ -35,7 +35,11 @@ import { getTransactions } from './getTransactions';
 import { getTransactionStatus } from './getTransactionStatus';
 import { getValue } from './getValue';
 import { recoverAccounts } from './recoverAccounts';
-import type { DisplayPrivateKeyParams, SignMessageParams, SignTransactionParams } from './rpcs';
+import type {
+  DisplayPrivateKeyParams,
+  SignMessageParams,
+  SignTransactionParams,
+} from './rpcs';
 import { displayPrivateKey, signMessage, signTransaction } from './rpcs';
 import { sendTransaction } from './sendTransaction';
 import { signDeclareTransaction } from './signDeclareTransaction';
