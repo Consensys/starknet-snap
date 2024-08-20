@@ -6,17 +6,14 @@ import {
   AddressStruct,
   confirmDialog,
   alertDialog,
-  getStateData,
-  AuthorizableStruct,
   BaseRequestStruct,
 } from '../utils';
-import { getAddressKeyDeriver } from '../utils/keyPair';
-import { getKeysFromAddress } from '../utils/starknetUtils';
 
 export const DisplayPrivateKeyRequestStruct = assign(
   object({
     address: AddressStruct,
   }),
+  BaseRequestStruct,
 );
 
 export const DisplayPrivateKeyResponseStruct = literal(null);
@@ -46,6 +43,7 @@ export class DisplayPrivateKeyRpc extends AccountRpcController<
    *
    * @param params - The parameters of the request.
    * @param params.address - The account address.
+   * @param params.chainId - The chain id of the network.
    */
   async execute(
     params: DisplayPrivateKeyParams,
@@ -54,12 +52,12 @@ export class DisplayPrivateKeyRpc extends AccountRpcController<
   }
 
   protected async handleRequest(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     params: DisplayPrivateKeyParams,
   ): Promise<DisplayPrivateKeyResponse> {
+    const confirmComponents = [text('Do you want to export your private key?')];
 
-    const components = [text('Do you want to export your private key?')];
-
-    if (!(await confirmDialog(components))) {
+    if (!(await confirmDialog(confirmComponents))) {
       throw new UserRejectedRequestError() as unknown as Error;
     }
 

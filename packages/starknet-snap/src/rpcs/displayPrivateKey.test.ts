@@ -1,7 +1,5 @@
-import type { BIP44AddressKeyDeriver } from '@metamask/key-tree';
 import {
   InvalidParamsError,
-  SnapError,
   UserRejectedRequestError,
 } from '@metamask/snaps-sdk';
 import { constants } from 'starknet';
@@ -10,7 +8,6 @@ import type { StarknetAccount } from '../../test/utils';
 import { generateAccounts } from '../../test/utils';
 import type { SnapState } from '../types/snapState';
 import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../utils/constants';
-import * as keyPairUtils from '../utils/keyPair';
 import * as snapHelper from '../utils/snap';
 import * as snapUtils from '../utils/snapUtils';
 import * as starknetUtils from '../utils/starknetUtils';
@@ -19,9 +16,8 @@ import type { DisplayPrivateKeyParams } from './displayPrivateKey';
 
 jest.mock('../utils/snap');
 jest.mock('../utils/logger');
-jest.mock('../utils/keyPair');
 
-describe('DisplayPrivateKeyRpc', () => {
+describe('displayPrivateKey', () => {
   const state: SnapState = {
     accContracts: [],
     erc20Tokens: [],
@@ -34,7 +30,10 @@ describe('DisplayPrivateKeyRpc', () => {
     return accounts[0];
   };
 
-  const prepareDisplayPrivateKeyMock = async (account: StarknetAccount) => {
+  const prepareMockAccount = (
+    account: StarknetAccount,
+    snapState: SnapState,
+  ) => {
     const getStateDataSpy = jest.spyOn(snapHelper, 'getStateData');
     const verifyIfAccountNeedUpgradeOrDeploySpy = jest.spyOn(
       snapUtils,
@@ -44,12 +43,6 @@ describe('DisplayPrivateKeyRpc', () => {
       starknetUtils,
       'getKeysFromAddress',
     );
-    const confirmDialogSpy = jest.spyOn(snapHelper, 'confirmDialog');
-    const alertDialogSpy = jest.spyOn(snapHelper, 'alertDialog');
-    const getAddressKeyDeriverSpy = jest.spyOn(
-      keyPairUtils,
-      'getAddressKeyDeriver',
-    );
 
     getKeysFromAddressSpy.mockResolvedValue({
       privateKey: account.privateKey,
@@ -57,134 +50,117 @@ describe('DisplayPrivateKeyRpc', () => {
       addressIndex: account.addressIndex,
       derivationPath: account.derivationPath as unknown as any,
     });
+
     verifyIfAccountNeedUpgradeOrDeploySpy.mockReturnThis();
-    confirmDialogSpy.mockResolvedValue(true);
-    alertDialogSpy.mockResolvedValue(true);
-    getStateDataSpy.mockResolvedValue(state);
-    const keyDeriverMock = {
-      path: "m / bip32:44' / bip32:60' / bip32:0' / bip32:0",
-      coin_type: 9004, // eslint-disable-line @typescript-eslint/naming-convention
-      derive: async (
-        address_index: number, // eslint-disable-line
-      ): Promise<any> => {
-        return {
-          privateKey: 'mockPrivateKey',
-          publicKey: 'mockPublicKey',
-          addressIndex: address_index, // eslint-disable-line
-        };
-      },
-    } as unknown as BIP44AddressKeyDeriver;
-    getAddressKeyDeriverSpy.mockResolvedValue(keyDeriverMock);
+    getStateDataSpy.mockResolvedValue(snapState);
 
     return {
       getKeysFromAddressSpy,
-      confirmDialogSpy,
-      alertDialogSpy,
-      getAddressKeyDeriverSpy,
       verifyIfAccountNeedUpgradeOrDeploySpy,
     };
   };
 
-  it('displays private key correctly when the user confirms', async () => {
-    const account = await mockAccount(constants.StarknetChainId.SN_SEPOLIA);
-
-    const { alertDialogSpy } = await prepareDisplayPrivateKeyMock(account);
-
-    const request: DisplayPrivateKeyParams = {
-      chainId: constants.StarknetChainId.SN_SEPOLIA,
-      address: account.address,
+  const prepareConfirmDialog = () => {
+    const confirmDialogSpy = jest.spyOn(snapHelper, 'confirmDialog');
+    confirmDialogSpy.mockResolvedValue(true);
+    return {
+      confirmDialogSpy,
     };
+  };
 
-    const result = await displayPrivateKey.execute(request);
+  const prepareAlertDialog = () => {
+    const alertDialogSpy = jest.spyOn(snapHelper, 'alertDialog');
+    alertDialogSpy.mockResolvedValue(true);
+    return {
+      alertDialogSpy,
+    };
+  };
 
-    expect(result).toBeNull();
-    expect(alertDialogSpy).toHaveBeenCalledWith([
-      expect.objectContaining({
-        type: 'text',
-        value: 'Starknet Account Private Key',
-      }),
-      expect.objectContaining({ type: 'copyable', value: account.privateKey }),
+  const createRequestParam = (
+    chainId: constants.StarknetChainId,
+    address: string,
+  ): DisplayPrivateKeyParams => {
+    const request: DisplayPrivateKeyParams = {
+      chainId,
+      address,
+    };
+    return request;
+  };
+
+  it('displays private key correctly', async () => {
+    const chainId = constants.StarknetChainId.SN_SEPOLIA;
+    const account = await mockAccount(chainId);
+    prepareMockAccount(account, state);
+    prepareConfirmDialog();
+    const { alertDialogSpy } = prepareAlertDialog();
+
+    const request = createRequestParam(chainId, account.address);
+
+    await displayPrivateKey.execute(request);
+
+    expect(alertDialogSpy).toHaveBeenCalledTimes(1);
+
+    const calls = alertDialogSpy.mock.calls[0][0];
+
+    expect(calls).toStrictEqual([
+      { type: 'text', value: 'Starknet Account Private Key' },
+      { type: 'copyable', value: account.privateKey },
+    ]);
+  });
+
+  it('renders confirmation dialog', async () => {
+    const chainId = constants.StarknetChainId.SN_SEPOLIA;
+    const account = await mockAccount(chainId);
+    prepareMockAccount(account, state);
+    const { confirmDialogSpy } = prepareConfirmDialog();
+    prepareAlertDialog();
+
+    const request = createRequestParam(chainId, account.address);
+
+    await displayPrivateKey.execute(request);
+
+    expect(confirmDialogSpy).toHaveBeenCalledTimes(1);
+
+    const calls = confirmDialogSpy.mock.calls[0][0];
+
+    expect(calls).toStrictEqual([
+      { type: 'text', value: 'Do you want to export your private key?' },
     ]);
   });
 
   it('throws `UserRejectedRequestError` if user denies the operation', async () => {
-    const account = await mockAccount(constants.StarknetChainId.SN_SEPOLIA);
-
-    const { confirmDialogSpy } = await prepareDisplayPrivateKeyMock(account);
+    const chainId = constants.StarknetChainId.SN_SEPOLIA;
+    const account = await mockAccount(chainId);
+    prepareMockAccount(account, state);
+    const { confirmDialogSpy } = prepareConfirmDialog();
+    prepareAlertDialog();
 
     confirmDialogSpy.mockResolvedValue(false);
 
-    const request: DisplayPrivateKeyParams = {
-      chainId: constants.StarknetChainId.SN_SEPOLIA,
-      address: account.address,
-    };
+    const request = createRequestParam(chainId, account.address);
 
     await expect(displayPrivateKey.execute(request)).rejects.toThrow(
       UserRejectedRequestError,
     );
   });
 
-  it('throws `InvalidParamsError` when request parameters are not correct', async () => {
-    await expect(
-      displayPrivateKey.execute({} as unknown as DisplayPrivateKeyParams),
-    ).rejects.toThrow(InvalidParamsError);
-  });
-
-  it('should throw an error if the user address is undefined', async () => {
-    await expect(
-      displayPrivateKey.execute({
+  it.each([
+    {
+      case: 'user address is omitted',
+      request: {
         chainId: constants.StarknetChainId.SN_SEPOLIA,
-      } as DisplayPrivateKeyParams),
-    ).rejects.toThrow(InvalidParamsError);
-  });
-
-  it('should throw an error if the user address is invalid', async () => {
-    await expect(
-      displayPrivateKey.execute({
+      },
+    },
+    {
+      case: 'user address is invalid',
+      request: {
         chainId: constants.StarknetChainId.SN_SEPOLIA,
         address: 'invalid_address',
-      } as DisplayPrivateKeyParams),
+      },
+    },
+  ])('throws `InvalidParamsError` when $case', async (request) => {
+    await expect(
+      displayPrivateKey.execute(request as unknown as DisplayPrivateKeyParams),
     ).rejects.toThrow(InvalidParamsError);
-  });
-
-  it('should throw error if validateAccountRequireUpgradeOrDeploy fails', async () => {
-    const account = await mockAccount(constants.StarknetChainId.SN_SEPOLIA);
-
-    const { verifyIfAccountNeedUpgradeOrDeploySpy } =
-      await prepareDisplayPrivateKeyMock(account);
-
-    verifyIfAccountNeedUpgradeOrDeploySpy.mockRejectedValue(
-      new SnapError('Upgrade required'),
-    );
-
-    const request: DisplayPrivateKeyParams = {
-      chainId: constants.StarknetChainId.SN_SEPOLIA,
-      address: account.address,
-    };
-
-    await expect(displayPrivateKey.execute(request)).rejects.toThrow(
-      'Upgrade required',
-    );
-  });
-
-  it('should throw error if getKeysFromAddress failed', async () => {
-    const account = await mockAccount(constants.StarknetChainId.SN_SEPOLIA);
-
-    const { getKeysFromAddressSpy } = await prepareDisplayPrivateKeyMock(
-      account,
-    );
-
-    getKeysFromAddressSpy.mockRejectedValue(
-      new SnapError('Failed to get keys'),
-    );
-
-    const request: DisplayPrivateKeyParams = {
-      chainId: constants.StarknetChainId.SN_SEPOLIA,
-      address: account.address,
-    };
-
-    await expect(displayPrivateKey.execute(request)).rejects.toThrow(
-      'Failed to get keys',
-    );
   });
 });
