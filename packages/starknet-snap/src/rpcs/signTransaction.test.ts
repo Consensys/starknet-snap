@@ -13,7 +13,7 @@ import * as starknetUtils from '../utils/starknetUtils';
 import {
   mockAccount,
   prepareMockAccount,
-  prepareSignConfirmDialog,
+  prepareConfirmDialog,
 } from './__tests__/helper';
 import { signTransaction } from './signTransaction';
 import type { SignTransactionParams } from './signTransaction';
@@ -48,7 +48,7 @@ describe('signTransaction', () => {
     const chainId = constants.StarknetChainId.SN_SEPOLIA;
     const account = await mockAccount(chainId);
     prepareMockAccount(account, state);
-    prepareSignConfirmDialog();
+    prepareConfirmDialog();
     const request = createRequestParam(chainId, account.address);
 
     const expectedResult = await starknetUtils.signTransactions(
@@ -66,7 +66,7 @@ describe('signTransaction', () => {
     const chainId = constants.StarknetChainId.SN_SEPOLIA;
     const account = await mockAccount(chainId);
     prepareMockAccount(account, state);
-    const { confirmDialogSpy } = prepareSignConfirmDialog();
+    const { confirmDialogSpy } = prepareConfirmDialog();
     const request = createRequestParam(chainId, account.address, true);
 
     await signTransaction.execute(request);
@@ -108,7 +108,7 @@ describe('signTransaction', () => {
     const chainId = constants.StarknetChainId.SN_SEPOLIA;
     const account = await mockAccount(chainId);
     prepareMockAccount(account, state);
-    const { confirmDialogSpy } = prepareSignConfirmDialog();
+    const { confirmDialogSpy } = prepareConfirmDialog();
     const request = createRequestParam(chainId, account.address, false);
 
     await signTransaction.execute(request);
@@ -120,7 +120,7 @@ describe('signTransaction', () => {
     const chainId = constants.StarknetChainId.SN_SEPOLIA;
     const account = await mockAccount(chainId);
     prepareMockAccount(account, state);
-    const { confirmDialogSpy } = prepareSignConfirmDialog();
+    const { confirmDialogSpy } = prepareConfirmDialog();
     confirmDialogSpy.mockResolvedValue(false);
     const request = createRequestParam(chainId, account.address, true);
 

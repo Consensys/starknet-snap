@@ -23,7 +23,6 @@ import { estimateAccDeployFee } from './estimateAccountDeployFee';
 import { estimateFee } from './estimateFee';
 import { estimateFees } from './estimateFees';
 import { executeTxn } from './executeTxn';
-import { extractPrivateKey } from './extractPrivateKey';
 import { extractPublicKey } from './extractPublicKey';
 import { getCurrentNetwork } from './getCurrentNetwork';
 import { getErc20TokenBalance } from './getErc20TokenBalance';
@@ -36,8 +35,12 @@ import { getTransactions } from './getTransactions';
 import { getTransactionStatus } from './getTransactionStatus';
 import { getValue } from './getValue';
 import { recoverAccounts } from './recoverAccounts';
-import type { SignMessageParams, SignTransactionParams } from './rpcs';
-import { signMessage, signTransaction } from './rpcs';
+import type {
+  DisplayPrivateKeyParams,
+  SignMessageParams,
+  SignTransactionParams,
+} from './rpcs';
+import { displayPrivateKey, signMessage, signTransaction } from './rpcs';
 import { sendTransaction } from './sendTransaction';
 import { signDeclareTransaction } from './signDeclareTransaction';
 import { signDeployAccountTransaction } from './signDeployAccountTransaction';
@@ -161,10 +164,9 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
       case 'starkNet_getStoredUserAccounts':
         return await getStoredUserAccounts(apiParams);
 
-      case 'starkNet_extractPrivateKey':
-        apiParams.keyDeriver = await getAddressKeyDeriver(snap);
-        return await extractPrivateKey(
-          apiParams as unknown as ApiParamsWithKeyDeriver,
+      case 'starkNet_displayPrivateKey':
+        return await displayPrivateKey.execute(
+          apiParams.requestParams as unknown as DisplayPrivateKeyParams,
         );
 
       case 'starkNet_extractPublicKey':
