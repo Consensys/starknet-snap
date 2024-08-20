@@ -4,15 +4,16 @@ import {
 } from '@metamask/snaps-sdk';
 import { constants } from 'starknet';
 
-import type { StarknetAccount } from '../../test/utils';
-import { generateAccounts } from '../../test/utils';
 import typedDataExample from '../__tests__/fixture/typedDataExample.json';
 import type { SnapState } from '../types/snapState';
 import { toJson } from '../utils';
 import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../utils/constants';
-import * as snapHelper from '../utils/snap';
-import * as snapUtils from '../utils/snapUtils';
 import * as starknetUtils from '../utils/starknetUtils';
+import {
+  mockAccount,
+  prepareMockAccount,
+  prepareConfirmDialog,
+} from './__tests__/helper';
 import { signMessage } from './signMessage';
 import type { SignMessageParams } from './signMessage';
 
@@ -27,45 +28,11 @@ describe('signMessage', () => {
     transactions: [],
   };
 
-  const mockAccount = async (network: constants.StarknetChainId) => {
-    const accounts = await generateAccounts(network, 1);
-    return accounts[0];
-  };
-
-  const prepareSignMessageMock = async (account: StarknetAccount) => {
-    const getStateDataSpy = jest.spyOn(snapHelper, 'getStateData');
-    const verifyIfAccountNeedUpgradeOrDeploySpy = jest.spyOn(
-      snapUtils,
-      'verifyIfAccountNeedUpgradeOrDeploy',
-    );
-    const getKeysFromAddressSpy = jest.spyOn(
-      starknetUtils,
-      'getKeysFromAddress',
-    );
-    const confirmDialogSpy = jest.spyOn(snapHelper, 'confirmDialog');
-
-    getKeysFromAddressSpy.mockResolvedValue({
-      privateKey: account.privateKey,
-      publicKey: account.publicKey,
-      addressIndex: account.addressIndex,
-      derivationPath: account.derivationPath as unknown as any,
-    });
-
-    verifyIfAccountNeedUpgradeOrDeploySpy.mockReturnThis();
-    confirmDialogSpy.mockResolvedValue(true);
-    getStateDataSpy.mockResolvedValue(state);
-
-    return {
-      getKeysFromAddressSpy,
-      verifyIfAccountNeedUpgradeOrDeploySpy,
-      confirmDialogSpy,
-    };
-  };
-
   it('signs message correctly', async () => {
     const account = await mockAccount(constants.StarknetChainId.SN_SEPOLIA);
 
-    await prepareSignMessageMock(account);
+    prepareMockAccount(account, state);
+    prepareConfirmDialog();
 
     const expectedResult = await starknetUtils.signMessage(
       account.privateKey,
@@ -86,7 +53,8 @@ describe('signMessage', () => {
   it('renders confirmation dialog', async () => {
     const account = await mockAccount(constants.StarknetChainId.SN_SEPOLIA);
 
-    const { confirmDialogSpy } = await prepareSignMessageMock(account);
+    prepareMockAccount(account, state);
+    const { confirmDialogSpy } = prepareConfirmDialog();
 
     const request = {
       chainId: constants.StarknetChainId.SN_SEPOLIA,
@@ -124,7 +92,8 @@ describe('signMessage', () => {
   it('throws `UserRejectedRequestError` if user denied the operation', async () => {
     const account = await mockAccount(constants.StarknetChainId.SN_SEPOLIA);
 
-    const { confirmDialogSpy } = await prepareSignMessageMock(account);
+    prepareMockAccount(account, state);
+    const { confirmDialogSpy } = prepareConfirmDialog();
 
     confirmDialogSpy.mockResolvedValue(false);
 
