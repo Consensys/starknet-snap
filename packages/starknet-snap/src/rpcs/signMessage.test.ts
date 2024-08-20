@@ -12,7 +12,7 @@ import * as starknetUtils from '../utils/starknetUtils';
 import {
   mockAccount,
   prepareMockAccount,
-  prepareSignConfirmDialog,
+  prepareConfirmDialog,
 } from './__tests__/helper';
 import { signMessage } from './signMessage';
 import type { SignMessageParams } from './signMessage';
@@ -32,7 +32,7 @@ describe('signMessage', () => {
     const account = await mockAccount(constants.StarknetChainId.SN_SEPOLIA);
 
     prepareMockAccount(account, state);
-    prepareSignConfirmDialog();
+    prepareConfirmDialog();
 
     const expectedResult = await starknetUtils.signMessage(
       account.privateKey,
@@ -54,7 +54,7 @@ describe('signMessage', () => {
     const account = await mockAccount(constants.StarknetChainId.SN_SEPOLIA);
 
     prepareMockAccount(account, state);
-    const { confirmDialogSpy } = prepareSignConfirmDialog();
+    const { confirmDialogSpy } = prepareConfirmDialog();
 
     const request = {
       chainId: constants.StarknetChainId.SN_SEPOLIA,
@@ -93,7 +93,7 @@ describe('signMessage', () => {
     const account = await mockAccount(constants.StarknetChainId.SN_SEPOLIA);
 
     prepareMockAccount(account, state);
-    const { confirmDialogSpy } = prepareSignConfirmDialog();
+    const { confirmDialogSpy } = prepareConfirmDialog();
 
     confirmDialogSpy.mockResolvedValue(false);
 
