@@ -8,7 +8,7 @@
   "servers": [],
   "methods": [
     {
-      "name": "starkNet_extractPrivateKey",
+      "name": "starkNet_displayPrivateKey",
       "summary": "Extract private key from deployed Starknet account and display in MetaMask",
       "paramStructure": "by-name",
       "params": [

@@ -48,10 +48,21 @@ export function prepareMockAccount(account: StarknetAccount, state: SnapState) {
 /**
  *
  */
-export function prepareSignConfirmDialog() {
+export function prepareConfirmDialog() {
   const confirmDialogSpy = jest.spyOn(snapHelper, 'confirmDialog');
   confirmDialogSpy.mockResolvedValue(true);
   return {
     confirmDialogSpy,
+  };
+}
+
+/**
+ *
+ */
+export function prepareAlertDialog() {
+  const alertDialogSpy = jest.spyOn(snapHelper, 'alertDialog');
+  alertDialogSpy.mockResolvedValue(true);
+  return {
+    alertDialogSpy,
   };
 }
