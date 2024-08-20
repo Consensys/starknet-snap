@@ -1,0 +1,22 @@
+{
+  "transactions": [
+    {
+      "entrypoint": "transfer",
+      "calldata": ["0", "0", "0"],
+      "contractAddress": "0x1234567890abcdef1234567890abcdef12345678"
+    },
+    {
+      "entrypoint": "transfer2",
+      "calldata": ["0", "0", "0"],
+      "contractAddress": "0x1234567890abcdef1234567890abcdef12345678"
+    }
+  ],
+  "transactionsDetail": {
+    "walletAddress": "0x00b28a089e7fb83debee4607b6334d687918644796b47d9e9e38ea8213833137",
+    "chainId": "0x534e5f4d41494e",
+    "cairoVersion": "0",
+    "nonce": "0x1",
+    "version": "0x0",
+    "maxFee": "0x64"
+  }
+}

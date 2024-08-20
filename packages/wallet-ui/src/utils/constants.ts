@@ -1,4 +1,5 @@
 import { constants } from 'starknet';
+import { FeeToken } from 'types';
 
 // TODO: Importing directly from constants when upgrading to starknet.js v6
 export const SEPOLIA_CHAINID = '0x534e5f5345504f4c4941';
@@ -61,3 +62,5 @@ export const TIMEOUT_DURATION = 10000;
 
 export const MIN_ACC_CONTRACT_VERSION = [0, 3, 0];
 export const DUMMY_ADDRESS = '0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx';
+
+export const DEFAULT_FEE_TOKEN = FeeToken.ETH;

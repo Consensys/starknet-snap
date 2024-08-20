@@ -1,12 +1,17 @@
 import { constants } from 'starknet';
 import { StructError, assert } from 'superstruct';
 
+import transactionExample from '../__tests__/fixture/transactionExample.json';
 import typedDataExample from '../__tests__/fixture/typedDataExample.json';
+import { CAIRO_VERSION, CAIRO_VERSION_LEGACY } from './constants';
 import {
   AddressStruct,
   AuthorizableStruct,
   BaseRequestStruct,
+  CairoVersionStruct,
+  CallDataStruct,
   ChainIdStruct,
+  TxVersionStruct,
   TypeDataStruct,
 } from './superstruct';
 
@@ -123,5 +128,49 @@ describe('BaseRequestStruct', () => {
         BaseRequestStruct,
       ),
     ).toThrow(StructError);
+  });
+});
+
+describe('CairoVersionStruct', () => {
+  it.each([CAIRO_VERSION, CAIRO_VERSION_LEGACY])(
+    'does not throw error if the version is %s',
+    (version) => {
+      expect(() => assert(version, CairoVersionStruct)).not.toThrow();
+    },
+  );
+
+  it('throws error if the cairo version is invalid', () => {
+    expect(() => assert('invalid version', CairoVersionStruct)).toThrow(
+      StructError,
+    );
+  });
+});
+
+describe('TxVersionStruct', () => {
+  it.each(Object.values(constants.TRANSACTION_VERSION))(
+    'does not throw error if the tx version is %s',
+    (version) => {
+      expect(() => assert(version, TxVersionStruct)).not.toThrow();
+    },
+  );
+
+  it('throws error if the tx version is invalid', () => {
+    expect(() => assert('invalid version', TxVersionStruct)).toThrow(
+      StructError,
+    );
+  });
+});
+
+describe('CallDataStruct', () => {
+  it('does not throw error if the call data is correct', () => {
+    expect(() =>
+      assert(transactionExample.transactions[0], CallDataStruct),
+    ).not.toThrow();
+  });
+
+  it('throws error if the call data is invalid', () => {
+    expect(() => assert('invalid version', CallDataStruct)).toThrow(
+      StructError,
+    );
   });
 });

@@ -53,3 +53,8 @@ export interface TokenBalance {
   balancePending: BigNumber;
   balanceLatest: BigNumber;
 }
+
+export enum FeeToken { // for retrieving txns from Voyager
+  ETH = 'ETH',
+  STRK = 'STRK',
+}
