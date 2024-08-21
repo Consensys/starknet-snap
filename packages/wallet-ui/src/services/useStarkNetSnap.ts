@@ -331,7 +331,7 @@ export const useStarkNetSnap = () => {
     contractAddress: string,
     contractFuncName: string,
     contractCallData: string,
-    senderAddress: string,
+    address: string,
     chainId: string,
     transactionVersion?:
       | typeof constants.TRANSACTION_VERSION.V2
@@ -349,7 +349,7 @@ export const useStarkNetSnap = () => {
               contractAddress,
               contractFuncName,
               contractCallData,
-              senderAddress,
+              address,
               chainId,
               transactionVersion,
             },
@@ -367,7 +367,7 @@ export const useStarkNetSnap = () => {
     contractAddress: string,
     contractFuncName: string,
     contractCallData: string,
-    senderAddress: string,
+    address: string,
     maxFee: string,
     chainId: string,
   ) {
@@ -384,7 +384,7 @@ export const useStarkNetSnap = () => {
               contractAddress,
               contractFuncName,
               contractCallData,
-              senderAddress,
+              address,
               maxFee,
               chainId,
             },

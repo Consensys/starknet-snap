@@ -36,8 +36,10 @@ import {
   validateAndParseAddress as _validateAndParseAddress,
   Signer,
   stark,
+  TransactionType as StarknetTransactionType,
 } from 'starknet';
 
+import type { EstimateFeeResponse } from '../rpcs/estimateFee';
 import type { RpcV4GetTransactionReceiptResponse } from '../types/snapApi';
 import type { Network, SnapState, Transaction } from '../types/snapState';
 import { TransactionType } from '../types/snapState';
@@ -915,6 +917,63 @@ export const validateAndParseAddress = (
   }
   return _validateAndParseAddressFn(address);
 };
+
+export async function getEstimatedFees(
+  network: Network,
+  address: string,
+  privateKey: string,
+  accountPublicKey: string,
+  contractAddress: string,
+  contractFuncName: string,
+  contractCallData: string[],
+  transactionVersion: '0x2' | '0x3',
+  includeDeployFee: boolean,
+): Promise<EstimateFeeResponse> {
+  const txnInvocation = {
+    contractAddress,
+    entrypoint: contractFuncName,
+    calldata: contractCallData,
+  };
+
+  let bulkTransactions: Invocations = [
+    {
+      type: StarknetTransactionType.INVOKE,
+      payload: txnInvocation,
+    },
+  ];
+
+  if (includeDeployFee) {
+    const { callData } = getAccContractAddressAndCallData(accountPublicKey);
+    const deployAccountpayload = {
+      classHash: ACCOUNT_CLASS_HASH,
+      contractAddress: address,
+      constructorCalldata: callData,
+      addressSalt: accountPublicKey,
+    };
+
+    bulkTransactions.unshift({
+      type: StarknetTransactionType.DEPLOY_ACCOUNT,
+      payload: deployAccountpayload,
+    });
+  }
+
+  const estimateBulkFeeResp = await estimateFeeBulk(
+    network,
+    address,
+    privateKey,
+    bulkTransactions,
+    transactionVersion,
+  );
+
+  const estimateFeeResp = addFeesFromAllTransactions(estimateBulkFeeResp);
+
+  return {
+    suggestedMaxFee: estimateFeeResp.suggestedMaxFee.toString(10),
+    overallFee: estimateFeeResp.overall_fee.toString(10),
+    unit: 'wei',
+    includeDeploy: includeDeployFee,
+  };
+}
 
 /**
  * Check address needed deploy by using getVersion and check if eth balance is non empty.

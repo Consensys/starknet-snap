@@ -19,9 +19,6 @@ import { addErc20Token } from './addErc20Token';
 import { addNetwork } from './addNetwork';
 import { createAccount } from './createAccount';
 import { declareContract } from './declareContract';
-import { estimateAccDeployFee } from './estimateAccountDeployFee';
-import { estimateFee } from './estimateFee';
-import { estimateFees } from './estimateFees';
 import { executeTxn } from './executeTxn';
 import { extractPublicKey } from './extractPublicKey';
 import { getCurrentNetwork } from './getCurrentNetwork';
@@ -37,10 +34,16 @@ import { getValue } from './getValue';
 import { recoverAccounts } from './recoverAccounts';
 import type {
   DisplayPrivateKeyParams,
+  EstimateFeeParams,
   SignMessageParams,
   SignTransactionParams,
 } from './rpcs';
-import { displayPrivateKey, signMessage, signTransaction } from './rpcs';
+import {
+  displayPrivateKey,
+  estimateFee,
+  signMessage,
+  signTransaction,
+} from './rpcs';
 import { sendTransaction } from './sendTransaction';
 import { signDeclareTransaction } from './signDeclareTransaction';
 import { signDeployAccountTransaction } from './signDeployAccountTransaction';
@@ -220,15 +223,8 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
         return await getValue(apiParams);
 
       case 'starkNet_estimateFee':
-        apiParams.keyDeriver = await getAddressKeyDeriver(snap);
-        return await estimateFee(
-          apiParams as unknown as ApiParamsWithKeyDeriver,
-        );
-
-      case 'starkNet_estimateAccountDeployFee':
-        apiParams.keyDeriver = await getAddressKeyDeriver(snap);
-        return await estimateAccDeployFee(
-          apiParams as unknown as ApiParamsWithKeyDeriver,
+        return await estimateFee.execute(
+          apiParams.requestParams as unknown as EstimateFeeParams,
         );
 
       case 'starkNet_addErc20Token':
@@ -264,12 +260,6 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
       case 'starkNet_executeTxn':
         apiParams.keyDeriver = await getAddressKeyDeriver(snap);
         return await executeTxn(
-          apiParams as unknown as ApiParamsWithKeyDeriver,
-        );
-
-      case 'starkNet_estimateFees':
-        apiParams.keyDeriver = await getAddressKeyDeriver(snap);
-        return await estimateFees(
           apiParams as unknown as ApiParamsWithKeyDeriver,
         );
 

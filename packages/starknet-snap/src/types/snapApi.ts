@@ -108,7 +108,7 @@ export type SendTransactionRequestParams = {
   contractAddress: string;
   contractFuncName: string;
   contractCallData?: string;
-  senderAddress: string;
+  address: string;
   maxFee?: string;
 } & BaseRequestParams;
 

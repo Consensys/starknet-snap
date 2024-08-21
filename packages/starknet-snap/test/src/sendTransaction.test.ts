@@ -7,7 +7,6 @@ import * as utils from '../../src/utils/starknetUtils';
 import * as snapUtils from '../../src/utils/snapUtils';
 import { SnapState } from '../../src/types/snapState';
 import { sendTransaction } from '../../src/sendTransaction';
-import * as estimateFeeSnap from '../../src/estimateFee';
 import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../../src/utils/constants';
 import {
   account1,
@@ -52,7 +51,7 @@ describe('Test function: sendTransaction', function () {
     contractFuncName: 'transfer',
     contractCallData:
       '0x0256d8f49882cc9366037415f48fa9fd2b5b7344ded7573ebfcef7c90e3e6b75,100000000000000000000,0',
-    senderAddress: account1.address,
+    address: account1.address,
     chainId: STARKNET_SEPOLIA_TESTNET_NETWORK.chainId,
   };
 
@@ -115,8 +114,8 @@ describe('Test function: sendTransaction', function () {
       }
     });
 
-    it('should show error when request senderAddress is not given', async function () {
-      invalidRequest.senderAddress = undefined as unknown as string;
+    it('should show error when request address is not given', async function () {
+      invalidRequest.address = undefined as unknown as string;
       apiParams.requestParams = invalidRequest;
       let result;
       try {
@@ -132,7 +131,7 @@ describe('Test function: sendTransaction', function () {
     });
 
     it('should show error when request contractAddress is invalid', async function () {
-      invalidRequest.senderAddress = '0x0';
+      invalidRequest.address = '0x0';
       apiParams.requestParams = invalidRequest;
       let result;
       try {
@@ -235,11 +234,12 @@ describe('Test function: sendTransaction', function () {
       let executeTxnStub: sinon.SinonStub;
       beforeEach(async function () {
         apiParams.requestParams = {
+          ...requestObject,
           ...apiParams.requestParams,
-          senderAddress: Cairo1Account1.address,
+          address: Cairo1Account1.address,
         };
         sandbox.stub(utils, 'isUpgradeRequired').resolves(false);
-        sandbox.stub(estimateFeeSnap, 'estimateFee').resolves({
+        sandbox.stub(utils, 'getEstimatedFees').resolves({
           suggestedMaxFee: estimateFeeResp.suggestedMaxFee.toString(10),
           overallFee: estimateFeeResp.overall_fee.toString(10),
           unit: 'wei',
@@ -313,7 +313,7 @@ describe('Test function: sendTransaction', function () {
         it('should send a transaction for transferring 10 tokens from an unfound user correctly', async function () {
           const apiRequest =
             apiParams.requestParams as SendTransactionRequestParams;
-          apiRequest.senderAddress = unfoundUserAddress;
+          apiRequest.address = unfoundUserAddress;
           const result = await sendTransaction(apiParams);
           expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledOnce;
           expect(walletStub.rpcStubs.snap_manageState).to.have.been.called;
@@ -349,7 +349,7 @@ describe('Test function: sendTransaction', function () {
             contractAddress: account1.address,
             contractFuncName: 'get_signer',
             contractCallData: '**foo**',
-            senderAddress: account1.address,
+            address: account1.address,
           };
           apiParams.requestParams = requestObject;
           await sendTransaction(apiParams);
@@ -437,7 +437,8 @@ describe('Test function: sendTransaction', function () {
             contractFuncName: 'transfer',
             contractCallData:
               '0x0256d8f49882cc9366037415f48fa9fd2b5b7344ded7573ebfcef7c90e3e6b75,100000000000000000000,0',
-            senderAddress: account1.address,
+            address: account1.address,
+            chainId: STARKNET_SEPOLIA_TESTNET_NETWORK.chainId,
           };
           apiParams.requestParams = requestObject;
           const result = await sendTransaction(apiParams);
