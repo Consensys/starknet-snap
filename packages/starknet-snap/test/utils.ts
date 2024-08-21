@@ -137,7 +137,7 @@ export async function generateAccounts(
  * @param params.finalityStatuses - Array of transaction finality status.
  * @param params.executionStatuses - Array of transaction execution status.
  * @param params.cnt - Number of transaction to generate.
- * @returns An array of StarknetAccount object.
+ * @returns An array of transaction object.
  */
 export function generateTransactions({
   chainId,

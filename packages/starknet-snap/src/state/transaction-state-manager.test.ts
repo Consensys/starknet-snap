@@ -36,13 +36,13 @@ describe('TransactionStateManager', () => {
     };
   };
 
-  describe('findTransaction', () => {
+  describe('getTransaction', () => {
     it('returns the transaction', async () => {
       const chainId = constants.StarknetChainId.SN_SEPOLIA;
       const { txns } = await prepareMockData(chainId);
 
       const stateManager = new TransactionStateManager();
-      const result = await stateManager.findTransaction({
+      const result = await stateManager.getTransaction({
         txnHash: txns[0].txnHash,
       });
 
@@ -54,7 +54,7 @@ describe('TransactionStateManager', () => {
       const { txns } = await prepareMockData(chainId);
 
       const stateManager = new TransactionStateManager();
-      const result = await stateManager.findTransaction({
+      const result = await stateManager.getTransaction({
         txnHash: txns[1].txnHash,
         chainId: txns[1].chainId,
       });
@@ -68,7 +68,7 @@ describe('TransactionStateManager', () => {
 
       const stateManager = new TransactionStateManager();
 
-      const result = await stateManager.findTransaction({
+      const result = await stateManager.getTransaction({
         txnHash: txns[0].txnHash,
         chainId: constants.StarknetChainId.SN_MAIN,
       });

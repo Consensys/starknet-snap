@@ -48,6 +48,8 @@ export class TxTimestampFilter
 {
   _apply(data: Transaction): boolean {
     // The timestamp from the data source is in seconds, but we are comparing it in milliseconds
+    // e.g if the search is 1630000000, it means we return the txns where the timestamp is greater than or equal to 1630000000 * 1000
+    // example use case: search for txns for the last 7 days, the search will be Date.now() - 7 * 24 * 60 * 60 * 1000
     return this.search !== undefined && data.timestamp * 1000 >= this.search;
   }
 }
@@ -59,6 +61,9 @@ export class TxnTypeFilter
   dataKey = 'txnType';
 }
 
+// Filter for transaction status
+// Search for transactions based on the finality status and execution status
+// It compare the finality status and execution status in OR condition, due to our use case is to find the transactions that fit to the given finality status or the given execution status
 export class TxStatusFilter implements ITxFilter {
   finalityStatus: Set<string>;
 
@@ -205,7 +210,7 @@ export class TransactionStateManager extends StateManager<Transaction> {
    * @param [state] - The optional SnapState object.
    * @returns A Promise that resolves with the transaction object if found, or null if not found.
    */
-  async findTransaction(
+  async getTransaction(
     {
       txnHash,
       chainId,
@@ -233,7 +238,7 @@ export class TransactionStateManager extends StateManager<Transaction> {
   async updateTransaction(data: Transaction): Promise<void> {
     try {
       await this.update(async (state: SnapState) => {
-        const dataInState = await this.findTransaction(
+        const dataInState = await this.getTransaction(
           {
             txnHash: data.txnHash,
             chainId: data.chainId,
@@ -261,7 +266,7 @@ export class TransactionStateManager extends StateManager<Transaction> {
   async addTransaction(data: Transaction): Promise<void> {
     try {
       await this.update(async (state: SnapState) => {
-        const dataInState = await this.findTransaction(
+        const dataInState = await this.getTransaction(
           {
             txnHash: data.txnHash,
             chainId: data.chainId,
