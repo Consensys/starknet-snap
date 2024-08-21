@@ -6,15 +6,19 @@ import {
   hash,
   type Calldata,
   num as numUtils,
+  TransactionFinalityStatus,
+  TransactionExecutionStatus,
+  TransactionType,
 } from 'starknet';
 import {
   BIP44CoinTypeNode,
   getBIP44AddressKeyDeriver,
 } from '@metamask/key-tree';
-import { AccContract } from '../src/types/snapState';
+import { AccContract, Transaction } from '../src/types/snapState';
 import {
   ACCOUNT_CLASS_HASH,
   ACCOUNT_CLASS_HASH_LEGACY,
+  PRELOADED_TOKENS,
   PROXY_CONTRACT_HASH,
 } from '../src/utils/constants';
 import { grindKey } from '../src/utils/keyPair';
@@ -120,4 +124,136 @@ export async function generateAccounts(
     });
   }
   return accounts;
+}
+
+/**
+ * Method to generate transactions.
+ *
+ * @param params
+ * @param params.chainId - Starknet Chain Id.
+ * @param params.address - Address of the account.
+ * @param params.contractAddresses - Contract addresses to generate transactions.
+ * @param params.txnTypes - Array of transaction types.
+ * @param params.finalityStatuses - Array of transaction finality status.
+ * @param params.executionStatuses - Array of transaction execution status.
+ * @param params.cnt - Number of transaction to generate.
+ * @returns An array of StarknetAccount object.
+ */
+export function generateTransactions({
+  chainId,
+  address,
+  contractAddresses = PRELOADED_TOKENS.map((token) => token.address),
+  txnTypes = Object.values(TransactionType),
+  finalityStatuses = Object.values(TransactionFinalityStatus),
+  executionStatuses = Object.values(TransactionExecutionStatus),
+  // The timestamp from data source is in seconds
+  timestamp = Math.floor(Date.now() / 1000),
+  cnt = 1,
+}: {
+  chainId: constants.StarknetChainId;
+  address: string;
+  contractAddresses?: string[];
+  txnTypes?: TransactionType[];
+  finalityStatuses?: TransactionFinalityStatus[];
+  executionStatuses?: TransactionExecutionStatus[];
+  timestamp?: number;
+  cnt?: number;
+}): Transaction[] {
+  const transaction = {
+    chainId: chainId,
+    contractAddress: '',
+    contractCallData: [],
+    contractFuncName: '',
+    senderAddress: address,
+    timestamp: timestamp,
+    txnHash: '',
+    txnType: '',
+    failureReason: '',
+    status: '',
+    executionStatus: '',
+    finalityStatus: '',
+    eventIds: [],
+  };
+  let accumulatedTimestamp = timestamp;
+  let accumulatedTxnHash = BigInt(
+    '0x2a8c2d5d4908a6561de87ecb18a76305c64800e3f81b393b9988de1abd37284',
+  );
+
+  let createCnt = cnt;
+  let filteredTxnTypes = txnTypes;
+  const transactions: Transaction[] = [];
+
+  // only 1 deploy account transaction to generate
+  if (
+    txnTypes.includes(TransactionType.DEPLOY_ACCOUNT) ||
+    txnTypes.includes(TransactionType.DEPLOY)
+  ) {
+    transactions.push({
+      ...transaction,
+      contractAddress: address,
+      txnType: TransactionType.DEPLOY_ACCOUNT,
+      finalityStatus: TransactionFinalityStatus.ACCEPTED_ON_L1,
+      executionStatus: TransactionExecutionStatus.SUCCEEDED,
+      timestamp: accumulatedTimestamp,
+      txnHash: '0x' + accumulatedTxnHash.toString(16),
+    });
+    createCnt -= 1;
+    // exclude deploy txnType
+    filteredTxnTypes = filteredTxnTypes.filter(
+      (type) =>
+        type !== TransactionType.DEPLOY_ACCOUNT &&
+        type !== TransactionType.DEPLOY,
+    );
+  }
+
+  if (filteredTxnTypes.length === 0) {
+    filteredTxnTypes = [TransactionType.INVOKE];
+  }
+
+  for (let i = 1; i <= createCnt; i++) {
+    const randomContractAddress =
+      contractAddresses[Math.floor(Math.random() * contractAddresses.length)];
+    const randomTxnType =
+      filteredTxnTypes[Math.floor(Math.random() * filteredTxnTypes.length)];
+    let randomFinalityStatus =
+      finalityStatuses[Math.floor(Math.random() * finalityStatuses.length)];
+    let randomExecutionStatus =
+      executionStatuses[Math.floor(Math.random() * executionStatuses.length)];
+    let randomContractFuncName = ['transfer', 'upgrade'][
+      Math.floor(Math.random() * 2)
+    ];
+    accumulatedTimestamp += i * 100;
+    accumulatedTxnHash += BigInt(i * 100);
+
+    if (randomExecutionStatus === TransactionExecutionStatus.REJECTED) {
+      if (
+        [
+          TransactionFinalityStatus.NOT_RECEIVED,
+          TransactionFinalityStatus.RECEIVED,
+          TransactionFinalityStatus.ACCEPTED_ON_L1,
+        ].includes(randomFinalityStatus)
+      ) {
+        randomFinalityStatus = TransactionFinalityStatus.ACCEPTED_ON_L2;
+      }
+    }
+
+    if (randomFinalityStatus === TransactionFinalityStatus.NOT_RECEIVED) {
+      randomFinalityStatus = TransactionFinalityStatus.ACCEPTED_ON_L2;
+      randomExecutionStatus = TransactionExecutionStatus.SUCCEEDED;
+    }
+
+    transactions.push({
+      ...transaction,
+      contractAddress: randomContractAddress,
+      txnType: randomTxnType,
+      finalityStatus: randomFinalityStatus,
+      executionStatus: randomExecutionStatus,
+      timestamp: accumulatedTimestamp,
+      contractFuncName:
+        randomTxnType === TransactionType.INVOKE ? randomContractFuncName : '',
+      txnHash: '0x' + accumulatedTxnHash.toString(16),
+    });
+  }
+
+  return transactions.sort((a, b) => b.timestamp - a.timestamp);
 }
