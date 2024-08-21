@@ -196,7 +196,7 @@ export class TransactionStateManager extends StateManager<Transaction> {
     );
   }
 
-   /**
+  /**
    * Finds a transaction object based on the given chain id and txn hash.
    *
    * @param param - The param object.
