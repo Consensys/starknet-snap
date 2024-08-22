@@ -110,8 +110,10 @@ export type Account = {
   derivationPath: ReturnType<typeof getBIP44ChangePathString>;
 };
 
-export type AccountRpcControllerOptions = Json & {
+export type AccountRpcControllerOptions = {
   showInvalidAccountAlert: boolean;
+  checkUpgrade?: boolean;
+  checkDeploy?: boolean;
 };
 
 export abstract class AccountRpcController<
@@ -126,6 +128,8 @@ export abstract class AccountRpcController<
 
   protected defaultOptions: AccountRpcControllerOptions = {
     showInvalidAccountAlert: true,
+    checkUpgrade: true,
+    checkDeploy: true,
   };
 
   constructor(options?: AccountRpcControllerOptions) {
@@ -137,7 +141,7 @@ export abstract class AccountRpcController<
     await super.preExecute(params);
 
     const { chainId, address } = params;
-    const { showInvalidAccountAlert } = this.options;
+    const { showInvalidAccountAlert, checkDeploy, checkUpgrade } = this.options;
 
     const deriver = await getBip44Deriver();
     // TODO: Instead of getting the state directly, we should implement state management to consolidate the state fetching
@@ -160,6 +164,8 @@ export abstract class AccountRpcController<
       address,
       this.account.publicKey,
       showInvalidAccountAlert,
+      checkDeploy,
+      checkUpgrade,
     );
   }
 }
