@@ -2,13 +2,13 @@ import { heading, panel, DialogType } from '@metamask/snaps-sdk';
 import { num as numUtils, constants } from 'starknet';
 
 import { createAccount } from './createAccount';
+import { estimateFee } from './estimateFee';
 import type {
   ApiParamsWithKeyDeriver,
   SendTransactionRequestParams,
 } from './types/snapApi';
 import type { Transaction } from './types/snapState';
 import { TransactionStatus, VoyagerTransactionType } from './types/snapState';
-import { TRANSACTION_VERSION } from './utils/constants';
 import { logger } from './utils/logger';
 import { toJson } from './utils/serializer';
 import {
@@ -23,7 +23,6 @@ import {
   executeTxn,
   isAccountDeployed,
   isUpgradeRequired,
-  getEstimatedFees,
 } from './utils/starknetUtils';
 
 /**
@@ -37,7 +36,7 @@ export async function sendTransaction(params: ApiParamsWithKeyDeriver) {
 
     if (
       !requestParamsObj.contractAddress ||
-      !requestParamsObj.address ||
+      !requestParamsObj.senderAddress ||
       !requestParamsObj.contractFuncName
     ) {
       throw new Error(
@@ -55,44 +54,32 @@ export async function sendTransaction(params: ApiParamsWithKeyDeriver) {
       );
     }
     try {
-      validateAndParseAddress(requestParamsObj.address);
+      validateAndParseAddress(requestParamsObj.senderAddress);
     } catch (error) {
       throw new Error(
-        `The given sender address is invalid: ${requestParamsObj.address}`,
+        `The given sender address is invalid: ${requestParamsObj.senderAddress}`,
       );
     }
-    const { address } = requestParamsObj;
-    const network = getNetworkFromChainId(state, requestParamsObj.chainId);
-    if (await isUpgradeRequired(network, address)) {
-      throw new Error('Upgrade required');
-    }
+
     const { contractAddress } = requestParamsObj;
     const { contractFuncName } = requestParamsObj;
     const contractCallData = getCallDataArray(
       requestParamsObj.contractCallData as unknown as string,
     );
-    const accountDeployed = await isAccountDeployed(network, address);
+    const { senderAddress } = requestParamsObj;
+    const network = getNetworkFromChainId(state, requestParamsObj.chainId);
 
-    const {
-      privateKey: senderPrivateKey,
-      addressIndex,
-      publicKey,
-    } = await getKeysFromAddress(keyDeriver, network, state, address);
+    if (await isUpgradeRequired(network, senderAddress)) {
+      throw new Error('Upgrade required');
+    }
+
+    const { privateKey: senderPrivateKey, addressIndex } =
+      await getKeysFromAddress(keyDeriver, network, state, senderAddress);
     let maxFee = requestParamsObj.maxFee
       ? numUtils.toBigInt(requestParamsObj.maxFee)
       : constants.ZERO;
     if (maxFee === constants.ZERO) {
-      const { suggestedMaxFee } = await getEstimatedFees(
-        network,
-        address,
-        senderPrivateKey,
-        publicKey,
-        contractAddress,
-        contractFuncName,
-        contractCallData,
-        TRANSACTION_VERSION,
-        !accountDeployed,
-      );
+      const { suggestedMaxFee } = await estimateFee(params);
       maxFee = numUtils.toBigInt(suggestedMaxFee);
     }
 
@@ -101,7 +88,7 @@ export async function sendTransaction(params: ApiParamsWithKeyDeriver) {
       contractAddress,
       contractFuncName,
       contractCallData,
-      address,
+      senderAddress,
       maxFee,
       network,
     );
@@ -131,6 +118,7 @@ export async function sendTransaction(params: ApiParamsWithKeyDeriver) {
       )}\nmaxFee: ${maxFee.toString()}}`,
     );
 
+    const accountDeployed = await isAccountDeployed(network, senderAddress);
     if (!accountDeployed) {
       // Deploy account before sending the transaction
       logger.log(
@@ -154,7 +142,7 @@ export async function sendTransaction(params: ApiParamsWithKeyDeriver) {
     const nonceSendTransaction = accountDeployed ? undefined : 1;
     const txnResp = await executeTxn(
       network,
-      address,
+      senderAddress,
       senderPrivateKey,
       txnInvocation,
       undefined,
@@ -171,7 +159,7 @@ export async function sendTransaction(params: ApiParamsWithKeyDeriver) {
         txnHash: txnResp.transaction_hash,
         txnType: VoyagerTransactionType.INVOKE,
         chainId: network.chainId,
-        senderAddress: address,
+        senderAddress,
         contractAddress,
         contractFuncName,
         contractCallData: contractCallData.map(

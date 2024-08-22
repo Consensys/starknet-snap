@@ -19,6 +19,8 @@ import { addErc20Token } from './addErc20Token';
 import { addNetwork } from './addNetwork';
 import { createAccount } from './createAccount';
 import { declareContract } from './declareContract';
+import { estimateAccDeployFee } from './estimateAccountDeployFee';
+import { estimateFees } from './estimateFees';
 import { executeTxn } from './executeTxn';
 import { extractPublicKey } from './extractPublicKey';
 import { getCurrentNetwork } from './getCurrentNetwork';
@@ -227,6 +229,12 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
           apiParams.requestParams as unknown as EstimateFeeParams,
         );
 
+      case 'starkNet_estimateAccountDeployFee':
+        apiParams.keyDeriver = await getAddressKeyDeriver(snap);
+        return await estimateAccDeployFee(
+          apiParams as unknown as ApiParamsWithKeyDeriver,
+        );
+
       case 'starkNet_addErc20Token':
         return await addErc20Token(apiParams);
 
@@ -260,6 +268,12 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
       case 'starkNet_executeTxn':
         apiParams.keyDeriver = await getAddressKeyDeriver(snap);
         return await executeTxn(
+          apiParams as unknown as ApiParamsWithKeyDeriver,
+        );
+
+      case 'starkNet_estimateFees':
+        apiParams.keyDeriver = await getAddressKeyDeriver(snap);
+        return await estimateFees(
           apiParams as unknown as ApiParamsWithKeyDeriver,
         );
 

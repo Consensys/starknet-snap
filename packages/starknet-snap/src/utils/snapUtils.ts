@@ -1218,8 +1218,6 @@ export async function showDeployRequestModal() {
  * @param address - The account address.
  * @param publicKey - The public key of the account address.
  * @param [showAlert] - The flag to show an alert modal; true will show the modal, false will not.
- * @param [checkUpgrade] - Flag to check if an upgrade is required.
- * @param [checkDeploy] - Flag to check if deployment is required.
  * @throws {DeployRequiredError} If the account needs to be deployed.
  * @throws {UpgradeRequiredError} If the account needs to be upgraded.
  */
@@ -1228,29 +1226,21 @@ export async function verifyIfAccountNeedUpgradeOrDeploy(
   address: string,
   publicKey: string,
   showAlert = true,
-  checkUpgrade = true,
-  checkDeploy = true,
 ) {
   try {
     await validateAccountRequireUpgradeOrDeploy(network, address, publicKey);
   } catch (error) {
-    if (error instanceof DeployRequiredError && checkDeploy) {
+    if (error instanceof DeployRequiredError) {
       showAlert && (await showDeployRequestModal());
-      throw error;
-    } else if (error instanceof UpgradeRequiredError && checkUpgrade) {
+    } else if (error instanceof UpgradeRequiredError) {
       showAlert && (await showUpgradeRequestModal());
-      throw error;
-    } else if (
-      (error instanceof DeployRequiredError && !checkDeploy) ||
-      (error instanceof UpgradeRequiredError && !checkUpgrade)
-    ) {
-      // Skip the error if the corresponding check is disabled
     } else {
       logger.warn(
-        'Unexpected Error, neither DeployRequiredError nor UpgradeRequiredError',
+        'Unexpected Error, neither DeployRequiredError or UpgradeRequiredError',
         error,
       );
-      throw error;
     }
+
+    throw error;
   }
 }

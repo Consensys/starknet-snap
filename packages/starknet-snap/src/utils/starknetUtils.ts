@@ -923,24 +923,11 @@ export async function getEstimatedFees(
   address: string,
   privateKey: string,
   accountPublicKey: string,
-  contractAddress: string,
-  contractFuncName: string,
-  contractCallData: string[],
+  transactionInvocations: Invocations,
   transactionVersion: '0x2' | '0x3',
   includeDeployFee: boolean,
 ): Promise<EstimateFeeResponse> {
-  const txnInvocation = {
-    contractAddress,
-    entrypoint: contractFuncName,
-    calldata: contractCallData,
-  };
-
-  let bulkTransactions: Invocations = [
-    {
-      type: StarknetTransactionType.INVOKE,
-      payload: txnInvocation,
-    },
-  ];
+  let bulkTransactions = transactionInvocations;
 
   if (includeDeployFee) {
     const { callData } = getAccContractAddressAndCallData(accountPublicKey);

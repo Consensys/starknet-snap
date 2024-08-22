@@ -1,9 +1,10 @@
+import type { Invocations } from 'starknet';
+import { TransactionType } from 'starknet';
 import type { Infer } from 'superstruct';
-import { object, string, assign, boolean } from 'superstruct';
+import { object, string, assign, boolean, enums } from 'superstruct';
 
 import {
   AddressStruct,
-  AuthorizableStruct,
   BaseRequestStruct,
   AccountRpcController,
   toJson,
@@ -17,9 +18,8 @@ export const EstimateFeeRequestStruct = assign(
     contractAddress: AddressStruct,
     contractFuncName: string(),
     contractCallData: string(),
-    transactionVersion: string(),
+    transactionVersion: enums(['0x2', '0x3']),
   }),
-  AuthorizableStruct,
   BaseRequestStruct,
 );
 
@@ -50,10 +50,11 @@ export class EstimateFeeRpc extends AccountRpcController<
    *
    * @param params - The parameters of the request.
    * @param params.address - The address of the signer.
-   * @param params.transactions - The list of transactions to be signed. Reference: https://www.starknetjs.com/docs/API/namespaces/types#call
-   * @param params.transactionsDetail - The InvocationsSignerDetails of the transactions to be signed. Reference: https://www.starknetjs.com/docs/API/namespaces/types#invocationssignerdetails
-   * @param [params.enableAuthorize] - Optional, a flag to enable or bypass the confirmation dialog.
-   * @returns the signature of the transaction in a string array.
+   * @param params.contractAddress - The address of the contract to interact with.
+   * @param params.contractFuncName - The name of the contract function to invoke.
+   * @param params.contractCallData - The calldata to be passed to the contract function, as a comma-separated string.
+   * @param params.transactionVersion - The version of the transaction, must be '0x2' or '0x3'.
+   * @returns The estimated transaction fee as an `EstimateFeeResponse`.
    */
   async execute(params: EstimateFeeParams): Promise<EstimateFeeResponse> {
     return super.execute(params);
@@ -80,19 +81,26 @@ export class EstimateFeeRpc extends AccountRpcController<
       })}`,
     );
 
+    const invocations: Invocations = [
+      {
+        type: TransactionType.INVOKE,
+        payload: {
+          contractAddress,
+          entrypoint: contractFuncName,
+          calldata: contractCallData.split(',').map((ele) => ele.trim()),
+        },
+      },
+    ];
+
     const estimateFeeResp = await getEstimatedFees(
       this.network,
       address,
       this.account.privateKey,
       this.account.publicKey,
-      contractAddress,
-      contractFuncName,
-      contractCallData.split(',').map((ele) => ele.trim()),
-      transactionVersion as '0x2' | '0x3',
+      invocations,
+      transactionVersion,
       !accountDeployed,
     );
-
-    logger.log(`estimateFee: Response: ${toJson(estimateFeeResp)}`);
 
     return estimateFeeResp;
   }
@@ -100,6 +108,4 @@ export class EstimateFeeRpc extends AccountRpcController<
 
 export const estimateFee = new EstimateFeeRpc({
   showInvalidAccountAlert: false,
-  checkDeploy: false,
-  checkUpgrade: true,
 });

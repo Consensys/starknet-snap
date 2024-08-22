@@ -213,8 +213,6 @@ describe('AccountRpcController', () => {
         account.address,
         account.publicKey,
         showInvalidAccountAlert,
-        true,
-        true,
       );
     },
   );
