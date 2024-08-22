@@ -81,8 +81,10 @@ export enum TransactionStatusType { // for retrieving txn from StarkNet feeder g
 
 export type Transaction = {
   txnHash: string; // in hex
+  // TODO: Change the type of txnType to `TransactionType` in the SnapState, when this state manager apply to getTransactions, there is no migration neeeded, as the state is override for every fetch for getTransactions
   txnType: VoyagerTransactionType | string;
   chainId: string; // in hex
+  // TODO: rename it to address to sync with the same naming convention in the AccContract
   senderAddress: string; // in hex
   contractAddress: string; // in hex
   contractFuncName: string;
