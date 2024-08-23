@@ -88,7 +88,7 @@ export class TokenStateManager extends StateManager<Erc20Token> {
    * @param [state] - The optional SnapState object.
    * @returns A Promise that resolves with the Erc20Token object if found, or null if not found.
    */
-  async findToken(
+  async getToken(
     {
       address,
       chainId,
@@ -116,7 +116,7 @@ export class TokenStateManager extends StateManager<Erc20Token> {
   async updateToken(data: Erc20Token): Promise<void> {
     try {
       await this.update(async (state: SnapState) => {
-        const dataInState = await this.findToken(
+        const dataInState = await this.getToken(
           {
             address: data.address,
             chainId: data.chainId,
@@ -145,7 +145,7 @@ export class TokenStateManager extends StateManager<Erc20Token> {
   async addToken(data: Erc20Token): Promise<void> {
     try {
       await this.update(async (state: SnapState) => {
-        const dataInState = await this.findToken(
+        const dataInState = await this.getToken(
           {
             address: data.address,
             chainId: data.chainId,
@@ -183,7 +183,7 @@ export class TokenStateManager extends StateManager<Erc20Token> {
     if (!address) {
       return null;
     }
-    return await this.findToken(
+    return await this.getToken(
       {
         address,
         chainId,
@@ -212,7 +212,7 @@ export class TokenStateManager extends StateManager<Erc20Token> {
     if (!address) {
       return null;
     }
-    return await this.findToken(
+    return await this.getToken(
       {
         address,
         chainId,
