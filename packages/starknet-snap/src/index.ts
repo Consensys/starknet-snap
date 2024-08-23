@@ -39,10 +39,15 @@ import type {
   DisplayPrivateKeyParams,
   SignMessageParams,
   SignTransactionParams,
+  SignDeclareTransactionParams,
 } from './rpcs';
-import { displayPrivateKey, signMessage, signTransaction } from './rpcs';
+import {
+  displayPrivateKey,
+  signMessage,
+  signTransaction,
+  signDeclareTransaction,
+} from './rpcs';
 import { sendTransaction } from './sendTransaction';
-import { signDeclareTransaction } from './signDeclareTransaction';
 import { signDeployAccountTransaction } from './signDeployAccountTransaction';
 import { switchNetwork } from './switchNetwork';
 import type {
@@ -187,9 +192,8 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
         );
 
       case 'starkNet_signDeclareTransaction':
-        apiParams.keyDeriver = await getAddressKeyDeriver(snap);
-        return await signDeclareTransaction(
-          apiParams as unknown as ApiParamsWithKeyDeriver,
+        return await signDeclareTransaction.execute(
+          apiParams as unknown as SignDeclareTransactionParams,
         );
 
       case 'starkNet_signDeployAccountTransaction':
