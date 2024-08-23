@@ -1,6 +1,6 @@
 import type { constants } from 'starknet';
 
-import { generateAccounts, type StarknetAccount } from '../../../test/utils';
+import { generateAccounts, type StarknetAccount } from '../../__tests__/helper';
 import type { Erc20Token, Network, Transaction } from '../../types/snapState';
 import * as snapHelper from '../../utils/snap';
 

@@ -2,7 +2,7 @@ import { constants } from 'starknet';
 
 import { onRpcRequest, onHomePage } from '.';
 import { manageStateSpy } from '../test/snap-provider.mock';
-import { generateAccounts, type StarknetAccount } from '../test/utils';
+import { generateAccounts, type StarknetAccount } from './__tests__/helper';
 import * as createAccountApi from './createAccount';
 import type { SnapState } from './types/snapState';
 import {

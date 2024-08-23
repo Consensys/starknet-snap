@@ -1,7 +1,11 @@
+import {
+  BIP44CoinTypeNode,
+  getBIP44AddressKeyDeriver,
+} from '@metamask/key-tree';
 import { generateMnemonic } from 'bip39';
+import type { constants } from 'starknet';
 import {
   ec,
-  constants,
   CallData,
   hash,
   type Calldata,
@@ -10,18 +14,15 @@ import {
   TransactionExecutionStatus,
   TransactionType,
 } from 'starknet';
-import {
-  BIP44CoinTypeNode,
-  getBIP44AddressKeyDeriver,
-} from '@metamask/key-tree';
-import { AccContract, Transaction } from '../src/types/snapState';
+
+import type { AccContract, Transaction } from '../types/snapState';
 import {
   ACCOUNT_CLASS_HASH,
   ACCOUNT_CLASS_HASH_LEGACY,
   PRELOADED_TOKENS,
   PROXY_CONTRACT_HASH,
-} from '../src/utils/constants';
-import { grindKey } from '../src/utils/keyPair';
+} from '../utils/constants';
+import { grindKey } from '../utils/keyPair';
 
 /* eslint-disable */
 export type StarknetAccount = AccContract & {
