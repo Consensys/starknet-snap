@@ -8,7 +8,7 @@ import {
 } from './account-state-manager';
 
 describe('AccountStateManager', () => {
-  describe('findAccount', () => {
+  describe('getAccount', () => {
     it('returns the account', async () => {
       const chainId = constants.StarknetChainId.SN_SEPOLIA;
       const accountsInTestnet = await mockAcccounts(chainId);
@@ -20,7 +20,7 @@ describe('AccountStateManager', () => {
       });
 
       const stateManager = new AccountStateManager();
-      const result = await stateManager.findAccount({
+      const result = await stateManager.getAccount({
         address: accountsInTestnet[0].address,
         chainId,
       });
@@ -36,7 +36,7 @@ describe('AccountStateManager', () => {
       });
 
       const stateManager = new AccountStateManager();
-      const result = await stateManager.findAccount({
+      const result = await stateManager.getAccount({
         address: accountNotExist.address,
         chainId,
       });
@@ -52,7 +52,7 @@ describe('AccountStateManager', () => {
       });
 
       const stateManager = new AccountStateManager();
-      const result = await stateManager.findAccount({
+      const result = await stateManager.getAccount({
         address: accounts[0].address,
         chainId: constants.StarknetChainId.SN_MAIN,
       });
