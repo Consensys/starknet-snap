@@ -12,7 +12,7 @@ import { StateManagerError } from './state-manager';
 import { TokenStateManager, ChainIdFilter } from './token-state-manager';
 
 describe('TokenStateManager', () => {
-  describe('findToken', () => {
+  describe('getToken', () => {
     it('returns the token', async () => {
       const chainId = constants.StarknetChainId.SN_SEPOLIA;
       await mockState({
@@ -20,7 +20,7 @@ describe('TokenStateManager', () => {
       });
 
       const stateManager = new TokenStateManager();
-      const result = await stateManager.findToken({
+      const result = await stateManager.getToken({
         chainId,
         address: ETHER_SEPOLIA_TESTNET.address,
       });
@@ -35,7 +35,7 @@ describe('TokenStateManager', () => {
       });
 
       const stateManager = new TokenStateManager();
-      const result = await stateManager.findToken({
+      const result = await stateManager.getToken({
         chainId,
         address: ETHER_SEPOLIA_TESTNET.address,
       });
@@ -50,7 +50,7 @@ describe('TokenStateManager', () => {
       });
 
       const stateManager = new TokenStateManager();
-      const result = await stateManager.findToken({
+      const result = await stateManager.getToken({
         chainId,
         address: ETHER_SEPOLIA_TESTNET.address,
       });

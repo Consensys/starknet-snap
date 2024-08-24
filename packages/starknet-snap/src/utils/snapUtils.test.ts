@@ -1,6 +1,6 @@
 import { constants } from 'starknet';
 
-import { generateAccounts } from '../../test/utils';
+import { generateAccounts } from '../__tests__/helper';
 import { STARKNET_SEPOLIA_TESTNET_NETWORK } from './constants';
 import { DeployRequiredError, UpgradeRequiredError } from './exceptions';
 import * as snapHelper from './snap';

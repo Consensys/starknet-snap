@@ -10,7 +10,7 @@ import { NetworkStateManager, ChainIdFilter } from './network-state-manager';
 import { StateManagerError } from './state-manager';
 
 describe('NetworkStateManager', () => {
-  describe('findNetwork', () => {
+  describe('getNetwork', () => {
     it('returns the network', async () => {
       const chainId = constants.StarknetChainId.SN_SEPOLIA;
       await mockState({
@@ -18,7 +18,7 @@ describe('NetworkStateManager', () => {
       });
 
       const stateManager = new NetworkStateManager();
-      const result = await stateManager.findNetwork({
+      const result = await stateManager.getNetwork({
         chainId,
       });
 
@@ -32,7 +32,7 @@ describe('NetworkStateManager', () => {
       });
 
       const stateManager = new NetworkStateManager();
-      const result = await stateManager.findNetwork({
+      const result = await stateManager.getNetwork({
         chainId,
       });
 

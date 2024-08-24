@@ -41,7 +41,7 @@ export class AccountStateManager extends StateManager<AccContract> {
    * @param [state] - The optional SnapState object.
    * @returns A Promise that resolves with the matching AccContract object if found, or null if not found.
    */
-  async findAccount(
+  async getAccount(
     {
       address,
       chainId,
@@ -68,7 +68,7 @@ export class AccountStateManager extends StateManager<AccContract> {
   async updateAccount(data: AccContract): Promise<void> {
     try {
       await this.update(async (state: SnapState) => {
-        const accountInState = await this.findAccount(
+        const accountInState = await this.getAccount(
           {
             address: data.address,
             chainId: data.chainId,
@@ -98,7 +98,7 @@ export class AccountStateManager extends StateManager<AccContract> {
   async addAccount(data: AccContract): Promise<void> {
     try {
       await this.update(async (state: SnapState) => {
-        const accountInState = await this.findAccount(
+        const accountInState = await this.getAccount(
           {
             address: data.address,
             chainId: data.chainId,

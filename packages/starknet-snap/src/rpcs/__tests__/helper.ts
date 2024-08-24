@@ -1,7 +1,7 @@
 import type { constants } from 'starknet';
 
-import type { StarknetAccount } from '../../../test/utils';
-import { generateAccounts } from '../../../test/utils';
+import type { StarknetAccount } from '../../__tests__/helper';
+import { generateAccounts } from '../../__tests__/helper';
 import type { SnapState } from '../../types/snapState';
 import * as snapHelper from '../../utils/snap';
 import * as snapUtils from '../../utils/snapUtils';

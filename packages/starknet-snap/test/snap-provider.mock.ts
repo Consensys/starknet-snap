@@ -1,6 +1,6 @@
 import { BIP44CoinTypeNode } from '@metamask/key-tree';
 import { generateMnemonic } from 'bip39';
-import { generateBip44Entropy } from './utils';
+import { generateBip44Entropy } from '../src/__tests__/helper';
 
 export type SnapProvider = {
   registerRpcMessageHandler: (fn) => unknown;
