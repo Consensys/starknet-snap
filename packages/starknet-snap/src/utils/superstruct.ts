@@ -1,5 +1,6 @@
 import { union } from '@metamask/snaps-sdk';
 import { constants, validateAndParseAddress } from 'starknet';
+import type { Struct } from 'superstruct';
 import {
   boolean,
   enums,
@@ -11,6 +12,8 @@ import {
   any,
   number,
   array,
+  dynamic,
+  assign,
 } from 'superstruct';
 
 import { CAIRO_VERSION_LEGACY, CAIRO_VERSION } from './constants';
@@ -91,3 +94,26 @@ export const CairoVersionStruct = enums([CAIRO_VERSION, CAIRO_VERSION_LEGACY]);
 export const TxVersionStruct = enums(
   Object.values(constants.TRANSACTION_VERSION),
 );
+
+// Define a function to extend predefined properties with additional properties
+export const createStructWithAdditionalProperties = (
+  predefinedProperties,
+  additionalPropertyTypes,
+) => {
+  return dynamic((value) => {
+    if (typeof value !== 'object' || value === null) {
+      return predefinedProperties;
+    }
+
+    const additionalProperties = Object.keys(value).reduce<
+      Record<string, Struct>
+    >((schema, key) => {
+      if (!(key in predefinedProperties.schema)) {
+        schema[key] = additionalPropertyTypes;
+      }
+      return schema;
+    }, {});
+
+    return assign(predefinedProperties, object(additionalProperties));
+  });
+};

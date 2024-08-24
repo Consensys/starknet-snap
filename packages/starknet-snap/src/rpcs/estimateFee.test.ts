@@ -1,5 +1,6 @@
 import { InvalidParamsError } from '@metamask/snaps-sdk';
-import { constants } from 'starknet';
+import type { Invocations } from 'starknet';
+import { constants, TransactionType } from 'starknet';
 
 import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../utils/constants';
 import * as starknetUtils from '../utils/starknetUtils';
@@ -43,15 +44,22 @@ describe('estimateFee', () => {
     (starknetUtils.addFeesFromAllTransactions as jest.Mock).mockReturnValue(
       estimateBulkFeeRespMock,
     );
-
+    const invocations: Invocations = [
+      {
+        type: TransactionType.INVOKE,
+        payload: {
+          contractAddress:
+            '0x00b28a089e7fb83debee4607b6334d687918644796b47d9e9e38ea8213833137',
+          entrypoint: 'functionName',
+          calldata: ['1', '1'],
+        },
+      },
+    ];
     const request: EstimateFeeParams = {
       chainId: state.networks[0].chainId as any,
       address: account.address,
-      contractAddress:
-        '0x00b28a089e7fb83debee4607b6334d687918644796b47d9e9e38ea8213833137',
-      contractFuncName: 'functionName',
-      contractCallData: '0xCallData',
-      transactionVersion: '0x2',
+      invocations: invocations as any,
+      details: { version: '0x2' },
     };
 
     const result = await estimateFee.execute(request);
@@ -87,14 +95,22 @@ describe('estimateFee', () => {
     const getEstimatedFees = jest.spyOn(starknetUtils, 'getEstimatedFees');
     getEstimatedFees.mockResolvedValue(estimateBulkFeeRespMock);
 
+    const invocations: Invocations = [
+      {
+        type: TransactionType.INVOKE,
+        payload: {
+          contractAddress:
+            '0x00b28a089e7fb83debee4607b6334d687918644796b47d9e9e38ea8213833137',
+          entrypoint: 'functionName',
+          calldata: ['1', '1'],
+        },
+      },
+    ];
     const request: EstimateFeeParams = {
       chainId: state.networks[0].chainId as any,
       address: account.address,
-      contractAddress:
-        '0x00b28a089e7fb83debee4607b6334d687918644796b47d9e9e38ea8213833137',
-      contractFuncName: 'functionName',
-      contractCallData: '0xCallData',
-      transactionVersion: '0x3',
+      invocations: invocations as any,
+      details: { version: '0x3' },
     };
 
     const result = await estimateFee.execute(request);
