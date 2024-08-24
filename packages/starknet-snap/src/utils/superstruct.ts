@@ -95,10 +95,22 @@ export const TxVersionStruct = enums(
   Object.values(constants.TRANSACTION_VERSION),
 );
 
-// Define a function to extend predefined properties with additional properties
+/**
+ * Creates a struct that combines predefined properties with additional dynamic properties.
+ *
+ * This function generates a Superstruct schema that includes both the predefined properties
+ * and any additional properties found in the input. The additional properties are validated
+ * according to the specified `additionalPropertyTypes`, or `any` if not provided.
+ *
+ * @param predefinedProperties - A Superstruct schema defining the base set of properties that are expected.
+ * @param additionalPropertyTypes - A Superstruct schema that defines the types for any additional properties.
+ * Defaults to `any`, allowing any additional properties.
+ * @returns A dynamic struct that first validates against the predefined properties and then
+ * includes any additional properties that match the `additionalPropertyTypes` schema.
+ */
 export const createStructWithAdditionalProperties = (
-  predefinedProperties,
-  additionalPropertyTypes,
+  predefinedProperties: Struct<any, any>,
+  additionalPropertyTypes: Struct<any, any> = any(),
 ) => {
   return dynamic((value) => {
     if (typeof value !== 'object' || value === null) {
