@@ -277,12 +277,103 @@ export const executeTxn = async (
   });
 };
 
+/**
+ * calculate contract address by publicKey
+ *
+ * @param publicKey - address's publicKey.
+ * @returns address and calldata.
+ */
+export const getAccContractAddressAndCallData = (publicKey) => {
+  const callData = CallData.compile({
+    signer: publicKey,
+    guardian: '0',
+  });
+
+  let address = hash.calculateContractAddressFromHash(
+    publicKey,
+    ACCOUNT_CLASS_HASH,
+    callData,
+    0,
+  );
+
+  if (address.length < 66) {
+    address = address.replace('0x', `0x${'0'.repeat(66 - address.length)}`);
+  }
+  return {
+    address,
+    callData,
+  };
+};
+
+/**
+ * calculate contract address by publicKey
+ *
+ * @param publicKey - address's publicKey.
+ * @returns address and calldata.
+ */
+export const getAccContractAddressAndCallDataLegacy = (publicKey) => {
+  // [TODO]: Check why use ACCOUNT_CLASS_HASH_LEGACY and PROXY_CONTRACT_HASH ?
+  const callData = CallData.compile({
+    implementation: ACCOUNT_CLASS_HASH_LEGACY,
+    selector: hash.getSelectorFromName('initialize'),
+    calldata: CallData.compile({ signer: publicKey, guardian: '0' }),
+  });
+  let address = hash.calculateContractAddressFromHash(
+    publicKey,
+    PROXY_CONTRACT_HASH,
+    callData,
+    0,
+  );
+  if (address.length < 66) {
+    address = address.replace('0x', `0x${'0'.repeat(66 - address.length)}`);
+  }
+  return {
+    address,
+    callData,
+  };
+};
+
+export const deployAccount = async (
+  network: Network,
+  contractAddress: string,
+  contractCallData: RawCalldata,
+  addressSalt: numUtils.BigNumberish,
+  privateKey: string | Uint8Array,
+  cairoVersion?: CairoVersion,
+  invocationsDetails?: UniversalDetails,
+): Promise<DeployContractResponse> => {
+  const classHash =
+    cairoVersion === CAIRO_VERSION ? ACCOUNT_CLASS_HASH : PROXY_CONTRACT_HASH;
+  const deployAccountPayload = {
+    classHash,
+    contractAddress,
+    constructorCalldata: contractCallData,
+    addressSalt,
+  };
+  console.log({
+    ...invocationsDetails,
+    skipValidate: false,
+    blockIdentifier: BlockIdentifierEnum.Latest,
+  });
+  console.log(deployAccountPayload);
+  return getAccountInstance(
+    network,
+    contractAddress,
+    privateKey,
+    cairoVersion,
+  ).deployAccount(deployAccountPayload, {
+    ...invocationsDetails,
+    skipValidate: false,
+    blockIdentifier: BlockIdentifierEnum.Latest,
+  });
+};
+
 export const createAccount = async (
   network: Network,
   publicKey: string,
   privateKey: string,
   cairoVersion: CairoVersion,
-  waitMode: boolean = false,
+  waitMode = false,
 ) => {
   const { address, callData } = getAccContractAddressAndCallData(publicKey);
   // Deploy account will auto estimate the fee from the network if not provided
@@ -344,39 +435,6 @@ export const createAccount = async (
     // eslint-disable-next-line @typescript-eslint/naming-convention
     transaction_hash: deployResp.transaction_hash,
   };
-};
-export const deployAccount = async (
-  network: Network,
-  contractAddress: string,
-  contractCallData: RawCalldata,
-  addressSalt: numUtils.BigNumberish,
-  privateKey: string | Uint8Array,
-  cairoVersion?: CairoVersion,
-  invocationsDetails?: UniversalDetails,
-): Promise<DeployContractResponse> => {
-  const classHash =
-    cairoVersion === CAIRO_VERSION ? ACCOUNT_CLASS_HASH : PROXY_CONTRACT_HASH;
-  const deployAccountPayload = {
-    classHash,
-    contractAddress,
-    constructorCalldata: contractCallData,
-    addressSalt,
-  };
-  console.log({
-    ...invocationsDetails,
-    skipValidate: false,
-    blockIdentifier: BlockIdentifierEnum.Latest})
-  console.log(deployAccountPayload)
-  return getAccountInstance(
-    network,
-    contractAddress,
-    privateKey,
-    cairoVersion,
-  ).deployAccount(deployAccountPayload, {
-    ...invocationsDetails,
-    skipValidate: false,
-    blockIdentifier: BlockIdentifierEnum.Latest,
-  });
 };
 
 export const estimateAccountDeployFee = async (
@@ -761,62 +819,6 @@ export const getNextAddressIndex = (
     )}`,
   );
   return uninitializedAccount?.addressIndex ?? accounts.length;
-};
-
-/**
- * calculate contract address by publicKey
- *
- * @param publicKey - address's publicKey.
- * @returns address and calldata.
- */
-export const getAccContractAddressAndCallData = (publicKey) => {
-  const callData = CallData.compile({
-    signer: publicKey,
-    guardian: '0',
-  });
-
-  let address = hash.calculateContractAddressFromHash(
-    publicKey,
-    ACCOUNT_CLASS_HASH,
-    callData,
-    0,
-  );
-
-  if (address.length < 66) {
-    address = address.replace('0x', `0x${'0'.repeat(66 - address.length)}`);
-  }
-  return {
-    address,
-    callData,
-  };
-};
-
-/**
- * calculate contract address by publicKey
- *
- * @param publicKey - address's publicKey.
- * @returns address and calldata.
- */
-export const getAccContractAddressAndCallDataLegacy = (publicKey) => {
-  // [TODO]: Check why use ACCOUNT_CLASS_HASH_LEGACY and PROXY_CONTRACT_HASH ?
-  const callData = CallData.compile({
-    implementation: ACCOUNT_CLASS_HASH_LEGACY,
-    selector: hash.getSelectorFromName('initialize'),
-    calldata: CallData.compile({ signer: publicKey, guardian: '0' }),
-  });
-  let address = hash.calculateContractAddressFromHash(
-    publicKey,
-    PROXY_CONTRACT_HASH,
-    callData,
-    0,
-  );
-  if (address.length < 66) {
-    address = address.replace('0x', `0x${'0'.repeat(66 - address.length)}`);
-  }
-  return {
-    address,
-    callData,
-  };
 };
 
 /**

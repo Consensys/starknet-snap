@@ -1,32 +1,21 @@
-import { UserRejectedRequestError } from '@metamask/snaps-sdk';
-import {
-  constants,
-  Invocations,
-  stark,
-  transaction,
-  TransactionType,
-  UniversalDetails,
-} from 'starknet';
-import invocationExample from '../__tests__/fixture/invocationExample.json'; // Assuming you have a similar fixture
+import type { Invocations } from 'starknet';
+import { constants, TransactionType } from 'starknet';
 
+import invocationExample from '../__tests__/fixture/invocationExample.json'; // Assuming you have a similar fixture
+import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../utils/constants';
 import * as starknetUtils from '../utils/starknetUtils';
-import {
-  createAccount,
-  executeTxn as executeTxnUtil,
-  getAccContractAddressAndCallData,
-  getEstimatedFees,
-  isAccountDeployed,
-} from '../utils/starknetUtils';
+import { executeTxn as executeTxnUtil } from '../utils/starknetUtils';
 import {
   mockAccount,
   prepareConfirmDialog,
   prepareMockAccount,
 } from './__tests__/helper';
-import { ACCOUNT_CLASS_HASH, STARKNET_SEPOLIA_TESTNET_NETWORK } from '../utils/constants';
-import { executeTxn, ExecuteTxnParams, ExecuteTxnRpc } from './executeTxn';
+import type { ExecuteTxnParams } from './executeTxn';
+import { executeTxn } from './executeTxn';
 
 const prepareMockExecuteTxn = () => {
   const executeTxnRespMock = {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     transaction_hash: '0x123',
   };
 
@@ -38,11 +27,17 @@ const prepareMockExecuteTxn = () => {
     unit: 'wei',
   });
 
-  const executeTxnUtil = jest.spyOn(starknetUtils, 'executeTxn');
-  executeTxnUtil.mockResolvedValue(executeTxnRespMock);
-  
-  return executeTxnRespMock;
-}
+  const executeTxnUtilStub = jest.spyOn(starknetUtils, 'executeTxn');
+  executeTxnUtilStub.mockResolvedValue(executeTxnRespMock);
+
+  const isAccountDeployed = jest.spyOn(starknetUtils, 'isAccountDeployed');
+
+  return {
+    executeTxnRespMock,
+    isAccountDeployed,
+    getEstimatedFees,
+  };
+};
 
 describe('ExecuteTxn', () => {
   const enableAuthorize = true;
@@ -56,7 +51,6 @@ describe('ExecuteTxn', () => {
   const createRequestParam = (
     chainId: constants.StarknetChainId,
     address: string,
-    enableAuthorize?: boolean,
     transactionType?: TransactionType,
   ): ExecuteTxnParams => {
     const details = {
@@ -64,7 +58,7 @@ describe('ExecuteTxn', () => {
       version: invocationExample.invocationsDetails.version as '0x2' | '0x3',
     };
     if (transactionType) {
-      invocationExample.invocations.map((invocation) => {
+      invocationExample.invocations.forEach((invocation) => {
         invocation.type = transactionType;
       });
     }
@@ -85,15 +79,14 @@ describe('ExecuteTxn', () => {
 
     prepareMockAccount(account, state);
     prepareConfirmDialog();
-    const executeTxnRespMock = prepareMockExecuteTxn();
+    const { executeTxnRespMock, isAccountDeployed, getEstimatedFees } =
+      prepareMockExecuteTxn();
 
-    const isAccountDeployed = jest.spyOn(starknetUtils, 'isAccountDeployed');
     isAccountDeployed.mockResolvedValue(true);
 
     const request = createRequestParam(
       state.networks[0].chainId as any,
       account.address,
-      enableAuthorize,
     );
 
     const result = await executeTxn.execute(request);
@@ -121,24 +114,25 @@ describe('ExecuteTxn', () => {
 
     prepareMockAccount(account, state);
     prepareConfirmDialog();
-    const executeTxnRespMock = prepareMockExecuteTxn();
+    const { executeTxnRespMock, isAccountDeployed } = prepareMockExecuteTxn();
 
-    const isAccountDeployed = jest.spyOn(starknetUtils, 'isAccountDeployed');
     isAccountDeployed.mockResolvedValue(false);
 
     const createAccount = jest.spyOn(starknetUtils, 'createAccount');
     createAccount.mockResolvedValue({
       address: account.address,
-      transaction_hash: ""
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      transaction_hash: '',
     });
 
     const request = createRequestParam(
       state.networks[0].chainId as any,
       account.address,
-      enableAuthorize,
     );
 
-    const invocations = request.invocations.map((invocation) => invocation.payload);
+    const invocations = request.invocations.map(
+      (invocation) => invocation.payload,
+    );
     const result = await executeTxn.execute(request);
 
     expect(result).toStrictEqual(executeTxnRespMock);
@@ -161,42 +155,47 @@ describe('ExecuteTxn', () => {
 
     prepareMockAccount(account, state);
     prepareConfirmDialog();
-    const executeTxnRespMock = prepareMockExecuteTxn();
+    const { isAccountDeployed } = prepareMockExecuteTxn();
 
-    const isAccountDeployed = jest.spyOn(starknetUtils, 'isAccountDeployed');
     isAccountDeployed.mockResolvedValue(true);
 
     const request = createRequestParam(
       state.networks[0].chainId as any,
       account.address,
-      enableAuthorize,
     );
 
     request.invocations = [];
-    
-    await expect(executeTxn.execute(request)).rejects.toThrow("At path:  -- Invocations cannot be empty")
+
+    await expect(executeTxn.execute(request)).rejects.toThrow(
+      'At path:  -- Invocations cannot be empty',
+    );
   });
 
-  it.each([TransactionType.DECLARE, TransactionType.DEPLOY, TransactionType.DEPLOY_ACCOUNT])(
+  it.each([
+    TransactionType.DECLARE,
+    TransactionType.DEPLOY,
+    TransactionType.DEPLOY_ACCOUNT,
+  ])(
     `throws error if invocation type is %s`,
     async (transactionType: TransactionType) => {
-    const account = await mockAccount(constants.StarknetChainId.SN_SEPOLIA);
+      const account = await mockAccount(constants.StarknetChainId.SN_SEPOLIA);
 
-    prepareMockAccount(account, state);
-    prepareConfirmDialog();
-    prepareMockExecuteTxn();
+      prepareMockAccount(account, state);
+      prepareConfirmDialog();
+      const { isAccountDeployed } = prepareMockExecuteTxn();
 
-    const isAccountDeployed = jest.spyOn(starknetUtils, 'isAccountDeployed');
-    isAccountDeployed.mockResolvedValue(true);
+      isAccountDeployed.mockResolvedValue(true);
 
-    const request = createRequestParam(
-      state.networks[0].chainId as any,
-      account.address,
-      enableAuthorize,
-    );
+      const request = createRequestParam(
+        state.networks[0].chainId as any,
+        account.address,
+      );
 
-    request.invocations[0].type = transactionType;
-    
-    await expect(executeTxn.execute(request)).rejects.toThrow(`At path:  -- Invocations should be of type INVOKE_FUNCTION received ${transactionType}`)
-  });
+      request.invocations[0].type = transactionType;
+
+      await expect(executeTxn.execute(request)).rejects.toThrow(
+        `At path:  -- Invocations should be of type INVOKE_FUNCTION received ${transactionType}`,
+      );
+    },
+  );
 });
