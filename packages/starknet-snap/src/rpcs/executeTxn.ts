@@ -199,10 +199,11 @@ export class ExecuteTxnRpc extends AccountRpcController<
       );
       components.push(divider());
     }
-    components.concat(
-      getTxnSnapTxt(address, this.network, calls, abis, details),
+    return await confirmDialog(
+      components.concat(
+        getTxnSnapTxt(address, this.network, calls, abis, details),
+      ),
     );
-    return await confirmDialog(components);
   }
 }
 
