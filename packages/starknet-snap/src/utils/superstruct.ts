@@ -1,5 +1,5 @@
 import { union } from '@metamask/snaps-sdk';
-import { constants, validateAndParseAddress } from 'starknet';
+import { constants, TransactionType, validateAndParseAddress } from 'starknet';
 import type { Struct } from 'superstruct';
 import {
   boolean,
@@ -129,3 +129,66 @@ export const createStructWithAdditionalProperties = (
     return assign(predefinedProperties, object(additionalProperties));
   });
 };
+
+// Define the types you expect for additional properties
+const additionalPropertyTypes = union([string(), number(), any()]);
+
+const DeclarePayloadStruct = createStructWithAdditionalProperties(
+  object({
+    contract: union([any(), string()]),
+    classHash: optional(string()),
+    casm: optional(any()),
+    compiledClassHash: optional(string()),
+  }),
+  additionalPropertyTypes,
+);
+
+const InvokePayloadStruct = createStructWithAdditionalProperties(
+  object({
+    contractAddress: string(),
+    calldata: optional(any()), // Assuming RawArgs or Calldata can be represented as any or string
+    entrypoint: optional(string()), // Making entrypoint optional as it was mentioned in the example
+  }),
+  additionalPropertyTypes,
+);
+
+const DeclareTransactionStruct = object({
+  type: enums([TransactionType.DECLARE]),
+  payload: optional(DeclarePayloadStruct),
+});
+
+const DeployTransactionStruct = object({
+  type: enums([TransactionType.DEPLOY]),
+  payload: optional(any()),
+});
+
+const DeployAccountTransactionStruct = object({
+  type: enums([TransactionType.DEPLOY_ACCOUNT]),
+  payload: optional(any()),
+});
+
+const InvokeTransactionStruct = object({
+  type: enums([TransactionType.INVOKE]),
+  payload: optional(InvokePayloadStruct),
+});
+
+export const InvocationStruct = union([
+  DeclareTransactionStruct,
+  DeployTransactionStruct,
+  DeployAccountTransactionStruct,
+  InvokeTransactionStruct,
+]);
+
+export const UniversalDetailsStruct = object({
+  nonce: optional(any()),
+  blockIdentifier: optional(any()),
+  maxFee: optional(any()),
+  tip: optional(any()),
+  paymasterData: optional(array(any())),
+  accountDeploymentData: optional(array(any())),
+  nonceDataAvailabilityMode: optional(any()),
+  feeDataAvailabilityMode: optional(any()),
+  version: optional(enums(['0x2', '0x3'])),
+  resourceBounds: optional(any()),
+  skipValidate: optional(boolean()),
+});
