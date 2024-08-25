@@ -32,7 +32,12 @@ import { ethers } from 'ethers';
 import { getAssetPriceUSD } from './coinGecko';
 import semver from 'semver/preload';
 import { setActiveNetwork } from 'slices/networkSlice';
-import { constants, Invocations, TransactionType, UniversalDetails } from 'starknet';
+import {
+  constants,
+  Invocations,
+  TransactionType,
+  UniversalDetails,
+} from 'starknet';
 
 export const useStarkNetSnap = () => {
   const dispatch = useAppDispatch();
@@ -378,6 +383,7 @@ export const useStarkNetSnap = () => {
     address: string,
     maxFee: string,
     chainId: string,
+    feeToken: string,
   ) {
     dispatch(enableLoadingWithMessage('Sending transaction...'));
     try {
@@ -401,7 +407,13 @@ export const useStarkNetSnap = () => {
               ...defaultParam,
               invocations,
               address,
-              details: { version: "0x2", maxFee } as UniversalDetails,
+              details: {
+                version:
+                  feeToken === 'ETH'
+                    ? constants.TRANSACTION_VERSION.V2
+                    : constants.TRANSACTION_VERSION.V3,
+                maxFee,
+              } as UniversalDetails,
               chainId,
               enableAuthorize: true,
             },

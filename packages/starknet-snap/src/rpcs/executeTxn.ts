@@ -167,7 +167,7 @@ export class ExecuteTxnRpc extends AccountRpcController<
       this.account.privateKey,
       this.account.publicKey,
       invocations as unknown as Invocations,
-      details?.version ?? TRANSACTION_VERSION,
+      details.version ?? TRANSACTION_VERSION,
       !accountDeployed,
     );
 
@@ -180,6 +180,7 @@ export class ExecuteTxnRpc extends AccountRpcController<
       {
         nonce: accountDeployed ? undefined : 1,
         maxFee: estimateFeeResp.suggestedMaxFee,
+        version: details.version ?? TRANSACTION_VERSION,
       },
     );
 

@@ -391,9 +391,11 @@ export function getTxnSnapTxt(
   }
 
   if (details?.maxFee) {
+    const feeToken =
+      details.version === constants.TRANSACTION_VERSION.V3 ? 'STRK' : 'ETH';
     addDialogTxt(
       components,
-      'Max Fee(ETH)',
+      `Max Fee(${feeToken})`,
       convert(details.maxFee, 'wei', 'ether'),
     );
   }
