@@ -1,7 +1,7 @@
-import type { Invocations } from 'starknet';
-import { constants, TransactionType } from 'starknet';
+import type { Invocations, UniversalDetails } from 'starknet';
+import { TransactionType, constants } from 'starknet';
 
-import invocationExample from '../__tests__/fixture/invocationExample.json'; // Assuming you have a similar fixture
+import invocationExamples from '../__tests__/fixture/invocationExamples.json'; // Assuming you have a similar fixture
 import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../utils/constants';
 import * as starknetUtils from '../utils/starknetUtils';
 import { executeTxn as executeTxnUtil } from '../utils/starknetUtils';
@@ -13,10 +13,10 @@ import {
 import type { ExecuteTxnParams } from './executeTxn';
 import { executeTxn } from './executeTxn';
 
-const prepareMockExecuteTxn = () => {
+const prepareMockExecuteTxn = (transactionHash: string) => {
   const executeTxnRespMock = {
     // eslint-disable-next-line @typescript-eslint/naming-convention
-    transaction_hash: '0x123',
+    transaction_hash: transactionHash,
   };
 
   const getEstimatedFees = jest.spyOn(starknetUtils, 'getEstimatedFees');
@@ -40,6 +40,7 @@ const prepareMockExecuteTxn = () => {
 };
 
 describe('ExecuteTxn', () => {
+  let invocationExample: any;
   const enableAuthorize = true;
   const state = {
     accContracts: [],
@@ -51,21 +52,19 @@ describe('ExecuteTxn', () => {
   const createRequestParam = (
     chainId: constants.StarknetChainId,
     address: string,
+    invocations: Invocations,
+    details: UniversalDetails,
     transactionType?: TransactionType,
   ): ExecuteTxnParams => {
-    const details = {
-      ...invocationExample.invocationsDetails,
-      version: invocationExample.invocationsDetails.version as '0x2' | '0x3',
-    };
     if (transactionType) {
-      invocationExample.invocations.forEach((invocation) => {
+      invocations.forEach((invocation) => {
         invocation.type = transactionType;
       });
     }
     const request: ExecuteTxnParams = {
       chainId,
       address,
-      invocations: invocationExample.invocations as Invocations,
+      invocations,
       details,
     } as ExecuteTxnParams;
     if (enableAuthorize) {
@@ -76,17 +75,19 @@ describe('ExecuteTxn', () => {
 
   it('executes transaction correctly when account is deployed', async () => {
     const account = await mockAccount(constants.StarknetChainId.SN_SEPOLIA);
+    invocationExample = invocationExamples.shift();
 
     prepareMockAccount(account, state);
     prepareConfirmDialog();
     const { executeTxnRespMock, isAccountDeployed, getEstimatedFees } =
-      prepareMockExecuteTxn();
-
+      prepareMockExecuteTxn(invocationExample.hash);
     isAccountDeployed.mockResolvedValue(true);
 
     const request = createRequestParam(
       state.networks[0].chainId as any,
       account.address,
+      invocationExample.invocations,
+      invocationExample.details,
     );
 
     const result = await executeTxn.execute(request);
@@ -111,11 +112,23 @@ describe('ExecuteTxn', () => {
   });
   it('executes transaction correctly when account is not deployed', async () => {
     const account = await mockAccount(constants.StarknetChainId.SN_SEPOLIA);
+    invocationExample = invocationExamples.shift();
+    const request = createRequestParam(
+      state.networks[0].chainId as any,
+      account.address,
+      invocationExample.invocations,
+      invocationExample.details,
+    );
+
+    const invocations = request.invocations.map(
+      (invocation) => invocation.payload,
+    );
 
     prepareMockAccount(account, state);
     prepareConfirmDialog();
-    const { executeTxnRespMock, isAccountDeployed } = prepareMockExecuteTxn();
-
+    const { executeTxnRespMock, isAccountDeployed } = prepareMockExecuteTxn(
+      invocationExample.hash,
+    );
     isAccountDeployed.mockResolvedValue(false);
 
     const createAccount = jest.spyOn(starknetUtils, 'createAccount');
@@ -125,14 +138,6 @@ describe('ExecuteTxn', () => {
       transaction_hash: '',
     });
 
-    const request = createRequestParam(
-      state.networks[0].chainId as any,
-      account.address,
-    );
-
-    const invocations = request.invocations.map(
-      (invocation) => invocation.payload,
-    );
     const result = await executeTxn.execute(request);
 
     expect(result).toStrictEqual(executeTxnRespMock);
@@ -152,16 +157,16 @@ describe('ExecuteTxn', () => {
 
   it('throws error if invocations are empty', async () => {
     const account = await mockAccount(constants.StarknetChainId.SN_SEPOLIA);
-
     prepareMockAccount(account, state);
     prepareConfirmDialog();
-    const { isAccountDeployed } = prepareMockExecuteTxn();
-
+    const { isAccountDeployed } = prepareMockExecuteTxn(invocationExample.hash);
     isAccountDeployed.mockResolvedValue(true);
 
     const request = createRequestParam(
       state.networks[0].chainId as any,
       account.address,
+      invocationExample.invocations,
+      invocationExample.details,
     );
 
     request.invocations = [];
@@ -179,16 +184,18 @@ describe('ExecuteTxn', () => {
     `throws error if invocation type is %s`,
     async (transactionType: TransactionType) => {
       const account = await mockAccount(constants.StarknetChainId.SN_SEPOLIA);
-
       prepareMockAccount(account, state);
       prepareConfirmDialog();
-      const { isAccountDeployed } = prepareMockExecuteTxn();
-
+      const { isAccountDeployed } = prepareMockExecuteTxn(
+        invocationExample.hash,
+      );
       isAccountDeployed.mockResolvedValue(true);
 
       const request = createRequestParam(
         state.networks[0].chainId as any,
         account.address,
+        invocationExample.invocations,
+        invocationExample.details,
       );
 
       request.invocations[0].type = transactionType;

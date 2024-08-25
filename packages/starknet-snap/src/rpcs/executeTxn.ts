@@ -4,8 +4,8 @@ import {
   divider,
   UserRejectedRequestError,
 } from '@metamask/snaps-sdk';
-import type { Call, Invocations } from 'starknet';
-import { TransactionType } from 'starknet';
+import type { Call, Calldata, Invocations } from 'starknet';
+import { TransactionStatus, TransactionType } from 'starknet';
 import type { Infer } from 'superstruct';
 import {
   object,
@@ -17,6 +17,9 @@ import {
   refine,
 } from 'superstruct';
 
+import { TransactionStateManager } from '../state/transaction-state-manager';
+import type { Transaction } from '../types/snapState';
+import { VoyagerTransactionType } from '../types/snapState';
 import {
   AddressStruct,
   BaseRequestStruct,
@@ -45,7 +48,7 @@ export const ExecuteTxnRequestStruct = refine(
     object({
       address: AddressStruct,
       invocations: array(InvocationStruct),
-      details: optional(UniversalDetailsStruct),
+      details: UniversalDetailsStruct,
       abis: optional(any()),
     }),
     AuthorizableStruct,
@@ -132,20 +135,9 @@ export class ExecuteTxnRpc extends AccountRpcController<
       });
     }
 
-    const estimateFeeResp = await getEstimatedFees(
-      this.network,
-      address,
-      this.account.privateKey,
-      this.account.publicKey,
-      invocations as unknown as Invocations,
-      details?.version ?? TRANSACTION_VERSION,
-      !accountDeployed,
-    );
-
-    const maxFee = estimateFeeResp.suggestedMaxFee;
-
     if (
-      // Get Starknet expected not to show the confirm dialog, therefore, `enableAuthorize` will set to false to bypass the confirmation
+      // Get Starknet expected not to show the confirm dialog, therefore,
+      // `enableAuthorize` will set to false to bypass the confirmation
       // TODO: enableAuthorize should set default to true
       enableAuthorize &&
       !(await this.getExecuteTxnConsensus(
@@ -168,16 +160,60 @@ export class ExecuteTxnRpc extends AccountRpcController<
         true,
       );
     }
-    const nonceSendTransaction = accountDeployed ? undefined : 1;
 
-    return await executeTxnUtil(
+    const estimateFeeResp = await getEstimatedFees(
+      this.network,
+      address,
+      this.account.privateKey,
+      this.account.publicKey,
+      invocations as unknown as Invocations,
+      details?.version ?? TRANSACTION_VERSION,
+      !accountDeployed,
+    );
+
+    const resp = await executeTxnUtil(
       this.network,
       address,
       this.account.privateKey,
       calls,
       abis,
-      { maxFee, nonce: nonceSendTransaction },
+      {
+        nonce: accountDeployed ? undefined : 1,
+        maxFee: estimateFeeResp.suggestedMaxFee,
+      },
     );
+
+    if (resp.transaction_hash) {
+      const callData = calls[0].calldata as Calldata;
+
+      const txn: Transaction = {
+        txnHash: resp.transaction_hash,
+        txnType: VoyagerTransactionType.INVOKE,
+        chainId: this.network.chainId,
+        senderAddress: address,
+        contractAddress: calls[0].contractAddress,
+        contractFuncName: calls[0].entrypoint,
+        contractCallData: callData.map((data: string) => {
+          try {
+            return `0x${BigInt(data).toString(16)}`;
+          } catch (error) {
+            // data is already send to chain, hence we should not throw error
+            return '0x0';
+          }
+        }),
+        finalityStatus: TransactionStatus.RECEIVED,
+        executionStatus: TransactionStatus.RECEIVED,
+        status: '', // DEPRECATED LATER
+        failureReason: '',
+        eventIds: [],
+        timestamp: Math.floor(Date.now() / 1000),
+      };
+
+      const stateManager = new TransactionStateManager();
+      await stateManager.addTransaction(txn);
+    }
+
+    return resp;
   }
 
   protected async getExecuteTxnConsensus(
