@@ -11,108 +11,58 @@ import {
   object,
   string,
   assign,
-  boolean,
-  enums,
   optional,
   array,
   any,
-  union,
-  number,
+  refine,
 } from 'superstruct';
 
-import { createAccount } from '../createAccount';
-import type { ApiParamsWithKeyDeriver } from '../types/snapApi';
-import { SnapState } from '../types/snapState';
 import {
   AddressStruct,
   BaseRequestStruct,
   AccountRpcController,
-  createStructWithAdditionalProperties,
   AuthorizableStruct,
-  getStateData,
   confirmDialog,
+  InvocationStruct,
+  UniversalDetailsStruct,
 } from '../utils';
-import { ACCOUNT_CLASS_HASH, TRANSACTION_VERSION } from '../utils/constants';
+import {
+  ACCOUNT_CLASS_HASH,
+  CAIRO_VERSION,
+  TRANSACTION_VERSION,
+} from '../utils/constants';
 import { addDialogTxt, getTxnSnapTxt } from '../utils/snapUtils';
 import {
+  createAccount,
   executeTxn as executeTxnUtil,
   getAccContractAddressAndCallData,
   getEstimatedFees,
   isAccountDeployed,
 } from '../utils/starknetUtils';
 
-// Define the types you expect for additional properties
-const additionalPropertyTypes = union([string(), number(), any()]);
-
-const DeclarePayloadStruct = createStructWithAdditionalProperties(
-  object({
-    contract: union([any(), string()]),
-    classHash: optional(string()),
-    casm: optional(any()),
-    compiledClassHash: optional(string()),
-  }),
-  additionalPropertyTypes,
-);
-
-const InvokePayloadStruct = createStructWithAdditionalProperties(
-  object({
-    contractAddress: string(),
-    calldata: optional(any()), // Assuming RawArgs or Calldata can be represented as any or string
-    entrypoint: optional(string()), // Making entrypoint optional as it was mentioned in the example
-  }),
-  additionalPropertyTypes,
-);
-
-const DeclareTransactionStruct = object({
-  type: enums([TransactionType.DECLARE]),
-  payload: optional(DeclarePayloadStruct),
-});
-
-const DeployTransactionStruct = object({
-  type: enums([TransactionType.DEPLOY]),
-  payload: optional(any()),
-});
-
-const DeployAccountTransactionStruct = object({
-  type: enums([TransactionType.DEPLOY_ACCOUNT]),
-  payload: optional(any()),
-});
-
-const InvokeTransactionStruct = object({
-  type: enums([TransactionType.INVOKE]),
-  payload: optional(InvokePayloadStruct),
-});
-
-const InvocationStruct = union([
-  DeclareTransactionStruct,
-  DeployTransactionStruct,
-  DeployAccountTransactionStruct,
-  InvokeTransactionStruct,
-]);
-
-const UniversalDetailsStruct = object({
-  nonce: optional(any()),
-  blockIdentifier: optional(any()),
-  maxFee: optional(any()),
-  tip: optional(any()),
-  paymasterData: optional(array(any())),
-  accountDeploymentData: optional(array(any())),
-  nonceDataAvailabilityMode: optional(any()),
-  feeDataAvailabilityMode: optional(any()),
-  version: optional(enums(['0x2', '0x3'])),
-  resourceBounds: optional(any()),
-  skipValidate: optional(boolean()),
-});
-
-export const ExecuteTxnRequestStruct = assign(
-  object({
-    address: AddressStruct,
-    invocations: array(InvocationStruct),
-    details: optional(UniversalDetailsStruct),
-    abis: optional(any()),
-  }),
-  AuthorizableStruct,
-  BaseRequestStruct,
+export const ExecuteTxnRequestStruct = refine(
+  assign(
+    object({
+      address: AddressStruct,
+      invocations: array(InvocationStruct),
+      details: optional(UniversalDetailsStruct),
+      abis: optional(any()),
+    }),
+    AuthorizableStruct,
+    BaseRequestStruct,
+  ),
+  'ExecuteTxnRequestStruct',
+  (value) => {
+    if (value.invocations.length === 0) {
+      return 'Invocations cannot be empty';
+    }
+    for (const invocation of value.invocations) {
+      if (invocation.type !== TransactionType.INVOKE) {
+        return `Invocations should be of type ${TransactionType.INVOKE} received ${invocation.type}`;
+      }
+    }
+    return true;
+  },
 );
 
 export const ExecuteTxnResponseStruct = object({
@@ -146,7 +96,8 @@ export class ExecuteTxnRpc extends AccountRpcController<
    *
    * @param params - The parameters of the request.
    * @param params.address - The address of the signer.
-   * @param params.invocations - The invocations to execute.
+   * @param params.invocations - The invocations to execute (only invocations of type TransactionType.INVOKE)
+   * @param params.abis - The abis associated to invocations.
    * @param params.details - The detail associated to the call.
    * @returns The InvokeFunctionResponse as an `ExecuteTxnResponse`.
    */
@@ -167,6 +118,7 @@ export class ExecuteTxnRpc extends AccountRpcController<
       const { callData } = getAccContractAddressAndCallData(
         this.account.publicKey,
       );
+
       const deployAccountpayload = {
         classHash: ACCOUNT_CLASS_HASH,
         contractAddress: address,
@@ -192,48 +144,30 @@ export class ExecuteTxnRpc extends AccountRpcController<
 
     const maxFee = estimateFeeResp.suggestedMaxFee;
 
-    let snapComponents: Component[] = [];
-    // const createAccountApiParams = {} as ApiParamsWithKeyDeriver;
-    if (!accountDeployed) {
-      snapComponents.push(heading(`The account will be deployed`));
-      addDialogTxt(snapComponents, 'Address', address);
-      addDialogTxt(snapComponents, 'Public Key', this.account.publicKey);
-      addDialogTxt(
-        snapComponents,
-        'Address Index',
-        this.account.addressIndex.toString(),
-      );
-      snapComponents.push(divider());
-      //   const state = await getStateData<SnapState>();
-      //   createAccountApiParams = {
-      //     state,
-      //     wallet: params.wallet,
-      //     saveMutex: saveMutex,
-      //     keyDeriver,
-      //     requestParams: {
-      //       addressIndex: this.account.addressIndex,
-      //       deploy: true,
-      //       chainId: this.network.chainId,
-      //     },
-      //   };
-    }
-
-    snapComponents = snapComponents.concat(
-      getTxnSnapTxt(address, this.network, calls, abis, details),
-    );
-
     if (
       // Get Starknet expected not to show the confirm dialog, therefore, `enableAuthorize` will set to false to bypass the confirmation
       // TODO: enableAuthorize should set default to true
       enableAuthorize &&
-      !(await this.getExecuteTxnConsensus(snapComponents))
+      !(await this.getExecuteTxnConsensus(
+        address,
+        calls,
+        abis,
+        details,
+        accountDeployed,
+      ))
     ) {
       throw new UserRejectedRequestError() as unknown as Error;
     }
 
-    // if (!accountDeployed) {
-    //   await createAccount(createAccountApiParams, true, true);
-    // }
+    if (!accountDeployed) {
+      await createAccount(
+        this.network,
+        this.account.publicKey,
+        this.account.privateKey,
+        CAIRO_VERSION,
+        true,
+      );
+    }
     const nonceSendTransaction = accountDeployed ? undefined : 1;
 
     return await executeTxnUtil(
@@ -246,11 +180,32 @@ export class ExecuteTxnRpc extends AccountRpcController<
     );
   }
 
-  protected async getExecuteTxnConsensus(snapComponents: Component[]) {
-    return await confirmDialog(snapComponents);
+  protected async getExecuteTxnConsensus(
+    address: string,
+    calls,
+    abis,
+    details,
+    accountDeployed: boolean,
+  ) {
+    const components: Component[] = [];
+    if (!accountDeployed) {
+      components.push(heading(`The account will be deployed`));
+      addDialogTxt(components, 'Address', address);
+      addDialogTxt(components, 'Public Key', this.account.publicKey);
+      addDialogTxt(
+        components,
+        'Address Index',
+        this.account.addressIndex.toString(),
+      );
+      components.push(divider());
+    }
+    components.concat(
+      getTxnSnapTxt(address, this.network, calls, abis, details),
+    );
+    return await confirmDialog(components);
   }
 }
 
 export const executeTxn = new ExecuteTxnRpc({
-  showInvalidAccountAlert: false,
+  showInvalidAccountAlert: true,
 });
