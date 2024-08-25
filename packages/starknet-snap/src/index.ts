@@ -21,7 +21,6 @@ import { createAccount } from './createAccount';
 import { declareContract } from './declareContract';
 import { estimateAccDeployFee } from './estimateAccountDeployFee';
 import { estimateFees } from './estimateFees';
-import { executeTxn } from './executeTxn';
 import { extractPublicKey } from './extractPublicKey';
 import { getCurrentNetwork } from './getCurrentNetwork';
 import { getErc20TokenBalance } from './getErc20TokenBalance';
@@ -37,12 +36,14 @@ import { recoverAccounts } from './recoverAccounts';
 import type {
   DisplayPrivateKeyParams,
   EstimateFeeParams,
+  ExecuteTxnParams,
   SignMessageParams,
   SignTransactionParams,
 } from './rpcs';
 import {
   displayPrivateKey,
   estimateFee,
+  executeTxn,
   signMessage,
   signTransaction,
 } from './rpcs';
@@ -267,8 +268,8 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
 
       case 'starkNet_executeTxn':
         apiParams.keyDeriver = await getAddressKeyDeriver(snap);
-        return await executeTxn(
-          apiParams as unknown as ApiParamsWithKeyDeriver,
+        return await executeTxn.execute(
+          apiParams.requestParams as unknown as ExecuteTxnParams,
         );
 
       case 'starkNet_estimateFees':

@@ -1,91 +1,17 @@
 import type { Json } from '@metamask/snaps-sdk';
 import type { Invocations } from 'starknet';
-import { TransactionType } from 'starknet';
 import type { Infer } from 'superstruct';
-import {
-  object,
-  string,
-  assign,
-  boolean,
-  enums,
-  optional,
-  array,
-  any,
-  union,
-  number,
-} from 'superstruct';
+import { object, string, assign, boolean, optional, array } from 'superstruct';
 
 import {
   AddressStruct,
   BaseRequestStruct,
   AccountRpcController,
-  createStructWithAdditionalProperties,
+  InvocationStruct,
+  UniversalDetailsStruct,
 } from '../utils';
 import { TRANSACTION_VERSION } from '../utils/constants';
 import { getEstimatedFees, isAccountDeployed } from '../utils/starknetUtils';
-
-// Define the types you expect for additional properties
-const additionalPropertyTypes = union([string(), number(), any()]);
-
-const DeclarePayloadStruct = createStructWithAdditionalProperties(
-  object({
-    contract: union([any(), string()]),
-    classHash: optional(string()),
-    casm: optional(any()),
-    compiledClassHash: optional(string()),
-  }),
-  additionalPropertyTypes,
-);
-
-const InvokePayloadStruct = createStructWithAdditionalProperties(
-  object({
-    contractAddress: string(),
-    calldata: optional(any()), // Assuming RawArgs or Calldata can be represented as any or string
-    entrypoint: optional(string()), // Making entrypoint optional as it was mentioned in the example
-  }),
-  additionalPropertyTypes,
-);
-
-const DeclareTransactionStruct = object({
-  type: enums([TransactionType.DECLARE]),
-  payload: optional(DeclarePayloadStruct),
-});
-
-const DeployTransactionStruct = object({
-  type: enums([TransactionType.DEPLOY]),
-  payload: optional(any()),
-});
-
-const DeployAccountTransactionStruct = object({
-  type: enums([TransactionType.DEPLOY_ACCOUNT]),
-  payload: optional(any()),
-});
-
-const InvokeTransactionStruct = object({
-  type: enums([TransactionType.INVOKE]),
-  payload: optional(InvokePayloadStruct),
-});
-
-const InvocationStruct = union([
-  DeclareTransactionStruct,
-  DeployTransactionStruct,
-  DeployAccountTransactionStruct,
-  InvokeTransactionStruct,
-]);
-
-const UniversalDetailsStruct = object({
-  nonce: optional(any()),
-  blockIdentifier: optional(any()),
-  maxFee: optional(any()),
-  tip: optional(any()),
-  paymasterData: optional(array(any())),
-  accountDeploymentData: optional(array(any())),
-  nonceDataAvailabilityMode: optional(any()),
-  feeDataAvailabilityMode: optional(any()),
-  version: optional(enums(['0x2', '0x3'])),
-  resourceBounds: optional(any()),
-  skipValidate: optional(boolean()),
-});
 
 export const EstimateFeeRequestStruct = assign(
   object({

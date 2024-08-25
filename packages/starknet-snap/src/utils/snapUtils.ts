@@ -10,6 +10,8 @@ import type {
   DeclareSignerDetails,
   Call,
   DeployAccountSignerDetails,
+  Invocations,
+  UniversalDetails,
 } from 'starknet';
 
 import type {
@@ -365,16 +367,16 @@ export function getNetworkTxt(network: Network) {
  *
  * @param senderAddress
  * @param network
- * @param txnInvocation
+ * @param invocations
  * @param abis
- * @param invocationsDetails
+ * @param details
  */
 export function getTxnSnapTxt(
   senderAddress: string,
   network: Network,
-  txnInvocation: Call | Call[],
+  invocations: Invocations | Call | Call[],
   abis?: Abi[],
-  invocationsDetails?: InvocationsDetails,
+  details?: UniversalDetails,
 ) {
   const components = [];
   addDialogTxt(components, 'Network', network.name);
@@ -382,24 +384,24 @@ export function getTxnSnapTxt(
   addDialogTxt(
     components,
     'Transaction Invocation',
-    JSON.stringify(txnInvocation, null, 2),
+    JSON.stringify(invocations, null, 2),
   );
   if (abis && abis.length > 0) {
     addDialogTxt(components, 'Abis', JSON.stringify(abis, null, 2));
   }
 
-  if (invocationsDetails?.maxFee) {
+  if (details?.maxFee) {
     addDialogTxt(
       components,
       'Max Fee(ETH)',
-      convert(invocationsDetails.maxFee, 'wei', 'ether'),
+      convert(details.maxFee, 'wei', 'ether'),
     );
   }
-  if (invocationsDetails?.nonce) {
-    addDialogTxt(components, 'Nonce', invocationsDetails.nonce.toString());
+  if (details?.nonce) {
+    addDialogTxt(components, 'Nonce', details.nonce.toString());
   }
-  if (invocationsDetails?.version) {
-    addDialogTxt(components, 'Version', invocationsDetails.version.toString());
+  if (details?.version) {
+    addDialogTxt(components, 'Version', details.version.toString());
   }
   return components;
 }

@@ -375,26 +375,35 @@ export const useStarkNetSnap = () => {
     contractAddress: string,
     contractFuncName: string,
     contractCallData: string,
-    senderAddress: string,
+    address: string,
     maxFee: string,
     chainId: string,
   ) {
     dispatch(enableLoadingWithMessage('Sending transaction...'));
     try {
+      const invocations: Invocations = [
+        {
+          type: TransactionType.INVOKE,
+          payload: {
+            contractAddress,
+            entrypoint: contractFuncName,
+            calldata: contractCallData.split(',').map((ele) => ele.trim()),
+          },
+        },
+      ];
       const response = await provider.request({
         method: 'wallet_invokeSnap',
         params: {
           snapId,
           request: {
-            method: 'starkNet_sendTransaction',
+            method: 'starkNet_executeTxn',
             params: {
               ...defaultParam,
-              contractAddress,
-              contractFuncName,
-              contractCallData,
-              senderAddress,
-              maxFee,
+              invocations,
+              address,
+              details: { version: "0x2", maxFee } as UniversalDetails,
               chainId,
+              enableAuthorize: true,
             },
           },
         },
