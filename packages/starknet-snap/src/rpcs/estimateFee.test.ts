@@ -1,10 +1,12 @@
 import { InvalidParamsError } from '@metamask/snaps-sdk';
 import type { Invocations } from 'starknet';
 import { constants, TransactionType } from 'starknet';
+import type { Infer } from 'superstruct';
 
 import { FeeTokenUnit } from '../types/snapApi';
 import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../utils/constants';
 import * as starknetUtils from '../utils/starknetUtils';
+import type { InvocationStruct } from '../utils/superstruct';
 import { mockAccount, prepareMockAccount } from './__tests__/helper';
 import { estimateFee } from './estimateFee';
 import type { EstimateFeeParams } from './estimateFee';
@@ -28,7 +30,6 @@ describe('estimateFee', () => {
 
     const estimateBulkFeeRespMock = {
       suggestedMaxFee: BigInt(1000000000000000).toString(10),
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       overallFee: BigInt(1500000000000000).toString(10),
       unit: FeeTokenUnit.ETH,
       includeDeploy: false,
@@ -42,9 +43,7 @@ describe('estimateFee', () => {
     (starknetUtils.estimateFeeBulk as jest.Mock).mockResolvedValue(
       estimateBulkFeeRespMock,
     );
-    (starknetUtils.addFeesFromAllTransactions as jest.Mock).mockReturnValue(
-      estimateBulkFeeRespMock,
-    );
+
     const invocations: Invocations = [
       {
         type: TransactionType.INVOKE,
@@ -57,9 +56,9 @@ describe('estimateFee', () => {
       },
     ];
     const request: EstimateFeeParams = {
-      chainId: state.networks[0].chainId as any,
+      chainId: state.networks[0].chainId as constants.StarknetChainId,
       address: account.address,
-      invocations: invocations as any,
+      invocations: invocations as unknown as Infer<typeof InvocationStruct>[],
       details: { version: '0x2' },
     };
 
@@ -108,9 +107,9 @@ describe('estimateFee', () => {
       },
     ];
     const request: EstimateFeeParams = {
-      chainId: state.networks[0].chainId as any,
+      chainId: state.networks[0].chainId as constants.StarknetChainId,
       address: account.address,
-      invocations: invocations as any,
+      invocations: invocations as unknown as Infer<typeof InvocationStruct>[],
       details: { version: '0x3' },
     };
 

@@ -964,7 +964,10 @@ export async function getEstimatedFees(
   return {
     suggestedMaxFee: estimateFeeResp.suggestedMaxFee.toString(10),
     overallFee: estimateFeeResp.overall_fee.toString(10),
-    unit: FeeTokenUnit.ETH,
+    unit:
+      transactionVersion === constants.TRANSACTION_VERSION.V2
+        ? FeeTokenUnit.ETH
+        : FeeTokenUnit.STRK,
     includeDeploy: includeDeployFee,
   };
 }

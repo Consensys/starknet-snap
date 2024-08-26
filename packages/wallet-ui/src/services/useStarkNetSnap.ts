@@ -36,7 +36,6 @@ import {
   constants,
   Invocations,
   TransactionType,
-  UniversalDetails,
 } from 'starknet';
 
 export const useStarkNetSnap = () => {
@@ -363,7 +362,7 @@ export const useStarkNetSnap = () => {
               ...defaultParam,
               address,
               invocations,
-              details: { version: transactionVersion } as UniversalDetails,
+              details: { version: transactionVersion },
               chainId,
             },
           },
