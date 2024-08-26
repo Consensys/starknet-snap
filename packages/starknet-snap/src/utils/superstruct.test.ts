@@ -372,6 +372,7 @@ describe('InvocationStructs', () => {
       type: TransactionType.INVOKE,
       payload: {
         contractAddress: '0x123',
+        calldata: ['0x1', '0x2'],
       },
     },
   ])(
