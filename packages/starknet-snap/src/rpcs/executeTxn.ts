@@ -2,8 +2,10 @@ import type { Component, Json } from '@metamask/snaps-sdk';
 import {
   heading,
   divider,
+  row,
   UserRejectedRequestError,
 } from '@metamask/snaps-sdk';
+import convert from 'ethereum-unit-converter';
 import type { Call, Calldata, Invocations } from 'starknet';
 import { TransactionStatus, TransactionType } from 'starknet';
 import type { Infer } from 'superstruct';
@@ -34,7 +36,6 @@ import {
   CAIRO_VERSION,
   TRANSACTION_VERSION,
 } from '../utils/constants';
-import { addDialogTxt, getTxnSnapTxt } from '../utils/snapUtils';
 import {
   createAccount,
   executeTxn as executeTxnUtil,
@@ -188,7 +189,7 @@ export class ExecuteTxnRpc extends AccountRpcController<
 
       const txn: Transaction = {
         txnHash: resp.transaction_hash,
-        txnType: VoyagerTransactionType.INVOKE,
+        txnType: TransactionType.INVOKE,
         chainId: this.network.chainId,
         senderAddress: address,
         contractAddress: calls[0].contractAddress,
@@ -224,22 +225,39 @@ export class ExecuteTxnRpc extends AccountRpcController<
     accountDeployed: boolean,
   ) {
     const components: Component[] = [];
+    let signHeadingStr = `Do you want to sign this transaction ?`;
     if (!accountDeployed) {
       components.push(heading(`The account will be deployed`));
-      addDialogTxt(components, 'Address', address);
-      addDialogTxt(components, 'Public Key', this.account.publicKey);
-      addDialogTxt(
-        components,
-        'Address Index',
-        this.account.addressIndex.toString(),
+      components.push(row('Address', address));
+      components.push(row('Public Key', this.account.publicKey));
+      components.push(
+        row('Address Index', this.account.addressIndex.toString()),
       );
       components.push(divider());
+      signHeadingStr = `Do you want to sign these transactions ?`;
     }
-    return await confirmDialog(
-      components.concat(
-        getTxnSnapTxt(address, this.network, calls, abis, details),
-      ),
+    components.push(heading(signHeadingStr));
+    components.push(row('Network', this.network.name));
+    components.push(row('Signer Address', address));
+    components.push(
+      row('Transaction Invocation', JSON.stringify(calls, null, 2)),
     );
+    if (abis && abis.length > 0) {
+      components.push(row('Abis', JSON.stringify(abis, null, 2)));
+    }
+
+    if (details?.maxFee) {
+      components.push(
+        row('Max Fee(ETH)', convert(details.maxFee, 'wei', 'ether')),
+      );
+    }
+    if (details?.nonce) {
+      components.push(row('Nonce', details.nonce.toString()));
+    }
+    if (details?.version) {
+      components.push(row('Version', details.version.toString()));
+    }
+    return await confirmDialog(components);
   }
 }
 
