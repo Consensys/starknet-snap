@@ -1,6 +1,7 @@
 import { union } from '@metamask/snaps-sdk';
+import { HexStruct } from '@metamask/utils';
 import { constants, TransactionType, validateAndParseAddress } from 'starknet';
-import type { Struct } from 'superstruct';
+import type { Struct, Infer } from 'superstruct';
 import {
   boolean,
   enums,
@@ -12,8 +13,12 @@ import {
   any,
   number,
   array,
-  dynamic,
   assign,
+  dynamic,
+  define,
+  mask,
+  validate,
+  nonempty,
 } from 'superstruct';
 
 import { CAIRO_VERSION_LEGACY, CAIRO_VERSION } from './constants';
@@ -89,10 +94,63 @@ export const CallDataStruct = object({
   calldata: union([array(string()), record(string(), any())]), // TODO: refine this to calldata
 });
 
+export const NumberStringStruct = union([number(), HexStruct]);
+
 export const CairoVersionStruct = enums([CAIRO_VERSION, CAIRO_VERSION_LEGACY]);
 
-export const TxVersionStruct = enums(
-  Object.values(constants.TRANSACTION_VERSION),
+export const TxVersionStruct = enums([
+  constants.TRANSACTION_VERSION.V2,
+  constants.TRANSACTION_VERSION.V3,
+]);
+
+export const V2TxVersionStruct = enums([constants.TRANSACTION_VERSION.V2]);
+
+export const V3TxVersionStruct = enums([constants.TRANSACTION_VERSION.V3]);
+
+export const EDataModeStruct = enums(['L1', 'L2']);
+
+export const ResourceBoundStruct = object({
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  max_amount: optional(string()),
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  max_price_per_unit: optional(string()),
+});
+
+export const ResourceBoundMappingStruct = object({
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  l1_gas: optional(ResourceBoundStruct),
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  l2_gas: optional(ResourceBoundStruct),
+});
+
+export const V3TransactionDetailStruct = object({
+  nonce: optional(NumberStringStruct),
+  version: optional(V3TxVersionStruct),
+  resourceBounds: optional(ResourceBoundMappingStruct),
+  tip: optional(NumberStringStruct),
+  paymasterData: optional(array(NumberStringStruct)),
+  accountDeploymentData: optional(array(NumberStringStruct)),
+  nonceDataAvailabilityMode: optional(EDataModeStruct),
+  feeDataAvailabilityMode: optional(EDataModeStruct),
+});
+
+// The declare transaction details struct does not using union to have more relax validation as starknet.js
+export const DeclareSignDetailsStruct = assign(
+  object({
+    nonce: optional(NumberStringStruct),
+    maxFee: optional(NumberStringStruct),
+  }),
+  V3TransactionDetailStruct,
+  // Only restrict some required parameters for the declare transaction
+  object({
+    // TODO: classHash should be a hex string
+    classHash: nonempty(string()),
+    // TODO: compiledClassHash should be a hex string
+    compiledClassHash: optional(string()),
+    senderAddress: AddressStruct,
+    chainId: ChainIdStruct,
+    version: TxVersionStruct,
+  }),
 );
 
 /**
@@ -133,51 +191,110 @@ export const createStructWithAdditionalProperties = (
 // Define the types you expect for additional properties
 const additionalPropertyTypes = union([string(), number(), any()]);
 
-const DeclarePayloadStruct = createStructWithAdditionalProperties(
+const DeclarePayloadStruct = object({
+  contract: union([any(), string()]),
+  classHash: optional(string()),
+  casm: optional(any()),
+  compiledClassHash: optional(string()),
+});
+
+const InvokePayloadStruct = object({
+  contractAddress: string(),
+  calldata: array(string()),
+  entrypoint: optional(string()), // Making entrypoint optional as it was mentioned in the example
+});
+
+const DeclareTransactionStruct = createStructWithAdditionalProperties(
   object({
-    contract: union([any(), string()]),
-    classHash: optional(string()),
-    casm: optional(any()),
-    compiledClassHash: optional(string()),
+    type: enums([TransactionType.DECLARE]),
+    payload: optional(DeclarePayloadStruct),
   }),
   additionalPropertyTypes,
 );
 
-const InvokePayloadStruct = createStructWithAdditionalProperties(
+const DeployTransactionStruct = createStructWithAdditionalProperties(
   object({
-    contractAddress: string(),
-    calldata: optional(any()), // Assuming RawArgs or Calldata can be represented as any or string
-    entrypoint: optional(string()), // Making entrypoint optional as it was mentioned in the example
+    type: enums([TransactionType.DEPLOY]),
+    payload: optional(any()),
   }),
   additionalPropertyTypes,
 );
 
-const DeclareTransactionStruct = object({
-  type: enums([TransactionType.DECLARE]),
-  payload: optional(DeclarePayloadStruct),
+const DeployAccountTransactionStruct = createStructWithAdditionalProperties(
+  object({
+    type: enums([TransactionType.DEPLOY_ACCOUNT]),
+    payload: optional(any()),
+  }),
+  additionalPropertyTypes,
+);
+
+const InvokeTransactionStruct = createStructWithAdditionalProperties(
+  object({
+    type: enums([TransactionType.INVOKE]),
+    payload: optional(InvokePayloadStruct),
+  }),
+  additionalPropertyTypes,
+);
+
+type Invocation =
+  | Infer<typeof DeclareTransactionStruct>
+  | Infer<typeof DeployTransactionStruct>
+  | Infer<typeof DeployAccountTransactionStruct>
+  | Infer<typeof InvokeTransactionStruct>;
+
+/**
+ * Mapping between account types and their matching `superstruct` schema.
+ */
+export const InvocationStructs: Record<
+  string,
+  | typeof DeclareTransactionStruct
+  | typeof DeployTransactionStruct
+  | typeof DeployAccountTransactionStruct
+  | typeof InvokeTransactionStruct
+> = {
+  [`${TransactionType.DECLARE}`]: DeclareTransactionStruct,
+  [`${TransactionType.DEPLOY}`]: DeployTransactionStruct,
+  [`${TransactionType.DEPLOY_ACCOUNT}`]: DeployAccountTransactionStruct,
+  [`${TransactionType.INVOKE}`]: InvokeTransactionStruct,
+};
+
+/**
+ * Base type for `Invocation` as a `superstruct.object`.
+ */
+export const BaseInvocationStruct = object({
+  /**
+   * Account type.
+   */
+  type: enums([
+    TransactionType.DECLARE,
+    TransactionType.DEPLOY,
+    TransactionType.DEPLOY_ACCOUNT,
+    TransactionType.INVOKE,
+  ]),
 });
 
-const DeployTransactionStruct = object({
-  type: enums([TransactionType.DEPLOY]),
-  payload: optional(any()),
-});
+/**
+ * Invocation as a `superstruct.object`.
+ *
+ * See {@link KeyringAccount}.
+ */
+export const InvocationStruct = define<Invocation>(
+  // We do use a custom `define` for this type to avoid having to use a `union` since error
+  // messages are a bit confusing.
+  //
+  // Doing manual validation allows us to use the "concrete" type of each supported acounts giving
+  // use a much nicer message from `superstruct`.
+  'InvocationStruct',
+  (value: unknown) => {
+    // This will also raise if `value` does not match any of the supported account types!
+    const account = mask(value, BaseInvocationStruct);
 
-const DeployAccountTransactionStruct = object({
-  type: enums([TransactionType.DEPLOY_ACCOUNT]),
-  payload: optional(any()),
-});
+    // At this point, we know that `value.type` can be used as an index for `KeyringAccountStructs`
+    const [error] = validate(value, InvocationStructs[account.type] as Struct);
 
-const InvokeTransactionStruct = object({
-  type: enums([TransactionType.INVOKE]),
-  payload: optional(InvokePayloadStruct),
-});
-
-export const InvocationStruct = union([
-  DeclareTransactionStruct,
-  DeployTransactionStruct,
-  DeployAccountTransactionStruct,
-  InvokeTransactionStruct,
-]);
+    return error ?? true;
+  },
+);
 
 export const UniversalDetailsStruct = object({
   nonce: optional(any()),
@@ -188,7 +305,7 @@ export const UniversalDetailsStruct = object({
   accountDeploymentData: optional(array(any())),
   nonceDataAvailabilityMode: optional(any()),
   feeDataAvailabilityMode: optional(any()),
-  version: optional(enums(['0x2', '0x3'])),
+  version: optional(TxVersionStruct),
   resourceBounds: optional(any()),
   skipValidate: optional(boolean()),
 });

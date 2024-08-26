@@ -1,4 +1,7 @@
 import type { GetTransactionResponse } from 'starknet';
+import type { Infer } from 'superstruct';
+
+import type { TxVersionStruct } from '../utils';
 
 export type TransactionStatuses = {
   executionStatus: string | undefined;
@@ -13,3 +16,5 @@ export type TransactionResponse = GetTransactionResponse & {
   contract_address?: string;
   calldata?: string[];
 };
+
+export type TransactionVersion = Infer<typeof TxVersionStruct>;

@@ -14,9 +14,11 @@ import type {
   UniversalDetails,
 } from 'starknet';
 
-import type {
-  AddErc20TokenRequestParams,
-  AddNetworkRequestParams,
+import {
+  FeeToken,
+  FeeTokenUnit,
+  type AddErc20TokenRequestParams,
+  type AddNetworkRequestParams,
 } from '../types/snapApi';
 import { TransactionStatus } from '../types/snapState';
 import type {
@@ -392,11 +394,17 @@ export function getTxnSnapTxt(
 
   if (details?.maxFee) {
     const feeToken =
-      details.version === constants.TRANSACTION_VERSION.V3 ? 'STRK' : 'ETH';
+      details.version === constants.TRANSACTION_VERSION.V3
+        ? FeeToken.STRK
+        : FeeToken.ETH;
+    const feeTokenUnit =
+      details.version === constants.TRANSACTION_VERSION.V3
+        ? FeeTokenUnit.STRK
+        : FeeTokenUnit.ETH;
     addDialogTxt(
       components,
       `Max Fee(${feeToken})`,
-      convert(details.maxFee, 'wei', 'ether'),
+      convert(details.maxFee, `${feeTokenUnit}`, 'ether'),
     );
   }
   if (details?.nonce) {

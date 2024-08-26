@@ -1,6 +1,6 @@
 import { InvalidParamsError, SnapError } from '@metamask/snaps-sdk';
 import { constants } from 'starknet';
-import { boolean, object, string, union } from 'superstruct';
+import { object, string } from 'superstruct';
 import type { Struct, Infer } from 'superstruct';
 
 import type { StarknetAccount } from '../__tests__/helper';
@@ -30,15 +30,6 @@ const validateParam = {
     '0x04882a372da3dfe1c53170ad75893832469bf87b62b13e84662565c4a88f25cd',
 };
 
-const treeStruct = union([
-  object({
-    field1: string(),
-  }),
-  object({
-    field3: boolean(),
-  }),
-]);
-
 describe('validateRequest', () => {
   it('does not throw error if the request is valid', () => {
     expect(() =>
@@ -59,23 +50,6 @@ describe('validateRequest', () => {
     ).toThrow(
       'At path: signerAddress -- Expected a string, but received: 1234',
     );
-  });
-
-  it('throws `InvalidParamsError` and prints meaningful error message for tree struct', () => {
-    const requestParams = {
-      field1: true,
-    };
-
-    expect(() =>
-      validateRequest(requestParams, treeStruct as unknown as Struct),
-    ).toThrow(InvalidParamsError);
-    expect(() =>
-      validateRequest(requestParams, treeStruct as unknown as Struct),
-    ).toThrow(`At path: field1 --
-    Expected a string, but received: true
-    Expected a value of type \`never\`, but received: \`true\`
-
-At path: field3 -- Expected a value of type \`boolean\`, but received: \`undefined\``);
   });
 });
 

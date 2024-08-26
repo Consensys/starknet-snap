@@ -78,7 +78,15 @@ export const getTxnToFromLabel = (transaction: Transaction): string => {
   const txnName = getTxnName(transaction);
   switch (txnName) {
     case 'Send':
-      return 'To ' + shortenAddress(transaction.contractCallData[0].toString());
+      if (transaction.contractCallData.length === 3) {
+        return (
+          'To ' + shortenAddress(transaction.contractCallData[0].toString())
+        );
+      } else {
+        return (
+          'To ' + shortenAddress(transaction.contractCallData[4].toString())
+        );
+      }
     case 'Receive':
       return 'From ' + shortenAddress(transaction.senderAddress);
     case 'Deploy':

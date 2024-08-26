@@ -25,35 +25,7 @@ export function validateRequest<Params>(requestParams: Params, struct: Struct) {
   try {
     assert(requestParams, struct);
   } catch (error) {
-    const failures: any = error.failures();
-    const maxPathLength = Math.max(
-      ...failures.map((failure) => failure.path.length),
-    );
-    const filteredFailures = failures.filter(
-      (failure) => failure.path.length === maxPathLength,
-    );
-    const groupedFailures = filteredFailures.reduce((acc, failure) => {
-      const pathStr = failure.path.join('.');
-      if (!acc[pathStr]) {
-        acc[pathStr] = [];
-      }
-      acc[pathStr].push(failure.message);
-      return acc;
-    }, {} as Record<string, string[]>);
-
-    // Generate the output format
-    const output = Object.entries(groupedFailures)
-      .map(([path, messages]) => {
-        const messageBlock = (messages as [string])
-          .map((message: string) => `    ${message}`)
-          .join('\n');
-        return (messages as [string]).length > 1
-          ? `At path: ${path} --\n${messageBlock}`
-          : `At path: ${path} -- ${(messages as [string])[0]}`;
-      })
-      .join('\n\n');
-
-    throw new InvalidParamsError(output) as unknown as Error;
+    throw new InvalidParamsError(error.message) as unknown as Error;
   }
 }
 
