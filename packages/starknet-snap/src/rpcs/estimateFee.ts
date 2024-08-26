@@ -11,7 +11,7 @@ import {
   UniversalDetailsStruct,
 } from '../utils';
 import { TRANSACTION_VERSION } from '../utils/constants';
-import { getEstimatedFees, isAccountDeployed } from '../utils/starknetUtils';
+import { getEstimatedFees } from '../utils/starknetUtils';
 
 export const EstimateFeeRequestStruct = assign(
   object({
@@ -62,8 +62,6 @@ export class EstimateFeeRpc extends AccountRpcController<
   ): Promise<EstimateFeeResponse> {
     const { address, invocations, details } = params;
 
-    const accountDeployed = await isAccountDeployed(this.network, address);
-
     const estimateFeeResp = await getEstimatedFees(
       this.network,
       address,
@@ -71,7 +69,6 @@ export class EstimateFeeRpc extends AccountRpcController<
       this.account.publicKey,
       invocations as unknown as Invocations,
       details?.version ?? TRANSACTION_VERSION,
-      !accountDeployed,
     );
 
     return estimateFeeResp;

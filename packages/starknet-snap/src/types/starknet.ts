@@ -1,4 +1,4 @@
-import type { GetTransactionResponse } from 'starknet';
+import type { constants, GetTransactionResponse } from 'starknet';
 
 export type TransactionStatuses = {
   executionStatus: string | undefined;
@@ -13,3 +13,7 @@ export type TransactionResponse = GetTransactionResponse & {
   contract_address?: string;
   calldata?: string[];
 };
+
+export type TransactionVersion =
+  | typeof constants.TRANSACTION_VERSION.V2
+  | typeof constants.TRANSACTION_VERSION.V3;
