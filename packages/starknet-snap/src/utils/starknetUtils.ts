@@ -21,6 +21,7 @@ import type {
   ProviderInterface,
   GetTransactionReceiptResponse,
   BigNumberish,
+  ArraySignatureType,
 } from 'starknet';
 import {
   ec,
@@ -645,28 +646,19 @@ export function getFullPublicKeyPairFromPrivateKey(privateKey: string) {
   );
 }
 
-export const getTypedDataMessageSignature = (
+export const verifyTypedDataMessageSignature = (
+  address: string,
   privateKey: string,
   typedDataMessage: TypedData,
-  signerUserAddress: string,
+  signature: ArraySignatureType,
 ) => {
-  const msgHash = typedData.getMessageHash(typedDataMessage, signerUserAddress);
-  return ec.starkCurve.sign(msgHash, privateKey);
-};
-
-export const getSignatureBySignatureString = (signatureStr: string) => {
-  return ec.starkCurve.Signature.fromDER(signatureStr);
-};
-
-export const verifyTypedDataMessageSignature = (
-  fullPublicKey: string,
-  typedDataMessage: TypedData,
-  signerUserAddress: numUtils.BigNumberish,
-  signatureStr: string,
-) => {
-  const signature = getSignatureBySignatureString(signatureStr);
-  const msgHash = typedData.getMessageHash(typedDataMessage, signerUserAddress);
-  return ec.starkCurve.verify(signature, msgHash, fullPublicKey);
+  const fullPublicKey = getFullPublicKeyPairFromPrivateKey(privateKey);
+  const signatureType = new ec.starkCurve.Signature(
+    BigInt(signature[0]),
+    BigInt(signature[1]),
+  );
+  const msgHash = typedData.getMessageHash(typedDataMessage, address);
+  return ec.starkCurve.verify(signatureType, msgHash, fullPublicKey);
 };
 
 export const getNextAddressIndex = (
