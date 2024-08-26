@@ -88,7 +88,7 @@ export class MetaMaskSnap {
     })) as Signature;
   }
 
-  async signDeclareTransaction(signerAddress: string, transaction: DeclareSignerDetails): Promise<Signature> {
+  async signDeclareTransaction(address: string, details: DeclareSignerDetails): Promise<Signature> {
     return (await this.#provider.request({
       method: 'wallet_invokeSnap',
       params: {
@@ -96,8 +96,8 @@ export class MetaMaskSnap {
         request: {
           method: 'starkNet_signDeclareTransaction',
           params: this.removeUndefined({
-            signerAddress,
-            transaction,
+            address,
+            details,
             ...(await this.#getSnapParams()),
           }),
         },
