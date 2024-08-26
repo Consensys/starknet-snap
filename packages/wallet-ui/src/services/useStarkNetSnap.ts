@@ -32,11 +32,7 @@ import { ethers } from 'ethers';
 import { getAssetPriceUSD } from './coinGecko';
 import semver from 'semver/preload';
 import { setActiveNetwork } from 'slices/networkSlice';
-import {
-  constants,
-  Invocations,
-  TransactionType,
-} from 'starknet';
+import { constants, Invocations, TransactionType } from 'starknet';
 
 export const useStarkNetSnap = () => {
   const dispatch = useAppDispatch();
