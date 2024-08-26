@@ -21,7 +21,7 @@ import {
 } from 'superstruct';
 
 import { TransactionStateManager } from '../state/transaction-state-manager';
-import type { Transaction } from '../types/snapState';
+import { VoyagerTransactionType, type Transaction } from '../types/snapState';
 import {
   AddressStruct,
   BaseRequestStruct,
@@ -187,7 +187,6 @@ export class ExecuteTxnRpc extends AccountRpcController<
       calls,
       abis,
       {
-        ...details,
         nonce: accountDeployed ? undefined : 1,
         maxFee: estimateFeeResp.suggestedMaxFee,
       },
@@ -204,7 +203,7 @@ export class ExecuteTxnRpc extends AccountRpcController<
 
     const txn: Transaction = {
       txnHash: executeTxnResp.transaction_hash,
-      txnType: TransactionType.INVOKE,
+      txnType: VoyagerTransactionType.INVOKE,
       chainId: this.network.chainId,
       senderAddress: address,
       contractAddress: calls[0].contractAddress,

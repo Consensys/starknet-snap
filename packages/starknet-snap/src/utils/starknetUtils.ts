@@ -1010,8 +1010,8 @@ export async function getEstimatedFees(
   transactionVersion: TransactionVersion,
 ): Promise<EstimateFeeResponse> {
   let bulkTransactions = transactionInvocations;
-  const includeDeployFee = await isAccountDeployed(this.network, address);
-  if (includeDeployFee) {
+  const accountDeployed = await isAccountDeployed(network, address);
+  if (!accountDeployed) {
     const { callData } = getAccContractAddressAndCallData(accountPublicKey);
     const deployAccountpayload = {
       classHash: ACCOUNT_CLASS_HASH,
@@ -1043,7 +1043,7 @@ export async function getEstimatedFees(
       transactionVersion === constants.TRANSACTION_VERSION.V2
         ? FeeTokenUnit.ETH
         : FeeTokenUnit.STRK,
-    includeDeploy: includeDeployFee,
+    includeDeploy: !accountDeployed,
   };
 }
 
