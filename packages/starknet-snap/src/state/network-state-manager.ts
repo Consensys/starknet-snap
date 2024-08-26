@@ -65,7 +65,7 @@ export class NetworkStateManager extends StateManager<Network> {
    * @param [state] - The optional SnapState object.
    * @returns A Promise that resolves with the Network object if found, or null if not found.
    */
-  async findNetwork(
+  async getNetwork(
     {
       chainId,
     }: {
@@ -88,7 +88,7 @@ export class NetworkStateManager extends StateManager<Network> {
   async updateNetwork(data: Network): Promise<void> {
     try {
       await this.update(async (state: SnapState) => {
-        const dataInState = await this.findNetwork(
+        const dataInState = await this.getNetwork(
           {
             chainId: data.chainId,
           },

@@ -5,7 +5,7 @@ import {
   TransactionExecutionStatus,
 } from 'starknet';
 
-import { generateTransactions } from '../../test/utils';
+import { generateTransactions } from '../__tests__/helper';
 import { PRELOADED_TOKENS } from '../utils/constants';
 import { mockAcccounts, mockState } from './__tests__/helper';
 import { StateManagerError } from './state-manager';

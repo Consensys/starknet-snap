@@ -3,8 +3,8 @@ import { constants } from 'starknet';
 import { object, string } from 'superstruct';
 import type { Struct, Infer } from 'superstruct';
 
-import type { StarknetAccount } from '../../test/utils';
-import { generateAccounts } from '../../test/utils';
+import type { StarknetAccount } from '../__tests__/helper';
+import { generateAccounts } from '../__tests__/helper';
 import type { SnapState } from '../types/snapState';
 import { STARKNET_SEPOLIA_TESTNET_NETWORK } from './constants';
 import {

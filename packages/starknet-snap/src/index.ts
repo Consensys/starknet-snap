@@ -40,12 +40,14 @@ import type {
   SignMessageParams,
   SignTransactionParams,
   SignDeclareTransactionParams,
+  VerifySignatureParams,
 } from './rpcs';
 import {
   displayPrivateKey,
   signMessage,
   signTransaction,
   signDeclareTransaction,
+  verifySignature,
 } from './rpcs';
 import { sendTransaction } from './sendTransaction';
 import { signDeployAccountTransaction } from './signDeployAccountTransaction';
@@ -81,7 +83,6 @@ import {
   getCorrectContractAddress,
   getKeysFromAddressIndex,
 } from './utils/starknetUtils';
-import { verifySignedMessage } from './verifySignedMessage';
 
 declare const snap;
 
@@ -203,9 +204,8 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
         );
 
       case 'starkNet_verifySignedMessage':
-        apiParams.keyDeriver = await getAddressKeyDeriver(snap);
-        return await verifySignedMessage(
-          apiParams as unknown as ApiParamsWithKeyDeriver,
+        return await verifySignature.execute(
+          apiParams as unknown as VerifySignatureParams,
         );
 
       case 'starkNet_getErc20TokenBalance':

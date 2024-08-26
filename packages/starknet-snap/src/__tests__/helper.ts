@@ -1,7 +1,12 @@
+import {
+  BIP44CoinTypeNode,
+  getBIP44AddressKeyDeriver,
+} from '@metamask/key-tree';
 import { generateMnemonic } from 'bip39';
+import { getRandomValues } from 'crypto';
+import type { constants } from 'starknet';
 import {
   ec,
-  constants,
   CallData,
   hash,
   type Calldata,
@@ -10,18 +15,15 @@ import {
   TransactionExecutionStatus,
   TransactionType,
 } from 'starknet';
-import {
-  BIP44CoinTypeNode,
-  getBIP44AddressKeyDeriver,
-} from '@metamask/key-tree';
-import { AccContract, Transaction } from '../src/types/snapState';
+
+import type { AccContract, Transaction } from '../types/snapState';
 import {
   ACCOUNT_CLASS_HASH,
   ACCOUNT_CLASS_HASH_LEGACY,
   PRELOADED_TOKENS,
   PROXY_CONTRACT_HASH,
-} from '../src/utils/constants';
-import { grindKey } from '../src/utils/keyPair';
+} from '../utils/constants';
+import { grindKey } from '../utils/keyPair';
 
 /* eslint-disable */
 export type StarknetAccount = AccContract & {
@@ -29,6 +31,23 @@ export type StarknetAccount = AccContract & {
 };
 
 /* eslint-disable */
+
+/**
+ * Using pseudorandom number generators (PRNGs) to generate a security-sensitive random value that recommended by sonarcloud.
+ * It has led in the past to the following vulnerabilities:
+ * - https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2013-6386
+ * - https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2006-3419
+ * - https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2008-4102
+ *
+ * @returns An random number.
+ */
+export function generateRandomValue() {
+  // max value of 32 bit signed integer
+  const maxU32 = 2 ** 32;
+  const u32Arr = new Uint32Array(1);
+  // by dividing the random value by maxU32, we get a decimal number between 0 and 1, which is the same as Math.random()
+  return getRandomValues(u32Arr)[0] / maxU32;
+}
 
 /**
  * Method to generate Bip44 Entropy.
@@ -212,15 +231,23 @@ export function generateTransactions({
 
   for (let i = 1; i <= createCnt; i++) {
     const randomContractAddress =
-      contractAddresses[Math.floor(Math.random() * contractAddresses.length)];
+      contractAddresses[
+        Math.floor(generateRandomValue() * contractAddresses.length)
+      ];
     const randomTxnType =
-      filteredTxnTypes[Math.floor(Math.random() * filteredTxnTypes.length)];
+      filteredTxnTypes[
+        Math.floor(generateRandomValue() * filteredTxnTypes.length)
+      ];
     let randomFinalityStatus =
-      finalityStatuses[Math.floor(Math.random() * finalityStatuses.length)];
+      finalityStatuses[
+        Math.floor(generateRandomValue() * finalityStatuses.length)
+      ];
     let randomExecutionStatus =
-      executionStatuses[Math.floor(Math.random() * executionStatuses.length)];
+      executionStatuses[
+        Math.floor(generateRandomValue() * executionStatuses.length)
+      ];
     let randomContractFuncName = ['transfer', 'upgrade'][
-      Math.floor(Math.random() * 2)
+      Math.floor(generateRandomValue() * 2)
     ];
     accumulatedTimestamp += i * 100;
     accumulatedTxnHash += BigInt(i * 100);
