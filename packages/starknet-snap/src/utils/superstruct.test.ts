@@ -1,4 +1,4 @@
-import { constants } from 'starknet';
+import { constants, TransactionType } from 'starknet';
 import { StructError, assert, object, number, string } from 'superstruct';
 
 import transactionExample from '../__tests__/fixture/transactionExample.json';
@@ -14,6 +14,7 @@ import {
   createStructWithAdditionalProperties,
   DeclareSignDetailsStruct,
   EDataModeStruct,
+  InvocationStruct,
   NumberStringStruct,
   ResourceBoundMappingStruct,
   TxVersionStruct,
@@ -362,6 +363,36 @@ describe('DeclareSignDetailsStruct', () => {
 
   it('throws error if the declare sign details is invalid', () => {
     expect(() => assert({}, DeclareSignDetailsStruct)).toThrow(StructError);
+  });
+});
+
+describe('InvocationStructs', () => {
+  it.each([
+    {
+      type: TransactionType.INVOKE,
+      payload: {
+        contractAddress: '0x123',
+      },
+    },
+  ])(
+    'does not throw error if the invocation is correct',
+    (request: unknown) => {
+      expect(() => assert(request, InvocationStruct)).not.toThrow();
+    },
+  );
+
+  it('throws error if the invocation is invalid', () => {
+    expect(() => assert({}, InvocationStruct)).toThrow(StructError);
+  });
+
+  it('throws meaningful error message', () => {
+    const request = {
+      type: TransactionType.INVOKE,
+      payload: {},
+    };
+    expect(() => assert(request, InvocationStruct)).toThrow(
+      'At path: payload.contractAddress -- At path: payload.contractAddress -- Expected a string, but received: undefined',
+    );
   });
 });
 
