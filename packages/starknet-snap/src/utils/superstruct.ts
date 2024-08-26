@@ -1,4 +1,5 @@
 import { union } from '@metamask/snaps-sdk';
+import { HexStruct } from '@metamask/utils';
 import { constants, validateAndParseAddress } from 'starknet';
 import {
   boolean,
@@ -88,7 +89,7 @@ export const CallDataStruct = object({
   calldata: union([array(string()), record(string(), any())]), // TODO: refine this to calldata
 });
 
-export const NumberStringStruct = union([number(), string()]);
+export const NumberStringStruct = union([number(), HexStruct]);
 
 export const CairoVersionStruct = enums([CAIRO_VERSION, CAIRO_VERSION_LEGACY]);
 
@@ -110,6 +111,8 @@ export const V3TxVersionStruct = enums([
   constants.TRANSACTION_VERSION.F3,
 ]);
 
+export const EDataModeStruct = enums(['L1', 'L2']);
+
 export const ResourceBoundStruct = object({
   // eslint-disable-next-line @typescript-eslint/naming-convention
   max_amount: optional(string()),
@@ -126,13 +129,13 @@ export const ResourceBoundMappingStruct = object({
 
 export const V3TransactionDetailStruct = object({
   nonce: optional(NumberStringStruct),
-  version: optional(NumberStringStruct),
+  version: optional(V3TxVersionStruct),
   resourceBounds: optional(ResourceBoundMappingStruct),
   tip: optional(NumberStringStruct),
   paymasterData: optional(array(NumberStringStruct)),
   accountDeploymentData: optional(array(NumberStringStruct)),
-  nonceDataAvailabilityMode: optional(enums(['L1', 'L2'])),
-  feeDataAvailabilityMode: optional(enums(['L1', 'L2'])),
+  nonceDataAvailabilityMode: optional(EDataModeStruct),
+  feeDataAvailabilityMode: optional(EDataModeStruct),
 });
 
 // The declare transaction details struct does not using union to have more relax validation as starknet.js
@@ -144,7 +147,9 @@ export const DeclareSignDetailsStruct = assign(
   V3TransactionDetailStruct,
   // Only restrict some required parameters for the declare transaction
   object({
+    // TODO: classHash should be a hex string
     classHash: nonempty(string()),
+    // TODO: compiledClassHash should be a hex string
     compiledClassHash: optional(string()),
     senderAddress: AddressStruct,
     chainId: ChainIdStruct,
