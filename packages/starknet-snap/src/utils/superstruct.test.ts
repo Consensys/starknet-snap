@@ -152,7 +152,7 @@ describe('CairoVersionStruct', () => {
 });
 
 describe('TxVersionStruct', () => {
-  it.each(Object.values(constants.TRANSACTION_VERSION))(
+  it.each([constants.TRANSACTION_VERSION.V2, constants.TRANSACTION_VERSION.V3])(
     'does not throw error if the tx version is %s',
     (version) => {
       expect(() => assert(version, TxVersionStruct)).not.toThrow();

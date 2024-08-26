@@ -93,23 +93,14 @@ export const NumberStringStruct = union([number(), HexStruct]);
 
 export const CairoVersionStruct = enums([CAIRO_VERSION, CAIRO_VERSION_LEGACY]);
 
-export const TxVersionStruct = enums(
-  Object.values(constants.TRANSACTION_VERSION),
-);
-
-export const V2TxVersionStruct = enums([
-  constants.TRANSACTION_VERSION.V0,
-  constants.TRANSACTION_VERSION.V1,
+export const TxVersionStruct = enums([
   constants.TRANSACTION_VERSION.V2,
-  constants.TRANSACTION_VERSION.F0,
-  constants.TRANSACTION_VERSION.F1,
-  constants.TRANSACTION_VERSION.F2,
+  constants.TRANSACTION_VERSION.V3,
 ]);
 
-export const V3TxVersionStruct = enums([
-  constants.TRANSACTION_VERSION.V3,
-  constants.TRANSACTION_VERSION.F3,
-]);
+export const V2TxVersionStruct = enums([constants.TRANSACTION_VERSION.V2]);
+
+export const V3TxVersionStruct = enums([constants.TRANSACTION_VERSION.V3]);
 
 export const EDataModeStruct = enums(['L1', 'L2']);
 
