@@ -14,11 +14,11 @@ import {
   number,
   array,
   assign,
-  nonempty,
+  dynamic,
   define,
   mask,
   validate,
-  dynamic,
+  nonempty,
 } from 'superstruct';
 
 import { CAIRO_VERSION_LEGACY, CAIRO_VERSION } from './constants';
