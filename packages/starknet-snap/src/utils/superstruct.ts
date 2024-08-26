@@ -200,7 +200,7 @@ const DeclarePayloadStruct = object({
 
 const InvokePayloadStruct = object({
   contractAddress: string(),
-  calldata: optional(any()), // Assuming RawArgs or Calldata can be represented as any or string
+  calldata: array(string()),
   entrypoint: optional(string()), // Making entrypoint optional as it was mentioned in the example
 });
 

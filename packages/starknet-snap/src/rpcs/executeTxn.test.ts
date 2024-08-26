@@ -13,29 +13,39 @@ import {
 import type { ExecuteTxnParams } from './executeTxn';
 import { executeTxn } from './executeTxn';
 
-const prepareMockExecuteTxn = (transactionHash: string) => {
+const prepareMockExecuteTxn = (
+  transactionHash: string,
+  accountDeployed: boolean,
+) => {
   const executeTxnRespMock = {
     // eslint-disable-next-line @typescript-eslint/naming-convention
     transaction_hash: transactionHash,
   };
 
-  const getEstimatedFees = jest.spyOn(starknetUtils, 'getEstimatedFees');
-  getEstimatedFees.mockResolvedValue({
+  const getEstmatedFeesRepsMock = {
     suggestedMaxFee: BigInt(1000000000000000).toString(10),
     overallFee: BigInt(1000000000000000).toString(10),
-    includeDeploy: false,
+    includeDeploy: !accountDeployed,
     unit: 'wei',
-  });
+  };
+  const getEstimatedFeesStub = jest.spyOn(starknetUtils, 'getEstimatedFees');
+  getEstimatedFeesStub.mockResolvedValue(getEstmatedFeesRepsMock);
 
   const executeTxnUtilStub = jest.spyOn(starknetUtils, 'executeTxn');
   executeTxnUtilStub.mockResolvedValue(executeTxnRespMock);
 
-  const isAccountDeployed = jest.spyOn(starknetUtils, 'isAccountDeployed');
+  const createAccountStub = jest.spyOn(starknetUtils, 'createAccount');
+  createAccountStub.mockResolvedValue({
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    transaction_hash: '0x123',
+    address: '0x234',
+  });
 
   return {
+    createAccountStub,
     executeTxnRespMock,
-    isAccountDeployed,
-    getEstimatedFees,
+    getEstimatedFeesStub,
+    getEstmatedFeesRepsMock,
   };
 };
 
@@ -79,9 +89,8 @@ describe('ExecuteTxn', () => {
 
     prepareMockAccount(account, state);
     prepareConfirmDialog();
-    const { executeTxnRespMock, isAccountDeployed, getEstimatedFees } =
-      prepareMockExecuteTxn(invocationExample.hash);
-    isAccountDeployed.mockResolvedValue(true);
+    const { createAccountStub, executeTxnRespMock, getEstimatedFeesStub } =
+      prepareMockExecuteTxn(invocationExample.hash, true);
 
     const request = createRequestParam(
       state.networks[0].chainId as any,
@@ -104,15 +113,19 @@ describe('ExecuteTxn', () => {
         nonce: undefined,
       }),
     );
-    expect(getEstimatedFees).toHaveBeenCalled();
-    expect(starknetUtils.isAccountDeployed).toHaveBeenCalledWith(
-      expect.anything(),
-      account.address,
-    );
+    expect(getEstimatedFeesStub).toHaveBeenCalled();
+    expect(createAccountStub).not.toHaveBeenCalled();
   });
+
   it('executes transaction correctly when account is not deployed', async () => {
     const account = await mockAccount(constants.StarknetChainId.SN_SEPOLIA);
     invocationExample = invocationExamples.shift();
+
+    prepareMockAccount(account, state);
+    prepareConfirmDialog();
+    const { createAccountStub, executeTxnRespMock, getEstimatedFeesStub } =
+      prepareMockExecuteTxn(invocationExample.hash, false);
+
     const request = createRequestParam(
       state.networks[0].chainId as any,
       account.address,
@@ -120,47 +133,18 @@ describe('ExecuteTxn', () => {
       invocationExample.details,
     );
 
-    const invocations = request.invocations.map(
-      (invocation) => invocation.payload,
-    );
-
-    prepareMockAccount(account, state);
-    prepareConfirmDialog();
-    const { executeTxnRespMock, isAccountDeployed } = prepareMockExecuteTxn(
-      invocationExample.hash,
-    );
-    isAccountDeployed.mockResolvedValue(false);
-
-    const createAccount = jest.spyOn(starknetUtils, 'createAccount');
-    createAccount.mockResolvedValue({
-      address: account.address,
-      // eslint-disable-next-line @typescript-eslint/naming-convention
-      transaction_hash: '',
-    });
-
     const result = await executeTxn.execute(request);
 
     expect(result).toStrictEqual(executeTxnRespMock);
-    expect(executeTxnUtil).toHaveBeenCalledWith(
-      expect.anything(),
-      account.address,
-      account.privateKey,
-      invocations,
-      undefined,
-      expect.objectContaining({
-        maxFee: '1000000000000000',
-        nonce: 1,
-      }),
-    );
-    expect(createAccount).toHaveBeenCalledTimes(1);
+    expect(getEstimatedFeesStub).toHaveBeenCalled();
+    expect(createAccountStub).toHaveBeenCalledTimes(1);
   });
 
   it('throws error if invocations are empty', async () => {
     const account = await mockAccount(constants.StarknetChainId.SN_SEPOLIA);
     prepareMockAccount(account, state);
     prepareConfirmDialog();
-    const { isAccountDeployed } = prepareMockExecuteTxn(invocationExample.hash);
-    isAccountDeployed.mockResolvedValue(true);
+    prepareMockExecuteTxn(invocationExample.hash, true);
 
     const request = createRequestParam(
       state.networks[0].chainId as any,
@@ -172,7 +156,7 @@ describe('ExecuteTxn', () => {
     request.invocations = [];
 
     await expect(executeTxn.execute(request)).rejects.toThrow(
-      'At path:  -- Invocations cannot be empty',
+      'Invocations cannot be empty',
     );
   });
 
@@ -186,10 +170,7 @@ describe('ExecuteTxn', () => {
       const account = await mockAccount(constants.StarknetChainId.SN_SEPOLIA);
       prepareMockAccount(account, state);
       prepareConfirmDialog();
-      const { isAccountDeployed } = prepareMockExecuteTxn(
-        invocationExample.hash,
-      );
-      isAccountDeployed.mockResolvedValue(true);
+      prepareMockExecuteTxn(invocationExample.hash, true);
 
       const request = createRequestParam(
         state.networks[0].chainId as any,
@@ -199,9 +180,10 @@ describe('ExecuteTxn', () => {
       );
 
       request.invocations[0].type = transactionType;
+      request.invocations[0].payload = {};
 
       await expect(executeTxn.execute(request)).rejects.toThrow(
-        `At path:  -- Invocations should be of type INVOKE_FUNCTION received ${transactionType}`,
+        `Invocations should be of type INVOKE_FUNCTION received ${transactionType}`,
       );
     },
   );

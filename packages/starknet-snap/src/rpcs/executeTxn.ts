@@ -4,6 +4,7 @@ import {
   divider,
   row,
   UserRejectedRequestError,
+  text,
 } from '@metamask/snaps-sdk';
 import convert from 'ethereum-unit-converter';
 import type { Call, Calldata, Invocations } from 'starknet';
@@ -40,7 +41,6 @@ import {
   executeTxn as executeTxnUtil,
   getAccContractAddressAndCallData,
   getEstimatedFees,
-  isAccountDeployed,
 } from '../utils/starknetUtils';
 
 export const ExecuteTxnRequestStruct = refine(
@@ -62,6 +62,16 @@ export const ExecuteTxnRequestStruct = refine(
     for (const invocation of value.invocations as Invocations) {
       if (invocation.type !== TransactionType.INVOKE) {
         return `Invocations should be of type ${TransactionType.INVOKE} received ${invocation.type}`;
+      }
+      try {
+        const payload = (invocation as any).payload as Call;
+        const callData = payload.calldata as string[];
+        for (const data of callData) {
+          BigInt(data).toString(16);
+        }
+      } catch (error) {
+        // data is already send to chain, hence we should not throw error
+        return 'calldata must be an array of string that can derive to array of bigint';
       }
     }
     return true;
@@ -113,9 +123,18 @@ export class ExecuteTxnRpc extends AccountRpcController<
   ): Promise<ExecuteTxnResponse> {
     const { address, invocations, abis, details, enableAuthorize } = params;
 
+    const estimateFeeResp = await getEstimatedFees(
+      this.network,
+      address,
+      this.account.privateKey,
+      this.account.publicKey,
+      invocations as unknown as Invocations,
+      details?.version ?? TRANSACTION_VERSION,
+    );
+
     const calls = getInvokeCalls(invocations as Invocations);
 
-    const accountDeployed = await isAccountDeployed(this.network, address);
+    const accountDeployed = !estimateFeeResp.includeDeploy;
 
     if (!accountDeployed) {
       const { callData } = getAccContractAddressAndCallData(
@@ -161,58 +180,50 @@ export class ExecuteTxnRpc extends AccountRpcController<
       );
     }
 
-    const estimateFeeResp = await getEstimatedFees(
-      this.network,
-      address,
-      this.account.privateKey,
-      this.account.publicKey,
-      invocations as unknown as Invocations,
-      details?.version ?? TRANSACTION_VERSION,
-    );
-
-    const resp = await executeTxnUtil(
+    const executeTxnResp = await executeTxnUtil(
       this.network,
       address,
       this.account.privateKey,
       calls,
       abis,
       {
+        ...details,
         nonce: accountDeployed ? undefined : 1,
         maxFee: estimateFeeResp.suggestedMaxFee,
       },
     );
 
-    if (resp.transaction_hash) {
-      const callData = calls[0].calldata as Calldata;
-
-      const txn: Transaction = {
-        txnHash: resp.transaction_hash,
-        txnType: TransactionType.INVOKE,
-        chainId: this.network.chainId,
-        senderAddress: address,
-        contractAddress: calls[0].contractAddress,
-        contractFuncName: calls[0].entrypoint,
-        contractCallData: callData.map((data: string) => {
-          try {
-            return `0x${BigInt(data).toString(16)}`;
-          } catch (error) {
-            // data is already send to chain, hence we should not throw error
-            return '0x0';
-          }
-        }),
-        finalityStatus: TransactionStatus.RECEIVED,
-        executionStatus: TransactionStatus.RECEIVED,
-        status: '', // DEPRECATED LATER
-        failureReason: '',
-        eventIds: [],
-        timestamp: Math.floor(Date.now() / 1000),
-      };
-
-      const stateManager = new TransactionStateManager();
-      await stateManager.addTransaction(txn);
+    if (
+      executeTxnResp === undefined ||
+      executeTxnResp.transaction_hash === undefined
+    ) {
+      throw new Error('Unable to execute transaction');
     }
 
-    return resp;
+    const callData = calls[0].calldata as Calldata;
+
+    const txn: Transaction = {
+      txnHash: executeTxnResp.transaction_hash,
+      txnType: TransactionType.INVOKE,
+      chainId: this.network.chainId,
+      senderAddress: address,
+      contractAddress: calls[0].contractAddress,
+      contractFuncName: calls[0].entrypoint,
+      contractCallData: callData.map(
+        (data: string) => `0x${BigInt(data).toString(16)}`,
+      ),
+      finalityStatus: TransactionStatus.RECEIVED,
+      executionStatus: TransactionStatus.RECEIVED,
+      status: '', // DEPRECATED LATER
+      failureReason: '',
+      eventIds: [],
+      timestamp: Math.floor(Date.now() / 1000),
+    };
+
+    const stateManager = new TransactionStateManager();
+    await stateManager.addTransaction(txn);
+
+    return executeTxnResp;
   }
 
   protected async getExecuteTxnConsensus(
@@ -226,34 +237,108 @@ export class ExecuteTxnRpc extends AccountRpcController<
     let signHeadingStr = `Do you want to sign this transaction ?`;
     if (!accountDeployed) {
       components.push(heading(`The account will be deployed`));
-      components.push(row('Address', address));
-      components.push(row('Public Key', this.account.publicKey));
       components.push(
-        row('Address Index', this.account.addressIndex.toString()),
+        row(
+          'Address',
+          text({
+            value: address,
+            markdown: false,
+          }),
+        ),
+      );
+      components.push(
+        row(
+          'Public Key',
+          text({
+            value: this.account.publicKey,
+            markdown: false,
+          }),
+        ),
+      );
+      components.push(
+        row(
+          'Address Index',
+          text({
+            value: this.account.addressIndex.toString(),
+            markdown: false,
+          }),
+        ),
       );
       components.push(divider());
       signHeadingStr = `Do you want to sign these transactions ?`;
     }
     components.push(heading(signHeadingStr));
-    components.push(row('Network', this.network.name));
-    components.push(row('Signer Address', address));
     components.push(
-      row('Transaction Invocation', JSON.stringify(calls, null, 2)),
+      row(
+        'Network',
+        text({
+          value: this.network.name,
+          markdown: false,
+        }),
+      ),
+    );
+    components.push(
+      row(
+        'Signer Address',
+        text({
+          value: address,
+          markdown: false,
+        }),
+      ),
+    );
+    components.push(
+      row(
+        'Transaction Invocation',
+        text({
+          value: JSON.stringify(calls, null, 2),
+          markdown: false,
+        }),
+      ),
     );
     if (abis && abis.length > 0) {
-      components.push(row('Abis', JSON.stringify(abis, null, 2)));
+      components.push(
+        row(
+          'Abis',
+          text({
+            value: JSON.stringify(abis, null, 2),
+            markdown: false,
+          }),
+        ),
+      );
     }
 
     if (details?.maxFee) {
       components.push(
-        row('Max Fee(ETH)', convert(details.maxFee, 'wei', 'ether')),
+        row(
+          'Max Fee(ETH)',
+          text({
+            value: convert(details.maxFee, 'wei', 'ether'),
+            markdown: false,
+          }),
+        ),
       );
     }
     if (details?.nonce) {
-      components.push(row('Nonce', details.nonce.toString()));
+      components.push(
+        row(
+          'Nonce',
+          text({
+            value: details.nonce.toString(),
+            markdown: false,
+          }),
+        ),
+      );
     }
     if (details?.version) {
-      components.push(row('Version', details.version.toString()));
+      components.push(
+        row(
+          'Version',
+          text({
+            value: details.version.toString(),
+            markdown: false,
+          }),
+        ),
+      );
     }
     return await confirmDialog(components);
   }
