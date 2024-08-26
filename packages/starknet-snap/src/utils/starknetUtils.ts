@@ -21,6 +21,7 @@ import type {
   ProviderInterface,
   GetTransactionReceiptResponse,
   BigNumberish,
+  ArraySignatureType,
 } from 'starknet';
 import {
   ec,
@@ -40,12 +41,16 @@ import {
 } from 'starknet';
 
 import type { EstimateFeeResponse } from '../rpcs/estimateFee';
-import type { RpcV4GetTransactionReceiptResponse } from '../types/snapApi';
+import {
+  FeeTokenUnit,
+  type RpcV4GetTransactionReceiptResponse,
+} from '../types/snapApi';
 import type { Network, SnapState, Transaction } from '../types/snapState';
 import { TransactionType } from '../types/snapState';
 import type {
   TransactionResponse,
   TransactionStatuses,
+  TransactionVersion,
 } from '../types/starknet';
 import type {
   VoyagerTransactions,
@@ -134,9 +139,7 @@ export const getAccountInstance = (
   userAddress: string,
   privateKey: string | Uint8Array,
   cairoVersion?: CairoVersion,
-  transactionVersion?:
-    | typeof constants.TRANSACTION_VERSION.V2
-    | typeof constants.TRANSACTION_VERSION.V3,
+  transactionVersion?: TransactionVersion,
   blockIdentifier?: BlockIdentifierEnum,
 ): Account => {
   const provider = getProvider(network, blockIdentifier);
@@ -234,9 +237,7 @@ export const estimateFeeBulk = async (
   senderAddress: string,
   privateKey: string | Uint8Array,
   txnInvocation: Invocations,
-  transactionVersion:
-    | typeof constants.TRANSACTION_VERSION.V2
-    | typeof constants.TRANSACTION_VERSION.V3 = TRANSACTION_VERSION,
+  transactionVersion: TransactionVersion = TRANSACTION_VERSION,
   invocationsDetails?: UniversalDetails,
   cairoVersion?: CairoVersion,
 ): Promise<EstimateFee[]> => {
@@ -776,28 +777,19 @@ export function getFullPublicKeyPairFromPrivateKey(privateKey: string) {
   );
 }
 
-export const getTypedDataMessageSignature = (
+export const verifyTypedDataMessageSignature = (
+  address: string,
   privateKey: string,
   typedDataMessage: TypedData,
-  signerUserAddress: string,
+  signature: ArraySignatureType,
 ) => {
-  const msgHash = typedData.getMessageHash(typedDataMessage, signerUserAddress);
-  return ec.starkCurve.sign(msgHash, privateKey);
-};
-
-export const getSignatureBySignatureString = (signatureStr: string) => {
-  return ec.starkCurve.Signature.fromDER(signatureStr);
-};
-
-export const verifyTypedDataMessageSignature = (
-  fullPublicKey: string,
-  typedDataMessage: TypedData,
-  signerUserAddress: numUtils.BigNumberish,
-  signatureStr: string,
-) => {
-  const signature = getSignatureBySignatureString(signatureStr);
-  const msgHash = typedData.getMessageHash(typedDataMessage, signerUserAddress);
-  return ec.starkCurve.verify(signature, msgHash, fullPublicKey);
+  const fullPublicKey = getFullPublicKeyPairFromPrivateKey(privateKey);
+  const signatureType = new ec.starkCurve.Signature(
+    BigInt(signature[0]),
+    BigInt(signature[1]),
+  );
+  const msgHash = typedData.getMessageHash(typedDataMessage, address);
+  return ec.starkCurve.verify(signatureType, msgHash, fullPublicKey);
 };
 
 export const getNextAddressIndex = (
@@ -993,17 +985,32 @@ export const validateAndParseAddress = (
   return _validateAndParseAddressFn(address);
 };
 
+/**
+ * Estimate the fees required for a set of transactions, including optional account deployment costs.
+ *
+ * This function is specifically designed for use with Cairo 1 and does not support Cairo 0.
+ * It calculates the fees for a batch of transaction invocations and includes the additional cost
+ * of deploying an account if the account has not yet been deployed.
+ *
+ * @param {Network} network - The StarkNet network to interact with.
+ * @param {string} address - The account address involved in the transactions.
+ * @param {string} privateKey - The private key for signing the transactions.
+ * @param {string} accountPublicKey - The public key of the account.
+ * @param {Invocations} transactionInvocations - The set of transactions to be executed.
+ * @param {constants.TRANSACTION_VERSION} transactionVersion - The version of the transaction, valid values are '0x2' or '0x3'.
+ * @returns {Promise<EstimateFeeResponse>} - A promise that resolves to the estimated fee response,
+ *                                           including suggested maximum fee and overall fee in wei.
+ */
 export async function getEstimatedFees(
   network: Network,
   address: string,
   privateKey: string,
   accountPublicKey: string,
   transactionInvocations: Invocations,
-  transactionVersion: '0x2' | '0x3',
-  includeDeployFee: boolean,
+  transactionVersion: TransactionVersion,
 ): Promise<EstimateFeeResponse> {
   let bulkTransactions = transactionInvocations;
-
+  const includeDeployFee = await isAccountDeployed(this.network, address);
   if (includeDeployFee) {
     const { callData } = getAccContractAddressAndCallData(accountPublicKey);
     const deployAccountpayload = {
@@ -1032,7 +1039,10 @@ export async function getEstimatedFees(
   return {
     suggestedMaxFee: estimateFeeResp.suggestedMaxFee.toString(10),
     overallFee: estimateFeeResp.overall_fee.toString(10),
-    unit: 'wei',
+    unit:
+      transactionVersion === constants.TRANSACTION_VERSION.V2
+        ? FeeTokenUnit.ETH
+        : FeeTokenUnit.STRK,
     includeDeploy: includeDeployFee,
   };
 }

@@ -32,7 +32,7 @@ import { useStarkNetSnap } from 'services';
 import { ethers } from 'ethers';
 import Toastr from 'toastr2';
 import { constants } from 'starknet';
-import { FeeToken } from 'types';
+import { FeeToken, FeeTokenUnit } from 'types';
 
 interface Props {
   address: string;
@@ -53,7 +53,8 @@ export const SendSummaryModalView = ({
   const [estimatingGas, setEstimatingGas] = useState(true);
   const [gasFees, setGasFees] = useState({
     suggestedMaxFee: '0',
-    unit: 'wei',
+    unit:
+      selectedFeeToken === FeeToken.ETH ? FeeTokenUnit.ETH : FeeTokenUnit.STRK,
     includeDeploy: false,
   });
   const [gasFeesError, setGasFeesError] = useState(false);

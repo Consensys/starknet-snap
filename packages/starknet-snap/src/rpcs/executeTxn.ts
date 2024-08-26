@@ -21,7 +21,6 @@ import {
 
 import { TransactionStateManager } from '../state/transaction-state-manager';
 import type { Transaction } from '../types/snapState';
-import { VoyagerTransactionType } from '../types/snapState';
 import {
   AddressStruct,
   BaseRequestStruct,
@@ -60,7 +59,7 @@ export const ExecuteTxnRequestStruct = refine(
     if (value.invocations.length === 0) {
       return 'Invocations cannot be empty';
     }
-    for (const invocation of value.invocations) {
+    for (const invocation of value.invocations as Invocations) {
       if (invocation.type !== TransactionType.INVOKE) {
         return `Invocations should be of type ${TransactionType.INVOKE} received ${invocation.type}`;
       }
@@ -169,7 +168,6 @@ export class ExecuteTxnRpc extends AccountRpcController<
       this.account.publicKey,
       invocations as unknown as Invocations,
       details?.version ?? TRANSACTION_VERSION,
-      !accountDeployed,
     );
 
     const resp = await executeTxnUtil(

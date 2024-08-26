@@ -363,7 +363,7 @@ export const useStarkNetSnap = () => {
               ...defaultParam,
               address,
               invocations,
-              details: { version: transactionVersion } as UniversalDetails,
+              details: { version: transactionVersion },
               chainId,
             },
           },
