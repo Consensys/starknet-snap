@@ -27,6 +27,7 @@ import { getAddressKeyDeriver } from '../../src/utils/keyPair';
 import { Mutex } from 'async-mutex';
 import {
   ApiParamsWithKeyDeriver,
+  FeeTokenUnit,
   SendTransactionRequestParams,
 } from '../../src/types/snapApi';
 import { GetTransactionReceiptResponse } from 'starknet';
@@ -242,7 +243,7 @@ describe('Test function: sendTransaction', function () {
         sandbox.stub(estimateFeeSnap, 'estimateFee').resolves({
           suggestedMaxFee: estimateFeeResp.suggestedMaxFee.toString(10),
           overallFee: estimateFeeResp.overall_fee.toString(10),
-          unit: 'wei',
+          unit: FeeTokenUnit.ETH,
           includeDeploy: true,
         });
         executeTxnResp = sendTransactionResp;

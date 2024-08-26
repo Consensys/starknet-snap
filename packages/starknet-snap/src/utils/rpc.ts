@@ -14,6 +14,7 @@ import {
 import { getKeysFromAddress } from './starknetUtils';
 
 /**
+ * TODO: Remove this, error handling refinement should happen elsewhere (superstruct)
  * Validates that the request parameters conform to the expected structure defined by the provided struct.
  *
  * @template Params - The expected structure of the request parameters.

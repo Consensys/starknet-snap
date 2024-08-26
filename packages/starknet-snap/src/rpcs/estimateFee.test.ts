@@ -2,6 +2,7 @@ import { InvalidParamsError } from '@metamask/snaps-sdk';
 import type { Invocations } from 'starknet';
 import { constants, TransactionType } from 'starknet';
 
+import { FeeTokenUnit } from '../types/snapApi';
 import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../utils/constants';
 import * as starknetUtils from '../utils/starknetUtils';
 import { mockAccount, prepareMockAccount } from './__tests__/helper';
@@ -29,7 +30,7 @@ describe('estimateFee', () => {
       suggestedMaxFee: BigInt(1000000000000000).toString(10),
       // eslint-disable-next-line @typescript-eslint/naming-convention
       overallFee: BigInt(1500000000000000).toString(10),
-      unit: 'wei',
+      unit: FeeTokenUnit.ETH,
       includeDeploy: false,
     };
 
@@ -67,7 +68,7 @@ describe('estimateFee', () => {
     expect(result).toStrictEqual({
       suggestedMaxFee: '1000000000000000',
       overallFee: '1500000000000000',
-      unit: 'wei',
+      unit: FeeTokenUnit.ETH,
       includeDeploy: false,
     });
   });
@@ -88,7 +89,7 @@ describe('estimateFee', () => {
       suggestedMaxFee: BigInt(1000000000000000).toString(10),
       // eslint-disable-next-line @typescript-eslint/naming-convention
       overallFee: BigInt(1500000000000000).toString(10),
-      unit: 'wei',
+      unit: FeeTokenUnit.ETH,
       includeDeploy: true,
     };
 
@@ -118,7 +119,7 @@ describe('estimateFee', () => {
     expect(result).toStrictEqual({
       suggestedMaxFee: '1000000000000000',
       overallFee: '1500000000000000',
-      unit: 'wei',
+      unit: FeeTokenUnit.ETH,
       includeDeploy: true,
     });
   });

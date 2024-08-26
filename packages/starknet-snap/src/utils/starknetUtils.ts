@@ -40,7 +40,10 @@ import {
 } from 'starknet';
 
 import type { EstimateFeeResponse } from '../rpcs/estimateFee';
-import type { RpcV4GetTransactionReceiptResponse } from '../types/snapApi';
+import {
+  FeeTokenUnit,
+  type RpcV4GetTransactionReceiptResponse,
+} from '../types/snapApi';
 import type { Network, SnapState, Transaction } from '../types/snapState';
 import { TransactionType } from '../types/snapState';
 import type {
@@ -969,7 +972,7 @@ export async function getEstimatedFees(
   return {
     suggestedMaxFee: estimateFeeResp.suggestedMaxFee.toString(10),
     overallFee: estimateFeeResp.overall_fee.toString(10),
-    unit: 'wei',
+    unit: FeeTokenUnit.ETH,
     includeDeploy: includeDeployFee,
   };
 }

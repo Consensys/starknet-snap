@@ -12,9 +12,10 @@ import type {
   DeployAccountSignerDetails,
 } from 'starknet';
 
-import type {
-  AddErc20TokenRequestParams,
-  AddNetworkRequestParams,
+import {
+  FeeToken,
+  type AddErc20TokenRequestParams,
+  type AddNetworkRequestParams,
 } from '../types/snapApi';
 import { TransactionStatus } from '../types/snapState';
 import type {
@@ -391,7 +392,7 @@ export function getTxnSnapTxt(
   if (invocationsDetails?.maxFee) {
     addDialogTxt(
       components,
-      'Max Fee(ETH)',
+      `Max Fee(${FeeToken.ETH})`,
       convert(invocationsDetails.maxFee, 'wei', 'ether'),
     );
   }
