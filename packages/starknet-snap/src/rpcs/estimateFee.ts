@@ -1,22 +1,21 @@
 import type { Json } from '@metamask/snaps-sdk';
-import type { Invocations } from 'starknet';
 import type { Infer } from 'superstruct';
-import { object, string, assign, boolean, optional, array } from 'superstruct';
+import { object, string, assign, boolean, optional, enums } from 'superstruct';
 
+import { FeeTokenUnit } from '../types/snapApi';
 import {
   AddressStruct,
   BaseRequestStruct,
   AccountRpcController,
-  InvocationStruct,
   UniversalDetailsStruct,
+  InvocationsStruct,
 } from '../utils';
-import { TRANSACTION_VERSION } from '../utils/constants';
 import { getEstimatedFees } from '../utils/starknetUtils';
 
 export const EstimateFeeRequestStruct = assign(
   object({
     address: AddressStruct,
-    invocations: array(InvocationStruct),
+    invocations: InvocationsStruct,
     details: optional(UniversalDetailsStruct),
   }),
   BaseRequestStruct,
@@ -25,7 +24,7 @@ export const EstimateFeeRequestStruct = assign(
 export const EstimateFeeResponseStruct = object({
   suggestedMaxFee: string(),
   overallFee: string(),
-  unit: string(),
+  unit: enums(Object.values(FeeTokenUnit)),
   includeDeploy: boolean(),
 });
 
@@ -45,13 +44,14 @@ export class EstimateFeeRpc extends AccountRpcController<
   protected responseStruct = EstimateFeeResponseStruct;
 
   /**
-   * Execute the estimate transaction fee request handler.
+   * Execute the bulk estimate transaction fee request handler.
    *
    * @param params - The parameters of the request.
-   * @param params.address - The address of the signer.
-   * @param params.invocations - The invocations to estimate fee.
-   * @param params.details - The detail associated to the call.
-   * @returns The estimated transaction fee as an `EstimateFeeResponse`.
+   * @param params.address - The account address.
+   * @param params.invocations - The invocations to estimate fee. Reference: https://starknetjs.com/docs/API/namespaces/types#invocations
+   * @param params.details - The universal details associated to the invocations. Reference: https://starknetjs.com/docs/API/interfaces/types.EstimateFeeDetails
+   * @param params.chainId - The chain id of the network.
+   * @returns A promise that resolves to a EstimateFeeResponse object.
    */
   async execute(params: EstimateFeeParams): Promise<EstimateFeeResponse> {
     return super.execute(params);
@@ -67,8 +67,8 @@ export class EstimateFeeRpc extends AccountRpcController<
       address,
       this.account.privateKey,
       this.account.publicKey,
-      invocations as unknown as Invocations,
-      details?.version ?? TRANSACTION_VERSION,
+      invocations,
+      details?.version,
     );
 
     return estimateFeeResp;
