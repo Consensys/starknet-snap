@@ -12,6 +12,7 @@ import {
 } from './__tests__/helper';
 import type { ExecuteTxnParams } from './executeTxn';
 import { executeTxn } from './executeTxn';
+import { FeeTokenUnit } from '../types/snapApi';
 
 const prepareMockExecuteTxn = (
   transactionHash: string,
@@ -26,7 +27,7 @@ const prepareMockExecuteTxn = (
     suggestedMaxFee: BigInt(1000000000000000).toString(10),
     overallFee: BigInt(1000000000000000).toString(10),
     includeDeploy: !accountDeployed,
-    unit: 'wei',
+    unit: 'wei' as FeeTokenUnit,
   };
   const getEstimatedFeesStub = jest.spyOn(starknetUtils, 'getEstimatedFees');
   getEstimatedFeesStub.mockResolvedValue(getEstmatedFeesRepsMock);
@@ -106,7 +107,7 @@ describe('ExecuteTxn', () => {
       expect.anything(),
       account.address,
       account.privateKey,
-      request.invocations.map((invocation) => invocation.payload),
+      request.invocations.map((invocation) => (invocation as any).payload),
       undefined,
       expect.objectContaining({
         maxFee: '1000000000000000',
@@ -159,32 +160,4 @@ describe('ExecuteTxn', () => {
       'Invocations cannot be empty',
     );
   });
-
-  it.each([
-    TransactionType.DECLARE,
-    TransactionType.DEPLOY,
-    TransactionType.DEPLOY_ACCOUNT,
-  ])(
-    `throws error if invocation type is %s`,
-    async (transactionType: TransactionType) => {
-      const account = await mockAccount(constants.StarknetChainId.SN_SEPOLIA);
-      prepareMockAccount(account, state);
-      prepareConfirmDialog();
-      prepareMockExecuteTxn(invocationExample.hash, true);
-
-      const request = createRequestParam(
-        state.networks[0].chainId as any,
-        account.address,
-        invocationExample.invocations,
-        invocationExample.details,
-      );
-
-      request.invocations[0].type = transactionType;
-      request.invocations[0].payload = {};
-
-      await expect(executeTxn.execute(request)).rejects.toThrow(
-        `Invocations should be of type INVOKE_FUNCTION received ${transactionType}`,
-      );
-    },
-  );
 });

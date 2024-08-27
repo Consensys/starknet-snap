@@ -28,7 +28,7 @@ import {
   AccountRpcController,
   AuthorizableStruct,
   confirmDialog,
-  InvocationStruct,
+  InvocationsStruct,
   UniversalDetailsStruct,
 } from '../utils';
 import {
@@ -47,7 +47,7 @@ export const ExecuteTxnRequestStruct = refine(
   assign(
     object({
       address: AddressStruct,
-      invocations: array(InvocationStruct),
+      invocations: InvocationsStruct,
       details: UniversalDetailsStruct,
       abis: optional(any()),
     }),

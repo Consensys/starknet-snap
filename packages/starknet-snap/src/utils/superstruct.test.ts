@@ -1,25 +1,31 @@
 import { constants, TransactionType } from 'starknet';
 import { StructError, assert, object, number, string } from 'superstruct';
 
+import contractExample from '../__tests__/fixture/contract-example.json';
 import transactionExample from '../__tests__/fixture/transactionExample.json';
 import typedDataExample from '../__tests__/fixture/typedDataExample.json';
-import { CAIRO_VERSION, CAIRO_VERSION_LEGACY } from './constants';
+import {
+  ACCOUNT_CLASS_HASH,
+  CAIRO_VERSION,
+  CAIRO_VERSION_LEGACY,
+  ETHER_SEPOLIA_TESTNET,
+} from './constants';
 import {
   AddressStruct,
   AuthorizableStruct,
   BaseRequestStruct,
   CairoVersionStruct,
   CallDataStruct,
-  ChainIdStruct,
   createStructWithAdditionalProperties,
   DeclareSignDetailsStruct,
   EDataModeStruct,
-  InvocationStruct,
   NumberStringStruct,
   ResourceBoundMappingStruct,
   TxVersionStruct,
   TypeDataStruct,
   V3TransactionDetailStruct,
+  InvocationsStruct,
+  ChainIdStruct,
 } from './superstruct';
 
 describe('AddressStruct', () => {
@@ -366,37 +372,6 @@ describe('DeclareSignDetailsStruct', () => {
   });
 });
 
-describe('InvocationStructs', () => {
-  it.each([
-    {
-      type: TransactionType.INVOKE,
-      payload: {
-        contractAddress: '0x123',
-        calldata: ['0x1', '0x2'],
-      },
-    },
-  ])(
-    'does not throw error if the invocation is correct',
-    (request: unknown) => {
-      expect(() => assert(request, InvocationStruct)).not.toThrow();
-    },
-  );
-
-  it('throws error if the invocation is invalid', () => {
-    expect(() => assert({}, InvocationStruct)).toThrow(StructError);
-  });
-
-  it('throws meaningful error message', () => {
-    const request = {
-      type: TransactionType.INVOKE,
-      payload: {},
-    };
-    expect(() => assert(request, InvocationStruct)).toThrow(
-      'At path: payload.contractAddress -- At path: payload.contractAddress -- Expected a string, but received: undefined',
-    );
-  });
-});
-
 describe('createStructWithAdditionalProperties', () => {
   const predefinedProperties = object({
     name: string(),
@@ -443,5 +418,151 @@ describe('createStructWithAdditionalProperties', () => {
 
     expect(error).toBeDefined();
     expect(error?.message).toContain('Expected a string, but received');
+  });
+});
+
+describe('InvocationsStruct', () => {
+  it.each([
+    {
+      type: TransactionType.INVOKE,
+      payload: {
+        contractAddress: ETHER_SEPOLIA_TESTNET.address,
+        entrypoint: 'transfer',
+      },
+    },
+    {
+      type: TransactionType.DECLARE,
+      payload: {
+        contract: contractExample.contract,
+      },
+    },
+    {
+      type: TransactionType.DEPLOY,
+      payload: {
+        classHash: ACCOUNT_CLASS_HASH,
+      },
+    },
+    {
+      type: TransactionType.DEPLOY_ACCOUNT,
+      payload: {
+        classHash: ACCOUNT_CLASS_HASH,
+      },
+    },
+  ])(
+    'does not throw error if the invocation type is $type and payload is valid',
+    (request: unknown) => {
+      expect(() => assert([request], InvocationsStruct)).not.toThrow();
+    },
+  );
+
+  it.each([
+    {
+      type: TransactionType.INVOKE,
+      payload: {
+        entrypoint: 'transfer',
+      },
+    },
+    {
+      type: TransactionType.DECLARE,
+      payload: {
+        contract: {
+          ...contractExample.contract,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          entry_points_by_type: {
+            invalid: 1,
+          },
+        },
+      },
+    },
+    {
+      type: TransactionType.DEPLOY,
+      payload: {
+        classHash: '',
+      },
+    },
+    {
+      type: TransactionType.DEPLOY_ACCOUNT,
+      payload: {
+        classHash: '',
+      },
+    },
+  ])(
+    'throws error if the invocation type is $type and payload is invalid',
+    (request: unknown) => {
+      expect(() => assert([request], InvocationsStruct)).toThrow(StructError);
+    },
+  );
+
+  it.each([
+    {
+      request: {
+        type: TransactionType.DECLARE,
+        payload: [
+          {
+            contract: contractExample.contract,
+          },
+        ],
+      },
+      expectedError: 'Declare payload does not accept mutiple items',
+    },
+    {
+      request: {
+        type: TransactionType.DEPLOY_ACCOUNT,
+        payload: [
+          {
+            classHash: ACCOUNT_CLASS_HASH,
+          },
+        ],
+      },
+      expectedError: 'Deploy account payload does not accept mutiple items',
+    },
+  ])(
+    'throws error if the invocation type is $request.type and payload is multiple',
+    ({
+      request,
+      expectedError,
+    }: {
+      request: unknown;
+      expectedError: string;
+    }) => {
+      expect(() => assert([request], InvocationsStruct)).toThrow(expectedError);
+    },
+  );
+
+  it.each([
+    {
+      type: TransactionType.INVOKE,
+      payload: [
+        {
+          contractAddress: ETHER_SEPOLIA_TESTNET.address,
+          entrypoint: 'transfer',
+        },
+      ],
+    },
+    {
+      type: TransactionType.DEPLOY,
+      payload: [
+        {
+          classHash: ACCOUNT_CLASS_HASH,
+        },
+      ],
+    },
+  ])(
+    'does not throw error if the invocation type is $type and payload is multiple',
+    (request: unknown) => {
+      expect(() => assert([request], InvocationsStruct)).not.toThrow();
+    },
+  );
+
+  it('throws meaningful error message if a nested StructError thrown', () => {
+    const request = {
+      type: TransactionType.INVOKE,
+      payload: {
+        contractAddress: ETHER_SEPOLIA_TESTNET.address,
+      },
+    };
+    expect(() => assert([request], InvocationsStruct)).toThrow(
+      'At path: entrypoint -- At path: entrypoint -- Expected a string, but received: undefined',
+    );
   });
 });
