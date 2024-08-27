@@ -11,9 +11,14 @@ import {
   CairoVersionStruct,
   CallDataStruct,
   ChainIdStruct,
+  DeclareSignDetailsStruct,
+  EDataModeStruct,
+  NumberStringStruct,
+  ResourceBoundMappingStruct,
   createStructWithAdditionalProperties,
   TxVersionStruct,
   TypeDataStruct,
+  V3TransactionDetailStruct,
 } from './superstruct';
 
 describe('AddressStruct', () => {
@@ -148,7 +153,7 @@ describe('CairoVersionStruct', () => {
 });
 
 describe('TxVersionStruct', () => {
-  it.each(Object.values(constants.TRANSACTION_VERSION))(
+  it.each([constants.TRANSACTION_VERSION.V2, constants.TRANSACTION_VERSION.V3])(
     'does not throw error if the tx version is %s',
     (version) => {
       expect(() => assert(version, TxVersionStruct)).not.toThrow();
@@ -173,6 +178,190 @@ describe('CallDataStruct', () => {
     expect(() => assert('invalid version', CallDataStruct)).toThrow(
       StructError,
     );
+  });
+});
+
+describe('NumberStringStruct', () => {
+  it.each([1, '0x1'])(
+    'does not throw error if the input is %s',
+    (val: number | string) => {
+      expect(() => assert(val, NumberStringStruct)).not.toThrow();
+    },
+  );
+
+  it('throws error if the input is invalid', () => {
+    expect(() => assert('9sd0', NumberStringStruct)).toThrow(StructError);
+  });
+});
+
+describe('EDataModeStruct', () => {
+  it.each(['L1', 'L2'])(
+    'does not throw error if the data mode is %s',
+    (val: string) => {
+      expect(() => assert(val, EDataModeStruct)).not.toThrow();
+    },
+  );
+
+  it('throws error if the data mode is invalid', () => {
+    expect(() => assert('L3', EDataModeStruct)).toThrow(StructError);
+  });
+});
+
+// this test also cover the test for ResourceBoundStruct
+describe('ResourceBoundMappingStruct', () => {
+  it.each([
+    {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      l1_gas: {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        max_amount: '100',
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        max_price_per_unit: '100',
+      },
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      l2_gas: {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        max_amount: '100',
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        max_price_per_unit: '100',
+      },
+    },
+    {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      l1_gas: {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        max_amount: '100',
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        max_price_per_unit: '100',
+      },
+    },
+    {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      l2_gas: {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        max_amount: '100',
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        max_price_per_unit: '100',
+      },
+    },
+  ])('does not throw error if the data mode is correct', (request: unknown) => {
+    expect(() => assert(request, ResourceBoundMappingStruct)).not.toThrow();
+  });
+
+  it('throws error if the data mode is invalid', () => {
+    expect(() =>
+      assert(
+        {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          l3_gas: {
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            max_amount: '100',
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            max_price_per_unit: '100',
+          },
+        },
+        ResourceBoundMappingStruct,
+      ),
+    ).toThrow(StructError);
+  });
+});
+
+describe('V3TransactionDetailStruct', () => {
+  it.each([
+    {
+      nonce: '1',
+      version: constants.TRANSACTION_VERSION.V3,
+      resourceBounds: {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        l1_gas: {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          max_amount: '100',
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          max_price_per_unit: '100',
+        },
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        l2_gas: {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          max_amount: '100',
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          max_price_per_unit: '100',
+        },
+      },
+      tip: '1',
+      paymasterData: ['1'],
+      accountDeploymentData: ['1'],
+      nonceDataAvailabilityMode: 'L1',
+      feeDataAvailabilityMode: 'L2',
+    },
+    {
+      nonce: '1',
+    },
+  ])('does not throw error if the data mode is correct', (request: unknown) => {
+    expect(() => assert(request, V3TransactionDetailStruct)).not.toThrow();
+  });
+
+  it('does not throw error if the tx detail is empty', () => {
+    expect(() => assert({}, V3TransactionDetailStruct)).not.toThrow();
+  });
+
+  it('throws error if the data mode is invalid', () => {
+    expect(() =>
+      assert(
+        {
+          nonce: 'ae',
+        },
+        ResourceBoundMappingStruct,
+      ),
+    ).toThrow(StructError);
+  });
+});
+
+describe('DeclareSignDetailsStruct', () => {
+  it.each([
+    {
+      classHash:
+        '0x025ec026985a3bf9d0cc1fe17326b245dfdc3ff89b8fde106542a3ea56c5a918',
+      senderAddress:
+        '0x025ec026985a3bf9d0cc1fe17326b245dfdc3ff89b8fde106542a3ea56c5a918',
+      chainId: constants.StarknetChainId.SN_SEPOLIA,
+      version: constants.TRANSACTION_VERSION.V2,
+      maxFee: '0',
+      nonce: '0',
+    },
+    {
+      classHash:
+        '0x025ec026985a3bf9d0cc1fe17326b245dfdc3ff89b8fde106542a3ea56c5a918',
+      senderAddress:
+        '0x025ec026985a3bf9d0cc1fe17326b245dfdc3ff89b8fde106542a3ea56c5a918',
+      chainId: constants.StarknetChainId.SN_SEPOLIA,
+      version: constants.TRANSACTION_VERSION.V3,
+      nonce: '0x1',
+      resourceBounds: {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        l1_gas: {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          max_amount: '100',
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          max_price_per_unit: '100',
+        },
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        l2_gas: {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          max_amount: '100',
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          max_price_per_unit: '100',
+        },
+      },
+    },
+  ])(
+    'does not throw error if the declare sign details is correct',
+    (request: unknown) => {
+      expect(() => assert(request, DeclareSignDetailsStruct)).not.toThrow();
+    },
+  );
+
+  it('throws error if the declare sign details is invalid', () => {
+    expect(() => assert({}, DeclareSignDetailsStruct)).toThrow(StructError);
   });
 });
 
