@@ -932,7 +932,7 @@ export async function getEstimatedFees(
   privateKey: string,
   accountPublicKey: string,
   transactionInvocations: Invocations,
-  transactionVersion: TransactionVersion,
+  transactionVersion: TransactionVersion = TRANSACTION_VERSION,
 ): Promise<EstimateFeeResponse> {
   let bulkTransactions = transactionInvocations;
   const includeDeployFee = await isAccountDeployed(network, address);
