@@ -262,6 +262,7 @@ export const executeTxn = async (
   senderAddress: string,
   privateKey: string | Uint8Array,
   txnInvocation: Call | Call[],
+  transactionVersion: TransactionVersion = TRANSACTION_VERSION,
   abis?: Abi[],
   invocationsDetails?: UniversalDetails,
   cairoVersion?: CairoVersion,
@@ -271,6 +272,7 @@ export const executeTxn = async (
     senderAddress,
     privateKey,
     cairoVersion,
+    transactionVersion,
   ).execute(txnInvocation, abis, {
     ...invocationsDetails,
     skipValidate: false,
@@ -340,6 +342,7 @@ export const deployAccount = async (
   contractCallData: RawCalldata,
   addressSalt: numUtils.BigNumberish,
   privateKey: string | Uint8Array,
+  transactionVersion: TransactionVersion = TRANSACTION_VERSION,
   cairoVersion?: CairoVersion,
   invocationsDetails?: UniversalDetails,
 ): Promise<DeployContractResponse> => {
@@ -351,91 +354,17 @@ export const deployAccount = async (
     constructorCalldata: contractCallData,
     addressSalt,
   };
-  console.log({
-    ...invocationsDetails,
-    skipValidate: false,
-    blockIdentifier: BlockIdentifierEnum.Latest,
-  });
-  console.log(deployAccountPayload);
   return getAccountInstance(
     network,
     contractAddress,
     privateKey,
     cairoVersion,
+    transactionVersion,
   ).deployAccount(deployAccountPayload, {
     ...invocationsDetails,
     skipValidate: false,
     blockIdentifier: BlockIdentifierEnum.Latest,
   });
-};
-
-export const createAccount = async (
-  network: Network,
-  publicKey: string,
-  privateKey: string,
-  cairoVersion: CairoVersion,
-  waitMode = false,
-) => {
-  const { address, callData } = getAccContractAddressAndCallData(publicKey);
-  // Deploy account will auto estimate the fee from the network if not provided
-  const deployResp = await deployAccount(
-    network,
-    address,
-    callData,
-    publicKey,
-    privateKey,
-    cairoVersion,
-  );
-
-  if (deployResp.contract_address && deployResp.transaction_hash) {
-    // TODO Use account state manager
-    // const userAccount: AccContract = {
-    //   addressSalt: publicKey,
-    //   publicKey,
-    //   address: deployResp.contract_address,
-    //   addressIndex: addressIndexInUsed,
-    //   derivationPath,
-    //   deployTxnHash: deployResp.transaction_hash,
-    //   chainId: network.chainId,
-    //   upgradeRequired: cairoVersion === CAIRO_VERSION_LEGACY,
-    //   deployRequired: false,
-    // };
-    // await upsertAccount(userAccount, wallet, saveMutex);
-    // TODO Use transaction state manager
-    // const txn: Transaction = {
-    //   txnHash: deployResp.transaction_hash,
-    //   txnType: VoyagerTransactionType.DEPLOY_ACCOUNT,
-    //   chainId: network.chainId,
-    //   senderAddress: deployResp.contract_address,
-    //   contractAddress: deployResp.contract_address,
-    //   contractFuncName: '',
-    //   contractCallData: [],
-    //   finalityStatus: TransactionStatus.RECEIVED,
-    //   executionStatus: TransactionStatus.RECEIVED,
-    //   status: '',
-    //   failureReason: '',
-    //   eventIds: [],
-    //   timestamp: Math.floor(Date.now() / 1000),
-    // };
-    // await upsertTransaction(txn, wallet, saveMutex);
-  }
-
-  logger.log(`createAccount:\ndeployResp: ${toJson(deployResp)}`);
-
-  if (waitMode) {
-    await waitForTransaction(
-      network,
-      deployResp.contract_address,
-      privateKey,
-      deployResp.transaction_hash,
-    );
-  }
-
-  return {
-    address: deployResp.contract_address,
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    transaction_hash: deployResp.transaction_hash,
-  };
 };
 
 export const estimateAccountDeployFee = async (

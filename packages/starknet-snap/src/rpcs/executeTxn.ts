@@ -7,8 +7,14 @@ import {
   text,
 } from '@metamask/snaps-sdk';
 import convert from 'ethereum-unit-converter';
-import type { Call, Calldata, Invocations } from 'starknet';
-import { TransactionStatus, TransactionType } from 'starknet';
+import type {
+  Call,
+  Calldata,
+  DeployContractResponse,
+  Invocations,
+  UniversalDetails,
+} from 'starknet';
+import { constants, TransactionStatus, TransactionType } from 'starknet';
 import type { Infer } from 'superstruct';
 import {
   object,
@@ -20,8 +26,12 @@ import {
   refine,
 } from 'superstruct';
 
+import { AccountStateManager } from '../state/account-state-manager';
 import { TransactionStateManager } from '../state/transaction-state-manager';
+import { FeeToken } from '../types/snapApi';
+import type { Network } from '../types/snapState';
 import { VoyagerTransactionType, type Transaction } from '../types/snapState';
+import type { TransactionVersion } from '../types/starknet';
 import {
   AddressStruct,
   BaseRequestStruct,
@@ -37,11 +47,94 @@ import {
   TRANSACTION_VERSION,
 } from '../utils/constants';
 import {
-  createAccount,
+  deployAccount,
   executeTxn as executeTxnUtil,
   getAccContractAddressAndCallData,
   getEstimatedFees,
+  waitForTransaction,
 } from '../utils/starknetUtils';
+
+/**
+ *
+ * @param deployResp
+ * @param network
+ */
+async function handleAccountDeployment(
+  deployResp: DeployContractResponse, // Adjust type as needed
+  network: Network,
+) {
+  const accountStateManager = new AccountStateManager(false);
+  const account = await accountStateManager.getAccount({
+    address: deployResp.contract_address,
+    chainId: network.chainId,
+  });
+  if (account === null) {
+    throw new Error('Account contract not found');
+  }
+  await accountStateManager.updateAccount({
+    ...account,
+    deployTxnHash: deployResp.transaction_hash,
+    upgradeRequired: false,
+    deployRequired: false,
+  });
+
+  const txn: Transaction = {
+    txnHash: deployResp.transaction_hash,
+    txnType: VoyagerTransactionType.DEPLOY_ACCOUNT,
+    chainId: network.chainId,
+    senderAddress: deployResp.contract_address,
+    contractAddress: deployResp.contract_address,
+    contractFuncName: '',
+    contractCallData: [],
+    finalityStatus: TransactionStatus.RECEIVED,
+    executionStatus: TransactionStatus.RECEIVED,
+    status: '',
+    failureReason: '',
+    eventIds: [],
+    timestamp: Math.floor(Date.now() / 1000),
+  };
+  const transactionStateManager = new TransactionStateManager();
+  await transactionStateManager.addTransaction(txn);
+}
+
+export const createAccount = async (
+  network: Network,
+  publicKey: string,
+  privateKey: string,
+  transactionVersion: TransactionVersion,
+  waitMode = false,
+) => {
+  const { address, callData } = getAccContractAddressAndCallData(publicKey);
+  // Deploy account will auto estimate the fee from the network if not provided
+  const deployResp = await deployAccount(
+    network,
+    address,
+    callData,
+    publicKey,
+    privateKey,
+    transactionVersion,
+    CAIRO_VERSION,
+  );
+
+  if (deployResp.contract_address && deployResp.transaction_hash) {
+    await handleAccountDeployment(deployResp, network);
+  }
+
+  if (waitMode) {
+    await waitForTransaction(
+      network,
+      deployResp.contract_address,
+      privateKey,
+      deployResp.transaction_hash,
+    );
+  }
+
+  return {
+    address: deployResp.contract_address,
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    transaction_hash: deployResp.transaction_hash,
+  };
+};
 
 export const ExecuteTxnRequestStruct = refine(
   assign(
@@ -175,7 +268,7 @@ export class ExecuteTxnRpc extends AccountRpcController<
         this.network,
         this.account.publicKey,
         this.account.privateKey,
-        CAIRO_VERSION,
+        details.version ?? TRANSACTION_VERSION,
         true,
       );
     }
@@ -185,12 +278,13 @@ export class ExecuteTxnRpc extends AccountRpcController<
       address,
       this.account.privateKey,
       calls,
+      details.version,
       abis,
       {
         nonce: accountDeployed ? undefined : 1,
         maxFee: estimateFeeResp.suggestedMaxFee,
-        version: details.version ?? TRANSACTION_VERSION,
-      },
+      } as UniversalDetails,
+      CAIRO_VERSION,
     );
 
     if (
@@ -286,15 +380,19 @@ export class ExecuteTxnRpc extends AccountRpcController<
         }),
       ),
     );
-    components.push(
-      row(
-        'Transaction Invocation',
-        text({
-          value: JSON.stringify(calls, null, 2),
-          markdown: false,
-        }),
-      ),
-    );
+    // Only show the first call in the dialog
+    for (const key of Object.keys(calls[0])) {
+      components.push(
+        row(
+          key,
+          text({
+            value: JSON.stringify(calls[0][key], null, 2),
+            markdown: false,
+          }),
+        ),
+      );
+    }
+
     if (abis && abis.length > 0) {
       components.push(
         row(
@@ -308,9 +406,13 @@ export class ExecuteTxnRpc extends AccountRpcController<
     }
 
     if (details?.maxFee) {
+      const feeToken =
+        details.version === constants.TRANSACTION_VERSION.V2
+          ? FeeToken.ETH
+          : FeeToken.STRK;
       components.push(
         row(
-          'Max Fee(ETH)',
+          `Max Fee(${feeToken})`,
           text({
             value: convert(details.maxFee, 'wei', 'ether'),
             markdown: false,

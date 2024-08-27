@@ -143,6 +143,7 @@ export async function executeTxn(params: ApiParamsWithKeyDeriver) {
       senderAddress,
       senderPrivateKey,
       requestParamsObj.txnInvocation,
+      TRANSACTION_VERSION,
       requestParamsObj.abis,
       { maxFee, nonce: nonceSendTransaction },
     );

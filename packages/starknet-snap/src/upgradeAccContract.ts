@@ -133,6 +133,7 @@ export async function upgradeAccContract(params: ApiParamsWithKeyDeriver) {
       contractAddress,
       privateKey,
       txnInvocation,
+      constants.TRANSACTION_VERSION.V2,
       undefined,
       {
         maxFee,

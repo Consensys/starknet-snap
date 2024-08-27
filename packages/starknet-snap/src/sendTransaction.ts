@@ -9,6 +9,7 @@ import type {
 } from './types/snapApi';
 import type { Transaction } from './types/snapState';
 import { TransactionStatus, VoyagerTransactionType } from './types/snapState';
+import { TRANSACTION_VERSION } from './utils/constants';
 import { logger } from './utils/logger';
 import { toJson } from './utils/serializer';
 import {
@@ -145,6 +146,7 @@ export async function sendTransaction(params: ApiParamsWithKeyDeriver) {
       senderAddress,
       senderPrivateKey,
       txnInvocation,
+      TRANSACTION_VERSION,
       undefined,
       {
         maxFee,

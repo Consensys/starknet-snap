@@ -2,7 +2,11 @@ import type { Invocations, UniversalDetails } from 'starknet';
 import { TransactionType, constants } from 'starknet';
 
 import invocationExamples from '../__tests__/fixture/invocationExamples.json'; // Assuming you have a similar fixture
-import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../utils/constants';
+import {
+  CAIRO_VERSION,
+  STARKNET_SEPOLIA_TESTNET_NETWORK,
+  TRANSACTION_VERSION,
+} from '../utils/constants';
 import * as starknetUtils from '../utils/starknetUtils';
 import { executeTxn as executeTxnUtil } from '../utils/starknetUtils';
 import {
@@ -11,7 +15,9 @@ import {
   prepareMockAccount,
 } from './__tests__/helper';
 import type { ExecuteTxnParams } from './executeTxn';
-import { executeTxn } from './executeTxn';
+import * as executeTxnMethods from './executeTxn';
+
+const { executeTxn } = executeTxnMethods;
 
 const prepareMockExecuteTxn = (
   transactionHash: string,
@@ -34,7 +40,7 @@ const prepareMockExecuteTxn = (
   const executeTxnUtilStub = jest.spyOn(starknetUtils, 'executeTxn');
   executeTxnUtilStub.mockResolvedValue(executeTxnRespMock);
 
-  const createAccountStub = jest.spyOn(starknetUtils, 'createAccount');
+  const createAccountStub = jest.spyOn(executeTxnMethods, 'createAccount');
   createAccountStub.mockResolvedValue({
     // eslint-disable-next-line @typescript-eslint/naming-convention
     transaction_hash: '0x123',
@@ -107,11 +113,13 @@ describe('ExecuteTxn', () => {
       account.address,
       account.privateKey,
       request.invocations.map((invocation) => invocation.payload),
+      TRANSACTION_VERSION,
       undefined,
       expect.objectContaining({
         maxFee: '1000000000000000',
         nonce: undefined,
       }),
+      CAIRO_VERSION,
     );
     expect(getEstimatedFeesStub).toHaveBeenCalled();
     expect(createAccountStub).not.toHaveBeenCalled();

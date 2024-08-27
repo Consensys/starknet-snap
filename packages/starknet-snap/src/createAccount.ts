@@ -8,7 +8,11 @@ import type {
 } from './types/snapApi';
 import type { AccContract, Transaction } from './types/snapState';
 import { VoyagerTransactionType, TransactionStatus } from './types/snapState';
-import { CAIRO_VERSION_LEGACY, CAIRO_VERSION } from './utils/constants';
+import {
+  CAIRO_VERSION_LEGACY,
+  CAIRO_VERSION,
+  TRANSACTION_VERSION,
+} from './utils/constants';
 import { logger } from './utils/logger';
 import { toJson } from './utils/serializer';
 import {
@@ -124,6 +128,7 @@ export async function createAccount(
         contractCallData,
         publicKey,
         privateKey,
+        TRANSACTION_VERSION,
         cairoVersion,
       );
 

@@ -52,7 +52,7 @@ export const addMissingPropertiesToToken = (
     ...token,
     amount: ethers.BigNumber.from(balance ? balance : '0x0'),
     spendableAmount: ethers.BigNumber.from(
-      balanceSpendable ? balanceSpendable : '0x0',
+      balanceSpendable ? balanceSpendable : balance ? balance : '0x0',
     ),
     usdPrice: usdPrice,
   };
