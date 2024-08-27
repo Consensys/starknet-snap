@@ -119,7 +119,7 @@ export const SendSummaryModalView = ({
     if (gasFees?.suggestedMaxFee) {
       const gasFeesBN = ethers.utils.parseUnits(
         gasFees.suggestedMaxFee,
-        gasFees.unit,
+        'wei',
       );
       let totalToCheck = gasFeesBN;
 

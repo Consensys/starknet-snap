@@ -22,6 +22,7 @@ import type {
   GetTransactionReceiptResponse,
   BigNumberish,
   ArraySignatureType,
+  InvocationsDetails,
 } from 'starknet';
 import {
   ec,
@@ -910,6 +911,17 @@ export const validateAndParseAddress = (
   return _validateAndParseAddressFn(address);
 };
 
+export function createAccountDeployPayload(address: string, publicKey: string) {
+  console.log('ciao');
+  const { callData } = getAccContractAddressAndCallData(publicKey);
+  return {
+    classHash: ACCOUNT_CLASS_HASH,
+    contractAddress: address,
+    constructorCalldata: callData,
+    addressSalt: publicKey,
+  };
+}
+
 /**
  * Estimate the fees required for a set of transactions, including optional account deployment costs.
  *
@@ -933,19 +945,16 @@ export async function getEstimatedFees(
   accountPublicKey: string,
   transactionInvocations: Invocations,
   transactionVersion: TransactionVersion = TRANSACTION_VERSION,
+  invocationsDetails?: InvocationsDetails,
 ): Promise<EstimateFeeResponse> {
-  let bulkTransactions = transactionInvocations;
-  const includeDeployFee = await isAccountDeployed(network, address);
-  if (!includeDeployFee) {
-    const { callData } = getAccContractAddressAndCallData(accountPublicKey);
-    const deployAccountpayload = {
-      classHash: ACCOUNT_CLASS_HASH,
-      contractAddress: address,
-      constructorCalldata: callData,
-      addressSalt: accountPublicKey,
-    };
+  const accountDeployed = await isAccountDeployed(network, address);
+  if (!accountDeployed) {
+    const deployAccountpayload = createAccountDeployPayload(
+      address,
+      accountPublicKey,
+    );
 
-    bulkTransactions.unshift({
+    transactionInvocations.unshift({
       type: StarknetTransactionType.DEPLOY_ACCOUNT,
       payload: deployAccountpayload,
     });
@@ -955,8 +964,9 @@ export async function getEstimatedFees(
     network,
     address,
     privateKey,
-    bulkTransactions,
+    transactionInvocations,
     transactionVersion,
+    invocationsDetails,
   );
 
   const estimateFeeResp = addFeesFromAllTransactions(estimateBulkFeeResp);
@@ -968,7 +978,7 @@ export async function getEstimatedFees(
       transactionVersion === constants.TRANSACTION_VERSION.V2
         ? FeeTokenUnit.ETH
         : FeeTokenUnit.STRK,
-    includeDeploy: includeDeployFee,
+    includeDeploy: !accountDeployed,
   };
 }
 
