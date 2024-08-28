@@ -962,6 +962,7 @@ export async function getEstimatedFees(
 ): Promise<EstimateFeeResponse> {
   const transactionVersion = (invocationsDetails?.version ??
     TRANSACTION_VERSION) as TransactionVersion;
+
   const accountDeployed = await isAccountDeployed(network, address);
   if (!accountDeployed) {
     const deployAccountpayload = createAccountDeployPayload(address, publicKey);
@@ -978,7 +979,10 @@ export async function getEstimatedFees(
     privateKey,
     transactionInvocations,
     transactionVersion,
-    invocationsDetails,
+    {
+      ...invocationsDetails,
+      version: transactionVersion, // To make sure the version is set
+    },
   );
 
   const estimateFeeResp = addFeesFromAllTransactions(estimateBulkFeeResp);

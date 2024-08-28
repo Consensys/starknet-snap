@@ -5,7 +5,10 @@ import { mockAccount, prepareMockAccount } from '../rpcs/__tests__/helper';
 import { FeeTokenUnit } from '../types/snapApi';
 import type { SnapState } from '../types/snapState';
 import type { TransactionVersion } from '../types/starknet';
-import { STARKNET_SEPOLIA_TESTNET_NETWORK } from './constants';
+import {
+  STARKNET_SEPOLIA_TESTNET_NETWORK,
+  TRANSACTION_VERSION,
+} from './constants';
 import * as starknetUtils from './starknetUtils';
 
 describe('getEstimatedFees', () => {
@@ -61,25 +64,30 @@ describe('getEstimatedFees', () => {
 
   it.each([
     {
-      version: constants.TRANSACTION_VERSION.V2,
+      txVersion: constants.TRANSACTION_VERSION.V2,
       expectedUnit: FeeTokenUnit.ETH,
+      expectedTxVersion: constants.TRANSACTION_VERSION.V2,
     },
     {
-      version: constants.TRANSACTION_VERSION.V3,
+      txVersion: constants.TRANSACTION_VERSION.V3,
       expectedUnit: FeeTokenUnit.STRK,
+      expectedTxVersion: constants.TRANSACTION_VERSION.V3,
     },
     {
-      version: undefined,
+      txVersion: undefined,
       expectedUnit: FeeTokenUnit.ETH,
+      expectedTxVersion: TRANSACTION_VERSION,
     },
   ])(
     'estimates fees correctly and assigns `$expectedUnit` to the unit of the result if the transaction version is $version',
     async ({
-      version,
+      txVersion,
       expectedUnit,
+      expectedTxVersion,
     }: {
-      version?: TransactionVersion;
+      txVersion?: TransactionVersion;
       expectedUnit: FeeTokenUnit;
+      expectedTxVersion: TransactionVersion;
     }) => {
       const network = STARKNET_SEPOLIA_TESTNET_NETWORK;
       const { account, invocations, estimateBulkFeeSpy } = await prepareSpy(
@@ -94,7 +102,7 @@ describe('getEstimatedFees', () => {
         account.publicKey,
         [call],
         {
-          version,
+          version: txVersion,
         },
       );
 
@@ -108,9 +116,9 @@ describe('getEstimatedFees', () => {
             type: TransactionType.INVOKE,
           },
         ],
-        version, // to verify if the version is passed to the estimateFeeBulk correctly
+        expectedTxVersion, // to verify if the version is passed to the estimateFeeBulk correctly
         {
-          version, // to verify if the version is passed to the estimateFeeBulk correctly
+          version: expectedTxVersion, // to verify if the version is passed to the estimateFeeBulk correctly
         },
       );
       expect(resp).toStrictEqual({
