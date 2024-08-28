@@ -7,10 +7,18 @@ import {
   text,
 } from '@metamask/snaps-sdk';
 import convert from 'ethereum-unit-converter';
-import type { Call, Calldata, Invocations } from 'starknet';
+import type { Calldata, Invocations } from 'starknet';
 import { TransactionStatus, TransactionType } from 'starknet';
 import type { Infer } from 'superstruct';
-import { object, string, assign, optional, any, refine } from 'superstruct';
+import {
+  object,
+  string,
+  assign,
+  optional,
+  any,
+  refine,
+  array,
+} from 'superstruct';
 
 import { TransactionStateManager } from '../state/transaction-state-manager';
 import { VoyagerTransactionType, type Transaction } from '../types/snapState';
@@ -18,20 +26,14 @@ import {
   AddressStruct,
   BaseRequestStruct,
   AccountRpcController,
-  AuthorizableStruct,
   confirmDialog,
-  InvocationsStruct,
   UniversalDetailsStruct,
+  CallDataStruct,
 } from '../utils';
-import {
-  ACCOUNT_CLASS_HASH,
-  CAIRO_VERSION,
-  TRANSACTION_VERSION,
-} from '../utils/constants';
+import { CAIRO_VERSION, TRANSACTION_VERSION } from '../utils/constants';
 import {
   createAccount,
   executeTxn as executeTxnUtil,
-  getAccContractAddressAndCallData,
   getEstimatedFees,
 } from '../utils/starknetUtils';
 
@@ -39,32 +41,16 @@ export const ExecuteTxnRequestStruct = refine(
   assign(
     object({
       address: AddressStruct,
-      invocations: InvocationsStruct,
+      calls: array(CallDataStruct),
       details: UniversalDetailsStruct,
       abis: optional(any()),
     }),
-    AuthorizableStruct,
     BaseRequestStruct,
   ),
   'ExecuteTxnRequestStruct',
   (value) => {
-    if (value.invocations.length === 0) {
-      return 'Invocations cannot be empty';
-    }
-    for (const invocation of value.invocations) {
-      if (invocation.type !== TransactionType.INVOKE) {
-        return `Invocations should be of type ${TransactionType.INVOKE} received ${invocation.type}`;
-      }
-      try {
-        const payload = (invocation as any).payload as Call;
-        const callData = payload.calldata as string[];
-        for (const data of callData) {
-          BigInt(data).toString(16);
-        }
-      } catch (error) {
-        // data is already send to chain, hence we should not throw error
-        return 'calldata must be an array of string that can derive to array of bigint';
-      }
+    if (value.calls.length === 0) {
+      return 'Calls cannot be empty';
     }
     return true;
   },
@@ -78,12 +64,6 @@ export const ExecuteTxnResponseStruct = object({
 export type ExecuteTxnParams = Infer<typeof ExecuteTxnRequestStruct> & Json;
 
 export type ExecuteTxnResponse = Infer<typeof ExecuteTxnResponseStruct>;
-
-const getInvokeCalls = (invocations: Invocations): Call[] => {
-  return invocations
-    .filter((invocation) => invocation.type === TransactionType.INVOKE)
-    .map((invocation: any) => invocation.payload as Call);
-};
 
 /**
  * The RPC handler to execute a transaction.
@@ -101,7 +81,7 @@ export class ExecuteTxnRpc extends AccountRpcController<
    *
    * @param params - The parameters of the request.
    * @param params.address - The address of the signer.
-   * @param params.invocations - The invocations to execute (only invocations of type TransactionType.INVOKE)
+   * @param params.calls - The invoke calls to execute
    * @param params.abis - The abis associated to invocations.
    * @param params.details - The detail associated to the call.
    * @returns The InvokeFunctionResponse as an `ExecuteTxnResponse`.
@@ -113,7 +93,14 @@ export class ExecuteTxnRpc extends AccountRpcController<
   protected async handleRequest(
     params: ExecuteTxnParams,
   ): Promise<ExecuteTxnResponse> {
-    const { address, invocations, abis, details, enableAuthorize } = params;
+    const { address, calls, abis, details } = params;
+
+    const invocations: Invocations = calls.map((call) => {
+      return {
+        type: TransactionType.INVOKE,
+        payload: call,
+      };
+    });
 
     const estimateFeeResp = await getEstimatedFees(
       this.network,
@@ -126,33 +113,9 @@ export class ExecuteTxnRpc extends AccountRpcController<
       },
     );
 
-    const calls = getInvokeCalls(invocations);
-
     const accountDeployed = !estimateFeeResp.includeDeploy;
 
-    if (!accountDeployed) {
-      const { callData } = getAccContractAddressAndCallData(
-        this.account.publicKey,
-      );
-
-      const deployAccountpayload = {
-        classHash: ACCOUNT_CLASS_HASH,
-        contractAddress: address,
-        constructorCalldata: callData,
-        addressSalt: this.account.publicKey,
-      };
-
-      invocations.unshift({
-        type: TransactionType.DEPLOY_ACCOUNT,
-        payload: deployAccountpayload,
-      });
-    }
-
     if (
-      // Get Starknet expected not to show the confirm dialog, therefore,
-      // `enableAuthorize` will set to false to bypass the confirmation
-      // TODO: enableAuthorize should set default to true
-      enableAuthorize &&
       !(await this.getExecuteTxnConsensus(
         address,
         calls,

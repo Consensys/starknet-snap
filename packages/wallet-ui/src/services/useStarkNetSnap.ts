@@ -33,6 +33,7 @@ import { getAssetPriceUSD } from './coinGecko';
 import semver from 'semver/preload';
 import { setActiveNetwork } from 'slices/networkSlice';
 import {
+  Call,
   constants,
   Invocations,
   TransactionType,
@@ -386,14 +387,21 @@ export const useStarkNetSnap = () => {
   ) {
     dispatch(enableLoadingWithMessage('Sending transaction...'));
     try {
-      const invocations: Invocations = [
+      // const invocations: Invocations = [
+      //   {
+      //     type: TransactionType.INVOKE,
+      //     payload: {
+      //       contractAddress,
+      //       entrypoint: contractFuncName,
+      //       calldata: contractCallData.split(',').map((ele) => ele.trim()),
+      //     },
+      //   },
+      // ];
+      const calls: Call[] = [
         {
-          type: TransactionType.INVOKE,
-          payload: {
-            contractAddress,
-            entrypoint: contractFuncName,
-            calldata: contractCallData.split(',').map((ele) => ele.trim()),
-          },
+          contractAddress,
+          entrypoint: contractFuncName,
+          calldata: contractCallData.split(',').map((ele) => ele.trim()),
         },
       ];
       const response = await provider.request({
@@ -401,14 +409,13 @@ export const useStarkNetSnap = () => {
         params: {
           snapId,
           request: {
-            method: 'starkNet_executeTxn',
+            method: 'starkNet_sendTransaction',
             params: {
               ...defaultParam,
-              invocations,
               address,
+              calls,
               details: { version: '0x2', maxFee } as UniversalDetails,
               chainId,
-              enableAuthorize: true,
             },
           },
         },
