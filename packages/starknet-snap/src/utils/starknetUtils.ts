@@ -49,6 +49,7 @@ import type { Network, SnapState, Transaction } from '../types/snapState';
 import { TransactionType } from '../types/snapState';
 import type {
   DeployAccountPayload,
+  RecordAccountDeploymentFn,
   TransactionResponse,
   TransactionStatuses,
   TransactionVersion,
@@ -375,6 +376,7 @@ export const createAccount = async (
   publicKey: string,
   privateKey: string,
   cairoVersion: CairoVersion,
+  recordAccountDeployment: RecordAccountDeploymentFn,
   waitMode = false,
 ) => {
   const { address, callData } = getAccContractAddressAndCallData(publicKey);
@@ -389,36 +391,7 @@ export const createAccount = async (
   );
 
   if (deployResp.contract_address && deployResp.transaction_hash) {
-    // TODO Use account state manager
-    // const userAccount: AccContract = {
-    //   addressSalt: publicKey,
-    //   publicKey,
-    //   address: deployResp.contract_address,
-    //   addressIndex: addressIndexInUsed,
-    //   derivationPath,
-    //   deployTxnHash: deployResp.transaction_hash,
-    //   chainId: network.chainId,
-    //   upgradeRequired: cairoVersion === CAIRO_VERSION_LEGACY,
-    //   deployRequired: false,
-    // };
-    // await upsertAccount(userAccount, wallet, saveMutex);
-    // TODO Use transaction state manager
-    // const txn: Transaction = {
-    //   txnHash: deployResp.transaction_hash,
-    //   txnType: VoyagerTransactionType.DEPLOY_ACCOUNT,
-    //   chainId: network.chainId,
-    //   senderAddress: deployResp.contract_address,
-    //   contractAddress: deployResp.contract_address,
-    //   contractFuncName: '',
-    //   contractCallData: [],
-    //   finalityStatus: TransactionStatus.RECEIVED,
-    //   executionStatus: TransactionStatus.RECEIVED,
-    //   status: '',
-    //   failureReason: '',
-    //   eventIds: [],
-    //   timestamp: Math.floor(Date.now() / 1000),
-    // };
-    // await upsertTransaction(txn, wallet, saveMutex);
+    await recordAccountDeployment(deployResp, network.chainId);
   }
 
   logger.log(`createAccount:\ndeployResp: ${toJson(deployResp)}`);

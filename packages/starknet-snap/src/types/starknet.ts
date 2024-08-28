@@ -1,4 +1,4 @@
-import type { GetTransactionResponse } from 'starknet';
+import type { DeployContractResponse, GetTransactionResponse } from 'starknet';
 import type { Infer } from 'superstruct';
 
 import type { TxVersionStruct } from '../utils';
@@ -25,3 +25,9 @@ export type DeployAccountPayload = {
   constructorCalldata: string[];
   addressSalt: string;
 };
+
+// TODO : Might be a better place
+export type RecordAccountDeploymentFn = (
+  deployResp: DeployContractResponse,
+  chainId: string,
+) => Promise<void>;

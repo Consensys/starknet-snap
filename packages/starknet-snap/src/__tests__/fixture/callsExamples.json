@@ -10,9 +10,9 @@
     "details": {
       "nonce": "0x1",
       "version": "0x2",
-      "maxFee": "0x64"
+      "maxFee": "1000000000000000"
     },
-    "hash": "0x234"
+    "hash": "0x042f5e546b2e55eb6b1b735f15fbfbd7621fc01ea7c96dcf87928ac27f054adb"
   },
   {
     "calls": [
@@ -25,8 +25,8 @@
     "details": {
       "nonce": "0x2",
       "version": "0x2",
-      "maxFee": "0x64"
+      "maxFee": "1000000000000000"
     },
-    "hash": "0x123"
+    "hash": "0x06385d46da9fbed4a5798298b17df069ac5f786e4c9f8f6b81c665540aea245a"
   }
 ]

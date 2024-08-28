@@ -1,6 +1,6 @@
 import { union } from '@metamask/snaps-sdk';
 import { HexStruct } from '@metamask/utils';
-import type { CompiledContract, Invocations } from 'starknet';
+import type { Call, CompiledContract, Invocations } from 'starknet';
 import { constants, TransactionType, validateAndParseAddress } from 'starknet';
 import type { Struct } from 'superstruct';
 import {
@@ -290,6 +290,35 @@ export const BaseInvocationStruct = object({
     TransactionType.INVOKE,
   ]),
 });
+
+export const CallsStruct = define<Call[] | Call>(
+  // We do use a custom `define` for this type to avoid having to use a `union` since error
+  // messages are a bit confusing.
+  //
+  // Doing manual validation allows us to use the "concrete" type of each supported acounts giving
+  // use a much nicer message from `superstruct`.
+  'CallsStruct',
+  (value: unknown[] | unknown) => {
+    const isArray = Array.isArray(value);
+    const calls = isArray ? (value as Call[]) : [value as Call];
+
+    // Check if the calls array is empty
+    if (calls.length === 0) {
+      return new Error('Calls cannot be empty');
+    }
+
+    for (const call of calls) {
+      // Validate the call structure
+      const [error] = validate(call, CallDataStruct); // Assuming CallStruct is defined elsewhere to validate each call
+
+      if (error !== undefined) {
+        return error;
+      }
+    }
+
+    return true;
+  },
+);
 
 export const InvocationsStruct = define<Invocations>(
   // We do use a custom `define` for this type to avoid having to use a `union` since error

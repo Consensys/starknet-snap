@@ -1,3 +1,7 @@
+import {
+  InvalidParamsError,
+  UserRejectedRequestError,
+} from '@metamask/snaps-sdk';
 import type { UniversalDetails, Call } from 'starknet';
 import { constants } from 'starknet';
 
@@ -14,8 +18,13 @@ import {
 import type { ExecuteTxnParams } from './executeTxn';
 import { executeTxn } from './executeTxn';
 
+jest.mock('../utils/snap');
+jest.mock('../utils/logger');
+
 const prepareMockExecuteTxn = async (
   transactionHash: string,
+  calls: Call[] | Call,
+  details: UniversalDetails,
   accountDeployed: boolean,
 ) => {
   const state = {
@@ -24,11 +33,17 @@ const prepareMockExecuteTxn = async (
     networks: [STARKNET_SEPOLIA_TESTNET_NETWORK],
     transactions: [],
   };
+  const { confirmDialogSpy } = prepareConfirmDialog();
 
   const account = await mockAccount(constants.StarknetChainId.SN_SEPOLIA);
-
   prepareMockAccount(account, state);
-  prepareConfirmDialog();
+
+  const request: ExecuteTxnParams = {
+    chainId: state.networks[0].chainId,
+    address: account.address,
+    calls,
+    details,
+  } as ExecuteTxnParams;
 
   const executeTxnRespMock = {
     // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -41,25 +56,29 @@ const prepareMockExecuteTxn = async (
     includeDeploy: !accountDeployed,
     unit: 'wei' as FeeTokenUnit,
   };
-  const getEstimatedFeesStub = jest.spyOn(starknetUtils, 'getEstimatedFees');
-  getEstimatedFeesStub.mockResolvedValue(getEstmatedFeesRepsMock);
+  const getEstimatedFeesSpy = jest.spyOn(starknetUtils, 'getEstimatedFees');
+  getEstimatedFeesSpy.mockResolvedValue(getEstmatedFeesRepsMock);
 
-  const executeTxnUtilStub = jest.spyOn(starknetUtils, 'executeTxn');
-  executeTxnUtilStub.mockResolvedValue(executeTxnRespMock);
+  const executeTxnUtilSpy = jest.spyOn(starknetUtils, 'executeTxn');
+  executeTxnUtilSpy.mockResolvedValue(executeTxnRespMock);
 
-  const createAccountStub = jest.spyOn(starknetUtils, 'createAccount');
-  createAccountStub.mockResolvedValue({
+  const createAccountSpy = jest.spyOn(starknetUtils, 'createAccount');
+  createAccountSpy.mockResolvedValue({
     // eslint-disable-next-line @typescript-eslint/naming-convention
-    transaction_hash: '0x123',
-    address: '0x234',
+    transaction_hash:
+      '0x07f901c023bac6c874691244c4c2332c6825b916fb68d240c807c6156db84fd3',
+    address: account.address,
   });
 
   return {
     network: state.networks[0],
     account,
-    createAccountStub,
+    request,
+    confirmDialogSpy,
+    createAccountSpy,
     executeTxnRespMock,
-    getEstimatedFeesStub,
+    executeTxnUtilSpy,
+    getEstimatedFeesSpy,
     getEstmatedFeesRepsMock,
   };
 };
@@ -67,36 +86,19 @@ const prepareMockExecuteTxn = async (
 describe('ExecuteTxn', () => {
   let callsExample: any;
 
-  const createRequestParam = (
-    chainId: constants.StarknetChainId,
-    address: string,
-    calls: Call[],
-    details: UniversalDetails,
-  ): ExecuteTxnParams => {
-    const request: ExecuteTxnParams = {
-      chainId,
-      address,
-      calls,
-      details,
-    } as ExecuteTxnParams;
-    return request;
-  };
-
   it('executes transaction correctly when account is deployed', async () => {
-    callsExample = callsExamples.shift();
+    callsExample = callsExamples[0];
     const {
       account,
-      network,
-      createAccountStub,
+      request,
+      createAccountSpy,
       executeTxnRespMock,
-      getEstimatedFeesStub,
-    } = await prepareMockExecuteTxn(callsExample.hash, true);
-
-    const request = createRequestParam(
-      network.chainId as any,
-      account.address,
+      getEstimatedFeesSpy,
+    } = await prepareMockExecuteTxn(
+      callsExample.hash,
       callsExample.calls,
       callsExample.details,
+      true,
     );
 
     const result = await executeTxn.execute(request);
@@ -113,50 +115,105 @@ describe('ExecuteTxn', () => {
         nonce: undefined,
       }),
     );
-    expect(getEstimatedFeesStub).toHaveBeenCalled();
-    expect(createAccountStub).not.toHaveBeenCalled();
+    expect(getEstimatedFeesSpy).toHaveBeenCalled();
+    expect(createAccountSpy).not.toHaveBeenCalled();
   });
 
   it('executes transaction correctly when account is not deployed', async () => {
-    callsExample = callsExamples.shift();
+    callsExample = callsExamples[1];
     const {
       account,
-      createAccountStub,
-      executeTxnRespMock,
-      getEstimatedFeesStub,
+      request,
       network,
-    } = await prepareMockExecuteTxn(callsExample.hash, false);
-
-    const request = createRequestParam(
-      network.chainId as any,
-      account.address,
+      createAccountSpy,
+      executeTxnRespMock,
+      getEstimatedFeesSpy,
+      executeTxnUtilSpy,
+    } = await prepareMockExecuteTxn(
+      callsExample.hash,
       callsExample.calls,
       callsExample.details,
+      false,
     );
+
     const result = await executeTxn.execute(request);
 
     expect(result).toStrictEqual(executeTxnRespMock);
-    expect(getEstimatedFeesStub).toHaveBeenCalled();
-    expect(createAccountStub).toHaveBeenCalledTimes(1);
+    expect(getEstimatedFeesSpy).toHaveBeenCalled();
+    expect(createAccountSpy).toHaveBeenCalledTimes(1);
+    expect(executeTxnUtilSpy).toHaveBeenCalledWith(
+      network,
+      account.address,
+      account.privateKey,
+      callsExample.calls,
+      undefined,
+      {
+        ...callsExample.details,
+        nonce: 1,
+      },
+    );
   });
 
-  it('throws error if invocations are empty', async () => {
-    const { account, network } = await prepareMockExecuteTxn(
+  it('throws UserRejectedRequestError if user cancels execution', async () => {
+    callsExample = callsExamples[1];
+    const { request, confirmDialogSpy } = await prepareMockExecuteTxn(
       callsExample.hash,
-      true,
-    );
-
-    const request = createRequestParam(
-      network.chainId as any,
-      account.address,
       callsExample.calls,
       callsExample.details,
+      true,
     );
+    confirmDialogSpy.mockResolvedValue(false);
 
+    await expect(executeTxn.execute(request)).rejects.toThrow(
+      UserRejectedRequestError,
+    );
+  });
+
+  it('throws error if calls are empty', async () => {
+    callsExample = Object.assign({}, callsExamples[1]);
+    const { request } = await prepareMockExecuteTxn(
+      callsExample.hash,
+      callsExample.calls,
+      callsExample.details,
+      true,
+    );
     request.calls = [];
 
     await expect(executeTxn.execute(request)).rejects.toThrow(
       'Calls cannot be empty',
     );
+  });
+
+  it.each([
+    {
+      case: 'executeTxnUtil response is undefined',
+      executeTxnUtilResp: {},
+    },
+    {
+      case: 'executeTxnUtil response.transaction_hash is undefined',
+      executeTxnUtilResp: {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        transaction_hash: undefined,
+      },
+    },
+  ])(
+    'throws `Error` when $case',
+    async ({ executeTxnUtilResp }: { executeTxnUtilResp: unknown }) => {
+      callsExample = callsExamples[1];
+      const { request, executeTxnUtilSpy } = await prepareMockExecuteTxn(
+        callsExample.hash,
+        callsExample.calls,
+        callsExample.details,
+        true,
+      );
+      executeTxnUtilSpy.mockResolvedValue(executeTxnUtilResp as any);
+      await expect(executeTxn.execute(request)).rejects.toThrow(Error);
+    },
+  );
+
+  it('throws `InvalidParamsError` when request parameter is not correct', async () => {
+    await expect(
+      executeTxn.execute({} as unknown as ExecuteTxnParams),
+    ).rejects.toThrow(InvalidParamsError);
   });
 });

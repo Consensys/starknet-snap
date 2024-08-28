@@ -1,26 +1,27 @@
 import type { Component, Json } from '@metamask/snaps-sdk';
 import {
   heading,
-  divider,
   row,
   UserRejectedRequestError,
   text,
+  divider,
 } from '@metamask/snaps-sdk';
 import convert from 'ethereum-unit-converter';
-import type { Calldata, Invocations } from 'starknet';
-import { TransactionStatus, TransactionType } from 'starknet';
+import type {
+  Call,
+  Calldata,
+  DeployContractResponse,
+  Invocations,
+  UniversalDetails,
+} from 'starknet';
+import { constants, TransactionStatus, TransactionType } from 'starknet';
 import type { Infer } from 'superstruct';
-import {
-  object,
-  string,
-  assign,
-  optional,
-  any,
-  refine,
-  array,
-} from 'superstruct';
+import { object, string, assign, optional, any } from 'superstruct';
 
+import { AccountStateManager } from '../state/account-state-manager';
+import { TokenStateManager } from '../state/token-state-manager';
 import { TransactionStateManager } from '../state/transaction-state-manager';
+import { FeeToken } from '../types/snapApi';
 import { VoyagerTransactionType, type Transaction } from '../types/snapState';
 import {
   AddressStruct,
@@ -28,7 +29,7 @@ import {
   AccountRpcController,
   confirmDialog,
   UniversalDetailsStruct,
-  CallDataStruct,
+  CallsStruct,
 } from '../utils';
 import { CAIRO_VERSION, TRANSACTION_VERSION } from '../utils/constants';
 import {
@@ -37,23 +38,14 @@ import {
   getEstimatedFees,
 } from '../utils/starknetUtils';
 
-export const ExecuteTxnRequestStruct = refine(
-  assign(
-    object({
-      address: AddressStruct,
-      calls: array(CallDataStruct),
-      details: UniversalDetailsStruct,
-      abis: optional(any()),
-    }),
-    BaseRequestStruct,
-  ),
-  'ExecuteTxnRequestStruct',
-  (value) => {
-    if (value.calls.length === 0) {
-      return 'Calls cannot be empty';
-    }
-    return true;
-  },
+export const ExecuteTxnRequestStruct = assign(
+  object({
+    address: AddressStruct,
+    calls: CallsStruct,
+    details: UniversalDetailsStruct,
+    abis: optional(any()),
+  }),
+  BaseRequestStruct,
 );
 
 export const ExecuteTxnResponseStruct = object({
@@ -64,6 +56,49 @@ export const ExecuteTxnResponseStruct = object({
 export type ExecuteTxnParams = Infer<typeof ExecuteTxnRequestStruct> & Json;
 
 export type ExecuteTxnResponse = Infer<typeof ExecuteTxnResponseStruct>;
+
+/**
+ *
+ * @param deployResp
+ * @param chainId
+ */
+async function recordAccountDeployment(
+  deployResp: DeployContractResponse, // Adjust type as needed
+  chainId: string,
+) {
+  const accountStateManager = new AccountStateManager(false);
+  const account = await accountStateManager.getAccount({
+    address: deployResp.contract_address,
+    chainId,
+  });
+  if (account === null) {
+    throw new Error('Account contract not found');
+  }
+  await accountStateManager.updateAccount({
+    ...account,
+    deployTxnHash: deployResp.transaction_hash,
+    upgradeRequired: false,
+    deployRequired: false,
+  });
+
+  const txn: Transaction = {
+    txnHash: deployResp.transaction_hash,
+    txnType: VoyagerTransactionType.DEPLOY_ACCOUNT,
+    chainId,
+    senderAddress: deployResp.contract_address,
+    contractAddress: deployResp.contract_address,
+    contractFuncName: '',
+    contractCallData: [],
+    finalityStatus: TransactionStatus.RECEIVED,
+    executionStatus: TransactionStatus.RECEIVED,
+    status: '',
+    failureReason: '',
+    eventIds: [],
+    timestamp: Math.floor(Date.now() / 1000),
+  };
+  const transactionStateManager = new TransactionStateManager();
+  await transactionStateManager.addTransaction(txn);
+}
 
 /**
  * The RPC handler to execute a transaction.
@@ -94,8 +129,9 @@ export class ExecuteTxnRpc extends AccountRpcController<
     params: ExecuteTxnParams,
   ): Promise<ExecuteTxnResponse> {
     const { address, calls, abis, details } = params;
-
-    const invocations: Invocations = calls.map((call) => {
+    const isArray = Array.isArray(calls);
+    const callsArray = isArray ? calls : [calls];
+    const invocations: Invocations = callsArray.map((call) => {
       return {
         type: TransactionType.INVOKE,
         payload: call,
@@ -118,9 +154,8 @@ export class ExecuteTxnRpc extends AccountRpcController<
     if (
       !(await this.getExecuteTxnConsensus(
         address,
-        calls,
-        abis,
-        details,
+        callsArray,
+        details as UniversalDetails,
         accountDeployed,
       ))
     ) {
@@ -133,6 +168,7 @@ export class ExecuteTxnRpc extends AccountRpcController<
         this.account.publicKey,
         this.account.privateKey,
         CAIRO_VERSION,
+        recordAccountDeployment,
         true,
       );
     }
@@ -144,9 +180,10 @@ export class ExecuteTxnRpc extends AccountRpcController<
       calls,
       abis,
       {
+        ...details,
         nonce: accountDeployed ? undefined : 1,
         maxFee: estimateFeeResp.suggestedMaxFee,
-      },
+      } as unknown as UniversalDetails,
     );
 
     if (
@@ -156,6 +193,7 @@ export class ExecuteTxnRpc extends AccountRpcController<
       throw new Error('Unable to execute transaction');
     }
 
+    // TODO should write all calls in state not just first one
     const callData = calls[0].calldata as Calldata;
 
     const txn: Transaction = {
@@ -184,55 +222,17 @@ export class ExecuteTxnRpc extends AccountRpcController<
 
   protected async getExecuteTxnConsensus(
     address: string,
-    calls,
-    abis,
-    details,
+    calls: Call[],
+    details: UniversalDetails,
     accountDeployed: boolean,
   ) {
     const components: Component[] = [];
-    let signHeadingStr = `Do you want to sign this transaction ?`;
-    if (!accountDeployed) {
-      components.push(heading(`The account will be deployed`));
-      components.push(
-        row(
-          'Address',
-          text({
-            value: address,
-            markdown: false,
-          }),
-        ),
-      );
-      components.push(
-        row(
-          'Public Key',
-          text({
-            value: this.account.publicKey,
-            markdown: false,
-          }),
-        ),
-      );
-      components.push(
-        row(
-          'Address Index',
-          text({
-            value: this.account.addressIndex.toString(),
-            markdown: false,
-          }),
-        ),
-      );
-      components.push(divider());
-      signHeadingStr = `Do you want to sign these transactions ?`;
-    }
-    components.push(heading(signHeadingStr));
-    components.push(
-      row(
-        'Network',
-        text({
-          value: this.network.name,
-          markdown: false,
-        }),
-      ),
-    );
+    const feeToken: FeeToken =
+      details.version === constants.TRANSACTION_VERSION.V3
+        ? FeeToken.STRK
+        : FeeToken.ETH;
+
+    // Display signer address
     components.push(
       row(
         'Signer Address',
@@ -242,31 +242,19 @@ export class ExecuteTxnRpc extends AccountRpcController<
         }),
       ),
     );
-    components.push(
-      row(
-        'Transaction Invocation',
-        text({
-          value: JSON.stringify(calls, null, 2),
-          markdown: false,
-        }),
-      ),
-    );
-    if (abis && abis.length > 0) {
-      components.push(
-        row(
-          'Abis',
-          text({
-            value: JSON.stringify(abis, null, 2),
-            markdown: false,
-          }),
-        ),
-      );
+
+    // Display a message if the account will be deployed
+    if (!accountDeployed) {
+      components.push(heading(`The account will be deployed`));
+      // Divider after account deployment info
+      components.push(divider());
     }
 
+    // Display estimated gas fee if available
     if (details?.maxFee) {
       components.push(
         row(
-          'Max Fee(ETH)',
+          `Estimated Gas Fee (${feeToken})`,
           text({
             value: convert(details.maxFee, 'wei', 'ether'),
             markdown: false,
@@ -274,6 +262,102 @@ export class ExecuteTxnRpc extends AccountRpcController<
         ),
       );
     }
+
+    // Display network name
+    components.push(
+      row(
+        'Network',
+        text({
+          value: this.network.name,
+          markdown: false,
+        }),
+      ),
+    );
+
+    // Divider before calls information
+    components.push(divider());
+
+    // Iterate over each call in the calls array
+    for (const call of calls) {
+      const { contractAddress, calldata, entrypoint } = call;
+      const contractFuncName = entrypoint;
+
+      // Display contract address
+      components.push(
+        row(
+          'Contract',
+          text({
+            value: contractAddress,
+            markdown: false,
+          }),
+        ),
+      );
+
+      // Display call data
+      components.push(
+        row(
+          'Call Data',
+          text({
+            value: JSON.stringify(calldata, null, 2),
+            markdown: false,
+          }),
+        ),
+      );
+
+      // If the contract is an ERC20 token and the function is 'transfer', display sender, recipient, and amount
+      const tokenStateManager = new TokenStateManager();
+
+      const token = await tokenStateManager.getToken({
+        address: contractAddress,
+        chainId: this.network.chainId,
+      });
+      if (token && contractFuncName === 'transfer' && calldata) {
+        try {
+          const senderAddress = address;
+          const recipientAddress = calldata[0]; // Assuming the first element in calldata is the recipient
+          let amount = '';
+
+          if ([3, 6, 9, 12, 15, 18].includes(token.decimals)) {
+            amount = convert(calldata[1], -1 * token.decimals, 'ether');
+          } else {
+            amount = (
+              Number(calldata[1]) * Math.pow(10, -1 * token.decimals)
+            ).toFixed(token.decimals);
+          }
+
+          components.push(
+            row(
+              'Sender Address',
+              text({
+                value: senderAddress,
+                markdown: false,
+              }),
+            ),
+            row(
+              'Recipient Address',
+              text({
+                value: recipientAddress,
+                markdown: false,
+              }),
+            ),
+            row(
+              'Amount',
+              text({
+                value: amount,
+                markdown: false,
+              }),
+            ),
+          );
+        } catch (error) {
+          console.error('Error processing ERC20 transfer:', error);
+        }
+      }
+
+      // Divider after each call
+      components.push(divider());
+    }
+
+    // Display details such as Nonce and Version if available
     if (details?.nonce) {
       components.push(
         row(
@@ -296,6 +380,8 @@ export class ExecuteTxnRpc extends AccountRpcController<
         ),
       );
     }
+
+    // Display the dialog to the user
     return await confirmDialog(components);
   }
 }
