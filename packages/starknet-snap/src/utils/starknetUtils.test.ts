@@ -4,8 +4,8 @@ import { constants, TransactionType } from 'starknet';
 import { mockAccount, prepareMockAccount } from '../rpcs/__tests__/helper';
 import { FeeTokenUnit } from '../types/snapApi';
 import type { SnapState } from '../types/snapState';
+import type { TransactionVersion } from '../types/starknet';
 import {
-  ACCOUNT_CLASS_HASH,
   STARKNET_SEPOLIA_TESTNET_NETWORK,
   TRANSACTION_VERSION,
 } from './constants';
@@ -50,7 +50,7 @@ describe('getEstimatedFees', () => {
       suggestedMaxFee,
       // eslint-disable-next-line @typescript-eslint/naming-convention
       gas_price: BigInt('0x0'),
-    } as EstimateFee;
+    } as unknown as EstimateFee;
     const estimateBulkFeeSpy = jest.spyOn(starknetUtils, 'estimateFeeBulk');
     estimateBulkFeeSpy.mockResolvedValue([estimateFeeResp]);
 
@@ -62,11 +62,29 @@ describe('getEstimatedFees', () => {
     };
   };
 
-  it.each([constants.TRANSACTION_VERSION.V2, constants.TRANSACTION_VERSION.V3])(
-    'estimate fees for transaction version %s',
-    async (transactionVersion) => {
-      const deployed = true;
-      const { account, invocations } = await prepareSpy(deployed);
+  it.each([
+    {
+      version: constants.TRANSACTION_VERSION.V2,
+      expectedUnit: FeeTokenUnit.ETH,
+    },
+    {
+      version: constants.TRANSACTION_VERSION.V3,
+      expectedUnit: FeeTokenUnit.STRK,
+    },
+    {
+      version: undefined,
+      expectedUnit: FeeTokenUnit.ETH,
+    },
+  ])(
+    'estimates fees correctly and assigns `$expectedUnit` to the unit of the result if the transaction version is $version',
+    async ({
+      version,
+      expectedUnit,
+    }: {
+      version?: TransactionVersion;
+      expectedUnit: FeeTokenUnit;
+    }) => {
+      const { account, invocations } = await prepareSpy(true);
 
       const resp = await starknetUtils.getEstimatedFees(
         STARKNET_SEPOLIA_TESTNET_NETWORK,
@@ -75,26 +93,22 @@ describe('getEstimatedFees', () => {
         account.publicKey,
         invocations,
         {
-          version: transactionVersion,
+          version,
         },
       );
 
       expect(resp).toStrictEqual({
         suggestedMaxFee: suggestedMaxFee.toString(10),
         overallFee: overallFee.toString(10),
-        unit:
-          transactionVersion === constants.TRANSACTION_VERSION.V2
-            ? FeeTokenUnit.ETH
-            : FeeTokenUnit.STRK,
-        includeDeploy: !deployed,
+        unit: expectedUnit,
+        includeDeploy: false,
       });
     },
   );
 
-  it('estimate fees including deployment if the account is not deployed', async () => {
-    const deployed = false;
+  it('estimates fees with account deploy payload if the account is not deployed', async () => {
     const { account, estimateBulkFeeSpy, invocations } = await prepareSpy(
-      deployed,
+      false,
     );
     const deployAccountpayload = starknetUtils.createAccountDeployPayload(
       account.address,
@@ -119,16 +133,11 @@ describe('getEstimatedFees', () => {
       account.privateKey,
       [
         {
-          payload: {
-            addressSalt: account.addressSalt,
-            classHash: ACCOUNT_CLASS_HASH,
-            constructorCalldata: deployAccountpayload.constructorCalldata,
-            contractAddress: deployAccountpayload.contractAddress,
-          },
+          payload: deployAccountpayload,
           type: TransactionType.DEPLOY_ACCOUNT,
         },
         {
-          payload: (invocations[0] as any).payload,
+          payload: (call as any).payload,
           type: TransactionType.INVOKE,
         },
       ],
@@ -141,27 +150,7 @@ describe('getEstimatedFees', () => {
       suggestedMaxFee: suggestedMaxFee.toString(10),
       overallFee: overallFee.toString(10),
       unit: FeeTokenUnit.ETH,
-      includeDeploy: !deployed,
-    });
-  });
-
-  it('estimate fees without transaction version', async () => {
-    const deployed = true;
-    const { account, invocations } = await prepareSpy(true);
-
-    const resp = await starknetUtils.getEstimatedFees(
-      STARKNET_SEPOLIA_TESTNET_NETWORK,
-      account.address,
-      account.privateKey,
-      account.publicKey,
-      invocations,
-    );
-
-    expect(resp).toStrictEqual({
-      suggestedMaxFee: suggestedMaxFee.toString(10),
-      overallFee: overallFee.toString(10),
-      unit: FeeTokenUnit.ETH,
-      includeDeploy: !deployed,
+      includeDeploy: true,
     });
   });
 });
