@@ -117,10 +117,7 @@ export const SendSummaryModalView = ({
 
   useEffect(() => {
     if (gasFees?.suggestedMaxFee) {
-      const gasFeesBN = ethers.utils.parseUnits(
-        gasFees.suggestedMaxFee,
-        'wei',
-      );
+      const gasFeesBN = ethers.utils.parseUnits(gasFees.suggestedMaxFee, 'wei');
       let totalToCheck = gasFeesBN;
 
       const gasFeesStr = ethers.utils.formatUnits(gasFeesBN, feeToken.decimals);
