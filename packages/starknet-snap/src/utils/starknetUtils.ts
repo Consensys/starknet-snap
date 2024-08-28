@@ -48,6 +48,7 @@ import {
 import type { Network, SnapState, Transaction } from '../types/snapState';
 import { TransactionType } from '../types/snapState';
 import type {
+  DeployAccountPayload,
   TransactionResponse,
   TransactionStatuses,
   TransactionVersion,
@@ -82,7 +83,6 @@ import {
   getTransactionsFromVoyagerUrl,
   getVoyagerCredentials,
 } from './snapUtils';
-import type { DeployAccountPayload } from './superstruct';
 
 export const getData = async (
   url = '',
