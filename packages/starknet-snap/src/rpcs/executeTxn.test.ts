@@ -1,7 +1,8 @@
-import type { Invocations, UniversalDetails } from 'starknet';
-import { TransactionType, constants } from 'starknet';
+import type { Invocations, UniversalDetails, TransactionType } from 'starknet';
+import { constants } from 'starknet';
 
 import invocationExamples from '../__tests__/fixture/invocationExamples.json'; // Assuming you have a similar fixture
+import type { FeeTokenUnit } from '../types/snapApi';
 import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../utils/constants';
 import * as starknetUtils from '../utils/starknetUtils';
 import { executeTxn as executeTxnUtil } from '../utils/starknetUtils';
@@ -12,7 +13,6 @@ import {
 } from './__tests__/helper';
 import type { ExecuteTxnParams } from './executeTxn';
 import { executeTxn } from './executeTxn';
-import { FeeTokenUnit } from '../types/snapApi';
 
 const prepareMockExecuteTxn = (
   transactionHash: string,

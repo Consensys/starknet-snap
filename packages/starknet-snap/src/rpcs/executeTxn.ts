@@ -10,15 +10,7 @@ import convert from 'ethereum-unit-converter';
 import type { Call, Calldata, Invocations } from 'starknet';
 import { TransactionStatus, TransactionType } from 'starknet';
 import type { Infer } from 'superstruct';
-import {
-  object,
-  string,
-  assign,
-  optional,
-  array,
-  any,
-  refine,
-} from 'superstruct';
+import { object, string, assign, optional, any, refine } from 'superstruct';
 
 import { TransactionStateManager } from '../state/transaction-state-manager';
 import { VoyagerTransactionType, type Transaction } from '../types/snapState';
@@ -59,7 +51,7 @@ export const ExecuteTxnRequestStruct = refine(
     if (value.invocations.length === 0) {
       return 'Invocations cannot be empty';
     }
-    for (const invocation of value.invocations as Invocations) {
+    for (const invocation of value.invocations) {
       if (invocation.type !== TransactionType.INVOKE) {
         return `Invocations should be of type ${TransactionType.INVOKE} received ${invocation.type}`;
       }
@@ -129,10 +121,12 @@ export class ExecuteTxnRpc extends AccountRpcController<
       this.account.privateKey,
       this.account.publicKey,
       invocations as unknown as Invocations,
-      details?.version ?? TRANSACTION_VERSION,
+      {
+        version: details?.version ?? TRANSACTION_VERSION,
+      },
     );
 
-    const calls = getInvokeCalls(invocations as Invocations);
+    const calls = getInvokeCalls(invocations);
 
     const accountDeployed = !estimateFeeResp.includeDeploy;
 

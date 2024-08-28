@@ -22,7 +22,6 @@ import type {
   GetTransactionReceiptResponse,
   BigNumberish,
   ArraySignatureType,
-  InvocationsDetails,
 } from 'starknet';
 import {
   ec,
@@ -49,6 +48,7 @@ import {
 import type { Network, SnapState, Transaction } from '../types/snapState';
 import { TransactionType } from '../types/snapState';
 import type {
+  DeployAccountPayload,
   TransactionResponse,
   TransactionStatuses,
   TransactionVersion,
@@ -986,8 +986,22 @@ export const validateAndParseAddress = (
   return _validateAndParseAddressFn(address);
 };
 
-export function createAccountDeployPayload(address: string, publicKey: string) {
-  console.log('ciao');
+/**
+ * Creates the payload required to deploy a new account on StarkNet.
+ *
+ * This function generates the necessary parameters for deploying an account, including the
+ * class hash, contract address, constructor calldata, and address salt. The payload returned
+ * by this function can be used in the deployment transaction to initialize the account.
+ *
+ * @param {string} address - The address of the account to be deployed.
+ * @param {string} publicKey - The public key associated with the account.
+ * @returns {DeployAccountPayload} - The payload object containing the class hash, contract address,
+ *                                   constructor calldata, and address salt required for deployment.
+ */
+export function createAccountDeployPayload(
+  address: string,
+  publicKey: string,
+): DeployAccountPayload {
   const { callData } = getAccContractAddressAndCallData(publicKey);
   return {
     classHash: ACCOUNT_CLASS_HASH,
@@ -1007,7 +1021,7 @@ export function createAccountDeployPayload(address: string, publicKey: string) {
  * @param {Network} network - The StarkNet network to interact with.
  * @param {string} address - The account address involved in the transactions.
  * @param {string} privateKey - The private key for signing the transactions.
- * @param {string} accountPublicKey - The public key of the account.
+ * @param {string} publicKey - The public key of the account.
  * @param {Invocations} transactionInvocations - The set of transactions to be executed.
  * @param {constants.TRANSACTION_VERSION} transactionVersion - The version of the transaction, valid values are '0x2' or '0x3'.
  * @returns {Promise<EstimateFeeResponse>} - A promise that resolves to the estimated fee response,
@@ -1017,17 +1031,15 @@ export async function getEstimatedFees(
   network: Network,
   address: string,
   privateKey: string,
-  accountPublicKey: string,
+  publicKey: string,
   transactionInvocations: Invocations,
-  transactionVersion: TransactionVersion = TRANSACTION_VERSION,
-  invocationsDetails?: InvocationsDetails,
+  invocationsDetails: UniversalDetails = {},
 ): Promise<EstimateFeeResponse> {
+  const transactionVersion = (invocationsDetails?.version ??
+    TRANSACTION_VERSION) as TransactionVersion;
   const accountDeployed = await isAccountDeployed(network, address);
   if (!accountDeployed) {
-    const deployAccountpayload = createAccountDeployPayload(
-      address,
-      accountPublicKey,
-    );
+    const deployAccountpayload = createAccountDeployPayload(address, publicKey);
 
     transactionInvocations.unshift({
       type: StarknetTransactionType.DEPLOY_ACCOUNT,

@@ -56,6 +56,7 @@ const prepareMockEstimateFee = ({
 
   return { estimateBulkFeeRespMock, invocations, request, getEstimatedFeesSpy };
 };
+
 describe('estimateFee', () => {
   const state = {
     accContracts: [],
@@ -67,7 +68,6 @@ describe('estimateFee', () => {
   it('estimates fee correctly', async () => {
     const chainId = constants.StarknetChainId.SN_SEPOLIA;
     const account = await mockAccount(chainId);
-
     prepareMockAccount(account, state);
     const { request, getEstimatedFeesSpy, estimateBulkFeeRespMock } =
       prepareMockEstimateFee({
@@ -85,9 +85,10 @@ describe('estimateFee', () => {
       account.privateKey,
       account.publicKey,
       request.invocations,
-      constants.TRANSACTION_VERSION.V2,
+      {
+        version: constants.TRANSACTION_VERSION.V2,
+      },
     );
-
     expect(result).toStrictEqual(estimateBulkFeeRespMock);
   });
 
