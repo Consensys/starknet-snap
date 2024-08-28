@@ -387,16 +387,6 @@ export const useStarkNetSnap = () => {
   ) {
     dispatch(enableLoadingWithMessage('Sending transaction...'));
     try {
-      // const invocations: Invocations = [
-      //   {
-      //     type: TransactionType.INVOKE,
-      //     payload: {
-      //       contractAddress,
-      //       entrypoint: contractFuncName,
-      //       calldata: contractCallData.split(',').map((ele) => ele.trim()),
-      //     },
-      //   },
-      // ];
       const calls: Call[] = [
         {
           contractAddress,

@@ -264,76 +264,22 @@ export const executeTxn = async (
   senderAddress: string,
   privateKey: string | Uint8Array,
   txnInvocation: Call | Call[],
-  abis?: Abi[],
+  transactionVersion: TransactionVersion = TRANSACTION_VERSION,
   invocationsDetails?: UniversalDetails,
   cairoVersion?: CairoVersion,
+  abis?: Abi[],
 ): Promise<InvokeFunctionResponse> => {
   return getAccountInstance(
     network,
     senderAddress,
     privateKey,
     cairoVersion,
+    transactionVersion,
   ).execute(txnInvocation, abis, {
     ...invocationsDetails,
     skipValidate: false,
     blockIdentifier: BlockIdentifierEnum.Latest,
   });
-};
-
-/**
- * calculate contract address by publicKey
- *
- * @param publicKey - address's publicKey.
- * @returns address and calldata.
- */
-export const getAccContractAddressAndCallData = (publicKey) => {
-  const callData = CallData.compile({
-    signer: publicKey,
-    guardian: '0',
-  });
-
-  let address = hash.calculateContractAddressFromHash(
-    publicKey,
-    ACCOUNT_CLASS_HASH,
-    callData,
-    0,
-  );
-
-  if (address.length < 66) {
-    address = address.replace('0x', `0x${'0'.repeat(66 - address.length)}`);
-  }
-  return {
-    address,
-    callData,
-  };
-};
-
-/**
- * calculate contract address by publicKey
- *
- * @param publicKey - address's publicKey.
- * @returns address and calldata.
- */
-export const getAccContractAddressAndCallDataLegacy = (publicKey) => {
-  // [TODO]: Check why use ACCOUNT_CLASS_HASH_LEGACY and PROXY_CONTRACT_HASH ?
-  const callData = CallData.compile({
-    implementation: ACCOUNT_CLASS_HASH_LEGACY,
-    selector: hash.getSelectorFromName('initialize'),
-    calldata: CallData.compile({ signer: publicKey, guardian: '0' }),
-  });
-  let address = hash.calculateContractAddressFromHash(
-    publicKey,
-    PROXY_CONTRACT_HASH,
-    callData,
-    0,
-  );
-  if (address.length < 66) {
-    address = address.replace('0x', `0x${'0'.repeat(66 - address.length)}`);
-  }
-  return {
-    address,
-    callData,
-  };
 };
 
 export const deployAccount = async (
@@ -369,47 +315,6 @@ export const deployAccount = async (
     skipValidate: false,
     blockIdentifier: BlockIdentifierEnum.Latest,
   });
-};
-
-export const createAccount = async (
-  network: Network,
-  publicKey: string,
-  privateKey: string,
-  cairoVersion: CairoVersion,
-  recordAccountDeployment: RecordAccountDeploymentFn,
-  waitMode = false,
-) => {
-  const { address, callData } = getAccContractAddressAndCallData(publicKey);
-  // Deploy account will auto estimate the fee from the network if not provided
-  const deployResp = await deployAccount(
-    network,
-    address,
-    callData,
-    publicKey,
-    privateKey,
-    cairoVersion,
-  );
-
-  if (deployResp.contract_address && deployResp.transaction_hash) {
-    await recordAccountDeployment(deployResp, network.chainId);
-  }
-
-  logger.log(`createAccount:\ndeployResp: ${toJson(deployResp)}`);
-
-  if (waitMode) {
-    await waitForTransaction(
-      network,
-      deployResp.contract_address,
-      privateKey,
-      deployResp.transaction_hash,
-    );
-  }
-
-  return {
-    address: deployResp.contract_address,
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    transaction_hash: deployResp.transaction_hash,
-  };
 };
 
 export const estimateAccountDeployFee = async (
@@ -785,6 +690,121 @@ export const getNextAddressIndex = (
     )}`,
   );
   return uninitializedAccount?.addressIndex ?? accounts.length;
+};
+
+/**
+ * calculate contract address by publicKey
+ *
+ * @param publicKey - address's publicKey.
+ * @returns address and calldata.
+ */
+export const getAccContractAddressAndCallData = (publicKey) => {
+  const callData = CallData.compile({
+    signer: publicKey,
+    guardian: '0',
+  });
+
+  let address = hash.calculateContractAddressFromHash(
+    publicKey,
+    ACCOUNT_CLASS_HASH,
+    callData,
+    0,
+  );
+
+  if (address.length < 66) {
+    address = address.replace('0x', `0x${'0'.repeat(66 - address.length)}`);
+  }
+  return {
+    address,
+    callData,
+  };
+};
+
+/**
+ * calculate contract address by publicKey
+ *
+ * @param publicKey - address's publicKey.
+ * @returns address and calldata.
+ */
+export const getAccContractAddressAndCallDataLegacy = (publicKey) => {
+  // [TODO]: Check why use ACCOUNT_CLASS_HASH_LEGACY and PROXY_CONTRACT_HASH ?
+  const callData = CallData.compile({
+    implementation: ACCOUNT_CLASS_HASH_LEGACY,
+    selector: hash.getSelectorFromName('initialize'),
+    calldata: CallData.compile({ signer: publicKey, guardian: '0' }),
+  });
+  let address = hash.calculateContractAddressFromHash(
+    publicKey,
+    PROXY_CONTRACT_HASH,
+    callData,
+    0,
+  );
+  if (address.length < 66) {
+    address = address.replace('0x', `0x${'0'.repeat(66 - address.length)}`);
+  }
+  return {
+    address,
+    callData,
+  };
+};
+
+/**
+ * Creates a new account on the specified network and records deployment information to the state.
+ *
+ * This function generates a new account address and call data based on the provided public key,
+ * deploys the account on the network, and records the deployment details such as contract address
+ * and transaction hash into the state using the provided `recordAccountDeployment` function.
+ *
+ * Optionally, if `waitMode` is enabled, the function will wait for the transaction to be confirmed
+ * before returning the account address and transaction hash.
+ *
+ * @param network - The network on which to deploy the account.
+ * @param publicKey - The public key used to derive the account address.
+ * @param privateKey - The private key used to sign the deployment transaction.
+ * @param cairoVersion - The version of Cairo to use for the account deployment.
+ * @param recordAccountDeployment - A function to record deployment information into the state.
+ * @param waitMode - If true, waits for the transaction to be confirmed before returning. Defaults to false.
+ * @returns An object containing the deployed account address and the transaction hash.
+ */
+export const createAccount = async (
+  network: Network,
+  publicKey: string,
+  privateKey: string,
+  cairoVersion: CairoVersion,
+  recordAccountDeployment: RecordAccountDeploymentFn,
+  waitMode = false,
+) => {
+  const { address, callData } = getAccContractAddressAndCallData(publicKey);
+  // Deploy account will auto estimate the fee from the network if not provided
+  const deployResp = await deployAccount(
+    network,
+    address,
+    callData,
+    publicKey,
+    privateKey,
+    cairoVersion,
+  );
+
+  if (deployResp.contract_address && deployResp.transaction_hash) {
+    await recordAccountDeployment(deployResp, network.chainId);
+  }
+
+  logger.log(`createAccount:\ndeployResp: ${toJson(deployResp)}`);
+
+  if (waitMode) {
+    await waitForTransaction(
+      network,
+      deployResp.contract_address,
+      privateKey,
+      deployResp.transaction_hash,
+    );
+  }
+
+  return {
+    address: deployResp.contract_address,
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    transaction_hash: deployResp.transaction_hash,
+  };
 };
 
 /**

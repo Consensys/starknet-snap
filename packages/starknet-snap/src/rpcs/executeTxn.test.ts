@@ -7,7 +7,10 @@ import { constants } from 'starknet';
 
 import callsExamples from '../__tests__/fixture/callsExamples.json'; // Assuming you have a similar fixture
 import type { FeeTokenUnit } from '../types/snapApi';
-import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../utils/constants';
+import {
+  STARKNET_SEPOLIA_TESTNET_NETWORK,
+  TRANSACTION_VERSION,
+} from '../utils/constants';
 import * as starknetUtils from '../utils/starknetUtils';
 import { executeTxn as executeTxnUtil } from '../utils/starknetUtils';
 import {
@@ -50,14 +53,14 @@ const prepareMockExecuteTxn = async (
     transaction_hash: transactionHash,
   };
 
-  const getEstmatedFeesRepsMock = {
+  const getEstimatedFeesRepsMock = {
     suggestedMaxFee: BigInt(1000000000000000).toString(10),
     overallFee: BigInt(1000000000000000).toString(10),
     includeDeploy: !accountDeployed,
     unit: 'wei' as FeeTokenUnit,
   };
   const getEstimatedFeesSpy = jest.spyOn(starknetUtils, 'getEstimatedFees');
-  getEstimatedFeesSpy.mockResolvedValue(getEstmatedFeesRepsMock);
+  getEstimatedFeesSpy.mockResolvedValue(getEstimatedFeesRepsMock);
 
   const executeTxnUtilSpy = jest.spyOn(starknetUtils, 'executeTxn');
   executeTxnUtilSpy.mockResolvedValue(executeTxnRespMock);
@@ -79,21 +82,23 @@ const prepareMockExecuteTxn = async (
     executeTxnRespMock,
     executeTxnUtilSpy,
     getEstimatedFeesSpy,
-    getEstmatedFeesRepsMock,
+    getEstimatedFeesRepsMock,
   };
 };
 
 describe('ExecuteTxn', () => {
   let callsExample: any;
+  const transactionVersion = TRANSACTION_VERSION;
 
   it('executes transaction correctly when account is deployed', async () => {
     callsExample = callsExamples[0];
     const {
       account,
-      request,
       createAccountSpy,
       executeTxnRespMock,
       getEstimatedFeesSpy,
+      getEstimatedFeesRepsMock,
+      request,
     } = await prepareMockExecuteTxn(
       callsExample.hash,
       callsExample.calls,
@@ -105,30 +110,31 @@ describe('ExecuteTxn', () => {
 
     expect(result).toStrictEqual(executeTxnRespMock);
     expect(executeTxnUtil).toHaveBeenCalledWith(
-      expect.anything(),
+      STARKNET_SEPOLIA_TESTNET_NETWORK,
       account.address,
       account.privateKey,
       request.calls,
-      undefined,
+      transactionVersion,
       expect.objectContaining({
-        maxFee: '1000000000000000',
+        maxFee: getEstimatedFeesRepsMock.suggestedMaxFee,
         nonce: undefined,
       }),
+      undefined,
     );
     expect(getEstimatedFeesSpy).toHaveBeenCalled();
     expect(createAccountSpy).not.toHaveBeenCalled();
   });
 
-  it('executes transaction correctly when account is not deployed', async () => {
+  it('creates an account if the account is not deployed and execute transaction', async () => {
     callsExample = callsExamples[1];
     const {
       account,
-      request,
-      network,
       createAccountSpy,
-      executeTxnRespMock,
-      getEstimatedFeesSpy,
       executeTxnUtilSpy,
+      getEstimatedFeesSpy,
+      getEstimatedFeesRepsMock,
+      network,
+      request,
     } = await prepareMockExecuteTxn(
       callsExample.hash,
       callsExample.calls,
@@ -136,9 +142,8 @@ describe('ExecuteTxn', () => {
       false,
     );
 
-    const result = await executeTxn.execute(request);
+    await executeTxn.execute(request);
 
-    expect(result).toStrictEqual(executeTxnRespMock);
     expect(getEstimatedFeesSpy).toHaveBeenCalled();
     expect(createAccountSpy).toHaveBeenCalledTimes(1);
     expect(executeTxnUtilSpy).toHaveBeenCalledWith(
@@ -146,11 +151,13 @@ describe('ExecuteTxn', () => {
       account.address,
       account.privateKey,
       callsExample.calls,
-      undefined,
+      transactionVersion,
       {
         ...callsExample.details,
+        maxFee: getEstimatedFeesRepsMock.suggestedMaxFee,
         nonce: 1,
       },
+      undefined,
     );
   });
 

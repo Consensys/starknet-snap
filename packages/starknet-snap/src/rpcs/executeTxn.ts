@@ -173,17 +173,23 @@ export class ExecuteTxnRpc extends AccountRpcController<
       );
     }
 
+    const transactionVersion = details?.version ?? TRANSACTION_VERSION;
+    // transaction version needs to be passed in the account
+    // having it also present in the details of the execution call creates
+    // unpredictable behaviour. This issue is not present when estimating fee bulk.
+    delete details.version;
     const executeTxnResp = await executeTxnUtil(
       this.network,
       address,
       this.account.privateKey,
       calls,
-      abis,
+      transactionVersion,
       {
         ...details,
         nonce: accountDeployed ? undefined : 1,
         maxFee: estimateFeeResp.suggestedMaxFee,
       } as unknown as UniversalDetails,
+      abis,
     );
 
     if (
