@@ -2,7 +2,7 @@ import { union } from '@metamask/snaps-sdk';
 import { HexStruct } from '@metamask/utils';
 import type { CompiledContract, Invocations } from 'starknet';
 import { constants, TransactionType, validateAndParseAddress } from 'starknet';
-import type { Struct } from 'superstruct';
+import type { Infer, Struct } from 'superstruct';
 import {
   boolean,
   enums,
@@ -354,3 +354,12 @@ export const UniversalDetailsStruct = assign(
     version: optional(TxVersionStruct),
   }),
 );
+
+export const DeployAccountPayloadStruct = object({
+  classHash: string(),
+  contractAddress: string(),
+  constructorCalldata: array(string()),
+  addressSalt: string(),
+});
+
+export type DeployAccountPayload = Infer<typeof DeployAccountPayloadStruct>;
