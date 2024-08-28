@@ -32,7 +32,7 @@ import { ethers } from 'ethers';
 import { getAssetPriceUSD } from './coinGecko';
 import semver from 'semver/preload';
 import { setActiveNetwork } from 'slices/networkSlice';
-import { constants } from 'starknet';
+import { constants, Invocations, TransactionType } from 'starknet';
 
 export const useStarkNetSnap = () => {
   const dispatch = useAppDispatch();
@@ -331,13 +331,23 @@ export const useStarkNetSnap = () => {
     contractAddress: string,
     contractFuncName: string,
     contractCallData: string,
-    senderAddress: string,
+    address: string,
     chainId: string,
     transactionVersion?:
       | typeof constants.TRANSACTION_VERSION.V2
       | typeof constants.TRANSACTION_VERSION.V3,
   ) {
     try {
+      const invocations: Invocations = [
+        {
+          type: TransactionType.INVOKE,
+          payload: {
+            contractAddress,
+            entrypoint: contractFuncName,
+            calldata: contractCallData.split(',').map((ele) => ele.trim()),
+          },
+        },
+      ];
       const response = await provider.request({
         method: 'wallet_invokeSnap',
         params: {
@@ -346,12 +356,10 @@ export const useStarkNetSnap = () => {
             method: 'starkNet_estimateFee',
             params: {
               ...defaultParam,
-              contractAddress,
-              contractFuncName,
-              contractCallData,
-              senderAddress,
+              address,
+              invocations,
+              details: { version: transactionVersion },
               chainId,
-              transactionVersion,
             },
           },
         },

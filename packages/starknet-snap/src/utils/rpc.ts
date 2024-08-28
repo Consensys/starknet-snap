@@ -110,7 +110,7 @@ export type Account = {
   derivationPath: ReturnType<typeof getBIP44ChangePathString>;
 };
 
-export type AccountRpcControllerOptions = Json & {
+export type AccountRpcControllerOptions = {
   showInvalidAccountAlert: boolean;
 };
 

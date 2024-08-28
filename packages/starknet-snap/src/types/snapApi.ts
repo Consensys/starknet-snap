@@ -234,4 +234,14 @@ export type GetStarkNameRequestParam = {
   userAddress: string;
 } & BaseRequestParams;
 
+export enum FeeToken {
+  ETH = 'ETH',
+  STRK = 'STRK',
+}
+
+export enum FeeTokenUnit {
+  ETH = 'wei',
+  STRK = 'fri',
+}
+
 /* eslint-disable */

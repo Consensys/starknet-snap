@@ -1,9 +1,10 @@
 import type { Invocations } from 'starknet';
 import { TransactionType } from 'starknet';
 
-import type {
-  ApiParamsWithKeyDeriver,
-  EstimateFeeRequestParams,
+import {
+  FeeTokenUnit,
+  type ApiParamsWithKeyDeriver,
+  type EstimateFeeRequestParams,
 } from './types/snapApi';
 import { ACCOUNT_CLASS_HASH } from './utils/constants';
 import { logger } from './utils/logger';
@@ -130,7 +131,7 @@ export async function estimateFee(params: ApiParamsWithKeyDeriver) {
     const resp = {
       suggestedMaxFee: estimateFeeResp.suggestedMaxFee.toString(10),
       overallFee: estimateFeeResp.overall_fee.toString(10),
-      unit: 'wei',
+      unit: FeeTokenUnit.ETH,
       includeDeploy: !accountDeployed,
     };
     logger.log(`estimateFee:\nresp: ${toJson(resp)}`);

@@ -1,6 +1,7 @@
 import { union } from '@metamask/snaps-sdk';
 import { HexStruct } from '@metamask/utils';
-import { constants, validateAndParseAddress } from 'starknet';
+import type { CompiledContract, Invocations } from 'starknet';
+import { constants, TransactionType, validateAndParseAddress } from 'starknet';
 import type { Struct } from 'superstruct';
 import {
   boolean,
@@ -13,9 +14,13 @@ import {
   any,
   number,
   array,
-  nonempty,
-  dynamic,
   assign,
+  dynamic,
+  define,
+  mask,
+  validate,
+  nonempty,
+  unknown,
 } from 'superstruct';
 
 import { CAIRO_VERSION_LEGACY, CAIRO_VERSION } from './constants';
@@ -85,10 +90,13 @@ export const BaseRequestStruct = object({
   debugLevel: optional(enums(Object.keys(LogLevel))),
 });
 
+// TODO: refine this to calldata
+export const RawArgsStruct = union([array(string()), record(string(), any())]);
+
 export const CallDataStruct = object({
-  entrypoint: string(),
-  contractAddress: string(),
-  calldata: union([array(string()), record(string(), any())]), // TODO: refine this to calldata
+  entrypoint: nonempty(string()),
+  contractAddress: nonempty(string()),
+  calldata: optional(RawArgsStruct),
 });
 
 export const NumberStringStruct = union([number(), HexStruct]);
@@ -184,3 +192,165 @@ export const createStructWithAdditionalProperties = (
     return assign(predefinedProperties, object(additionalProperties));
   });
 };
+
+// Define the types you expect for additional properties
+export const additionalPropertyTypes = union([string(), number(), any()]);
+
+/* ------------------------------ Contract Struct ------------------------------ */
+/* eslint-disable */
+export const SierraContractEntryPointFieldsStruct = object({
+  selector: string(),
+  function_idx: string(),
+});
+
+export const ContractEntryPointFieldsStruct = object({
+  selector: string(),
+  offset: union([string(), number()]),
+  builtins: optional(array(string())),
+});
+
+export const EntryPointByTypeStruct = object({
+  CONSTRUCTOR: array(ContractEntryPointFieldsStruct),
+  EXTERNAL: array(ContractEntryPointFieldsStruct),
+  L1_HANDLER: array(ContractEntryPointFieldsStruct),
+});
+
+export const SierraEntryPointByTypeStruct = object({
+  CONSTRUCTOR: array(SierraContractEntryPointFieldsStruct),
+  EXTERNAL: array(SierraContractEntryPointFieldsStruct),
+  L1_HANDLER: array(SierraContractEntryPointFieldsStruct),
+});
+
+export const CompiledSierraStruct = object({
+  sierra_program: array(string()),
+  contract_class_version: nonempty(string()),
+  entry_points_by_type: SierraEntryPointByTypeStruct,
+  sierra_program_debug_info: optional(any()),
+  abi: any(),
+});
+
+export const CompiledSierraCasmStruct = object({
+  prime: string(),
+  compiler_version: string(),
+  bytecode: array(string()),
+  hints: array(any()),
+  pythonic_hints: optional(array(any())),
+  bytecode_segment_lengths: optional(array(number())),
+  entry_points_by_type: EntryPointByTypeStruct,
+});
+
+export const LegacyCompiledContractStruct = object({
+  program: record(string(), any()),
+  entry_points_by_type: EntryPointByTypeStruct,
+  abi: any(),
+});
+/* eslint-disable */
+/* ------------------------------ Contract Struct ------------------------------ */
+
+// TODO: add unit test
+export const CompiledContractStruct = define<CompiledContract>(
+  'CompiledContractStruct',
+  (value: CompiledContract) => {
+    if (Object.prototype.hasOwnProperty.call(value, 'sierra_program')) {
+      return validate(value, CompiledSierraStruct)[0] ?? true;
+    }
+    return validate(value, LegacyCompiledContractStruct)[0] ?? true;
+  },
+);
+
+export const DeclareContractPayloadStruct = object({
+  contract: CompiledContractStruct,
+  classHash: optional(string()),
+  casm: optional(CompiledSierraCasmStruct),
+  compiledClassHash: optional(string()),
+});
+
+export const DeployAccountContractStruct = object({
+  classHash: nonempty(string()),
+  constructorCalldata: optional(RawArgsStruct),
+  addressSalt: optional(NumberStringStruct),
+  contractAddress: optional(string()),
+});
+
+export const UniversalDeployerContractPayloadStruct = object({
+  classHash: NumberStringStruct,
+  salt: optional(string()),
+  unique: optional(boolean()),
+  constructorCalldata: optional(RawArgsStruct),
+});
+
+export const BaseInvocationStruct = object({
+  // lets not accept optaional payload to reduce the complexity of the struct
+  // as the snap control the input
+  payload: unknown(),
+  type: enums([
+    TransactionType.DECLARE,
+    TransactionType.DEPLOY,
+    TransactionType.DEPLOY_ACCOUNT,
+    TransactionType.INVOKE,
+  ]),
+});
+
+export const InvocationsStruct = define<Invocations>(
+  // We do use a custom `define` for this type to avoid having to use a `union` since error
+  // messages are a bit confusing.
+  //
+  // Doing manual validation allows us to use the "concrete" type of each supported acounts giving
+  // use a much nicer message from `superstruct`.
+  'InvocationsStruct',
+  (value: unknown[]) => {
+    for (const invocation of value as Invocations) {
+      // This will also raise if `value` does not match any of the supported TransactionType!
+      const maskedInvocation = mask(invocation, BaseInvocationStruct);
+
+      const isArray = Array.isArray(maskedInvocation.payload);
+
+      let struct: Struct;
+
+      switch (invocation.type) {
+        case TransactionType.DECLARE:
+          struct = DeclareContractPayloadStruct;
+          if (isArray) {
+            throw new Error('Declare payload does not accept mutiple items');
+          }
+          break;
+        case TransactionType.DEPLOY:
+          struct = UniversalDeployerContractPayloadStruct;
+          break;
+        case TransactionType.DEPLOY_ACCOUNT:
+          struct = DeployAccountContractStruct;
+          if (isArray) {
+            throw new Error(
+              'Deploy account payload does not accept mutiple items',
+            );
+          }
+          break;
+        case TransactionType.INVOKE:
+          struct = CallDataStruct;
+          break;
+        default:
+          throw new Error('Invalid transaction type');
+      }
+
+      const [error] = validate(
+        maskedInvocation.payload,
+        isArray ? array(struct) : struct,
+      );
+
+      if (error !== undefined) {
+        return error;
+      }
+    }
+    return true;
+  },
+);
+
+export const UniversalDetailsStruct = assign(
+  V3TransactionDetailStruct,
+  object({
+    blockIdentifier: optional(string()),
+    maxFee: optional(NumberStringStruct),
+    skipValidate: optional(boolean()),
+    version: optional(TxVersionStruct),
+  }),
+);
