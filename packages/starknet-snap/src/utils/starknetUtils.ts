@@ -22,7 +22,6 @@ import type {
   GetTransactionReceiptResponse,
   BigNumberish,
   ArraySignatureType,
-  InvocationsDetails,
 } from 'starknet';
 import {
   ec,
@@ -959,9 +958,10 @@ export async function getEstimatedFees(
   privateKey: string,
   publicKey: string,
   transactionInvocations: Invocations,
-  transactionVersion: TransactionVersion = TRANSACTION_VERSION,
-  invocationsDetails?: InvocationsDetails,
+  invocationsDetails: UniversalDetails = {},
 ): Promise<EstimateFeeResponse> {
+  const transactionVersion = (invocationsDetails?.version ??
+    TRANSACTION_VERSION) as TransactionVersion;
   const accountDeployed = await isAccountDeployed(network, address);
   if (!accountDeployed) {
     const deployAccountpayload = createAccountDeployPayload(address, publicKey);

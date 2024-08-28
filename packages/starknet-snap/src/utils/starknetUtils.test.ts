@@ -68,7 +68,9 @@ describe('getEstimatedFees', () => {
         account.privateKey,
         account.publicKey,
         invocations,
-        transactionVersion,
+        {
+          version: transactionVersion,
+        },
       );
 
       expect(resp).toStrictEqual({
@@ -93,7 +95,9 @@ describe('getEstimatedFees', () => {
       account.privateKey,
       account.publicKey,
       invocations,
-      '0x2',
+      {
+        version: '0x2',
+      },
     );
     const deployAccountpayload = starknetUtils.createAccountDeployPayload(
       account.address,
@@ -120,7 +124,27 @@ describe('getEstimatedFees', () => {
         },
       ],
       '0x2',
-      undefined,
+      {
+        version: '0x2',
+      },
+    );
+    expect(resp).toStrictEqual({
+      suggestedMaxFee: '12',
+      overallFee: '10',
+      unit: FeeTokenUnit.ETH,
+      includeDeploy: !deployed,
+    });
+  });
+  it('sets default version correctly', async () => {
+    const deployed = true;
+    const { account } = await prepareSpy(true);
+
+    const resp = await starknetUtils.getEstimatedFees(
+      STARKNET_SEPOLIA_TESTNET_NETWORK,
+      account.address,
+      account.privateKey,
+      account.publicKey,
+      invocations,
     );
     expect(resp).toStrictEqual({
       suggestedMaxFee: '12',

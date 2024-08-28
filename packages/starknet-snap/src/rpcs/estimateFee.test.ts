@@ -85,7 +85,9 @@ describe('estimateFee', () => {
       account.privateKey,
       account.publicKey,
       request.invocations,
-      constants.TRANSACTION_VERSION.V2,
+      {
+        version: constants.TRANSACTION_VERSION.V2,
+      },
     );
 
     expect(result).toStrictEqual(estimateBulkFeeRespMock);
