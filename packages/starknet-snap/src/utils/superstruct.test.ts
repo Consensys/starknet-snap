@@ -160,12 +160,13 @@ describe('CairoVersionStruct', () => {
 });
 
 describe('TxVersionStruct', () => {
-  it.each([constants.TRANSACTION_VERSION.V1, constants.TRANSACTION_VERSION.V3])(
-    'does not throw error if the tx version is %s',
-    (version) => {
-      expect(() => assert(version, TxVersionStruct)).not.toThrow();
-    },
-  );
+  it.each([
+    constants.TRANSACTION_VERSION.V1,
+    constants.TRANSACTION_VERSION.V2,
+    constants.TRANSACTION_VERSION.V3,
+  ])('does not throw error if the tx version is %s', (version) => {
+    expect(() => assert(version, TxVersionStruct)).not.toThrow();
+  });
 
   it('throws error if the tx version is invalid', () => {
     expect(() => assert('invalid version', TxVersionStruct)).toThrow(

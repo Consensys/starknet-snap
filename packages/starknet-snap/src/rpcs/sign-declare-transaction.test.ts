@@ -37,7 +37,7 @@ describe('signDeclareTransaction', () => {
         '0x025ec026985a3bf9d0cc1fe17326b245dfdc3ff89b8fde106542a3ea56c5a918',
       senderAddress: address,
       chainId,
-      version: constants.TRANSACTION_VERSION.V1,
+      version: constants.TRANSACTION_VERSION.V2,
       maxFee: 0,
       nonce: 0,
     },

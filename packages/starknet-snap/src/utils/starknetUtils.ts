@@ -68,7 +68,6 @@ import {
   CAIRO_VERSION_LEGACY,
   ETHER_MAINNET,
   ETHER_SEPOLIA_TESTNET,
-  TRANSACTION_VERSION,
   BlockIdentifierEnum,
 } from './constants';
 import { DeployRequiredError, UpgradeRequiredError } from './exceptions';
@@ -140,6 +139,10 @@ export const getAccountInstance = (
   userAddress: string,
   privateKey: string | Uint8Array,
   cairoVersion?: CairoVersion,
+  transactionVersion?:
+    | BigNumberish
+    | typeof constants.TRANSACTION_VERSION.V2
+    | typeof constants.TRANSACTION_VERSION.V3,
   blockIdentifier?: BlockIdentifierEnum,
 ): Account => {
   const provider = getProvider(network, blockIdentifier);
@@ -148,6 +151,9 @@ export const getAccountInstance = (
     userAddress,
     privateKey,
     cairoVersion ?? CAIRO_VERSION,
+    transactionVersion as unknown as
+      | typeof constants.TRANSACTION_VERSION.V2
+      | typeof constants.TRANSACTION_VERSION.V3,
   );
 };
 
@@ -197,9 +203,9 @@ export const declareContract = async (
     senderAddress,
     privateKey,
     cairoVersion,
+    invocationsDetails?.version,
   ).declare(contractPayload, {
     ...invocationsDetails,
-    version: invocationsDetails?.version ?? TRANSACTION_VERSION,
     skipValidate: false,
     blockIdentifier: BlockIdentifierEnum.Latest,
   });
@@ -220,10 +226,10 @@ export const estimateFee = async (
     senderAddress,
     privateKey,
     cairoVersion,
+    invocationsDetails?.version,
     BlockIdentifierEnum.Latest,
   ).estimateInvokeFee(txnInvocation, {
     ...invocationsDetails,
-    version: invocationsDetails?.version ?? TRANSACTION_VERSION,
     skipValidate: false,
     blockIdentifier: BlockIdentifierEnum.Latest,
   });
@@ -244,10 +250,10 @@ export const estimateFeeBulk = async (
     senderAddress,
     privateKey,
     cairoVersion,
+    invocationsDetails?.version,
     BlockIdentifierEnum.Latest,
   ).estimateFeeBulk(txnInvocation, {
     ...invocationsDetails,
-    version: invocationsDetails?.version ?? TRANSACTION_VERSION,
     skipValidate: false,
     blockIdentifier: BlockIdentifierEnum.Latest,
   });
@@ -269,9 +275,9 @@ export const executeTxn = async (
     senderAddress,
     privateKey,
     cairoVersion,
+    invocationsDetails?.version,
   ).execute(txnInvocation, abis, {
     ...invocationsDetails,
-    version: invocationsDetails?.version ?? TRANSACTION_VERSION,
     skipValidate: false,
     blockIdentifier: BlockIdentifierEnum.Latest,
   });
@@ -299,9 +305,9 @@ export const deployAccount = async (
     contractAddress,
     privateKey,
     cairoVersion,
+    invocationsDetails?.version,
   ).deployAccount(deployAccountPayload, {
     ...invocationsDetails,
-    version: invocationsDetails?.version ?? TRANSACTION_VERSION,
     skipValidate: false,
     blockIdentifier: BlockIdentifierEnum.Latest,
   });
@@ -329,9 +335,9 @@ export const estimateAccountDeployFee = async (
     contractAddress,
     privateKey,
     cairoVersion,
+    invocationsDetails?.version,
   ).estimateAccountDeployFee(deployAccountPayload, {
     ...invocationsDetails,
-    version: invocationsDetails?.version ?? TRANSACTION_VERSION,
     skipValidate: false,
     blockIdentifier: BlockIdentifierEnum.Latest,
   });
@@ -1047,10 +1053,8 @@ export async function getEstimatedFees(
   privateKey: string,
   publicKey: string,
   transactionInvocations: Invocations,
-  invocationsDetails: UniversalDetails = {},
+  invocationsDetails?: UniversalDetails,
 ): Promise<EstimateFeeResponse> {
-  invocationsDetails.version =
-    invocationsDetails?.version ?? TRANSACTION_VERSION;
   const accountDeployed = await isAccountDeployed(network, address);
   if (!accountDeployed) {
     const deployAccountpayload = createAccountDeployPayload(address, publicKey);
@@ -1075,9 +1079,9 @@ export async function getEstimatedFees(
     suggestedMaxFee: estimateFeeResp.suggestedMaxFee.toString(10),
     overallFee: estimateFeeResp.overall_fee.toString(10),
     unit:
-      invocationsDetails.version === constants.TRANSACTION_VERSION.V1
-        ? FeeTokenUnit.ETH
-        : FeeTokenUnit.STRK,
+      invocationsDetails?.version === constants.TRANSACTION_VERSION.V3
+        ? FeeTokenUnit.STRK
+        : FeeTokenUnit.ETH,
     includeDeploy: !accountDeployed,
   };
 }
