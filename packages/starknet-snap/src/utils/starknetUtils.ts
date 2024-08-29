@@ -1061,7 +1061,6 @@ export async function getEstimatedFees(
     });
   }
 
-  console.log("here")
   const estimateBulkFeeResp = await estimateFeeBulk(
     network,
     address,
@@ -1070,7 +1069,6 @@ export async function getEstimatedFees(
     invocationsDetails,
   );
 
-  console.log("there")
   const estimateFeeResp = addFeesFromAllTransactions(estimateBulkFeeResp);
 
   return {
