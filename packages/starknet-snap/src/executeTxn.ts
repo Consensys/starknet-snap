@@ -147,10 +147,9 @@ export async function executeTxn(params: ApiParamsWithKeyDeriver) {
       senderAddress,
       senderPrivateKey,
       requestParamsObj.txnInvocation,
-      undefined,
+      requestParamsObj.abis,
       { maxFee, nonce: nonceSendTransaction },
       CAIRO_VERSION,
-      requestParamsObj.abis,
     );
   } catch (error) {
     logger.error(`Problem found:`, error);

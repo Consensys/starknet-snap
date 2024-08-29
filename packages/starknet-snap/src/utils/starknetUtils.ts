@@ -22,6 +22,7 @@ import type {
   GetTransactionReceiptResponse,
   BigNumberish,
   ArraySignatureType,
+  Calldata,
 } from 'starknet';
 import {
   ec,
@@ -49,7 +50,6 @@ import type { Network, SnapState, Transaction } from '../types/snapState';
 import { TransactionType } from '../types/snapState';
 import type {
   DeployAccountPayload,
-  RecordAccountDeploymentFn,
   TransactionResponse,
   TransactionStatuses,
   TransactionVersion,
@@ -141,7 +141,7 @@ export const getAccountInstance = (
   userAddress: string,
   privateKey: string | Uint8Array,
   cairoVersion?: CairoVersion,
-  transactionVersion?: TransactionVersion,
+  transactionVersion?: TransactionVersion | BigNumberish,
   blockIdentifier?: BlockIdentifierEnum,
 ): Account => {
   const provider = getProvider(network, blockIdentifier);
@@ -150,7 +150,8 @@ export const getAccountInstance = (
     userAddress,
     privateKey,
     cairoVersion ?? CAIRO_VERSION,
-    transactionVersion ?? TRANSACTION_VERSION,
+    (transactionVersion ??
+      TRANSACTION_VERSION) as unknown as TransactionVersion,
   );
 };
 
@@ -264,17 +265,16 @@ export const executeTxn = async (
   senderAddress: string,
   privateKey: string | Uint8Array,
   txnInvocation: Call | Call[],
-  transactionVersion: TransactionVersion = TRANSACTION_VERSION,
+  abis?: Abi[],
   invocationsDetails?: UniversalDetails,
   cairoVersion?: CairoVersion,
-  abis?: Abi[],
 ): Promise<InvokeFunctionResponse> => {
   return getAccountInstance(
     network,
     senderAddress,
     privateKey,
     cairoVersion,
-    transactionVersion,
+    invocationsDetails?.version,
   ).execute(txnInvocation, abis, {
     ...invocationsDetails,
     skipValidate: false,
@@ -299,12 +299,6 @@ export const deployAccount = async (
     constructorCalldata: contractCallData,
     addressSalt,
   };
-  console.log({
-    ...invocationsDetails,
-    skipValidate: false,
-    blockIdentifier: BlockIdentifierEnum.Latest,
-  });
-  console.log(deployAccountPayload);
   return getAccountInstance(
     network,
     contractAddress,
@@ -699,10 +693,7 @@ export const getNextAddressIndex = (
  * @returns address and calldata.
  */
 export const getAccContractAddressAndCallData = (publicKey) => {
-  const callData = CallData.compile({
-    signer: publicKey,
-    guardian: '0',
-  });
+  const callData = getDeployAccountCallData(publicKey, CAIRO_VERSION);
 
   let address = hash.calculateContractAddressFromHash(
     publicKey,
@@ -728,11 +719,8 @@ export const getAccContractAddressAndCallData = (publicKey) => {
  */
 export const getAccContractAddressAndCallDataLegacy = (publicKey) => {
   // [TODO]: Check why use ACCOUNT_CLASS_HASH_LEGACY and PROXY_CONTRACT_HASH ?
-  const callData = CallData.compile({
-    implementation: ACCOUNT_CLASS_HASH_LEGACY,
-    selector: hash.getSelectorFromName('initialize'),
-    calldata: CallData.compile({ signer: publicKey, guardian: '0' }),
-  });
+  const callData = getDeployAccountCallData(publicKey, CAIRO_VERSION_LEGACY);
+
   let address = hash.calculateContractAddressFromHash(
     publicKey,
     PROXY_CONTRACT_HASH,
@@ -749,7 +737,7 @@ export const getAccContractAddressAndCallDataLegacy = (publicKey) => {
 };
 
 /**
- * Creates a new account on the specified network and records deployment information to the state.
+ * Creates a new Cairo 1 account on the specified network and records deployment information to the state.
  *
  * This function generates a new account address and call data based on the provided public key,
  * deploys the account on the network, and records the deployment details such as contract address
@@ -759,52 +747,88 @@ export const getAccContractAddressAndCallDataLegacy = (publicKey) => {
  * before returning the account address and transaction hash.
  *
  * @param network - The network on which to deploy the account.
- * @param publicKey - The public key used to derive the account address.
+ * @param address - The account address.
+ * @param publicKey - The public key of the account address.
  * @param privateKey - The private key used to sign the deployment transaction.
  * @param cairoVersion - The version of Cairo to use for the account deployment.
  * @param recordAccountDeployment - A function to record deployment information into the state.
  * @param waitMode - If true, waits for the transaction to be confirmed before returning. Defaults to false.
  * @returns An object containing the deployed account address and the transaction hash.
  */
-export const createAccount = async (
-  network: Network,
-  publicKey: string,
-  privateKey: string,
-  cairoVersion: CairoVersion,
-  recordAccountDeployment: RecordAccountDeploymentFn,
+export async function createAccount({
+  network,
+  address,
+  publicKey,
+  privateKey,
+  cairoVersion = CAIRO_VERSION,
   waitMode = false,
-) => {
-  const { address, callData } = getAccContractAddressAndCallData(publicKey);
+  callback,
+}: {
+  network: Network;
+  address: string;
+  publicKey: string;
+  privateKey: string;
+  cairoVersion?: CairoVersion;
+  waitMode?: boolean;
+  callback?: (address: string, transactionHash: string) => Promise<void>;
+}) {
   // Deploy account will auto estimate the fee from the network if not provided
-  const deployResp = await deployAccount(
+  const {
+    contract_address: contractAddress,
+    transaction_hash: transactionHash,
+  } = await deployAccount(
     network,
     address,
-    callData,
+    getDeployAccountCallData(publicKey, cairoVersion),
     publicKey,
     privateKey,
     cairoVersion,
   );
 
-  if (deployResp.contract_address && deployResp.transaction_hash) {
-    await recordAccountDeployment(deployResp, network.chainId);
+  if (contractAddress !== address) {
+    logger.warn(`
+      contract address is not match with the desired address\n contract address: ${contractAddress}, desired address: ${address}
+      `);
   }
 
-  logger.log(`createAccount:\ndeployResp: ${toJson(deployResp)}`);
+  if (typeof callback === 'function') {
+    await callback(contractAddress, transactionHash);
+  }
 
   if (waitMode) {
     await waitForTransaction(
       network,
-      deployResp.contract_address,
+      contractAddress,
       privateKey,
-      deployResp.transaction_hash,
+      transactionHash,
     );
   }
 
   return {
-    address: deployResp.contract_address,
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    transaction_hash: deployResp.transaction_hash,
+    address: contractAddress,
+    transactionHash: transactionHash,
   };
+}
+
+export const getDeployAccountCallData = (
+  publicKey: string,
+  cairoVersion: CairoVersion,
+): Calldata => {
+  switch (cairoVersion) {
+    case '1':
+      return CallData.compile({
+        signer: publicKey,
+        guardian: '0',
+      });
+    case '0':
+      return CallData.compile({
+        implementation: ACCOUNT_CLASS_HASH_LEGACY,
+        selector: hash.getSelectorFromName('initialize'),
+        calldata: CallData.compile({ signer: publicKey, guardian: '0' }),
+      });
+    default:
+      throw new Error(`Unsupported Cairo version: ${cairoVersion}`);
+  }
 };
 
 /**

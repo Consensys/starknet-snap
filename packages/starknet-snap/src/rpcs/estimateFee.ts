@@ -1,5 +1,4 @@
 import type { Json } from '@metamask/snaps-sdk';
-import type { UniversalDetails } from 'starknet';
 import type { Infer } from 'superstruct';
 import { object, string, assign, boolean, optional, enums } from 'superstruct';
 
@@ -69,7 +68,7 @@ export class EstimateFeeRpc extends AccountRpcController<
       this.account.privateKey,
       this.account.publicKey,
       invocations,
-      details as UniversalDetails,
+      details,
     );
 
     return estimateFeeResp;

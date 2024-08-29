@@ -1,6 +1,11 @@
 import { union } from '@metamask/snaps-sdk';
 import { HexStruct } from '@metamask/utils';
-import type { Call, CompiledContract, Invocations } from 'starknet';
+import type {
+  Call,
+  CompiledContract,
+  Invocations,
+  UniversalDetails,
+} from 'starknet';
 import { constants, TransactionType, validateAndParseAddress } from 'starknet';
 import type { Struct } from 'superstruct';
 import {
@@ -299,24 +304,8 @@ export const CallsStruct = define<Call[] | Call>(
   // use a much nicer message from `superstruct`.
   'CallsStruct',
   (value: unknown[] | unknown) => {
-    const isArray = Array.isArray(value);
-    const calls = isArray ? (value as Call[]) : [value as Call];
-
-    // Check if the calls array is empty
-    if (calls.length === 0) {
-      return new Error('Calls cannot be empty');
-    }
-
-    for (const call of calls) {
-      // Validate the call structure
-      const [error] = validate(call, CallDataStruct); // Assuming CallStruct is defined elsewhere to validate each call
-
-      if (error !== undefined) {
-        return error;
-      }
-    }
-
-    return true;
+    const calls = Array.isArray(value) ? (value as Call[]) : [value as Call];
+    return validate(calls, array(CallDataStruct))[0] ?? true;
   },
 );
 
@@ -374,12 +363,22 @@ export const InvocationsStruct = define<Invocations>(
   },
 );
 
-export const UniversalDetailsStruct = assign(
-  V3TransactionDetailStruct,
-  object({
-    blockIdentifier: optional(string()),
-    maxFee: optional(NumberStringStruct),
-    skipValidate: optional(boolean()),
-    version: optional(TxVersionStruct),
-  }),
+export const UniversalDetailsStruct = define<UniversalDetails>(
+  'UniversalDetailsStruct',
+  (value: unknown) => {
+    return (
+      validate(
+        value,
+        assign(
+          V3TransactionDetailStruct,
+          object({
+            blockIdentifier: optional(string()),
+            maxFee: optional(NumberStringStruct),
+            skipValidate: optional(boolean()),
+            version: optional(TxVersionStruct),
+          }),
+        ),
+      )[0] ?? true
+    );
+  },
 );
