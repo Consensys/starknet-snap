@@ -109,11 +109,11 @@ export const NumberStringStruct = union([number(), HexStruct]);
 export const CairoVersionStruct = enums([CAIRO_VERSION, CAIRO_VERSION_LEGACY]);
 
 export const TxVersionStruct = enums([
-  constants.TRANSACTION_VERSION.V2,
+  constants.TRANSACTION_VERSION.V1,
   constants.TRANSACTION_VERSION.V3,
 ]);
 
-export const V2TxVersionStruct = enums([constants.TRANSACTION_VERSION.V2]);
+export const V1TxVersionStruct = enums([constants.TRANSACTION_VERSION.V1]);
 
 export const V3TxVersionStruct = enums([constants.TRANSACTION_VERSION.V3]);
 

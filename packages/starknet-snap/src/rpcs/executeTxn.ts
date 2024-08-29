@@ -117,6 +117,7 @@ export class ExecuteTxnRpc extends AccountRpcController<
         address,
         accountDeployed,
         calls,
+        suggestedMaxFee,
         details?.version as unknown as constants.TRANSACTION_VERSION,
       ))
     ) {

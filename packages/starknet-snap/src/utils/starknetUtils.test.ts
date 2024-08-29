@@ -62,7 +62,7 @@ describe('getEstimatedFees', () => {
     };
   };
 
-  it.each([constants.TRANSACTION_VERSION.V2, constants.TRANSACTION_VERSION.V3])(
+  it.each([constants.TRANSACTION_VERSION.V1, constants.TRANSACTION_VERSION.V3])(
     'estimate fees for transaction version %s',
     async (transactionVersion) => {
       const deployed = true;
@@ -83,7 +83,7 @@ describe('getEstimatedFees', () => {
         suggestedMaxFee: suggestedMaxFee.toString(10),
         overallFee: overallFee.toString(10),
         unit:
-          transactionVersion === constants.TRANSACTION_VERSION.V2
+          transactionVersion === constants.TRANSACTION_VERSION.V1
             ? FeeTokenUnit.ETH
             : FeeTokenUnit.STRK,
         includeDeploy: !deployed,
@@ -132,7 +132,6 @@ describe('getEstimatedFees', () => {
           type: TransactionType.INVOKE,
         },
       ],
-      TRANSACTION_VERSION,
       {
         version: TRANSACTION_VERSION,
       },

@@ -7,10 +7,7 @@ import { constants } from 'starknet';
 
 import callsExamples from '../__tests__/fixture/callsExamples.json'; // Assuming you have a similar fixture
 import type { FeeTokenUnit } from '../types/snapApi';
-import {
-  STARKNET_SEPOLIA_TESTNET_NETWORK,
-  TRANSACTION_VERSION,
-} from '../utils/constants';
+import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../utils/constants';
 import * as starknetUtils from '../utils/starknetUtils';
 import { executeTxn as executeTxnUtil } from '../utils/starknetUtils';
 import {
@@ -88,7 +85,6 @@ const prepareMockExecuteTxn = async (
 
 describe('ExecuteTxn', () => {
   let callsExample: any;
-  const transactionVersion = TRANSACTION_VERSION;
 
   it('executes transaction correctly if the account is deployed', async () => {
     callsExample = callsExamples[0];

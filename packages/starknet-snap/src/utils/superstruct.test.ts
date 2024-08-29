@@ -160,7 +160,7 @@ describe('CairoVersionStruct', () => {
 });
 
 describe('TxVersionStruct', () => {
-  it.each([constants.TRANSACTION_VERSION.V2, constants.TRANSACTION_VERSION.V3])(
+  it.each([constants.TRANSACTION_VERSION.V1, constants.TRANSACTION_VERSION.V3])(
     'does not throw error if the tx version is %s',
     (version) => {
       expect(() => assert(version, TxVersionStruct)).not.toThrow();
@@ -331,7 +331,7 @@ describe('DeclareSignDetailsStruct', () => {
       senderAddress:
         '0x025ec026985a3bf9d0cc1fe17326b245dfdc3ff89b8fde106542a3ea56c5a918',
       chainId: constants.StarknetChainId.SN_SEPOLIA,
-      version: constants.TRANSACTION_VERSION.V2,
+      version: constants.TRANSACTION_VERSION.V1,
       maxFee: '0',
       nonce: '0',
     },
