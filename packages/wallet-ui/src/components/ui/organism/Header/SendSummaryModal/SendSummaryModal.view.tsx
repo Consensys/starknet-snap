@@ -95,7 +95,7 @@ export const SendSummaryModalView = ({
           wallet.accounts[0] as unknown as string,
           chainId,
           selectedFeeToken === FeeToken.ETH
-            ? constants.TRANSACTION_VERSION.V2
+            ? constants.TRANSACTION_VERSION.V1
             : constants.TRANSACTION_VERSION.V3,
         )
           .then((response) => {

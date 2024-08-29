@@ -52,7 +52,6 @@ import type {
   DeployAccountPayload,
   TransactionResponse,
   TransactionStatuses,
-  TransactionVersion,
 } from '../types/starknet';
 import type {
   VoyagerTransactions,
@@ -69,7 +68,6 @@ import {
   CAIRO_VERSION_LEGACY,
   ETHER_MAINNET,
   ETHER_SEPOLIA_TESTNET,
-  TRANSACTION_VERSION,
   BlockIdentifierEnum,
 } from './constants';
 import { DeployRequiredError, UpgradeRequiredError } from './exceptions';
@@ -141,7 +139,10 @@ export const getAccountInstance = (
   userAddress: string,
   privateKey: string | Uint8Array,
   cairoVersion?: CairoVersion,
-  transactionVersion?: TransactionVersion | BigNumberish,
+  transactionVersion?:
+    | BigNumberish
+    | typeof constants.TRANSACTION_VERSION.V2
+    | typeof constants.TRANSACTION_VERSION.V3,
   blockIdentifier?: BlockIdentifierEnum,
 ): Account => {
   const provider = getProvider(network, blockIdentifier);
@@ -150,8 +151,9 @@ export const getAccountInstance = (
     userAddress,
     privateKey,
     cairoVersion ?? CAIRO_VERSION,
-    (transactionVersion ??
-      TRANSACTION_VERSION) as unknown as TransactionVersion,
+    transactionVersion as unknown as
+      | typeof constants.TRANSACTION_VERSION.V2
+      | typeof constants.TRANSACTION_VERSION.V3,
   );
 };
 
@@ -201,6 +203,7 @@ export const declareContract = async (
     senderAddress,
     privateKey,
     cairoVersion,
+    invocationsDetails?.version,
   ).declare(contractPayload, {
     ...invocationsDetails,
     skipValidate: false,
@@ -213,9 +216,6 @@ export const estimateFee = async (
   senderAddress: string,
   privateKey: string | Uint8Array,
   txnInvocation: Call | Call[],
-  transactionVersion:
-    | typeof constants.TRANSACTION_VERSION.V2
-    | typeof constants.TRANSACTION_VERSION.V3 = TRANSACTION_VERSION,
   cairoVersion?: CairoVersion,
   invocationsDetails?: UniversalDetails,
 ): Promise<EstimateFee> => {
@@ -226,7 +226,7 @@ export const estimateFee = async (
     senderAddress,
     privateKey,
     cairoVersion,
-    transactionVersion,
+    invocationsDetails?.version,
     BlockIdentifierEnum.Latest,
   ).estimateInvokeFee(txnInvocation, {
     ...invocationsDetails,
@@ -240,7 +240,6 @@ export const estimateFeeBulk = async (
   senderAddress: string,
   privateKey: string | Uint8Array,
   txnInvocation: Invocations,
-  transactionVersion: TransactionVersion = TRANSACTION_VERSION,
   invocationsDetails?: UniversalDetails,
   cairoVersion?: CairoVersion,
 ): Promise<EstimateFee[]> => {
@@ -251,7 +250,7 @@ export const estimateFeeBulk = async (
     senderAddress,
     privateKey,
     cairoVersion,
-    transactionVersion,
+    invocationsDetails?.version,
     BlockIdentifierEnum.Latest,
   ).estimateFeeBulk(txnInvocation, {
     ...invocationsDetails,
@@ -269,6 +268,8 @@ export const executeTxn = async (
   invocationsDetails?: UniversalDetails,
   cairoVersion?: CairoVersion,
 ): Promise<InvokeFunctionResponse> => {
+  // const version = invocationsDetails?.version;
+  // delete invocationsDetails?.version;
   return getAccountInstance(
     network,
     senderAddress,
@@ -304,6 +305,7 @@ export const deployAccount = async (
     contractAddress,
     privateKey,
     cairoVersion,
+    invocationsDetails?.version,
   ).deployAccount(deployAccountPayload, {
     ...invocationsDetails,
     skipValidate: false,
@@ -333,6 +335,7 @@ export const estimateAccountDeployFee = async (
     contractAddress,
     privateKey,
     cairoVersion,
+    invocationsDetails?.version,
   ).estimateAccountDeployFee(deployAccountPayload, {
     ...invocationsDetails,
     skipValidate: false,
@@ -1040,7 +1043,7 @@ export function createAccountDeployPayload(
  * @param {string} privateKey - The private key for signing the transactions.
  * @param {string} publicKey - The public key of the account.
  * @param {Invocations} transactionInvocations - The set of transactions to be executed.
- * @param {constants.TRANSACTION_VERSION} transactionVersion - The version of the transaction, valid values are '0x2' or '0x3'.
+ * @param {constants.TRANSACTION_VERSION} transactionVersion - The version of the transaction, valid values are '0x1' or '0x3'.
  * @returns {Promise<EstimateFeeResponse>} - A promise that resolves to the estimated fee response,
  *                                           including suggested maximum fee and overall fee in wei.
  */
@@ -1050,10 +1053,8 @@ export async function getEstimatedFees(
   privateKey: string,
   publicKey: string,
   transactionInvocations: Invocations,
-  invocationsDetails: UniversalDetails = {},
+  invocationsDetails?: UniversalDetails,
 ): Promise<EstimateFeeResponse> {
-  const transactionVersion = (invocationsDetails?.version ??
-    TRANSACTION_VERSION) as TransactionVersion;
   const accountDeployed = await isAccountDeployed(network, address);
   if (!accountDeployed) {
     const deployAccountpayload = createAccountDeployPayload(address, publicKey);
@@ -1069,7 +1070,6 @@ export async function getEstimatedFees(
     address,
     privateKey,
     transactionInvocations,
-    transactionVersion,
     invocationsDetails,
   );
 
@@ -1079,9 +1079,9 @@ export async function getEstimatedFees(
     suggestedMaxFee: estimateFeeResp.suggestedMaxFee.toString(10),
     overallFee: estimateFeeResp.overall_fee.toString(10),
     unit:
-      transactionVersion === constants.TRANSACTION_VERSION.V2
-        ? FeeTokenUnit.ETH
-        : FeeTokenUnit.STRK,
+      invocationsDetails?.version === constants.TRANSACTION_VERSION.V3
+        ? FeeTokenUnit.STRK
+        : FeeTokenUnit.ETH,
     includeDeploy: !accountDeployed,
   };
 }
@@ -1191,7 +1191,6 @@ export async function estimateAccountUpgradeFee(
       contractAddress,
       privateKey,
       txnInvocation,
-      TRANSACTION_VERSION,
       CAIRO_VERSION_LEGACY,
     );
     return numUtils.toBigInt(estFeeResp.suggestedMaxFee.toString(10) ?? '0');

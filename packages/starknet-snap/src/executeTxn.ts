@@ -8,11 +8,7 @@ import type {
   ApiParamsWithKeyDeriver,
   ExecuteTxnRequestParams,
 } from './types/snapApi';
-import {
-  ACCOUNT_CLASS_HASH,
-  CAIRO_VERSION,
-  TRANSACTION_VERSION,
-} from './utils/constants';
+import { ACCOUNT_CLASS_HASH, CAIRO_VERSION } from './utils/constants';
 import { logger } from './utils/logger';
 import {
   getNetworkFromChainId,
@@ -75,7 +71,6 @@ export async function executeTxn(params: ApiParamsWithKeyDeriver) {
       senderAddress,
       senderPrivateKey,
       bulkTransactions,
-      TRANSACTION_VERSION,
       requestParamsObj.invocationsDetails
         ? requestParamsObj.invocationsDetails
         : undefined,
