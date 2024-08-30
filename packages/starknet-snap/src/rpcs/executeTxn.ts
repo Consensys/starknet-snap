@@ -170,18 +170,16 @@ export class ExecuteTxnRpc extends AccountRpcController<
     if (!transactionHash) {
       throw new Error(`Failed to deploy account for address ${address}`);
     }
-    // TODO uncomment this
-    // await this.txnStateManager.withTransaction(async (_) => {
-    //   await this.txnStateManager.addTransaction(
-    //     this.createDeployTxn(address, transactionHash),
-    //   );
-    //   console.log("update the account state")
-    //   await this.accStateManager.updateAccountAsDeploy({
-    //     address,
-    //     chainId: this.network.chainId,
-    //     transactionHash,
-    //   });
-    // });
+
+    await this.txnStateManager.addTransaction(
+      this.createDeployTxn(address, transactionHash),
+    );
+
+    await this.accStateManager.updateAccountAsDeploy({
+      address,
+      chainId: this.network.chainId,
+      transactionHash,
+    });
   }
 
   protected async getExecuteTxnConsensus(
