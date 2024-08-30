@@ -142,8 +142,6 @@ export class AccountStateManager extends StateManager<AccContract> {
         accountInState.upgradeRequired = false;
         accountInState.deployRequired = false;
         accountInState.deployTxnHash = transactionHash;
-
-        await this.updateAccount(accountInState);
       });
     } catch (error) {
       throw new StateManagerError(error.message);
