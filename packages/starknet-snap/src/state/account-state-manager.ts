@@ -115,4 +115,36 @@ export class AccountStateManager extends StateManager<AccContract> {
       throw new StateManagerError(error.message);
     }
   }
+
+  async updateAccountAsDeploy({
+    address,
+    chainId,
+    transactionHash,
+  }: {
+    address: string;
+    chainId: string;
+    transactionHash: string;
+  }): Promise<void> {
+    try {
+      await this.update(async (state: SnapState) => {
+        const accountInState = await this.getAccount(
+          {
+            address,
+            chainId,
+          },
+          state,
+        );
+
+        if (!accountInState) {
+          throw new StateManagerError(`Account does not exist`);
+        }
+
+        accountInState.upgradeRequired = false;
+        accountInState.deployRequired = false;
+        accountInState.deployTxnHash = transactionHash;
+      });
+    } catch (error) {
+      throw new StateManagerError(error.message);
+    }
+  }
 }

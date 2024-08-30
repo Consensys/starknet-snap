@@ -339,9 +339,7 @@ export const useStarkNetSnap = () => {
     contractCallData: string,
     address: string,
     chainId: string,
-    transactionVersion?:
-      | typeof constants.TRANSACTION_VERSION.V2
-      | typeof constants.TRANSACTION_VERSION.V3,
+    transactionVersion?: typeof constants.TRANSACTION_VERSION.V3,
   ) {
     try {
       const invocations: Invocations = [
@@ -404,7 +402,7 @@ export const useStarkNetSnap = () => {
               ...defaultParam,
               address,
               calls,
-              details: { version: '0x2', maxFee } as UniversalDetails,
+              details: { maxFee } as UniversalDetails,
               chainId,
             },
           },

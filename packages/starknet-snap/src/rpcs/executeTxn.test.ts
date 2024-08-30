@@ -2,15 +2,12 @@ import {
   InvalidParamsError,
   UserRejectedRequestError,
 } from '@metamask/snaps-sdk';
-import type { UniversalDetails, Call } from 'starknet';
+import type { UniversalDetails, Call, InvokeFunctionResponse } from 'starknet';
 import { constants } from 'starknet';
 
 import callsExamples from '../__tests__/fixture/callsExamples.json'; // Assuming you have a similar fixture
 import type { FeeTokenUnit } from '../types/snapApi';
-import {
-  STARKNET_SEPOLIA_TESTNET_NETWORK,
-  TRANSACTION_VERSION,
-} from '../utils/constants';
+import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../utils/constants';
 import * as starknetUtils from '../utils/starknetUtils';
 import { executeTxn as executeTxnUtil } from '../utils/starknetUtils';
 import {
@@ -59,6 +56,7 @@ const prepareMockExecuteTxn = async (
     includeDeploy: !accountDeployed,
     unit: 'wei' as FeeTokenUnit,
   };
+
   const getEstimatedFeesSpy = jest.spyOn(starknetUtils, 'getEstimatedFees');
   getEstimatedFeesSpy.mockResolvedValue(getEstimatedFeesRepsMock);
 
@@ -67,8 +65,7 @@ const prepareMockExecuteTxn = async (
 
   const createAccountSpy = jest.spyOn(starknetUtils, 'createAccount');
   createAccountSpy.mockResolvedValue({
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    transaction_hash:
+    transactionHash:
       '0x07f901c023bac6c874691244c4c2332c6825b916fb68d240c807c6156db84fd3',
     address: account.address,
   });
@@ -88,9 +85,8 @@ const prepareMockExecuteTxn = async (
 
 describe('ExecuteTxn', () => {
   let callsExample: any;
-  const transactionVersion = TRANSACTION_VERSION;
 
-  it('executes transaction correctly when account is deployed', async () => {
+  it('executes transaction correctly if the account is deployed', async () => {
     callsExample = callsExamples[0];
     const {
       account,
@@ -114,18 +110,17 @@ describe('ExecuteTxn', () => {
       account.address,
       account.privateKey,
       request.calls,
-      transactionVersion,
-      expect.objectContaining({
-        maxFee: getEstimatedFeesRepsMock.suggestedMaxFee,
-        nonce: undefined,
-      }),
       undefined,
+      {
+        ...callsExample.details,
+        maxFee: getEstimatedFeesRepsMock.suggestedMaxFee,
+      },
     );
     expect(getEstimatedFeesSpy).toHaveBeenCalled();
     expect(createAccountSpy).not.toHaveBeenCalled();
   });
 
-  it('creates an account if the account is not deployed and execute transaction', async () => {
+  it('creates an account if the account is not deployed and execute the transaction', async () => {
     callsExample = callsExamples[1];
     const {
       account,
@@ -151,13 +146,12 @@ describe('ExecuteTxn', () => {
       account.address,
       account.privateKey,
       callsExample.calls,
-      transactionVersion,
+      undefined,
       {
         ...callsExample.details,
         maxFee: getEstimatedFeesRepsMock.suggestedMaxFee,
         nonce: 1,
       },
-      undefined,
     );
   });
 
@@ -176,47 +170,20 @@ describe('ExecuteTxn', () => {
     );
   });
 
-  it('throws error if calls are empty', async () => {
-    callsExample = Object.assign({}, callsExamples[1]);
-    const { request } = await prepareMockExecuteTxn(
+  it('throws `Failed to execute transaction` when the transaction hash is not returned from executeTxnUtil', async () => {
+    callsExample = callsExamples[1];
+    const { request, executeTxnUtilSpy } = await prepareMockExecuteTxn(
       callsExample.hash,
       callsExample.calls,
       callsExample.details,
       true,
     );
-    request.calls = [];
-
-    await expect(executeTxn.execute(request)).rejects.toThrow(
-      'Calls cannot be empty',
+    executeTxnUtilSpy.mockResolvedValue(
+      {} as unknown as InvokeFunctionResponse,
     );
-  });
 
-  it.each([
-    {
-      case: 'executeTxnUtil response is undefined',
-      executeTxnUtilResp: {},
-    },
-    {
-      case: 'executeTxnUtil response.transaction_hash is undefined',
-      executeTxnUtilResp: {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        transaction_hash: undefined,
-      },
-    },
-  ])(
-    'throws `Error` when $case',
-    async ({ executeTxnUtilResp }: { executeTxnUtilResp: unknown }) => {
-      callsExample = callsExamples[1];
-      const { request, executeTxnUtilSpy } = await prepareMockExecuteTxn(
-        callsExample.hash,
-        callsExample.calls,
-        callsExample.details,
-        true,
-      );
-      executeTxnUtilSpy.mockResolvedValue(executeTxnUtilResp as any);
-      await expect(executeTxn.execute(request)).rejects.toThrow(Error);
-    },
-  );
+    await expect(executeTxn.execute(request)).rejects.toThrow(Error);
+  });
 
   it('throws `InvalidParamsError` when request parameter is not correct', async () => {
     await expect(

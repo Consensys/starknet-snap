@@ -74,7 +74,7 @@ describe('estimateFee', () => {
         includeDeploy: false,
         chainId,
         address: account.address,
-        version: constants.TRANSACTION_VERSION.V2,
+        version: constants.TRANSACTION_VERSION.V1,
       });
 
     const result = await estimateFee.execute(request);
@@ -86,7 +86,7 @@ describe('estimateFee', () => {
       account.publicKey,
       request.invocations,
       {
-        version: constants.TRANSACTION_VERSION.V2,
+        version: constants.TRANSACTION_VERSION.V1,
       },
     );
     expect(result).toStrictEqual(estimateBulkFeeRespMock);
