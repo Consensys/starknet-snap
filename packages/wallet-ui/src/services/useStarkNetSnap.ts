@@ -339,9 +339,7 @@ export const useStarkNetSnap = () => {
     contractCallData: string,
     address: string,
     chainId: string,
-    transactionVersion?:
-      | typeof constants.TRANSACTION_VERSION.V1
-      | typeof constants.TRANSACTION_VERSION.V3,
+    transactionVersion?: typeof constants.TRANSACTION_VERSION.V3,
   ) {
     try {
       const invocations: Invocations = [
