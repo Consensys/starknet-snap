@@ -16,7 +16,6 @@ import type {
 
 import {
   FeeToken,
-  FeeTokenUnit,
   type AddErc20TokenRequestParams,
   type AddNetworkRequestParams,
 } from '../types/snapApi';
@@ -393,18 +392,10 @@ export function getTxnSnapTxt(
   }
 
   if (details?.maxFee) {
-    const feeToken =
-      details.version === constants.TRANSACTION_VERSION.V3
-        ? FeeToken.STRK
-        : FeeToken.ETH;
-    const feeTokenUnit =
-      details.version === constants.TRANSACTION_VERSION.V3
-        ? FeeTokenUnit.STRK
-        : FeeTokenUnit.ETH;
     addDialogTxt(
       components,
-      `Max Fee(${feeToken})`,
-      convert(details.maxFee, `${feeTokenUnit}`, 'ether'),
+      `Max Fee(${FeeToken.ETH})`,
+      convert(details.maxFee, 'wei', 'ether'),
     );
   }
   if (details?.nonce) {
