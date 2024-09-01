@@ -268,8 +268,6 @@ export const executeTxn = async (
   invocationsDetails?: UniversalDetails,
   cairoVersion?: CairoVersion,
 ): Promise<InvokeFunctionResponse> => {
-  // const version = invocationsDetails?.version;
-  // delete invocationsDetails?.version;
   return getAccountInstance(
     network,
     senderAddress,
@@ -813,6 +811,14 @@ export async function createAccount({
   };
 }
 
+/**
+ * Generates the calldata required for deploying an account based on the specified Cairo version.
+ *
+ * @param {string} publicKey - The public key of the account to be deployed.
+ * @param {CairoVersion} cairoVersion - The version of Cairo to be used ('0' or '1').
+ * @returns {Calldata} The calldata for deploying the account.
+ * @throws {Error} If the Cairo version is unsupported.
+ */
 export const getDeployAccountCallData = (
   publicKey: string,
   cairoVersion: CairoVersion,
@@ -1032,20 +1038,21 @@ export function createAccountDeployPayload(
 }
 
 /**
- * Estimate the fees required for a set of transactions, including optional account deployment costs.
+ * Estimates the fees required for a batch of transactions on the StarkNet network,
+ * including the optional cost of deploying an account if it has not been deployed yet.
  *
- * This function is specifically designed for use with Cairo 1 and does not support Cairo 0.
- * It calculates the fees for a batch of transaction invocations and includes the additional cost
- * of deploying an account if the account has not yet been deployed.
+ * This function is designed for use with Cairo 1, supporting transaction versions '0x1' and '0x3' only.
+ * It calculates the fees for a set of transaction invocations and includes the cost of deploying an account
+ * if the specified account is not already deployed on the network.
  *
- * @param {Network} network - The StarkNet network to interact with.
- * @param {string} address - The account address involved in the transactions.
+ * @param {Network} network - The StarkNet network to interact with (e.g., mainnet, testnet).
+ * @param {string} address - The address of the account involved in the transactions.
  * @param {string} privateKey - The private key for signing the transactions.
- * @param {string} publicKey - The public key of the account.
- * @param {Invocations} transactionInvocations - The set of transactions to be executed.
- * @param {constants.TRANSACTION_VERSION} transactionVersion - The version of the transaction, valid values are '0x1' or '0x3'.
- * @returns {Promise<EstimateFeeResponse>} - A promise that resolves to the estimated fee response,
- *                                           including suggested maximum fee and overall fee in wei.
+ * @param {string} publicKey - The public key of the account to be potentially deployed.
+ * @param {Invocations} transactionInvocations - The batch of transactions to be executed.
+ * @param {UniversalDetails} [invocationsDetails] - Optional details about the transaction invocations.
+ * @returns {Promise<EstimateFeeResponse>} A promise that resolves to an object containing the estimated fees,
+ * including the suggested maximum fee and the overall fee in wei.
  */
 export async function getEstimatedFees(
   network: Network,

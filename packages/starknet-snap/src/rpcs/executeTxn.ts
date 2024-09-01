@@ -84,7 +84,7 @@ export class ExecuteTxnRpc extends AccountRpcController<
    * @param params.calls - The invoke calls to execute
    * @param [params.abis] - The abis associated to invocations.
    * @param [params.details] - Optional, the UniversalDetails of the transactions to be signed. Reference: https://starknetjs.com/docs/API/interfaces/types.UniversalDetails
-   * @returns The InvokeFunctionResponse as an `ExecuteTxnResponse`.
+   * @returns A Promise that resolve the ExecuteTxnResponse object.
    */
   async execute(params: ExecuteTxnParams): Promise<ExecuteTxnResponse> {
     return super.execute(params);
