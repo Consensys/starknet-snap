@@ -18,3 +18,10 @@ export type TransactionResponse = GetTransactionResponse & {
 };
 
 export type TransactionVersion = Infer<typeof TxVersionStruct>;
+
+export type DeployAccountPayload = {
+  classHash: string;
+  contractAddress: string;
+  constructorCalldata: string[];
+  addressSalt: string;
+};

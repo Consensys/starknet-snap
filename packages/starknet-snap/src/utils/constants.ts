@@ -184,8 +184,6 @@ export const CAIRO_VERSION = '1';
 
 export const CAIRO_VERSION_LEGACY = '0';
 
-export const TRANSACTION_VERSION = constants.TRANSACTION_VERSION.V2;
-
 export enum BlockIdentifierEnum {
   Latest = 'latest',
   Pending = 'pending',

@@ -94,9 +94,9 @@ export const SendSummaryModalView = ({
           callData,
           wallet.accounts[0] as unknown as string,
           chainId,
-          selectedFeeToken === FeeToken.ETH
-            ? constants.TRANSACTION_VERSION.V2
-            : constants.TRANSACTION_VERSION.V3,
+          selectedFeeToken === FeeToken.STRK
+            ? constants.TRANSACTION_VERSION.V3
+            : undefined,
         )
           .then((response) => {
             if (response.message && response.message.includes('Error')) {
@@ -117,7 +117,10 @@ export const SendSummaryModalView = ({
 
   useEffect(() => {
     if (gasFees?.suggestedMaxFee) {
-      const gasFeesBN = ethers.utils.parseUnits(gasFees.suggestedMaxFee, 'wei');
+      const gasFeesBN = ethers.utils.parseUnits(
+        gasFees.suggestedMaxFee,
+        FeeTokenUnit.ETH,
+      );
       let totalToCheck = gasFeesBN;
 
       const gasFeesStr = ethers.utils.formatUnits(gasFeesBN, feeToken.decimals);

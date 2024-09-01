@@ -22,6 +22,7 @@ import type {
   GetTransactionReceiptResponse,
   BigNumberish,
   ArraySignatureType,
+  Calldata,
 } from 'starknet';
 import {
   ec,
@@ -48,9 +49,9 @@ import {
 import type { Network, SnapState, Transaction } from '../types/snapState';
 import { TransactionType } from '../types/snapState';
 import type {
+  DeployAccountPayload,
   TransactionResponse,
   TransactionStatuses,
-  TransactionVersion,
 } from '../types/starknet';
 import type {
   VoyagerTransactions,
@@ -67,7 +68,6 @@ import {
   CAIRO_VERSION_LEGACY,
   ETHER_MAINNET,
   ETHER_SEPOLIA_TESTNET,
-  TRANSACTION_VERSION,
   BlockIdentifierEnum,
 } from './constants';
 import { DeployRequiredError, UpgradeRequiredError } from './exceptions';
@@ -139,7 +139,10 @@ export const getAccountInstance = (
   userAddress: string,
   privateKey: string | Uint8Array,
   cairoVersion?: CairoVersion,
-  transactionVersion?: TransactionVersion,
+  transactionVersion?:
+    | BigNumberish
+    | typeof constants.TRANSACTION_VERSION.V2
+    | typeof constants.TRANSACTION_VERSION.V3,
   blockIdentifier?: BlockIdentifierEnum,
 ): Account => {
   const provider = getProvider(network, blockIdentifier);
@@ -148,7 +151,9 @@ export const getAccountInstance = (
     userAddress,
     privateKey,
     cairoVersion ?? CAIRO_VERSION,
-    transactionVersion ?? TRANSACTION_VERSION,
+    transactionVersion as unknown as
+      | typeof constants.TRANSACTION_VERSION.V2
+      | typeof constants.TRANSACTION_VERSION.V3,
   );
 };
 
@@ -198,6 +203,7 @@ export const declareContract = async (
     senderAddress,
     privateKey,
     cairoVersion,
+    invocationsDetails?.version,
   ).declare(contractPayload, {
     ...invocationsDetails,
     skipValidate: false,
@@ -210,9 +216,6 @@ export const estimateFee = async (
   senderAddress: string,
   privateKey: string | Uint8Array,
   txnInvocation: Call | Call[],
-  transactionVersion:
-    | typeof constants.TRANSACTION_VERSION.V2
-    | typeof constants.TRANSACTION_VERSION.V3 = TRANSACTION_VERSION,
   cairoVersion?: CairoVersion,
   invocationsDetails?: UniversalDetails,
 ): Promise<EstimateFee> => {
@@ -223,7 +226,7 @@ export const estimateFee = async (
     senderAddress,
     privateKey,
     cairoVersion,
-    transactionVersion,
+    invocationsDetails?.version,
     BlockIdentifierEnum.Latest,
   ).estimateInvokeFee(txnInvocation, {
     ...invocationsDetails,
@@ -237,7 +240,6 @@ export const estimateFeeBulk = async (
   senderAddress: string,
   privateKey: string | Uint8Array,
   txnInvocation: Invocations,
-  transactionVersion: TransactionVersion = TRANSACTION_VERSION,
   invocationsDetails?: UniversalDetails,
   cairoVersion?: CairoVersion,
 ): Promise<EstimateFee[]> => {
@@ -248,7 +250,7 @@ export const estimateFeeBulk = async (
     senderAddress,
     privateKey,
     cairoVersion,
-    transactionVersion,
+    invocationsDetails?.version,
     BlockIdentifierEnum.Latest,
   ).estimateFeeBulk(txnInvocation, {
     ...invocationsDetails,
@@ -262,7 +264,6 @@ export const executeTxn = async (
   senderAddress: string,
   privateKey: string | Uint8Array,
   txnInvocation: Call | Call[],
-  transactionVersion: TransactionVersion = TRANSACTION_VERSION,
   abis?: Abi[],
   invocationsDetails?: UniversalDetails,
   cairoVersion?: CairoVersion,
@@ -272,68 +273,12 @@ export const executeTxn = async (
     senderAddress,
     privateKey,
     cairoVersion,
-    transactionVersion,
+    invocationsDetails?.version,
   ).execute(txnInvocation, abis, {
     ...invocationsDetails,
     skipValidate: false,
     blockIdentifier: BlockIdentifierEnum.Latest,
   });
-};
-
-/**
- * calculate contract address by publicKey
- *
- * @param publicKey - address's publicKey.
- * @returns address and calldata.
- */
-export const getAccContractAddressAndCallData = (publicKey) => {
-  const callData = CallData.compile({
-    signer: publicKey,
-    guardian: '0',
-  });
-
-  let address = hash.calculateContractAddressFromHash(
-    publicKey,
-    ACCOUNT_CLASS_HASH,
-    callData,
-    0,
-  );
-
-  if (address.length < 66) {
-    address = address.replace('0x', `0x${'0'.repeat(66 - address.length)}`);
-  }
-  return {
-    address,
-    callData,
-  };
-};
-
-/**
- * calculate contract address by publicKey
- *
- * @param publicKey - address's publicKey.
- * @returns address and calldata.
- */
-export const getAccContractAddressAndCallDataLegacy = (publicKey) => {
-  // [TODO]: Check why use ACCOUNT_CLASS_HASH_LEGACY and PROXY_CONTRACT_HASH ?
-  const callData = CallData.compile({
-    implementation: ACCOUNT_CLASS_HASH_LEGACY,
-    selector: hash.getSelectorFromName('initialize'),
-    calldata: CallData.compile({ signer: publicKey, guardian: '0' }),
-  });
-  let address = hash.calculateContractAddressFromHash(
-    publicKey,
-    PROXY_CONTRACT_HASH,
-    callData,
-    0,
-  );
-  if (address.length < 66) {
-    address = address.replace('0x', `0x${'0'.repeat(66 - address.length)}`);
-  }
-  return {
-    address,
-    callData,
-  };
 };
 
 export const deployAccount = async (
@@ -342,7 +287,6 @@ export const deployAccount = async (
   contractCallData: RawCalldata,
   addressSalt: numUtils.BigNumberish,
   privateKey: string | Uint8Array,
-  transactionVersion: TransactionVersion = TRANSACTION_VERSION,
   cairoVersion?: CairoVersion,
   invocationsDetails?: UniversalDetails,
 ): Promise<DeployContractResponse> => {
@@ -359,7 +303,7 @@ export const deployAccount = async (
     contractAddress,
     privateKey,
     cairoVersion,
-    transactionVersion,
+    invocationsDetails?.version,
   ).deployAccount(deployAccountPayload, {
     ...invocationsDetails,
     skipValidate: false,
@@ -389,6 +333,7 @@ export const estimateAccountDeployFee = async (
     contractAddress,
     privateKey,
     cairoVersion,
+    invocationsDetails?.version,
   ).estimateAccountDeployFee(deployAccountPayload, {
     ...invocationsDetails,
     skipValidate: false,
@@ -743,6 +688,159 @@ export const getNextAddressIndex = (
 };
 
 /**
+ * calculate contract address by publicKey
+ *
+ * @param publicKey - address's publicKey.
+ * @returns address and calldata.
+ */
+export const getAccContractAddressAndCallData = (publicKey) => {
+  const callData = getDeployAccountCallData(publicKey, CAIRO_VERSION);
+
+  let address = hash.calculateContractAddressFromHash(
+    publicKey,
+    ACCOUNT_CLASS_HASH,
+    callData,
+    0,
+  );
+
+  if (address.length < 66) {
+    address = address.replace('0x', `0x${'0'.repeat(66 - address.length)}`);
+  }
+  return {
+    address,
+    callData,
+  };
+};
+
+/**
+ * calculate contract address by publicKey
+ *
+ * @param publicKey - address's publicKey.
+ * @returns address and calldata.
+ */
+export const getAccContractAddressAndCallDataLegacy = (publicKey) => {
+  // [TODO]: Check why use ACCOUNT_CLASS_HASH_LEGACY and PROXY_CONTRACT_HASH ?
+  const callData = getDeployAccountCallData(publicKey, CAIRO_VERSION_LEGACY);
+
+  let address = hash.calculateContractAddressFromHash(
+    publicKey,
+    PROXY_CONTRACT_HASH,
+    callData,
+    0,
+  );
+  if (address.length < 66) {
+    address = address.replace('0x', `0x${'0'.repeat(66 - address.length)}`);
+  }
+  return {
+    address,
+    callData,
+  };
+};
+
+/**
+ * Creates a new Cairo 1 account on the specified network and records deployment information to the state.
+ *
+ * This function generates a new account address and call data based on the provided public key,
+ * deploys the account on the network, and records the deployment details such as contract address
+ * and transaction hash into the state using the provided `recordAccountDeployment` function.
+ *
+ * Optionally, if `waitMode` is enabled, the function will wait for the transaction to be confirmed
+ * before returning the account address and transaction hash.
+ *
+ * @param network - The network on which to deploy the account.
+ * @param address - The account address.
+ * @param publicKey - The public key of the account address.
+ * @param privateKey - The private key used to sign the deployment transaction.
+ * @param cairoVersion - The version of Cairo to use for the account deployment.
+ * @param recordAccountDeployment - A function to record deployment information into the state.
+ * @param waitMode - If true, waits for the transaction to be confirmed before returning. Defaults to false.
+ * @returns An object containing the deployed account address and the transaction hash.
+ */
+export async function createAccount({
+  network,
+  address,
+  publicKey,
+  privateKey,
+  cairoVersion = CAIRO_VERSION,
+  waitMode = false,
+  callback,
+}: {
+  network: Network;
+  address: string;
+  publicKey: string;
+  privateKey: string;
+  cairoVersion?: CairoVersion;
+  waitMode?: boolean;
+  callback?: (address: string, transactionHash: string) => Promise<void>;
+}) {
+  // Deploy account will auto estimate the fee from the network if not provided
+  const {
+    contract_address: contractAddress,
+    transaction_hash: transactionHash,
+  } = await deployAccount(
+    network,
+    address,
+    getDeployAccountCallData(publicKey, cairoVersion),
+    publicKey,
+    privateKey,
+    cairoVersion,
+  );
+
+  if (contractAddress !== address) {
+    logger.warn(`
+      contract address is not match with the desired address\n contract address: ${contractAddress}, desired address: ${address}
+      `);
+  }
+
+  if (typeof callback === 'function') {
+    await callback(contractAddress, transactionHash);
+  }
+
+  if (waitMode) {
+    await waitForTransaction(
+      network,
+      contractAddress,
+      privateKey,
+      transactionHash,
+    );
+  }
+
+  return {
+    address: contractAddress,
+    transactionHash: transactionHash,
+  };
+}
+
+/**
+ * Generates the calldata required for deploying an account based on the specified Cairo version.
+ *
+ * @param {string} publicKey - The public key of the account to be deployed.
+ * @param {CairoVersion} cairoVersion - The version of Cairo to be used ('0' or '1').
+ * @returns {Calldata} The calldata for deploying the account.
+ * @throws {Error} If the Cairo version is unsupported.
+ */
+export const getDeployAccountCallData = (
+  publicKey: string,
+  cairoVersion: CairoVersion,
+): Calldata => {
+  switch (cairoVersion) {
+    case '1':
+      return CallData.compile({
+        signer: publicKey,
+        guardian: '0',
+      });
+    case '0':
+      return CallData.compile({
+        implementation: ACCOUNT_CLASS_HASH_LEGACY,
+        selector: hash.getSelectorFromName('initialize'),
+        calldata: CallData.compile({ signer: publicKey, guardian: '0' }),
+      });
+    default:
+      throw new Error(`Unsupported Cairo version: ${cairoVersion}`);
+  }
+};
+
+/**
  * Get address permutation by public key
  *
  * @param pk - Public key.
@@ -915,41 +1013,60 @@ export const validateAndParseAddress = (
 };
 
 /**
- * Estimate the fees required for a set of transactions, including optional account deployment costs.
+ * Creates the payload required to deploy a new account on StarkNet.
  *
- * This function is specifically designed for use with Cairo 1 and does not support Cairo 0.
- * It calculates the fees for a batch of transaction invocations and includes the additional cost
- * of deploying an account if the account has not yet been deployed.
+ * This function generates the necessary parameters for deploying an account, including the
+ * class hash, contract address, constructor calldata, and address salt. The payload returned
+ * by this function can be used in the deployment transaction to initialize the account.
  *
- * @param {Network} network - The StarkNet network to interact with.
- * @param {string} address - The account address involved in the transactions.
+ * @param {string} address - The address of the account to be deployed.
+ * @param {string} publicKey - The public key associated with the account.
+ * @returns {DeployAccountPayload} - The payload object containing the class hash, contract address,
+ *                                   constructor calldata, and address salt required for deployment.
+ */
+export function createAccountDeployPayload(
+  address: string,
+  publicKey: string,
+): DeployAccountPayload {
+  const { callData } = getAccContractAddressAndCallData(publicKey);
+  return {
+    classHash: ACCOUNT_CLASS_HASH,
+    contractAddress: address,
+    constructorCalldata: callData,
+    addressSalt: publicKey,
+  };
+}
+
+/**
+ * Estimates the fees required for a batch of transactions on the StarkNet network,
+ * including the optional cost of deploying an account if it has not been deployed yet.
+ *
+ * This function is designed for use with Cairo 1, supporting transaction versions '0x1' and '0x3' only.
+ * It calculates the fees for a set of transaction invocations and includes the cost of deploying an account
+ * if the specified account is not already deployed on the network.
+ *
+ * @param {Network} network - The StarkNet network to interact with (e.g., mainnet, testnet).
+ * @param {string} address - The address of the account involved in the transactions.
  * @param {string} privateKey - The private key for signing the transactions.
- * @param {string} accountPublicKey - The public key of the account.
- * @param {Invocations} transactionInvocations - The set of transactions to be executed.
- * @param {constants.TRANSACTION_VERSION} transactionVersion - The version of the transaction, valid values are '0x2' or '0x3'.
- * @returns {Promise<EstimateFeeResponse>} - A promise that resolves to the estimated fee response,
- *                                           including suggested maximum fee and overall fee in wei.
+ * @param {string} publicKey - The public key of the account to be potentially deployed.
+ * @param {Invocations} transactionInvocations - The batch of transactions to be executed.
+ * @param {UniversalDetails} [invocationsDetails] - Optional details about the transaction invocations.
+ * @returns {Promise<EstimateFeeResponse>} A promise that resolves to an object containing the estimated fees,
+ * including the suggested maximum fee and the overall fee in wei.
  */
 export async function getEstimatedFees(
   network: Network,
   address: string,
   privateKey: string,
-  accountPublicKey: string,
+  publicKey: string,
   transactionInvocations: Invocations,
-  transactionVersion: TransactionVersion,
+  invocationsDetails?: UniversalDetails,
 ): Promise<EstimateFeeResponse> {
-  let bulkTransactions = transactionInvocations;
   const accountDeployed = await isAccountDeployed(network, address);
   if (!accountDeployed) {
-    const { callData } = getAccContractAddressAndCallData(accountPublicKey);
-    const deployAccountpayload = {
-      classHash: ACCOUNT_CLASS_HASH,
-      contractAddress: address,
-      constructorCalldata: callData,
-      addressSalt: accountPublicKey,
-    };
+    const deployAccountpayload = createAccountDeployPayload(address, publicKey);
 
-    bulkTransactions.unshift({
+    transactionInvocations.unshift({
       type: StarknetTransactionType.DEPLOY_ACCOUNT,
       payload: deployAccountpayload,
     });
@@ -959,8 +1076,8 @@ export async function getEstimatedFees(
     network,
     address,
     privateKey,
-    bulkTransactions,
-    transactionVersion,
+    transactionInvocations,
+    invocationsDetails,
   );
 
   const estimateFeeResp = addFeesFromAllTransactions(estimateBulkFeeResp);
@@ -969,9 +1086,9 @@ export async function getEstimatedFees(
     suggestedMaxFee: estimateFeeResp.suggestedMaxFee.toString(10),
     overallFee: estimateFeeResp.overall_fee.toString(10),
     unit:
-      transactionVersion === constants.TRANSACTION_VERSION.V2
-        ? FeeTokenUnit.ETH
-        : FeeTokenUnit.STRK,
+      invocationsDetails?.version === constants.TRANSACTION_VERSION.V3
+        ? FeeTokenUnit.STRK
+        : FeeTokenUnit.ETH,
     includeDeploy: !accountDeployed,
   };
 }
@@ -1081,7 +1198,6 @@ export async function estimateAccountUpgradeFee(
       contractAddress,
       privateKey,
       txnInvocation,
-      TRANSACTION_VERSION,
       CAIRO_VERSION_LEGACY,
     );
     return numUtils.toBigInt(estFeeResp.suggestedMaxFee.toString(10) ?? '0');

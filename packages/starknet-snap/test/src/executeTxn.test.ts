@@ -8,7 +8,6 @@ import { SnapState } from '../../src/types/snapState';
 import {
   STARKNET_MAINNET_NETWORK,
   STARKNET_SEPOLIA_TESTNET_NETWORK,
-  TRANSACTION_VERSION,
 } from '../../src/utils/constants';
 import {
   createAccountProxyTxn,
@@ -121,7 +120,6 @@ describe('Test function: executeTxn', function () {
         calldata: ['0', '0', '0'],
         contractAddress: createAccountProxyTxn.contractAddress,
       },
-      TRANSACTION_VERSION,
       undefined,
       { maxFee: '22702500105945', nonce: 1 },
     );
@@ -188,7 +186,6 @@ describe('Test function: executeTxn', function () {
           contractAddress: createAccountProxyTxn.contractAddress,
         },
       ],
-      TRANSACTION_VERSION,
       undefined,
       { maxFee: '22702500105945', nonce: 1 },
     );
@@ -227,7 +224,6 @@ describe('Test function: executeTxn', function () {
         calldata: ['0', '0', '0'],
         contractAddress: createAccountProxyTxn.contractAddress,
       },
-      TRANSACTION_VERSION,
       undefined,
       { maxFee: '22702500105945', nonce: undefined },
     );
@@ -288,7 +284,6 @@ describe('Test function: executeTxn', function () {
           contractAddress: createAccountProxyTxn.contractAddress,
         },
       ],
-      TRANSACTION_VERSION,
       undefined,
       { maxFee: '22702500105945', nonce: undefined },
     );
@@ -322,7 +317,6 @@ describe('Test function: executeTxn', function () {
           calldata: ['0', '0', '0'],
           contractAddress: createAccountProxyTxn.contractAddress,
         },
-        TRANSACTION_VERSION,
         undefined,
         { maxFee: '22702500105945', nonce: undefined },
       );

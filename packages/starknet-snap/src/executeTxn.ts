@@ -8,7 +8,7 @@ import type {
   ApiParamsWithKeyDeriver,
   ExecuteTxnRequestParams,
 } from './types/snapApi';
-import { ACCOUNT_CLASS_HASH, TRANSACTION_VERSION } from './utils/constants';
+import { ACCOUNT_CLASS_HASH, CAIRO_VERSION } from './utils/constants';
 import { logger } from './utils/logger';
 import {
   getNetworkFromChainId,
@@ -71,7 +71,6 @@ export async function executeTxn(params: ApiParamsWithKeyDeriver) {
       senderAddress,
       senderPrivateKey,
       bulkTransactions,
-      TRANSACTION_VERSION,
       requestParamsObj.invocationsDetails
         ? requestParamsObj.invocationsDetails
         : undefined,
@@ -143,9 +142,9 @@ export async function executeTxn(params: ApiParamsWithKeyDeriver) {
       senderAddress,
       senderPrivateKey,
       requestParamsObj.txnInvocation,
-      TRANSACTION_VERSION,
       requestParamsObj.abis,
       { maxFee, nonce: nonceSendTransaction },
+      CAIRO_VERSION,
     );
   } catch (error) {
     logger.error(`Problem found:`, error);

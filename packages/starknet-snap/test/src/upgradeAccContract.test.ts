@@ -28,7 +28,7 @@ import {
   CAIRO_VERSION_LEGACY,
   ACCOUNT_CLASS_HASH,
 } from '../../src/utils/constants';
-import { CallData, constants, num } from 'starknet';
+import { CallData, num } from 'starknet';
 
 chai.use(sinonChai);
 chai.use(chaiAsPromised);
@@ -184,7 +184,6 @@ describe('Test function: upgradeAccContract', function () {
         address,
         'pk',
         txnInvocation,
-        constants.TRANSACTION_VERSION.V2,
         undefined,
         {
           maxFee: num.toBigInt(10000),
@@ -221,7 +220,6 @@ describe('Test function: upgradeAccContract', function () {
         address,
         'pk',
         txnInvocation,
-        constants.TRANSACTION_VERSION.V2,
         undefined,
         {
           maxFee: num.toBigInt(estimateFeeResp.suggestedMaxFee),

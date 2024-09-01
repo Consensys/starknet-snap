@@ -38,7 +38,6 @@ export async function estimateFee(params: ApiParamsWithKeyDeriver) {
     );
     const { senderAddress } = requestParamsObj;
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
-    const { transactionVersion } = requestParamsObj;
 
     if (
       !contractAddress ||
@@ -117,7 +116,6 @@ export async function estimateFee(params: ApiParamsWithKeyDeriver) {
       senderAddress,
       senderPrivateKey,
       bulkTransactions,
-      transactionVersion,
     );
     logger.log(
       `estimateFee:\nestimateFeeBulk estimateBulkFeeResp: ${toJson(

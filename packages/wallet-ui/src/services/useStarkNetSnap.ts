@@ -33,6 +33,7 @@ import { getAssetPriceUSD } from './coinGecko';
 import semver from 'semver/preload';
 import { setActiveNetwork } from 'slices/networkSlice';
 import {
+  Call,
   constants,
   Invocations,
   TransactionType,
@@ -338,9 +339,7 @@ export const useStarkNetSnap = () => {
     contractCallData: string,
     address: string,
     chainId: string,
-    transactionVersion?:
-      | typeof constants.TRANSACTION_VERSION.V2
-      | typeof constants.TRANSACTION_VERSION.V3,
+    transactionVersion?: typeof constants.TRANSACTION_VERSION.V3,
   ) {
     try {
       const invocations: Invocations = [
@@ -387,14 +386,11 @@ export const useStarkNetSnap = () => {
   ) {
     dispatch(enableLoadingWithMessage('Sending transaction...'));
     try {
-      const invocations: Invocations = [
+      const calls: Call[] = [
         {
-          type: TransactionType.INVOKE,
-          payload: {
-            contractAddress,
-            entrypoint: contractFuncName,
-            calldata: contractCallData.split(',').map((ele) => ele.trim()),
-          },
+          contractAddress,
+          entrypoint: contractFuncName,
+          calldata: contractCallData.split(',').map((ele) => ele.trim()),
         },
       ];
       const response = await provider.request({
@@ -402,20 +398,19 @@ export const useStarkNetSnap = () => {
         params: {
           snapId,
           request: {
-            method: 'starkNet_executeTxn',
+            method: 'starkNet_sendTransaction',
             params: {
               ...defaultParam,
-              invocations,
               address,
+              calls,
               details: {
                 version:
-                  feeToken === 'ETH'
-                    ? constants.TRANSACTION_VERSION.V2
-                    : constants.TRANSACTION_VERSION.V3,
+                  feeToken === 'STRK'
+                    ? constants.TRANSACTION_VERSION.V3
+                    : undefined,
                 maxFee,
               } as UniversalDetails,
               chainId,
-              enableAuthorize: true,
             },
           },
         },

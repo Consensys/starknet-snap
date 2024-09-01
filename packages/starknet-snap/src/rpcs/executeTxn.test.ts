@@ -1,12 +1,13 @@
-import type { Invocations, UniversalDetails } from 'starknet';
-import { TransactionType, constants } from 'starknet';
-
-import invocationExamples from '../__tests__/fixture/invocationExamples.json'; // Assuming you have a similar fixture
 import {
-  CAIRO_VERSION,
-  STARKNET_SEPOLIA_TESTNET_NETWORK,
-  TRANSACTION_VERSION,
-} from '../utils/constants';
+  InvalidParamsError,
+  UserRejectedRequestError,
+} from '@metamask/snaps-sdk';
+import type { UniversalDetails, Call, InvokeFunctionResponse } from 'starknet';
+import { constants } from 'starknet';
+
+import callsExamples from '../__tests__/fixture/callsExamples.json'; // Assuming you have a similar fixture
+import type { FeeTokenUnit } from '../types/snapApi';
+import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../utils/constants';
 import * as starknetUtils from '../utils/starknetUtils';
 import { executeTxn as executeTxnUtil } from '../utils/starknetUtils';
 import {
@@ -15,184 +16,178 @@ import {
   prepareMockAccount,
 } from './__tests__/helper';
 import type { ExecuteTxnParams } from './executeTxn';
-import * as executeTxnMethods from './executeTxn';
+import { executeTxn } from './executeTxn';
 
-const { executeTxn } = executeTxnMethods;
+jest.mock('../utils/snap');
+jest.mock('../utils/logger');
 
-const prepareMockExecuteTxn = (
+const prepareMockExecuteTxn = async (
   transactionHash: string,
+  calls: Call[] | Call,
+  details: UniversalDetails,
   accountDeployed: boolean,
 ) => {
-  const executeTxnRespMock = {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    transaction_hash: transactionHash,
-  };
-
-  const getEstmatedFeesRepsMock = {
-    suggestedMaxFee: BigInt(1000000000000000).toString(10),
-    overallFee: BigInt(1000000000000000).toString(10),
-    includeDeploy: !accountDeployed,
-    unit: 'wei',
-  };
-  const getEstimatedFeesStub = jest.spyOn(starknetUtils, 'getEstimatedFees');
-  getEstimatedFeesStub.mockResolvedValue(getEstmatedFeesRepsMock);
-
-  const executeTxnUtilStub = jest.spyOn(starknetUtils, 'executeTxn');
-  executeTxnUtilStub.mockResolvedValue(executeTxnRespMock);
-
-  const createAccountStub = jest.spyOn(executeTxnMethods, 'createAccount');
-  createAccountStub.mockResolvedValue({
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    transaction_hash: '0x123',
-    address: '0x234',
-  });
-
-  return {
-    createAccountStub,
-    executeTxnRespMock,
-    getEstimatedFeesStub,
-    getEstmatedFeesRepsMock,
-  };
-};
-
-describe('ExecuteTxn', () => {
-  let invocationExample: any;
-  const enableAuthorize = true;
   const state = {
     accContracts: [],
     erc20Tokens: [],
     networks: [STARKNET_SEPOLIA_TESTNET_NETWORK],
     transactions: [],
   };
+  const { confirmDialogSpy } = prepareConfirmDialog();
 
-  const createRequestParam = (
-    chainId: constants.StarknetChainId,
-    address: string,
-    invocations: Invocations,
-    details: UniversalDetails,
-    transactionType?: TransactionType,
-  ): ExecuteTxnParams => {
-    if (transactionType) {
-      invocations.forEach((invocation) => {
-        invocation.type = transactionType;
-      });
-    }
-    const request: ExecuteTxnParams = {
-      chainId,
-      address,
-      invocations,
-      details,
-    } as ExecuteTxnParams;
-    if (enableAuthorize) {
-      request.enableAuthorize = enableAuthorize;
-    }
-    return request;
+  const account = await mockAccount(constants.StarknetChainId.SN_SEPOLIA);
+  prepareMockAccount(account, state);
+
+  const request: ExecuteTxnParams = {
+    chainId: state.networks[0].chainId,
+    address: account.address,
+    calls,
+    details,
+  } as ExecuteTxnParams;
+
+  const executeTxnRespMock = {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    transaction_hash: transactionHash,
   };
 
-  it('executes transaction correctly when account is deployed', async () => {
-    const account = await mockAccount(constants.StarknetChainId.SN_SEPOLIA);
-    invocationExample = invocationExamples.shift();
+  const getEstimatedFeesRepsMock = {
+    suggestedMaxFee: BigInt(1000000000000000).toString(10),
+    overallFee: BigInt(1000000000000000).toString(10),
+    includeDeploy: !accountDeployed,
+    unit: 'wei' as FeeTokenUnit,
+  };
 
-    prepareMockAccount(account, state);
-    prepareConfirmDialog();
-    const { createAccountStub, executeTxnRespMock, getEstimatedFeesStub } =
-      prepareMockExecuteTxn(invocationExample.hash, true);
+  const getEstimatedFeesSpy = jest.spyOn(starknetUtils, 'getEstimatedFees');
+  getEstimatedFeesSpy.mockResolvedValue(getEstimatedFeesRepsMock);
 
-    const request = createRequestParam(
-      state.networks[0].chainId as any,
-      account.address,
-      invocationExample.invocations,
-      invocationExample.details,
+  const executeTxnUtilSpy = jest.spyOn(starknetUtils, 'executeTxn');
+  executeTxnUtilSpy.mockResolvedValue(executeTxnRespMock);
+
+  const createAccountSpy = jest.spyOn(starknetUtils, 'createAccount');
+  createAccountSpy.mockResolvedValue({
+    transactionHash:
+      '0x07f901c023bac6c874691244c4c2332c6825b916fb68d240c807c6156db84fd3',
+    address: account.address,
+  });
+
+  return {
+    network: state.networks[0],
+    account,
+    request,
+    confirmDialogSpy,
+    createAccountSpy,
+    executeTxnRespMock,
+    executeTxnUtilSpy,
+    getEstimatedFeesSpy,
+    getEstimatedFeesRepsMock,
+  };
+};
+
+describe('ExecuteTxn', () => {
+  let callsExample: any;
+
+  it('executes transaction correctly if the account is deployed', async () => {
+    callsExample = callsExamples[0];
+    const {
+      account,
+      createAccountSpy,
+      executeTxnRespMock,
+      getEstimatedFeesSpy,
+      getEstimatedFeesRepsMock,
+      request,
+    } = await prepareMockExecuteTxn(
+      callsExample.hash,
+      callsExample.calls,
+      callsExample.details,
+      true,
     );
 
     const result = await executeTxn.execute(request);
 
     expect(result).toStrictEqual(executeTxnRespMock);
     expect(executeTxnUtil).toHaveBeenCalledWith(
-      expect.anything(),
+      STARKNET_SEPOLIA_TESTNET_NETWORK,
       account.address,
       account.privateKey,
-      request.invocations.map((invocation) => invocation.payload),
-      TRANSACTION_VERSION,
+      request.calls,
       undefined,
-      expect.objectContaining({
-        maxFee: '1000000000000000',
-        nonce: undefined,
-      }),
-      CAIRO_VERSION,
+      {
+        ...callsExample.details,
+        maxFee: getEstimatedFeesRepsMock.suggestedMaxFee,
+      },
     );
-    expect(getEstimatedFeesStub).toHaveBeenCalled();
-    expect(createAccountStub).not.toHaveBeenCalled();
+    expect(getEstimatedFeesSpy).toHaveBeenCalled();
+    expect(createAccountSpy).not.toHaveBeenCalled();
   });
 
-  it('executes transaction correctly when account is not deployed', async () => {
-    const account = await mockAccount(constants.StarknetChainId.SN_SEPOLIA);
-    invocationExample = invocationExamples.shift();
-
-    prepareMockAccount(account, state);
-    prepareConfirmDialog();
-    const { createAccountStub, executeTxnRespMock, getEstimatedFeesStub } =
-      prepareMockExecuteTxn(invocationExample.hash, false);
-
-    const request = createRequestParam(
-      state.networks[0].chainId as any,
-      account.address,
-      invocationExample.invocations,
-      invocationExample.details,
+  it('creates an account if the account is not deployed and execute the transaction', async () => {
+    callsExample = callsExamples[1];
+    const {
+      account,
+      createAccountSpy,
+      executeTxnUtilSpy,
+      getEstimatedFeesSpy,
+      getEstimatedFeesRepsMock,
+      network,
+      request,
+    } = await prepareMockExecuteTxn(
+      callsExample.hash,
+      callsExample.calls,
+      callsExample.details,
+      false,
     );
 
-    const result = await executeTxn.execute(request);
+    await executeTxn.execute(request);
 
-    expect(result).toStrictEqual(executeTxnRespMock);
-    expect(getEstimatedFeesStub).toHaveBeenCalled();
-    expect(createAccountStub).toHaveBeenCalledTimes(1);
+    expect(getEstimatedFeesSpy).toHaveBeenCalled();
+    expect(createAccountSpy).toHaveBeenCalledTimes(1);
+    expect(executeTxnUtilSpy).toHaveBeenCalledWith(
+      network,
+      account.address,
+      account.privateKey,
+      callsExample.calls,
+      undefined,
+      {
+        ...callsExample.details,
+        maxFee: getEstimatedFeesRepsMock.suggestedMaxFee,
+        nonce: 1,
+      },
+    );
   });
 
-  it('throws error if invocations are empty', async () => {
-    const account = await mockAccount(constants.StarknetChainId.SN_SEPOLIA);
-    prepareMockAccount(account, state);
-    prepareConfirmDialog();
-    prepareMockExecuteTxn(invocationExample.hash, true);
-
-    const request = createRequestParam(
-      state.networks[0].chainId as any,
-      account.address,
-      invocationExample.invocations,
-      invocationExample.details,
+  it('throws UserRejectedRequestError if user cancels execution', async () => {
+    callsExample = callsExamples[1];
+    const { request, confirmDialogSpy } = await prepareMockExecuteTxn(
+      callsExample.hash,
+      callsExample.calls,
+      callsExample.details,
+      true,
     );
-
-    request.invocations = [];
+    confirmDialogSpy.mockResolvedValue(false);
 
     await expect(executeTxn.execute(request)).rejects.toThrow(
-      'Invocations cannot be empty',
+      UserRejectedRequestError,
     );
   });
 
-  it.each([
-    TransactionType.DECLARE,
-    TransactionType.DEPLOY,
-    TransactionType.DEPLOY_ACCOUNT,
-  ])(
-    `throws error if invocation type is %s`,
-    async (transactionType: TransactionType) => {
-      const account = await mockAccount(constants.StarknetChainId.SN_SEPOLIA);
-      prepareMockAccount(account, state);
-      prepareConfirmDialog();
-      prepareMockExecuteTxn(invocationExample.hash, true);
+  it('throws `Failed to execute transaction` when the transaction hash is not returned from executeTxnUtil', async () => {
+    callsExample = callsExamples[1];
+    const { request, executeTxnUtilSpy } = await prepareMockExecuteTxn(
+      callsExample.hash,
+      callsExample.calls,
+      callsExample.details,
+      true,
+    );
+    executeTxnUtilSpy.mockResolvedValue(
+      {} as unknown as InvokeFunctionResponse,
+    );
 
-      const request = createRequestParam(
-        state.networks[0].chainId as any,
-        account.address,
-        invocationExample.invocations,
-        invocationExample.details,
-      );
+    await expect(executeTxn.execute(request)).rejects.toThrow(Error);
+  });
 
-      request.invocations[0].type = transactionType;
-      request.invocations[0].payload = {};
-
-      await expect(executeTxn.execute(request)).rejects.toThrow(
-        `Invocations should be of type INVOKE_FUNCTION received ${transactionType}`,
-      );
-    },
-  );
+  it('throws `InvalidParamsError` when request parameter is not correct', async () => {
+    await expect(
+      executeTxn.execute({} as unknown as ExecuteTxnParams),
+    ).rejects.toThrow(InvalidParamsError);
+  });
 });

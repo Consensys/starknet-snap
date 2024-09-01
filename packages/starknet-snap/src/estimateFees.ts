@@ -32,7 +32,6 @@ export async function estimateFees(params: ApiParamsWithKeyDeriver) {
       senderAddress,
       senderPrivateKey,
       requestParamsObj.invocations,
-      requestParamsObj.transactionVersion,
       requestParamsObj.invocationDetails,
     );
 
