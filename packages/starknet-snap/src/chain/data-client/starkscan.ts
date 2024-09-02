@@ -6,6 +6,7 @@ import {
 } from 'starknet';
 
 import type { Network, Transaction } from '../../types/snapState';
+import type { IDataClient } from '../data-client';
 
 /* eslint-disable */
 export type StarkScanTransaction = {
@@ -63,7 +64,7 @@ export type StarkScanOptions = {
 };
 /* eslint-enable */
 
-export class StarkScanClient {
+export class StarkScanClient implements IDataClient {
   protected network: Network;
 
   protected options: StarkScanOptions;
