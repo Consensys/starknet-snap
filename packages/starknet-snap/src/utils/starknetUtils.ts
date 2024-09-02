@@ -747,6 +747,13 @@ export const getAccContractAddressAndCallDataLegacy = (publicKey) => {
  * Optionally, if `waitMode` is enabled, the function will wait for the transaction to be confirmed
  * before returning the account address and transaction hash.
  *
+ * The function also supports an optional `callback` that will be invoked with the deployed account address
+ * and transaction hash once the deployment is complete. Can be used to update internal state after 
+ * successful transaction
+ * 
+ * Additionally, an optional `version` parameter can be specified to use a transaction version 3
+ * ('0x3') during the deployment process.
+ *
  * @param network - The network on which to deploy the account.
  * @param address - The account address.
  * @param publicKey - The public key of the account address.
@@ -754,6 +761,8 @@ export const getAccContractAddressAndCallDataLegacy = (publicKey) => {
  * @param cairoVersion - The version of Cairo to use for the account deployment.
  * @param recordAccountDeployment - A function to record deployment information into the state.
  * @param waitMode - If true, waits for the transaction to be confirmed before returning. Defaults to false.
+ * @param version - (Optional) Specifies the transaction version to use ('0x3').
+ * @param callback - (Optional) A function to be called with the account address and transaction hash once deployment is complete.
  * @returns An object containing the deployed account address and the transaction hash.
  */
 export async function createAccount({
@@ -764,6 +773,7 @@ export async function createAccount({
   cairoVersion = CAIRO_VERSION,
   waitMode = false,
   callback,
+  version = undefined,
 }: {
   network: Network;
   address: string;
@@ -771,6 +781,7 @@ export async function createAccount({
   privateKey: string;
   cairoVersion?: CairoVersion;
   waitMode?: boolean;
+  version?: constants.TRANSACTION_VERSION,
   callback?: (address: string, transactionHash: string) => Promise<void>;
 }) {
   // Deploy account will auto estimate the fee from the network if not provided
@@ -784,6 +795,7 @@ export async function createAccount({
     publicKey,
     privateKey,
     cairoVersion,
+    { version }
   );
 
   if (contractAddress !== address) {

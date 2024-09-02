@@ -134,6 +134,7 @@ export class ExecuteTxnRpc extends AccountRpcController<
         callback: async (contractAddress: string, transactionHash: string) => {
           await this.updateAccountAsDeploy(contractAddress, transactionHash);
         },
+        version: details?.version as unknown as constants.TRANSACTION_VERSION,
       });
     }
 
