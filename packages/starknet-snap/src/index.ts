@@ -21,7 +21,7 @@ import { createAccount } from './createAccount';
 import { declareContract } from './declareContract';
 import { estimateAccDeployFee } from './estimateAccountDeployFee';
 import { estimateFees } from './estimateFees';
-import { executeTxn } from './executeTxn';
+import { executeTxn as executeTxnLegacy } from './executeTxn';
 import { extractPublicKey } from './extractPublicKey';
 import { getCurrentNetwork } from './getCurrentNetwork';
 import { getErc20TokenBalance } from './getErc20TokenBalance';
@@ -37,6 +37,7 @@ import { recoverAccounts } from './recoverAccounts';
 import type {
   DisplayPrivateKeyParams,
   EstimateFeeParams,
+  ExecuteTxnParams,
   SignMessageParams,
   SignTransactionParams,
   SignDeclareTransactionParams,
@@ -45,12 +46,12 @@ import type {
 import {
   displayPrivateKey,
   estimateFee,
+  executeTxn,
   signMessage,
   signTransaction,
   signDeclareTransaction,
   verifySignature,
 } from './rpcs';
-import { sendTransaction } from './sendTransaction';
 import { signDeployAccountTransaction } from './signDeployAccountTransaction';
 import { switchNetwork } from './switchNetwork';
 import type {
@@ -217,8 +218,8 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
 
       case 'starkNet_sendTransaction':
         apiParams.keyDeriver = await getAddressKeyDeriver(snap);
-        return await sendTransaction(
-          apiParams as unknown as ApiParamsWithKeyDeriver,
+        return await executeTxn.execute(
+          apiParams.requestParams as unknown as ExecuteTxnParams,
         );
 
       case 'starkNet_getValue':
@@ -267,7 +268,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
 
       case 'starkNet_executeTxn':
         apiParams.keyDeriver = await getAddressKeyDeriver(snap);
-        return await executeTxn(
+        return await executeTxnLegacy(
           apiParams as unknown as ApiParamsWithKeyDeriver,
         );
 

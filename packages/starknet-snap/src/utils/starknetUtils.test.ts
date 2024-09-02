@@ -7,7 +7,6 @@ import type { SnapState } from '../types/snapState';
 import {
   ACCOUNT_CLASS_HASH,
   STARKNET_SEPOLIA_TESTNET_NETWORK,
-  TRANSACTION_VERSION,
 } from './constants';
 import * as starknetUtils from './starknetUtils';
 
@@ -62,34 +61,35 @@ describe('getEstimatedFees', () => {
     };
   };
 
-  it.each([constants.TRANSACTION_VERSION.V2, constants.TRANSACTION_VERSION.V3])(
-    'estimate fees for transaction version %s',
-    async (transactionVersion) => {
-      const deployed = true;
-      const { account, invocations } = await prepareSpy(deployed);
+  it.each([
+    constants.TRANSACTION_VERSION.V1,
+    constants.TRANSACTION_VERSION.V2,
+    constants.TRANSACTION_VERSION.V3,
+  ])('estimate fees for transaction version %s', async (transactionVersion) => {
+    const deployed = true;
+    const { account, invocations } = await prepareSpy(deployed);
 
-      const resp = await starknetUtils.getEstimatedFees(
-        STARKNET_SEPOLIA_TESTNET_NETWORK,
-        account.address,
-        account.privateKey,
-        account.publicKey,
-        invocations,
-        {
-          version: transactionVersion,
-        },
-      );
+    const resp = await starknetUtils.getEstimatedFees(
+      STARKNET_SEPOLIA_TESTNET_NETWORK,
+      account.address,
+      account.privateKey,
+      account.publicKey,
+      invocations,
+      {
+        version: transactionVersion,
+      },
+    );
 
-      expect(resp).toStrictEqual({
-        suggestedMaxFee: suggestedMaxFee.toString(10),
-        overallFee: overallFee.toString(10),
-        unit:
-          transactionVersion === constants.TRANSACTION_VERSION.V2
-            ? FeeTokenUnit.ETH
-            : FeeTokenUnit.STRK,
-        includeDeploy: !deployed,
-      });
-    },
-  );
+    expect(resp).toStrictEqual({
+      suggestedMaxFee: suggestedMaxFee.toString(10),
+      overallFee: overallFee.toString(10),
+      unit:
+        transactionVersion === constants.TRANSACTION_VERSION.V3
+          ? FeeTokenUnit.STRK
+          : FeeTokenUnit.ETH,
+      includeDeploy: !deployed,
+    });
+  });
 
   it('estimate fees including deployment if the account is not deployed', async () => {
     const deployed = false;
@@ -108,9 +108,6 @@ describe('getEstimatedFees', () => {
       account.privateKey,
       account.publicKey,
       [call],
-      {
-        version: TRANSACTION_VERSION,
-      },
     );
 
     expect(estimateBulkFeeSpy).toHaveBeenCalledWith(
@@ -132,10 +129,7 @@ describe('getEstimatedFees', () => {
           type: TransactionType.INVOKE,
         },
       ],
-      TRANSACTION_VERSION,
-      {
-        version: TRANSACTION_VERSION,
-      },
+      undefined,
     );
     expect(resp).toStrictEqual({
       suggestedMaxFee: suggestedMaxFee.toString(10),
