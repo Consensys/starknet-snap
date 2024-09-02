@@ -748,9 +748,9 @@ export const getAccContractAddressAndCallDataLegacy = (publicKey) => {
  * before returning the account address and transaction hash.
  *
  * The function also supports an optional `callback` that will be invoked with the deployed account address
- * and transaction hash once the deployment is complete. Can be used to update internal state after 
+ * and transaction hash once the deployment is complete. Can be used to update internal state after
  * successful transaction
- * 
+ *
  * Additionally, an optional `version` parameter can be specified to use a transaction version 3
  * ('0x3') during the deployment process.
  *
@@ -781,7 +781,7 @@ export async function createAccount({
   privateKey: string;
   cairoVersion?: CairoVersion;
   waitMode?: boolean;
-  version?: constants.TRANSACTION_VERSION,
+  version?: constants.TRANSACTION_VERSION;
   callback?: (address: string, transactionHash: string) => Promise<void>;
 }) {
   // Deploy account will auto estimate the fee from the network if not provided
@@ -795,7 +795,7 @@ export async function createAccount({
     publicKey,
     privateKey,
     cairoVersion,
-    { version }
+    { version },
   );
 
   if (contractAddress !== address) {
