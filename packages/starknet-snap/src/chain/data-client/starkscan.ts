@@ -52,7 +52,6 @@ export type StarkScanAccountCall = {
   entry_point_type: string;
   selector_name: string;
 };
-/* eslint-disable */
 
 export type StarkScanTransactionsResponse = {
   next_url: string | null;
@@ -62,12 +61,14 @@ export type StarkScanTransactionsResponse = {
 export type StarkScanOptions = {
   apiKey: string;
 };
+/* eslint-enable */
 
 export class StarkScanClient {
   protected network: Network;
+
   protected options: StarkScanOptions;
 
-  protected deploySelectorName: string = 'constructor';
+  protected deploySelectorName = 'constructor';
 
   constructor(network: Network, options: StarkScanOptions) {
     this.network = network;
@@ -107,6 +108,14 @@ export class StarkScanClient {
     return response.json() as unknown as Resp;
   }
 
+  /**
+   * Fetches the transactions for a given contract address.
+   * The transactions are fetched in descending order and it will include the deploy transaction.
+   *
+   * @param address - The address of the contract to fetch the transactions for.
+   * @param tillTo - The timestamp to fetch the transactions until.
+   * @returns A Promise that resolve an array of Transaction object.
+   */
   async getTransactions(
     address: string,
     tillTo: number,
@@ -159,10 +168,17 @@ export class StarkScanClient {
     return txs;
   }
 
+  /**
+   * Fetches the deploy transaction for a given contract address.
+   *
+   * @param address - The address of the contract to fetch the deploy transaction for.
+   * @returns A Promise that resolve the Transaction object.
+   * @throws Throws an error if the deploy transaction is not found.
+   */
   async getDeployTransaction(address: string): Promise<Transaction> {
     // Fetch the first 5 transactions to find the deploy transaction
     // The deploy transaction usually is the first transaction from the list
-    let apiUrl = this.getApiUrl(
+    const apiUrl = this.getApiUrl(
       `/transactions?contract_address=${address}&order_by=asc&limit=5`,
     );
 
@@ -182,11 +198,12 @@ export class StarkScanClient {
   }
 
   protected toTransaction(tx: StarkScanTransaction): Transaction {
-    let sender: string,
-      contract: string,
-      contractFuncName: string,
-      contractCallData: null | string[];
-    /* eslint-disable */
+    let sender = '';
+    let contract = '';
+    let contractFuncName = '';
+    let contractCallData: null | string[] = null;
+
+    // eslint-disable-next-line no-negated-condition
     if (!this.isDeployTransaction(tx)) {
       // When an account deployed, it invokes the transaction from the account contract, hence the account_calls[0] is the main invoke call from the contract
       const contractCallArg = tx.account_calls[0];
@@ -197,13 +214,14 @@ export class StarkScanClient {
       contractCallData = contractCallArg.calldata;
     } else {
       // In case of deploy transaction, the contract address is the sender address
-      contract = sender = tx.contract_address as unknown as string;
-
+      sender = tx.contract_address as unknown as string;
+      contract = tx.contract_address as unknown as string;
       contractFuncName = '';
       // In case of deploy transaction, the contract call data is the constructor calldata
       contractCallData = tx.constructor_calldata;
     }
 
+    /* eslint-disable */
     return {
       txnHash: tx.transaction_hash,
       txnType: tx.transaction_type,
@@ -219,6 +237,6 @@ export class StarkScanClient {
       maxFee: BigInt(tx.max_fee),
       actualFee: BigInt(tx.actual_fee),
     };
-    /* eslint-disable */
+    /* eslint-enable */
   }
 }
