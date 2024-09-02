@@ -16,6 +16,10 @@ import {
   TransactionType,
 } from 'starknet';
 
+import type {
+  StarkScanTransaction,
+  StarkScanTransactionsResponse,
+} from '../chain/data-client/starkscan';
 import type { AccContract, Transaction } from '../types/snapState';
 import {
   ACCOUNT_CLASS_HASH,
@@ -24,6 +28,7 @@ import {
   PROXY_CONTRACT_HASH,
 } from '../utils/constants';
 import { grindKey } from '../utils/keyPair';
+import { invokeTx, cairo0DeployTx } from './fixture/stark-scan-example.json';
 
 /* eslint-disable */
 export type StarknetAccount = AccContract & {
@@ -283,4 +288,52 @@ export function generateTransactions({
   }
 
   return transactions.sort((a, b) => b.timestamp - a.timestamp);
+}
+
+export function generateStarkScanTranscations({
+  address,
+  startFrom = Date.now(),
+  timestampReduction = 100,
+  cnt = 10,
+  txnTypes = [TransactionType.DEPLOY_ACCOUNT, TransactionType.INVOKE],
+}: {
+  address: string;
+  startFrom?: number;
+  timestampReduction?: number;
+  cnt?: number;
+  txnTypes?: TransactionType[];
+}): StarkScanTransactionsResponse {
+  let transactionStartFrom = startFrom;
+  const txs: StarkScanTransaction[] = [];
+  let totalRecordCnt = txnTypes.includes(TransactionType.DEPLOY_ACCOUNT)
+    ? cnt - 1
+    : cnt;
+
+  for (let i = 0; i < totalRecordCnt; i++) {
+    let newTx = {
+      ...invokeTx,
+      account_calls: [...invokeTx.account_calls],
+    };
+    newTx.sender_address = address;
+    newTx.account_calls[0].caller_address = address;
+    newTx.timestamp = transactionStartFrom;
+    newTx.transaction_hash = `0x${transactionStartFrom.toString(16)}`;
+    transactionStartFrom -= timestampReduction;
+    txs.push(newTx as unknown as StarkScanTransaction);
+  }
+
+  if (txnTypes.includes(TransactionType.DEPLOY_ACCOUNT)) {
+    let deployTx = {
+      ...cairo0DeployTx,
+      account_calls: [...cairo0DeployTx.account_calls],
+    };
+    deployTx.contract_address = address;
+    deployTx.transaction_hash = `0x${transactionStartFrom.toString(16)}`;
+    txs.push(deployTx as unknown as StarkScanTransaction);
+  }
+
+  return {
+    next_url: null,
+    data: txs,
+  };
 }

@@ -1,4 +1,9 @@
-import type { RawCalldata } from 'starknet';
+import type {
+  RawCalldata,
+  TransactionType as StarkNetTransactionType,
+  TransactionExecutionStatus,
+  TransactionFinalityStatus,
+} from 'starknet';
 
 /* eslint-disable */
 export type SnapState = {
@@ -81,20 +86,27 @@ export enum TransactionStatusType { // for retrieving txn from StarkNet feeder g
 
 export type Transaction = {
   txnHash: string; // in hex
-  // TODO: Change the type of txnType to `TransactionType` in the SnapState, when this state manager apply to getTransactions, there is no migration neeeded, as the state is override for every fetch for getTransactions
-  txnType: VoyagerTransactionType | string;
+  // TEMP: add StarkNetTransactionType as optional to support the legacy data
+  txnType: VoyagerTransactionType | string | StarkNetTransactionType;
   chainId: string; // in hex
   // TODO: rename it to address to sync with the same naming convention in the AccContract
   senderAddress: string; // in hex
   contractAddress: string; // in hex
   contractFuncName: string;
-  contractCallData: RawCalldata;
+  contractCallData: RawCalldata | string[];
   status?: TransactionStatus | string;
-  executionStatus?: TransactionStatus | string;
-  finalityStatus?: TransactionStatus | string;
-  failureReason: string;
-  eventIds: string[];
+  // TEMP: add TransactionFinalityStatus as optional to support the legacy data
+  executionStatus?: TransactionStatus | string | TransactionFinalityStatus;
+  // TEMP: add TransactionExecutionStatus as optional to support the legacy data
+  finalityStatus?: TransactionStatus | string | TransactionExecutionStatus;
+  failureReason?: string;
+  // TEMP: add it as optional to support the legacy data
+  eventIds?: string[];
   timestamp: number;
+  // TEMP: add it as optional to support the legacy data
+  maxFee?: BigInt;
+  // TEMP: add it as optional to support the legacy data
+  actualFee?: BigInt;
 };
 
 /* eslint-disable */
