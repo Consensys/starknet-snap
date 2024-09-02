@@ -39,7 +39,8 @@ export const getTxnName = (transaction: Transaction): string => {
 export const getTxnDate = (transaction: Transaction): string => {
   const date = new Date(transaction.timestamp * 1000);
 
-  return date.toLocaleString(undefined, {
+  return date.toLocaleString('en-US', {
+    year: 'numeric',
     month: 'short',
     day: 'numeric',
     hour: '2-digit',

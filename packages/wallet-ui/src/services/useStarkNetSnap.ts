@@ -28,7 +28,7 @@ import { Account } from '../types';
 import { Erc20TokenBalance, Erc20Token } from '../types';
 import { disableLoading, enableLoadingWithMessage } from '../slices/UISlice';
 import { Transaction } from 'types';
-import { ethers } from 'ethers';
+import { BigNumber, ethers } from 'ethers';
 import { getAssetPriceUSD } from './coinGecko';
 import semver from 'semver/preload';
 import { setActiveNetwork } from 'slices/networkSlice';
@@ -717,13 +717,16 @@ export const useStarkNetSnap = () => {
           },
         },
       });
-      return response;
+      return {
+        balanceLatest: BigNumber.from(response.balanceLatest),
+        balancePending: BigNumber.from(response.balancePending),
+      };
     } catch (err) {
       //eslint-disable-next-line no-console
       console.error(err);
       return {
-        balanceLatest: '0x0',
-        balancePending: '0x0',
+        balanceLatest: BigNumber.from('0x0'),
+        balancePending: BigNumber.from('0x0'),
       };
     }
   };

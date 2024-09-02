@@ -120,40 +120,56 @@ describe('ExecuteTxn', () => {
     expect(createAccountSpy).not.toHaveBeenCalled();
   });
 
-  it('creates an account if the account is not deployed and execute the transaction', async () => {
-    callsExample = callsExamples[1];
-    const {
-      account,
-      createAccountSpy,
-      executeTxnUtilSpy,
-      getEstimatedFeesSpy,
-      getEstimatedFeesRepsMock,
-      network,
-      request,
-    } = await prepareMockExecuteTxn(
-      callsExample.hash,
-      callsExample.calls,
-      callsExample.details,
-      false,
-    );
+  it.each([constants.TRANSACTION_VERSION.V1, constants.TRANSACTION_VERSION.V3])(
+    'creates an account and execute the transaction with transaction version %s if the account is not deployed',
+    async (transactionVersion) => {
+      callsExample = callsExamples[1];
+      const {
+        account,
+        createAccountSpy,
+        executeTxnUtilSpy,
+        getEstimatedFeesSpy,
+        getEstimatedFeesRepsMock,
+        network,
+        request,
+      } = await prepareMockExecuteTxn(
+        callsExample.hash,
+        callsExample.calls,
+        {
+          ...callsExample.details,
+          version: transactionVersion,
+        },
+        false,
+      );
 
-    await executeTxn.execute(request);
+      await executeTxn.execute(request);
 
-    expect(getEstimatedFeesSpy).toHaveBeenCalled();
-    expect(createAccountSpy).toHaveBeenCalledTimes(1);
-    expect(executeTxnUtilSpy).toHaveBeenCalledWith(
-      network,
-      account.address,
-      account.privateKey,
-      callsExample.calls,
-      undefined,
-      {
-        ...callsExample.details,
-        maxFee: getEstimatedFeesRepsMock.suggestedMaxFee,
-        nonce: 1,
-      },
-    );
-  });
+      expect(getEstimatedFeesSpy).toHaveBeenCalled();
+      expect(createAccountSpy).toHaveBeenCalledTimes(1);
+      expect(createAccountSpy).toHaveBeenCalledWith({
+        address: account.address,
+        callback: expect.any(Function),
+        network,
+        privateKey: account.privateKey,
+        publicKey: account.publicKey,
+        version: transactionVersion,
+        waitMode: true,
+      });
+      expect(executeTxnUtilSpy).toHaveBeenCalledWith(
+        network,
+        account.address,
+        account.privateKey,
+        callsExample.calls,
+        undefined,
+        {
+          ...callsExample.details,
+          version: transactionVersion,
+          maxFee: getEstimatedFeesRepsMock.suggestedMaxFee,
+          nonce: '0x2',
+        },
+      );
+    },
+  );
 
   it('throws UserRejectedRequestError if user cancels execution', async () => {
     callsExample = callsExamples[1];

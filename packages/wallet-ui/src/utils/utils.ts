@@ -48,12 +48,15 @@ export const addMissingPropertiesToToken = (
   balanceSpendable?: string,
   usdPrice?: number,
 ): Erc20TokenBalance => {
+  // when balance is undefined, use 0
+  const hexBalance = balance ?? '0x0';
+  // when balanceSpendable is undefined, we use hexBalance
+  const hexSpendableBalance = balanceSpendable ?? hexBalance;
+
   return {
     ...token,
-    amount: ethers.BigNumber.from(balance ? balance : '0x0'),
-    spendableAmount: ethers.BigNumber.from(
-      balanceSpendable ? balanceSpendable : balance ? balance : '0x0',
-    ),
+    amount: ethers.BigNumber.from(hexBalance),
+    spendableAmount: ethers.BigNumber.from(hexSpendableBalance),
     usdPrice: usdPrice,
   };
 };
@@ -246,8 +249,9 @@ export function getTokenBalanceWithDetails(
   tokenUSDPrice?: number,
 ): Erc20TokenBalance {
   const { balancePending, balanceLatest } = tokenBalance;
-  const spendableBalance =
-    balancePending < balanceLatest ? balancePending : balanceLatest;
+  const spendableBalance = balancePending.lt(balanceLatest)
+    ? balancePending
+    : balanceLatest;
   return addMissingPropertiesToToken(
     token,
     balanceLatest.toString(),

@@ -190,6 +190,21 @@ export const waitForTransaction = async (
   ).waitForTransaction(txnHash);
 };
 
+export const waitForBlock = async (
+  network: Network,
+  senderAddress: string,
+  privateKey: string | Uint8Array,
+  blockIdentifier?: BlockIdentifierEnum,
+  cairoVersion?: CairoVersion,
+): Promise<void> => {
+  return getAccountInstance(
+    network,
+    senderAddress,
+    privateKey,
+    cairoVersion,
+  ).waitForBlock(blockIdentifier);
+};
+
 export const declareContract = async (
   network: Network,
   senderAddress: string,
@@ -809,11 +824,15 @@ export async function createAccount({
   }
 
   if (waitMode) {
-    await waitForTransaction(
+    // In `waitMode`, we need to ensure that the account deployment is fully confirmed
+    // before proceeding with other transactions.
+    // Instead of waiting for a specific transaction to complete (`waitForTransaction`),
+    // we use `waitForBlock` to wait until the `Pending` block get's accepted.
+    await waitForBlock(
       network,
       contractAddress,
       privateKey,
-      transactionHash,
+      BlockIdentifierEnum.Pending,
     );
   }
 
