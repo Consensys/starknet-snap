@@ -24,51 +24,115 @@ describe('Logger', () => {
     logger.debug(message);
   };
 
-  it('logs when `logLevel` is `LogLevel.ALL`', () => {
-    const spys = createLogSpy();
+  it.each([
+    {
+      logLevel: LogLevel.ALL,
+      expected: {
+        info: true,
+        warn: true,
+        error: true,
+        debug: true,
+        log: true,
+        trace: true,
+      },
+    },
+    {
+      logLevel: LogLevel.OFF,
+      expected: {
+        info: false,
+        warn: false,
+        error: false,
+        debug: false,
+        log: false,
+        trace: false,
+      },
+    },
+    {
+      logLevel: LogLevel.INFO,
+      expected: {
+        info: true,
+        warn: true,
+        error: true,
+        debug: false,
+        log: false,
+        trace: false,
+      },
+    },
+    {
+      logLevel: LogLevel.ERROR,
+      expected: {
+        info: false,
+        warn: false,
+        error: true,
+        debug: false,
+        log: false,
+        trace: false,
+      },
+    },
+    {
+      logLevel: LogLevel.WARN,
+      expected: {
+        info: false,
+        warn: true,
+        error: true,
+        debug: false,
+        log: false,
+        trace: false,
+      },
+    },
+    {
+      logLevel: LogLevel.DEBUG,
+      expected: {
+        info: true,
+        warn: true,
+        error: true,
+        debug: true,
+        log: false,
+        trace: false,
+      },
+    },
+    {
+      logLevel: LogLevel.TRACE,
+      expected: {
+        info: true,
+        warn: true,
+        error: true,
+        debug: true,
+        log: false,
+        trace: true,
+      },
+    },
+  ])(
+    'logs correctly when `logLevel` is `$logLevel`',
+    ({
+      logLevel,
+      expected,
+    }: {
+      logLevel: LogLevel;
+      expected: {
+        info: boolean;
+        warn: boolean;
+        error: boolean;
+        debug: boolean;
+        log: boolean;
+        trace: boolean;
+      };
+    }) => {
+      const spys = createLogSpy();
+      logger.logLevel = logLevel;
+      const logMsg = 'log';
 
-    logger.logLevel = LogLevel.ALL;
+      testLog(logMsg);
 
-    testLog('log');
-
-    expect(spys.info).toHaveBeenCalledWith('log');
-    expect(spys.warn).toHaveBeenCalledWith('log');
-    expect(spys.error).toHaveBeenCalledWith('log');
-    expect(spys.debug).toHaveBeenCalledWith('log');
-    expect(spys.log).toHaveBeenCalledWith('log');
-    expect(spys.trace).toHaveBeenCalledWith('log');
-  });
-
-  it('does not log when `logLevel` is `LogLevel.OFF`', () => {
-    const spys = createLogSpy();
-
-    logger.logLevel = LogLevel.OFF;
-
-    testLog('log');
-
-    expect(spys.info).toHaveBeenCalledTimes(0);
-    expect(spys.warn).toHaveBeenCalledTimes(0);
-    expect(spys.error).toHaveBeenCalledTimes(0);
-    expect(spys.debug).toHaveBeenCalledTimes(0);
-    expect(spys.log).toHaveBeenCalledTimes(0);
-    expect(spys.trace).toHaveBeenCalledTimes(0);
-  });
-
-  it('logs correctly when `logLevel` is `LogLevel.INFO`', () => {
-    const spys = createLogSpy();
-
-    logger.logLevel = LogLevel.INFO;
-
-    testLog('log');
-
-    expect(spys.info).toHaveBeenCalledWith('log');
-    expect(spys.warn).toHaveBeenCalledWith('log');
-    expect(spys.error).toHaveBeenCalledWith('log');
-
-    expect(spys.debug).toHaveBeenCalledTimes(0);
-    expect(spys.log).toHaveBeenCalledTimes(0);
-    expect(spys.trace).toHaveBeenCalledTimes(0);
-  });
+      Object.entries(expected).forEach(([key, value]) => {
+        if (value) {
+          expect(spys[key]).toHaveBeenCalledWith(logMsg);
+        } else {
+          expect(spys[key]).toHaveBeenCalledTimes(0);
+        }
+      });
+    },
+  );
 
   it('return correct `LogLevel`', () => {
     logger.logLevel = LogLevel.INFO;
