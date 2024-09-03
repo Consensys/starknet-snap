@@ -15,7 +15,6 @@ import {
 import * as starknetUtils from '../../src/utils/starknetUtils';
 import * as createAccountApi from '../../src/createAccount';
 import * as keyPairUtils from '../../src/utils/keyPair';
-import * as logger from '../../src/utils/logger';
 import { onHomePage, onRpcRequest } from '../../src';
 
 chai.use(sinonChai);
@@ -32,8 +31,6 @@ describe('onRpcRequest', function () {
   afterEach(function () {
     walletStub.reset();
     sandbox.restore();
-    // Temp solution: Switch off logger after each test
-    logger.logger.init('off');
   });
 
   it('processes request successfully', async function () {
@@ -85,36 +82,6 @@ describe('onRpcRequest', function () {
       expect(expectedError.message).to.equal(
         'Unable to execute the rpc request',
       );
-    }
-  });
-
-  it('does not hide the error message if an error is thrown and `LogLevel` is not `OFF`', async function () {
-    mockSnap();
-    const createAccountSpy = sandbox.stub(createAccountApi, 'createAccount');
-    const keyPairSpy = sandbox.stub(keyPairUtils, 'getAddressKeyDeriver');
-
-    createAccountSpy.rejects(new Error('Custom Error'));
-    keyPairSpy.resolvesThis();
-
-    let expectedError;
-
-    try {
-      await onRpcRequest({
-        origin: 'http://localhost:3000',
-        request: {
-          method: 'starkNet_createAccount',
-          params: {
-            debugLevel: 'DEBUG',
-          },
-          jsonrpc: '2.0',
-          id: 1,
-        },
-      });
-    } catch (error) {
-      expectedError = error;
-    } finally {
-      expect(expectedError).to.be.instanceOf(SnapError);
-      expect(expectedError.message).to.equal('Custom Error');
     }
   });
 });

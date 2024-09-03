@@ -17,6 +17,7 @@ import { ethers } from 'ethers';
 
 import { addErc20Token } from './addErc20Token';
 import { addNetwork } from './addNetwork';
+import { Config } from './config';
 import { createAccount } from './createAccount';
 import { declareContract } from './declareContract';
 import { estimateAccDeployFee } from './estimateAccountDeployFee';
@@ -90,10 +91,8 @@ declare const snap;
 
 export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
   const requestParams = request?.params as unknown as ApiRequestParams;
-  const debugLevel = requestParams?.debugLevel;
-  logger.init(debugLevel as unknown as string);
-  // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-  console.log(`debugLevel: ${logger.getLogLevel()}`);
+
+  logger.logLevel = parseInt(Config.logLevel, 10);
 
   logger.log(`${request.method}:\nrequestParams: ${toJson(requestParams)}`);
 
@@ -300,7 +299,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
     // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     logger.error(`Error: ${error}`);
     // We don't want to expose the error message to the user when it is a production build
-    if (logger.getLogLevel() === LogLevel.OFF) {
+    if (logger.logLevel === LogLevel.OFF) {
       throw new SnapError(
         'Unable to execute the rpc request',
       ) as unknown as Error;

@@ -19,8 +19,8 @@ export type ILogger = {
   debug: LoggingFn;
   info: LoggingFn;
   trace: LoggingFn;
-  init: (level: string) => void;
-  getLogLevel: () => LogLevel;
+  init: () => void;
+  logLevel: LogLevel;
 };
 
 export const emptyLog: LoggingFn = (
@@ -32,35 +32,31 @@ export const emptyLog: LoggingFn = (
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   {};
 
-class Logger implements ILogger {
-  readonly log: LoggingFn;
+export class Logger implements ILogger {
+  log: LoggingFn;
 
-  readonly warn: LoggingFn;
+  warn: LoggingFn;
 
-  readonly error: LoggingFn;
+  error: LoggingFn;
 
-  readonly debug: LoggingFn;
+  debug: LoggingFn;
 
-  readonly info: LoggingFn;
+  info: LoggingFn;
 
-  readonly trace: LoggingFn;
+  trace: LoggingFn;
 
-  readonly #logLevel: LogLevel = LogLevel.OFF;
+  #logLevel: LogLevel = LogLevel.OFF;
 
-  constructor() {
-    this.init(LogLevel.OFF.toString());
+  set logLevel(level: LogLevel) {
+    this.#logLevel = level;
+    this.init();
   }
 
-  #setLogLevel = function (level: string): void {
-    if (level && Object.values(LogLevel).includes(level.toUpperCase())) {
-      this.#logLevel = LogLevel[level.toUpperCase()];
-    } else {
-      this.#logLevel = LogLevel.OFF;
-    }
-  };
+  get logLevel(): LogLevel {
+    return this.#logLevel;
+  }
 
-  public init = function (level: string): void {
-    this.#setLogLevel(level);
+  init(): void {
     this.error = console.error.bind(console);
     this.warn = console.warn.bind(console);
     this.info = console.info.bind(console);
@@ -86,11 +82,7 @@ class Logger implements ILogger {
     if (this.#logLevel < LogLevel.ALL) {
       this.log = emptyLog;
     }
-  };
-
-  public getLogLevel = function (): LogLevel {
-    return this.#logLevel;
-  };
+  }
 }
 
 export const logger = new Logger();
