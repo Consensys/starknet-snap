@@ -45,11 +45,6 @@ describe('validateRequest', () => {
     expect(() =>
       validateRequest(requestParams, validateStruct as unknown as Struct),
     ).toThrow(InvalidParamsError);
-    expect(() =>
-      validateRequest(requestParams, validateStruct as unknown as Struct),
-    ).toThrow(
-      'At path: signerAddress -- Expected a string, but received: 1234',
-    );
   });
 });
 

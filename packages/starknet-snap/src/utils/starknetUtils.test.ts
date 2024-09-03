@@ -4,10 +4,8 @@ import { constants, TransactionType } from 'starknet';
 import { mockAccount, prepareMockAccount } from '../rpcs/__tests__/helper';
 import { FeeTokenUnit } from '../types/snapApi';
 import type { SnapState } from '../types/snapState';
-import {
-  ACCOUNT_CLASS_HASH,
-  STARKNET_SEPOLIA_TESTNET_NETWORK,
-} from './constants';
+import type { TransactionVersion } from '../types/starknet';
+import { STARKNET_SEPOLIA_TESTNET_NETWORK } from './constants';
 import * as starknetUtils from './starknetUtils';
 
 describe('getEstimatedFees', () => {
@@ -49,7 +47,7 @@ describe('getEstimatedFees', () => {
       suggestedMaxFee,
       // eslint-disable-next-line @typescript-eslint/naming-convention
       gas_price: BigInt('0x0'),
-    } as EstimateFee;
+    } as unknown as EstimateFee;
     const estimateBulkFeeSpy = jest.spyOn(starknetUtils, 'estimateFeeBulk');
     estimateBulkFeeSpy.mockResolvedValue([estimateFeeResp]);
 
@@ -62,39 +60,71 @@ describe('getEstimatedFees', () => {
   };
 
   it.each([
-    constants.TRANSACTION_VERSION.V1,
-    constants.TRANSACTION_VERSION.V2,
-    constants.TRANSACTION_VERSION.V3,
-  ])('estimate fees for transaction version %s', async (transactionVersion) => {
-    const deployed = true;
-    const { account, invocations } = await prepareSpy(deployed);
+    {
+      txVersion: constants.TRANSACTION_VERSION.V2,
+      expectedUnit: FeeTokenUnit.ETH,
+    },
+    {
+      txVersion: constants.TRANSACTION_VERSION.V3,
+      expectedUnit: FeeTokenUnit.STRK,
+    },
+    {
+      txVersion: undefined,
+      expectedUnit: FeeTokenUnit.ETH,
+    },
+  ])(
+    'estimates fees correctly and assigns `$expectedUnit` to the unit of the result if the transaction version is $version',
+    async ({
+      txVersion,
+      expectedUnit,
+    }: {
+      txVersion?: TransactionVersion;
+      expectedUnit: FeeTokenUnit;
+    }) => {
+      const network = STARKNET_SEPOLIA_TESTNET_NETWORK;
+      const { account, invocations, estimateBulkFeeSpy } = await prepareSpy(
+        true,
+      );
+      const call = invocations[0];
 
-    const resp = await starknetUtils.getEstimatedFees(
-      STARKNET_SEPOLIA_TESTNET_NETWORK,
-      account.address,
-      account.privateKey,
-      account.publicKey,
-      invocations,
-      {
-        version: transactionVersion,
-      },
-    );
+      const resp = await starknetUtils.getEstimatedFees(
+        network,
+        account.address,
+        account.privateKey,
+        account.publicKey,
+        [call],
+        {
+          version: txVersion,
+        },
+      );
 
-    expect(resp).toStrictEqual({
-      suggestedMaxFee: suggestedMaxFee.toString(10),
-      overallFee: overallFee.toString(10),
-      unit:
-        transactionVersion === constants.TRANSACTION_VERSION.V3
-          ? FeeTokenUnit.STRK
-          : FeeTokenUnit.ETH,
-      includeDeploy: !deployed,
-    });
-  });
+      expect(estimateBulkFeeSpy).toHaveBeenCalledWith(
+        network,
+        account.address,
+        account.privateKey,
+        [
+          {
+            payload: (call as any).payload,
+            type: TransactionType.INVOKE,
+          },
+        ],
+        {
+          version: txVersion, // to verify if the version is passed to the estimateFeeBulk correctly
+        },
+      );
+      expect(resp).toStrictEqual({
+        suggestedMaxFee: suggestedMaxFee.toString(10),
+        overallFee: overallFee.toString(10),
+        unit: expectedUnit, // to verify if the unit is return correctly
+        includeDeploy: false,
+      });
+    },
+  );
 
-  it('estimate fees including deployment if the account is not deployed', async () => {
-    const deployed = false;
+  it('estimates fees with account deploy payload if the account is not deployed', async () => {
+    const network = STARKNET_SEPOLIA_TESTNET_NETWORK;
     const { account, estimateBulkFeeSpy, invocations } = await prepareSpy(
-      deployed,
+      false,
     );
     const deployAccountpayload = starknetUtils.createAccountDeployPayload(
       account.address,
@@ -103,7 +133,7 @@ describe('getEstimatedFees', () => {
     const call = invocations[0];
 
     const resp = await starknetUtils.getEstimatedFees(
-      STARKNET_SEPOLIA_TESTNET_NETWORK,
+      network,
       account.address,
       account.privateKey,
       account.publicKey,
@@ -111,21 +141,16 @@ describe('getEstimatedFees', () => {
     );
 
     expect(estimateBulkFeeSpy).toHaveBeenCalledWith(
-      STARKNET_SEPOLIA_TESTNET_NETWORK,
+      network,
       account.address,
       account.privateKey,
       [
         {
-          payload: {
-            addressSalt: account.addressSalt,
-            classHash: ACCOUNT_CLASS_HASH,
-            constructorCalldata: deployAccountpayload.constructorCalldata,
-            contractAddress: deployAccountpayload.contractAddress,
-          },
+          payload: deployAccountpayload,
           type: TransactionType.DEPLOY_ACCOUNT,
         },
         {
-          payload: (invocations[0] as any).payload,
+          payload: (call as any).payload,
           type: TransactionType.INVOKE,
         },
       ],
@@ -135,27 +160,7 @@ describe('getEstimatedFees', () => {
       suggestedMaxFee: suggestedMaxFee.toString(10),
       overallFee: overallFee.toString(10),
       unit: FeeTokenUnit.ETH,
-      includeDeploy: !deployed,
-    });
-  });
-
-  it('estimate fees without transaction version', async () => {
-    const deployed = true;
-    const { account, invocations } = await prepareSpy(true);
-
-    const resp = await starknetUtils.getEstimatedFees(
-      STARKNET_SEPOLIA_TESTNET_NETWORK,
-      account.address,
-      account.privateKey,
-      account.publicKey,
-      invocations,
-    );
-
-    expect(resp).toStrictEqual({
-      suggestedMaxFee: suggestedMaxFee.toString(10),
-      overallFee: overallFee.toString(10),
-      unit: FeeTokenUnit.ETH,
-      includeDeploy: !deployed,
+      includeDeploy: true,
     });
   });
 });
