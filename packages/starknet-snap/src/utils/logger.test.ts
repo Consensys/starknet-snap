@@ -124,13 +124,17 @@ describe('Logger', () => {
 
       testLog(logMsg);
 
-      Object.entries(expected).forEach(([key, value]) => {
-        if (value) {
+      Object.entries(expected)
+        .filter(([_, value]) => !value)
+        .forEach(([key]) => {
+          expect(spys[key]).not.toHaveBeenCalled();
+        });
+
+      Object.entries(expected)
+        .filter(([_, value]) => value)
+        .forEach(([key]) => {
           expect(spys[key]).toHaveBeenCalledWith(logMsg);
-        } else {
-          expect(spys[key]).toHaveBeenCalledTimes(0);
-        }
-      });
+        });
     },
   );
 
