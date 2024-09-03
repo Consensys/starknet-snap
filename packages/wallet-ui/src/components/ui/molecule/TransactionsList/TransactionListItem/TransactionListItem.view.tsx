@@ -77,9 +77,9 @@ export const TransactionListItemView = ({ transaction }: Props) => {
           <Label>{txnName}</Label>
           <Description>
             {txnDate}
+            <br />
             <Status status={transaction.executionStatus}>
-              {' '}
-              . {txnStatus}
+              {txnStatus}
               {txnFailureReason}
             </Status>
           </Description>

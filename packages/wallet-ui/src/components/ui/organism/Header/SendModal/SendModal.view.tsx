@@ -53,7 +53,7 @@ export const SendModalView = ({ closeModal }: Props) => {
             fieldValue,
             wallet.erc20TokenBalanceSelected.decimals,
           );
-          const userBalance = wallet.erc20TokenBalanceSelected.amount;
+          const userBalance = wallet.erc20TokenBalanceSelected.spendableAmount;
           if (inputAmount.gt(userBalance)) {
             setErrors((prevErrors) => ({
               ...prevErrors,
