@@ -15,7 +15,7 @@ const config: SnapConfig = {
     SNAP_ENV: process.env.SNAP_ENV ?? 'prod',
     VOYAGER_API_KEY: process.env.VOYAGER_API_KEY ?? '',
     ALCHEMY_API_KEY: process.env.ALCHEMY_API_KEY ?? '',
-    LOG_LEVEL: process.env.LOG_LEVEL ?? 'off',
+    LOG_LEVEL: process.env.LOG_LEVEL ?? '0',
     /* eslint-disable */
   },
   polyfills: true,
