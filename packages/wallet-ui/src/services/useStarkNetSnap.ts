@@ -55,17 +55,11 @@ export const useStarkNetSnap = () => {
   const minSnapVersion = process.env.REACT_APP_MIN_SNAP_VERSION
     ? process.env.REACT_APP_MIN_SNAP_VERSION
     : '2.0.1';
-  const debugLevel =
-    process.env.REACT_APP_DEBUG_LEVEL !== undefined
-      ? process.env.REACT_APP_DEBUG_LEVEL
-      : 'ALL';
   const START_SCAN_INDEX = 0;
   const MAX_SCANNED = 1;
   const MAX_MISSED = 1;
 
-  const defaultParam = {
-    debugLevel,
-  };
+  const defaultParam = {};
 
   const connectToSnap = () => {
     dispatch(enableLoadingWithMessage('Connecting...'));

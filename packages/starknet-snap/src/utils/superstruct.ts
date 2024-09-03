@@ -29,7 +29,6 @@ import {
 } from 'superstruct';
 
 import { CAIRO_VERSION_LEGACY, CAIRO_VERSION } from './constants';
-import { LogLevel } from './logger';
 
 export const AddressStruct = refine(
   string(),
@@ -91,8 +90,6 @@ export const AuthorizableStruct = object({
 
 export const BaseRequestStruct = object({
   chainId: ChainIdStruct,
-  // TODO: the debug level should be set by snap rather than pass in from request.
-  debugLevel: optional(enums(Object.keys(LogLevel))),
 });
 
 // TODO: refine this to calldata

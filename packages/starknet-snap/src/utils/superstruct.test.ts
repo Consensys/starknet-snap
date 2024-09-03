@@ -113,34 +113,10 @@ describe('BaseRequestStruct', () => {
       assert(
         {
           chainId: constants.StarknetChainId.SN_SEPOLIA.toString(),
-          debugLevel: 'ALL',
         },
         BaseRequestStruct,
       ),
     ).not.toThrow();
-  });
-
-  it('does not throw error if `debugLevel` is omit', () => {
-    expect(() =>
-      assert(
-        {
-          chainId: constants.StarknetChainId.SN_SEPOLIA.toString(),
-        },
-        BaseRequestStruct,
-      ),
-    ).not.toThrow();
-  });
-
-  it('throws error if `debugLevel` is invalid', () => {
-    expect(() =>
-      assert(
-        {
-          chainId: constants.StarknetChainId.SN_SEPOLIA.toString(),
-          debugLevel: 'Invalid-Debug-Level',
-        },
-        BaseRequestStruct,
-      ),
-    ).toThrow(StructError);
   });
 });
 
