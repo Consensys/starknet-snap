@@ -111,6 +111,8 @@ export class ExecuteTxnRpc extends AccountRpcController<
     );
 
     const accountDeployed = !includeDeploy;
+    const version =
+      details?.version as unknown as constants.TRANSACTION_VERSION;
 
     if (
       !(await this.getExecuteTxnConsensus(
@@ -118,7 +120,7 @@ export class ExecuteTxnRpc extends AccountRpcController<
         accountDeployed,
         calls,
         suggestedMaxFee,
-        details?.version as unknown as constants.TRANSACTION_VERSION,
+        version,
       ))
     ) {
       throw new UserRejectedRequestError() as unknown as Error;
@@ -134,7 +136,7 @@ export class ExecuteTxnRpc extends AccountRpcController<
         callback: async (contractAddress: string, transactionHash: string) => {
           await this.updateAccountAsDeploy(contractAddress, transactionHash);
         },
-        version: details?.version as unknown as constants.TRANSACTION_VERSION,
+        version,
       });
     }
 
@@ -146,6 +148,9 @@ export class ExecuteTxnRpc extends AccountRpcController<
       abis,
       {
         ...details,
+        // Aways repect the input, unless the account is not deployed
+        // TODO: we may also need to increment the nonce base on the input, if the account is not deployed
+        nonce: accountDeployed ? details?.nonce : 1,
         maxFee: suggestedMaxFee,
       },
     );

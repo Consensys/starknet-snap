@@ -41,21 +41,21 @@ jobs:
               echo "VERSION=${BASE}-dev-${HASH}-${DATE}"
               echo "TAG=dev"
               echo "ENV=dev"
-              echo "LOG_LEVEL=ALL"
+              echo "LOG_LEVEL=all"
             } >> "$GITHUB_OUTPUT"
           elif [[ $ENV  == "staging" ]]; then
             {
               echo "VERSION=${BASE}-staging"
               echo "TAG=staging"
               echo "ENV=staging"
-              echo "LOG_LEVEL=OFF"
+              echo "LOG_LEVEL=off"
             } >> "$GITHUB_OUTPUT"
           elif [[ $ENV  == "production" ]]; then
             {
               echo "VERSION=${BASE}"
               echo "TAG=latest"
               echo "ENV=prod"
-              echo "LOG_LEVEL=OFF"
+              echo "LOG_LEVEL=off"
             } >> "$GITHUB_OUTPUT"
           else
             echo "Invalid environment"

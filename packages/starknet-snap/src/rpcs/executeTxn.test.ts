@@ -121,7 +121,7 @@ describe('ExecuteTxn', () => {
   });
 
   it.each([constants.TRANSACTION_VERSION.V1, constants.TRANSACTION_VERSION.V3])(
-    'creates an account and execute the transaction with transaction version %s if the account is not deployed',
+    'creates an account and execute the transaction with nonce 1 with transaction version %s if the account is not deployed',
     async (transactionVersion) => {
       callsExample = callsExamples[1];
       const {
@@ -165,7 +165,7 @@ describe('ExecuteTxn', () => {
           ...callsExample.details,
           version: transactionVersion,
           maxFee: getEstimatedFeesRepsMock.suggestedMaxFee,
-          nonce: '0x2',
+          nonce: 1,
         },
       );
     },
