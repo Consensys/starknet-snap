@@ -301,7 +301,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
     let snapError = error;
 
     if (!isSnapRpcError(error)) {
-      snapError = new SnapError(error);
+      snapError = new SnapError('Unable to execute the rpc request');
     }
     logger.error(
       `onRpcRequest error: ${JSON.stringify(snapError.toJSON(), null, 2)}`,
