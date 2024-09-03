@@ -32,7 +32,13 @@ import { ethers } from 'ethers';
 import { getAssetPriceUSD } from './coinGecko';
 import semver from 'semver/preload';
 import { setActiveNetwork } from 'slices/networkSlice';
-import { constants, Invocations, TransactionType } from 'starknet';
+import {
+  Call,
+  constants,
+  Invocations,
+  TransactionType,
+  UniversalDetails,
+} from 'starknet';
 
 export const useStarkNetSnap = () => {
   const dispatch = useAppDispatch();
@@ -333,9 +339,7 @@ export const useStarkNetSnap = () => {
     contractCallData: string,
     address: string,
     chainId: string,
-    transactionVersion?:
-      | typeof constants.TRANSACTION_VERSION.V2
-      | typeof constants.TRANSACTION_VERSION.V3,
+    transactionVersion?: typeof constants.TRANSACTION_VERSION.V3,
   ) {
     try {
       const invocations: Invocations = [
@@ -375,12 +379,19 @@ export const useStarkNetSnap = () => {
     contractAddress: string,
     contractFuncName: string,
     contractCallData: string,
-    senderAddress: string,
+    address: string,
     maxFee: string,
     chainId: string,
   ) {
     dispatch(enableLoadingWithMessage('Sending transaction...'));
     try {
+      const calls: Call[] = [
+        {
+          contractAddress,
+          entrypoint: contractFuncName,
+          calldata: contractCallData.split(',').map((ele) => ele.trim()),
+        },
+      ];
       const response = await provider.request({
         method: 'wallet_invokeSnap',
         params: {
@@ -389,11 +400,9 @@ export const useStarkNetSnap = () => {
             method: 'starkNet_sendTransaction',
             params: {
               ...defaultParam,
-              contractAddress,
-              contractFuncName,
-              contractCallData,
-              senderAddress,
-              maxFee,
+              address,
+              calls,
+              details: { maxFee } as UniversalDetails,
               chainId,
             },
           },

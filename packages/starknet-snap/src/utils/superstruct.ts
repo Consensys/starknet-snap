@@ -1,6 +1,11 @@
 import { union } from '@metamask/snaps-sdk';
 import { HexStruct } from '@metamask/utils';
-import type { CompiledContract, Invocations } from 'starknet';
+import type {
+  Call,
+  CompiledContract,
+  Invocations,
+  UniversalDetails,
+} from 'starknet';
 import { constants, TransactionType, validateAndParseAddress } from 'starknet';
 import type { Struct } from 'superstruct';
 import {
@@ -104,11 +109,12 @@ export const NumberStringStruct = union([number(), HexStruct]);
 export const CairoVersionStruct = enums([CAIRO_VERSION, CAIRO_VERSION_LEGACY]);
 
 export const TxVersionStruct = enums([
+  constants.TRANSACTION_VERSION.V1,
   constants.TRANSACTION_VERSION.V2,
   constants.TRANSACTION_VERSION.V3,
 ]);
 
-export const V2TxVersionStruct = enums([constants.TRANSACTION_VERSION.V2]);
+export const V1TxVersionStruct = enums([constants.TRANSACTION_VERSION.V1]);
 
 export const V3TxVersionStruct = enums([constants.TRANSACTION_VERSION.V3]);
 
@@ -291,6 +297,19 @@ export const BaseInvocationStruct = object({
   ]),
 });
 
+export const CallsStruct = define<Call[] | Call>(
+  // We do use a custom `define` for this type to avoid having to use a `union` since error
+  // messages are a bit confusing.
+  //
+  // Doing manual validation allows us to use the "concrete" type of each supported acounts giving
+  // use a much nicer message from `superstruct`.
+  'CallsStruct',
+  (value: unknown[] | unknown) => {
+    const calls = Array.isArray(value) ? (value as Call[]) : [value as Call];
+    return validate(calls, array(CallDataStruct))[0] ?? true;
+  },
+);
+
 export const InvocationsStruct = define<Invocations>(
   // We do use a custom `define` for this type to avoid having to use a `union` since error
   // messages are a bit confusing.
@@ -345,12 +364,22 @@ export const InvocationsStruct = define<Invocations>(
   },
 );
 
-export const UniversalDetailsStruct = assign(
-  V3TransactionDetailStruct,
-  object({
-    blockIdentifier: optional(string()),
-    maxFee: optional(NumberStringStruct),
-    skipValidate: optional(boolean()),
-    version: optional(TxVersionStruct),
-  }),
+export const UniversalDetailsStruct = define<UniversalDetails>(
+  'UniversalDetailsStruct',
+  (value: unknown) => {
+    return (
+      validate(
+        value,
+        assign(
+          V3TransactionDetailStruct,
+          object({
+            blockIdentifier: optional(string()),
+            maxFee: optional(NumberStringStruct),
+            skipValidate: optional(boolean()),
+            version: optional(TxVersionStruct),
+          }),
+        ),
+      )[0] ?? true
+    );
+  },
 );

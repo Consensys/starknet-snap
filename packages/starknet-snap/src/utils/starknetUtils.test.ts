@@ -5,10 +5,7 @@ import { mockAccount, prepareMockAccount } from '../rpcs/__tests__/helper';
 import { FeeTokenUnit } from '../types/snapApi';
 import type { SnapState } from '../types/snapState';
 import type { TransactionVersion } from '../types/starknet';
-import {
-  STARKNET_SEPOLIA_TESTNET_NETWORK,
-  TRANSACTION_VERSION,
-} from './constants';
+import { STARKNET_SEPOLIA_TESTNET_NETWORK } from './constants';
 import * as starknetUtils from './starknetUtils';
 
 describe('getEstimatedFees', () => {
@@ -66,28 +63,23 @@ describe('getEstimatedFees', () => {
     {
       txVersion: constants.TRANSACTION_VERSION.V2,
       expectedUnit: FeeTokenUnit.ETH,
-      expectedTxVersion: constants.TRANSACTION_VERSION.V2,
     },
     {
       txVersion: constants.TRANSACTION_VERSION.V3,
       expectedUnit: FeeTokenUnit.STRK,
-      expectedTxVersion: constants.TRANSACTION_VERSION.V3,
     },
     {
       txVersion: undefined,
       expectedUnit: FeeTokenUnit.ETH,
-      expectedTxVersion: TRANSACTION_VERSION,
     },
   ])(
     'estimates fees correctly and assigns `$expectedUnit` to the unit of the result if the transaction version is $version',
     async ({
       txVersion,
       expectedUnit,
-      expectedTxVersion,
     }: {
       txVersion?: TransactionVersion;
       expectedUnit: FeeTokenUnit;
-      expectedTxVersion: TransactionVersion;
     }) => {
       const network = STARKNET_SEPOLIA_TESTNET_NETWORK;
       const { account, invocations, estimateBulkFeeSpy } = await prepareSpy(
@@ -116,9 +108,8 @@ describe('getEstimatedFees', () => {
             type: TransactionType.INVOKE,
           },
         ],
-        expectedTxVersion, // to verify if the version is passed to the estimateFeeBulk correctly
         {
-          version: expectedTxVersion, // to verify if the version is passed to the estimateFeeBulk correctly
+          version: txVersion, // to verify if the version is passed to the estimateFeeBulk correctly
         },
       );
       expect(resp).toStrictEqual({
@@ -131,7 +122,6 @@ describe('getEstimatedFees', () => {
   );
 
   it('estimates fees with account deploy payload if the account is not deployed', async () => {
-    const txVersion = constants.TRANSACTION_VERSION.V2;
     const network = STARKNET_SEPOLIA_TESTNET_NETWORK;
     const { account, estimateBulkFeeSpy, invocations } = await prepareSpy(
       false,
@@ -148,9 +138,6 @@ describe('getEstimatedFees', () => {
       account.privateKey,
       account.publicKey,
       [call],
-      {
-        version: txVersion,
-      },
     );
 
     expect(estimateBulkFeeSpy).toHaveBeenCalledWith(
@@ -167,10 +154,7 @@ describe('getEstimatedFees', () => {
           type: TransactionType.INVOKE,
         },
       ],
-      txVersion,
-      {
-        version: txVersion,
-      },
+      undefined,
     );
     expect(resp).toStrictEqual({
       suggestedMaxFee: suggestedMaxFee.toString(10),
