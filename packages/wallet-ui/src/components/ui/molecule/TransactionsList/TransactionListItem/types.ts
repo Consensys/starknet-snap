@@ -37,11 +37,15 @@ export const getTxnName = (transaction: Transaction): string => {
 };
 
 export const getTxnDate = (transaction: Transaction): string => {
-  return new Date(transaction.timestamp * 1000)
-    .toDateString()
-    .split(' ')
-    .slice(1, 3)
-    .join(' ');
+  const date = new Date(transaction.timestamp * 1000);
+
+  return date.toLocaleString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
 };
 
 export const getTxnStatus = (transaction: Transaction): string => {
@@ -78,7 +82,16 @@ export const getTxnToFromLabel = (transaction: Transaction): string => {
   const txnName = getTxnName(transaction);
   switch (txnName) {
     case 'Send':
-      return 'To ' + shortenAddress(transaction.contractCallData[0].toString());
+      // TODO : This will not be needed after getTransactions revamp.
+      if (transaction.contractCallData.length === 3) {
+        return (
+          'To ' + shortenAddress(transaction.contractCallData[0].toString())
+        );
+      } else {
+        return (
+          'To ' + shortenAddress(transaction.contractCallData[4].toString())
+        );
+      }
     case 'Receive':
       return 'From ' + shortenAddress(transaction.senderAddress);
     case 'Deploy':
