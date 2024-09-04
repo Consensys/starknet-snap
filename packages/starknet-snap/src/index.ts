@@ -62,6 +62,7 @@ import type {
 } from './types/snapApi';
 import type { SnapState } from './types/snapState';
 import { upgradeAccContract } from './upgradeAccContract';
+import { getDappUrl } from './utils';
 import {
   CAIRO_VERSION_LEGACY,
   ETHER_MAINNET,
@@ -76,7 +77,6 @@ import { acquireLock } from './utils/lock';
 import { logger, LogLevel } from './utils/logger';
 import { toJson } from './utils/serializer';
 import {
-  dappUrl,
   upsertErc20Token,
   upsertNetwork,
   removeNetwork,
@@ -313,10 +313,7 @@ export const onInstall: OnInstallHandler = async () => {
   const component = panel([
     text('Your MetaMask wallet is now compatible with Starknet!'),
     text(
-      `To manage your Starknet account and send and receive funds, visit the [companion dapp for Starknet](${dappUrl(
-        // eslint-disable-next-line no-restricted-globals
-        process.env.SNAP_ENV as unknown as string,
-      )}).`,
+      `To manage your Starknet account and send and receive funds, visit the [companion dapp for Starknet](${getDappUrl()}).`,
     ),
   ]);
 
@@ -397,10 +394,7 @@ export const onHomePage: OnHomePageHandler = async () => {
     panelItems.push(divider());
     panelItems.push(
       text(
-        `Visit the [companion dapp for Starknet](${dappUrl(
-          // eslint-disable-next-line no-restricted-globals
-          process.env.SNAP_ENV as unknown as string,
-        )}) to manage your account.`,
+        `Visit the [companion dapp for Starknet](${getDappUrl()}) to manage your account.`,
       ),
     );
 
