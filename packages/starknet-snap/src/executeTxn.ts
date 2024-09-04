@@ -1,9 +1,8 @@
 import type { Component } from '@metamask/snaps-sdk';
 import { heading, panel, divider, DialogType } from '@metamask/snaps-sdk';
-import type { Invocations } from 'starknet';
+import type { constants, Invocations } from 'starknet';
 import { TransactionType } from 'starknet';
 
-import { createAccount } from './createAccount';
 import type {
   ApiParamsWithKeyDeriver,
   ExecuteTxnRequestParams,
@@ -23,6 +22,7 @@ import {
   estimateFeeBulk,
   getAccContractAddressAndCallData,
   addFeesFromAllTransactions,
+  createAccount,
 } from './utils/starknetUtils';
 
 /**
@@ -33,15 +33,16 @@ export async function executeTxn(params: ApiParamsWithKeyDeriver) {
   try {
     const { state, keyDeriver, requestParams, wallet } = params;
     const requestParamsObj = requestParams as ExecuteTxnRequestParams;
-    const { senderAddress } = requestParamsObj;
+    const { senderAddress: address, invocationsDetails } = requestParamsObj;
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
-    const {
-      privateKey: senderPrivateKey,
-      publicKey,
-      addressIndex,
-    } = await getKeysFromAddress(keyDeriver, network, state, senderAddress);
+    const { privateKey, publicKey, addressIndex } = await getKeysFromAddress(
+      keyDeriver,
+      network,
+      state,
+      address,
+    );
 
-    await verifyIfAccountNeedUpgradeOrDeploy(network, senderAddress, publicKey);
+    await verifyIfAccountNeedUpgradeOrDeploy(network, address, publicKey);
 
     const txnInvocationArray = Array.isArray(requestParamsObj.txnInvocation)
       ? requestParamsObj.txnInvocation
@@ -50,12 +51,16 @@ export async function executeTxn(params: ApiParamsWithKeyDeriver) {
       type: TransactionType.INVOKE,
       payload: ele,
     }));
-    const accountDeployed = await isAccountDeployed(network, senderAddress);
+
+    const accountDeployed = await isAccountDeployed(network, address);
+    const version =
+      invocationsDetails?.version as unknown as constants.TRANSACTION_VERSION;
+
     if (!accountDeployed) {
       const { callData } = getAccContractAddressAndCallData(publicKey);
       const deployAccountpayload = {
         classHash: ACCOUNT_CLASS_HASH,
-        contractAddress: senderAddress,
+        contractAddress: address,
         constructorCalldata: callData,
         addressSalt: publicKey,
       };
@@ -68,12 +73,10 @@ export async function executeTxn(params: ApiParamsWithKeyDeriver) {
 
     const fees = await estimateFeeBulk(
       network,
-      senderAddress,
-      senderPrivateKey,
+      address,
+      privateKey,
       bulkTransactions,
-      requestParamsObj.invocationsDetails
-        ? requestParamsObj.invocationsDetails
-        : undefined,
+      invocationsDetails ?? undefined,
     );
     const estimateFeeResp = addFeesFromAllTransactions(fees);
 
@@ -88,33 +91,21 @@ export async function executeTxn(params: ApiParamsWithKeyDeriver) {
     logger.log(`MaxFee: ${maxFee}`);
 
     let snapComponents: Component[] = [];
-    let createAccountApiParams = {} as ApiParamsWithKeyDeriver;
     if (!accountDeployed) {
       snapComponents.push(heading(`The account will be deployed`));
-      addDialogTxt(snapComponents, 'Address', senderAddress);
+      addDialogTxt(snapComponents, 'Address', address);
       addDialogTxt(snapComponents, 'Public Key', publicKey);
       addDialogTxt(snapComponents, 'Address Index', addressIndex.toString());
       snapComponents.push(divider());
-      createAccountApiParams = {
-        state,
-        wallet: params.wallet,
-        saveMutex: params.saveMutex,
-        keyDeriver,
-        requestParams: {
-          addressIndex,
-          deploy: true,
-          chainId: requestParamsObj.chainId,
-        },
-      };
     }
 
     snapComponents = snapComponents.concat(
       getTxnSnapTxt(
-        senderAddress,
+        address,
         network,
         requestParamsObj.txnInvocation,
         requestParamsObj.abis,
-        requestParamsObj.invocationsDetails,
+        invocationsDetails,
       ),
     );
 
@@ -133,17 +124,29 @@ export async function executeTxn(params: ApiParamsWithKeyDeriver) {
     }
 
     if (!accountDeployed) {
-      await createAccount(createAccountApiParams, true, true);
+      await createAccount({
+        network,
+        address,
+        publicKey,
+        privateKey,
+        waitMode: true,
+        callback: undefined,
+        version,
+      });
     }
     const nonceSendTransaction = accountDeployed ? undefined : 1;
 
     return await executeTxnUtil(
       network,
-      senderAddress,
-      senderPrivateKey,
+      address,
+      privateKey,
       requestParamsObj.txnInvocation,
       requestParamsObj.abis,
-      { maxFee, nonce: nonceSendTransaction },
+      {
+        ...invocationsDetails,
+        maxFee,
+        nonce: nonceSendTransaction,
+      },
       CAIRO_VERSION,
     );
   } catch (error) {

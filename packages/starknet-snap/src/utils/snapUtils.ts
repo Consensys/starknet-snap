@@ -392,9 +392,13 @@ export function getTxnSnapTxt(
   }
 
   if (details?.maxFee) {
+    const feeToken: FeeToken =
+      details?.version === constants.TRANSACTION_VERSION.V3
+        ? FeeToken.STRK
+        : FeeToken.ETH;
     addDialogTxt(
       components,
-      `Max Fee(${FeeToken.ETH})`,
+      `Max Fee(${feeToken})`,
       convert(details.maxFee, 'wei', 'ether'),
     );
   }

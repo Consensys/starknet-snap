@@ -16,8 +16,6 @@ import {
   account1,
   estimateFeeResp,
 } from '../constants.test';
-import * as createAccountUtils from '../../src/createAccount';
-import * as snapsUtil from '../../src/utils/snapUtils';
 import { getAddressKeyDeriver } from '../../src/utils/keyPair';
 import { Mutex } from 'async-mutex';
 import {
@@ -25,10 +23,6 @@ import {
   ExecuteTxnRequestParams,
 } from '../../src/types/snapApi';
 import { GetTransactionReceiptResponse } from 'starknet';
-import {
-  DeployRequiredError,
-  UpgradeRequiredError,
-} from '../../src/utils/exceptions';
 
 chai.use(sinonChai);
 const sandbox = sinon.createSandbox();
@@ -96,7 +90,7 @@ describe('Test function: executeTxn', function () {
     sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolvesThis();
     sandbox.stub(utils, 'isAccountDeployed').resolves(false);
     const createAccountStub = sandbox
-      .stub(createAccountUtils, 'createAccount')
+      .stub(utils, 'createAccount')
       .resolvesThis();
     const stub = sandbox.stub(utils, 'executeTxn').resolves({
       transaction_hash: 'transaction_hash',
@@ -123,18 +117,22 @@ describe('Test function: executeTxn', function () {
       undefined,
       { maxFee: '22702500105945', nonce: 1 },
     );
-    expect(createAccountStub).to.have.been.calledOnceWith(
-      sinon.match.any,
-      true,
-      true,
-    );
+    expect(createAccountStub).to.have.been.calledOnceWith({
+      network: STARKNET_MAINNET_NETWORK,
+      address: account1.address,
+      publicKey: account1.publicKey,
+      privateKey: privateKey,
+      waitMode: true,
+      callback: undefined,
+      version: undefined,
+    });
   });
 
   it('should executeTxn multiple and deploy an account', async function () {
     sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolvesThis();
     sandbox.stub(utils, 'isAccountDeployed').resolves(false);
     const createAccountStub = sandbox
-      .stub(createAccountUtils, 'createAccount')
+      .stub(utils, 'createAccount')
       .resolvesThis();
     const stub = sandbox.stub(utils, 'executeTxn').resolves({
       transaction_hash: 'transaction_hash',
@@ -189,15 +187,19 @@ describe('Test function: executeTxn', function () {
       undefined,
       { maxFee: '22702500105945', nonce: 1 },
     );
-    expect(createAccountStub).to.have.been.calledOnceWith(
-      sinon.match.any,
-      true,
-      true,
-    );
+    expect(createAccountStub).to.have.been.calledOnceWith({
+      network: STARKNET_MAINNET_NETWORK,
+      address: account1.address,
+      publicKey: account1.publicKey,
+      privateKey: privateKey,
+      waitMode: true,
+      callback: undefined,
+      version: undefined,
+    });
   });
 
   it('should executeTxn and not deploy an account', async function () {
-    const createAccountStub = sandbox.stub(createAccountUtils, 'createAccount');
+    const createAccountStub = sandbox.stub(utils, 'createAccount');
     sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolvesThis();
     sandbox.stub(utils, 'isAccountDeployed').resolves(true);
     const stub = sandbox.stub(utils, 'executeTxn').resolves({
@@ -231,7 +233,7 @@ describe('Test function: executeTxn', function () {
   });
 
   it('should executeTxn multiple and not deploy an account', async function () {
-    const createAccountStub = sandbox.stub(createAccountUtils, 'createAccount');
+    const createAccountStub = sandbox.stub(utils, 'createAccount');
     sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolvesThis();
     sandbox.stub(utils, 'isAccountDeployed').resolves(true);
     const stub = sandbox.stub(utils, 'executeTxn').resolves({
