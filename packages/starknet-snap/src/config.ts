@@ -1,5 +1,5 @@
-import { LogLevel } from './utils/logger';
 import { SnapEnv } from './utils/constants';
+import { LogLevel } from './utils/logger';
 
 export type SnapConfig = {
   logLevel: string;
