@@ -1,3 +1,4 @@
+import { MethodNotFoundError, SnapError } from '@metamask/snaps-sdk';
 import { constants } from 'starknet';
 
 import { onRpcRequest, onHomePage } from '.';
@@ -50,15 +51,30 @@ describe('onRpcRequest', () => {
     expect(createAccountSpy).toHaveBeenCalledTimes(1);
   });
 
-  it('throws `Unable to execute the rpc request` error if an error has thrown', async () => {
-    const { createAccountSpy, keyPairSpy } = createMockSpy();
+  it('throws `MethodNotFoundError` if the request method not found', async () => {
+    await expect(
+      onRpcRequest({
+        ...createMockRequest(),
+        request: {
+          ...createMockRequest().request,
+          method: 'method_not_found',
+        },
+      }),
+    ).rejects.toThrow(MethodNotFoundError);
+  });
 
-    createAccountSpy.mockRejectedValue(new Error('Custom Error'));
-    keyPairSpy.mockReturnThis();
+  it('throws `SnapError` if the error is an instance of SnapError', async () => {
+    const { createAccountSpy } = createMockSpy();
+    createAccountSpy.mockRejectedValue(new SnapError('error'));
 
-    await expect(onRpcRequest(createMockRequest())).rejects.toThrow(
-      'Unable to execute the rpc request',
-    );
+    await expect(onRpcRequest(createMockRequest())).rejects.toThrow(SnapError);
+  });
+
+  it('throws `SnapError` if the error is not an instance of SnapError', async () => {
+    const { createAccountSpy } = createMockSpy();
+    createAccountSpy.mockRejectedValue(new Error('error'));
+
+    await expect(onRpcRequest(createMockRequest())).rejects.toThrow(SnapError);
   });
 });
 
