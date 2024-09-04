@@ -6,4 +6,5 @@ export * from './superstruct';
 export * from './logger';
 export * from './formatterUtils';
 export * from './snap-state';
+export * from './url';
 // TODO: add other utils

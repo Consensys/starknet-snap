@@ -29,7 +29,6 @@ import type {
   VoyagerTransactionType,
 } from '../types/snapState';
 import {
-  DAPP,
   MAXIMUM_NETWORK_NAME_LENGTH,
   MAXIMUM_TOKEN_NAME_LENGTH,
   MAXIMUM_TOKEN_SYMBOL_LENGTH,
@@ -54,6 +53,7 @@ import {
   StatusFilter,
   ChainIdFilter,
 } from './transaction/filter';
+import { getDappUrl } from './url';
 
 /**
  *
@@ -1164,37 +1164,13 @@ export function toMap<Key, Val, FnParam>(
 }
 
 /**
- *
- * @param envt
- */
-export function dappUrl(envt: string) {
-  if (!envt) {
-    return DAPP.prod;
-  }
-
-  switch (envt.toLowerCase()) {
-    case 'dev':
-      return DAPP.dev;
-    case 'staging':
-      return DAPP.staging;
-    case 'prod':
-      return DAPP.prod;
-    default:
-      return DAPP.prod;
-  }
-}
-
-/**
  * Displays a modal to the user requesting them to upgrade their account.
  */
 export async function showUpgradeRequestModal() {
   await alertDialog([
     heading('Account Upgrade Mandatory!'),
     text(
-      `Visit the [companion dapp for Starknet](${dappUrl(
-        // eslint-disable-next-line no-restricted-globals
-        process.env.SNAP_ENV as unknown as string,
-      )}) and click “Upgrade”.\nThank you!`,
+      `Visit the [companion dapp for Starknet](${getDappUrl()}) and click “Upgrade”.\nThank you!`,
     ),
   ]);
 }
@@ -1206,10 +1182,7 @@ export async function showDeployRequestModal() {
   await alertDialog([
     heading('Account Deployment Mandatory!'),
     text(
-      `Visit the [companion dapp for Starknet](${dappUrl(
-        // eslint-disable-next-line no-restricted-globals
-        process.env.SNAP_ENV as unknown as string,
-      )}) to deploy your account.\nThank you!`,
+      `Visit the [companion dapp for Starknet](${getDappUrl()}) to deploy your account.\nThank you!`,
     ),
   ]);
 }
