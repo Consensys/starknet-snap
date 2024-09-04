@@ -2,7 +2,7 @@ import { text } from '@metamask/snaps-sdk';
 
 import { onHomePage, onRpcRequest } from '.';
 import * as createAccountApi from './createAccount';
-import { HomePageController } from './rpcs/on-home-page';
+import { HomePageController } from './on-home-page';
 import * as keyPairUtils from './utils/keyPair';
 
 jest.mock('./utils/logger');

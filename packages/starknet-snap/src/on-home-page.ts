@@ -9,21 +9,21 @@ import {
 } from '@metamask/snaps-sdk';
 import { ethers } from 'ethers';
 
-import { NetworkStateManager } from '../state/network-state-manager';
-import type { Network, SnapState } from '../types/snapState';
+import { NetworkStateManager } from './state/network-state-manager';
+import type { Network, SnapState } from './types/snapState';
 import {
   getBip44Deriver,
   getDappUrl,
   getStateData,
   logger,
   toJson,
-} from '../utils';
-import { BlockIdentifierEnum, ETHER_MAINNET } from '../utils/constants';
+} from './utils';
+import { BlockIdentifierEnum, ETHER_MAINNET } from './utils/constants';
 import {
   getBalance,
   getCorrectContractAddress,
   getKeysFromAddressIndex,
-} from '../utils/starknetUtils';
+} from './utils/starknetUtils';
 
 /**
  * The onHomePage handler to execute the home page event operation.

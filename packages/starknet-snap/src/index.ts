@@ -25,6 +25,7 @@ import { getStoredUserAccounts } from './getStoredUserAccounts';
 import { getTransactions } from './getTransactions';
 import { getTransactionStatus } from './getTransactionStatus';
 import { getValue } from './getValue';
+import { homePageController } from './on-home-page';
 import { recoverAccounts } from './recoverAccounts';
 import type {
   DisplayPrivateKeyParams,
@@ -44,7 +45,6 @@ import {
   signDeclareTransaction,
   verifySignature,
 } from './rpcs';
-import { homePageController } from './rpcs/on-home-page';
 import { signDeployAccountTransaction } from './signDeployAccountTransaction';
 import { switchNetwork } from './switchNetwork';
 import type {

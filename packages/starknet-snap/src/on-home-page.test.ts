@@ -1,19 +1,19 @@
 import { ethers } from 'ethers';
 import { constants } from 'starknet';
 
-import { generateAccounts, type StarknetAccount } from '../__tests__/helper';
-import type { Network, SnapState } from '../types/snapState';
+import { generateAccounts, type StarknetAccount } from './__tests__/helper';
+import { HomePageController } from './on-home-page';
+import type { Network, SnapState } from './types/snapState';
 import {
   BlockIdentifierEnum,
   ETHER_MAINNET,
   STARKNET_SEPOLIA_TESTNET_NETWORK,
-} from '../utils/constants';
-import * as snapHelper from '../utils/snap';
-import * as starknetUtils from '../utils/starknetUtils';
-import { HomePageController } from './on-home-page';
+} from './utils/constants';
+import * as snapHelper from './utils/snap';
+import * as starknetUtils from './utils/starknetUtils';
 
-jest.mock('../utils/snap');
-jest.mock('../utils/logger');
+jest.mock('./utils/snap');
+jest.mock('./utils/logger');
 
 describe('homepageController', () => {
   const state: SnapState = {
