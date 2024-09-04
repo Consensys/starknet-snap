@@ -4,7 +4,12 @@ import type {
   OnInstallHandler,
   OnUpdateHandler,
 } from '@metamask/snaps-sdk';
-import { panel, text, SnapError } from '@metamask/snaps-sdk';
+import {
+  panel,
+  text,
+  SnapError,
+  MethodNotFoundError,
+} from '@metamask/snaps-sdk';
 
 import { addErc20Token } from './addErc20Token';
 import { addNetwork } from './addNetwork';
