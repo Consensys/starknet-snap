@@ -54,7 +54,7 @@ import type {
 } from './types/snapApi';
 import type { SnapState } from './types/snapState';
 import { upgradeAccContract } from './upgradeAccContract';
-import { getDappUrl } from './utils';
+import { getDappUrl, isSnapRpcError } from './utils';
 import {
   CAIRO_VERSION_LEGACY,
   PRELOADED_TOKENS,
@@ -64,7 +64,7 @@ import {
 } from './utils/constants';
 import { getAddressKeyDeriver } from './utils/keyPair';
 import { acquireLock } from './utils/lock';
-import { logger, LogLevel } from './utils/logger';
+import { logger } from './utils/logger';
 import { toJson } from './utils/serializer';
 import {
   upsertErc20Token,
@@ -278,19 +278,18 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
         return await getStarkName(apiParams);
 
       default:
-        throw new Error('Method not found.');
+        throw new MethodNotFoundError() as unknown as Error;
     }
   } catch (error) {
-    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-    logger.error(`Error: ${error}`);
-    // We don't want to expose the error message to the user when it is a production build
-    if (logger.logLevel === LogLevel.OFF) {
-      throw new SnapError(
-        'Unable to execute the rpc request',
-      ) as unknown as Error;
-    } else {
-      throw new SnapError(error.message) as unknown as Error;
+    let snapError = error;
+
+    if (!isSnapRpcError(error)) {
+      snapError = new SnapError('Unable to execute the rpc request');
     }
+    logger.error(
+      `onRpcRequest error: ${JSON.stringify(snapError.toJSON(), null, 2)}`,
+    );
+    throw snapError;
   }
 };
 
