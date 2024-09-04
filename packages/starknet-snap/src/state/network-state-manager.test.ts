@@ -4,6 +4,7 @@ import type { Network } from '../types/snapState';
 import {
   STARKNET_MAINNET_NETWORK,
   STARKNET_SEPOLIA_TESTNET_NETWORK,
+  STARKNET_TESTNET_NETWORK,
 } from '../utils/constants';
 import { mockState } from './__tests__/helper';
 import { NetworkStateManager, ChainIdFilter } from './network-state-manager';
@@ -173,7 +174,7 @@ describe('NetworkStateManager', () => {
       expect(result).toStrictEqual(STARKNET_MAINNET_NETWORK);
     });
 
-    it('returns null if the current network is null or undefined', async () => {
+    it('returns sepolia testnet if the current network is null or undefined', async () => {
       await mockState({
         networks: [STARKNET_MAINNET_NETWORK, STARKNET_SEPOLIA_TESTNET_NETWORK],
       });
@@ -181,7 +182,19 @@ describe('NetworkStateManager', () => {
       const stateManager = new NetworkStateManager();
       const result = await stateManager.getCurrentNetwork();
 
-      expect(result).toBeNull();
+      expect(result).toStrictEqual(STARKNET_SEPOLIA_TESTNET_NETWORK);
+    });
+
+    it('returns sepolia testnet if the current network is neither mainnet or sepolia testnet', async () => {
+      await mockState({
+        networks: [STARKNET_MAINNET_NETWORK, STARKNET_SEPOLIA_TESTNET_NETWORK],
+        currentNetwork: STARKNET_TESTNET_NETWORK,
+      });
+
+      const stateManager = new NetworkStateManager();
+      const result = await stateManager.getCurrentNetwork();
+
+      expect(result).toStrictEqual(STARKNET_SEPOLIA_TESTNET_NETWORK);
     });
   });
 

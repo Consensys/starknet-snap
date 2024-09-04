@@ -1,6 +1,10 @@
 import { assert, string } from 'superstruct';
 
 import type { Network, SnapState } from '../types/snapState';
+import {
+  STARKNET_MAINNET_NETWORK,
+  STARKNET_SEPOLIA_TESTNET_NETWORK,
+} from '../utils/constants';
 import type { IFilter } from './filter';
 import { ChainIdFilter as BaseChainIdFilter } from './filter';
 import { StateManager, StateManagerError } from './state-manager';
@@ -111,8 +115,18 @@ export class NetworkStateManager extends StateManager<Network> {
    * @param [state] - The optional SnapState object.
    * @returns A Promise that resolves with the current Network object if found, or null if not found.
    */
-  async getCurrentNetwork(state?: SnapState): Promise<Network | null> {
-    return (state ?? (await this.get())).currentNetwork ?? null;
+  async getCurrentNetwork(state?: SnapState): Promise<Network> {
+    const { currentNetwork } = state ?? (await this.get());
+
+    // Make sure the current network is either Sepolia testnet or Mainnet. By default it will be Sepolia testnet.
+    if (
+      !currentNetwork ||
+      currentNetwork.chainId !== STARKNET_MAINNET_NETWORK.chainId
+    ) {
+      return STARKNET_SEPOLIA_TESTNET_NETWORK;
+    }
+
+    return currentNetwork;
   }
 
   /**

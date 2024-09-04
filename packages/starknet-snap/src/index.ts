@@ -3,17 +3,8 @@ import type {
   OnHomePageHandler,
   OnInstallHandler,
   OnUpdateHandler,
-  Component,
 } from '@metamask/snaps-sdk';
-import {
-  panel,
-  row,
-  divider,
-  text,
-  copyable,
-  SnapError,
-} from '@metamask/snaps-sdk';
-import { ethers } from 'ethers';
+import { panel, text, SnapError } from '@metamask/snaps-sdk';
 
 import { addErc20Token } from './addErc20Token';
 import { addNetwork } from './addNetwork';
@@ -53,6 +44,7 @@ import {
   signDeclareTransaction,
   verifySignature,
 } from './rpcs';
+import { homePageController } from './rpcs/on-home-page';
 import { signDeployAccountTransaction } from './signDeployAccountTransaction';
 import { switchNetwork } from './switchNetwork';
 import type {
@@ -65,8 +57,6 @@ import { upgradeAccContract } from './upgradeAccContract';
 import { getDappUrl } from './utils';
 import {
   CAIRO_VERSION_LEGACY,
-  ETHER_MAINNET,
-  ETHER_SEPOLIA_TESTNET,
   PRELOADED_TOKENS,
   STARKNET_MAINNET_NETWORK,
   STARKNET_SEPOLIA_TESTNET_NETWORK,
@@ -81,11 +71,6 @@ import {
   upsertNetwork,
   removeNetwork,
 } from './utils/snapUtils';
-import {
-  getBalance,
-  getCorrectContractAddress,
-  getKeysFromAddressIndex,
-} from './utils/starknetUtils';
 
 declare const snap;
 
@@ -342,70 +327,5 @@ export const onUpdate: OnUpdateHandler = async () => {
 };
 
 export const onHomePage: OnHomePageHandler = async () => {
-  try {
-    const state: SnapState = await snap.request({
-      method: 'snap_manageState',
-      params: {
-        operation: 'get',
-      },
-    });
-
-    if (!state) {
-      throw new Error('State not found.');
-    }
-
-    // default network is testnet
-    let network = STARKNET_SEPOLIA_TESTNET_NETWORK;
-
-    if (
-      state.currentNetwork &&
-      state.currentNetwork.chainId !== STARKNET_TESTNET_NETWORK.chainId
-    ) {
-      network = state.currentNetwork;
-    }
-
-    // we only support 1 address at this moment
-    const idx = 0;
-    const keyDeriver = await getAddressKeyDeriver(snap);
-    const { publicKey } = await getKeysFromAddressIndex(
-      keyDeriver,
-      network.chainId,
-      state,
-      idx,
-    );
-    const { address } = await getCorrectContractAddress(network, publicKey);
-
-    const ethToken =
-      network.chainId === ETHER_SEPOLIA_TESTNET.chainId
-        ? ETHER_SEPOLIA_TESTNET
-        : ETHER_MAINNET;
-    const balance =
-      (await getBalance(address, ethToken.address, network)) ?? BigInt(0);
-    const displayBalance = ethers.utils.formatUnits(
-      ethers.BigNumber.from(balance),
-      ethToken.decimals,
-    );
-
-    const panelItems: Component[] = [];
-    panelItems.push(text('Address'));
-    panelItems.push(copyable(`${address}`));
-    panelItems.push(row('Network', text(`${network.name}`)));
-    panelItems.push(row('Balance', text(`${displayBalance} ETH`)));
-    panelItems.push(divider());
-    panelItems.push(
-      text(
-        `Visit the [companion dapp for Starknet](${getDappUrl()}) to manage your account.`,
-      ),
-    );
-
-    return {
-      content: panel(panelItems),
-    };
-  } catch (error) {
-    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-    logger.error(`Error: ${error}`);
-    throw new SnapError(
-      'Unable to initialize Snap HomePage',
-    ) as unknown as Error;
-  }
+  return await homePageController.execute();
 };
