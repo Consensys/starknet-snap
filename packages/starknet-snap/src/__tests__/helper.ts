@@ -171,7 +171,7 @@ export function generateTransactions({
   finalityStatuses = Object.values(TransactionFinalityStatus),
   executionStatuses = Object.values(TransactionExecutionStatus),
   // The timestamp from data source is in seconds
-  timestamp = Math.floor(Date.now() / 1000),
+  timestamp = Date.now(),
   cnt = 1,
 }: {
   chainId: constants.StarknetChainId;
@@ -197,6 +197,7 @@ export function generateTransactions({
     executionStatus: '',
     finalityStatus: '',
     eventIds: [],
+    accountCalls: undefined
   };
   let accumulatedTimestamp = timestamp;
   let accumulatedTxnHash = BigInt(
@@ -237,19 +238,19 @@ export function generateTransactions({
   for (let i = 1; i <= createCnt; i++) {
     const randomContractAddress =
       contractAddresses[
-        Math.floor(generateRandomValue() * contractAddresses.length)
+      Math.floor(generateRandomValue() * contractAddresses.length)
       ];
     const randomTxnType =
       filteredTxnTypes[
-        Math.floor(generateRandomValue() * filteredTxnTypes.length)
+      Math.floor(generateRandomValue() * filteredTxnTypes.length)
       ];
     let randomFinalityStatus =
       finalityStatuses[
-        Math.floor(generateRandomValue() * finalityStatuses.length)
+      Math.floor(generateRandomValue() * finalityStatuses.length)
       ];
     let randomExecutionStatus =
       executionStatuses[
-        Math.floor(generateRandomValue() * executionStatuses.length)
+      Math.floor(generateRandomValue() * executionStatuses.length)
       ];
     let randomContractFuncName = ['transfer', 'upgrade'][
       Math.floor(generateRandomValue() * 2)
@@ -276,15 +277,31 @@ export function generateTransactions({
 
     transactions.push({
       ...transaction,
-      contractAddress: randomContractAddress,
+      contractAddress: '',
       txnType: randomTxnType,
       finalityStatus: randomFinalityStatus,
       executionStatus: randomExecutionStatus,
       timestamp: accumulatedTimestamp,
-      contractFuncName:
-        randomTxnType === TransactionType.INVOKE ? randomContractFuncName : '',
+      // TODO: when multiple calls are supported, we move this to accountCalls, we keep it for legacy support
+      contractFuncName: '',
+      // TODO: when multiple calls are supported, we move this to accountCalls, we keep it for legacy support
+      contractCallData: [],
       txnHash: '0x' + accumulatedTxnHash.toString(16),
-    });
+      accountCalls: {
+        [randomContractAddress]: [
+          {
+            contract: randomContractAddress,
+            contractFuncName: randomTxnType === TransactionType.INVOKE ? randomContractFuncName : '',
+            contractCallData: [
+              randomContractAddress,
+              (Math.max(generateRandomValue() * 1000, 100)).toString(16),
+              "0x0"
+            ],
+          },
+        ],
+      },
+    }
+    );
   }
 
   return transactions.sort((a, b) => b.timestamp - a.timestamp);

@@ -3,9 +3,9 @@ import {
   TransactionFinalityStatus,
   TransactionExecutionStatus,
 } from 'starknet';
-import { assert, enums, number } from 'superstruct';
+import { assert, enums, number, string } from 'superstruct';
 
-import type { Transaction, SnapState } from '../types/snapState';
+import type { Transaction, SnapState, TranscationAccountCall } from '../types/snapState';
 import { TransactionStatusType } from '../types/snapState';
 import type { IFilter } from './filter';
 import {
@@ -13,6 +13,7 @@ import {
   ChainIdFilter as BaseChainIdFilter,
   StringFllter,
   Filter,
+  MultiFilter,
 } from './filter';
 import { StateManager, StateManagerError } from './state-manager';
 
@@ -23,11 +24,23 @@ export class ChainIdFilter
   implements ITxFilter {}
 
 export class ContractAddressFilter
-  extends BigIntFilter<Transaction>
-  implements ITxFilter
-{
-  dataKey = 'contractAddress';
+  extends MultiFilter<
+  string,
+  bigint,
+  Transaction
+> {
+  protected _prepareSearch(search: string[]): void {
+    this.search = new Set(search?.map((val) => BigInt(val)));
+  }
+
+  protected _apply(data: Transaction): boolean {
+    if (!data.accountCalls) {
+      return false;
+    }
+    return Object.keys(data.accountCalls).some( (contractAddress:string) => this.search.has(BigInt(contractAddress)));
+  }
 }
+
 export class SenderAddressFilter
   extends BigIntFilter<Transaction>
   implements ITxFilter
@@ -47,10 +60,7 @@ export class TxTimestampFilter
   implements ITxFilter
 {
   _apply(data: Transaction): boolean {
-    // The timestamp from the data source is in seconds, but we are comparing it in milliseconds
-    // e.g if the search is 1630000000, it means we return the txns where the timestamp is greater than or equal to 1630000000 * 1000
-    // example use case: search for txns for the last 7 days, the search will be Date.now() - 7 * 24 * 60 * 60 * 1000
-    return this.search !== undefined && data.timestamp * 1000 >= this.search;
+    return this.search !== undefined && data.timestamp >= this.search;
   }
 }
 

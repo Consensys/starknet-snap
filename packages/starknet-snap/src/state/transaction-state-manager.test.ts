@@ -144,8 +144,12 @@ describe('TransactionStateManager', () => {
       expect(result).toStrictEqual(
         txns.filter(
           (txn) =>
-            txn.contractAddress === tokenAddress1 ||
-            txn.contractAddress === tokenAddress2,
+            txn.accountCalls && 
+            Object.keys(txn.accountCalls).some(
+              (contractAddress: string) => 
+                contractAddress === tokenAddress1 ||
+                contractAddress === tokenAddress2
+            )
         ),
       );
     });
@@ -154,8 +158,7 @@ describe('TransactionStateManager', () => {
       const { txns, stateManager } = await prepareFindTransctions();
 
       const result = await stateManager.findTransactions({
-        // The timestamp from data source is in seconds, but we are comparing it in milliseconds
-        timestamp: txns[5].timestamp * 1000,
+        timestamp: txns[5].timestamp,
       });
 
       expect(result).toStrictEqual(
@@ -214,7 +217,7 @@ describe('TransactionStateManager', () => {
       const contractAddressCond = [
         PRELOADED_TOKENS.map((token) => token.address)[0],
       ];
-      const timestampCond = txns[5].timestamp * 1000;
+      const timestampCond = txns[5].timestamp;
       const chainIdCond = [
         txns[0].chainId as unknown as constants.StarknetChainId,
       ];
@@ -238,7 +241,10 @@ describe('TransactionStateManager', () => {
                 txn.executionStatus as unknown as TransactionExecutionStatus,
               )) &&
             txn.timestamp >= txns[5].timestamp &&
-            contractAddressCond.includes(txn.contractAddress) &&
+            txn.accountCalls && 
+            Object.keys(txn.accountCalls).some(
+              (contractAddress: string) => contractAddressCond.includes(contractAddress)
+            ) &&
             chainIdCond.includes(
               txn.chainId as unknown as constants.StarknetChainId,
             ) &&
@@ -270,7 +276,7 @@ describe('TransactionStateManager', () => {
         ...txn,
         executionStatus: TransactionExecutionStatus.REJECTED,
         finalityStatus: TransactionFinalityStatus.ACCEPTED_ON_L1,
-        timestamp: Math.floor(Date.now() / 1000),
+        timestamp: Date.now(),
       };
       await stateManager.updateTransaction(updatedEntity);
 
@@ -289,7 +295,7 @@ describe('TransactionStateManager', () => {
       const txn = txns[2];
       const updatedEntity = {
         ...txn,
-        timestamp: Math.floor(Date.now() / 1000),
+        timestamp: Date.now(),
         txnHash: '0x123',
       };
 
