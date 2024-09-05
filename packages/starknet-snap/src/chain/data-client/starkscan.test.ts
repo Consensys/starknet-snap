@@ -300,6 +300,12 @@ describe('StarkScanClient', () => {
       const client = createMockClient();
       const result = client.toTransaction(mockTx);
 
+      const {
+        contract_address: contract,
+        selector_name: contractFuncName,
+        calldata: contractCallData,
+      } = mockTx.account_calls[0];
+
       expect(result).toStrictEqual({
         txnHash: mockTx.transaction_hash,
         txnType: mockTx.transaction_type,
@@ -314,15 +320,17 @@ describe('StarkScanClient', () => {
         failureReason: mockTx.revert_error ?? undefined,
         maxFee: BigInt(mockTx.max_fee),
         actualFee: BigInt(mockTx.actual_fee),
-        accountCalls: [
-          {
-            contract: mockTx.account_calls[0].contract_address,
-            contractFuncName: mockTx.account_calls[0].selector_name,
-            contractCallData: mockTx.account_calls[0].calldata,
-            recipient: mockTx.account_calls[0].calldata[0],
-            amount: mockTx.account_calls[0].calldata[1],
-          },
-        ],
+        accountCalls: {
+          [contract]: [
+            {
+              contract,
+              contractFuncName,
+              contractCallData,
+              recipient: contractCallData[0],
+              amount: contractCallData[1],
+            },
+          ],
+        },
       });
     });
 
@@ -350,7 +358,7 @@ describe('StarkScanClient', () => {
         failureReason: mockTx.revert_error ?? undefined,
         maxFee: BigInt(mockTx.max_fee),
         actualFee: BigInt(mockTx.actual_fee),
-        accountCalls: [],
+        accountCalls: undefined,
       });
     });
   });

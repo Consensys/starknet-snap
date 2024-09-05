@@ -208,24 +208,12 @@ export class StarkScanClient implements IDataClient {
 
   protected toTransaction(tx: StarkScanTransaction): Transaction {
     let sender = tx.sender_address ?? '';
-    const accountCalls: TranscationAccountCall[] = [];
+
+    // account_calls representing the calls to invoke from the account contract, it can be multiple
+    const accountCalls = this.toAccountCall(tx.account_calls);
 
     // eslint-disable-next-line no-negated-condition
-    if (!this.isDeployTransaction(tx)) {
-      // account_calls representing the calls to invoke from the account contract, it can be multiple
-      for (const accountCallArg of tx.account_calls) {
-        const accountCall: TranscationAccountCall = {
-          contract: accountCallArg.contract_address,
-          contractFuncName: accountCallArg.selector_name,
-          contractCallData: accountCallArg.calldata,
-        };
-        if (this.isFundTransferTransaction(accountCallArg)) {
-          accountCall.recipient = accountCallArg.calldata[0];
-          accountCall.amount = accountCallArg.calldata[1];
-        }
-        accountCalls.push(accountCall);
-      }
-    } else {
+    if (this.isDeployTransaction(tx)) {
       // In case of deploy transaction, the contract address is the sender address
       sender = tx.contract_address as unknown as string;
     }
@@ -248,8 +236,49 @@ export class StarkScanClient implements IDataClient {
       failureReason: tx.revert_error ?? undefined,
       maxFee: BigInt(tx.max_fee),
       actualFee: BigInt(tx.actual_fee),
-      accountCalls,
+      accountCalls: accountCalls,
     };
     /* eslint-enable */
+  }
+
+  protected toAccountCall(
+    calls: StarkScanAccountCall[],
+  ): Record<string, TranscationAccountCall[]> | undefined {
+    if (!calls || calls.length === 0) {
+      return undefined;
+    }
+
+    return calls.reduce(
+      (
+        data: Record<string, TranscationAccountCall[]>,
+        accountCallArg: StarkScanAccountCall,
+      ) => {
+        const {
+          contract_address: contract,
+          selector_name: contractFuncName,
+          calldata: contractCallData,
+        } = accountCallArg;
+
+        if (!Object.prototype.hasOwnProperty.call(data, contract)) {
+          data[contract] = [];
+        }
+
+        const accountCall: TranscationAccountCall = {
+          contract,
+          contractFuncName,
+          contractCallData,
+        };
+
+        if (this.isFundTransferTransaction(accountCallArg)) {
+          accountCall.recipient = accountCallArg.calldata[0];
+          accountCall.amount = accountCallArg.calldata[1];
+        }
+
+        data[contract].push(accountCall);
+
+        return data;
+      },
+      {},
+    );
   }
 }

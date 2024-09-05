@@ -116,7 +116,8 @@ export type Transaction = {
   // TEMP: put it as optional to support the legacy data
   actualFee?: BigInt;
   // TEMP: put it as optional to support the legacy data
-  accountCalls?: TranscationAccountCall[];
+  // using Record<string, TranscationAccountCall[]> to support O(1) searching
+  accountCalls?: Record<string, TranscationAccountCall[]>;
 };
 
 /* eslint-disable */
