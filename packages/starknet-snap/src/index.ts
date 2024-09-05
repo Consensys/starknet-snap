@@ -267,7 +267,6 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
         );
 
       case 'starkNet_executeTxn':
-        apiParams.keyDeriver = await getAddressKeyDeriver(snap);
         return await executeTxn.execute(
           apiParams.requestParams as unknown as ExecuteTxnParams,
         );
