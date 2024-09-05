@@ -3,9 +3,9 @@ import {
   TransactionFinalityStatus,
   TransactionExecutionStatus,
 } from 'starknet';
-import { assert, enums, number, string } from 'superstruct';
+import { assert, enums, number } from 'superstruct';
 
-import type { Transaction, SnapState, TranscationAccountCall } from '../types/snapState';
+import type { Transaction, SnapState } from '../types/snapState';
 import { TransactionStatusType } from '../types/snapState';
 import type { IFilter } from './filter';
 import {
@@ -23,8 +23,7 @@ export class ChainIdFilter
   extends BaseChainIdFilter<Transaction>
   implements ITxFilter {}
 
-export class ContractAddressFilter
-  extends MultiFilter<
+export class ContractAddressFilter extends MultiFilter<
   string,
   bigint,
   Transaction
@@ -37,7 +36,9 @@ export class ContractAddressFilter
     if (!data.accountCalls) {
       return false;
     }
-    return Object.keys(data.accountCalls).some( (contractAddress:string) => this.search.has(BigInt(contractAddress)));
+    return Object.keys(data.accountCalls).some((contractAddress: string) =>
+      this.search.has(BigInt(contractAddress)),
+    );
   }
 }
 

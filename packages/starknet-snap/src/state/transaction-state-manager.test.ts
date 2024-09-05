@@ -144,12 +144,12 @@ describe('TransactionStateManager', () => {
       expect(result).toStrictEqual(
         txns.filter(
           (txn) =>
-            txn.accountCalls && 
+            txn.accountCalls &&
             Object.keys(txn.accountCalls).some(
-              (contractAddress: string) => 
+              (contractAddress: string) =>
                 contractAddress === tokenAddress1 ||
-                contractAddress === tokenAddress2
-            )
+                contractAddress === tokenAddress2,
+            ),
         ),
       );
     });
@@ -241,9 +241,9 @@ describe('TransactionStateManager', () => {
                 txn.executionStatus as unknown as TransactionExecutionStatus,
               )) &&
             txn.timestamp >= txns[5].timestamp &&
-            txn.accountCalls && 
-            Object.keys(txn.accountCalls).some(
-              (contractAddress: string) => contractAddressCond.includes(contractAddress)
+            txn.accountCalls &&
+            Object.keys(txn.accountCalls).some((contractAddress: string) =>
+              contractAddressCond.includes(contractAddress),
             ) &&
             chainIdCond.includes(
               txn.chainId as unknown as constants.StarknetChainId,
