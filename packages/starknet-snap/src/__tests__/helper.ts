@@ -197,7 +197,7 @@ export function generateTransactions({
     executionStatus: '',
     finalityStatus: '',
     eventIds: [],
-    accountCalls: undefined
+    accountCalls: undefined,
   };
   let accumulatedTimestamp = timestamp;
   let accumulatedTxnHash = BigInt(
@@ -238,19 +238,19 @@ export function generateTransactions({
   for (let i = 1; i <= createCnt; i++) {
     const randomContractAddress =
       contractAddresses[
-      Math.floor(generateRandomValue() * contractAddresses.length)
+        Math.floor(generateRandomValue() * contractAddresses.length)
       ];
     const randomTxnType =
       filteredTxnTypes[
-      Math.floor(generateRandomValue() * filteredTxnTypes.length)
+        Math.floor(generateRandomValue() * filteredTxnTypes.length)
       ];
     let randomFinalityStatus =
       finalityStatuses[
-      Math.floor(generateRandomValue() * finalityStatuses.length)
+        Math.floor(generateRandomValue() * finalityStatuses.length)
       ];
     let randomExecutionStatus =
       executionStatuses[
-      Math.floor(generateRandomValue() * executionStatuses.length)
+        Math.floor(generateRandomValue() * executionStatuses.length)
       ];
     let randomContractFuncName = ['transfer', 'upgrade'][
       Math.floor(generateRandomValue() * 2)
@@ -291,17 +291,19 @@ export function generateTransactions({
         [randomContractAddress]: [
           {
             contract: randomContractAddress,
-            contractFuncName: randomTxnType === TransactionType.INVOKE ? randomContractFuncName : '',
+            contractFuncName:
+              randomTxnType === TransactionType.INVOKE
+                ? randomContractFuncName
+                : '',
             contractCallData: [
               randomContractAddress,
-              (Math.max(generateRandomValue() * 1000, 100)).toString(16),
-              "0x0"
+              Math.max(generateRandomValue() * 1000, 100).toString(16),
+              '0x0',
             ],
           },
         ],
       },
-    }
-    );
+    });
   }
 
   return transactions.sort((a, b) => b.timestamp - a.timestamp);
