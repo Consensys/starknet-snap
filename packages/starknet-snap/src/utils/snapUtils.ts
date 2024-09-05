@@ -10,6 +10,8 @@ import type {
   DeclareSignerDetails,
   Call,
   DeployAccountSignerDetails,
+  Invocations,
+  UniversalDetails,
 } from 'starknet';
 
 import {
@@ -27,7 +29,6 @@ import type {
   VoyagerTransactionType,
 } from '../types/snapState';
 import {
-  DAPP,
   MAXIMUM_NETWORK_NAME_LENGTH,
   MAXIMUM_TOKEN_NAME_LENGTH,
   MAXIMUM_TOKEN_SYMBOL_LENGTH,
@@ -52,6 +53,7 @@ import {
   StatusFilter,
   ChainIdFilter,
 } from './transaction/filter';
+import { getDappUrl } from './url';
 
 /**
  *
@@ -366,16 +368,16 @@ export function getNetworkTxt(network: Network) {
  *
  * @param senderAddress
  * @param network
- * @param txnInvocation
+ * @param invocations
  * @param abis
- * @param invocationsDetails
+ * @param details
  */
 export function getTxnSnapTxt(
   senderAddress: string,
   network: Network,
-  txnInvocation: Call | Call[],
+  invocations: Invocations | Call | Call[],
   abis?: Abi[],
-  invocationsDetails?: InvocationsDetails,
+  details?: UniversalDetails,
 ) {
   const components = [];
   addDialogTxt(components, 'Network', network.name);
@@ -383,24 +385,28 @@ export function getTxnSnapTxt(
   addDialogTxt(
     components,
     'Transaction Invocation',
-    JSON.stringify(txnInvocation, null, 2),
+    JSON.stringify(invocations, null, 2),
   );
   if (abis && abis.length > 0) {
     addDialogTxt(components, 'Abis', JSON.stringify(abis, null, 2));
   }
 
-  if (invocationsDetails?.maxFee) {
+  if (details?.maxFee) {
+    const feeToken: FeeToken =
+      details?.version === constants.TRANSACTION_VERSION.V3
+        ? FeeToken.STRK
+        : FeeToken.ETH;
     addDialogTxt(
       components,
-      `Max Fee(${FeeToken.ETH})`,
-      convert(invocationsDetails.maxFee, 'wei', 'ether'),
+      `Max Fee(${feeToken})`,
+      convert(details.maxFee, 'wei', 'ether'),
     );
   }
-  if (invocationsDetails?.nonce) {
-    addDialogTxt(components, 'Nonce', invocationsDetails.nonce.toString());
+  if (details?.nonce) {
+    addDialogTxt(components, 'Nonce', details.nonce.toString());
   }
-  if (invocationsDetails?.version) {
-    addDialogTxt(components, 'Version', invocationsDetails.version.toString());
+  if (details?.version) {
+    addDialogTxt(components, 'Version', details.version.toString());
   }
   return components;
 }
@@ -1162,37 +1168,13 @@ export function toMap<Key, Val, FnParam>(
 }
 
 /**
- *
- * @param envt
- */
-export function dappUrl(envt: string) {
-  if (!envt) {
-    return DAPP.prod;
-  }
-
-  switch (envt.toLowerCase()) {
-    case 'dev':
-      return DAPP.dev;
-    case 'staging':
-      return DAPP.staging;
-    case 'prod':
-      return DAPP.prod;
-    default:
-      return DAPP.prod;
-  }
-}
-
-/**
  * Displays a modal to the user requesting them to upgrade their account.
  */
 export async function showUpgradeRequestModal() {
   await alertDialog([
     heading('Account Upgrade Mandatory!'),
     text(
-      `Visit the [companion dapp for Starknet](${dappUrl(
-        // eslint-disable-next-line no-restricted-globals
-        process.env.SNAP_ENV as unknown as string,
-      )}) and click “Upgrade”.\nThank you!`,
+      `Visit the [companion dapp for Starknet](${getDappUrl()}) and click “Upgrade”.\nThank you!`,
     ),
   ]);
 }
@@ -1204,10 +1186,7 @@ export async function showDeployRequestModal() {
   await alertDialog([
     heading('Account Deployment Mandatory!'),
     text(
-      `Visit the [companion dapp for Starknet](${dappUrl(
-        // eslint-disable-next-line no-restricted-globals
-        process.env.SNAP_ENV as unknown as string,
-      )}) to deploy your account.\nThank you!`,
+      `Visit the [companion dapp for Starknet](${getDappUrl()}) to deploy your account.\nThank you!`,
     ),
   ]);
 }

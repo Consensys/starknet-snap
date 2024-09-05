@@ -41,21 +41,21 @@ jobs:
               echo "VERSION=${BASE}-dev-${HASH}-${DATE}"
               echo "TAG=dev"
               echo "ENV=dev"
-              echo "LOG_LEVEL=all"
+              echo "LOG_LEVEL=6"
             } >> "$GITHUB_OUTPUT"
           elif [[ $ENV  == "staging" ]]; then
             {
               echo "VERSION=${BASE}-staging"
               echo "TAG=staging"
               echo "ENV=staging"
-              echo "LOG_LEVEL=off"
+              echo "LOG_LEVEL=0"
             } >> "$GITHUB_OUTPUT"
           elif [[ $ENV  == "production" ]]; then
             {
               echo "VERSION=${BASE}"
               echo "TAG=latest"
               echo "ENV=prod"
-              echo "LOG_LEVEL=off"
+              echo "LOG_LEVEL=0"
             } >> "$GITHUB_OUTPUT"
           else
             echo "Invalid environment"
@@ -107,7 +107,7 @@ jobs:
 
           echo "Building UI with version $VERSION"
           
-          REACT_APP_DEBUG_LEVEL="${LOG_LEVEL}" REACT_APP_SNAP_VERSION="${VERSION}" yarn workspace wallet-ui build
+          REACT_APP_SNAP_VERSION="${VERSION}" yarn workspace wallet-ui build
 
           echo "Building Get Starknet with GET_STARKNET_PUBLIC_PATH=$GET_STARKNET_PUBLIC_PATH" 
 

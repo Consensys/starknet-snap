@@ -78,20 +78,10 @@ export abstract class RpcController<
    * @returns A promise that resolves to an json.
    */
   async execute(params: Request): Promise<Response> {
-    try {
-      await this.preExecute(params);
-      const resp = await this.handleRequest(params);
-      await this.postExecute(resp);
-      return resp;
-    } catch (error) {
-      logger.error('Failed to execute the rpc method', error);
-
-      if (error instanceof SnapError) {
-        throw error as unknown as Error;
-      }
-
-      throw new Error('Failed to execute the rpc method');
-    }
+    await this.preExecute(params);
+    const resp = await this.handleRequest(params);
+    await this.postExecute(resp);
+    return resp;
   }
 }
 

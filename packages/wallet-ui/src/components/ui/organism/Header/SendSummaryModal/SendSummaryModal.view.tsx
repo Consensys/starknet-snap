@@ -94,9 +94,9 @@ export const SendSummaryModalView = ({
           callData,
           wallet.accounts[0] as unknown as string,
           chainId,
-          selectedFeeToken === FeeToken.ETH
-            ? constants.TRANSACTION_VERSION.V2
-            : constants.TRANSACTION_VERSION.V3,
+          selectedFeeToken === FeeToken.STRK
+            ? constants.TRANSACTION_VERSION.V3
+            : undefined,
         )
           .then((response) => {
             if (response.message && response.message.includes('Error')) {
@@ -188,11 +188,11 @@ export const SendSummaryModalView = ({
         wallet.accounts[0] as unknown as string,
         gasFees.suggestedMaxFee,
         chainId,
+        selectedFeeToken,
       )
         .then((result) => {
           if (result) {
             toastr.success('Transaction sent successfully');
-            // can't trigger getTransaction by calling dispatch or setErc20TokenBalance here
             getTransactions(
               wallet.accounts[0] as unknown as string,
               wallet.erc20TokenBalanceSelected.address,

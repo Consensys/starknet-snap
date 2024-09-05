@@ -1,3 +1,4 @@
+import { MethodNotFoundError, SnapError } from '@metamask/snaps-sdk';
 import { constants } from 'starknet';
 
 import { onRpcRequest, onHomePage } from '.';
@@ -12,7 +13,6 @@ import {
   STARKNET_SEPOLIA_TESTNET_NETWORK,
 } from './utils/constants';
 import * as keyPairUtils from './utils/keyPair';
-import { LogLevel, logger } from './utils/logger';
 import * as starknetUtils from './utils/starknetUtils';
 
 jest.mock('./utils/logger');
@@ -21,11 +21,9 @@ describe('onRpcRequest', () => {
   const createMockSpy = () => {
     const createAccountSpy = jest.spyOn(createAccountApi, 'createAccount');
     const keyPairSpy = jest.spyOn(keyPairUtils, 'getAddressKeyDeriver');
-    const getLogLevelSpy = jest.spyOn(logger, 'getLogLevel');
     return {
       createAccountSpy,
       keyPairSpy,
-      getLogLevelSpy,
     };
   };
 
@@ -42,11 +40,10 @@ describe('onRpcRequest', () => {
   };
 
   it('processes request successfully', async () => {
-    const { createAccountSpy, keyPairSpy, getLogLevelSpy } = createMockSpy();
+    const { createAccountSpy, keyPairSpy } = createMockSpy();
 
     createAccountSpy.mockReturnThis();
     keyPairSpy.mockReturnThis();
-    getLogLevelSpy.mockReturnValue(LogLevel.OFF);
 
     await onRpcRequest(createMockRequest());
 
@@ -54,43 +51,31 @@ describe('onRpcRequest', () => {
     expect(createAccountSpy).toHaveBeenCalledTimes(1);
   });
 
-  it('throws `Unable to execute the rpc request` error if an error has thrown and LogLevel is 0', async () => {
-    const { createAccountSpy, keyPairSpy, getLogLevelSpy } = createMockSpy();
-
-    createAccountSpy.mockRejectedValue(new Error('Custom Error'));
-    keyPairSpy.mockReturnThis();
-    getLogLevelSpy.mockReturnValue(LogLevel.OFF);
-
-    await expect(onRpcRequest(createMockRequest())).rejects.toThrow(
-      'Unable to execute the rpc request',
-    );
+  it('throws `MethodNotFoundError` if the request method not found', async () => {
+    await expect(
+      onRpcRequest({
+        ...createMockRequest(),
+        request: {
+          ...createMockRequest().request,
+          method: 'method_not_found',
+        },
+      }),
+    ).rejects.toThrow(MethodNotFoundError);
   });
 
-  it.each([
-    LogLevel.DEBUG,
-    LogLevel.ALL,
-    LogLevel.ERROR,
-    LogLevel.INFO,
-    LogLevel.TRACE,
-    LogLevel.WARN,
-  ])(
-    `throws 'Unable to execute the rpc request' error if an error has thrown and LogLevel is %s`,
-    async function (logLevel) {
-      const { createAccountSpy, keyPairSpy, getLogLevelSpy } = createMockSpy();
+  it('throws `SnapError` if the error is an instance of SnapError', async () => {
+    const { createAccountSpy } = createMockSpy();
+    createAccountSpy.mockRejectedValue(new SnapError('error'));
 
-      createAccountSpy.mockRejectedValue(new Error('Custom Error'));
-      keyPairSpy.mockReturnThis();
-      getLogLevelSpy.mockReturnValue(logLevel);
+    await expect(onRpcRequest(createMockRequest())).rejects.toThrow(SnapError);
+  });
 
-      await expect(
-        onRpcRequest(
-          createMockRequest({
-            debugLevel: LogLevel[logLevel],
-          }),
-        ),
-      ).rejects.toThrow('Custom Error');
-    },
-  );
+  it('throws `SnapError` if the error is not an instance of SnapError', async () => {
+    const { createAccountSpy } = createMockSpy();
+    createAccountSpy.mockRejectedValue(new Error('error'));
+
+    await expect(onRpcRequest(createMockRequest())).rejects.toThrow(SnapError);
+  });
 });
 
 describe('onHomePage', () => {

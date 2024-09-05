@@ -16,6 +16,7 @@ const config: SnapConfig = {
     VOYAGER_API_KEY: process.env.VOYAGER_API_KEY ?? '',
     ALCHEMY_API_KEY: process.env.ALCHEMY_API_KEY ?? '',
     STARKSCAN_API_KEY: process.env.STARKSCAN_API_KEY ?? '',
+    LOG_LEVEL: process.env.LOG_LEVEL ?? '0',
     /* eslint-disable */
   },
   polyfills: true,

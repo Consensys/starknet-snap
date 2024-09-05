@@ -45,11 +45,6 @@ describe('validateRequest', () => {
     expect(() =>
       validateRequest(requestParams, validateStruct as unknown as Struct),
     ).toThrow(InvalidParamsError);
-    expect(() =>
-      validateRequest(requestParams, validateStruct as unknown as Struct),
-    ).toThrow(
-      'At path: signerAddress -- Expected a string, but received: 1234',
-    );
   });
 });
 
@@ -89,26 +84,6 @@ describe('RpcController', () => {
     const result = await rpc.execute('test');
 
     expect(result).toBe('done test');
-  });
-
-  it('throws `Failed to execute the rpc method` if an error was thrown', async () => {
-    const rpc = new MockRpc();
-
-    jest
-      .spyOn(MockRpc.prototype, 'handleRequest')
-      .mockRejectedValue(new Error('error'));
-
-    await expect(rpc.execute('test')).rejects.toThrow(
-      'Failed to execute the rpc method',
-    );
-  });
-
-  it('throws the actual error if an snap error was thrown', async () => {
-    const rpc = new MockRpc();
-
-    await expect(rpc.execute(1 as unknown as string)).rejects.toThrow(
-      'Expected a string, but received: 1',
-    );
   });
 });
 

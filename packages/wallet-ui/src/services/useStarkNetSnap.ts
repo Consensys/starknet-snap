@@ -28,11 +28,17 @@ import { Account } from '../types';
 import { Erc20TokenBalance, Erc20Token } from '../types';
 import { disableLoading, enableLoadingWithMessage } from '../slices/UISlice';
 import { Transaction } from 'types';
-import { ethers } from 'ethers';
+import { BigNumber, ethers } from 'ethers';
 import { getAssetPriceUSD } from './coinGecko';
 import semver from 'semver/preload';
 import { setActiveNetwork } from 'slices/networkSlice';
-import { constants, Invocations, TransactionType } from 'starknet';
+import {
+  Call,
+  constants,
+  Invocations,
+  TransactionType,
+  UniversalDetails,
+} from 'starknet';
 
 export const useStarkNetSnap = () => {
   const dispatch = useAppDispatch();
@@ -49,17 +55,11 @@ export const useStarkNetSnap = () => {
   const minSnapVersion = process.env.REACT_APP_MIN_SNAP_VERSION
     ? process.env.REACT_APP_MIN_SNAP_VERSION
     : '2.0.1';
-  const debugLevel =
-    process.env.REACT_APP_DEBUG_LEVEL !== undefined
-      ? process.env.REACT_APP_DEBUG_LEVEL
-      : 'ALL';
   const START_SCAN_INDEX = 0;
   const MAX_SCANNED = 1;
   const MAX_MISSED = 1;
 
-  const defaultParam = {
-    debugLevel,
-  };
+  const defaultParam = {};
 
   const connectToSnap = () => {
     dispatch(enableLoadingWithMessage('Connecting...'));
@@ -333,9 +333,7 @@ export const useStarkNetSnap = () => {
     contractCallData: string,
     address: string,
     chainId: string,
-    transactionVersion?:
-      | typeof constants.TRANSACTION_VERSION.V2
-      | typeof constants.TRANSACTION_VERSION.V3,
+    transactionVersion?: typeof constants.TRANSACTION_VERSION.V3,
   ) {
     try {
       const invocations: Invocations = [
@@ -375,12 +373,20 @@ export const useStarkNetSnap = () => {
     contractAddress: string,
     contractFuncName: string,
     contractCallData: string,
-    senderAddress: string,
+    address: string,
     maxFee: string,
     chainId: string,
+    feeToken: string,
   ) {
     dispatch(enableLoadingWithMessage('Sending transaction...'));
     try {
+      const calls: Call[] = [
+        {
+          contractAddress,
+          entrypoint: contractFuncName,
+          calldata: contractCallData.split(',').map((ele) => ele.trim()),
+        },
+      ];
       const response = await provider.request({
         method: 'wallet_invokeSnap',
         params: {
@@ -389,11 +395,15 @@ export const useStarkNetSnap = () => {
             method: 'starkNet_sendTransaction',
             params: {
               ...defaultParam,
-              contractAddress,
-              contractFuncName,
-              contractCallData,
-              senderAddress,
-              maxFee,
+              address,
+              calls,
+              details: {
+                version:
+                  feeToken === 'STRK'
+                    ? constants.TRANSACTION_VERSION.V3
+                    : undefined,
+                maxFee,
+              } as UniversalDetails,
               chainId,
             },
           },
@@ -701,13 +711,16 @@ export const useStarkNetSnap = () => {
           },
         },
       });
-      return response;
+      return {
+        balanceLatest: BigNumber.from(response.balanceLatest),
+        balancePending: BigNumber.from(response.balancePending),
+      };
     } catch (err) {
       //eslint-disable-next-line no-console
       console.error(err);
       return {
-        balanceLatest: '0x0',
-        balancePending: '0x0',
+        balanceLatest: BigNumber.from('0x0'),
+        balancePending: BigNumber.from('0x0'),
       };
     }
   };

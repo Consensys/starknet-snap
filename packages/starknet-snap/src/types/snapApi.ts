@@ -55,7 +55,6 @@ export type ApiRequestParams =
 
 export type BaseRequestParams = {
   chainId?: string;
-  debugLevel?: string;
 };
 
 export type TransactionVersionParams = {

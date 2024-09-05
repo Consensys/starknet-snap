@@ -15,6 +15,8 @@ import {
 import { displayPrivateKey } from './displayPrivateKey';
 import type { DisplayPrivateKeyParams } from './displayPrivateKey';
 
+jest.mock('../utils/logger');
+
 describe('displayPrivateKey', () => {
   const state: SnapState = {
     accContracts: [],

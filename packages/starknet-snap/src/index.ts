@@ -12,16 +12,18 @@ import {
   text,
   copyable,
   SnapError,
+  MethodNotFoundError,
 } from '@metamask/snaps-sdk';
 import { ethers } from 'ethers';
 
 import { addErc20Token } from './addErc20Token';
 import { addNetwork } from './addNetwork';
+import { Config } from './config';
 import { createAccount } from './createAccount';
 import { declareContract } from './declareContract';
 import { estimateAccDeployFee } from './estimateAccountDeployFee';
 import { estimateFees } from './estimateFees';
-import { executeTxn } from './executeTxn';
+import { executeTxn as executeTxnLegacy } from './executeTxn';
 import { extractPublicKey } from './extractPublicKey';
 import { getCurrentNetwork } from './getCurrentNetwork';
 import { getErc20TokenBalance } from './getErc20TokenBalance';
@@ -37,6 +39,7 @@ import { recoverAccounts } from './recoverAccounts';
 import type {
   DisplayPrivateKeyParams,
   EstimateFeeParams,
+  ExecuteTxnParams,
   SignMessageParams,
   SignTransactionParams,
   SignDeclareTransactionParams,
@@ -45,12 +48,12 @@ import type {
 import {
   displayPrivateKey,
   estimateFee,
+  executeTxn,
   signMessage,
   signTransaction,
   signDeclareTransaction,
   verifySignature,
 } from './rpcs';
-import { sendTransaction } from './sendTransaction';
 import { signDeployAccountTransaction } from './signDeployAccountTransaction';
 import { switchNetwork } from './switchNetwork';
 import type {
@@ -60,6 +63,7 @@ import type {
 } from './types/snapApi';
 import type { SnapState } from './types/snapState';
 import { upgradeAccContract } from './upgradeAccContract';
+import { getDappUrl, isSnapRpcError } from './utils';
 import {
   CAIRO_VERSION_LEGACY,
   ETHER_MAINNET,
@@ -71,10 +75,9 @@ import {
 } from './utils/constants';
 import { getAddressKeyDeriver } from './utils/keyPair';
 import { acquireLock } from './utils/lock';
-import { logger, LogLevel } from './utils/logger';
+import { logger } from './utils/logger';
 import { toJson } from './utils/serializer';
 import {
-  dappUrl,
   upsertErc20Token,
   upsertNetwork,
   removeNetwork,
@@ -89,10 +92,8 @@ declare const snap;
 
 export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
   const requestParams = request?.params as unknown as ApiRequestParams;
-  const debugLevel = requestParams?.debugLevel;
-  logger.init(debugLevel as unknown as string);
-  // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-  console.log(`debugLevel: ${logger.getLogLevel()}`);
+
+  logger.logLevel = parseInt(Config.logLevel, 10);
 
   logger.log(`${request.method}:\nrequestParams: ${toJson(requestParams)}`);
 
@@ -217,8 +218,8 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
 
       case 'starkNet_sendTransaction':
         apiParams.keyDeriver = await getAddressKeyDeriver(snap);
-        return await sendTransaction(
-          apiParams as unknown as ApiParamsWithKeyDeriver,
+        return await executeTxn.execute(
+          apiParams.requestParams as unknown as ExecuteTxnParams,
         );
 
       case 'starkNet_getValue':
@@ -267,7 +268,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
 
       case 'starkNet_executeTxn':
         apiParams.keyDeriver = await getAddressKeyDeriver(snap);
-        return await executeTxn(
+        return await executeTxnLegacy(
           apiParams as unknown as ApiParamsWithKeyDeriver,
         );
 
@@ -293,19 +294,18 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
         return await getStarkName(apiParams);
 
       default:
-        throw new Error('Method not found.');
+        throw new MethodNotFoundError() as unknown as Error;
     }
   } catch (error) {
-    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-    logger.error(`Error: ${error}`);
-    // We don't want to expose the error message to the user when it is a production build
-    if (logger.getLogLevel() === LogLevel.OFF) {
-      throw new SnapError(
-        'Unable to execute the rpc request',
-      ) as unknown as Error;
-    } else {
-      throw new SnapError(error.message) as unknown as Error;
+    let snapError = error;
+
+    if (!isSnapRpcError(error)) {
+      snapError = new SnapError('Unable to execute the rpc request');
     }
+    logger.error(
+      `onRpcRequest error: ${JSON.stringify(snapError.toJSON(), null, 2)}`,
+    );
+    throw snapError;
   }
 };
 
@@ -313,10 +313,7 @@ export const onInstall: OnInstallHandler = async () => {
   const component = panel([
     text('Your MetaMask wallet is now compatible with Starknet!'),
     text(
-      `To manage your Starknet account and send and receive funds, visit the [companion dapp for Starknet](${dappUrl(
-        // eslint-disable-next-line no-restricted-globals
-        process.env.SNAP_ENV as unknown as string,
-      )}).`,
+      `To manage your Starknet account and send and receive funds, visit the [companion dapp for Starknet](${getDappUrl()}).`,
     ),
   ]);
 
@@ -397,10 +394,7 @@ export const onHomePage: OnHomePageHandler = async () => {
     panelItems.push(divider());
     panelItems.push(
       text(
-        `Visit the [companion dapp for Starknet](${dappUrl(
-          // eslint-disable-next-line no-restricted-globals
-          process.env.SNAP_ENV as unknown as string,
-        )}) to manage your account.`,
+        `Visit the [companion dapp for Starknet](${getDappUrl()}) to manage your account.`,
       ),
     );
 

@@ -22,18 +22,6 @@ export const ACCOUNT_CLASS_HASH_LEGACY =
 export const ACCOUNT_CLASS_HASH =
   '0x29927c8af6bccf3f6fda035981e765a7bdbf18a2dc0d630494f8758aa908e2b'; // from argent-x repo
 
-type IDappConfig = {
-  dev: string;
-  staging: string;
-  prod: string;
-};
-
-export const DAPP: IDappConfig = {
-  dev: 'https://dev.snaps.consensys.io/starknet',
-  staging: 'https://staging.snaps.consensys.io/starknet',
-  prod: 'https://snaps.consensys.io/starknet',
-};
-
 export const STARKNET_MAINNET_NETWORK: Network = {
   name: 'Starknet Mainnet',
   chainId: constants.StarknetChainId.SN_MAIN,
@@ -184,9 +172,13 @@ export const CAIRO_VERSION = '1';
 
 export const CAIRO_VERSION_LEGACY = '0';
 
-export const TRANSACTION_VERSION = constants.TRANSACTION_VERSION.V2;
-
 export enum BlockIdentifierEnum {
   Latest = 'latest',
   Pending = 'pending',
+}
+
+export enum SnapEnv {
+  Dev = 'dev',
+  Staging = 'staging',
+  Prod = 'prod',
 }
