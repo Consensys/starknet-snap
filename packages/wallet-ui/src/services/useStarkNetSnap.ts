@@ -392,7 +392,7 @@ export const useStarkNetSnap = () => {
         params: {
           snapId,
           request: {
-            method: 'starkNet_sendTransaction',
+            method: 'starkNet_executeTxn',
             params: {
               ...defaultParam,
               address,

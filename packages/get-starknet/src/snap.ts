@@ -45,7 +45,7 @@ export class MetaMaskSnap {
   }
 
   async signTransaction(
-    signerAddress: string,
+    address: string,
     transactions: Call[],
     transactionsDetail: InvocationsSignerDetails,
     abis?: Abi[],
@@ -57,10 +57,9 @@ export class MetaMaskSnap {
         request: {
           method: 'starkNet_signTransaction',
           params: this.removeUndefined({
-            signerAddress,
+            address,
             transactions,
             transactionsDetail,
-            abis,
             ...(await this.#getSnapParams()),
           }),
         },
@@ -106,10 +105,10 @@ export class MetaMaskSnap {
   }
 
   async execute(
-    senderAddress: string,
-    txnInvocation: AllowArray<Call>,
+    address: string,
+    calls: AllowArray<Call>,
     abis?: Abi[],
-    invocationsDetails?: InvocationsDetails,
+    details?: InvocationsDetails,
   ): Promise<InvokeFunctionResponse> {
     return (await this.#provider.request({
       method: 'wallet_invokeSnap',
@@ -118,9 +117,9 @@ export class MetaMaskSnap {
         request: {
           method: 'starkNet_executeTxn',
           params: this.removeUndefined({
-            senderAddress,
-            txnInvocation,
-            invocationsDetails,
+            address,
+            calls,
+            details,
             abis,
             ...(await this.#getSnapParams()),
           }),
@@ -129,7 +128,7 @@ export class MetaMaskSnap {
     })) as InvokeFunctionResponse;
   }
 
-  async signMessage(typedDataMessage: TypedData, enableAuthorize: boolean, signerAddress: string): Promise<Signature> {
+  async signMessage(typedDataMessage: TypedData, enableAuthorize: boolean, address: string): Promise<Signature> {
     return (await this.#provider.request({
       method: 'wallet_invokeSnap',
       params: {
@@ -137,7 +136,7 @@ export class MetaMaskSnap {
         request: {
           method: 'starkNet_signMessage',
           params: this.removeUndefined({
-            signerAddress,
+            address,
             typedDataMessage,
             enableAuthorize,
             ...(await this.#getSnapParams()),
