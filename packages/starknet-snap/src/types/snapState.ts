@@ -84,6 +84,14 @@ export enum TransactionStatusType { // for retrieving txn from StarkNet feeder g
   DEPRECATION = 'status',
 }
 
+export type TranscationAccountCall = {
+  contract: string;
+  contractFuncName: string;
+  contractCallData: string[];
+  recipient?: string;
+  amount?: string;
+};
+
 export type Transaction = {
   txnHash: string; // in hex
   // TEMP: add StarkNetTransactionType as optional to support the legacy data
@@ -103,10 +111,12 @@ export type Transaction = {
   // TEMP: add it as optional to support the legacy data
   eventIds?: string[];
   timestamp: number;
-  // TEMP: add it as optional to support the legacy data
+  // TEMP: put it as optional to support the legacy data
   maxFee?: BigInt;
-  // TEMP: add it as optional to support the legacy data
+  // TEMP: put it as optional to support the legacy data
   actualFee?: BigInt;
+  // TEMP: put it as optional to support the legacy data
+  accountCalls?: TranscationAccountCall[];
 };
 
 /* eslint-disable */

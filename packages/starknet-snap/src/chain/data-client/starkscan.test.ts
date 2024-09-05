@@ -293,7 +293,7 @@ describe('StarkScanClient', () => {
       return tx;
     };
 
-    it('converts an invoke type starkscan transaction to a transaction', async () => {
+    it('converts an invoke type starkscan transaction to a transaction object', async () => {
       const account = await mockAccount();
       const mockTx = mockTxByType(TransactionType.INVOKE, account.address);
 
@@ -305,19 +305,28 @@ describe('StarkScanClient', () => {
         txnType: mockTx.transaction_type,
         chainId: STARKNET_SEPOLIA_TESTNET_NETWORK.chainId,
         senderAddress: account.address,
-        contractAddress: mockTx.account_calls[0].contract_address,
-        contractFuncName: mockTx.account_calls[0].selector_name,
-        contractCallData: mockTx.account_calls[0].calldata,
+        contractAddress: '',
+        contractFuncName: '',
+        contractCallData: mockTx.calldata,
         timestamp: mockTx.timestamp,
         finalityStatus: mockTx.transaction_finality_status,
         executionStatus: mockTx.transaction_execution_status,
         failureReason: mockTx.revert_error ?? undefined,
         maxFee: BigInt(mockTx.max_fee),
         actualFee: BigInt(mockTx.actual_fee),
+        accountCalls: [
+          {
+            contract: mockTx.account_calls[0].contract_address,
+            contractFuncName: mockTx.account_calls[0].selector_name,
+            contractCallData: mockTx.account_calls[0].calldata,
+            recipient: mockTx.account_calls[0].calldata[0],
+            amount: mockTx.account_calls[0].calldata[1],
+          },
+        ],
       });
     });
 
-    it('converts a deploy type starkscan transaction to a transaction', async () => {
+    it('converts a deploy type starkscan transaction to a transaction object', async () => {
       const account = await mockAccount();
       const mockTx = mockTxByType(
         TransactionType.DEPLOY_ACCOUNT,
@@ -334,13 +343,14 @@ describe('StarkScanClient', () => {
         senderAddress: account.address,
         contractAddress: account.address,
         contractFuncName: '',
-        contractCallData: mockTx.constructor_calldata,
+        contractCallData: [],
         timestamp: mockTx.timestamp,
         finalityStatus: mockTx.transaction_finality_status,
         executionStatus: mockTx.transaction_execution_status,
         failureReason: mockTx.revert_error ?? undefined,
         maxFee: BigInt(mockTx.max_fee),
         actualFee: BigInt(mockTx.actual_fee),
+        accountCalls: [],
       });
     });
   });

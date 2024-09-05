@@ -5,7 +5,11 @@ import {
   constants,
 } from 'starknet';
 
-import type { Network, Transaction } from '../../types/snapState';
+import type {
+  Network,
+  Transaction,
+  TranscationAccountCall,
+} from '../../types/snapState';
 import type { IDataClient } from '../data-client';
 
 /* eslint-disable */
@@ -198,28 +202,32 @@ export class StarkScanClient implements IDataClient {
     return tx.transaction_type === TransactionType.DEPLOY_ACCOUNT;
   }
 
+  protected isFundTransferTransaction(call: StarkScanAccountCall): boolean {
+    return call.selector_name === 'transfer';
+  }
+
   protected toTransaction(tx: StarkScanTransaction): Transaction {
-    let sender = '';
-    let contract = '';
-    let contractFuncName = '';
-    let contractCallData: null | string[] = null;
+    let sender = tx.sender_address ?? '';
+    const accountCalls: TranscationAccountCall[] = [];
 
     // eslint-disable-next-line no-negated-condition
     if (!this.isDeployTransaction(tx)) {
-      // When an account deployed, it invokes the transaction from the account contract, hence the account_calls[0] is the main invoke call from the contract
-      const contractCallArg = tx.account_calls[0];
-
-      sender = contractCallArg.caller_address;
-      contract = contractCallArg.contract_address;
-      contractFuncName = contractCallArg.selector_name;
-      contractCallData = contractCallArg.calldata;
+      // account_calls representing the calls to invoke from the account contract, it can be multiple
+      for (const accountCallArg of tx.account_calls) {
+        const accountCall: TranscationAccountCall = {
+          contract: accountCallArg.contract_address,
+          contractFuncName: accountCallArg.selector_name,
+          contractCallData: accountCallArg.calldata,
+        };
+        if (this.isFundTransferTransaction(accountCallArg)) {
+          accountCall.recipient = accountCallArg.calldata[0];
+          accountCall.amount = accountCallArg.calldata[1];
+        }
+        accountCalls.push(accountCall);
+      }
     } else {
       // In case of deploy transaction, the contract address is the sender address
       sender = tx.contract_address as unknown as string;
-      contract = tx.contract_address as unknown as string;
-      contractFuncName = '';
-      // In case of deploy transaction, the contract call data is the constructor calldata
-      contractCallData = tx.constructor_calldata;
     }
 
     /* eslint-disable */
@@ -228,15 +236,19 @@ export class StarkScanClient implements IDataClient {
       txnType: tx.transaction_type,
       chainId: this.network.chainId,
       senderAddress: sender,
-      contractAddress: contract,
-      contractFuncName: contractFuncName,
-      contractCallData: contractCallData ?? [],
+      // In case of deploy transaction, the contract address is the sender address, else it will be empty string
+      contractAddress: tx.contract_address ?? '',
+      // TODO: when multiple calls are supported, we move this to accountCalls, hence we keep it for legacy support
+      contractFuncName: '',
+      // TODO: when multiple calls are supported, we move this to accountCalls, hence we keep it for legacy support
+      contractCallData: tx.calldata ?? [],
       timestamp: tx.timestamp,
       finalityStatus: tx.transaction_finality_status,
       executionStatus: tx.transaction_execution_status,
       failureReason: tx.revert_error ?? undefined,
       maxFee: BigInt(tx.max_fee),
       actualFee: BigInt(tx.actual_fee),
+      accountCalls,
     };
     /* eslint-enable */
   }
