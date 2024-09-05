@@ -35,8 +35,6 @@ export type StarknetAccount = AccContract & {
   privateKey: string;
 };
 
-/* eslint-disable */
-
 /**
  * Using pseudorandom number generators (PRNGs) to generate a security-sensitive random value that recommended by sonarcloud.
  * It has led in the past to the following vulnerabilities:
@@ -61,10 +59,7 @@ export function generateRandomValue() {
  * @param coinType - The coin type of the bip44, default is 9004 - Starknet Coin.
  * @returns An Bip44 Node.
  */
-export async function generateBip44Entropy(
-  mnemonic: string,
-  coinType: number = 9004,
-) {
+export async function generateBip44Entropy(mnemonic: string, coinType = 9004) {
   return await BIP44CoinTypeNode.fromDerivationPath([
     `bip39:${mnemonic}`,
     "bip32:44'",
@@ -78,11 +73,12 @@ export async function generateBip44Entropy(
  * @param network - Starknet Chain Id.
  * @param cnt - Number of accounts to generate.
  * @param cairoVersion - Cairo version of the generated accounts.
+ * @param [mnemonic] - The random mnemonic of the wallet.
  * @returns An array of StarknetAccount object.
  */
 export async function generateAccounts(
   network: constants.StarknetChainId,
-  cnt: number = 1,
+  cnt = 1,
   cairoVersion = '1',
   mnemonic?: string,
 ) {
@@ -140,7 +136,7 @@ export async function generateAccounts(
       addressSalt: pubKey,
       privateKey: numUtils.toHex(addressKey),
       publicKey: pubKey,
-      address: address,
+      address,
       addressIndex: i,
       derivationPath: keyDeriver.path,
       deployTxnHash: '',
@@ -155,12 +151,13 @@ export async function generateAccounts(
  *
  * @param params
  * @param params.chainId - Starknet Chain Id.
- * @param params.address - Address of the account.
- * @param params.contractAddresses - Contract addresses to generate transactions.
- * @param params.txnTypes - Array of transaction types.
- * @param params.finalityStatuses - Array of transaction finality status.
- * @param params.executionStatuses - Array of transaction execution status.
- * @param params.cnt - Number of transaction to generate.
+ * @param [params.address] - Address of the account.
+ * @param [params.contractAddresses] - Contract addresses to generate transactions.
+ * @param [params.txnTypes] - Array of transaction types.
+ * @param [params.finalityStatuses] - Array of transaction finality status.
+ * @param [params.executionStatuses] - Array of transaction execution status.
+ * @param [params.cnt] - Number of transaction to generate.
+ * @param [params.timestamp] - The timestamp of the transaction.
  * @returns An array of transaction object.
  */
 export function generateTransactions({
@@ -184,12 +181,12 @@ export function generateTransactions({
   cnt?: number;
 }): Transaction[] {
   const transaction = {
-    chainId: chainId,
+    chainId,
     contractAddress: '',
     contractCallData: [],
     contractFuncName: '',
     senderAddress: address,
-    timestamp: timestamp,
+    timestamp,
     txnHash: '',
     txnType: '',
     failureReason: '',
@@ -197,7 +194,7 @@ export function generateTransactions({
     executionStatus: '',
     finalityStatus: '',
     eventIds: [],
-    accountCalls: undefined
+    accountCalls: undefined,
   };
   let accumulatedTimestamp = timestamp;
   let accumulatedTxnHash = BigInt(
@@ -220,7 +217,7 @@ export function generateTransactions({
       finalityStatus: TransactionFinalityStatus.ACCEPTED_ON_L1,
       executionStatus: TransactionExecutionStatus.SUCCEEDED,
       timestamp: accumulatedTimestamp,
-      txnHash: '0x' + accumulatedTxnHash.toString(16),
+      txnHash: `0x${accumulatedTxnHash.toString(16)}`,
     });
     createCnt -= 1;
     // exclude deploy txnType
@@ -238,21 +235,21 @@ export function generateTransactions({
   for (let i = 1; i <= createCnt; i++) {
     const randomContractAddress =
       contractAddresses[
-      Math.floor(generateRandomValue() * contractAddresses.length)
+        Math.floor(generateRandomValue() * contractAddresses.length)
       ];
     const randomTxnType =
       filteredTxnTypes[
-      Math.floor(generateRandomValue() * filteredTxnTypes.length)
+        Math.floor(generateRandomValue() * filteredTxnTypes.length)
       ];
     let randomFinalityStatus =
       finalityStatuses[
-      Math.floor(generateRandomValue() * finalityStatuses.length)
+        Math.floor(generateRandomValue() * finalityStatuses.length)
       ];
     let randomExecutionStatus =
       executionStatuses[
-      Math.floor(generateRandomValue() * executionStatuses.length)
+        Math.floor(generateRandomValue() * executionStatuses.length)
       ];
-    let randomContractFuncName = ['transfer', 'upgrade'][
+    const randomContractFuncName = ['transfer', 'upgrade'][
       Math.floor(generateRandomValue() * 2)
     ];
     accumulatedTimestamp += i * 100;
@@ -286,27 +283,40 @@ export function generateTransactions({
       contractFuncName: '',
       // TODO: when multiple calls are supported, we move this to accountCalls, we keep it for legacy support
       contractCallData: [],
-      txnHash: '0x' + accumulatedTxnHash.toString(16),
+      txnHash: `0x${accumulatedTxnHash.toString(16)}`,
       accountCalls: {
         [randomContractAddress]: [
           {
             contract: randomContractAddress,
-            contractFuncName: randomTxnType === TransactionType.INVOKE ? randomContractFuncName : '',
+            contractFuncName:
+              randomTxnType === TransactionType.INVOKE
+                ? randomContractFuncName
+                : '',
             contractCallData: [
               randomContractAddress,
-              (Math.max(generateRandomValue() * 1000, 100)).toString(16),
-              "0x0"
+              Math.max(generateRandomValue() * 1000, 100).toString(16),
+              '0x0',
             ],
           },
         ],
       },
-    }
-    );
+    });
   }
 
   return transactions.sort((a, b) => b.timestamp - a.timestamp);
 }
 
+/**
+ * Method to generate starkscan transactions.
+ *
+ * @param params
+ * @param params.address - The address of the account.
+ * @param params.startFrom - The timestamp to start from.
+ * @param params.timestampReduction - The timestamp reduction.
+ * @param params.cnt - The number of transactions to generate.
+ * @param params.txnTypes - The array of transaction types.
+ * @returns An array of starkscan transaction object.
+ */
 export function generateStarkScanTranscations({
   address,
   startFrom = Date.now(),
@@ -322,12 +332,12 @@ export function generateStarkScanTranscations({
 }): StarkScanTransactionsResponse {
   let transactionStartFrom = startFrom;
   const txs: StarkScanTransaction[] = [];
-  let totalRecordCnt = txnTypes.includes(TransactionType.DEPLOY_ACCOUNT)
+  const totalRecordCnt = txnTypes.includes(TransactionType.DEPLOY_ACCOUNT)
     ? cnt - 1
     : cnt;
 
   for (let i = 0; i < totalRecordCnt; i++) {
-    let newTx = {
+    const newTx = {
       ...invokeTx,
       account_calls: [...invokeTx.account_calls],
     };
@@ -340,7 +350,7 @@ export function generateStarkScanTranscations({
   }
 
   if (txnTypes.includes(TransactionType.DEPLOY_ACCOUNT)) {
-    let deployTx = {
+    const deployTx = {
       ...cairo0DeployTx,
       account_calls: [...cairo0DeployTx.account_calls],
     };
