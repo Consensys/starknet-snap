@@ -37,14 +37,13 @@ export class MetaMaskSigner implements SignerInterface {
    *
    * @param transactions - The array of transactions to be signed.
    * @param transactionsDetail - The details required for signing the transactions.
-   * @param abis - [Deprecated] The ABI definitions for the contracts involved in the transactions. This parameter is optional and may be undefined.
-   * 
+   * @param _abis - [Deprecated] The ABI definitions for the contracts involved in the transactions. This parameter is optional and may be undefined.
    * @returns A promise that resolves to the transaction signature.
    */
   async signTransaction(
     transactions: Call[],
     transactionsDetail: InvocationsSignerDetails,
-    abis?: Abi[] | undefined,
+    _abis?: Abi[] | undefined,
   ): Promise<Signature> {
     const result = (await this.#snap.signTransaction(
       this.#address,
