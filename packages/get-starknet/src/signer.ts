@@ -32,6 +32,15 @@ export class MetaMaskSigner implements SignerInterface {
     return new ec.starkCurve.Signature(numUtils.toBigInt(result[0]), numUtils.toBigInt(result[1]));
   }
 
+  /**
+   * Signs a transaction calling the Snap.
+   *
+   * @param transactions - The array of transactions to be signed.
+   * @param transactionsDetail - The details required for signing the transactions.
+   * @param abis - [Deprecated] The ABI definitions for the contracts involved in the transactions. This parameter is optional and may be undefined.
+   * 
+   * @returns A promise that resolves to the transaction signature.
+   */
   async signTransaction(
     transactions: Call[],
     transactionsDetail: InvocationsSignerDetails,
@@ -41,7 +50,6 @@ export class MetaMaskSigner implements SignerInterface {
       this.#address,
       transactions,
       transactionsDetail,
-      abis,
     )) as ArraySignatureType;
     return new ec.starkCurve.Signature(numUtils.toBigInt(result[0]), numUtils.toBigInt(result[1]));
   }

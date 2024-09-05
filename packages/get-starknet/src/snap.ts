@@ -44,21 +44,10 @@ export class MetaMaskSnap {
     })) as string;
   }
 
-  /**
-   * Signs a transaction using the MetaMask Snap.
-   *
-   * @param address - The address of the signer.
-   * @param transactions - The array of transactions to be signed.
-   * @param transactionsDetail - The details required for signing the transactions.
-   * @param abis - [Deprecated] The ABI definitions for the contracts involved in the transactions.
-   * 
-   * @returns A promise that resolves to the transaction signature.
-   */
   async signTransaction(
     address: string,
     transactions: Call[],
     transactionsDetail: InvocationsSignerDetails,
-    abis?: Abi[],
   ): Promise<Signature> {
     return (await this.#provider.request({
       method: 'wallet_invokeSnap',
