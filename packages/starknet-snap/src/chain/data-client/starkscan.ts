@@ -224,9 +224,12 @@ export class StarkScanClient implements IDataClient {
       txnType: tx.transaction_type,
       chainId: this.network.chainId,
       senderAddress: sender,
+
       // In case of deploy transaction, the contract address is the sender address, else it will be empty string
       contractAddress: tx.contract_address ?? '',
-      // TODO: when multiple calls are supported, we move this to accountCalls, hence we keep it for legacy support
+      // TODO: when multiple calls are supported, we move this to accountCalls
+      contractFuncName: '',
+      // TODO: when multiple calls are supported, we move this to accountCalls
       contractCallData: tx.calldata ?? [],
       timestamp: tx.timestamp,
       finalityStatus: tx.transaction_finality_status,
