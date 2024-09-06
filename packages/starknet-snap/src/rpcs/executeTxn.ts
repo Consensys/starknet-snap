@@ -17,7 +17,6 @@ import { TokenStateManager } from '../state/token-state-manager';
 import { TransactionStateManager } from '../state/transaction-state-manager';
 import { FeeToken } from '../types/snapApi';
 import { VoyagerTransactionType, type Transaction } from '../types/snapState';
-import type { ResourceBoundsMapping } from '../types/starknet';
 import type { AccountRpcControllerOptions } from '../utils';
 import {
   AddressStruct,
@@ -97,7 +96,7 @@ export class ExecuteTxnRpc extends AccountRpcController<
     const { address, calls, abis, details } = params;
     const { privateKey, publicKey } = this.account;
 
-    const { includeDeploy, suggestedMaxFee, resourceBounds } =
+    const { includeDeploy, suggestedMaxFee, estimateResults } =
       await getEstimatedFees(
         this.network,
         address,
@@ -142,6 +141,10 @@ export class ExecuteTxnRpc extends AccountRpcController<
       });
     }
 
+    const resourceBounds = estimateResults.map(
+      (result) => result.resourceBounds,
+    );
+
     const executeTxnResp = await executeTxnUtil(
       this.network,
       address,
@@ -154,9 +157,7 @@ export class ExecuteTxnRpc extends AccountRpcController<
         // TODO: we may also need to increment the nonce base on the input, if the account is not deployed
         nonce: accountDeployed ? details?.nonce : 1,
         maxFee: suggestedMaxFee,
-        resourceBounds: resourceBounds[
-          resourceBounds.length - 1
-        ] as ResourceBoundsMapping, // We assume 1 normal transaction and 1 optional transactions (deploy)
+        resourceBounds: resourceBounds[resourceBounds.length - 1],
       },
     );
 

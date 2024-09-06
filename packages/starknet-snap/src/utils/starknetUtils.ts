@@ -41,7 +41,6 @@ import {
   TransactionType as StarknetTransactionType,
 } from 'starknet';
 
-import type { EstimateFeeResponse } from '../rpcs/estimateFee';
 import {
   FeeTokenUnit,
   type RpcV4GetTransactionReceiptResponse,
@@ -1073,7 +1072,13 @@ export async function getEstimatedFees(
   publicKey: string,
   transactionInvocations: Invocations,
   invocationsDetails?: UniversalDetails,
-): Promise<EstimateFeeResponse> {
+): Promise<{
+  suggestedMaxFee: string;
+  overallFee: string;
+  unit: FeeTokenUnit;
+  includeDeploy: boolean;
+  estimateResults: EstimateFee[];
+}> {
   const accountDeployed = await isAccountDeployed(network, address);
   if (!accountDeployed) {
     const deployAccountpayload = createAccountDeployPayload(address, publicKey);
@@ -1102,9 +1107,7 @@ export async function getEstimatedFees(
         ? FeeTokenUnit.STRK
         : FeeTokenUnit.ETH,
     includeDeploy: !accountDeployed,
-    resourceBounds: estimateBulkFeeResp.map(
-      (value: EstimateFee) => value.resourceBounds,
-    ),
+    estimateResults: estimateBulkFeeResp,
   };
 }
 

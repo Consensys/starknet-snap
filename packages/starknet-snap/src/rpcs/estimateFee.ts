@@ -1,14 +1,6 @@
 import type { Json } from '@metamask/snaps-sdk';
 import type { Infer } from 'superstruct';
-import {
-  object,
-  string,
-  assign,
-  boolean,
-  optional,
-  enums,
-  array,
-} from 'superstruct';
+import { object, string, assign, boolean, optional, enums } from 'superstruct';
 
 import { FeeTokenUnit } from '../types/snapApi';
 import {
@@ -17,7 +9,6 @@ import {
   AccountRpcController,
   UniversalDetailsStruct,
   InvocationsStruct,
-  ResourceBoundMappingStruct,
 } from '../utils';
 import { getEstimatedFees } from '../utils/starknetUtils';
 
@@ -35,7 +26,6 @@ export const EstimateFeeResponseStruct = object({
   overallFee: string(),
   unit: enums(Object.values(FeeTokenUnit)),
   includeDeploy: boolean(),
-  resourceBounds: array(ResourceBoundMappingStruct),
 });
 
 export type EstimateFeeParams = Infer<typeof EstimateFeeRequestStruct> & Json;
@@ -81,7 +71,12 @@ export class EstimateFeeRpc extends AccountRpcController<
       details,
     );
 
-    return estimateFeeResp;
+    return {
+      suggestedMaxFee: estimateFeeResp.suggestedMaxFee,
+      overallFee: estimateFeeResp.overallFee,
+      unit: estimateFeeResp.unit,
+      includeDeploy: estimateFeeResp.includeDeploy,
+    };
   }
 }
 
