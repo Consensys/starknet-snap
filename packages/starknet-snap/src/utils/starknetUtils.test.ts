@@ -47,24 +47,22 @@ describe('getEstimatedFees', () => {
       suggestedMaxFee,
       // eslint-disable-next-line @typescript-eslint/naming-convention
       gas_price: BigInt('0x0'),
-      resourceBounds: [
-        {
+      resourceBounds: {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        l1_gas: {
           // eslint-disable-next-line @typescript-eslint/naming-convention
-          l1_gas: {
-            // eslint-disable-next-line @typescript-eslint/naming-convention
-            max_amount: '0',
-            // eslint-disable-next-line @typescript-eslint/naming-convention
-            max_price_per_unit: '0',
-          },
+          max_amount: '0',
           // eslint-disable-next-line @typescript-eslint/naming-convention
-          l2_gas: {
-            // eslint-disable-next-line @typescript-eslint/naming-convention
-            max_amount: '0',
-            // eslint-disable-next-line @typescript-eslint/naming-convention
-            max_price_per_unit: '0',
-          },
+          max_price_per_unit: '0',
         },
-      ],
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        l2_gas: {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          max_amount: '0',
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          max_price_per_unit: '0',
+        },
+      },
     } as unknown as EstimateFee;
     const estimateBulkFeeSpy = jest.spyOn(starknetUtils, 'estimateFeeBulk');
     estimateBulkFeeSpy.mockResolvedValue([estimateFeeResp]);
@@ -135,7 +133,7 @@ describe('getEstimatedFees', () => {
         overallFee: overallFee.toString(10),
         unit: expectedUnit, // to verify if the unit is return correctly
         includeDeploy: false,
-        resourceBounds: [estimateFeeResp.resourceBounds],
+        estimateResults: [estimateFeeResp],
       });
     },
   );
@@ -179,7 +177,7 @@ describe('getEstimatedFees', () => {
       overallFee: overallFee.toString(10),
       unit: FeeTokenUnit.ETH,
       includeDeploy: true,
-      resourceBounds: [estimateFeeResp.resourceBounds],
+      estimateResults: [estimateFeeResp],
     });
   });
 });

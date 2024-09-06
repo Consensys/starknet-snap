@@ -1,5 +1,5 @@
 import { InvalidParamsError } from '@metamask/snaps-sdk';
-import type { Invocations } from 'starknet';
+import type { EstimateFee, Invocations } from 'starknet';
 import { constants, TransactionType } from 'starknet';
 import type { Infer } from 'superstruct';
 
@@ -49,23 +49,32 @@ const prepareMockEstimateFee = ({
     overallFee: BigInt(1500000000000000).toString(10),
     unit: FeeTokenUnit.ETH,
     includeDeploy,
-    resourceBounds: [
+    estimateResults: [
       {
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        l1_gas: {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          max_amount: '0',
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          max_price_per_unit: '0',
-        },
+        overall_fee: BigInt(1500000000000000).toString(10),
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        l2_gas: {
+        gas_consumed: BigInt('0x0'),
+        suggestedMaxFee: BigInt(1500000000000000).toString(10),
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        gas_price: BigInt('0x0'),
+        resourceBounds: {
           // eslint-disable-next-line @typescript-eslint/naming-convention
-          max_amount: '0',
+          l1_gas: {
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            max_amount: '0',
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            max_price_per_unit: '0',
+          },
           // eslint-disable-next-line @typescript-eslint/naming-convention
-          max_price_per_unit: '0',
+          l2_gas: {
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            max_amount: '0',
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            max_price_per_unit: '0',
+          },
         },
-      },
+      } as unknown as EstimateFee,
     ],
   };
 
@@ -107,7 +116,9 @@ describe('estimateFee', () => {
         version: constants.TRANSACTION_VERSION.V1,
       },
     );
-    expect(result).toStrictEqual(estimateBulkFeeRespMock);
+    const { estimateResults, ...resp } = estimateBulkFeeRespMock;
+
+    expect(result).toStrictEqual(resp);
   });
 
   it('throws `InvalidParamsError` when request parameter is not correct', async () => {

@@ -2,7 +2,12 @@ import {
   InvalidParamsError,
   UserRejectedRequestError,
 } from '@metamask/snaps-sdk';
-import type { UniversalDetails, Call, InvokeFunctionResponse } from 'starknet';
+import type {
+  UniversalDetails,
+  Call,
+  InvokeFunctionResponse,
+  EstimateFee,
+} from 'starknet';
 import { constants } from 'starknet';
 
 import callsExamples from '../__tests__/fixture/callsExamples.json'; // Assuming you have a similar fixture
@@ -55,23 +60,32 @@ const prepareMockExecuteTxn = async (
     overallFee: BigInt(1000000000000000).toString(10),
     includeDeploy: !accountDeployed,
     unit: 'wei' as FeeTokenUnit,
-    resourceBounds: [
+    estimateResults: [
       {
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        l1_gas: {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          max_amount: '0',
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          max_price_per_unit: '0',
-        },
+        overall_fee: BigInt(1500000000000000).toString(10),
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        l2_gas: {
+        gas_consumed: BigInt('0x0'),
+        suggestedMaxFee: BigInt(1500000000000000).toString(10),
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        gas_price: BigInt('0x0'),
+        resourceBounds: {
           // eslint-disable-next-line @typescript-eslint/naming-convention
-          max_amount: '0',
+          l1_gas: {
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            max_amount: '0',
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            max_price_per_unit: '0',
+          },
           // eslint-disable-next-line @typescript-eslint/naming-convention
-          max_price_per_unit: '0',
+          l2_gas: {
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            max_amount: '0',
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            max_price_per_unit: '0',
+          },
         },
-      },
+      } as unknown as EstimateFee,
     ],
   };
 
@@ -132,7 +146,8 @@ describe('ExecuteTxn', () => {
       {
         ...callsExample.details,
         maxFee: getEstimatedFeesRepsMock.suggestedMaxFee,
-        resourceBounds: getEstimatedFeesRepsMock.resourceBounds[0],
+        resourceBounds:
+          getEstimatedFeesRepsMock.estimateResults[0].resourceBounds,
       },
     );
     expect(getEstimatedFeesSpy).toHaveBeenCalled();
@@ -185,7 +200,8 @@ describe('ExecuteTxn', () => {
           version: transactionVersion,
           maxFee: getEstimatedFeesRepsMock.suggestedMaxFee,
           nonce: 1,
-          resourceBounds: getEstimatedFeesRepsMock.resourceBounds[0],
+          resourceBounds:
+            getEstimatedFeesRepsMock.estimateResults[0].resourceBounds,
         },
       );
     },
