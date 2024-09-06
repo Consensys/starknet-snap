@@ -7,7 +7,6 @@ import {
   divider,
 } from '@metamask/snaps-sdk';
 import convert from 'ethereum-unit-converter';
-import { logger } from 'ethers';
 import type { Call, Calldata } from 'starknet';
 import { constants, TransactionStatus, TransactionType } from 'starknet';
 import type { Infer } from 'superstruct';
@@ -27,6 +26,7 @@ import {
   UniversalDetailsStruct,
   CallsStruct,
 } from '../utils';
+import { logger } from '../utils/logger';
 import {
   createAccount,
   executeTxn as executeTxnUtil,
@@ -96,19 +96,20 @@ export class ExecuteTxnRpc extends AccountRpcController<
     const { address, calls, abis, details } = params;
     const { privateKey, publicKey } = this.account;
 
-    const { includeDeploy, suggestedMaxFee } = await getEstimatedFees(
-      this.network,
-      address,
-      privateKey,
-      publicKey,
-      [
-        {
-          type: TransactionType.INVOKE,
-          payload: calls,
-        },
-      ],
-      details,
-    );
+    const { includeDeploy, suggestedMaxFee, estimateResults } =
+      await getEstimatedFees(
+        this.network,
+        address,
+        privateKey,
+        publicKey,
+        [
+          {
+            type: TransactionType.INVOKE,
+            payload: calls,
+          },
+        ],
+        details,
+      );
 
     const accountDeployed = !includeDeploy;
     const version =
@@ -132,13 +133,17 @@ export class ExecuteTxnRpc extends AccountRpcController<
         address,
         publicKey,
         privateKey,
-        waitMode: true,
+        waitMode: false,
         callback: async (contractAddress: string, transactionHash: string) => {
           await this.updateAccountAsDeploy(contractAddress, transactionHash);
         },
         version,
       });
     }
+
+    const resourceBounds = estimateResults.map(
+      (result) => result.resourceBounds,
+    );
 
     const executeTxnResp = await executeTxnUtil(
       this.network,
@@ -152,6 +157,7 @@ export class ExecuteTxnRpc extends AccountRpcController<
         // TODO: we may also need to increment the nonce base on the input, if the account is not deployed
         nonce: accountDeployed ? details?.nonce : 1,
         maxFee: suggestedMaxFee,
+        resourceBounds: resourceBounds[resourceBounds.length - 1],
       },
     );
 

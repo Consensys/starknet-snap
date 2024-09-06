@@ -4,7 +4,7 @@ import {
 } from '@metamask/key-tree';
 import { generateMnemonic } from 'bip39';
 import { getRandomValues } from 'crypto';
-import type { constants } from 'starknet';
+import type { constants, EstimateFee } from 'starknet';
 import {
   ec,
   CallData,
@@ -290,6 +290,17 @@ export function generateTransactions({
   return transactions.sort((a, b) => b.timestamp - a.timestamp);
 }
 
+/**
+ * Method to generate starkscan transactions.
+ *
+ * @param params
+ * @param params.address - Address of the account.
+ * @param params.startFrom - start timestamp of the first transactions.
+ * @param params.timestampReduction - the deduction timestamp per transactions.
+ * @param params.txnTypes - Array of txn types.
+ * @param params.cnt - Number of transaction to generate.
+ * @returns An array of transaction object.
+ */
 export function generateStarkScanTranscations({
   address,
   startFrom = Date.now(),
@@ -336,4 +347,39 @@ export function generateStarkScanTranscations({
     next_url: null,
     data: txs,
   };
+}
+
+/**
+ * Method to generate a mock estimate fee response.
+ *
+ * @returns An array containing a mock EstimateFee object.
+ */
+export function getEstimateFees() {
+  return [
+    {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      overall_fee: BigInt(1500000000000000).toString(10),
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      gas_consumed: BigInt('0x0'),
+      suggestedMaxFee: BigInt(1500000000000000).toString(10),
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      gas_price: BigInt('0x0'),
+      resourceBounds: {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        l1_gas: {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          max_amount: '0',
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          max_price_per_unit: '0',
+        },
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        l2_gas: {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          max_amount: '0',
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          max_price_per_unit: '0',
+        },
+      },
+    } as unknown as EstimateFee,
+  ];
 }
