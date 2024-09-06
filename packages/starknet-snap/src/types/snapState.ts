@@ -100,8 +100,7 @@ export type Transaction = {
   // TODO: rename it to address to sync with the same naming convention in the AccContract
   senderAddress: string; // in hex
   contractAddress: string; // in hex
-  // TEMP: add contractFuncName as optional, as it will move to `accountCalls`
-  contractFuncName?: string;
+  contractFuncName: string;
   contractCallData: RawCalldata | string[];
   status?: TransactionStatus | string;
   // TEMP: add TransactionFinalityStatus as optional to support the legacy data
