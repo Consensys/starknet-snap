@@ -101,7 +101,7 @@ export type Transaction = {
   senderAddress: string; // in hex
   contractAddress: string; // in hex
   contractFuncName: string;
-  contractCallData: RawCalldata | string[];
+  contractCallData: RawCalldata;
   status?: TransactionStatus | string;
   // TEMP: add TransactionFinalityStatus as optional to support the legacy data
   executionStatus?: TransactionStatus | string | TransactionFinalityStatus;
@@ -111,13 +111,13 @@ export type Transaction = {
   // TEMP: add it as optional to support the legacy data
   eventIds?: string[];
   timestamp: number;
-  // TEMP: put it as optional to support the legacy data
-  maxFee?: string;
-  // TEMP: put it as optional to support the legacy data
-  actualFee?: string;
-  // TEMP: put it as optional to support the legacy data
+
+  // New fields
+  // TEMP: put those new fields as optional to support the legacy data
+  maxFee?: string | null;
+  actualFee?: string | null;
   // using Record<string, TranscationAccountCall[]> to support O(1) searching
-  accountCalls?: Record<string, TranscationAccountCall[]>;
+  accountCalls?: Record<string, TranscationAccountCall[]> | null;
 };
 
 /* eslint-disable */
