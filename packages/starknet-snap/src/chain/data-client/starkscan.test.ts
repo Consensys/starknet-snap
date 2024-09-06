@@ -155,8 +155,8 @@ describe('StarkScanClient', () => {
 
   describe('getTransactions', () => {
     const getFromAndToTimestamp = (tillToInDay: number) => {
-      const from = Date.now();
-      const to = from - mSecsFor24Hours * tillToInDay;
+      const from = Math.floor(Date.now() / 1000);
+      const to = from - tillToInDay * 24 * 60 * 60;
       return {
         from,
         to,
@@ -194,6 +194,37 @@ describe('StarkScanClient', () => {
       expect(
         result.find((tx) => tx.txnType === TransactionType.DEPLOY_ACCOUNT),
       ).toBeDefined();
+    });
+
+    it('returns empty array if no result found', async () => {
+      const account = await mockAccount();
+      const { fetchSpy } = createMockFetch();
+      const { to } = getFromAndToTimestamp(5);
+      // generate 0 transactions
+      const mockInvokeResponse = generateStarkScanTranscations({
+        address: account.address,
+        cnt: 0,
+        txnTypes: [TransactionType.INVOKE],
+      });
+      // generate 0 transactions
+      const mockDeployResponse = generateStarkScanTranscations({
+        address: account.address,
+        cnt: 0,
+        txnTypes: [TransactionType.INVOKE],
+      });
+      fetchSpy.mockResolvedValueOnce({
+        ok: true,
+        json: jest.fn().mockResolvedValue(mockInvokeResponse),
+      });
+      fetchSpy.mockResolvedValue({
+        ok: true,
+        json: jest.fn().mockResolvedValue(mockDeployResponse),
+      });
+
+      const client = createMockClient();
+      const result = await client.getTransactions(account.address, to);
+
+      expect(result).toStrictEqual([]);
     });
 
     it('continue to fetch if next_url is presented', async () => {
@@ -256,7 +287,7 @@ describe('StarkScanClient', () => {
       // generate 5 invoke transactions + deploy transactions
       const mockDeployResponse = generateStarkScanTranscations({
         address: account.address,
-        // generate transactions which not overlap with above invoke transactions
+        // generate transactions that start from 100 days ago, to ensure not overlap with above invoke transactions
         startFrom: from - mSecsFor24Hours * 100,
         timestampReduction: mSecsFor24Hours,
         txnTypes: [TransactionType.INVOKE, TransactionType.DEPLOY_ACCOUNT],
@@ -317,7 +348,7 @@ describe('StarkScanClient', () => {
         timestamp: mockTx.timestamp,
         finalityStatus: mockTx.transaction_finality_status,
         executionStatus: mockTx.transaction_execution_status,
-        failureReason: mockTx.revert_error ?? undefined,
+        failureReason: mockTx.revert_error ?? '',
         maxFee: mockTx.max_fee,
         actualFee: mockTx.actual_fee,
         accountCalls: {
@@ -355,10 +386,10 @@ describe('StarkScanClient', () => {
         timestamp: mockTx.timestamp,
         finalityStatus: mockTx.transaction_finality_status,
         executionStatus: mockTx.transaction_execution_status,
-        failureReason: mockTx.revert_error ?? undefined,
+        failureReason: mockTx.revert_error ?? '',
         maxFee: mockTx.max_fee,
         actualFee: mockTx.actual_fee,
-        accountCalls: undefined,
+        accountCalls: null,
       });
     });
   });
@@ -380,10 +411,11 @@ describe('StarkScanClient', () => {
       const client = createMockClient();
       const result = await client.getDeployTransaction(account.address);
 
-      expect(result.txnType).toStrictEqual(TransactionType.DEPLOY_ACCOUNT);
+      expect(result).not.toBeNull();
+      expect(result?.txnType).toStrictEqual(TransactionType.DEPLOY_ACCOUNT);
     });
 
-    it('throws `Deploy transaction not found` error if no deploy transaction found', async () => {
+    it('returns null if no deploy transaction found', async () => {
       const account = await mockAccount();
       const { fetchSpy } = createMockFetch();
       // generate 5 invoke transactions with deploy transaction
@@ -398,10 +430,9 @@ describe('StarkScanClient', () => {
       });
 
       const client = createMockClient();
+      const result = await client.getDeployTransaction(account.address);
 
-      await expect(
-        client.getDeployTransaction(account.address),
-      ).rejects.toThrow('Deploy transaction not found');
+      expect(result).toBeNull();
     });
   });
 });

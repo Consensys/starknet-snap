@@ -167,7 +167,8 @@ export class StarkScanClient implements IDataClient {
 
     // If the deploy transaction is not found from above traverse, we need to fetch it separately
     if (!deployTxFound) {
-      txs.push(await this.getDeployTransaction(address));
+      const deployTx = await this.getDeployTransaction(address);
+      deployTx && txs.push(deployTx);
     }
 
     return txs;
@@ -177,10 +178,9 @@ export class StarkScanClient implements IDataClient {
    * Fetches the deploy transaction for a given contract address.
    *
    * @param address - The address of the contract to fetch the deploy transaction for.
-   * @returns A Promise that resolve the Transaction object.
-   * @throws Throws an error if the deploy transaction is not found.
+   * @returns A Promise that resolve the Transaction object or null if the transaction can not be found.
    */
-  async getDeployTransaction(address: string): Promise<Transaction> {
+  async getDeployTransaction(address: string): Promise<Transaction | null> {
     // Fetch the first 5 transactions to find the deploy transaction
     // The deploy transaction usually is the first transaction from the list
     const apiUrl = this.getApiUrl(
@@ -195,7 +195,7 @@ export class StarkScanClient implements IDataClient {
       }
     }
 
-    throw new Error(`Deploy transaction not found`);
+    return null;
   }
 
   protected isDeployTransaction(tx: StarkScanTransaction): boolean {
@@ -234,7 +234,7 @@ export class StarkScanClient implements IDataClient {
       timestamp: tx.timestamp,
       finalityStatus: tx.transaction_finality_status,
       executionStatus: tx.transaction_execution_status,
-      failureReason: tx.revert_error ?? undefined,
+      failureReason: tx.revert_error ?? '',
       maxFee: tx.max_fee,
       actualFee: tx.actual_fee,
       accountCalls: accountCalls,
@@ -244,9 +244,9 @@ export class StarkScanClient implements IDataClient {
 
   protected toAccountCall(
     calls: StarkScanAccountCall[],
-  ): Record<string, TranscationAccountCall[]> | undefined {
+  ): Record<string, TranscationAccountCall[]> | null {
     if (!calls || calls.length === 0) {
-      return undefined;
+      return null;
     }
 
     return calls.reduce(
