@@ -100,7 +100,8 @@ export type Transaction = {
   // TODO: rename it to address to sync with the same naming convention in the AccContract
   senderAddress: string; // in hex
   contractAddress: string; // in hex
-  contractFuncName: string;
+  // TEMP: add contractFuncName as optional, as it will move to `accountCalls`
+  contractFuncName?: string;
   contractCallData: RawCalldata | string[];
   status?: TransactionStatus | string;
   // TEMP: add TransactionFinalityStatus as optional to support the legacy data
@@ -112,9 +113,9 @@ export type Transaction = {
   eventIds?: string[];
   timestamp: number;
   // TEMP: put it as optional to support the legacy data
-  maxFee?: BigInt;
+  maxFee?: string;
   // TEMP: put it as optional to support the legacy data
-  actualFee?: BigInt;
+  actualFee?: string;
   // TEMP: put it as optional to support the legacy data
   // using Record<string, TranscationAccountCall[]> to support O(1) searching
   accountCalls?: Record<string, TranscationAccountCall[]>;
