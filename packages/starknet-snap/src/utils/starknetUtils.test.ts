@@ -1,6 +1,7 @@
 import type { EstimateFee, Invocations } from 'starknet';
 import { constants, TransactionType } from 'starknet';
 
+import { getEstimateFees } from '../__tests__/helper';
 import { mockAccount, prepareMockAccount } from '../rpcs/__tests__/helper';
 import { FeeTokenUnit } from '../types/snapApi';
 import type { SnapState } from '../types/snapState';
@@ -39,6 +40,9 @@ describe('getEstimatedFees', () => {
     const accountDeployedSpy = jest.spyOn(starknetUtils, 'isAccountDeployed');
     accountDeployedSpy.mockResolvedValue(deployed);
 
+    const estimateResults = getEstimateFees();
+    const { resourceBounds } = estimateResults[0];
+
     const estimateFeeResp = {
       // eslint-disable-next-line @typescript-eslint/naming-convention
       overall_fee: overallFee,
@@ -47,22 +51,7 @@ describe('getEstimatedFees', () => {
       suggestedMaxFee,
       // eslint-disable-next-line @typescript-eslint/naming-convention
       gas_price: BigInt('0x0'),
-      resourceBounds: {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        l1_gas: {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          max_amount: '0',
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          max_price_per_unit: '0',
-        },
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        l2_gas: {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          max_amount: '0',
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          max_price_per_unit: '0',
-        },
-      },
+      resourceBounds,
     } as unknown as EstimateFee;
     const estimateBulkFeeSpy = jest.spyOn(starknetUtils, 'estimateFeeBulk');
     estimateBulkFeeSpy.mockResolvedValue([estimateFeeResp]);

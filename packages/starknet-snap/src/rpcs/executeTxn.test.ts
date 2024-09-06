@@ -2,15 +2,11 @@ import {
   InvalidParamsError,
   UserRejectedRequestError,
 } from '@metamask/snaps-sdk';
-import type {
-  UniversalDetails,
-  Call,
-  InvokeFunctionResponse,
-  EstimateFee,
-} from 'starknet';
+import type { UniversalDetails, Call, InvokeFunctionResponse } from 'starknet';
 import { constants } from 'starknet';
 
 import callsExamples from '../__tests__/fixture/callsExamples.json'; // Assuming you have a similar fixture
+import { getEstimateFees } from '../__tests__/helper';
 import type { FeeTokenUnit } from '../types/snapApi';
 import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../utils/constants';
 import * as starknetUtils from '../utils/starknetUtils';
@@ -55,38 +51,14 @@ const prepareMockExecuteTxn = async (
     transaction_hash: transactionHash,
   };
 
+  const estimateResults = getEstimateFees();
+
   const getEstimatedFeesRepsMock = {
     suggestedMaxFee: BigInt(1000000000000000).toString(10),
     overallFee: BigInt(1000000000000000).toString(10),
     includeDeploy: !accountDeployed,
     unit: 'wei' as FeeTokenUnit,
-    estimateResults: [
-      {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        overall_fee: BigInt(1500000000000000).toString(10),
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        gas_consumed: BigInt('0x0'),
-        suggestedMaxFee: BigInt(1500000000000000).toString(10),
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        gas_price: BigInt('0x0'),
-        resourceBounds: {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          l1_gas: {
-            // eslint-disable-next-line @typescript-eslint/naming-convention
-            max_amount: '0',
-            // eslint-disable-next-line @typescript-eslint/naming-convention
-            max_price_per_unit: '0',
-          },
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          l2_gas: {
-            // eslint-disable-next-line @typescript-eslint/naming-convention
-            max_amount: '0',
-            // eslint-disable-next-line @typescript-eslint/naming-convention
-            max_price_per_unit: '0',
-          },
-        },
-      } as unknown as EstimateFee,
-    ],
+    estimateResults,
   };
 
   const getEstimatedFeesSpy = jest.spyOn(starknetUtils, 'getEstimatedFees');

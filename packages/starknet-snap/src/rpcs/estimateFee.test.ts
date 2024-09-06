@@ -1,8 +1,9 @@
 import { InvalidParamsError } from '@metamask/snaps-sdk';
-import type { EstimateFee, Invocations } from 'starknet';
+import type { Invocations } from 'starknet';
 import { constants, TransactionType } from 'starknet';
 import type { Infer } from 'superstruct';
 
+import { getEstimateFees } from '../__tests__/helper';
 import { FeeTokenUnit } from '../types/snapApi';
 import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../utils/constants';
 import * as starknetUtils from '../utils/starknetUtils';
@@ -44,38 +45,14 @@ const prepareMockEstimateFee = ({
     details: { version },
   } as unknown as EstimateFeeParams;
 
+  const estimateResults = getEstimateFees();
+
   const estimateBulkFeeRespMock = {
     suggestedMaxFee: BigInt(1000000000000000).toString(10),
     overallFee: BigInt(1500000000000000).toString(10),
     unit: FeeTokenUnit.ETH,
     includeDeploy,
-    estimateResults: [
-      {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        overall_fee: BigInt(1500000000000000).toString(10),
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        gas_consumed: BigInt('0x0'),
-        suggestedMaxFee: BigInt(1500000000000000).toString(10),
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        gas_price: BigInt('0x0'),
-        resourceBounds: {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          l1_gas: {
-            // eslint-disable-next-line @typescript-eslint/naming-convention
-            max_amount: '0',
-            // eslint-disable-next-line @typescript-eslint/naming-convention
-            max_price_per_unit: '0',
-          },
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          l2_gas: {
-            // eslint-disable-next-line @typescript-eslint/naming-convention
-            max_amount: '0',
-            // eslint-disable-next-line @typescript-eslint/naming-convention
-            max_price_per_unit: '0',
-          },
-        },
-      } as unknown as EstimateFee,
-    ],
+    estimateResults,
   };
 
   const getEstimatedFeesSpy = jest.spyOn(starknetUtils, 'getEstimatedFees');
