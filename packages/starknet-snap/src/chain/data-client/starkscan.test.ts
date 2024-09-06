@@ -312,14 +312,13 @@ describe('StarkScanClient', () => {
         chainId: STARKNET_SEPOLIA_TESTNET_NETWORK.chainId,
         senderAddress: account.address,
         contractAddress: '',
-        contractFuncName: '',
         contractCallData: mockTx.calldata,
         timestamp: mockTx.timestamp,
         finalityStatus: mockTx.transaction_finality_status,
         executionStatus: mockTx.transaction_execution_status,
         failureReason: mockTx.revert_error ?? undefined,
-        maxFee: BigInt(mockTx.max_fee),
-        actualFee: BigInt(mockTx.actual_fee),
+        maxFee: mockTx.max_fee,
+        actualFee: mockTx.actual_fee,
         accountCalls: {
           [contract]: [
             {
@@ -350,14 +349,13 @@ describe('StarkScanClient', () => {
         chainId: STARKNET_SEPOLIA_TESTNET_NETWORK.chainId,
         senderAddress: account.address,
         contractAddress: account.address,
-        contractFuncName: '',
         contractCallData: [],
         timestamp: mockTx.timestamp,
         finalityStatus: mockTx.transaction_finality_status,
         executionStatus: mockTx.transaction_execution_status,
         failureReason: mockTx.revert_error ?? undefined,
-        maxFee: BigInt(mockTx.max_fee),
-        actualFee: BigInt(mockTx.actual_fee),
+        maxFee: mockTx.max_fee,
+        actualFee: mockTx.actual_fee,
         accountCalls: undefined,
       });
     });
