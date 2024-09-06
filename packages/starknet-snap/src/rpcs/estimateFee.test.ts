@@ -3,6 +3,7 @@ import type { Invocations } from 'starknet';
 import { constants, TransactionType } from 'starknet';
 import type { Infer } from 'superstruct';
 
+import { getEstimateFees } from '../__tests__/helper';
 import { FeeTokenUnit } from '../types/snapApi';
 import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../utils/constants';
 import * as starknetUtils from '../utils/starknetUtils';
@@ -44,11 +45,14 @@ const prepareMockEstimateFee = ({
     details: { version },
   } as unknown as EstimateFeeParams;
 
+  const estimateResults = getEstimateFees();
+
   const estimateBulkFeeRespMock = {
     suggestedMaxFee: BigInt(1000000000000000).toString(10),
     overallFee: BigInt(1500000000000000).toString(10),
     unit: FeeTokenUnit.ETH,
     includeDeploy,
+    estimateResults,
   };
 
   const getEstimatedFeesSpy = jest.spyOn(starknetUtils, 'getEstimatedFees');
@@ -89,7 +93,12 @@ describe('estimateFee', () => {
         version: constants.TRANSACTION_VERSION.V1,
       },
     );
-    expect(result).toStrictEqual(estimateBulkFeeRespMock);
+    expect(result).toStrictEqual({
+      includeDeploy: estimateBulkFeeRespMock.includeDeploy,
+      overallFee: estimateBulkFeeRespMock.overallFee,
+      suggestedMaxFee: estimateBulkFeeRespMock.suggestedMaxFee,
+      unit: estimateBulkFeeRespMock.unit,
+    });
   });
 
   it('throws `InvalidParamsError` when request parameter is not correct', async () => {
