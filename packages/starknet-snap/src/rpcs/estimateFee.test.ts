@@ -116,9 +116,12 @@ describe('estimateFee', () => {
         version: constants.TRANSACTION_VERSION.V1,
       },
     );
-    const { estimateResults, ...resp } = estimateBulkFeeRespMock;
-
-    expect(result).toStrictEqual(resp);
+    expect(result).toStrictEqual({
+      includeDeploy: estimateBulkFeeRespMock.includeDeploy,
+      overallFee: estimateBulkFeeRespMock.overallFee,
+      suggestedMaxFee: estimateBulkFeeRespMock.suggestedMaxFee,
+      unit: estimateBulkFeeRespMock.unit,
+    });
   });
 
   it('throws `InvalidParamsError` when request parameter is not correct', async () => {

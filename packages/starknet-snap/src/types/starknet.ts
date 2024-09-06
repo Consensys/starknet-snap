@@ -25,16 +25,3 @@ export type DeployAccountPayload = {
   constructorCalldata: string[];
   addressSalt: string;
 };
-
-export type ResourceBoundsMapping = {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  l1_gas: ResourceBounds;
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  l2_gas: ResourceBounds;
-};
-export type ResourceBounds = {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  max_amount: string;
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  max_price_per_unit: string;
-};
