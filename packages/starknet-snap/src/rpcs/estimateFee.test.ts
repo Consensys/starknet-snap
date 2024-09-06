@@ -49,6 +49,24 @@ const prepareMockEstimateFee = ({
     overallFee: BigInt(1500000000000000).toString(10),
     unit: FeeTokenUnit.ETH,
     includeDeploy,
+    resourceBounds: [
+      {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        l1_gas: {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          max_amount: '0',
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          max_price_per_unit: '0',
+        },
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        l2_gas: {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          max_amount: '0',
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          max_price_per_unit: '0',
+        },
+      },
+    ],
   };
 
   const getEstimatedFeesSpy = jest.spyOn(starknetUtils, 'getEstimatedFees');

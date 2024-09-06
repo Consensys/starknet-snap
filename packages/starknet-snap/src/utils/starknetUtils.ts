@@ -1102,6 +1102,9 @@ export async function getEstimatedFees(
         ? FeeTokenUnit.STRK
         : FeeTokenUnit.ETH,
     includeDeploy: !accountDeployed,
+    resourceBounds: estimateBulkFeeResp.map(
+      (value: EstimateFee) => value.resourceBounds,
+    ),
   };
 }
 

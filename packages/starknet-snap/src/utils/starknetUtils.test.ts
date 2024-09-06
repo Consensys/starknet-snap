@@ -47,6 +47,24 @@ describe('getEstimatedFees', () => {
       suggestedMaxFee,
       // eslint-disable-next-line @typescript-eslint/naming-convention
       gas_price: BigInt('0x0'),
+      resourceBounds: [
+        {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          l1_gas: {
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            max_amount: '0',
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            max_price_per_unit: '0',
+          },
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          l2_gas: {
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            max_amount: '0',
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            max_price_per_unit: '0',
+          },
+        },
+      ],
     } as unknown as EstimateFee;
     const estimateBulkFeeSpy = jest.spyOn(starknetUtils, 'estimateFeeBulk');
     estimateBulkFeeSpy.mockResolvedValue([estimateFeeResp]);
@@ -56,6 +74,7 @@ describe('getEstimatedFees', () => {
       invocations,
       accountDeployedSpy,
       estimateBulkFeeSpy,
+      estimateFeeResp,
     };
   };
 
@@ -82,9 +101,8 @@ describe('getEstimatedFees', () => {
       expectedUnit: FeeTokenUnit;
     }) => {
       const network = STARKNET_SEPOLIA_TESTNET_NETWORK;
-      const { account, invocations, estimateBulkFeeSpy } = await prepareSpy(
-        true,
-      );
+      const { account, invocations, estimateBulkFeeSpy, estimateFeeResp } =
+        await prepareSpy(true);
       const call = invocations[0];
 
       const resp = await starknetUtils.getEstimatedFees(
@@ -117,15 +135,15 @@ describe('getEstimatedFees', () => {
         overallFee: overallFee.toString(10),
         unit: expectedUnit, // to verify if the unit is return correctly
         includeDeploy: false,
+        resourceBounds: [estimateFeeResp.resourceBounds],
       });
     },
   );
 
   it('estimates fees with account deploy payload if the account is not deployed', async () => {
     const network = STARKNET_SEPOLIA_TESTNET_NETWORK;
-    const { account, estimateBulkFeeSpy, invocations } = await prepareSpy(
-      false,
-    );
+    const { account, estimateBulkFeeSpy, estimateFeeResp, invocations } =
+      await prepareSpy(false);
     const deployAccountpayload = starknetUtils.createAccountDeployPayload(
       account.address,
       account.publicKey,
@@ -161,6 +179,7 @@ describe('getEstimatedFees', () => {
       overallFee: overallFee.toString(10),
       unit: FeeTokenUnit.ETH,
       includeDeploy: true,
+      resourceBounds: [estimateFeeResp.resourceBounds],
     });
   });
 });

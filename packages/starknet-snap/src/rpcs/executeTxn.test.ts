@@ -55,6 +55,24 @@ const prepareMockExecuteTxn = async (
     overallFee: BigInt(1000000000000000).toString(10),
     includeDeploy: !accountDeployed,
     unit: 'wei' as FeeTokenUnit,
+    resourceBounds: [
+      {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        l1_gas: {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          max_amount: '0',
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          max_price_per_unit: '0',
+        },
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        l2_gas: {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          max_amount: '0',
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          max_price_per_unit: '0',
+        },
+      },
+    ],
   };
 
   const getEstimatedFeesSpy = jest.spyOn(starknetUtils, 'getEstimatedFees');
@@ -114,6 +132,7 @@ describe('ExecuteTxn', () => {
       {
         ...callsExample.details,
         maxFee: getEstimatedFeesRepsMock.suggestedMaxFee,
+        resourceBounds: getEstimatedFeesRepsMock.resourceBounds[0],
       },
     );
     expect(getEstimatedFeesSpy).toHaveBeenCalled();
@@ -153,7 +172,7 @@ describe('ExecuteTxn', () => {
         privateKey: account.privateKey,
         publicKey: account.publicKey,
         version: transactionVersion,
-        waitMode: true,
+        waitMode: false,
       });
       expect(executeTxnUtilSpy).toHaveBeenCalledWith(
         network,
@@ -166,6 +185,7 @@ describe('ExecuteTxn', () => {
           version: transactionVersion,
           maxFee: getEstimatedFeesRepsMock.suggestedMaxFee,
           nonce: 1,
+          resourceBounds: getEstimatedFeesRepsMock.resourceBounds[0],
         },
       );
     },
