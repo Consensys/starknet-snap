@@ -227,15 +227,13 @@ export class StarkScanClient implements IDataClient {
       // In case of deploy transaction, the contract address is the sender address, else it will be empty string
       contractAddress: tx.contract_address ?? '',
       // TODO: when multiple calls are supported, we move this to accountCalls, hence we keep it for legacy support
-      contractFuncName: '',
-      // TODO: when multiple calls are supported, we move this to accountCalls, hence we keep it for legacy support
       contractCallData: tx.calldata ?? [],
       timestamp: tx.timestamp,
       finalityStatus: tx.transaction_finality_status,
       executionStatus: tx.transaction_execution_status,
       failureReason: tx.revert_error ?? undefined,
-      maxFee: BigInt(tx.max_fee),
-      actualFee: BigInt(tx.actual_fee),
+      maxFee: tx.max_fee,
+      actualFee: tx.actual_fee,
       accountCalls: accountCalls,
     };
     /* eslint-enable */
