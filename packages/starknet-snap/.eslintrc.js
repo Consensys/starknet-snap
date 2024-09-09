@@ -23,7 +23,7 @@ module.exports = {
         '@typescript-eslint/no-shadow': [
           'error',
           {
-            'allow': ['Text'],
+            allow: ['Text'],
           },
         ],
       },
