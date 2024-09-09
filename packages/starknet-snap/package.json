@@ -39,7 +39,7 @@
   },
   "dependencies": {
     "@metamask/key-tree": "9.0.0",
-    "@metamask/snaps-sdk": "^4.0.0",
+    "@metamask/snaps-sdk": "^6.1.1",
     "@metamask/utils": "^9.1.0",
     "async-mutex": "^0.3.2",
     "ethereum-unit-converter": "^0.0.17",

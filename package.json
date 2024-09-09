@@ -37,8 +37,5 @@
       "sharp": true,
       "@commitlint/cli>@commitlint/load>ts-node>@swc/core": false
     }
-  },
-  "resolutions": {
-    "@types/react": "18.0.15"
   }
 }
