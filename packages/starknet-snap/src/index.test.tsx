@@ -141,36 +141,78 @@ describe('onHomePage', () => {
 
     expect(result).toStrictEqual({
       content: {
-        type: 'panel',
-        children: [
-          { type: 'text', value: 'Address' },
-          {
-            type: 'copyable',
-            value: account.address,
-          },
-          {
-            type: 'row',
-            label: 'Network',
-            value: {
-              type: 'text',
-              value: STARKNET_SEPOLIA_TESTNET_NETWORK.name,
+        type: 'Box',
+        key: null,
+        props: {
+          children: [
+            {
+              key: null,
+              type: 'Text',
+              props: {
+                children: 'Address',
+              },
             },
-          },
-          {
-            type: 'row',
-            label: 'Balance',
-            value: {
-              type: 'text',
-              value: '0.000000000000001 ETH',
+            {
+              key: null,
+              type: 'Copyable',
+              props: {
+                value: account.address,
+              },
             },
-          },
-          { type: 'divider' },
-          {
-            type: 'text',
-            value:
-              'Visit the [companion dapp for Starknet](https://snaps.consensys.io/starknet) to manage your account.',
-          },
-        ],
+            {
+              key: null,
+              type: 'Row',
+              props: {
+                label: 'Network',
+                children: {
+                  key: null,
+                  type: 'Text',
+                  props: {
+                    children: 'Sepolia Testnet',
+                  },
+                },
+              },
+            },
+            {
+              key: null,
+              type: 'Row',
+              props: {
+                label: 'Balance',
+                children: {
+                  key: null,
+                  type: 'Text',
+                  props: {
+                    children: ['0.000000000000001', ' ETH'],
+                  },
+                },
+              },
+            },
+            {
+              key: null,
+              type: 'Divider',
+              props: {},
+            },
+            {
+              key: null,
+              type: 'Text',
+              props: {
+                children: [
+                  'Visit the',
+                  ' ',
+                  {
+                    key: null,
+                    type: 'Link',
+                    props: {
+                      children: 'companion dapp for Starknet',
+                      href: 'https://snaps.consensys.io/starknet',
+                    },
+                  },
+                  ' to manage your account.',
+                ],
+              },
+            },
+          ],
+        },
       },
     });
   });
@@ -189,36 +231,78 @@ describe('onHomePage', () => {
 
     expect(result).toStrictEqual({
       content: {
-        type: 'panel',
-        children: [
-          { type: 'text', value: 'Address' },
-          {
-            type: 'copyable',
-            value: account.address,
-          },
-          {
-            type: 'row',
-            label: 'Network',
-            value: {
-              type: 'text',
-              value: network.name,
+        type: 'Box',
+        key: null,
+        props: {
+          children: [
+            {
+              key: null,
+              type: 'Text',
+              props: {
+                children: 'Address',
+              },
             },
-          },
-          {
-            type: 'row',
-            label: 'Balance',
-            value: {
-              type: 'text',
-              value: '0.000000000000001 ETH',
+            {
+              key: null,
+              type: 'Copyable',
+              props: {
+                value: account.address,
+              },
             },
-          },
-          { type: 'divider' },
-          {
-            type: 'text',
-            value:
-              'Visit the [companion dapp for Starknet](https://snaps.consensys.io/starknet) to manage your account.',
-          },
-        ],
+            {
+              key: null,
+              type: 'Row',
+              props: {
+                label: 'Network',
+                children: {
+                  key: null,
+                  type: 'Text',
+                  props: {
+                    children: network.name,
+                  },
+                },
+              },
+            },
+            {
+              key: null,
+              type: 'Row',
+              props: {
+                label: 'Balance',
+                children: {
+                  key: null,
+                  type: 'Text',
+                  props: {
+                    children: ['0.000000000000001', ' ETH'],
+                  },
+                },
+              },
+            },
+            {
+              key: null,
+              type: 'Divider',
+              props: {},
+            },
+            {
+              key: null,
+              type: 'Text',
+              props: {
+                children: [
+                  'Visit the',
+                  ' ',
+                  {
+                    key: null,
+                    type: 'Link',
+                    props: {
+                      children: 'companion dapp for Starknet',
+                      href: 'https://snaps.consensys.io/starknet',
+                    },
+                  },
+                  ' to manage your account.',
+                ],
+              },
+            },
+          ],
+        },
       },
     });
   });

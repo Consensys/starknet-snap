@@ -3,17 +3,16 @@ import type {
   OnHomePageHandler,
   OnInstallHandler,
   OnUpdateHandler,
-  Component,
 } from '@metamask/snaps-sdk';
+import { SnapError, MethodNotFoundError } from '@metamask/snaps-sdk';
 import {
-  panel,
-  row,
-  divider,
-  text,
-  copyable,
-  SnapError,
-  MethodNotFoundError,
-} from '@metamask/snaps-sdk';
+  Box,
+  Text,
+  Link,
+  Copyable,
+  Row,
+  Divider,
+} from '@metamask/snaps-sdk/jsx';
 import { ethers } from 'ethers';
 
 import { addErc20Token } from './addErc20Token';
@@ -309,33 +308,38 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
 };
 
 export const onInstall: OnInstallHandler = async () => {
-  const component = panel([
-    text('Your MetaMask wallet is now compatible with Starknet!'),
-    text(
-      `To manage your Starknet account and send and receive funds, visit the [companion dapp for Starknet](${getDappUrl()}).`,
-    ),
-  ]);
+  const content = (
+    <Box>
+      <Text>Your MetaMask wallet is now compatible with Starknet!</Text>
+      <Text>
+        To manage your Starknet account and send and receive funds, visit the{' '}
+        <Link href={getDappUrl()}>companion dapp for Starknet</Link>.
+      </Text>
+    </Box>
+  );
 
   await snap.request({
     method: 'snap_dialog',
     params: {
       type: 'alert',
-      content: component,
+      content,
     },
   });
 };
 
 export const onUpdate: OnUpdateHandler = async () => {
-  const component = panel([
-    text('Features released with this update:'),
-    text('Cairo contract upgrade support.'),
-  ]);
+  const content = (
+    <Box>
+      <Text>Features released with this update:</Text>
+      <Text>Cairo contract upgrade support.</Text>
+    </Box>
+  );
 
   await snap.request({
     method: 'snap_dialog',
     params: {
       type: 'alert',
-      content: component,
+      content,
     },
   });
 };
@@ -385,20 +389,25 @@ export const onHomePage: OnHomePageHandler = async () => {
       ethToken.decimals,
     );
 
-    const panelItems: Component[] = [];
-    panelItems.push(text('Address'));
-    panelItems.push(copyable(`${address}`));
-    panelItems.push(row('Network', text(`${network.name}`)));
-    panelItems.push(row('Balance', text(`${displayBalance} ETH`)));
-    panelItems.push(divider());
-    panelItems.push(
-      text(
-        `Visit the [companion dapp for Starknet](${getDappUrl()}) to manage your account.`,
-      ),
-    );
-
     return {
-      content: panel(panelItems),
+      content: (
+        <Box>
+          <Text>Address</Text>
+          <Copyable value={address} />
+          <Row label="Network">
+            <Text>{network.name}</Text>
+          </Row>
+          <Row label="Balance">
+            <Text>{displayBalance} ETH</Text>
+          </Row>
+          <Divider />
+          <Text>
+            Visit the{' '}
+            <Link href={getDappUrl()}>companion dapp for Starknet</Link> to
+            manage your account.
+          </Text>
+        </Box>
+      ),
     };
   } catch (error) {
     // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
