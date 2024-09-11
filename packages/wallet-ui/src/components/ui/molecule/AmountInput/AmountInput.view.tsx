@@ -112,7 +112,7 @@ export const AmountInputView = ({
   const handleMaxClick = () => {
     if (inputRef.current && asset.usdPrice) {
       const amountStr = ethers.utils
-        .formatUnits(asset.spendableAmount, asset.decimals)
+        .formatUnits(asset.amount, asset.decimals)
         .toString();
       const amountFloat = parseFloat(amountStr);
       inputRef.current.value = usdMode
