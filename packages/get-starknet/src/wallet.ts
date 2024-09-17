@@ -37,6 +37,8 @@ export class MetaMaskSnapWallet implements IStarknetWindowObject {
 
   metamaskProvider: MetaMaskProvider;
 
+  isPopupVisible: boolean;
+
   static readonly #cairoVersion = '0';
 
   // eslint-disable-next-line @typescript-eslint/naming-convention, no-restricted-globals
@@ -53,6 +55,7 @@ export class MetaMaskSnapWallet implements IStarknetWindowObject {
     this.account = undefined;
     this.selectedAddress = undefined;
     this.isConnected = false;
+    this.isPopupVisible = false;
     this.snap = new MetaMaskSnap(MetaMaskSnapWallet.#SNAPI_ID, snapVersion, this.metamaskProvider);
   }
 
@@ -128,6 +131,16 @@ export class MetaMaskSnapWallet implements IStarknetWindowObject {
   }
 
   async enable() {
+    const minRequiredVersion = '12.0.0';
+    if (await this.snap.isUpgradeRequired(minRequiredVersion)) {
+      if (typeof document !== 'undefined') {
+        // Safe to use document
+        this.#showPopup();
+      }
+
+      throw new Error('MetaMask upgrade required');
+    }
+
     await this.snap.installIfNot();
     this.isConnected = true;
     const network = await this.#getNetwork();
@@ -157,5 +170,124 @@ export class MetaMaskSnapWallet implements IStarknetWindowObject {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   off<Event extends WalletEvents>() {
     throw new Error('Method not supported');
+  }
+
+  // Function to dynamically create and show the pop-up
+  // Function to dynamically create and show the pop-up
+  #showPopup() {
+    if (this.isPopupVisible) {
+      return;
+    } // Prevent multiple pop-ups
+    this.isPopupVisible = true;
+
+    const backdrop = document.createElement('div');
+    Object.assign(backdrop.style, {
+      position: 'fixed',
+      top: '0',
+      left: '0',
+      width: '100%',
+      height: '100%',
+      backgroundColor: 'rgba(0, 0, 0, 0.25)',
+      backdropFilter: 'blur(5px)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: '1000',
+    });
+    backdrop.id = 'popupBackdrop';
+
+    const popup = document.createElement('div');
+    Object.assign(popup.style, {
+      position: 'relative',
+      backgroundColor: '#ffffff',
+      borderRadius: '8px',
+      padding: '20px',
+      maxWidth: '400px',
+      width: '100%',
+      boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+      display: 'flex', // Flexbox to handle vertical centering
+      flexDirection: 'column',
+      alignItems: 'center', // Center content horizontally
+      justifyContent: 'center', // Center content vertically
+      height: '300px', // Ensure enough height to center the button in the middle of the pop-up
+      textAlign: 'center',
+    });
+
+    const closeButton = document.createElement('button');
+    Object.assign(closeButton.style, {
+      position: 'absolute',
+      top: '10px',
+      right: '10px',
+      fontSize: '1.5rem',
+      border: 'none',
+      background: 'none',
+      cursor: 'pointer',
+    });
+    closeButton.innerHTML = '&times;';
+    closeButton.onclick = () => {
+      document.body.removeChild(backdrop);
+      this.isPopupVisible = false;
+    };
+
+    const title = document.createElement('h2');
+    title.innerText = 'Update MetaMask';
+    Object.assign(title.style, {
+      fontSize: '1.5rem',
+      marginBottom: '16px',
+    });
+
+    const message = document.createElement('p');
+    message.innerText = 'Please update your MetaMask to the latest version for the best experience.';
+    Object.assign(message.style, {
+      fontSize: '1rem',
+      marginBottom: '16px',
+    });
+
+    // Center the button using margin and block-level display
+    const updateButton = document.createElement('button');
+    Object.assign(updateButton.style, {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: '10px',
+      padding: '10px 20px',
+      backgroundColor: '#f0f0f0',
+      border: 'none',
+      borderRadius: '5px',
+      color: '#333333',
+      cursor: 'pointer',
+      fontSize: '1rem',
+      marginTop: '20px',
+    });
+
+    const logoImg = document.createElement('img');
+    Object.assign(logoImg.style, {
+      width: '30px',
+      height: '30px',
+    });
+    logoImg.src = 'https://metamask.io/assets/icon.svg';
+    logoImg.alt = 'MetaMask Logo';
+
+    const buttonText = document.createElement('span');
+    buttonText.innerText = 'Update MetaMask';
+
+    updateButton.onclick = () => {
+      window.open('https://metamask.io/', '_blank');
+    };
+
+    updateButton.appendChild(logoImg);
+    updateButton.appendChild(buttonText);
+
+    // Append elements to the pop-up
+    popup.appendChild(closeButton);
+    popup.appendChild(title);
+    popup.appendChild(message);
+    popup.appendChild(updateButton);
+
+    // Append the pop-up to the backdrop
+    backdrop.appendChild(popup);
+
+    // Append the backdrop (with the pop-up inside) to the body
+    document.body.appendChild(backdrop);
   }
 }
