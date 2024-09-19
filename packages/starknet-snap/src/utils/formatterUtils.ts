@@ -1,3 +1,5 @@
+import type { Json } from '@metamask/snaps-sdk';
+
 export const hexToString = (hexStr) => {
   let str = '';
   for (let i = 0; i < hexStr.length; i += 2) {
@@ -26,12 +28,12 @@ export const hexToString = (hexStr) => {
  * mapDeprecatedParams(apiParams.requestParams, paramMappings);
  */
 export const mapDeprecatedParams = (
-  requestParams: any,
+  requestParams: Record<string, Json>,
   mappings: Record<string, string>,
 ) => {
   Object.keys(mappings).forEach((oldParam) => {
     const newParam = mappings[oldParam];
-    if (requestParams[oldParam]) {
+    if (Object.prototype.hasOwnProperty.call(requestParams, oldParam)) {
       requestParams[newParam] = requestParams[oldParam];
       delete requestParams[oldParam]; // Remove old param after mapping
     }

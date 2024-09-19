@@ -63,7 +63,7 @@ import type {
 } from './types/snapApi';
 import type { SnapState } from './types/snapState';
 import { upgradeAccContract } from './upgradeAccContract';
-import { getDappUrl, isSnapRpcError, mapDeprecatedParams } from './utils';
+import { getDappUrl, isSnapRpcError } from './utils';
 import {
   CAIRO_VERSION_LEGACY,
   ETHER_MAINNET,
@@ -152,21 +152,6 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
       wallet: snap,
       saveMutex,
     };
-
-    // Define mappings to ensure backward compatibility with previous versions of the API.
-    // These mappings replace deprecated parameter names with the updated equivalents,
-    // allowing older integrations to function without changes, while the new version
-    // expects parameters such as `calls`, `details`, and `address`.
-    const paramMappings: Record<string, string> = {
-      signerAddress: 'address',
-      senderAddress: 'address',
-      txnInvocation: 'calls',
-      invocationsDetails: 'details',
-      transaction: 'details',
-    };
-
-    // Apply the mappings to apiParams.requestParams
-    mapDeprecatedParams(apiParams.requestParams, paramMappings);
 
     switch (request.method) {
       case 'starkNet_createAccount':
