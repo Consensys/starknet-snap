@@ -52,7 +52,7 @@ describe('mapDeprecatedParams', () => {
     expect(requestParams).toStrictEqual(expected);
   });
 
-  it('should handle empty mappings correctly', () => {
+  it('does nothing if the mapping is empty', () => {
     const requestParams = {
       signerAddress: '0x123',
     };
