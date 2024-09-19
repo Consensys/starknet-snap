@@ -88,7 +88,7 @@ export class ExecuteTxnRpc extends AccountRpcController<
     };
 
     // Apply the mappings to params
-    mapDeprecatedParams(params as Record<string, Json>, paramMappings);
+    mapDeprecatedParams(params, paramMappings);
     await super.preExecute(params);
   }
 
