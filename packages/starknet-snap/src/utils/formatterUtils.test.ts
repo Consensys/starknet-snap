@@ -37,7 +37,7 @@ describe('mapDeprecatedParams', () => {
     expect(requestParams).not.toHaveProperty('txnInvocation');
   });
 
-  it('should not map if deprecated parameter does not exist', () => {
+  it('does nothing if the deprecated parameter does not exist', () => {
     const requestParams = {
       otherParam: 'value',
     };
