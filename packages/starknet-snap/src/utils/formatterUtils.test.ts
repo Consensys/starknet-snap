@@ -1,4 +1,4 @@
-import { mapDeprecatedParams } from './formatterUtils'; // replace 'yourModule' with the actual module path
+import { mapDeprecatedParams } from './formatterUtils';
 
 describe('mapDeprecatedParams', () => {
   it('should map deprecated parameters to their new equivalents', () => {
