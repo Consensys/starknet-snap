@@ -45,18 +45,14 @@ export const isValidAddress = (toCheck: string) => {
 export const addMissingPropertiesToToken = (
   token: Erc20Token,
   balance?: string,
-  balanceSpendable?: string,
   usdPrice?: number,
 ): Erc20TokenBalance => {
   // when balance is undefined, use 0
   const hexBalance = balance ?? '0x0';
-  // when balanceSpendable is undefined, we use hexBalance
-  const hexSpendableBalance = balanceSpendable ?? hexBalance;
 
   return {
     ...token,
     amount: ethers.BigNumber.from(hexBalance),
-    spendableAmount: ethers.BigNumber.from(hexSpendableBalance),
     usdPrice: usdPrice,
   };
 };
@@ -87,20 +83,15 @@ export const getHumanReadableAmount = (
 };
 
 export const getSpendableTotalBalance = (asset: Erc20TokenBalance): string => {
-  if (asset.spendableAmount === undefined) {
-    throw new Error('Spendable amount can not be undefined');
+  if (asset.amount === undefined) {
+    throw new Error('Amount can not be undefined');
   }
-  const spendableAmount = getHumanReadableAmount(
+  const amount = getHumanReadableAmount(
     asset,
-    ethers.utils.formatUnits(asset.spendableAmount, asset.decimals),
+    ethers.utils.formatUnits(asset.amount, asset.decimals),
   );
-  if (asset.spendableAmount.eq(asset.amount)) {
-    return `${spendableAmount}`;
-  }
 
-  const totalAmount = getHumanReadableAmount(asset);
-
-  return `${spendableAmount} (${totalAmount})`;
+  return amount;
 };
 
 export const getMaxDecimalsReadable = (
@@ -248,14 +239,6 @@ export function getTokenBalanceWithDetails(
   token: Erc20Token,
   tokenUSDPrice?: number,
 ): Erc20TokenBalance {
-  const { balancePending, balanceLatest } = tokenBalance;
-  const spendableBalance = balancePending.lt(balanceLatest)
-    ? balancePending
-    : balanceLatest;
-  return addMissingPropertiesToToken(
-    token,
-    balanceLatest.toString(),
-    spendableBalance.toString(),
-    tokenUSDPrice,
-  );
+  const { balance } = tokenBalance;
+  return addMissingPropertiesToToken(token, balance.toString(), tokenUSDPrice);
 }

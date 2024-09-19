@@ -12,7 +12,6 @@ export type Network = Pick<
 
 export interface Erc20TokenBalance extends Types.Erc20Token {
   amount: BigNumber;
-  spendableAmount: BigNumber;
   usdPrice?: number;
 }
 export type TransactionStatusOptions =
@@ -50,8 +49,7 @@ export type {
 
 // Define the type for your token balances
 export interface TokenBalance {
-  balancePending: BigNumber;
-  balanceLatest: BigNumber;
+  balance: BigNumber;
 }
 
 export enum FeeToken {
