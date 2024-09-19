@@ -21,7 +21,7 @@ describe('mapDeprecatedParams', () => {
     expect(requestParams).toStrictEqual(expected);
   });
 
-  it('should remove deprecated parameters after mapping', () => {
+  it('removes the deprecated parameter after mapping', () => {
     const requestParams = {
       signerAddress: '0x123',
       txnInvocation: 'invoke',
