@@ -1,7 +1,7 @@
 import { mapDeprecatedParams } from './formatterUtils';
 
 describe('mapDeprecatedParams', () => {
-  it('should map deprecated parameters to their new equivalents', () => {
+  it('maps deprecated parameters to their new equivalents', () => {
     const requestParams = {
       signerAddress: '0x123',
       txnInvocation: 'invoke',
