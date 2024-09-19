@@ -25,6 +25,7 @@ import {
   confirmDialog,
   UniversalDetailsStruct,
   CallsStruct,
+  mapDeprecatedParams,
 } from '../utils';
 import { logger } from '../utils/logger';
 import {
@@ -74,6 +75,21 @@ export class ExecuteTxnRpc extends AccountRpcController<
     this.txnStateManager = new TransactionStateManager();
     this.accStateManager = new AccountStateManager();
     this.tokenStateManager = new TokenStateManager();
+  }
+
+  protected async preExecute(params: ExecuteTxnParams): Promise<void> {
+    // Define mappings to ensure backward compatibility with previous versions of the API.
+    // These mappings replace deprecated parameter names with the updated equivalents,
+    // allowing older integrations to function without changes
+    const paramMappings: Record<string, string> = {
+      senderAddress: 'address',
+      txnInvocation: 'calls',
+      invocationsDetails: 'details',
+    };
+
+    // Apply the mappings to params
+    mapDeprecatedParams(params, paramMappings);
+    await super.preExecute(params);
   }
 
   /**
