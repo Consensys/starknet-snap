@@ -4,7 +4,12 @@ import type {
   OnInstallHandler,
   OnUpdateHandler,
 } from '@metamask/snaps-sdk';
-import { SnapError, MethodNotFoundError } from '@metamask/snaps-sdk';
+import {
+  SnapError,
+  MethodNotFoundError,
+  panel,
+  text,
+} from '@metamask/snaps-sdk';
 import {
   Box,
   Text,
@@ -62,7 +67,12 @@ import type {
 } from './types/snapApi';
 import type { SnapState } from './types/snapState';
 import { upgradeAccContract } from './upgradeAccContract';
-import { getDappUrl, isSnapRpcError } from './utils';
+import {
+  getDappUrl,
+  getStateData,
+  isSnapRpcError,
+  setStateData,
+} from './utils';
 import {
   CAIRO_VERSION_LEGACY,
   ETHER_MAINNET,
@@ -308,27 +318,52 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
 };
 
 export const onInstall: OnInstallHandler = async () => {
-  const content = (
-    <Box>
-      <Text>Your MetaMask wallet is now compatible with Starknet!</Text>
-      <Text>
-        To manage your Starknet account and send and receive funds, visit the{' '}
-        <Link href={getDappUrl()}>companion dapp for Starknet</Link>.
-      </Text>
-    </Box>
-  );
+  try {
+    const content = (
+      <Box>
+        <Text>Your MetaMask wallet is now compatible with Starknet!</Text>
+        <Text>
+          To manage your Starknet account and send and receive funds, visit the{' '}
+          <Link href={getDappUrl()}>companion dapp for Starknet</Link>.
+        </Text>
+      </Box>
+    );
 
-  await snap.request({
-    method: 'snap_dialog',
-    params: {
-      type: 'alert',
-      content,
-    },
-  });
+    await snap.request({
+      method: 'snap_dialog',
+      params: {
+        type: 'alert',
+        content,
+      },
+    });
+  } catch (error) {
+    const state = (await getStateData()) as SnapState;
+    state.requireMMUpgrade = true;
+    await setStateData(state);
+    await snap.request({
+      method: 'snap_dialog',
+      params: {
+        type: 'alert',
+        content: panel([
+          text(
+            'You need to update your MetaMask to latest version to use this snap.',
+          ),
+        ]),
+      },
+    });
+  }
 };
 
 export const onUpdate: OnUpdateHandler = async () => {
-  const content = (
+  const { requireMMUpgrade } = (await getStateData()) as SnapState;
+
+  const content = requireMMUpgrade ? (
+    panel([
+      text(
+        'You need to update your MetaMask to latest version to use this snap.',
+      ),
+    ])
+  ) : (
     <Box>
       <Text>Features released with this update:</Text>
       <Text>Cairo contract upgrade support.</Text>
@@ -346,12 +381,7 @@ export const onUpdate: OnUpdateHandler = async () => {
 
 export const onHomePage: OnHomePageHandler = async () => {
   try {
-    const state: SnapState = await snap.request({
-      method: 'snap_manageState',
-      params: {
-        operation: 'get',
-      },
-    });
+    const state: SnapState = (await getStateData()) as SnapState;
 
     if (!state) {
       throw new Error('State not found.');
@@ -390,7 +420,13 @@ export const onHomePage: OnHomePageHandler = async () => {
     );
 
     return {
-      content: (
+      content: state.requireMMUpgrade ? (
+        panel([
+          text(
+            'You need to update your MetaMask to latest version to use this snap.',
+          ),
+        ])
+      ) : (
         <Box>
           <Text>Address</Text>
           <Copyable value={address} />
