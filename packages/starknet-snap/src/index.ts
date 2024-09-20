@@ -55,7 +55,6 @@ import {
 } from './rpcs';
 import { sendTransaction } from './sendTransaction';
 import { signDeployAccountTransaction } from './signDeployAccountTransaction';
-import { NetworkStateManager } from './state/network-state-manager';
 import { switchNetwork } from './switchNetwork';
 import type {
   ApiParams,
@@ -354,9 +353,14 @@ export const onHomePage: OnHomePageHandler = async () => {
       throw new Error('State not found.');
     }
 
-    const stateManager = new NetworkStateManager();
-    const network =
-      (await stateManager.getCurrentNetwork()) ?? STARKNET_MAINNET_NETWORK;
+    // default network is mainnet
+    let network = STARKNET_MAINNET_NETWORK;
+    if (
+      state.currentNetwork &&
+      state.currentNetwork.chainId !== STARKNET_TESTNET_NETWORK.chainId
+    ) {
+      network = state.currentNetwork;
+    }
 
     // we only support 1 address at this moment
     const idx = 0;
