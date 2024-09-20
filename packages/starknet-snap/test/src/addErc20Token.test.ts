@@ -7,7 +7,7 @@ import { SnapState } from '../../src/types/snapState';
 import * as snapUtils from '../../src/utils/snapUtils';
 import {
   DEFAULT_DECIMAL_PLACES,
-  STARKNET_SEPOLIA_TESTNET_NETWORK,
+  STARKNET_MAINNET_NETWORK,
 } from '../../src/utils/constants';
 import { Mutex } from 'async-mutex';
 import { AddErc20TokenRequestParams, ApiParams } from '../../src/types/snapApi';
@@ -20,7 +20,7 @@ describe('Test function: addErc20Token', function () {
   const state: SnapState = {
     accContracts: [],
     erc20Tokens: [],
-    networks: [STARKNET_SEPOLIA_TESTNET_NETWORK],
+    networks: [STARKNET_MAINNET_NETWORK],
     transactions: [],
   };
   const apiParams: ApiParams = {

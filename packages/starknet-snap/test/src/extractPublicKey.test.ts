@@ -4,7 +4,7 @@ import sinonChai from 'sinon-chai';
 import { WalletMock } from '../wallet.mock.test';
 import { SnapState } from '../../src/types/snapState';
 import { extractPublicKey } from '../../src/extractPublicKey';
-import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../../src/utils/constants';
+import { STARKNET_MAINNET_NETWORK } from '../../src/utils/constants';
 import {
   account1,
   getBip44EntropyStub,
@@ -28,7 +28,7 @@ describe('Test function: extractPublicKey', function () {
   const state: SnapState = {
     accContracts: [account1],
     erc20Tokens: [],
-    networks: [STARKNET_SEPOLIA_TESTNET_NETWORK],
+    networks: [STARKNET_MAINNET_NETWORK],
     transactions: [],
   };
   let apiParams: ApiParamsWithKeyDeriver;
@@ -110,7 +110,7 @@ describe('Test function: extractPublicKey', function () {
           expect(
             validateAccountRequireUpgradeOrDeployStub,
           ).to.have.been.calledOnceWith(
-            STARKNET_SEPOLIA_TESTNET_NETWORK,
+            STARKNET_MAINNET_NETWORK,
             account1.address,
             account1.publicKey,
           );
@@ -137,7 +137,7 @@ describe('Test function: extractPublicKey', function () {
           expect(
             validateAccountRequireUpgradeOrDeployStub,
           ).to.have.been.calledOnceWith(
-            STARKNET_SEPOLIA_TESTNET_NETWORK,
+            STARKNET_MAINNET_NETWORK,
             account1.address,
             account1.publicKey,
           );

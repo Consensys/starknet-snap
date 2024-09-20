@@ -55,6 +55,7 @@ import {
 } from './rpcs';
 import { sendTransaction } from './sendTransaction';
 import { signDeployAccountTransaction } from './signDeployAccountTransaction';
+import { NetworkStateManager } from './state/network-state-manager';
 import { switchNetwork } from './switchNetwork';
 import type {
   ApiParams,
@@ -309,6 +310,9 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
 };
 
 export const onInstall: OnInstallHandler = async () => {
+  const stateManager = new NetworkStateManager();
+  await stateManager.setCurrentNetwork(STARKNET_MAINNET_NETWORK);
+
   const component = panel([
     text('Your MetaMask wallet is now compatible with Starknet!'),
     text(
@@ -353,15 +357,9 @@ export const onHomePage: OnHomePageHandler = async () => {
       throw new Error('State not found.');
     }
 
-    // default network is testnet
-    let network = STARKNET_SEPOLIA_TESTNET_NETWORK;
-
-    if (
-      state.currentNetwork &&
-      state.currentNetwork.chainId !== STARKNET_TESTNET_NETWORK.chainId
-    ) {
-      network = state.currentNetwork;
-    }
+    const stateManager = new NetworkStateManager();
+    const network =
+      (await stateManager.getCurrentNetwork()) ?? STARKNET_MAINNET_NETWORK;
 
     // we only support 1 address at this moment
     const idx = 0;

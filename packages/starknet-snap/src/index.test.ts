@@ -153,7 +153,7 @@ describe('onHomePage', () => {
             label: 'Network',
             value: {
               type: 'text',
-              value: STARKNET_SEPOLIA_TESTNET_NETWORK.name,
+              value: STARKNET_MAINNET_NETWORK.name,
             },
           },
           {
