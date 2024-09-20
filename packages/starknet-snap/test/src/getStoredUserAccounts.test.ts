@@ -37,7 +37,9 @@ describe('Test function: getStoredUserAccounts', function () {
   });
 
   it('should get the stored user accounts correctly', async function () {
-    const requestObject: GetStoredUserAccountsRequestParams = {};
+    const requestObject: GetStoredUserAccountsRequestParams = {
+      chainId: STARKNET_SEPOLIA_TESTNET_NETWORK.chainId,
+    };
     apiParams.requestParams = requestObject;
     const result = await getStoredUserAccounts(apiParams);
     expect(walletStub.rpcStubs.snap_manageState).not.to.have.been.called;

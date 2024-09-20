@@ -353,9 +353,8 @@ export const onHomePage: OnHomePageHandler = async () => {
       throw new Error('State not found.');
     }
 
-    // default network is testnet
-    let network = STARKNET_SEPOLIA_TESTNET_NETWORK;
-
+    // default network is mainnet
+    let network = STARKNET_MAINNET_NETWORK;
     if (
       state.currentNetwork &&
       state.currentNetwork.chainId !== STARKNET_TESTNET_NETWORK.chainId

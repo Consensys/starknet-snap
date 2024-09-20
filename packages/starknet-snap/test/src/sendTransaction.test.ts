@@ -8,7 +8,10 @@ import * as snapUtils from '../../src/utils/snapUtils';
 import { SnapState } from '../../src/types/snapState';
 import { sendTransaction } from '../../src/sendTransaction';
 import * as estimateFeeSnap from '../../src/estimateFee';
-import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../../src/utils/constants';
+import {
+  STARKNET_MAINNET_NETWORK,
+  STARKNET_SEPOLIA_TESTNET_NETWORK,
+} from '../../src/utils/constants';
 import {
   account1,
   createAccountProxyResp,
@@ -42,7 +45,7 @@ describe('Test function: sendTransaction', function () {
   const state: SnapState = {
     accContracts: [],
     erc20Tokens: [token2, token3],
-    networks: [STARKNET_SEPOLIA_TESTNET_NETWORK],
+    networks: [STARKNET_MAINNET_NETWORK, STARKNET_SEPOLIA_TESTNET_NETWORK],
     transactions: [],
   };
   let apiParams: ApiParamsWithKeyDeriver;
@@ -61,7 +64,9 @@ describe('Test function: sendTransaction', function () {
     walletStub.rpcStubs.snap_getBip44Entropy.callsFake(getBip44EntropyStub);
     apiParams = {
       state,
-      requestParams: {},
+      requestParams: {
+        chainId: STARKNET_SEPOLIA_TESTNET_NETWORK.chainId,
+      },
       wallet: walletStub,
       saveMutex: new Mutex(),
       keyDeriver: await getAddressKeyDeriver(walletStub),
@@ -351,6 +356,7 @@ describe('Test function: sendTransaction', function () {
             contractFuncName: 'get_signer',
             contractCallData: '**foo**',
             senderAddress: account1.address,
+            chainId: STARKNET_SEPOLIA_TESTNET_NETWORK.chainId,
           };
           apiParams.requestParams = requestObject;
           await sendTransaction(apiParams);

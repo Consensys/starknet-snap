@@ -7,7 +7,7 @@ import { estimateFee } from '../../src/estimateFee';
 import { SnapState } from '../../src/types/snapState';
 import {
   ACCOUNT_CLASS_HASH,
-  STARKNET_SEPOLIA_TESTNET_NETWORK,
+  STARKNET_MAINNET_NETWORK,
 } from '../../src/utils/constants';
 import { getAddressKeyDeriver } from '../../src/utils/keyPair';
 import {
@@ -35,7 +35,7 @@ describe('Test function: estimateFee', function () {
   const state: SnapState = {
     accContracts: [],
     erc20Tokens: [],
-    networks: [STARKNET_SEPOLIA_TESTNET_NETWORK],
+    networks: [STARKNET_MAINNET_NETWORK],
     transactions: [],
   };
   const requestObject: EstimateFeeRequestParams = {
@@ -149,7 +149,7 @@ describe('Test function: estimateFee', function () {
           expect(
             validateAccountRequireUpgradeOrDeployStub,
           ).to.have.been.calledOnceWith(
-            STARKNET_SEPOLIA_TESTNET_NETWORK,
+            STARKNET_MAINNET_NETWORK,
             account2.address,
             account2.publicKey,
           );
@@ -208,7 +208,7 @@ describe('Test function: estimateFee', function () {
 
           const { privateKey, publicKey } = await utils.getKeysFromAddress(
             apiParams.keyDeriver,
-            STARKNET_SEPOLIA_TESTNET_NETWORK,
+            STARKNET_MAINNET_NETWORK,
             state,
             Cairo1Account1.address,
           );
@@ -244,7 +244,7 @@ describe('Test function: estimateFee', function () {
           );
           expect(estimateFeeBulkStub).callCount(1);
           expect(estimateFeeBulkStub).to.be.calledWith(
-            STARKNET_SEPOLIA_TESTNET_NETWORK,
+            STARKNET_MAINNET_NETWORK,
             Cairo1Account1.address,
             privateKey,
             expectedBulkTransaction,
