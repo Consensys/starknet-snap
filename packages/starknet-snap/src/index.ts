@@ -310,9 +310,6 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
 };
 
 export const onInstall: OnInstallHandler = async () => {
-  const stateManager = new NetworkStateManager();
-  await stateManager.setCurrentNetwork(STARKNET_MAINNET_NETWORK);
-
   const component = panel([
     text('Your MetaMask wallet is now compatible with Starknet!'),
     text(
