@@ -328,7 +328,14 @@ export const onInstall: OnInstallHandler = async () => {
 export const onUpdate: OnUpdateHandler = async () => {
   const component = panel([
     text('Features released with this update:'),
-    text('Cairo contract upgrade support.'),
+    row(
+      'Gas Fee',
+      text(
+        'Support STRK token for the gas fee in sending transaction and estimating fee.',
+      ),
+    ),
+    row('Network', text('Default network changed to mainnet.')),
+    row('Transactions', text('Support for multiple consecutive transactions.')),
   ]);
 
   await snap.request({
