@@ -1,5 +1,14 @@
 # Changelog
 
+## [2.10.0](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v2.9.0...starknet-snap-v2.10.0) (2024-09-20)
+
+
+### Features
+
+* support STRK token for the gas fee in sending transaction and estimate fee ([#271](https://github.com/Consensys/starknet-snap/issues/271)) ([8f50a33](https://github.com/Consensys/starknet-snap/commit/8f50a33ca7cdce88c6853ce1945cd7f7a7b24fae))
+* change default network to mainnet ([#357](https://github.com/Consensys/starknet-snap/issues/357)) ([b2eccb7](https://github.com/Consensys/starknet-snap/commit/b2eccb74e958d2087917484469cb2139e2f537b7))
+* bump starknet.js to v6.11.0 ([#296](https://github.com/Consensys/starknet-snap/issues/296)) ([e298244](https://github.com/Consensys/starknet-snap/commit/e298244a5e68e2809ab6367330e104c53ca5c861))
+* allow multiple consecutive transactions ([#289](https://github.com/Consensys/starknet-snap/issues/289)) ([5a501f9](https://github.com/Consensys/starknet-snap/commit/5a501f9aae7c3cdf041f479eac38f4a1e82855e9))
 
 ## [2.9.0](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v2.8.0...starknet-snap-v2.9.0) (2024-07-16)
 
