@@ -5,7 +5,7 @@
 
 ### Features
 
-* upgrade to sarknet.js v6.11.0 ([#296](https://github.com/Consensys/starknet-snap/issues/296)) ([e298244](https://github.com/Consensys/starknet-snap/commit/e298244a5e68e2809ab6367330e104c53ca5c861))
+* bump starknet.js to v6.11.0 ([#296](https://github.com/Consensys/starknet-snap/issues/296)) ([e298244](https://github.com/Consensys/starknet-snap/commit/e298244a5e68e2809ab6367330e104c53ca5c861))
 
 ## [1.1.0](https://github.com/Consensys/starknet-snap/compare/get-starknet-v1.0.0...get-starknet-v1.1.0) (2024-07-16)
 

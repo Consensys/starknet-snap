@@ -8,16 +8,12 @@ All notable changes to this project will be documented in this file. See [standa
 
 ### Features
 
-* [UI] support tx v3 in wallet-ui ([#271](https://github.com/Consensys/starknet-snap/issues/271)) ([8f50a33](https://github.com/Consensys/starknet-snap/commit/8f50a33ca7cdce88c6853ce1945cd7f7a7b24fae))
-* added craco and craco.config.js for wallet-ui ([#318](https://github.com/Consensys/starknet-snap/issues/318)) ([cd53fa4](https://github.com/Consensys/starknet-snap/commit/cd53fa40a9898d2a315f32935b6f870e9b95aed4))
-* support txv3 in estimateFee (UI) ([#263](https://github.com/Consensys/starknet-snap/issues/263)) ([52b07d0](https://github.com/Consensys/starknet-snap/commit/52b07d002d8171a557293b500179de995b95bc27))
-* upgrade to sarknet.js v6.11.0 ([#296](https://github.com/Consensys/starknet-snap/issues/296)) ([e298244](https://github.com/Consensys/starknet-snap/commit/e298244a5e68e2809ab6367330e104c53ca5c861))
+* support STRK token for the gas fee in wallet-ui ([#271](https://github.com/Consensys/starknet-snap/issues/271)) ([8f50a33](https://github.com/Consensys/starknet-snap/commit/8f50a33ca7cdce88c6853ce1945cd7f7a7b24fae))
+* bump starknet.js to v6.11.0 ([#296](https://github.com/Consensys/starknet-snap/issues/296)) ([e298244](https://github.com/Consensys/starknet-snap/commit/e298244a5e68e2809ab6367330e104c53ca5c861))
 
 
 ### Bug Fixes
 
-* getSpendableTotalBalance ([#316](https://github.com/Consensys/starknet-snap/issues/316)) ([458fa8a](https://github.com/Consensys/starknet-snap/commit/458fa8a7c4701764582ba0b99bc800168b30c6b5))
-* qa review request, show only one balance ([#352](https://github.com/Consensys/starknet-snap/issues/352)) ([fdbeeb2](https://github.com/Consensys/starknet-snap/commit/fdbeeb2c307678cfa71409e66f425ba4a0cf476d))
 * update message for waiting deploy/upgrade txn complete ([#297](https://github.com/Consensys/starknet-snap/issues/297)) ([141fa20](https://github.com/Consensys/starknet-snap/commit/141fa2023911e8c6f2d1b495a2d78bec79a3e5d7))
 
 ## [1.23.0](https://github.com/Consensys/starknet-snap/compare/wallet-ui-v1.22.0...wallet-ui-v1.23.0) (2024-07-16)

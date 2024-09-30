@@ -1,23 +1,14 @@
 # Changelog
 
-
 ## [2.10.0](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v2.9.0...starknet-snap-v2.10.0) (2024-09-20)
 
 
 ### Features
 
-* [UI] support tx v3 in wallet-ui ([#271](https://github.com/Consensys/starknet-snap/issues/271)) ([8f50a33](https://github.com/Consensys/starknet-snap/commit/8f50a33ca7cdce88c6853ce1945cd7f7a7b24fae))
+* support STRK token for the gas fee in sending transaction and estimate fee ([#271](https://github.com/Consensys/starknet-snap/issues/271)) ([8f50a33](https://github.com/Consensys/starknet-snap/commit/8f50a33ca7cdce88c6853ce1945cd7f7a7b24fae))
 * change default network to mainnet ([#357](https://github.com/Consensys/starknet-snap/issues/357)) ([b2eccb7](https://github.com/Consensys/starknet-snap/commit/b2eccb74e958d2087917484469cb2139e2f537b7))
-* createStructWithAdditionalProperties superstruct factory ([#334](https://github.com/Consensys/starknet-snap/issues/334)) ([b393fe8](https://github.com/Consensys/starknet-snap/commit/b393fe8e3de17f49198145babf5747b06595a772))
-* enable v3 in executeTxn legacy ([#346](https://github.com/Consensys/starknet-snap/issues/346)) ([6f2b099](https://github.com/Consensys/starknet-snap/commit/6f2b099ff2ed2c26c70ce37c3578bb439dbe9e36))
-* support txv3 in estimateFee and estimateFeeBulk [SNAP] ([#262](https://github.com/Consensys/starknet-snap/issues/262)) ([d2dcbad](https://github.com/Consensys/starknet-snap/commit/d2dcbad85d581a00aec61b668b6aa9cd8013a860))
-* upgrade to sarknet.js v6.11.0 ([#296](https://github.com/Consensys/starknet-snap/issues/296)) ([e298244](https://github.com/Consensys/starknet-snap/commit/e298244a5e68e2809ab6367330e104c53ca5c861))
-
-
-### Bug Fixes
-
-* allow multiple consecutive transactions in estimateFee(Bulk) ([#289](https://github.com/Consensys/starknet-snap/issues/289)) ([5a501f9](https://github.com/Consensys/starknet-snap/commit/5a501f9aae7c3cdf041f479eac38f4a1e82855e9))
-* get balance should check on pending block ([#293](https://github.com/Consensys/starknet-snap/issues/293)) ([6df26d8](https://github.com/Consensys/starknet-snap/commit/6df26d8374da6161a9677a172bef93a826e8401f))
+* bump starknet.js to v6.11.0 ([#296](https://github.com/Consensys/starknet-snap/issues/296)) ([e298244](https://github.com/Consensys/starknet-snap/commit/e298244a5e68e2809ab6367330e104c53ca5c861))
+* allow multiple consecutive transactions ([#289](https://github.com/Consensys/starknet-snap/issues/289)) ([5a501f9](https://github.com/Consensys/starknet-snap/commit/5a501f9aae7c3cdf041f479eac38f4a1e82855e9))
 
 ## [2.9.0](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v2.8.0...starknet-snap-v2.9.0) (2024-07-16)
 
