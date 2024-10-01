@@ -1,0 +1,53 @@
+name: Build and Deploy Get-Starknet and Wallet-UI
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy Get-Starknet and Wallet-UI'
+        type: string
+        required: true
+
+jobs:
+  prepare-deployment:
+    uses: ./.github/workflows/setup-deployment-environment.yml # Reuse the setup workflow
+    with:
+      environment: ${{ inputs.environment }}
+      aws_cloudfront_distributions_id: ${{ vars.AWS_CLOUDFRONT_DISTRIBUTIONS_ID }}
+      aws_s3_get_starknet_url: ${{ vars.AWS_S3_GET_STARKNET_URL }}
+      aws_s3_url: ${{ vars.AWS_S3_URL }}
+      get_starknet_public_path: ${{ vars.GET_STARKNET_PUBLIC_PATH }}
+
+  install-build-publish-rest:
+    needs: prepare-deployment
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.sha }}
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20.x
+      - name: Install Dependencies
+        run: |
+          yarn --no-immutable
+          yarn allow-scripts
+      - name: Build Get-Starknet
+        run: |
+          GET_STARKNET_PUBLIC_PATH=$GET_STARKNET_PUBLIC_PATH yarn workspace @consensys/get-starknet build
+        env:
+          GET_STARKNET_PUBLIC_PATH: ${{ needs.prepare-deployment.outputs.GET_STARKNET_PUBLIC_PATH }}
+      - name: Build Wallet-UI
+        run: |
+          REACT_APP_SNAP_VERSION="${VERSION}" yarn workspace wallet-ui build
+        env:
+          VERSION: ${{ needs.prepare-deployment.outputs.VERSION }}
+      - name: Publish to AWS
+        run: |
+          echo "Publishing Get-Starknet and Wallet-UI to AWS"
+          aws s3 sync ./packages/wallet-ui/build "$AWS_S3_URL"
+          aws s3 sync ./packages/get-starknet/dist/webpack "$AWS_S3_GET_STARKNET_URL"
+        env:
+          AWS_S3_URL: ${{ needs.prepare-deployment.outputs.AWS_S3_URL }}
+          AWS_S3_GET_STARKNET_URL: ${{ needs.prepare-deployment.outputs.AWS_S3_GET_STARKNET_URL }}

@@ -1,0 +1,50 @@
+name: Build and Publish Starknet Snap
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to build and publish Snap'
+        type: string
+        required: true
+
+jobs:
+  prepare-deployment:
+    uses: ./.github/workflows/setup-deployment-environment.yml # Reuse the setup workflow
+    with:
+      environment: ${{ inputs.environment }}
+      aws_cloudfront_distributions_id: ${{ vars.AWS_CLOUDFRONT_DISTRIBUTIONS_ID }}
+      aws_s3_get_starknet_url: ${{ vars.AWS_S3_GET_STARKNET_URL }}
+      aws_s3_url: ${{ vars.AWS_S3_URL }}
+      get_starknet_public_path: ${{ vars.GET_STARKNET_PUBLIC_PATH }}
+
+  install-build-publish-snap:
+    needs: prepare-deployment
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.sha }}
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20.x
+      - name: Install Dependencies
+        run: |
+          yarn --no-immutable
+          yarn allow-scripts
+      - name: Build Snap
+        run: |
+          echo "Building Snap with version $VERSION"
+          npm --prefix ./packages/starknet-snap version --new-version "$VERSION" --no-git-tag-version --allow-same-version
+          yarn workspace @consensys/starknet-snap build
+        env:
+          VERSION: ${{ needs.prepare-deployment.outputs.VERSION }}
+      - name: Output Snap Manifest (with shasum)
+        run: |
+          cat ./packages/starknet-snap/snap.manifest.json
+      - name: Publish Snap
+        run: |
+          npm publish ./packages/starknet-snap --tag "$TAG" --access public
+        env:
+          TAG: ${{ needs.prepare-deployment.outputs.TAG }}

@@ -1,0 +1,82 @@
+name: Setup Deployment Environment
+
+on:
+  workflow_call: # This enables the workflow to be reusable by other workflows
+    inputs:
+      environment:
+        required: true
+        type: string
+      aws_cloudfront_distributions_id:
+        required: true
+        type: string
+      aws_s3_get_starknet_url:
+        required: true
+        type: string
+      aws_s3_url:
+        required: true
+        type: string
+      get_starknet_public_path:
+        required: true
+        type: string
+
+jobs:
+  prepare-deployment:
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20.x
+      - name: Prepare Parameters
+        id: prepare_parameters
+        run: |
+          BASE=$(node -p "require('./packages/starknet-snap/package.json').version")
+          HASH=$(git rev-parse --short HEAD)
+          DATE=$(date +%Y%m%d)
+          ENV=${{ inputs.environment }}
+
+          {
+            echo "AWS_CLOUDFRONT_DISTRIBUTIONS_ID=${{ inputs.aws_cloudfront_distributions_id }}"
+            echo "AWS_S3_GET_STARKNET_URL=${{ inputs.aws_s3_get_starknet_url }}"
+            echo "AWS_S3_URL=${{ inputs.aws_s3_url }}"
+            echo "GET_STARKNET_PUBLIC_PATH=${{ inputs.get_starknet_public_path }}"
+          } >> "$GITHUB_OUTPUT"
+
+          if [[ $ENV == "dev" ]]; then
+            {
+              echo "VERSION=${BASE}-dev-${HASH}-${DATE}"
+              echo "TAG=dev"
+              echo "ENV=dev"
+              echo "LOG_LEVEL=6"
+            } >> "$GITHUB_OUTPUT"
+          elif [[ $ENV == "staging" ]]; then
+            {
+              echo "VERSION=${BASE}-staging"
+              echo "TAG=staging"
+              echo "ENV=staging"
+              echo "LOG_LEVEL=0"
+            } >> "$GITHUB_OUTPUT"
+          elif [[ $ENV == "production" ]]; then
+            {
+              echo "VERSION=${BASE}"
+              echo "TAG=latest"
+              echo "ENV=prod"
+              echo "LOG_LEVEL=0"
+            } >> "$GITHUB_OUTPUT"
+          else
+            echo "Invalid environment"
+            exit 1
+          fi
+    outputs:
+      VERSION: ${{ steps.prepare_parameters.outputs.VERSION }}
+      TAG: ${{ steps.prepare_parameters.outputs.TAG }}
+      ENV: ${{ steps.prepare_parameters.outputs.ENV }}
+      AWS_S3_GET_STARKNET_URL: ${{ steps.prepare_parameters.outputs.AWS_S3_GET_STARKNET_URL }}
+      AWS_CLOUDFRONT_DISTRIBUTIONS_ID: ${{ steps.prepare_parameters.outputs.AWS_CLOUDFRONT_DISTRIBUTIONS_ID }}
+      AWS_S3_URL: ${{ steps.prepare_parameters.outputs.AWS_S3_URL }}
+      GET_STARKNET_PUBLIC_PATH: ${{ steps.prepare_parameters.outputs.GET_STARKNET_PUBLIC_PATH }}
+      CACHE_KEY: ${{ github.sha }}-${{ steps.prepare_parameters.outputs.ENV }}
+      LOG_LEVEL: ${{ steps.prepare_parameters.outputs.LOG_LEVEL }}
