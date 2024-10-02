@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.10.1](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v2.10.0...starknet-snap-v2.10.1) (2024-10-02)
+
+
+### Bug Fixes
+
+* logger undefine if not init ([#363](https://github.com/Consensys/starknet-snap/issues/363)) ([6117509](https://github.com/Consensys/starknet-snap/commit/61175090256aa3d614b0e850947e0f90b5e05908))
+
 ## [2.10.0](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v2.9.0...starknet-snap-v2.10.0) (2024-09-20)
 
 
