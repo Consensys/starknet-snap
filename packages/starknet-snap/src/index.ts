@@ -89,11 +89,10 @@ import {
 } from './utils/starknetUtils';
 
 declare const snap;
+logger.logLevel = parseInt(Config.logLevel, 10);
 
 export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
   const requestParams = request?.params as unknown as ApiRequestParams;
-
-  logger.logLevel = parseInt(Config.logLevel, 10);
 
   logger.log(`${request.method}:\nrequestParams: ${toJson(requestParams)}`);
 
