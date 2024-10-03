@@ -71,7 +71,7 @@ export class MetaMaskSnapWallet implements StarknetWindowObject {
     throw new Error(`Method not supported`);
   }
 
-  async #getNetwork() {
+  async #getNetwork(): Promise<Network> {
     return await this.snap.getCurrentNetwork();
   }
 
@@ -87,6 +87,10 @@ export class MetaMaskSnapWallet implements StarknetWindowObject {
 
   get account() {
     if (!this.#account) {
+      if (!this.selectedAddress) {
+        throw new Error('Address is not set');
+      }
+
       const signer = new MetaMaskSigner(this.snap, this.selectedAddress);
 
       this.#account = new MetaMaskAccount(this.snap, this.provider, this.selectedAddress, signer);
@@ -115,12 +119,20 @@ export class MetaMaskSnapWallet implements StarknetWindowObject {
     return this.#chainId;
   }
 
-  async setNetwork(network: Network) {
-    if (!network) {
-      throw new Error('Network cannot be undefined or null');
+  // This method is to make sure the local state network is sync with the snap,
+  // Hence to set the updated address, account object, provider object and chainId
+  async init(net?: Network) {
+    // Always reject any request if the snap is not installed
+    if (!(await this.snap.installIfNot())) {
+      throw new Error('Snap is not installed');
     }
 
-    // in case of multiple calls to setNetwork, we need to ensure that only one call is in progress
+    const network = net ?? (await this.#getNetwork());
+    if (!network) {
+      throw new Error('Unable to find the selected network');
+    }
+
+    // in case of multiple calls to init, we need to ensure that only one call is in progress
     await this.lock.runExclusive(async () => {
       if (!this.#network || network.chainId !== this.#network.chainId) {
         // address is depends on network, if network changes, address will update
@@ -134,16 +146,12 @@ export class MetaMaskSnapWallet implements StarknetWindowObject {
 
       this.#network = network;
       this.#chainId = network.chainId;
+      this.isConnected = true;
     });
   }
 
   async enable() {
-    await this.snap.installIfNot();
-
-    this.isConnected = true;
-
-    await this.setNetwork(await this.#getNetwork());
-
+    await this.init();
     return [this.selectedAddress];
   }
 

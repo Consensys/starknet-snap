@@ -15,6 +15,7 @@ describe('MetaMaskSnapWallet', () => {
   describe('enable', () => {
     it('installs the snap and return default account', async () => {
       const expectedAccountAddress = '0x04882a372da3dfe1c53170ad75893832469bf87b62b13e84662565c4a88f25cd'; // in hex
+      jest.spyOn(MetaMaskSnap.prototype, 'installIfNot').mockResolvedValue(true);
       jest.spyOn(MetaMaskSnap.prototype, 'getCurrentNetwork').mockResolvedValue(SepoliaNetwork);
       jest.spyOn(MetaMaskSnap.prototype, 'recoverDefaultAccount').mockResolvedValue(
         generateAccount({
