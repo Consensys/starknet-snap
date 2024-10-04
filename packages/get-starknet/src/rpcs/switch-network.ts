@@ -9,7 +9,7 @@ type Result = RpcTypeToMessageMap[WalletSwitchStarknetChainMethod]['result'];
 export class WalletSwitchStarknetChain extends StarknetWalletRpc {
   async handleRequest(param: Params): Promise<Result> {
     try {
-      // The wallet.chainid should be always refer to the latest snap chain id
+      // The wallet.chainid should always refer to the latest snap chain id
       // reference: MetaMaskSnapWallet.init
       if (this.wallet.chainId === param.chainId) {
         return true;
