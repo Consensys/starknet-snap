@@ -197,86 +197,41 @@ describe('homepageController', () => {
   });
 
   describe('getBalance', () => {
-    const prepareGetBalanceMock = async (
-      latestVal: number,
-      pendingVal: number,
-    ) => {
+    const prepareGetBalanceMock = async (balance: number) => {
       const getBalanceSpy = jest.spyOn(starknetUtils, 'getBalance');
 
-      getBalanceSpy.mockResolvedValueOnce(latestVal.toString(16));
-      getBalanceSpy.mockResolvedValue(pendingVal.toString(16));
+      getBalanceSpy.mockResolvedValue(balance.toString(16));
 
       return {
         getBalanceSpy,
       };
     };
 
-    it.each([
-      {
-        latestBalance: 1,
-        pendingBalance: 2,
-        expectedBalance: 1,
-        title: {
-          blockIdentifier1: 'latest',
-          blockIdentifier2: 'pending',
-        },
-      },
-      {
-        latestBalance: 2,
-        pendingBalance: 1,
-        expectedBalance: 1,
-        title: {
-          blockIdentifier1: 'pending',
-          blockIdentifier2: 'latest',
-        },
-      },
-    ])(
-      'returns the balance on $title.blockIdentifier1 block if it is smaller than the balance on $title.blockIdentifier2 block',
-      async ({
-        latestBalance,
-        pendingBalance,
-        expectedBalance,
-      }: {
-        latestBalance: number;
-        pendingBalance: number;
-        expectedBalance: number;
-      }) => {
-        const network = STARKNET_SEPOLIA_TESTNET_NETWORK;
-        // as we only accept mainnet / sepolia testnet, and ETH token address are same across all networks
-        // hence we can hardcode the token
-        const token = ETHER_MAINNET;
-        await mockState();
-        const { address } = await mockAccount(
-          constants.StarknetChainId.SN_SEPOLIA,
-        );
-        const { getBalanceSpy } = await prepareGetBalanceMock(
-          latestBalance,
-          pendingBalance,
-        );
+    it('returns the balance on pending block', async () => {
+      const network = STARKNET_SEPOLIA_TESTNET_NETWORK;
+      const token = ETHER_MAINNET;
+      const expectedBalance = 100;
+      await mockState();
+      const { address } = await mockAccount(
+        constants.StarknetChainId.SN_SEPOLIA,
+      );
+      const { getBalanceSpy } = await prepareGetBalanceMock(expectedBalance);
 
-        const homepageController = new MockHomePageController();
-        const result = await homepageController.getBalance(network, address);
+      const homepageController = new MockHomePageController();
+      const result = await homepageController.getBalance(network, address);
 
-        expect(result).toStrictEqual(
-          ethers.utils.formatUnits(
-            ethers.BigNumber.from(expectedBalance.toString(16)),
-            token.decimals,
-          ),
-        );
-        expect(getBalanceSpy).toHaveBeenCalledTimes(2);
-        expect(getBalanceSpy).toHaveBeenCalledWith(
-          address,
-          token.address,
-          network,
-          BlockIdentifierEnum.Latest,
-        );
-        expect(getBalanceSpy).toHaveBeenCalledWith(
-          address,
-          token.address,
-          network,
-          BlockIdentifierEnum.Pending,
-        );
-      },
-    );
+      expect(result).toStrictEqual(
+        ethers.utils.formatUnits(
+          ethers.BigNumber.from(expectedBalance.toString(16)),
+          token.decimals,
+        ),
+      );
+      expect(getBalanceSpy).toHaveBeenCalledWith(
+        address,
+        token.address,
+        network,
+        BlockIdentifierEnum.Pending,
+      );
+    });
   });
 });

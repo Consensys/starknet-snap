@@ -79,24 +79,20 @@ export class HomePageController {
     network: Network,
     address: string,
   ): Promise<string> {
-    // as we only accept mainnet / sepolia testnet, and ETH token address are same across all networks
+    // As the snap only accept mainnet / sepolia testnet, and ETH token address are same across all networks
     // hence we can hardcode the token
     const ethToken = ETHER_MAINNET;
 
-    const [balanceLatest, balancePending]: bigint[] = await Promise.all(
-      [BlockIdentifierEnum.Latest, BlockIdentifierEnum.Pending].map(
-        async (identifier: BlockIdentifierEnum) => {
-          return BigInt(
-            await getBalance(address, ethToken.address, network, identifier),
-          );
-        },
-      ),
+    // Align with the FE Dapp to use the pending block for enquiry the account balance
+    const balance = await getBalance(
+      address,
+      ethToken.address,
+      network,
+      BlockIdentifierEnum.Pending,
     );
 
     return ethers.utils.formatUnits(
-      ethers.BigNumber.from(
-        balancePending < balanceLatest ? balancePending : balanceLatest,
-      ),
+      ethers.BigNumber.from(balance),
       ethToken.decimals,
     );
   }
