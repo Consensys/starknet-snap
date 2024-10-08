@@ -14,7 +14,7 @@ import type {
   UniversalDetails,
 } from 'starknet';
 
-import { Config } from '../config';
+import { Config, Config } from '../config';
 import {
   FeeToken,
   type AddErc20TokenRequestParams,
@@ -55,7 +55,6 @@ import {
   ChainIdFilter,
 } from './transaction/filter';
 import { getDappUrl } from './url';
-import { Config } from '../config';
 
 /**
  *

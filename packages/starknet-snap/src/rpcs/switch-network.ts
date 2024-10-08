@@ -9,13 +9,13 @@ import {
 import type { Infer } from 'superstruct';
 import { assign, boolean } from 'superstruct';
 
+import { NetworkStateManager } from '../state/network-state-manager';
 import {
   confirmDialog,
   AuthorizableStruct,
   BaseRequestStruct,
   RpcController,
 } from '../utils';
-import { NetworkStateManager } from '../state/network-state-manager';
 
 export const SwitchNetworkRequestStruct = assign(
   AuthorizableStruct,
@@ -69,15 +69,16 @@ export class SwitchNetworkRpc extends RpcController<
         return true;
       }
 
-      let network = await networkStateMgr.getNetwork({
+      const network = await networkStateMgr.getNetwork({
         chainId
       }, state)
-  
+      );
+
       // if the network is not in the list of networks that we support, we throw an error
       if (!network) {
         throw new Error(`Network not supported`);
       }
-      
+
       if (
         // Get Starknet expected not to show the confirm dialog, therefore, `enableAuthorize` will set to false to bypass the confirmation
         // TODO: enableAuthorize should set default to true
@@ -88,9 +89,9 @@ export class SwitchNetworkRpc extends RpcController<
       }
 
       await networkStateMgr.setCurrentNetwork(network);
-      
-      return true
-    })
+
+      return true;
+    });
   }
 
   protected async getSwitchNetworkConsensus(
@@ -99,21 +100,25 @@ export class SwitchNetworkRpc extends RpcController<
   ) {
     const components: Component[] = [];
     components.push(heading('Do you want to switch to this network?'));
-    components.push(row(
-      'Chain Name',
-      text({
-        value: networkName,
-        markdown: false,
-      }),
-    ));
-    components.push(divider())
-    components.push(row(
-      'Chain ID',
-      text({
-        value: networkChainId,
-        markdown: false,
-      }),
-    ));
+    components.push(
+      row(
+        'Chain Name',
+        text({
+          value: networkName,
+          markdown: false,
+        }),
+      ),
+    );
+    components.push(divider());
+    components.push(
+      row(
+        'Chain ID',
+        text({
+          value: networkChainId,
+          markdown: false,
+        }),
+      ),
+    );
 
     return await confirmDialog(components);
   }

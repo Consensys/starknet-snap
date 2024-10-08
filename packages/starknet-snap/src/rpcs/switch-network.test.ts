@@ -2,17 +2,18 @@ import {
   InvalidParamsError,
   UserRejectedRequestError,
 } from '@metamask/snaps-sdk';
-import { constants } from 'starknet';
+import type { constants } from 'starknet';
 
+import { Config } from '../config';
+import { NetworkStateManager } from '../state/network-state-manager';
 import type { Network } from '../types/snapState';
-import { STARKNET_SEPOLIA_TESTNET_NETWORK, STARKNET_MAINNET_NETWORK } from '../utils/constants';
 import {
-  prepareConfirmDialog,
-} from './__tests__/helper';
+  STARKNET_SEPOLIA_TESTNET_NETWORK,
+  STARKNET_MAINNET_NETWORK,
+} from '../utils/constants';
+import { prepareConfirmDialog } from './__tests__/helper';
 import { switchNetwork } from './switch-network';
 import type { SwitchNetworkParams } from './switch-network';
-import { NetworkStateManager } from '../state/network-state-manager';
-import { Config } from '../config';
 
 jest.mock('../utils/logger');
 
@@ -33,14 +34,26 @@ describe('switchNetwork', () => {
   const mockNetworkStateManager = ({
     network = STARKNET_SEPOLIA_TESTNET_NETWORK,
     currentNetwork = STARKNET_MAINNET_NETWORK,
-  } : {
-    network?: Network | null,
-    currentNetwork?: Network,
+  }: {
+    network?: Network | null;
+    currentNetwork?: Network;
   }) => {
-    const txStateSpy = jest.spyOn(NetworkStateManager.prototype, 'withTransaction');
-    const getNetworkSpy = jest.spyOn(NetworkStateManager.prototype, 'getNetwork');
-    const setCurrentNetworkSpy = jest.spyOn(NetworkStateManager.prototype, 'setCurrentNetwork');
-    const getCurrentNetworkSpy = jest.spyOn(NetworkStateManager.prototype, 'getCurrentNetwork');
+    const txStateSpy = jest.spyOn(
+      NetworkStateManager.prototype,
+      'withTransaction',
+    );
+    const getNetworkSpy = jest.spyOn(
+      NetworkStateManager.prototype,
+      'getNetwork',
+    );
+    const setCurrentNetworkSpy = jest.spyOn(
+      NetworkStateManager.prototype,
+      'setCurrentNetwork',
+    );
+    const getCurrentNetworkSpy = jest.spyOn(
+      NetworkStateManager.prototype,
+      'getCurrentNetwork',
+    );
 
     getNetworkSpy.mockResolvedValue(network);
     getCurrentNetworkSpy.mockResolvedValue(currentNetwork);
@@ -51,40 +64,45 @@ describe('switchNetwork', () => {
         networks: Config.availableNetworks,
         transactions: [],
       });
-    })
+    });
 
     return { getNetworkSpy, setCurrentNetworkSpy, getCurrentNetworkSpy };
-  }
-  
+  };
+
   it('switchs a network correctly', async () => {
     const currentNetwork = STARKNET_MAINNET_NETWORK;
-    const requestNetwork = STARKNET_SEPOLIA_TESTNET_NETWORK;  
-    const { getNetworkSpy, setCurrentNetworkSpy, getCurrentNetworkSpy } = mockNetworkStateManager({
-      currentNetwork,
-      network: requestNetwork,
-    });
+    const requestNetwork = STARKNET_SEPOLIA_TESTNET_NETWORK;
+    const { getNetworkSpy, setCurrentNetworkSpy, getCurrentNetworkSpy } =
+      mockNetworkStateManager({
+        currentNetwork,
+        network: requestNetwork,
+      });
     const request = createRequestParam(requestNetwork.chainId);
 
     const result = await switchNetwork.execute(request);
 
-    expect(result).toStrictEqual(true);
+    expect(result).toBe(true);
     expect(getCurrentNetworkSpy).toHaveBeenCalled();
-    expect(getNetworkSpy).toHaveBeenCalledWith({ chainId: requestNetwork.chainId }, expect.anything());
+    expect(getNetworkSpy).toHaveBeenCalledWith(
+      { chainId: requestNetwork.chainId },
+      expect.anything(),
+    );
     expect(setCurrentNetworkSpy).toHaveBeenCalledWith(requestNetwork);
   });
 
   it('returns `true` if the request chainId is the same with current network', async () => {
     const currentNetwork = STARKNET_SEPOLIA_TESTNET_NETWORK;
-    const requestNetwork = STARKNET_SEPOLIA_TESTNET_NETWORK;  
-    const { getNetworkSpy, setCurrentNetworkSpy, getCurrentNetworkSpy } = mockNetworkStateManager({
-      currentNetwork,
-      network: requestNetwork,
-    });
+    const requestNetwork = STARKNET_SEPOLIA_TESTNET_NETWORK;
+    const { getNetworkSpy, setCurrentNetworkSpy, getCurrentNetworkSpy } =
+      mockNetworkStateManager({
+        currentNetwork,
+        network: requestNetwork,
+      });
     const request = createRequestParam(requestNetwork.chainId);
 
     const result = await switchNetwork.execute(request);
 
-    expect(result).toStrictEqual(true);
+    expect(result).toBe(true);
     expect(getCurrentNetworkSpy).toHaveBeenCalled();
     expect(getNetworkSpy).not.toHaveBeenCalled();
     expect(setCurrentNetworkSpy).not.toHaveBeenCalled();
@@ -92,7 +110,7 @@ describe('switchNetwork', () => {
 
   it('renders confirmation dialog', async () => {
     const currentNetwork = STARKNET_MAINNET_NETWORK;
-    const requestNetwork = STARKNET_SEPOLIA_TESTNET_NETWORK;  
+    const requestNetwork = STARKNET_SEPOLIA_TESTNET_NETWORK;
     mockNetworkStateManager({
       currentNetwork,
       network: requestNetwork,
@@ -101,7 +119,7 @@ describe('switchNetwork', () => {
     const request = createRequestParam(requestNetwork.chainId, true);
 
     await switchNetwork.execute(request);
-    
+
     expect(confirmDialogSpy).toHaveBeenCalledWith([
       { type: 'heading', value: 'Do you want to switch to this network?' },
       {
@@ -114,7 +132,7 @@ describe('switchNetwork', () => {
         },
       },
       {
-        type: "divider",
+        type: 'divider',
       },
       {
         type: 'row',
@@ -130,7 +148,7 @@ describe('switchNetwork', () => {
 
   it('throws `UserRejectedRequestError` if user denied the operation', async () => {
     const currentNetwork = STARKNET_MAINNET_NETWORK;
-    const requestNetwork = STARKNET_SEPOLIA_TESTNET_NETWORK;  
+    const requestNetwork = STARKNET_SEPOLIA_TESTNET_NETWORK;
     mockNetworkStateManager({
       currentNetwork,
       network: requestNetwork,
@@ -146,8 +164,8 @@ describe('switchNetwork', () => {
 
   it('throws `Network not supported` error if the request network is not support', async () => {
     const currentNetwork = STARKNET_MAINNET_NETWORK;
-    const requestNetwork = STARKNET_SEPOLIA_TESTNET_NETWORK;  
-    // Mock the network state manager to return null network 
+    const requestNetwork = STARKNET_SEPOLIA_TESTNET_NETWORK;
+    // Mock the network state manager to return null network
     // even if the request chain id is not block by the superstruct
     mockNetworkStateManager({
       currentNetwork,

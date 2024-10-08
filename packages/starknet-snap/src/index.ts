@@ -246,7 +246,9 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
         return await addNetwork(apiParams);
 
       case 'starkNet_switchNetwork':
-        return await switchNetwork.execute(apiParams.requestParams as unknown as SwitchNetworkParams);
+        return await switchNetwork.execute(
+          apiParams.requestParams as unknown as SwitchNetworkParams,
+        );
 
       case 'starkNet_getCurrentNetwork':
         return await getCurrentNetwork(apiParams);
