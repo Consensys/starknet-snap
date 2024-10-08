@@ -38,5 +38,5 @@ module.exports = {
     },
   ],
 
-  ignorePatterns: ['!.eslintrc.js', 'dist/', '**/test', '.nyc_output/', 'coverage/', '*.js'],
+  ignorePatterns: ['!.eslintrc.js', 'dist/', '**/test', '.nyc_output/', 'coverage/', 'webpack.*.js'],
 };
