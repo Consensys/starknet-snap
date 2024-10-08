@@ -34,7 +34,6 @@ import {
   MAXIMUM_TOKEN_SYMBOL_LENGTH,
   PRELOADED_NETWORKS,
   PRELOADED_TOKENS,
-  STARKNET_MAINNET_NETWORK,
   STARKNET_SEPOLIA_TESTNET_NETWORK,
 } from './constants';
 import { DeployRequiredError, UpgradeRequiredError } from './exceptions';
@@ -55,6 +54,7 @@ import {
   ChainIdFilter,
 } from './transaction/filter';
 import { getDappUrl } from './url';
+import { Config } from '../config';
 
 /**
  *
@@ -855,7 +855,7 @@ export function getNetworkFromChainId(
   state: SnapState,
   targerChainId: string | undefined,
 ) {
-  const chainId = targerChainId ?? STARKNET_MAINNET_NETWORK.chainId;
+  const chainId = targerChainId ?? Config.defaultNetwork.chainId;
   const network = getNetwork(state, chainId);
   if (network === undefined) {
     throw new Error(
@@ -1117,7 +1117,7 @@ export async function removeAcceptedTransaction(
  * @param state
  */
 export function getCurrentNetwork(state: SnapState) {
-  return state.currentNetwork ?? STARKNET_MAINNET_NETWORK;
+  return state.currentNetwork ?? Config.defaultNetwork;
 }
 
 /**
