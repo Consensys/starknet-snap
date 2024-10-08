@@ -60,6 +60,9 @@ export class NetworkStateManager extends StateManager<Network> {
 
   /**
    * Finds a network based on the given chainId.
+   * The query will first be looked up in the state. If the result is false, it will then fallback to the available Networks constants.
+   *
+   * (Note) Due to the returned network object may not exist in the state, it may failed to execute `updateNetwork` with the returned network object.
    *
    * @param param - The param object.
    * @param param.chainId - The chainId to search for.
