@@ -1,10 +1,10 @@
 import { assert, string } from 'superstruct';
 
+import { Config } from '../config';
 import type { Network, SnapState } from '../types/snapState';
 import type { IFilter } from './filter';
 import { ChainIdFilter as BaseChainIdFilter } from './filter';
 import { StateManager, StateManagerError } from './state-manager';
-import { Config } from '../config';
 
 export type INetworkFilter = IFilter<Network>;
 
@@ -76,7 +76,11 @@ export class NetworkStateManager extends StateManager<Network> {
   ): Promise<Network | null> {
     const filters: INetworkFilter[] = [new ChainIdFilter([chainId])];
     // in case the network not found from the state, try to get the network from the available Networks constants
-    return await this.find(filters, state) ?? Config.availableNetworks.find((network) => network.chainId === chainId) ?? null;
+    return (
+      (await this.find(filters, state)) ??
+      Config.availableNetworks.find((network) => network.chainId === chainId) ??
+      null
+    );
   }
 
   /**
@@ -113,7 +117,19 @@ export class NetworkStateManager extends StateManager<Network> {
    * @returns A Promise that resolves with the current Network object if found, or null if not found.
    */
   async getCurrentNetwork(state?: SnapState): Promise<Network> {
-    return (state ?? (await this.get())).currentNetwork ?? Config.defaultNetwork;
+    const { currentNetwork } = state ?? (await this.get());
+
+    // Make sure the current network is either Sepolia testnet or Mainnet. By default it will be Mainnet.
+    if (
+      !currentNetwork ||
+      !Config.availableNetworks.find(
+        (network) => network.chainId === currentNetwork.chainId,
+      )
+    ) {
+      return Config.defaultNetwork;
+    }
+
+    return currentNetwork;
   }
 
   /**

@@ -1,14 +1,15 @@
 import { constants } from 'starknet';
 
+import { Config } from '../config';
 import type { Network } from '../types/snapState';
 import {
   STARKNET_MAINNET_NETWORK,
   STARKNET_SEPOLIA_TESTNET_NETWORK,
+  STARKNET_TESTNET_NETWORK,
 } from '../utils/constants';
 import { mockState } from './__tests__/helper';
 import { NetworkStateManager, ChainIdFilter } from './network-state-manager';
 import { StateManagerError } from './state-manager';
-import { Config } from '../config';
 
 describe('NetworkStateManager', () => {
   describe('getNetwork', () => {
@@ -46,7 +47,7 @@ describe('NetworkStateManager', () => {
 
       const stateManager = new NetworkStateManager();
       const result = await stateManager.getNetwork({
-        chainId: "0x9999",
+        chainId: '0x9999',
       });
 
       expect(result).toBeNull();
@@ -186,9 +187,21 @@ describe('NetworkStateManager', () => {
       expect(result).toStrictEqual(STARKNET_MAINNET_NETWORK);
     });
 
-    it('returns default network if the current network is null or undefined', async () => {
+    it(`returns default network if the current network is null or undefined`, async () => {
       await mockState({
         networks: Config.availableNetworks,
+      });
+
+      const stateManager = new NetworkStateManager();
+      const result = await stateManager.getCurrentNetwork();
+
+      expect(result).toStrictEqual(Config.defaultNetwork);
+    });
+
+    it(`returns default network if the current network is neither mainnet or sepolia testnet`, async () => {
+      await mockState({
+        networks: Config.availableNetworks,
+        currentNetwork: STARKNET_TESTNET_NETWORK,
       });
 
       const stateManager = new NetworkStateManager();
@@ -226,10 +239,7 @@ describe('NetworkStateManager', () => {
         updateTo: Network;
       }) => {
         const { state } = await mockState({
-          networks: [
-            STARKNET_MAINNET_NETWORK,
-            STARKNET_SEPOLIA_TESTNET_NETWORK,
-          ],
+          networks: Config.availableNetworks,
           currentNetwork,
         });
 
