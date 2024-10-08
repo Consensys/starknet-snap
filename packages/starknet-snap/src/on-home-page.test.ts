@@ -65,9 +65,9 @@ describe('homepageController', () => {
     };
 
     it('returns the correct homepage response', async () => {
-      const network = STARKNET_SEPOLIA_TESTNET_NETWORK;
+      const currentNetwork = state.currentNetwork
       await mockState();
-      const account = await mockAccount(constants.StarknetChainId.SN_SEPOLIA);
+      const account = await mockAccount(currentNetwork?.chainId as unknown as constants.StarknetChainId);
       const balance = '100';
 
       const { getAddressSpy, getBalanceSpy } = prepareExecuteMock(
@@ -94,7 +94,7 @@ describe('homepageController', () => {
               type: 'row',
               value: {
                 type: 'text',
-                value: network.name,
+                value: currentNetwork?.name,
               },
             },
             {
@@ -117,8 +117,8 @@ describe('homepageController', () => {
           type: 'panel',
         },
       });
-      expect(getAddressSpy).toHaveBeenCalledWith(network);
-      expect(getBalanceSpy).toHaveBeenCalledWith(network, account.address);
+      expect(getAddressSpy).toHaveBeenCalledWith(currentNetwork);
+      expect(getBalanceSpy).toHaveBeenCalledWith(currentNetwork, account.address);
     });
 
     it('throws `Failed to initialize Snap HomePage` error if an error was thrown', async () => {
