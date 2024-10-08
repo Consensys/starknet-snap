@@ -38,5 +38,5 @@ module.exports = {
     },
   ],
 
-  ignorePatterns: ['!.eslintrc.js', 'dist/', '**/test', '.nyc_output/', 'coverage/'],
+  ignorePatterns: ['!.eslintrc.js', 'dist/', '**/test', '.nyc_output/', 'coverage/', '*.js'],
 };
