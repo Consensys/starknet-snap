@@ -69,9 +69,11 @@ export class SwitchNetworkRpc extends RpcController<
         return true;
       }
 
-      const network = await networkStateMgr.getNetwork({
-        chainId
-      }, state)
+      const network = await networkStateMgr.getNetwork(
+        {
+          chainId,
+        },
+        state,
       );
 
       // if the network is not in the list of networks that we support, we throw an error
