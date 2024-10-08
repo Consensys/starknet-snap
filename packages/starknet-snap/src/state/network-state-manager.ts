@@ -1,10 +1,7 @@
 import { assert, string } from 'superstruct';
 
+import { Config } from '../config';
 import type { Network, SnapState } from '../types/snapState';
-import {
-  STARKNET_MAINNET_NETWORK,
-  STARKNET_SEPOLIA_TESTNET_NETWORK,
-} from '../utils/constants';
 import type { IFilter } from './filter';
 import { ChainIdFilter as BaseChainIdFilter } from './filter';
 import { StateManager, StateManagerError } from './state-manager';
@@ -78,7 +75,12 @@ export class NetworkStateManager extends StateManager<Network> {
     state?: SnapState,
   ): Promise<Network | null> {
     const filters: INetworkFilter[] = [new ChainIdFilter([chainId])];
-    return this.find(filters, state);
+    // in case the network not found from the state, try to get the network from the available Networks constants
+    return (
+      (await this.find(filters, state)) ??
+      Config.availableNetworks.find((network) => network.chainId === chainId) ??
+      null
+    );
   }
 
   /**
@@ -92,10 +94,9 @@ export class NetworkStateManager extends StateManager<Network> {
   async updateNetwork(data: Network): Promise<void> {
     try {
       await this.update(async (state: SnapState) => {
-        const dataInState = await this.getNetwork(
-          {
-            chainId: data.chainId,
-          },
+        // Use underlying function `find` to avoid searching network from constants
+        const dataInState = await this.find(
+          [new ChainIdFilter([data.chainId])],
           state,
         );
 
@@ -118,12 +119,14 @@ export class NetworkStateManager extends StateManager<Network> {
   async getCurrentNetwork(state?: SnapState): Promise<Network> {
     const { currentNetwork } = state ?? (await this.get());
 
-    // Make sure the current network is either Sepolia testnet or Mainnet. By default it will be Sepolia testnet.
+    // Make sure the current network is either Sepolia testnet or Mainnet. By default it will be Mainnet.
     if (
       !currentNetwork ||
-      currentNetwork.chainId !== STARKNET_MAINNET_NETWORK.chainId
+      !Config.availableNetworks.find(
+        (network) => network.chainId === currentNetwork.chainId,
+      )
     ) {
-      return STARKNET_SEPOLIA_TESTNET_NETWORK;
+      return Config.defaultNetwork;
     }
 
     return currentNetwork;
