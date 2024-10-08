@@ -1117,7 +1117,7 @@ export async function removeAcceptedTransaction(
  * @param state
  */
 export function getCurrentNetwork(state: SnapState) {
-  return state.currentNetwork ?? Config.defaultNetwork.chainId;
+  return state.currentNetwork ?? Config.defaultNetwork;
 }
 
 /**
