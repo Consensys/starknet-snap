@@ -1,5 +1,9 @@
-import { Network } from './types/snapState';
-import { SnapEnv, STARKNET_MAINNET_NETWORK, STARKNET_SEPOLIA_TESTNET_NETWORK } from './utils/constants';
+import type { Network } from './types/snapState';
+import {
+  SnapEnv,
+  STARKNET_MAINNET_NETWORK,
+  STARKNET_SEPOLIA_TESTNET_NETWORK,
+} from './utils/constants';
 import { LogLevel } from './utils/logger';
 
 export type SnapConfig = {
@@ -19,6 +23,6 @@ export const Config: SnapConfig = {
 
   availableNetworks: [
     STARKNET_MAINNET_NETWORK,
-    STARKNET_SEPOLIA_TESTNET_NETWORK
-  ]
+    STARKNET_SEPOLIA_TESTNET_NETWORK,
+  ],
 };

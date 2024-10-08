@@ -1,5 +1,6 @@
 import { constants } from 'starknet';
 
+import { Config } from '../config';
 import type { Network } from '../types/snapState';
 import {
   STARKNET_MAINNET_NETWORK,
@@ -9,7 +10,6 @@ import {
 import { mockState } from './__tests__/helper';
 import { NetworkStateManager, ChainIdFilter } from './network-state-manager';
 import { StateManagerError } from './state-manager';
-import { Config } from '../config';
 
 describe('NetworkStateManager', () => {
   describe('getNetwork', () => {
@@ -47,7 +47,7 @@ describe('NetworkStateManager', () => {
 
       const stateManager = new NetworkStateManager();
       const result = await stateManager.getNetwork({
-        chainId: "0x9999",
+        chainId: '0x9999',
       });
 
       expect(result).toBeNull();
