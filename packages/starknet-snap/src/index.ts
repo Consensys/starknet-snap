@@ -18,7 +18,6 @@ import { createAccount } from './createAccount';
 import { declareContract } from './declareContract';
 import { estimateAccDeployFee } from './estimateAccountDeployFee';
 import { estimateFees } from './estimateFees';
-import { executeTxn as executeTxnLegacy } from './executeTxn';
 import { extractPublicKey } from './extractPublicKey';
 import { getCurrentNetwork } from './getCurrentNetwork';
 import { getErc20TokenBalance } from './getErc20TokenBalance';
@@ -50,6 +49,7 @@ import {
   signDeclareTransaction,
   verifySignature,
 } from './rpcs';
+import { sendTransaction } from './sendTransaction';
 import { signDeployAccountTransaction } from './signDeployAccountTransaction';
 import { switchNetwork } from './switchNetwork';
 import type {
@@ -78,11 +78,10 @@ import {
 } from './utils/snapUtils';
 
 declare const snap;
+logger.logLevel = parseInt(Config.logLevel, 10);
 
 export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
   const requestParams = request?.params as unknown as ApiRequestParams;
-
-  logger.logLevel = parseInt(Config.logLevel, 10);
 
   logger.log(`${request.method}:\nrequestParams: ${toJson(requestParams)}`);
 
@@ -207,8 +206,8 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
 
       case 'starkNet_sendTransaction':
         apiParams.keyDeriver = await getAddressKeyDeriver(snap);
-        return await executeTxn.execute(
-          apiParams.requestParams as unknown as ExecuteTxnParams,
+        return await sendTransaction(
+          apiParams as unknown as ApiParamsWithKeyDeriver,
         );
 
       case 'starkNet_getValue':
@@ -256,9 +255,8 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
         );
 
       case 'starkNet_executeTxn':
-        apiParams.keyDeriver = await getAddressKeyDeriver(snap);
-        return await executeTxnLegacy(
-          apiParams as unknown as ApiParamsWithKeyDeriver,
+        return await executeTxn.execute(
+          apiParams.requestParams as unknown as ExecuteTxnParams,
         );
 
       case 'starkNet_estimateFees':
@@ -318,7 +316,11 @@ export const onInstall: OnInstallHandler = async () => {
 export const onUpdate: OnUpdateHandler = async () => {
   const component = panel([
     text('Features released with this update:'),
-    text('Cairo contract upgrade support.'),
+    text(
+      'Support STRK token for the gas fee in sending transaction and estimating fee.',
+    ),
+    text('Default network changed to mainnet.'),
+    text('Support for multiple consecutive transactions.'),
   ]);
 
   await snap.request({

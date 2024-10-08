@@ -16,6 +16,7 @@ import {
   AuthorizableStruct,
   BaseRequestStruct,
   AccountRpcController,
+  mapDeprecatedParams,
 } from '../utils';
 import { signMessage as signMessageUtil } from '../utils/starknetUtils';
 
@@ -44,6 +45,19 @@ export class SignMessageRpc extends AccountRpcController<
   protected requestStruct = SignMessageRequestStruct;
 
   protected responseStruct = SignMessageResponseStruct;
+
+  protected async preExecute(params: SignMessageParams): Promise<void> {
+    // Define mappings to ensure backward compatibility with previous versions of the API.
+    // These mappings replace deprecated parameter names with the updated equivalents,
+    // allowing older integrations to function without changes
+    const paramMappings: Record<string, string> = {
+      signerAddress: 'address',
+    };
+
+    // Apply the mappings to params
+    mapDeprecatedParams(params, paramMappings);
+    await super.preExecute(params);
+  }
 
   /**
    * Execute the sign message request handler.

@@ -16,6 +16,7 @@ import {
   BaseRequestStruct,
   AccountRpcController,
   DeclareSignDetailsStruct,
+  mapDeprecatedParams,
 } from '../utils';
 import { signDeclareTransaction as signDeclareTransactionUtil } from '../utils/starknetUtils';
 
@@ -47,6 +48,22 @@ export class SignDeclareTransactionRpc extends AccountRpcController<
   protected requestStruct = SignDeclareTransactionRequestStruct;
 
   protected responseStruct = SignDeclareTransactionResponseStruct;
+
+  protected async preExecute(
+    params: SignDeclareTransactionParams,
+  ): Promise<void> {
+    // Define mappings to ensure backward compatibility with previous versions of the API.
+    // These mappings replace deprecated parameter names with the updated equivalents,
+    // allowing older integrations to function without changes
+    const paramMappings: Record<string, string> = {
+      signerAddress: 'address',
+      transaction: 'details',
+    };
+
+    // Apply the mappings to params
+    mapDeprecatedParams(params, paramMappings);
+    await super.preExecute(params);
+  }
 
   /**
    * Execute the sign declare transaction request handler.

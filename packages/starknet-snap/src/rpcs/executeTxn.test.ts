@@ -6,6 +6,7 @@ import type { UniversalDetails, Call, InvokeFunctionResponse } from 'starknet';
 import { constants } from 'starknet';
 
 import callsExamples from '../__tests__/fixture/callsExamples.json'; // Assuming you have a similar fixture
+import { getEstimateFees } from '../__tests__/helper';
 import type { FeeTokenUnit } from '../types/snapApi';
 import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../utils/constants';
 import * as starknetUtils from '../utils/starknetUtils';
@@ -50,11 +51,14 @@ const prepareMockExecuteTxn = async (
     transaction_hash: transactionHash,
   };
 
+  const estimateResults = getEstimateFees();
+
   const getEstimatedFeesRepsMock = {
     suggestedMaxFee: BigInt(1000000000000000).toString(10),
     overallFee: BigInt(1000000000000000).toString(10),
     includeDeploy: !accountDeployed,
     unit: 'wei' as FeeTokenUnit,
+    estimateResults,
   };
 
   const getEstimatedFeesSpy = jest.spyOn(starknetUtils, 'getEstimatedFees');
@@ -114,6 +118,8 @@ describe('ExecuteTxn', () => {
       {
         ...callsExample.details,
         maxFee: getEstimatedFeesRepsMock.suggestedMaxFee,
+        resourceBounds:
+          getEstimatedFeesRepsMock.estimateResults[0].resourceBounds,
       },
     );
     expect(getEstimatedFeesSpy).toHaveBeenCalled();
@@ -153,7 +159,7 @@ describe('ExecuteTxn', () => {
         privateKey: account.privateKey,
         publicKey: account.publicKey,
         version: transactionVersion,
-        waitMode: true,
+        waitMode: false,
       });
       expect(executeTxnUtilSpy).toHaveBeenCalledWith(
         network,
@@ -166,6 +172,8 @@ describe('ExecuteTxn', () => {
           version: transactionVersion,
           maxFee: getEstimatedFeesRepsMock.suggestedMaxFee,
           nonce: 1,
+          resourceBounds:
+            getEstimatedFeesRepsMock.estimateResults[0].resourceBounds,
         },
       );
     },

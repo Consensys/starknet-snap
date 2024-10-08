@@ -392,7 +392,7 @@ export const useStarkNetSnap = () => {
         params: {
           snapId,
           request: {
-            method: 'starkNet_sendTransaction',
+            method: 'starkNet_executeTxn',
             params: {
               ...defaultParam,
               address,
@@ -712,15 +712,13 @@ export const useStarkNetSnap = () => {
         },
       });
       return {
-        balanceLatest: BigNumber.from(response.balanceLatest),
-        balancePending: BigNumber.from(response.balancePending),
+        balance: BigNumber.from(response.balancePending),
       };
     } catch (err) {
       //eslint-disable-next-line no-console
       console.error(err);
       return {
-        balanceLatest: BigNumber.from('0x0'),
-        balancePending: BigNumber.from('0x0'),
+        balance: BigNumber.from('0x0'),
       };
     }
   };

@@ -71,7 +71,12 @@ export class EstimateFeeRpc extends AccountRpcController<
       details,
     );
 
-    return estimateFeeResp;
+    return {
+      suggestedMaxFee: estimateFeeResp.suggestedMaxFee,
+      overallFee: estimateFeeResp.overallFee,
+      unit: estimateFeeResp.unit,
+      includeDeploy: estimateFeeResp.includeDeploy,
+    };
   }
 }
 
