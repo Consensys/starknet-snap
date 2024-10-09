@@ -36,6 +36,13 @@ module.exports = {
         'import/no-nodejs-modules': 'off',
       },
     },
+
+    {
+      files: ['src/wallet.ts'],
+      rules: {
+        'no-restricted-globals': ['off', 'document', 'window'] // Disable rule for document and window
+      },
+    },
   ],
 
   ignorePatterns: ['!.eslintrc.js', 'dist/', '**/test', '.nyc_output/', 'coverage/'],

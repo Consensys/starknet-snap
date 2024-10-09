@@ -28,6 +28,39 @@ export class MetaMaskSnap {
     this.#version = version;
   }
 
+  async isUpgradeRequired(minRequiredVersion = '13.0.0'): Promise<boolean> {
+    const version = await this.#getVersionNumber();
+    const parts = version.split('.').map(Number);
+    const requiredParts = minRequiredVersion.split('.').map(Number);
+
+    for (let i = 0; i < 3; i++) {
+      if (parts[i] < requiredParts[i]) {
+        return true; // current version is smaller, upgrade required
+      } else if (parts[i] > requiredParts[i]) {
+        return false; // current version is greater or equal, no upgrade required
+      }
+    }
+
+    return false; // If both versions are equal
+  }
+
+  async #getVersionNumber(): Promise<string> {
+    // Requesting the client version from the provider
+    const clientVersion: string = (await this.#provider.request({
+      method: 'web3_clientVersion',
+      params: [],
+    })) as string;
+
+    // Extracting the version number (xx.yy.zz) using a regular expression
+    const versionMatch = clientVersion.match(/(\d+\.\d+\.\d+)/u);
+
+    // If a match is found, return it; otherwise, return a default value or throw an error
+    if (versionMatch) {
+      return versionMatch[0]; // The version number (xx.yy.zz)
+    }
+    throw new Error('Version number not found in client version');
+  }
+
   async getPubKey(userAddress: string): Promise<string> {
     return (await this.#provider.request({
       method: 'wallet_invokeSnap',

@@ -17,7 +17,7 @@
     "build": "webpack --config webpack.config.build.js",
     "prettier": "prettier --write \"src/**/*.ts\"",
     "lint": "eslint 'src/*.{js,ts,tsx}' --max-warnings 0 -f json -o eslint-report.json",
-    "lint:fix": "eslint '**/*.{js,ts,tsx}' --fix",
+    "lint:fix": "eslint 'src/*.{js,ts,tsx}' --fix",
     "test:unit": ""
   },
   "keywords": [],
