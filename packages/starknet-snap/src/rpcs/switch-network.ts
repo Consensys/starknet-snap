@@ -82,8 +82,8 @@ export class SwitchNetworkRpc extends RpcController<
       }
 
       if (
-        // Get Starknet expected not to show the confirm dialog, therefore, `enableAuthorize` will set to false to bypass the confirmation
-        // TODO: enableAuthorize should set default to true
+        // Get Starknet expected show the confirm dialog, while the companion doesnt needed,
+        // therefore, `enableAuthorize` is to enable/disable the confirmation
         enableAuthorize &&
         !(await this.getSwitchNetworkConsensus(network.name, network.chainId))
       ) {
