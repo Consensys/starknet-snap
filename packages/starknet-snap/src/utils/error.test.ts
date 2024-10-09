@@ -27,7 +27,7 @@ import {
   InvalidNetworkError,
   UnknownError,
   UserRejectedOpError,
-  InvalidRequestError as CustomInvalidRequestError,
+  InvalidRequestParamsError,
 } from './exceptions';
 
 describe('isSnapRpcError', () => {
@@ -56,7 +56,7 @@ describe('isSnapRpcError', () => {
       InvalidNetworkError,
       UserRejectedOpError,
       UnknownError,
-      CustomInvalidRequestError,
+      InvalidRequestParamsError,
     ];
 
     for (const ErrorCtor of [...snapErrors, ...customSnapErrors]) {

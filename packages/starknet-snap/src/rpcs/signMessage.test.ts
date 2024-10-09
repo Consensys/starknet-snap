@@ -4,7 +4,10 @@ import typedDataExample from '../__tests__/fixture/typedDataExample.json';
 import type { SnapState } from '../types/snapState';
 import { toJson } from '../utils';
 import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../utils/constants';
-import { UserRejectedOpError, InvalidRequestError } from '../utils/exceptions';
+import {
+  UserRejectedOpError,
+  InvalidRequestParamsError,
+} from '../utils/exceptions';
 import * as starknetUtils from '../utils/starknetUtils';
 import {
   mockAccount,
@@ -106,9 +109,9 @@ describe('signMessage', () => {
     );
   });
 
-  it('throws `InvalidRequestError` when request parameter is not correct', async () => {
+  it('throws `InvalidRequestParamsError` when request parameter is not correct', async () => {
     await expect(
       signMessage.execute({} as unknown as SignMessageParams),
-    ).rejects.toThrow(InvalidRequestError);
+    ).rejects.toThrow(InvalidRequestParamsError);
   });
 });

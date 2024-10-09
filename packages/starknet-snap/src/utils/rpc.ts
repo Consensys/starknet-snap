@@ -4,7 +4,7 @@ import type { Struct } from 'superstruct';
 import { assert } from 'superstruct';
 
 import type { Network, SnapState } from '../types/snapState';
-import { InvalidRequestError, UnknownError } from './exceptions';
+import { InvalidRequestParamsError, UnknownError } from './exceptions';
 import { logger } from './logger';
 import { getBip44Deriver, getStateData } from './snap';
 import {
@@ -19,13 +19,13 @@ import { getKeysFromAddress } from './starknetUtils';
  * @template Params - The expected structure of the request parameters.
  * @param requestParams - The request parameters to validate.
  * @param struct - The expected structure of the request parameters.
- * @throws {InvalidRequestError} If the request parameters do not conform to the expected structure.
+ * @throws {InvalidRequestParamsError} If the request parameters do not conform to the expected structure.
  */
 export function validateRequest<Params>(requestParams: Params, struct: Struct) {
   try {
     assert(requestParams, struct);
   } catch (error) {
-    throw new InvalidRequestError(error.message) as unknown as Error;
+    throw new InvalidRequestParamsError(error.message) as unknown as Error;
   }
 }
 

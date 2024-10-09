@@ -6,7 +6,7 @@ import type { StarknetAccount } from '../__tests__/helper';
 import { generateAccounts } from '../__tests__/helper';
 import type { SnapState } from '../types/snapState';
 import { STARKNET_SEPOLIA_TESTNET_NETWORK } from './constants';
-import { InvalidRequestError, UnknownError } from './exceptions';
+import { InvalidRequestParamsError, UnknownError } from './exceptions';
 import {
   AccountRpcController,
   RpcController,
@@ -37,14 +37,14 @@ describe('validateRequest', () => {
     ).not.toThrow();
   });
 
-  it('throws `InvalidRequestError` if the request is invalid', () => {
+  it('throws `InvalidRequestParamsError` if the request is invalid', () => {
     const requestParams = {
       signerAddress: 1234,
     };
 
     expect(() =>
       validateRequest(requestParams, validateStruct as unknown as Struct),
-    ).toThrow(InvalidRequestError);
+    ).toThrow(InvalidRequestParamsError);
   });
 });
 

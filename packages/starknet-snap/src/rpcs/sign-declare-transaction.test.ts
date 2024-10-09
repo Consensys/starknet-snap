@@ -4,7 +4,10 @@ import { constants } from 'starknet';
 import type { SnapState } from '../types/snapState';
 import { toJson } from '../utils';
 import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../utils/constants';
-import { UserRejectedOpError, InvalidRequestError } from '../utils/exceptions';
+import {
+  UserRejectedOpError,
+  InvalidRequestParamsError,
+} from '../utils/exceptions';
 import * as starknetUtils from '../utils/starknetUtils';
 import {
   mockAccount,
@@ -121,11 +124,11 @@ describe('signDeclareTransaction', () => {
     );
   });
 
-  it('throws `InvalidRequestError` when request parameter is not correct', async () => {
+  it('throws `InvalidRequestParamsError` when request parameter is not correct', async () => {
     await expect(
       signDeclareTransaction.execute(
         {} as unknown as SignDeclareTransactionParams,
       ),
-    ).rejects.toThrow(InvalidRequestError);
+    ).rejects.toThrow(InvalidRequestParamsError);
   });
 });

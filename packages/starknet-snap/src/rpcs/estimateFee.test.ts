@@ -5,7 +5,7 @@ import type { Infer } from 'superstruct';
 import { getEstimateFees } from '../__tests__/helper';
 import { FeeTokenUnit } from '../types/snapApi';
 import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../utils/constants';
-import { InvalidRequestError } from '../utils/exceptions';
+import { InvalidRequestParamsError } from '../utils/exceptions';
 import * as starknetUtils from '../utils/starknetUtils';
 import type { TxVersionStruct } from '../utils/superstruct';
 import { mockAccount, prepareMockAccount } from './__tests__/helper';
@@ -101,9 +101,9 @@ describe('estimateFee', () => {
     });
   });
 
-  it('throws `InvalidRequestError` when request parameter is not correct', async () => {
+  it('throws `InvalidRequestParamsError` when request parameter is not correct', async () => {
     await expect(
       estimateFee.execute({} as unknown as EstimateFeeParams),
-    ).rejects.toThrow(InvalidRequestError);
+    ).rejects.toThrow(InvalidRequestParamsError);
   });
 });

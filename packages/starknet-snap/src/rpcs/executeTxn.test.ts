@@ -5,7 +5,10 @@ import callsExamples from '../__tests__/fixture/callsExamples.json'; // Assuming
 import { getEstimateFees } from '../__tests__/helper';
 import type { FeeTokenUnit } from '../types/snapApi';
 import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../utils/constants';
-import { UserRejectedOpError, InvalidRequestError } from '../utils/exceptions';
+import {
+  UserRejectedOpError,
+  InvalidRequestParamsError,
+} from '../utils/exceptions';
 import * as starknetUtils from '../utils/starknetUtils';
 import { executeTxn as executeTxnUtil } from '../utils/starknetUtils';
 import {
@@ -206,9 +209,9 @@ describe('ExecuteTxn', () => {
     await expect(executeTxn.execute(request)).rejects.toThrow(Error);
   });
 
-  it('throws `InvalidRequestError` when request parameter is not correct', async () => {
+  it('throws `InvalidRequestParamsError` when request parameter is not correct', async () => {
     await expect(
       executeTxn.execute({} as unknown as ExecuteTxnParams),
-    ).rejects.toThrow(InvalidRequestError);
+    ).rejects.toThrow(InvalidRequestParamsError);
   });
 });

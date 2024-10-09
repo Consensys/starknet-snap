@@ -2,7 +2,10 @@ import { constants } from 'starknet';
 
 import type { SnapState } from '../types/snapState';
 import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../utils/constants';
-import { UserRejectedOpError, InvalidRequestError } from '../utils/exceptions';
+import {
+  UserRejectedOpError,
+  InvalidRequestParamsError,
+} from '../utils/exceptions';
 import {
   mockAccount,
   prepareAlertDialog,
@@ -105,11 +108,11 @@ describe('displayPrivateKey', () => {
       },
     },
   ])(
-    'throws `InvalidRequestError` when $case',
+    'throws `InvalidRequestParamsError` when $case',
     async ({ request }: { request: unknown }) => {
       await expect(
         displayPrivateKey.execute(request as DisplayPrivateKeyParams),
-      ).rejects.toThrow(InvalidRequestError);
+      ).rejects.toThrow(InvalidRequestParamsError);
     },
   );
 });

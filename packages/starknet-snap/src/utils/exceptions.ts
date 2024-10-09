@@ -37,7 +37,7 @@ export class UserRejectedOpError extends UserRejectedRequestError {
   }
 }
 
-export class InvalidRequestError extends InvalidParamsError {
+export class InvalidRequestParamsError extends InvalidParamsError {
   constructor(message?: string) {
     super(
       message,
