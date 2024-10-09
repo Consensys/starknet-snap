@@ -4,12 +4,7 @@ import type {
   OnInstallHandler,
   OnUpdateHandler,
 } from '@metamask/snaps-sdk';
-import {
-  panel,
-  text,
-  SnapError,
-  MethodNotFoundError,
-} from '@metamask/snaps-sdk';
+import { panel, text, MethodNotFoundError } from '@metamask/snaps-sdk';
 
 import { addErc20Token } from './addErc20Token';
 import { addNetwork } from './addNetwork';
@@ -67,6 +62,7 @@ import {
   STARKNET_SEPOLIA_TESTNET_NETWORK,
   STARKNET_TESTNET_NETWORK,
 } from './utils/constants';
+import { UnknownError } from './utils/exceptions';
 import { getAddressKeyDeriver } from './utils/keyPair';
 import { acquireLock } from './utils/lock';
 import { logger } from './utils/logger';
@@ -287,7 +283,8 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
     let snapError = error;
 
     if (!isSnapRpcError(error)) {
-      snapError = new SnapError('Unable to execute the rpc request');
+      // To ensure the error meet the SnapError format and WalletRpc format.
+      snapError = new UnknownError('Unable to execute the rpc request');
     }
     logger.error(
       `onRpcRequest error: ${JSON.stringify(snapError.toJSON(), null, 2)}`,

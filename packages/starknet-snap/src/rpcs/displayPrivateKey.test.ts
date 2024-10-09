@@ -1,11 +1,8 @@
-import {
-  InvalidParamsError,
-  UserRejectedRequestError,
-} from '@metamask/snaps-sdk';
 import { constants } from 'starknet';
 
 import type { SnapState } from '../types/snapState';
 import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../utils/constants';
+import { UserRejectedOpError, InvalidRequestError } from '../utils/exceptions';
 import {
   mockAccount,
   prepareAlertDialog,
@@ -77,7 +74,7 @@ describe('displayPrivateKey', () => {
     ]);
   });
 
-  it('throws `UserRejectedRequestError` if user denies the operation', async () => {
+  it('throws `UserRejectedOpError` if user denies the operation', async () => {
     const chainId = constants.StarknetChainId.SN_SEPOLIA;
     const account = await mockAccount(chainId);
     prepareMockAccount(account, state);
@@ -89,7 +86,7 @@ describe('displayPrivateKey', () => {
     const request = createRequestParam(chainId, account.address);
 
     await expect(displayPrivateKey.execute(request)).rejects.toThrow(
-      UserRejectedRequestError,
+      UserRejectedOpError,
     );
   });
 
@@ -108,11 +105,11 @@ describe('displayPrivateKey', () => {
       },
     },
   ])(
-    'throws `InvalidParamsError` when $case',
+    'throws `InvalidRequestError` when $case',
     async ({ request }: { request: unknown }) => {
       await expect(
         displayPrivateKey.execute(request as DisplayPrivateKeyParams),
-      ).rejects.toThrow(InvalidParamsError);
+      ).rejects.toThrow(InvalidRequestError);
     },
   );
 });

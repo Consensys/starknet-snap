@@ -1,13 +1,10 @@
-import {
-  InvalidParamsError,
-  UserRejectedRequestError,
-} from '@metamask/snaps-sdk';
 import { constants } from 'starknet';
 
 import typedDataExample from '../__tests__/fixture/typedDataExample.json';
 import type { SnapState } from '../types/snapState';
 import { toJson } from '../utils';
 import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../utils/constants';
+import { UserRejectedOpError, InvalidRequestError } from '../utils/exceptions';
 import * as starknetUtils from '../utils/starknetUtils';
 import {
   mockAccount,
@@ -89,7 +86,7 @@ describe('signMessage', () => {
     ]);
   });
 
-  it('throws `UserRejectedRequestError` if user denied the operation', async () => {
+  it('throws `UserRejectedOpError` if user denied the operation', async () => {
     const account = await mockAccount(constants.StarknetChainId.SN_SEPOLIA);
 
     prepareMockAccount(account, state);
@@ -105,13 +102,13 @@ describe('signMessage', () => {
     };
 
     await expect(signMessage.execute(request)).rejects.toThrow(
-      UserRejectedRequestError,
+      UserRejectedOpError,
     );
   });
 
-  it('throws `InvalidParamsError` when request parameter is not correct', async () => {
+  it('throws `InvalidRequestError` when request parameter is not correct', async () => {
     await expect(
       signMessage.execute({} as unknown as SignMessageParams),
-    ).rejects.toThrow(InvalidParamsError);
+    ).rejects.toThrow(InvalidRequestError);
   });
 });

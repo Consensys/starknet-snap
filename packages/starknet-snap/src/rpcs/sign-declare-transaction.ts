@@ -1,10 +1,5 @@
 import type { Component } from '@metamask/snaps-sdk';
-import {
-  heading,
-  row,
-  text,
-  UserRejectedRequestError,
-} from '@metamask/snaps-sdk';
+import { heading, row, text } from '@metamask/snaps-sdk';
 import type { DeclareSignerDetails } from 'starknet';
 import type { Infer } from 'superstruct';
 import { array, object, string, assign } from 'superstruct';
@@ -18,6 +13,7 @@ import {
   DeclareSignDetailsStruct,
   mapDeprecatedParams,
 } from '../utils';
+import { UserRejectedOpError } from '../utils/exceptions';
 import { signDeclareTransaction as signDeclareTransactionUtil } from '../utils/starknetUtils';
 
 export const SignDeclareTransactionRequestStruct = assign(
@@ -87,7 +83,7 @@ export class SignDeclareTransactionRpc extends AccountRpcController<
   ): Promise<SignDeclareTransactionResponse> {
     const { details } = params;
     if (!(await this.getSignDeclareTransactionConsensus(details))) {
-      throw new UserRejectedRequestError() as unknown as Error;
+      throw new UserRejectedOpError() as unknown as Error;
     }
 
     return (await signDeclareTransactionUtil(

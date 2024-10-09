@@ -1,4 +1,4 @@
-import { copyable, text, UserRejectedRequestError } from '@metamask/snaps-sdk';
+import { copyable, text } from '@metamask/snaps-sdk';
 import { type Infer, object, literal, assign } from 'superstruct';
 
 import {
@@ -8,6 +8,7 @@ import {
   alertDialog,
   BaseRequestStruct,
 } from '../utils';
+import { UserRejectedOpError } from '../utils/exceptions';
 
 export const DisplayPrivateKeyRequestStruct = assign(
   object({
@@ -58,7 +59,7 @@ export class DisplayPrivateKeyRpc extends AccountRpcController<
     const confirmComponents = [text('Do you want to export your private key?')];
 
     if (!(await confirmDialog(confirmComponents))) {
-      throw new UserRejectedRequestError() as unknown as Error;
+      throw new UserRejectedOpError() as unknown as Error;
     }
 
     const alertComponents = [

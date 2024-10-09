@@ -1,7 +1,3 @@
-import {
-  InvalidParamsError,
-  UserRejectedRequestError,
-} from '@metamask/snaps-sdk';
 import type { UniversalDetails, Call, InvokeFunctionResponse } from 'starknet';
 import { constants } from 'starknet';
 
@@ -9,6 +5,7 @@ import callsExamples from '../__tests__/fixture/callsExamples.json'; // Assuming
 import { getEstimateFees } from '../__tests__/helper';
 import type { FeeTokenUnit } from '../types/snapApi';
 import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../utils/constants';
+import { UserRejectedOpError, InvalidRequestError } from '../utils/exceptions';
 import * as starknetUtils from '../utils/starknetUtils';
 import { executeTxn as executeTxnUtil } from '../utils/starknetUtils';
 import {
@@ -179,7 +176,7 @@ describe('ExecuteTxn', () => {
     },
   );
 
-  it('throws UserRejectedRequestError if user cancels execution', async () => {
+  it('throws UserRejectedOpError if user cancels execution', async () => {
     callsExample = callsExamples[1];
     const { request, confirmDialogSpy } = await prepareMockExecuteTxn(
       callsExample.hash,
@@ -190,7 +187,7 @@ describe('ExecuteTxn', () => {
     confirmDialogSpy.mockResolvedValue(false);
 
     await expect(executeTxn.execute(request)).rejects.toThrow(
-      UserRejectedRequestError,
+      UserRejectedOpError,
     );
   });
 
@@ -209,9 +206,9 @@ describe('ExecuteTxn', () => {
     await expect(executeTxn.execute(request)).rejects.toThrow(Error);
   });
 
-  it('throws `InvalidParamsError` when request parameter is not correct', async () => {
+  it('throws `InvalidRequestError` when request parameter is not correct', async () => {
     await expect(
       executeTxn.execute({} as unknown as ExecuteTxnParams),
-    ).rejects.toThrow(InvalidParamsError);
+    ).rejects.toThrow(InvalidRequestError);
   });
 });

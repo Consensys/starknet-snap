@@ -1,10 +1,10 @@
 import type { getBIP44ChangePathString } from '@metamask/key-tree/dist/types/utils';
 import type { Json } from '@metamask/snaps-sdk';
-import { InvalidParamsError, SnapError } from '@metamask/snaps-sdk';
 import type { Struct } from 'superstruct';
 import { assert } from 'superstruct';
 
 import type { Network, SnapState } from '../types/snapState';
+import { InvalidRequestError, UnknownError } from './exceptions';
 import { logger } from './logger';
 import { getBip44Deriver, getStateData } from './snap';
 import {
@@ -19,13 +19,13 @@ import { getKeysFromAddress } from './starknetUtils';
  * @template Params - The expected structure of the request parameters.
  * @param requestParams - The request parameters to validate.
  * @param struct - The expected structure of the request parameters.
- * @throws {InvalidParamsError} If the request parameters do not conform to the expected structure.
+ * @throws {InvalidRequestError} If the request parameters do not conform to the expected structure.
  */
 export function validateRequest<Params>(requestParams: Params, struct: Struct) {
   try {
     assert(requestParams, struct);
   } catch (error) {
-    throw new InvalidParamsError(error.message) as unknown as Error;
+    throw new InvalidRequestError(error.message) as unknown as Error;
   }
 }
 
@@ -41,7 +41,7 @@ export function validateResponse<Params>(response: Params, struct: Struct) {
   try {
     assert(response, struct);
   } catch (error) {
-    throw new SnapError('Invalid Response') as unknown as Error;
+    throw new UnknownError('Invalid Response') as unknown as Error;
   }
 }
 

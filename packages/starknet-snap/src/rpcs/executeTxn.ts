@@ -1,11 +1,5 @@
 import type { Component, Json } from '@metamask/snaps-sdk';
-import {
-  heading,
-  row,
-  UserRejectedRequestError,
-  text,
-  divider,
-} from '@metamask/snaps-sdk';
+import { heading, row, text, divider } from '@metamask/snaps-sdk';
 import convert from 'ethereum-unit-converter';
 import type { Call, Calldata } from 'starknet';
 import { constants, TransactionStatus, TransactionType } from 'starknet';
@@ -27,6 +21,7 @@ import {
   CallsStruct,
   mapDeprecatedParams,
 } from '../utils';
+import { UserRejectedOpError } from '../utils/exceptions';
 import { logger } from '../utils/logger';
 import {
   createAccount,
@@ -140,7 +135,7 @@ export class ExecuteTxnRpc extends AccountRpcController<
         version,
       ))
     ) {
-      throw new UserRejectedRequestError() as unknown as Error;
+      throw new UserRejectedOpError() as unknown as Error;
     }
 
     if (!accountDeployed) {

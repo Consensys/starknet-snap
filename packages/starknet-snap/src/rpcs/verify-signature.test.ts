@@ -1,9 +1,9 @@
-import { InvalidParamsError } from '@metamask/snaps-sdk';
 import { constants } from 'starknet';
 
 import typedDataExample from '../__tests__/fixture/typedDataExample.json';
 import type { SnapState } from '../types/snapState';
 import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../utils/constants';
+import { InvalidRequestError } from '../utils/exceptions';
 import * as starknetUtils from '../utils/starknetUtils';
 import { mockAccount, prepareMockAccount } from './__tests__/helper';
 import { verifySignature } from './verify-signature';
@@ -67,9 +67,9 @@ describe('verifySignature', () => {
     expect(result).toBe(false);
   });
 
-  it('throws `InvalidParamsError` when request parameter is not correct', async () => {
+  it('throws `InvalidRequestError` when request parameter is not correct', async () => {
     await expect(
       verifySignature.execute({} as unknown as VerifySignatureParams),
-    ).rejects.toThrow(InvalidParamsError);
+    ).rejects.toThrow(InvalidRequestError);
   });
 });

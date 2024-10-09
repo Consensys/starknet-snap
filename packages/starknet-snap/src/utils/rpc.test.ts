@@ -1,4 +1,3 @@
-import { InvalidParamsError, SnapError } from '@metamask/snaps-sdk';
 import { constants } from 'starknet';
 import { object, string } from 'superstruct';
 import type { Struct, Infer } from 'superstruct';
@@ -7,6 +6,7 @@ import type { StarknetAccount } from '../__tests__/helper';
 import { generateAccounts } from '../__tests__/helper';
 import type { SnapState } from '../types/snapState';
 import { STARKNET_SEPOLIA_TESTNET_NETWORK } from './constants';
+import { InvalidRequestError, UnknownError } from './exceptions';
 import {
   AccountRpcController,
   RpcController,
@@ -37,14 +37,14 @@ describe('validateRequest', () => {
     ).not.toThrow();
   });
 
-  it('throws `InvalidParamsError` if the request is invalid', () => {
+  it('throws `InvalidRequestError` if the request is invalid', () => {
     const requestParams = {
       signerAddress: 1234,
     };
 
     expect(() =>
       validateRequest(requestParams, validateStruct as unknown as Struct),
-    ).toThrow(InvalidParamsError);
+    ).toThrow(InvalidRequestError);
   });
 });
 
@@ -62,7 +62,7 @@ describe('validateResponse', () => {
 
     expect(() =>
       validateResponse(response, validateStruct as unknown as Struct),
-    ).toThrow(new SnapError('Invalid Response'));
+    ).toThrow(new UnknownError('Invalid Response'));
   });
 });
 

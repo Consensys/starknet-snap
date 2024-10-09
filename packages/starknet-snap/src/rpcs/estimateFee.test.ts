@@ -1,4 +1,4 @@
-import { InvalidParamsError } from '@metamask/snaps-sdk';
+import { InvalidRequestError } from '@metamask/snaps-sdk';
 import type { Invocations } from 'starknet';
 import { constants, TransactionType } from 'starknet';
 import type { Infer } from 'superstruct';
@@ -101,9 +101,9 @@ describe('estimateFee', () => {
     });
   });
 
-  it('throws `InvalidParamsError` when request parameter is not correct', async () => {
+  it('throws `InvalidRequestError` when request parameter is not correct', async () => {
     await expect(
       estimateFee.execute({} as unknown as EstimateFeeParams),
-    ).rejects.toThrow(InvalidParamsError);
+    ).rejects.toThrow(InvalidRequestError);
   });
 });
