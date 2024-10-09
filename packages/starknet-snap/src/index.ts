@@ -283,7 +283,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
     let snapError = error;
 
     if (!isSnapRpcError(error)) {
-      // To ensure the error meet the SnapError format and WalletRpc format.
+      // To ensure the error meets both the SnapError format and WalletRpc format.
       snapError = new UnknownError('Unable to execute the rpc request');
     }
     logger.error(
