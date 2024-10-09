@@ -1,4 +1,3 @@
-import { InvalidRequestError } from '@metamask/snaps-sdk';
 import type { Invocations } from 'starknet';
 import { constants, TransactionType } from 'starknet';
 import type { Infer } from 'superstruct';
@@ -6,6 +5,7 @@ import type { Infer } from 'superstruct';
 import { getEstimateFees } from '../__tests__/helper';
 import { FeeTokenUnit } from '../types/snapApi';
 import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../utils/constants';
+import { InvalidRequestError } from '../utils/exceptions';
 import * as starknetUtils from '../utils/starknetUtils';
 import type { TxVersionStruct } from '../utils/superstruct';
 import { mockAccount, prepareMockAccount } from './__tests__/helper';
