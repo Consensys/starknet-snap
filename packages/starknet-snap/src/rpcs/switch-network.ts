@@ -61,6 +61,8 @@ export class SwitchNetworkRpc extends RpcController<
     const { enableAuthorize, chainId } = params;
     const networkStateMgr = new NetworkStateManager();
 
+    // Using transactional state interaction to ensure that the state is updated atomically
+    // To avoid a use case while 2 requests are trying to update/read the state at the same time
     return await networkStateMgr.withTransaction<boolean>(async (state) => {
       const currentNetwork = await networkStateMgr.getCurrentNetwork(state);
 
