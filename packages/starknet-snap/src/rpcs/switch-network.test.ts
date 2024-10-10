@@ -1,7 +1,3 @@
-import {
-  InvalidParamsError,
-  UserRejectedRequestError,
-} from '@metamask/snaps-sdk';
 import type { constants } from 'starknet';
 
 import { Config } from '../config';
@@ -11,6 +7,11 @@ import {
   STARKNET_SEPOLIA_TESTNET_NETWORK,
   STARKNET_MAINNET_NETWORK,
 } from '../utils/constants';
+import {
+  InvalidNetworkError,
+  InvalidRequestParamsError,
+  UserRejectedOpError,
+} from '../utils/exceptions';
 import { prepareConfirmDialog } from './__tests__/helper';
 import { switchNetwork } from './switch-network';
 import type { SwitchNetworkParams } from './switch-network';
@@ -158,7 +159,7 @@ describe('switchNetwork', () => {
     const request = createRequestParam(requestNetwork.chainId, true);
 
     await expect(switchNetwork.execute(request)).rejects.toThrow(
-      UserRejectedRequestError,
+      UserRejectedOpError,
     );
   });
 
@@ -174,13 +175,13 @@ describe('switchNetwork', () => {
     const request = createRequestParam(requestNetwork.chainId);
 
     await expect(switchNetwork.execute(request)).rejects.toThrow(
-      `Network not supported`,
+      InvalidNetworkError,
     );
   });
 
-  it('throws `InvalidParamsError` when request parameter is not correct', async () => {
+  it('throws `InvalidRequestParamsError` when request parameter is not correct', async () => {
     await expect(
       switchNetwork.execute({} as unknown as SwitchNetworkParams),
-    ).rejects.toThrow(InvalidParamsError);
+    ).rejects.toThrow(InvalidRequestParamsError);
   });
 });

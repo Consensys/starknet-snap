@@ -1,11 +1,5 @@
 import type { Component } from '@metamask/snaps-sdk';
-import {
-  divider,
-  heading,
-  row,
-  text,
-  UserRejectedRequestError,
-} from '@metamask/snaps-sdk';
+import { divider, heading, row, text } from '@metamask/snaps-sdk';
 import type { Infer } from 'superstruct';
 import { assign, boolean } from 'superstruct';
 
@@ -16,6 +10,7 @@ import {
   BaseRequestStruct,
   RpcController,
 } from '../utils';
+import { InvalidNetworkError, UserRejectedOpError } from '../utils/exceptions';
 
 export const SwitchNetworkRequestStruct = assign(
   AuthorizableStruct,
@@ -80,7 +75,7 @@ export class SwitchNetworkRpc extends RpcController<
 
       // if the network is not in the list of networks that we support, we throw an error
       if (!network) {
-        throw new Error(`Network not supported`);
+        throw new InvalidNetworkError() as unknown as Error;
       }
 
       if (
@@ -89,7 +84,7 @@ export class SwitchNetworkRpc extends RpcController<
         enableAuthorize &&
         !(await this.getSwitchNetworkConsensus(network.name, network.chainId))
       ) {
-        throw new UserRejectedRequestError() as unknown as Error;
+        throw new UserRejectedOpError() as unknown as Error;
       }
 
       await networkStateMgr.setCurrentNetwork(network);
