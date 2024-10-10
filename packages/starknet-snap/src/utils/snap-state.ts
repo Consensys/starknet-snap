@@ -90,7 +90,7 @@ export abstract class SnapStateManager<State> {
       try {
         const result = await callback(this.#transaction.current);
         await this.set(this.#transaction.current);
-        return result as unknown as Response;
+        return result;
       } catch (error) {
         logger.info(
           `SnapStateManager.withTransaction [${
