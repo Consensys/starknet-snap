@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.1](https://github.com/Consensys/starknet-snap/compare/get-starknet-v1.2.0...get-starknet-v1.2.1) (2024-10-10)
+
+
+### Bug Fixes
+
+* **get-starknet:** address not update when network change in get-starknet ([#366](https://github.com/Consensys/starknet-snap/issues/366)) ([c96f75e](https://github.com/Consensys/starknet-snap/commit/c96f75eb6c95b76513e3a0488d7ccdb3d59e5a71))
+
 ## [1.2.0](https://github.com/Consensys/starknet-snap/compare/get-starknet-v1.1.0...get-starknet-v1.2.0) (2024-09-20)
 
 
