@@ -1,5 +1,6 @@
 import type { RpcTypeToMessageMap } from 'get-starknet-core';
 
+import { createStarkError } from '../utils/error';
 import { StarknetWalletRpc } from '../utils/rpc';
 
 export type WalletSwitchStarknetChainMethod = 'wallet_switchStarknetChain';
@@ -15,13 +16,13 @@ export class WalletSwitchStarknetChain extends StarknetWalletRpc {
         return true;
       }
 
-      await this.snap.switchNetwork(param.chainId);
+      const result = await this.snap.switchNetwork(param.chainId);
 
       await this.wallet.init();
 
-      return true;
+      return result;
     } catch (error) {
-      return false;
+      throw createStarkError(error?.data?.walletRpcError?.code);
     }
   }
 }
