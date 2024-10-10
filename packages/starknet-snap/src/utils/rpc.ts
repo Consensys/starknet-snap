@@ -86,7 +86,7 @@ export abstract class RpcController<
 }
 
 // TODO: the Type should be moved to a common place
-export type AccountRpcParams = Json & {
+export type AccountRpcParams = {
   chainId: string;
   address: string;
 };

@@ -34,6 +34,7 @@ import type {
   SignTransactionParams,
   SignDeclareTransactionParams,
   VerifySignatureParams,
+  SwitchNetworkParams,
 } from './rpcs';
 import {
   displayPrivateKey,
@@ -43,10 +44,10 @@ import {
   signTransaction,
   signDeclareTransaction,
   verifySignature,
+  switchNetwork,
 } from './rpcs';
 import { sendTransaction } from './sendTransaction';
 import { signDeployAccountTransaction } from './signDeployAccountTransaction';
-import { switchNetwork } from './switchNetwork';
 import type {
   ApiParams,
   ApiParamsWithKeyDeriver,
@@ -230,7 +231,9 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
         return await addNetwork(apiParams);
 
       case 'starkNet_switchNetwork':
-        return await switchNetwork(apiParams);
+        return await switchNetwork.execute(
+          apiParams.requestParams as unknown as SwitchNetworkParams,
+        );
 
       case 'starkNet_getCurrentNetwork':
         return await getCurrentNetwork(apiParams);
