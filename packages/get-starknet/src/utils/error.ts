@@ -10,7 +10,7 @@ export enum WalletRpcErrorCode {
 }
 
 // Here we define the error message for each error
-export const WalletRpcError = {
+export const WalletRpcErrorMap = {
   [WalletRpcErrorCode.InvalidErc20]: 'An error occurred (NOT_ERC20)',
   [WalletRpcErrorCode.InvalidNetwork]: 'An error occurred (UNLISTED_NETWORK)',
   [WalletRpcErrorCode.UserDeny]: 'An error occurred (USER_REFUSED_OP)',
@@ -20,9 +20,9 @@ export const WalletRpcError = {
   [WalletRpcErrorCode.Unknown]: 'An error occurred (UNKNOWN_ERROR)',
 };
 export const defaultErrorCode = WalletRpcErrorCode.Unknown;
-export const defaultErrorMessage = WalletRpcError[defaultErrorCode];
+export const defaultErrorMessage = WalletRpcErrorMap[defaultErrorCode];
 
-export class CustomError extends Error {
+export class WalletRpcError extends Error {
   readonly code: number;
 
   constructor(message: string, errorCode: number) {
@@ -32,20 +32,20 @@ export class CustomError extends Error {
 }
 
 /**
- * Create Custom Error base on the given error code to map with the Wallet API error.
+ * Create WalletRpcError object based on the given error code to map with the Wallet API error.
  *
  * @param [errorCode] - Error code to map with the Wallet API error.
- * @returns A CustomError Object that contains the corresponing Wallet API Error code and message.
+ * @returns A WalletRpcError Object that contains the corresponing Wallet API Error code and message.
  */
 export function createStarkError(errorCode?: number) {
   let code = errorCode ?? defaultErrorCode;
   let message = defaultErrorMessage;
 
-  if (WalletRpcError[code]) {
-    message = WalletRpcError[code];
+  if (WalletRpcErrorMap[code]) {
+    message = WalletRpcErrorMap[code];
   } else {
     code = defaultErrorCode;
   }
 
-  return new CustomError(message, code);
+  return new WalletRpcError(message, code);
 }
