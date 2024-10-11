@@ -176,8 +176,13 @@ export class ExecuteTxnRpc extends AccountRpcController<
       throw new Error('Failed to execute transaction');
     }
 
+    // Since the RPC supports the `calls` parameter either as a single `call` object or an array of `call` objects,
+    // and the current state data structure does not yet support multiple `call` objects in a single transaction,
+    // we need to convert `calls` into a single `call` object as a temporary fix.
+    const call = Array.isArray(calls) ? calls[0] : calls;
+
     await this.txnStateManager.addTransaction(
-      this.createInvokeTxn(address, executeTxnResp.transaction_hash, calls[0]),
+      this.createInvokeTxn(address, executeTxnResp.transaction_hash, call),
     );
 
     return executeTxnResp;

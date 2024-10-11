@@ -74,12 +74,15 @@ const prepareMockExecuteTxn = async (
     address: account.address,
   });
 
+  const createInvokeTxnSpy = jest.spyOn(executeTxn as any, 'createInvokeTxn');
+
   return {
     network: state.networks[0],
     account,
     request,
     confirmDialogSpy,
     createAccountSpy,
+    createInvokeTxnSpy,
     executeTxnRespMock,
     executeTxnUtilSpy,
     getEstimatedFeesSpy,
@@ -88,10 +91,8 @@ const prepareMockExecuteTxn = async (
 };
 
 describe('ExecuteTxn', () => {
-  let callsExample: any;
-
   it('executes transaction correctly if the account is deployed', async () => {
-    callsExample = callsExamples[0];
+    const calls = callsExamples.multipleCalls;
     const {
       account,
       createAccountSpy,
@@ -100,9 +101,9 @@ describe('ExecuteTxn', () => {
       getEstimatedFeesRepsMock,
       request,
     } = await prepareMockExecuteTxn(
-      callsExample.hash,
-      callsExample.calls,
-      callsExample.details,
+      calls.hash,
+      calls.calls,
+      calls.details,
       true,
     );
 
@@ -116,7 +117,7 @@ describe('ExecuteTxn', () => {
       request.calls,
       undefined,
       {
-        ...callsExample.details,
+        ...calls.details,
         maxFee: getEstimatedFeesRepsMock.suggestedMaxFee,
         resourceBounds:
           getEstimatedFeesRepsMock.estimateResults[0].resourceBounds,
@@ -126,10 +127,64 @@ describe('ExecuteTxn', () => {
     expect(createAccountSpy).not.toHaveBeenCalled();
   });
 
+  it.each([
+    {
+      calls: callsExamples.multipleCalls,
+      testCaseTitle: 'an array of call object',
+    },
+    {
+      calls: callsExamples.singleCall,
+      testCaseTitle: 'a call object',
+    },
+  ])(
+    'stores transaction in state correctly if the params `calls` is $testCaseTitle',
+    async ({ calls }: { calls: any }) => {
+      const call = Array.isArray(calls.calls) ? calls.calls[0] : calls.calls;
+      const {
+        account,
+        createAccountSpy,
+        createInvokeTxnSpy,
+        executeTxnRespMock,
+        getEstimatedFeesSpy,
+        getEstimatedFeesRepsMock,
+        request,
+      } = await prepareMockExecuteTxn(
+        calls.hash,
+        calls.calls,
+        calls.details,
+        true,
+      );
+
+      const result = await executeTxn.execute(request);
+
+      expect(result).toStrictEqual(executeTxnRespMock);
+      expect(executeTxnUtil).toHaveBeenCalledWith(
+        STARKNET_SEPOLIA_TESTNET_NETWORK,
+        account.address,
+        account.privateKey,
+        request.calls,
+        undefined,
+        {
+          ...calls.details,
+          maxFee: getEstimatedFeesRepsMock.suggestedMaxFee,
+          resourceBounds:
+            getEstimatedFeesRepsMock.estimateResults[0].resourceBounds,
+        },
+      );
+      expect(getEstimatedFeesSpy).toHaveBeenCalled();
+      expect(createAccountSpy).not.toHaveBeenCalled();
+      expect(createInvokeTxnSpy).toHaveBeenCalledWith(
+        account.address,
+        calls.hash,
+        call,
+      );
+    },
+  );
+
   it.each([constants.TRANSACTION_VERSION.V1, constants.TRANSACTION_VERSION.V3])(
     'creates an account and execute the transaction with nonce 1 with transaction version %s if the account is not deployed',
     async (transactionVersion) => {
-      callsExample = callsExamples[1];
+      const calls = callsExamples.multipleCalls;
       const {
         account,
         createAccountSpy,
@@ -139,10 +194,10 @@ describe('ExecuteTxn', () => {
         network,
         request,
       } = await prepareMockExecuteTxn(
-        callsExample.hash,
-        callsExample.calls,
+        calls.hash,
+        calls.calls,
         {
-          ...callsExample.details,
+          ...calls.details,
           version: transactionVersion,
         },
         false,
@@ -165,10 +220,10 @@ describe('ExecuteTxn', () => {
         network,
         account.address,
         account.privateKey,
-        callsExample.calls,
+        calls.calls,
         undefined,
         {
-          ...callsExample.details,
+          ...calls.details,
           version: transactionVersion,
           maxFee: getEstimatedFeesRepsMock.suggestedMaxFee,
           nonce: 1,
@@ -180,11 +235,11 @@ describe('ExecuteTxn', () => {
   );
 
   it('throws UserRejectedOpError if user cancels execution', async () => {
-    callsExample = callsExamples[1];
+    const calls = callsExamples.multipleCalls;
     const { request, confirmDialogSpy } = await prepareMockExecuteTxn(
-      callsExample.hash,
-      callsExample.calls,
-      callsExample.details,
+      calls.hash,
+      calls.calls,
+      calls.details,
       true,
     );
     confirmDialogSpy.mockResolvedValue(false);
@@ -195,11 +250,11 @@ describe('ExecuteTxn', () => {
   });
 
   it('throws `Failed to execute transaction` when the transaction hash is not returned from executeTxnUtil', async () => {
-    callsExample = callsExamples[1];
+    const calls = callsExamples.multipleCalls;
     const { request, executeTxnUtilSpy } = await prepareMockExecuteTxn(
-      callsExample.hash,
-      callsExample.calls,
-      callsExample.details,
+      calls.hash,
+      calls.calls,
+      calls.details,
       true,
     );
     executeTxnUtilSpy.mockResolvedValue(
