@@ -1,5 +1,5 @@
 import { mockWalletInit, createWallet } from '../__tests__/helper';
-import { WalletRequestAccount } from './wallet-request-account';
+import { WalletRequestAccount } from './request-account';
 
 describe('WalletRequestAccount', () => {
   it('returns accounts', async () => {
