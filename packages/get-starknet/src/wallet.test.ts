@@ -1,49 +1,42 @@
+import { Mutex } from 'async-mutex';
 import { Provider } from 'starknet';
 
-import { generateAccount, SepoliaNetwork } from './__tests__/helper';
+import { SepoliaNetwork, mockWalletInit, createWallet } from './__tests__/helper';
 import { MetaMaskAccount } from './accounts';
-import { MetaMaskSnap } from './snap';
-import type { MetaMaskProvider, Network } from './type';
-import { MetaMaskSnapWallet } from './wallet';
+import { WalletSupportedSpecs } from './rpcs';
+import type { AccContract, Network } from './type';
 
 describe('MetaMaskSnapWallet', () => {
-  class MockProvider implements MetaMaskProvider {
-    request = jest.fn();
-  }
-
-  const createWallet = () => {
-    return new MetaMaskSnapWallet(new MockProvider(), '*');
-  };
-
   describe('enable', () => {
     it('returns an account address', async () => {
       const expectedAccountAddress = '0x04882a372da3dfe1c53170ad75893832469bf87b62b13e84662565c4a88f25cd'; // in hex
-      jest.spyOn(MetaMaskSnap.prototype, 'installIfNot').mockResolvedValue(true);
-      jest.spyOn(MetaMaskSnap.prototype, 'getCurrentNetwork').mockResolvedValue(SepoliaNetwork);
-      jest.spyOn(MetaMaskSnap.prototype, 'recoverDefaultAccount').mockResolvedValue(
-        generateAccount({
-          address: expectedAccountAddress,
-        }),
-      );
+      mockWalletInit({
+        address: expectedAccountAddress,
+      });
 
       const wallet = createWallet();
       const [address] = await wallet.enable();
 
       expect(address).toStrictEqual(expectedAccountAddress);
     });
+
+    it('throws `Unable to recover accounts` error if the account address not return from the Snap', async () => {
+      const { recoverDefaultAccountSpy } = mockWalletInit({});
+      recoverDefaultAccountSpy.mockResolvedValue({} as unknown as AccContract);
+
+      const wallet = createWallet();
+
+      await expect(wallet.enable()).rejects.toThrow('Unable to recover accounts');
+    });
   });
 
   describe('init', () => {
     it('installs the snap and set the properties', async () => {
       const expectedAccountAddress = '0x04882a372da3dfe1c53170ad75893832469bf87b62b13e84662565c4a88f25cd'; // in hex
-      const installSpy = jest.spyOn(MetaMaskSnap.prototype, 'installIfNot');
-      jest.spyOn(MetaMaskSnap.prototype, 'getCurrentNetwork').mockResolvedValue(SepoliaNetwork);
-      jest.spyOn(MetaMaskSnap.prototype, 'recoverDefaultAccount').mockResolvedValue(
-        generateAccount({
-          address: expectedAccountAddress,
-        }),
-      );
-      installSpy.mockResolvedValue(true);
+
+      const { installSpy } = mockWalletInit({
+        address: expectedAccountAddress,
+      });
 
       const wallet = createWallet();
       await wallet.init();
@@ -56,38 +49,26 @@ describe('MetaMaskSnapWallet', () => {
       expect(wallet.account).toBeDefined();
     });
 
-    it('set the properties base on the given network', async () => {
-      const expectedAccountAddress = '0x04882a372da3dfe1c53170ad75893832469bf87b62b13e84662565c4a88f25cd'; // in hex
-      const installSpy = jest.spyOn(MetaMaskSnap.prototype, 'installIfNot');
-      jest.spyOn(MetaMaskSnap.prototype, 'getCurrentNetwork');
-      jest.spyOn(MetaMaskSnap.prototype, 'recoverDefaultAccount').mockResolvedValue(
-        generateAccount({
-          address: expectedAccountAddress,
-        }),
-      );
-      installSpy.mockResolvedValue(true);
+    it('does not create the lock if the `createLock` param is false', async () => {
+      const runExclusiveSpy = jest.spyOn(Mutex.prototype, 'runExclusive');
+      runExclusiveSpy.mockReturnThis();
+      mockWalletInit({});
 
       const wallet = createWallet();
-      await wallet.init(SepoliaNetwork);
+      await wallet.init(false);
 
-      expect(installSpy).toHaveBeenCalled();
-      expect(wallet.isConnected).toBe(true);
-      expect(wallet.selectedAddress).toStrictEqual(expectedAccountAddress);
-      expect(wallet.chainId).toStrictEqual(SepoliaNetwork.chainId);
-      expect(wallet.provider).toBeDefined();
-      expect(wallet.account).toBeDefined();
+      expect(runExclusiveSpy).not.toHaveBeenCalled();
     });
 
     it('throw `Snap is not installed` error if the snap is not able to install', async () => {
-      jest.spyOn(MetaMaskSnap.prototype, 'installIfNot').mockResolvedValue(false);
+      mockWalletInit({ install: false });
 
       const wallet = createWallet();
       await expect(wallet.init()).rejects.toThrow('Snap is not installed');
     });
 
     it('throw `Unable to find the selected network` error if the network is not return from snap', async () => {
-      jest.spyOn(MetaMaskSnap.prototype, 'installIfNot').mockResolvedValue(true);
-      jest.spyOn(MetaMaskSnap.prototype, 'getCurrentNetwork').mockResolvedValue(null as unknown as Network);
+      mockWalletInit({ currentNetwork: null as unknown as Network });
 
       const wallet = createWallet();
       await expect(wallet.init()).rejects.toThrow('Unable to find the selected network');
@@ -96,9 +77,7 @@ describe('MetaMaskSnapWallet', () => {
 
   describe('account', () => {
     it('returns an account object', async () => {
-      jest.spyOn(MetaMaskSnap.prototype, 'installIfNot').mockResolvedValue(true);
-      jest.spyOn(MetaMaskSnap.prototype, 'getCurrentNetwork').mockResolvedValue(SepoliaNetwork);
-      jest.spyOn(MetaMaskSnap.prototype, 'recoverDefaultAccount').mockResolvedValue(generateAccount({}));
+      mockWalletInit({});
 
       const wallet = createWallet();
       await wallet.enable();
@@ -115,9 +94,7 @@ describe('MetaMaskSnapWallet', () => {
 
   describe('provider', () => {
     it('returns an provider object', async () => {
-      jest.spyOn(MetaMaskSnap.prototype, 'installIfNot').mockResolvedValue(true);
-      jest.spyOn(MetaMaskSnap.prototype, 'getCurrentNetwork').mockResolvedValue(SepoliaNetwork);
-      jest.spyOn(MetaMaskSnap.prototype, 'recoverDefaultAccount').mockResolvedValue(generateAccount({}));
+      mockWalletInit({});
 
       const wallet = createWallet();
       await wallet.enable();
@@ -129,6 +106,49 @@ describe('MetaMaskSnapWallet', () => {
       const wallet = createWallet();
 
       expect(() => wallet.provider).toThrow('Network is not set');
+    });
+  });
+
+  describe('request', () => {
+    it('executes a request', async () => {
+      const spy = jest.spyOn(WalletSupportedSpecs.prototype, 'execute');
+      spy.mockReturnThis();
+
+      const wallet = createWallet();
+      await wallet.request({ type: 'wallet_supportedSpecs' });
+
+      expect(spy).toHaveBeenCalled();
+    });
+
+    it('throws `WalletRpcError` if the request method does not exist', async () => {
+      const wallet = createWallet();
+      // force the 'invalid_method' as a correct type of the request to test the error
+      await expect(wallet.request({ type: 'invalid_method' as unknown as 'wallet_supportedSpecs' })).rejects.toThrow(
+        'Method not supported',
+      );
+    });
+  });
+
+  describe('isPreauthorized', () => {
+    it('returns true', async () => {
+      const wallet = createWallet();
+      expect(await wallet.isPreauthorized()).toBe(true);
+    });
+  });
+
+  describe('on', () => {
+    it('throws `Method not supported` error', async () => {
+      const wallet = createWallet();
+
+      expect(() => wallet.on()).toThrow('Method not supported');
+    });
+  });
+
+  describe('off', () => {
+    it('throws `Method not supported` error', async () => {
+      const wallet = createWallet();
+
+      expect(() => wallet.off()).toThrow('Method not supported');
     });
   });
 });

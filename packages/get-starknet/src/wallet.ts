@@ -11,6 +11,7 @@ import { MetaMaskSigner } from './signer';
 import { MetaMaskSnap } from './snap';
 import type { MetaMaskProvider, Network } from './type';
 import type { IStarknetWalletRpc } from './utils';
+import { WalletRpcError, WalletRpcErrorCode } from './utils/error';
 
 export class MetaMaskSnapWallet implements StarknetWindowObject {
   id: string;
@@ -60,6 +61,13 @@ export class MetaMaskSnapWallet implements StarknetWindowObject {
     ]);
   }
 
+  /**
+   * Execute the Wallet RPC request.
+   * It will call the corresponding RPC handler based on the request type.
+   *
+   * @param call - The RPC request object.
+   * @returns The corresponding RPC response.
+   */
   async request<Data extends RpcMessage>(call: Omit<Data, 'result'>): Promise<Data['result']> {
     const { type, params } = call;
 
@@ -69,7 +77,7 @@ export class MetaMaskSnapWallet implements StarknetWindowObject {
       return await handler.execute(params);
     }
 
-    throw new Error(`Method not supported`);
+    throw new WalletRpcError(`Method not supported`, WalletRpcErrorCode.Unknown);
   }
 
   async #getNetwork(): Promise<Network> {
@@ -120,37 +128,54 @@ export class MetaMaskSnapWallet implements StarknetWindowObject {
     return this.#chainId;
   }
 
-  // This method is to make sure the local state network is sync with the snap,
-  // Hence to set the updated address, account object, provider object and chainId
-  async init(net?: Network) {
+  /**
+   * Initializes the wallet by fetching the network and account information.
+   * and set the network, address, account object and provider object.
+   *
+   * @param createLock - The flag to enable/disable the mutex lock. Default is true.
+   */
+  async init(createLock = true) {
+    if (createLock) {
+      await this.lock.runExclusive(async () => {
+        await this.#init();
+      });
+    } else {
+      await this.#init();
+    }
+  }
+
+  async #init() {
     // Always reject any request if the snap is not installed
     if (!(await this.snap.installIfNot())) {
       throw new Error('Snap is not installed');
     }
 
-    const network = net ?? (await this.#getNetwork());
+    const network = await this.#getNetwork();
     if (!network) {
       throw new Error('Unable to find the selected network');
     }
 
-    // in case of multiple calls to init, we need to ensure that only one call is in progress
-    await this.lock.runExclusive(async () => {
-      if (!this.#network || network.chainId !== this.#network.chainId) {
-        // address is depends on network, if network changes, address will update
-        this.#selectedAddress = await this.#getWalletAddress(network.chainId);
-        // provider is depends on network.nodeUrl, if network changes, set provider to undefine for reinitialization
-        this.#provider = undefined;
-        // account is depends on address and provider, if network changes, address will update,
-        // hence set account to undefine for reinitialization
-        this.#account = undefined;
-      }
+    if (!this.#network || network.chainId !== this.#network.chainId) {
+      // address is depends on network, if network changes, address will update
+      this.#selectedAddress = await this.#getWalletAddress(network.chainId);
+      // provider is depends on network.nodeUrl, if network changes, set provider to undefine for reinitialization
+      this.#provider = undefined;
+      // account is depends on address and provider, if network changes, address will update,
+      // hence set account to undefine for reinitialization
+      this.#account = undefined;
+    }
 
-      this.#network = network;
-      this.#chainId = network.chainId;
-      this.isConnected = true;
-    });
+    this.#network = network;
+    this.#chainId = network.chainId;
+    this.isConnected = true;
   }
 
+  /**
+   * The entry point that trigger by `connect()` in get-starknet.
+   * It initializes the `MetaMaskSnapWallet` object and return the address that collect from Snap.
+   *
+   * @returns An array of address.
+   */
   async enable() {
     await this.init();
     return [this.selectedAddress];
