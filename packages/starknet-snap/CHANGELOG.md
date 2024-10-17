@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.11.0](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v2.10.1...starknet-snap-v2.11.0) (2024-10-17)
+
+
+### Features
+
+* add RPC `starkNet_getDeploymentData` ([#381](https://github.com/Consensys/starknet-snap/issues/381)) ([a034bcf](https://github.com/Consensys/starknet-snap/commit/a034bcfb3b60242559e57f7ffbba9a7359444f1f))
+
+
+### Bug Fixes
+
+* the RPC starkNet_executeTxn storing incorrect state data if single calls argument was given ([#376](https://github.com/Consensys/starknet-snap/issues/376)) ([508b958](https://github.com/Consensys/starknet-snap/commit/508b9584b534bd93235296fd36328fbaaa52334b))
+
 ## [2.10.1](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v2.10.0...starknet-snap-v2.10.1) (2024-10-02)
 
 
