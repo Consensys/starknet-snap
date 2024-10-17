@@ -10,6 +10,8 @@ export type AccContract = {
   derivationPath: string;
   deployTxnHash: string; // in hex
   chainId: string; // in hex
+  upgradeRequired?: boolean;
+  deployRequired?: boolean;
 };
 
 export type Network = {
