@@ -6,7 +6,13 @@ import { Provider } from 'starknet';
 
 import { MetaMaskAccount } from './accounts';
 import { RpcMethod, WalletIconMetaData } from './constants';
-import { WalletSupportedSpecs, WalletSupportedWalletApi, WalletSwitchStarknetChain, WalletRequestAccount, WalletRequestChainId } from './rpcs';
+import {
+  WalletSupportedSpecs,
+  WalletSupportedWalletApi,
+  WalletSwitchStarknetChain,
+  WalletRequestAccount,
+  WalletRequestChainId,
+} from './rpcs';
 import { MetaMaskSigner } from './signer';
 import { MetaMaskSnap } from './snap';
 import type { MetaMaskProvider, Network } from './type';
