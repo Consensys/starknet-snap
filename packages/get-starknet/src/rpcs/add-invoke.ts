@@ -1,4 +1,5 @@
 import type { RpcTypeToMessageMap } from 'get-starknet-core';
+import type { Call } from 'starknet';
 
 import { StarknetWalletRpc } from '../utils/rpc';
 
@@ -10,7 +11,8 @@ export class WalletAddInvokeTransaction extends StarknetWalletRpc {
   async handleRequest(params: Params): Promise<Result> {
     const { calls } = params;
 
-    const result = await this.snap.addInvoke(this.wallet.selectedAddress, calls);
+    // Todo remove the cast when merging to main
+    const result = await this.snap.execute(this.wallet.selectedAddress, calls as unknown as Call[]);
 
     return result;
   }

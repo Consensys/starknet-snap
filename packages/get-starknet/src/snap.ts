@@ -12,10 +12,8 @@ import type {
   Signature,
   TypedData,
 } from 'starknet';
-import type { Call as CallGetStarknetV4 } from 'starknet-types-07';
 
 import type { AccContract, MetaMaskProvider, Network, RequestSnapResponse } from './type';
-import { formatCalls } from './utils/helper';
 
 export class MetaMaskSnap {
   #provider: MetaMaskProvider;
@@ -122,25 +120,6 @@ export class MetaMaskSnap {
             calls,
             details,
             abis,
-            ...(await this.#getSnapParams()),
-          }),
-        },
-      },
-    })) as InvokeFunctionResponse;
-  }
-
-  async addInvoke(address: string, calls: CallGetStarknetV4[]): Promise<InvokeFunctionResponse> {
-    // Format the `calls` using the conversion function
-    const formattedCalls = formatCalls(calls);
-    return (await this.#provider.request({
-      method: 'wallet_invokeSnap',
-      params: {
-        snapId: this.#snapId,
-        request: {
-          method: 'starkNet_executeTxn',
-          params: this.removeUndefined({
-            address,
-            formattedCalls,
             ...(await this.#getSnapParams()),
           }),
         },
