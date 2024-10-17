@@ -2,6 +2,7 @@ import type { RpcMessage, RpcTypeToMessageMap } from 'get-starknet-core';
 
 import type { MetaMaskSnap } from '../snap';
 import type { MetaMaskSnapWallet } from '../wallet';
+import { createStarkError } from './error';
 
 export type IStarknetWalletRpc = {
   execute<Rpc extends RpcMessage['type']>(
@@ -22,9 +23,12 @@ export abstract class StarknetWalletRpc implements IStarknetWalletRpc {
   async execute<Rpc extends RpcMessage['type']>(
     params?: RpcTypeToMessageMap[Rpc]['params'],
   ): Promise<RpcTypeToMessageMap[Rpc]['result']> {
-    await this.wallet.init();
-
-    return this.handleRequest(params);
+    try {
+      await this.wallet.init(false);
+      return await this.handleRequest(params);
+    } catch (error) {
+      throw createStarkError(error?.data?.walletRpcError?.code);
+    }
   }
 
   abstract handleRequest<Rpc extends RpcMessage['type']>(
