@@ -1,6 +1,7 @@
 export enum RpcMethod {
   WalletSwitchStarknetChain = 'wallet_switchStarknetChain',
   WalletSupportedSpecs = 'wallet_supportedSpecs',
+  WalletSupportedWalletApi = 'wallet_supportedWalletApi',
   WalletRequestAccounts = 'wallet_requestAccounts',
   WalletRequestChainId = 'wallet_requestChainId',
 }
@@ -10,3 +11,6 @@ export const WalletIconMetaData = `data:image/svg+xml;utf8;base64,PHN2ZyB4bWxucz
 // The supported RPC version should be update base on the Provider.
 // With Provider `Alchemy`, it is 0.7
 export const SupportedStarknetSpecVersion = ['0.7'];
+
+// The wallet API support is 0.7.2 but the RPC specs requests xx.yy. Hence we skip the last digits.
+export const SupportedWalletApi = ['0.7'];
