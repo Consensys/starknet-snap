@@ -6,7 +6,7 @@ import { Provider } from 'starknet';
 
 import { MetaMaskAccount } from './accounts';
 import { RpcMethod, WalletIconMetaData } from './constants';
-import { WalletSupportedSpecs, WalletSwitchStarknetChain, WalletDeploymentData } from './rpcs';
+import { WalletSupportedSpecs, WalletSwitchStarknetChain, WalletRequestAccount, WalletRequestChainId, WalletDeploymentData } from './rpcs';
 import { MetaMaskSigner } from './signer';
 import { MetaMaskSnap } from './snap';
 import type { MetaMaskProvider, Network } from './type';
@@ -59,6 +59,8 @@ export class MetaMaskSnapWallet implements StarknetWindowObject {
       [RpcMethod.WalletSwitchStarknetChain, new WalletSwitchStarknetChain(this)],
       [RpcMethod.WalletSupportedSpecs, new WalletSupportedSpecs(this)],
       [RpcMethod.walletDeploymentData, new WalletDeploymentData(this)],
+      [RpcMethod.WalletRequestAccounts, new WalletRequestAccount(this)],
+      [RpcMethod.WalletRequestChainId, new WalletRequestChainId(this)],
     ]);
   }
 
