@@ -30,8 +30,3 @@ export type RequestSnapResponse = {
     blocked: boolean;
   };
 };
-
-export type ApiVersion = {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  api_version?: string;
-};

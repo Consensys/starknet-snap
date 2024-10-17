@@ -1,5 +1,3 @@
-import type { ApiVersion } from './type';
-
 export enum RpcMethod {
   WalletSwitchStarknetChain = 'wallet_switchStarknetChain',
   WalletSupportedSpecs = 'wallet_supportedSpecs',
@@ -15,4 +13,4 @@ export const WalletIconMetaData = `data:image/svg+xml;utf8;base64,PHN2ZyB4bWxucz
 export const SupportedStarknetSpecVersion = ['0.7'];
 
 // The wallet API support is 0.7.2 but the RPC specs requests xx.yy. Hence we skip the last digits.
-export const SupportedWalletApi = ['0.7'] as ApiVersion[];
+export const SupportedWalletApi = ['0.7'];

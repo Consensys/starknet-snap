@@ -9,6 +9,6 @@ type Result = RpcTypeToMessageMap[WalletSupportedWalletApiMethod]['result'];
 
 export class WalletSupportedWalletApi extends StarknetWalletRpc {
   async handleRequest(_param: Params): Promise<Result> {
-    return SupportedWalletApi;
+    return SupportedWalletApi as unknown as Result;
   }
 }
