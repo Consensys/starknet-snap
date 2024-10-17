@@ -131,7 +131,7 @@ export class MetaMaskSnapWallet implements StarknetWindowObject {
 
   /**
    * Initializes the wallet by fetching the network and account information.
-   * and set the network, address, account object and provider object.
+   * and sets the network, address, account object and provider object.
    *
    * @param createLock - The flag to enable/disable the mutex lock. Default is true.
    */
@@ -172,8 +172,9 @@ export class MetaMaskSnapWallet implements StarknetWindowObject {
   }
 
   /**
-   * The entry point that trigger by `connect()` in get-starknet.
-   * It initializes the `MetaMaskSnapWallet` object and return the address that collect from Snap.
+   * Initializes the `MetaMaskSnapWallet` object and retrieves an array of addresses derived from Snap.
+   * Currently, the array contains only one address, but it is returned as an array to
+   * accommodate potential support for multiple addresses in the future.
    *
    * @returns An array of address.
    */
