@@ -40,6 +40,7 @@ export type GetDeploymentDataResponse = Infer<
 
 /**
  * The RPC handler to get the deployment data.
+ *
  */
 export class GetDeploymentDataRpc extends AccountRpcController<
   GetDeploymentDataParams,
@@ -67,8 +68,10 @@ export class GetDeploymentDataRpc extends AccountRpcController<
     params: GetDeploymentDataParams,
   ): Promise<GetDeploymentDataResponse> {
     const { address } = params;
+    // Due to AccountRpcController built-in validation,
     // if the account required to force deploy (Cairo 0 with balance), it will alert with a warning dialog.
     // if the account required to force upgrade (Cairo 0 without balance), it will alert with a warning dialog.
+    // hence we can safely assume that the account is Cairo 1 account.
     if (await isAccountDeployed(this.network, address)) {
       throw new AccountAlreadyDeployedError();
     }
