@@ -1,7 +1,7 @@
 export enum RpcMethod {
   WalletSwitchStarknetChain = 'wallet_switchStarknetChain',
   WalletSupportedSpecs = 'wallet_supportedSpecs',
-  walletDeploymentData = 'wallet_deploymentData',
+  WalletDeploymentData = 'wallet_deploymentData',
   WalletRequestAccounts = 'wallet_requestAccounts',
   WalletRequestChainId = 'wallet_requestChainId',
 }

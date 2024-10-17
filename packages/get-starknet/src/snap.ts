@@ -13,7 +13,7 @@ import type {
   TypedData,
 } from 'starknet';
 
-import type { AccContract, MetaMaskProvider, Network, RequestSnapResponse } from './type';
+import type { AccContract, DeploymentData, MetaMaskProvider, Network, RequestSnapResponse } from './type';
 
 export class MetaMaskSnap {
   #provider: MetaMaskProvider;
@@ -272,6 +272,24 @@ export class MetaMaskSnap {
         },
       },
     })) as Network;
+
+    return response;
+  }
+
+  async getDeploymentData(chainId: string, address: string): Promise<DeploymentData> {
+    const response = (await this.#provider.request({
+      method: 'wallet_invokeSnap',
+      params: {
+        snapId: this.#snapId,
+        request: {
+          method: 'starkNet_getDeploymentData',
+          params: {
+            chainId,
+            address,
+          },
+        },
+      },
+    })) as DeploymentData;
 
     return response;
   }
