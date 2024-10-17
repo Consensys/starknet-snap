@@ -1,5 +1,6 @@
 import type { UniversalDetails, Call, InvokeFunctionResponse } from 'starknet';
 import { constants } from 'starknet';
+import type { Call as CallGetStarknetV4 } from 'starknet-types-07';
 
 import callsExamples from '../__tests__/fixture/callsExamples.json'; // Assuming you have a similar fixture
 import { getEstimateFees } from '../__tests__/helper';
@@ -24,7 +25,7 @@ jest.mock('../utils/logger');
 
 const prepareMockExecuteTxn = async (
   transactionHash: string,
-  calls: Call[] | Call,
+  calls: Call[] | Call | CallGetStarknetV4[] | CallGetStarknetV4,
   details: UniversalDetails,
   accountDeployed: boolean,
 ) => {
@@ -115,6 +116,49 @@ describe('ExecuteTxn', () => {
       account.address,
       account.privateKey,
       request.calls,
+      undefined,
+      {
+        ...calls.details,
+        maxFee: getEstimatedFeesRepsMock.suggestedMaxFee,
+        resourceBounds:
+          getEstimatedFeesRepsMock.estimateResults[0].resourceBounds,
+      },
+    );
+    expect(getEstimatedFeesSpy).toHaveBeenCalled();
+    expect(createAccountSpy).not.toHaveBeenCalled();
+  });
+
+  it('accepts CallGetStarknetV4 format and converts it correctly', async () => {
+    const calls = callsExamples.callGetStarknetV4Format; // New meaningful key for your callsExamples fixture
+    const {
+      account,
+      createAccountSpy,
+      executeTxnRespMock,
+      getEstimatedFeesSpy,
+      getEstimatedFeesRepsMock,
+      request,
+    } = await prepareMockExecuteTxn(
+      calls.hash,
+      calls.calls, // Calls in CallGetStarknetV4 format
+      calls.details,
+      true,
+    );
+
+    const result = await executeTxn.execute(request);
+
+    expect(result).toStrictEqual(executeTxnRespMock);
+    expect(executeTxnUtil).toHaveBeenCalledWith(
+      STARKNET_SEPOLIA_TESTNET_NETWORK,
+      account.address,
+      account.privateKey,
+      expect.arrayContaining([
+        {
+          contractAddress:
+            '0x00b28a089e7fb83debee4607b6334d687918644796b47d9e9e38ea8213833137', // converted contract_address from CallGetStarknetV4 to contractAddress
+          entrypoint: 'functionName', // converted entry_point to entrypoint
+          calldata: ['1', '1'], // kept calldata as is
+        },
+      ]),
       undefined,
       {
         ...calls.details,

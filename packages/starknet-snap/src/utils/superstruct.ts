@@ -7,6 +7,7 @@ import type {
   UniversalDetails,
 } from 'starknet';
 import { constants, TransactionType, validateAndParseAddress } from 'starknet';
+import type { Call as CallGetStarknetV4 } from 'starknet-types-07';
 import type { Struct } from 'superstruct';
 import {
   boolean,
@@ -29,6 +30,7 @@ import {
 } from 'superstruct';
 
 import { CAIRO_VERSION_LEGACY, CAIRO_VERSION } from './constants';
+import { formatCalls } from './formatterUtils';
 
 export const AddressStruct = refine(
   string(),
@@ -294,7 +296,9 @@ export const BaseInvocationStruct = object({
   ]),
 });
 
-export const CallsStruct = define<Call[] | Call>(
+export const CallsStruct = define<
+  Call[] | Call | CallGetStarknetV4[] | CallGetStarknetV4
+>(
   // We do use a custom `define` for this type to avoid having to use a `union` since error
   // messages are a bit confusing.
   //
@@ -302,7 +306,11 @@ export const CallsStruct = define<Call[] | Call>(
   // use a much nicer message from `superstruct`.
   'CallsStruct',
   (value: unknown[] | unknown) => {
-    const calls = Array.isArray(value) ? (value as Call[]) : [value as Call];
+    const calls = formatCalls(
+      Array.isArray(value) ? (value as Call[]) : [value as Call],
+    );
+
+    // We try to format it to correct format if needed
     return validate(calls, array(CallDataStruct))[0] ?? true;
   },
 );

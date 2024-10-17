@@ -20,6 +20,7 @@ import {
   UniversalDetailsStruct,
   CallsStruct,
   mapDeprecatedParams,
+  formatCalls,
 } from '../utils';
 import { UserRejectedOpError } from '../utils/exceptions';
 import { logger } from '../utils/logger';
@@ -85,6 +86,9 @@ export class ExecuteTxnRpc extends AccountRpcController<
     // Apply the mappings to params
     mapDeprecatedParams(params, paramMappings);
     await super.preExecute(params);
+    params.calls = formatCalls(
+      Array.isArray(params.calls) ? params.calls : [params.calls],
+    );
   }
 
   /**
@@ -116,7 +120,7 @@ export class ExecuteTxnRpc extends AccountRpcController<
         [
           {
             type: TransactionType.INVOKE,
-            payload: calls,
+            payload: calls as Call | Call[],
           },
         ],
         details,
@@ -125,12 +129,11 @@ export class ExecuteTxnRpc extends AccountRpcController<
     const accountDeployed = !includeDeploy;
     const version =
       details?.version as unknown as constants.TRANSACTION_VERSION;
-
     if (
       !(await this.getExecuteTxnConsensus(
         address,
         accountDeployed,
-        calls,
+        calls as Call | Call[],
         suggestedMaxFee,
         version,
       ))
@@ -160,7 +163,7 @@ export class ExecuteTxnRpc extends AccountRpcController<
       this.network,
       address,
       privateKey,
-      calls,
+      calls as Call | Call[],
       abis,
       {
         ...details,
@@ -182,7 +185,11 @@ export class ExecuteTxnRpc extends AccountRpcController<
     const call = Array.isArray(calls) ? calls[0] : calls;
 
     await this.txnStateManager.addTransaction(
-      this.createInvokeTxn(address, executeTxnResp.transaction_hash, call),
+      this.createInvokeTxn(
+        address,
+        executeTxnResp.transaction_hash,
+        call as Call,
+      ),
     );
 
     return executeTxnResp;

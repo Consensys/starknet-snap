@@ -14,6 +14,21 @@
     },
     "hash": "0x042f5e546b2e55eb6b1b735f15fbfbd7621fc01ea7c96dcf87928ac27f054adb"
   },
+  "callGetStarknetV4Format": {
+    "calls": [
+      {
+        "contract_address": "0x00b28a089e7fb83debee4607b6334d687918644796b47d9e9e38ea8213833137",
+        "entry_point": "functionName",
+        "calldata": ["1", "1"]
+      }
+    ],
+    "details": {
+      "nonce": "0x1",
+      "version": "0x1",
+      "maxFee": "1000000000000000"
+    },
+    "hash": "0x042f5e546b2e55eb6b1b735f15fbfbd7621fc01ea7c96dcf87928ac27f054adb"
+  },
   "singleCall": {
     "calls": {
       "contractAddress": "0x00b28a089e7fb83debee4607b6334d687918644796b47d9e9e38ea8213833137",
