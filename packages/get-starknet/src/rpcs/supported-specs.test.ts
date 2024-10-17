@@ -10,6 +10,6 @@ describe('WalletSupportedWalletApi', () => {
     const walletSupportedSpecs = new WalletSupportedSpecs(wallet);
     const result = await walletSupportedSpecs.execute();
 
-    expect(result).toBe(SupportedStarknetSpecVersion);
+    expect(result).toStrictEqual(SupportedStarknetSpecVersion);
   });
 });
