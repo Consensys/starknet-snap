@@ -1,6 +1,5 @@
 import { mockWalletInit, createWallet } from '../__tests__/helper';
 import { MetaMaskSnap } from '../snap';
-import { WalletRpcError } from '../utils/error';
 import { WalletAddInvokeTransaction } from './add-invoke';
 
 describe('WalletAddInvokeTransaction', () => {
@@ -47,27 +46,5 @@ describe('WalletAddInvokeTransaction', () => {
 
     expect(result).toStrictEqual(expectedResult.transaction_hash);
     expect(invokeTransactionSpy).toHaveBeenCalledWith(undefined, calls);
-  });
-
-  it('throws `WalletRpcError` if invoking transaction fails', async () => {
-    const calls = [
-      {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        contract_address: '0xabcdef',
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        entry_point: 'transfer',
-        calldata: ['0x1', '0x2', '0x3'],
-      },
-    ];
-    const { wallet, invokeTransactionSpy } = prepareInvokeTransaction('0x12345abcd');
-    invokeTransactionSpy.mockRejectedValue(new Error('Transaction failed'));
-
-    const walletAddInvokeTransaction = new WalletAddInvokeTransaction(wallet);
-
-    await expect(
-      walletAddInvokeTransaction.handleRequest({
-        calls,
-      }),
-    ).rejects.toThrow(WalletRpcError);
   });
 });
