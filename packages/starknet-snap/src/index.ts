@@ -35,6 +35,7 @@ import type {
   SignDeclareTransactionParams,
   VerifySignatureParams,
   SwitchNetworkParams,
+  GetDeploymentDataParams,
 } from './rpcs';
 import {
   displayPrivateKey,
@@ -45,6 +46,7 @@ import {
   signDeclareTransaction,
   verifySignature,
   switchNetwork,
+  getDeploymentData,
 } from './rpcs';
 import { sendTransaction } from './sendTransaction';
 import { signDeployAccountTransaction } from './signDeployAccountTransaction';
@@ -278,6 +280,11 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
 
       case 'starkNet_getStarkName':
         return await getStarkName(apiParams);
+
+      case 'starkNet_getDeploymentData':
+        return await getDeploymentData.execute(
+          apiParams as unknown as GetDeploymentDataParams,
+        );
 
       default:
         throw new MethodNotFoundError() as unknown as Error;

@@ -6,3 +6,4 @@ export * from './signTransaction';
 export * from './sign-declare-transaction';
 export * from './verify-signature';
 export * from './switch-network';
+export * from './get-deployment-data';
