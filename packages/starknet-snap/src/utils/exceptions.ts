@@ -54,3 +54,12 @@ export class UnknownError extends SnapError {
     );
   }
 }
+
+export class AccountAlreadyDeployedError extends SnapError {
+  constructor(message?: string) {
+    super(
+      message ?? 'Account already deployed',
+      createWalletRpcErrorWrapper(WalletRpcErrorCode.AccountAlreadyDeployed),
+    );
+  }
+}
