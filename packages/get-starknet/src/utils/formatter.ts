@@ -30,45 +30,6 @@ export const formatCalls = (calls: Call[] | CallGetStarknetV4[]): Call[] => {
 };
 
 /**
- * Converts `AddDeclareTransactionParameters` into the `DeclareContractPayload` format.
- *
- * The function ensures that:
- * - `compiled_class_hash` is renamed to `classHash` if needed.
- * - `contract_class.sierra_program` is passed as is.
- * - `contract_class.entry_points_by_type` is converted appropriately to match `SierraEntryPointsByType`.
- * - `contract_class.abi` is passed as is (since Abi accepts any, a string should be fine).
- *
- * @param params - The `AddDeclareTransactionParameters` to be converted.
- * @returns The formatted `DeclareContractPayload`.
- */
-export const formatDeclareTransactionParams = (params: AddDeclareTransactionParameters): DeclareContractPayload => {
-  const { compiled_class_hash, class_hash, contract_class } = params;
-
-  return {
-    classHash: class_hash ?? compiled_class_hash, // Use `class_hash` if provided; otherwise, use `compiled_class_hash`.
-    contract: {
-      sierra_program: contract_class.sierra_program, // `sierra_program` is already in the correct format.
-      contract_class_version: contract_class.contract_class_version, // Version is passed directly.
-      entry_points_by_type: {
-        CONSTRUCTOR: contract_class?.entry_points_by_type?.CONSTRUCTOR.map((ep) => ({
-          selector: ep.selector,
-          function_idx: ep.function_idx,
-        })),
-        EXTERNAL: contract_class?.entry_points_by_type?.EXTERNAL.map((ep) => ({
-          selector: ep.selector,
-          function_idx: ep.function_idx,
-        })),
-        L1_HANDLER: contract_class?.entry_points_by_type?.L1_HANDLER.map((ep) => ({
-          selector: ep.selector,
-          function_idx: ep.function_idx,
-        })),
-      },
-      abi: contract_class.abi as unknown as Abi, // Abi accepts `any`, so passing a string should work fine.
-    },
-  };
-};
-
-/**
  * Converts `AddDeclareTransactionParameters` into `DeclareContractPayload` format.
  *
  * The function ensures that:
@@ -89,15 +50,15 @@ export const formatDeclareTransaction = (params: AddDeclareTransactionParameters
       sierra_program: contract_class.sierra_program,
       contract_class_version: contract_class.contract_class_version,
       entry_points_by_type: {
-        CONSTRUCTOR: contract_class.entry_points_by_type.CONSTRUCTOR.map((ep) => ({
+        CONSTRUCTOR: contract_class?.entry_points_by_type.CONSTRUCTOR.map((ep) => ({
           selector: ep.selector,
           function_idx: ep.function_idx,
         })),
-        EXTERNAL: contract_class.entry_points_by_type.EXTERNAL.map((ep) => ({
+        EXTERNAL: contract_class?.entry_points_by_type.EXTERNAL.map((ep) => ({
           selector: ep.selector,
           function_idx: ep.function_idx,
         })),
-        L1_HANDLER: contract_class.entry_points_by_type.L1_HANDLER.map((ep) => ({
+        L1_HANDLER: contract_class?.entry_points_by_type.L1_HANDLER.map((ep) => ({
           selector: ep.selector,
           function_idx: ep.function_idx,
         })),
