@@ -22,7 +22,6 @@ describe('WalletAddInvokeTransaction', () => {
     const wallet = createWallet();
     const account = generateAccount({});
     mockWalletInit({ address: account.address });
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     const executeSpy = jest.spyOn(MetaMaskSnap.prototype, 'execute');
     executeSpy.mockResolvedValue(expectedResult);
     const walletAddInvokeTransaction = new WalletAddInvokeTransaction(wallet);
