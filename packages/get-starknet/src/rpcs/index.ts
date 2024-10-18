@@ -4,6 +4,7 @@ export * from './deployment-data';
 export * from './supported-wallet-api';
 export * from './request-account';
 export * from './request-chain-id';
+export * from './add-invoke';
 export * from './watch-asset';
 export * from './sign-typed-data';
 export * from './get-permissions';
