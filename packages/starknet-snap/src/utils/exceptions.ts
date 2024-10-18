@@ -63,3 +63,12 @@ export class AccountAlreadyDeployedError extends SnapError {
     );
   }
 }
+
+export class TokenIsPreloadedError extends SnapError {
+  constructor(message?: string) {
+    super(
+      message ??
+        'Token address, name, or symbol is the same as one of the preloaded tokens',
+    );
+  }
+}

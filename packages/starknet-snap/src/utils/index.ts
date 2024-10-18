@@ -7,4 +7,6 @@ export * from './logger';
 export * from './formatterUtils';
 export * from './snap-state';
 export * from './url';
+export * from './string';
+export * from './token';
 // TODO: add other utils

@@ -26,7 +26,45 @@ import {
   V3TransactionDetailStruct,
   InvocationsStruct,
   ChainIdStruct,
+  TokenSymbolStruct,
+  TokenNameStruct,
 } from './superstruct';
+
+describe('TokenNameStruct', () => {
+  it.each(['Hello', 'Hello World'])(
+    'does not throw error if the token name is valid - %s',
+    (tokenName) => {
+      expect(() => assert(tokenName, TokenNameStruct)).not.toThrow();
+    },
+  );
+
+  it.each([
+    // non ASCII string
+    'Schönen',
+    // invalid length, longer than 64 chars
+    '372da3dfe1c53170ad75893832469bf87b62b13e84662565c4a88f25cddddddd372da3dfe1c53170ad75893832469bf87b62b13e84662565c4a88f25cddddddd',
+  ])('throws error if the token name is invalid - %s', (tokenName) => {
+    expect(() => assert(tokenName, TokenNameStruct)).toThrow(StructError);
+  });
+});
+
+describe('TokenSymbolStruct', () => {
+  it.each(['symbol', 'symbol A'])(
+    'does not throw error if the token symbol is valid - %s',
+    (tokenSymbol) => {
+      expect(() => assert(tokenSymbol, TokenSymbolStruct)).not.toThrow();
+    },
+  );
+
+  it.each([
+    // non ASCII string
+    'Schönen',
+    // invalid length, longer than 16 chars
+    'ABCDEFGHIJKLMNOPABCDEFGHIJKLMNOP',
+  ])('throws error if the token symbol is invalid - %s', (tokenSymbol) => {
+    expect(() => assert(tokenSymbol, TokenSymbolStruct)).toThrow(StructError);
+  });
+});
 
 describe('AddressStruct', () => {
   it.each([

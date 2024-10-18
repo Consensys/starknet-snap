@@ -1,8 +1,16 @@
-import type { Network } from './types/snapState';
+import type { Erc20Token, Network } from './types/snapState';
 import {
   SnapEnv,
   STARKNET_MAINNET_NETWORK,
   STARKNET_SEPOLIA_TESTNET_NETWORK,
+  ETHER_MAINNET,
+  ETHER_SEPOLIA_TESTNET,
+  USDC_MAINNET,
+  USDC_SEPOLIA_TESTNET,
+  USDT_MAINNET,
+  USDT_SEPOLIA_TESTNET,
+  STRK_MAINNET,
+  STRK_SEPOLIA_TESTNET,
 } from './utils/constants';
 import { LogLevel } from './utils/logger';
 
@@ -11,6 +19,7 @@ export type SnapConfig = {
   snapEnv: SnapEnv;
   defaultNetwork: Network;
   availableNetworks: Network[];
+  preloadTokens: Erc20Token[];
 };
 
 export const Config: SnapConfig = {
@@ -24,5 +33,16 @@ export const Config: SnapConfig = {
   availableNetworks: [
     STARKNET_MAINNET_NETWORK,
     STARKNET_SEPOLIA_TESTNET_NETWORK,
+  ],
+
+  preloadTokens: [
+    ETHER_MAINNET,
+    ETHER_SEPOLIA_TESTNET,
+    USDC_MAINNET,
+    USDC_SEPOLIA_TESTNET,
+    USDT_MAINNET,
+    USDT_SEPOLIA_TESTNET,
+    STRK_MAINNET,
+    STRK_SEPOLIA_TESTNET,
   ],
 };
