@@ -1,5 +1,6 @@
 import type { RpcTypeToMessageMap } from 'get-starknet-core';
 
+import { formatCalls } from '../utils/helper';
 import { StarknetWalletRpc } from '../utils/rpc';
 
 export type WalletAddInvokeTransactionMethod = 'wallet_addInvokeTransaction';
@@ -10,8 +11,6 @@ export class WalletAddInvokeTransaction extends StarknetWalletRpc {
   async handleRequest(params: Params): Promise<Result> {
     const { calls } = params;
 
-    const result = await this.snap.addInvoke(this.wallet.selectedAddress, calls);
-
-    return result;
+    return await this.snap.execute(this.wallet.selectedAddress, formatCalls(calls));
   }
 }

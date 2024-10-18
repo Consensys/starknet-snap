@@ -1,10 +1,11 @@
 import { mockWalletInit, createWallet } from '../__tests__/helper';
 import { MetaMaskSnap } from '../snap';
+import { formatCalls } from '../utils/helper';
 import { WalletAddInvokeTransaction } from './add-invoke';
 
 describe('WalletAddInvokeTransaction', () => {
   const mockInvokeTransaction = (expectedResult) => {
-    const spy = jest.spyOn(MetaMaskSnap.prototype, 'addInvoke');
+    const spy = jest.spyOn(MetaMaskSnap.prototype, 'execute');
     spy.mockResolvedValue(expectedResult);
     return spy;
   };
@@ -31,6 +32,7 @@ describe('WalletAddInvokeTransaction', () => {
         calldata: ['0x1', '0x2', '0x3'],
       },
     ];
+    const callsFormated = formatCalls(calls);
     const expectedResult = {
       // eslint-disable-next-line @typescript-eslint/naming-convention
       transaction_hash: '0x12345abcd',
@@ -45,6 +47,6 @@ describe('WalletAddInvokeTransaction', () => {
     });
 
     expect(result).toStrictEqual(expectedResult.transaction_hash);
-    expect(invokeTransactionSpy).toHaveBeenCalledWith(undefined, calls);
+    expect(invokeTransactionSpy).toHaveBeenCalledWith(undefined, callsFormated);
   });
 });
