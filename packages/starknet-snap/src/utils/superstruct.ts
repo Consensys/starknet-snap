@@ -43,7 +43,7 @@ export const TokenNameStruct = refine(
     if (isValidAsciiStrField(value, MAXIMUM_TOKEN_NAME_LENGTH)) {
       return true;
     }
-    return `The given token name is invalid, needs to be in ASCII chars, not all spaces, and has length larger than ${MAXIMUM_TOKEN_NAME_LENGTH}`;
+    return `The given token name is invalid, needs to be in ASCII chars, not all spaces, and has length smaller than ${MAXIMUM_TOKEN_NAME_LENGTH}`;
   },
 );
 
@@ -54,7 +54,7 @@ export const TokenSymbolStruct = refine(
     if (isValidAsciiStrField(value, MAXIMUM_TOKEN_SYMBOL_LENGTH)) {
       return true;
     }
-    return `The given token symbol is invalid, needs to be in ASCII chars, not all spaces, and has length larger than ${MAXIMUM_TOKEN_SYMBOL_LENGTH}`;
+    return `The given token symbol is invalid, needs to be in ASCII chars, not all spaces, and has length smaller than ${MAXIMUM_TOKEN_SYMBOL_LENGTH}`;
   },
 );
 

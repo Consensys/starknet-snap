@@ -6,7 +6,7 @@ import { isPreloadedToken } from './token';
 
 describe('isPreloadedToken', () => {
   it.each(Config.preloadTokens)(
-    'returns ture if the token is a preloaded token',
+    'returns true if the token is a preloaded token',
     (token: Erc20Token) => {
       expect(
         isPreloadedToken({
@@ -34,7 +34,7 @@ describe('isPreloadedToken', () => {
       address: '0x12345',
     },
   ])(
-    'returns ture if the token is a preloaded token but with different name, symbol, address',
+    'returns true if the token is a preloaded token but with different name, symbol, address',
     (token: Erc20Token) => {
       expect(
         isPreloadedToken({

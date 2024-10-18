@@ -62,7 +62,7 @@ export class WatchAssetRpc extends RpcController<
 
   /**
    * Execute the watch asset request handler.
-   * It will promot a dialog to ask user confirmation.
+   * It will prompt a dialog to ask user confirmation.
    *
    * @param params - The parameters of the request.
    * @param params.tokenAddress - The address of the token to add.
@@ -70,7 +70,7 @@ export class WatchAssetRpc extends RpcController<
    * @param params.tokenSymbol - The symbol of the token to add.
    * @param params.tokenDecimals - The decimals of the token to add.
    * @param params.chainId - The chain id of the network to switch.
-   * @returns the response of adding a asset in boolean.
+   * @returns the response of adding the asset in boolean.
    * @throws {UserRejectedRequestError} If the user rejects the request.
    * @throws {Error} If the network with the chain id is not supported.
    * @throws {Error} If the token address, name, or symbol is the same as one of the preloaded tokens.

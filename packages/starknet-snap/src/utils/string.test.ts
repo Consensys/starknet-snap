@@ -1,7 +1,7 @@
 import { isAsciiString, isValidAsciiStrField } from './string';
 
 describe('isAsciiString', () => {
-  it('returns true for an ASCII string', () => {
+  it('returns true for a ASCII string', () => {
     expect(isAsciiString('hello')).toBe(true);
   });
 
@@ -13,7 +13,7 @@ describe('isAsciiString', () => {
 
 describe('isValidAsciiStrField', () => {
   it.each(['hello', 'hello '])(
-    'returns true for an valid ASCII string: %s',
+    'returns true for a valid ASCII string: %s',
     (str: string) => {
       expect(isValidAsciiStrField(str, 10)).toBe(true);
     },
@@ -26,7 +26,10 @@ describe('isValidAsciiStrField', () => {
     'Schönen',
     // non ASCII string
     ' Schönaa ',
-  ])('returns false for a non valid ASCII string: %s', (str: string) => {
-    expect(isValidAsciiStrField(str, 10)).toBe(false);
-  });
+  ])(
+    'returns false for a string that fails ASCII check or length validation: %s',
+    (str: string) => {
+      expect(isValidAsciiStrField(str, 10)).toBe(false);
+    },
+  );
 });

@@ -89,7 +89,7 @@ describe('WatchAssetRpc', () => {
     };
   };
 
-  it('returns true if the token has added', async () => {
+  it('returns true if the token is added', async () => {
     const { request } = await prepareWatchAssetTest({});
 
     const expectedResult = true;
@@ -130,7 +130,7 @@ describe('WatchAssetRpc', () => {
     );
   });
 
-  it('throws `TokenIsPreloadedError` if the given token is one of the preloaded token', async () => {
+  it('throws `TokenIsPreloadedError` if the given token is one of the preloaded tokens', async () => {
     const preloadedToken = Config.preloadTokens[0];
     const { address, symbol, decimals, name, chainId } = preloadedToken;
     // Ensure the network is matching the preloaded token
