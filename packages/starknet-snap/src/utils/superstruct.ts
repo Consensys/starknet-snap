@@ -20,7 +20,6 @@ import {
   number,
   array,
   assign,
-  dynamic,
   define,
   mask,
   validate,
@@ -189,44 +188,6 @@ export const DeclareSignDetailsStruct = assign(
   }),
 );
 
-/**
- * Creates a struct that combines predefined properties with additional dynamic properties.
- *
- * This function generates a Superstruct schema that includes both the predefined properties
- * and any additional properties found in the input. The additional properties are validated
- * according to the specified `additionalPropertyTypes`, or `any` if not provided.
- *
- * @param predefinedProperties - A Superstruct schema defining the base set of properties that are expected.
- * @param additionalPropertyTypes - A Superstruct schema that defines the types for any additional properties.
- * Defaults to `any`, allowing any additional properties.
- * @returns A dynamic struct that first validates against the predefined properties and then
- * includes any additional properties that match the `additionalPropertyTypes` schema.
- */
-export const createStructWithAdditionalProperties = (
-  predefinedProperties: Struct<any, any>,
-  additionalPropertyTypes: Struct<any, any> = any(),
-) => {
-  return dynamic((value) => {
-    if (typeof value !== 'object' || value === null) {
-      return predefinedProperties;
-    }
-
-    const additionalProperties = Object.keys(value).reduce<
-      Record<string, Struct>
-    >((schema, key) => {
-      if (!(key in predefinedProperties.schema)) {
-        schema[key] = additionalPropertyTypes;
-      }
-      return schema;
-    }, {});
-
-    return assign(predefinedProperties, object(additionalProperties));
-  });
-};
-
-// Define the types you expect for additional properties
-export const additionalPropertyTypes = union([string(), number(), any()]);
-
 /* ------------------------------ Contract Struct ------------------------------ */
 /* eslint-disable */
 export const SierraContractEntryPointFieldsStruct = object({
@@ -275,7 +236,7 @@ export const LegacyCompiledContractStruct = object({
   entry_points_by_type: EntryPointByTypeStruct,
   abi: any(),
 });
-/* eslint-disable */
+/* eslint-enable */
 /* ------------------------------ Contract Struct ------------------------------ */
 
 // TODO: add unit test

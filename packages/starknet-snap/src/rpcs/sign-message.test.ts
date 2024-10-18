@@ -14,8 +14,8 @@ import {
   prepareMockAccount,
   prepareConfirmDialog,
 } from './__tests__/helper';
-import { signMessage } from './signMessage';
-import type { SignMessageParams } from './signMessage';
+import { signMessage } from './sign-message';
+import type { SignMessageParams } from './sign-message';
 
 jest.mock('../utils/snap');
 jest.mock('../utils/logger');

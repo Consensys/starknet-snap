@@ -1,4 +1,4 @@
-import { mapDeprecatedParams } from './formatterUtils';
+import { mapDeprecatedParams } from './formatter-utils';
 
 describe('mapDeprecatedParams', () => {
   it('maps deprecated parameters to their new equivalents', () => {

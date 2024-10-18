@@ -1,5 +1,5 @@
 import { constants, TransactionType } from 'starknet';
-import { StructError, assert, object, number, string } from 'superstruct';
+import { StructError, assert } from 'superstruct';
 
 import contractExample from '../__tests__/fixture/contract-example.json';
 import transactionExample from '../__tests__/fixture/transactionExample.json';
@@ -16,7 +16,6 @@ import {
   BaseRequestStruct,
   CairoVersionStruct,
   CallDataStruct,
-  createStructWithAdditionalProperties,
   DeclareSignDetailsStruct,
   EDataModeStruct,
   NumberStringStruct,
@@ -384,55 +383,6 @@ describe('DeclareSignDetailsStruct', () => {
 
   it('throws error if the declare sign details is invalid', () => {
     expect(() => assert({}, DeclareSignDetailsStruct)).toThrow(StructError);
-  });
-});
-
-describe('createStructWithAdditionalProperties', () => {
-  const predefinedProperties = object({
-    name: string(),
-    age: number(),
-  });
-
-  const additionalPropertyTypes = string(); // Additional properties should be strings
-  const ExtendedPropStruct = createStructWithAdditionalProperties(
-    predefinedProperties,
-    additionalPropertyTypes,
-  );
-  it('should validate predefined properties correctly', () => {
-    const validData = {
-      name: 'John',
-      age: 30,
-    };
-    const [error, result] = ExtendedPropStruct.validate(validData);
-
-    expect(error).toBeUndefined();
-    expect(result).toStrictEqual(validData);
-  });
-
-  it('should validate additional properties correctly', () => {
-    const validDataWithExtra = {
-      name: 'John',
-      age: 30,
-      nickname: 'Johnny',
-    };
-
-    const [error, result] = ExtendedPropStruct.validate(validDataWithExtra);
-
-    expect(error).toBeUndefined();
-    expect(result).toStrictEqual(validDataWithExtra);
-  });
-
-  it('should fail validation if additional properties are of the wrong type', () => {
-    const invalidData = {
-      name: 'John',
-      age: 30,
-      nickname: 12345, // Invalid type for additional property
-    };
-
-    const [error] = ExtendedPropStruct.validate(invalidData);
-
-    expect(error).toBeDefined();
-    expect(error?.message).toContain('Expected a string, but received');
   });
 });
 

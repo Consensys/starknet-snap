@@ -12,8 +12,8 @@ import {
   prepareMockAccount,
   prepareConfirmDialog,
 } from './__tests__/helper';
-import { displayPrivateKey } from './displayPrivateKey';
-import type { DisplayPrivateKeyParams } from './displayPrivateKey';
+import { displayPrivateKey } from './display-private-key';
+import type { DisplayPrivateKeyParams } from './display-private-key';
 
 jest.mock('../utils/logger');
 

@@ -16,8 +16,8 @@ import {
   prepareConfirmDialog,
   prepareMockAccount,
 } from './__tests__/helper';
-import type { ExecuteTxnParams } from './executeTxn';
-import { executeTxn } from './executeTxn';
+import type { ExecuteTxnParams } from './execute-txn';
+import { executeTxn } from './execute-txn';
 
 jest.mock('../utils/snap');
 jest.mock('../utils/logger');
