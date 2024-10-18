@@ -5,6 +5,7 @@ export enum RpcMethod {
   WalletSupportedWalletApi = 'wallet_supportedWalletApi',
   WalletRequestAccounts = 'wallet_requestAccounts',
   WalletRequestChainId = 'wallet_requestChainId',
+  WalletWatchAsset = 'wallet_watchAsset',
   WalletSignTypedData = 'wallet_signTypedData',
 }
 
