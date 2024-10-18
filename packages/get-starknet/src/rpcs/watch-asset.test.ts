@@ -4,7 +4,7 @@ import { MetaMaskSnap } from '../snap';
 import { WalletWatchAsset } from './watch-asset';
 
 describe('WalletWatchAsset', () => {
-  it('returns the signature', async () => {
+  it('watches the specified asset and returns a success response', async () => {
     const wallet = createWallet();
     mockWalletInit({ currentNetwork: SepoliaNetwork });
     const expectedResult = true;
