@@ -40,7 +40,7 @@ export type ApiRequestParams =
   | GetTransactionsRequestParams
   | RecoverAccountsRequestParams
   | EstimateFeesRequestParams
-  | DeclareContractRequestParams
+  | DeclareContractRequestParams;
 
 export type BaseRequestParams = {
   chainId?: string;
