@@ -1,7 +1,7 @@
-import { formatCalls } from './helper';
+import { formatCalls } from './formatter';
 
 describe('formatCalls', () => {
-  it('converts Call (GetStarknet format) to Call (starknet.js format)', () => {
+  it('converts a list of `Call` objects to the expected format', () => {
     const calls = [
       {
         // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -25,7 +25,7 @@ describe('formatCalls', () => {
     expect(result).toStrictEqual(expected);
   });
 
-  it('leaves Call unchanged if already in correct starknet.js format', () => {
+  it('remains unchanged if the `Call` object is in the expected format', () => {
     const calls = [
       {
         contractAddress: '0xdef',
@@ -47,7 +47,7 @@ describe('formatCalls', () => {
     expect(result).toStrictEqual(expected);
   });
 
-  it('leaves calldata undefined if undefined in Call', () => {
+  it('remains `calldata` undefined if it is undefined in the `Call` object', () => {
     const calls = [
       { contractAddress: '0xdef', entrypoint: 'approve' }, // no calldata
     ];
