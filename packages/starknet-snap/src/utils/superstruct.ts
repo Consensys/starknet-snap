@@ -28,7 +28,35 @@ import {
   unknown,
 } from 'superstruct';
 
-import { CAIRO_VERSION_LEGACY, CAIRO_VERSION } from './constants';
+import {
+  CAIRO_VERSION_LEGACY,
+  CAIRO_VERSION,
+  MAXIMUM_TOKEN_NAME_LENGTH,
+  MAXIMUM_TOKEN_SYMBOL_LENGTH,
+} from './constants';
+import { isValidAsciiStrField } from './string';
+
+export const TokenNameStruct = refine(
+  string(),
+  'TokenNameStruct',
+  (value: string) => {
+    if (isValidAsciiStrField(value, MAXIMUM_TOKEN_NAME_LENGTH)) {
+      return true;
+    }
+    return `The given token name is invalid`;
+  },
+);
+
+export const TokenSymbolStruct = refine(
+  string(),
+  'TokenSymbolStruct',
+  (value: string) => {
+    if (isValidAsciiStrField(value, MAXIMUM_TOKEN_SYMBOL_LENGTH)) {
+      return true;
+    }
+    return `The given token symbol is invalid`;
+  },
+);
 
 export const AddressStruct = refine(
   string(),

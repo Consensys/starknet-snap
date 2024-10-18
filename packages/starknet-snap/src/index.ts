@@ -6,7 +6,6 @@ import type {
 } from '@metamask/snaps-sdk';
 import { panel, text, MethodNotFoundError } from '@metamask/snaps-sdk';
 
-import { addErc20Token } from './addErc20Token';
 import { addNetwork } from './addNetwork';
 import { Config } from './config';
 import { createAccount } from './createAccount';
@@ -36,6 +35,7 @@ import type {
   VerifySignatureParams,
   SwitchNetworkParams,
   GetDeploymentDataParams,
+  WatchAssetParams,
 } from './rpcs';
 import {
   displayPrivateKey,
@@ -47,6 +47,7 @@ import {
   verifySignature,
   switchNetwork,
   getDeploymentData,
+  watchAsset,
 } from './rpcs';
 import { sendTransaction } from './sendTransaction';
 import { signDeployAccountTransaction } from './signDeployAccountTransaction';
@@ -224,7 +225,9 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
         );
 
       case 'starkNet_addErc20Token':
-        return await addErc20Token(apiParams);
+        return await watchAsset.execute(
+          apiParams.requestParams as unknown as WatchAssetParams,
+        );
 
       case 'starkNet_getStoredErc20Tokens':
         return await getStoredErc20Tokens(apiParams);

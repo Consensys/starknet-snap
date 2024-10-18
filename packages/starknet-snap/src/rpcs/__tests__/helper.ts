@@ -66,3 +66,19 @@ export function prepareAlertDialog() {
     alertDialogSpy,
   };
 }
+
+export const buildRowComponent = (label: string, value: string) => ({
+  type: 'row',
+  label,
+  value: {
+    value,
+    markdown: false,
+    type: 'text',
+  },
+});
+
+export const buildDividerComponent = () => {
+  return {
+    type: 'divider',
+  };
+};
