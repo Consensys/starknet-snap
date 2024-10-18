@@ -15,8 +15,8 @@ import {
   prepareMockAccount,
   prepareConfirmDialog,
 } from './__tests__/helper';
-import { signTransaction } from './signTransaction';
-import type { SignTransactionParams } from './signTransaction';
+import { signTransaction } from './sign-transaction';
+import type { SignTransactionParams } from './sign-transaction';
 
 jest.mock('../utils/logger');
 

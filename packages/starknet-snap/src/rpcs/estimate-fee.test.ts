@@ -9,8 +9,8 @@ import { InvalidRequestParamsError } from '../utils/exceptions';
 import * as starknetUtils from '../utils/starknetUtils';
 import type { TxVersionStruct } from '../utils/superstruct';
 import { mockAccount, prepareMockAccount } from './__tests__/helper';
-import { estimateFee } from './estimateFee';
-import type { EstimateFeeParams } from './estimateFee';
+import { estimateFee } from './estimate-fee';
+import type { EstimateFeeParams } from './estimate-fee';
 
 jest.mock('../utils/snap');
 jest.mock('../utils/logger');
