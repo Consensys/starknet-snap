@@ -24,6 +24,7 @@ describe('WalletAddInvokeTransaction', () => {
     mockWalletInit({ address: account.address });
     const executeSpy = jest.spyOn(MetaMaskSnap.prototype, 'execute');
     executeSpy.mockResolvedValue(expectedResult);
+
     const walletAddInvokeTransaction = new WalletAddInvokeTransaction(wallet);
     const result = await walletAddInvokeTransaction.execute({
       calls,
