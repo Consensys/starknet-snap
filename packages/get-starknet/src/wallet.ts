@@ -17,6 +17,7 @@ import {
   WalletWatchAsset,
   WalletSignTypedData,
   WalletGetPermissions,
+  WalletAddDeclareTransaction,
 } from './rpcs';
 import { MetaMaskSigner } from './signer';
 import { MetaMaskSnap } from './snap';
@@ -77,6 +78,7 @@ export class MetaMaskSnapWallet implements StarknetWindowObject {
       [RpcMethod.WalletWatchAsset, new WalletWatchAsset(this)],
       [RpcMethod.WalletSignTypedData, new WalletSignTypedData(this)],
       [RpcMethod.WalletGetPermissions, new WalletGetPermissions(this)],
+      [RpcMethod.WalletAddDeclareTransaction, new WalletAddDeclareTransaction(this)],
     ]);
   }
 
