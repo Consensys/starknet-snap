@@ -127,9 +127,9 @@ export class WatchAssetRpc extends RpcController<
     params: WatchAssetParams,
   ): Promise<WatchAssetResponse> {
     const { chainId } = params;
-    const network = await this.getNetworkFromChainId(chainId);
 
     const erc20Token: Erc20Token = this.buildErc20Token(params);
+    const network = await this.getNetworkFromChainId(chainId);
 
     if (!(await this.getWatchAssetConsensus(network.name, erc20Token))) {
       throw new UserRejectedOpError() as unknown as Error;
