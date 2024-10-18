@@ -109,6 +109,7 @@ describe('formatDeclareTransaction', () => {
       abi,
     },
   });
+
   it('converts the `AddDeclareTransactionParameters` object to the expected format', () => {
     const params = generateDeclareTransactionParams();
     const expected = generateExpectedDeclareTransactionPayload();
