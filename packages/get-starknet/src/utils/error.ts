@@ -14,7 +14,7 @@ export const WalletRpcErrorMap = {
   [WalletRpcErrorCode.InvalidErc20]: 'An error occurred (NOT_ERC20)',
   [WalletRpcErrorCode.InvalidNetwork]: 'An error occurred (UNLISTED_NETWORK)',
   [WalletRpcErrorCode.UserDeny]: 'An error occurred (USER_REFUSED_OP)',
-  [WalletRpcErrorCode.InvalidRequest]: 'An error occurred (NOT_ERC20)',
+  [WalletRpcErrorCode.InvalidRequest]: 'An error occurred (INVALID_REQUEST_PAYLOAD)',
   [WalletRpcErrorCode.AccountAlreadyDeployed]: 'An error occurred (ACCOUNT_ALREADY_DEPLOYED)',
   [WalletRpcErrorCode.ApiVersionNotSupported]: 'An error occurred (API_VERSION_NOT_SUPPORTED)',
   [WalletRpcErrorCode.Unknown]: 'An error occurred (UNKNOWN_ERROR)',
