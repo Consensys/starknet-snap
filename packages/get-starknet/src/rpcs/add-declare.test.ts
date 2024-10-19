@@ -38,7 +38,11 @@ describe('WalletAddDeclareTransaction', () => {
     const result = await walletAddDeclareTransaction.execute(params);
 
     expect(result).toStrictEqual(expectedResult);
-    expect(declareSpy).toHaveBeenCalledWith(account.address, formattedParams);
+    expect(declareSpy).toHaveBeenCalledWith({
+      senderAddress: account.address,
+      contractPayload: formattedParams,
+      chainId: wallet.chainId,
+    });
   });
 });
 /* eslint-enable @typescript-eslint/naming-convention */

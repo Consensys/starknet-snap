@@ -6,9 +6,10 @@ import { WalletSignTypedData } from './sign-typed-data';
 
 describe('WalletSignTypedData', () => {
   it('returns the signature', async () => {
+    const network = SepoliaNetwork;
     const wallet = createWallet();
-    const account = generateAccount({ chainId: SepoliaNetwork.chainId });
-    mockWalletInit({ currentNetwork: SepoliaNetwork, address: account.address });
+    const account = generateAccount({ chainId: network.chainId });
+    mockWalletInit({ currentNetwork: network, address: account.address });
     const expectedResult = ['signature1', 'signature2'];
     const signSpy = jest.spyOn(MetaMaskSnap.prototype, 'signMessage');
     signSpy.mockResolvedValue(expectedResult);
@@ -20,7 +21,12 @@ describe('WalletSignTypedData', () => {
       api_version: SupportedWalletApi[0],
     });
 
-    expect(signSpy).toHaveBeenCalledWith(typedDataExample, true, account.address);
+    expect(signSpy).toHaveBeenCalledWith({
+      chainId: network.chainId,
+      typedDataMessage: typedDataExample,
+      enableAuthorize: true,
+      address: account.address,
+    });
     expect(result).toStrictEqual(expectedResult);
   });
 });

@@ -37,22 +37,32 @@ export class MetaMaskAccount extends Account {
   async execute(
     calls: AllowArray<Call>,
     abisOrTransactionsDetail?: Abi[] | InvocationsDetails,
-    transactionsDetail?: InvocationsDetails,
+    details?: InvocationsDetails,
   ): Promise<InvokeFunctionResponse> {
-    if (!transactionsDetail) {
-      return this.#snap.execute(this.#address, calls, undefined, abisOrTransactionsDetail as InvocationsDetails);
-    }
-    return this.#snap.execute(this.#address, calls, abisOrTransactionsDetail as Abi[], transactionsDetail);
+    return this.#snap.execute({
+      address: this.#address,
+      calls,
+      details: details ?? (abisOrTransactionsDetail as unknown as InvocationsDetails),
+      abis: details ? (abisOrTransactionsDetail as Abi[]) : undefined,
+    });
   }
 
-  async signMessage(typedData: TypedData): Promise<Signature> {
-    return this.#snap.signMessage(typedData, true, this.#address);
+  async signMessage(typedDataMessage: TypedData): Promise<Signature> {
+    return this.#snap.signMessage({
+      typedDataMessage,
+      address: this.#address,
+      enableAuthorize: true,
+    });
   }
 
   async declare(
     contractPayload: DeclareContractPayload,
-    transactionsDetails?: InvocationsDetails,
+    invocationsDetails?: InvocationsDetails,
   ): Promise<DeclareContractResponse> {
-    return this.#snap.declare(this.#address, contractPayload, transactionsDetails);
+    return this.#snap.declare({
+      senderAddress: this.#address,
+      contractPayload,
+      invocationsDetails,
+    });
   }
 }

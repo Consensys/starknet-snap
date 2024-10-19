@@ -6,7 +6,8 @@ import { WalletWatchAsset } from './watch-asset';
 describe('WalletWatchAsset', () => {
   it('watches the specified asset and returns a success response', async () => {
     const wallet = createWallet();
-    mockWalletInit({ currentNetwork: SepoliaNetwork });
+    const network = SepoliaNetwork;
+    mockWalletInit({ currentNetwork: network });
     const expectedResult = true;
     const watchAssetSpy = jest.spyOn(MetaMaskSnap.prototype, 'watchAsset');
     watchAssetSpy.mockResolvedValue(expectedResult);
@@ -19,7 +20,13 @@ describe('WalletWatchAsset', () => {
       api_version: SupportedWalletApi[0],
     });
 
-    expect(watchAssetSpy).toHaveBeenCalledWith(EthAsset.address, EthAsset.name, EthAsset.symbol, EthAsset.decimals);
+    expect(watchAssetSpy).toHaveBeenCalledWith({
+      address: EthAsset.address,
+      symbol: EthAsset.symbol,
+      decimals: EthAsset.decimals,
+      name: EthAsset.name,
+      chainId: network.chainId,
+    });
     expect(result).toStrictEqual(expectedResult);
   });
 });

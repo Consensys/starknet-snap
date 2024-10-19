@@ -10,6 +10,10 @@ type Result = RpcTypeToMessageMap[WalletAddInvokeTransactionMethod]['result'];
 export class WalletAddInvokeTransaction extends StarknetWalletRpc {
   async handleRequest(params: Params): Promise<Result> {
     const { calls } = params;
-    return await this.snap.execute(this.wallet.selectedAddress, formatCalls(calls));
+    return await this.snap.execute({
+      address: this.wallet.selectedAddress,
+      calls: formatCalls(calls),
+      chainId: this.wallet.chainId,
+    });
   }
 }

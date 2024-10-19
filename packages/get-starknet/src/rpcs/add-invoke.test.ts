@@ -31,6 +31,10 @@ describe('WalletAddInvokeTransaction', () => {
     });
 
     expect(result).toStrictEqual(expectedResult);
-    expect(executeSpy).toHaveBeenCalledWith(account.address, callsFormated);
+    expect(executeSpy).toHaveBeenCalledWith({
+      calls: callsFormated,
+      address: account.address,
+      chainId: wallet.chainId,
+    });
   });
 });
