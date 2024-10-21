@@ -13,7 +13,6 @@ import { declareContract } from './declareContract';
 import { estimateAccDeployFee } from './estimateAccountDeployFee';
 import { estimateFees } from './estimateFees';
 import { extractPublicKey } from './extractPublicKey';
-import { getCurrentNetwork } from './getCurrentNetwork';
 import { getErc20TokenBalance } from './getErc20TokenBalance';
 import { getStarkName } from './getStarkName';
 import { getStoredErc20Tokens } from './getStoredErc20Tokens';
@@ -48,6 +47,7 @@ import {
   switchNetwork,
   getDeploymentData,
   watchAsset,
+  getCurrentNetwork,
 } from './rpcs';
 import { sendTransaction } from './sendTransaction';
 import { signDeployAccountTransaction } from './signDeployAccountTransaction';
@@ -241,7 +241,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
         );
 
       case 'starkNet_getCurrentNetwork':
-        return await getCurrentNetwork(apiParams);
+        return await getCurrentNetwork.execute(null);
 
       case 'starkNet_getStoredNetworks':
         return await getStoredNetworks(apiParams);
