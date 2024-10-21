@@ -9,7 +9,6 @@ import { panel, text, MethodNotFoundError } from '@metamask/snaps-sdk';
 import { addNetwork } from './addNetwork';
 import { Config } from './config';
 import { createAccount } from './createAccount';
-import { declareContract } from './declareContract';
 import { estimateAccDeployFee } from './estimateAccountDeployFee';
 import { estimateFees } from './estimateFees';
 import { extractPublicKey } from './extractPublicKey';
@@ -35,12 +34,14 @@ import type {
   VerifySignatureParams,
   SwitchNetworkParams,
   GetDeploymentDataParams,
+  DeclareContractParams,
   WatchAssetParams,
 } from './rpcs';
 import {
   displayPrivateKey,
   estimateFee,
   executeTxn,
+  declareContract,
   signMessage,
   signTransaction,
   signDeclareTransaction,
@@ -276,9 +277,8 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
         );
 
       case 'starkNet_declareContract':
-        apiParams.keyDeriver = await getAddressKeyDeriver(snap);
-        return await declareContract(
-          apiParams as unknown as ApiParamsWithKeyDeriver,
+        return await declareContract.execute(
+          apiParams as unknown as DeclareContractParams,
         );
 
       case 'starkNet_getStarkName':
