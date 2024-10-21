@@ -69,15 +69,15 @@ export class MetaMaskSnapWallet implements StarknetWindowObject {
 
     this.#rpcHandlers = new Map<string, IStarknetWalletRpc>([
       [RpcMethod.WalletSwitchStarknetChain, new WalletSwitchStarknetChain(this)],
-      [RpcMethod.WalletSupportedSpecs, new WalletSupportedSpecs(this)],
+      [RpcMethod.WalletSupportedSpecs, new WalletSupportedSpecs()],
       [RpcMethod.WalletDeploymentData, new WalletDeploymentData(this)],
-      [RpcMethod.WalletSupportedWalletApi, new WalletSupportedWalletApi(this)],
+      [RpcMethod.WalletSupportedWalletApi, new WalletSupportedWalletApi()],
       [RpcMethod.WalletRequestAccounts, new WalletRequestAccount(this)],
       [RpcMethod.WalletRequestChainId, new WalletRequestChainId(this)],
       [RpcMethod.WalletAddInvokeTransaction, new WalletAddInvokeTransaction(this)],
       [RpcMethod.WalletWatchAsset, new WalletWatchAsset(this)],
       [RpcMethod.WalletSignTypedData, new WalletSignTypedData(this)],
-      [RpcMethod.WalletGetPermissions, new WalletGetPermissions(this)],
+      [RpcMethod.WalletGetPermissions, new WalletGetPermissions()],
       [RpcMethod.WalletAddDeclareTransaction, new WalletAddDeclareTransaction(this)],
     ]);
   }
