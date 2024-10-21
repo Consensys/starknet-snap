@@ -35,10 +35,10 @@ export class MetaMaskSnap {
         snapId: this.#snapId,
         request: {
           method: 'starkNet_extractPublicKey',
-          params: {
+          params: await this.#getSnapParams({
             userAddress,
             chainId,
-          },
+          }),
         },
       },
     })) as string;
@@ -61,7 +61,7 @@ export class MetaMaskSnap {
         snapId: this.#snapId,
         request: {
           method: 'starkNet_signTransaction',
-          params: this.#getSnapParams({
+          params: await this.#getSnapParams({
             address,
             transactions,
             transactionsDetail,
@@ -87,7 +87,7 @@ export class MetaMaskSnap {
         snapId: this.#snapId,
         request: {
           method: 'starkNet_signDeployAccountTransaction',
-          params: this.#getSnapParams({
+          params: await this.#getSnapParams({
             signerAddress,
             transaction,
             chainId,
@@ -112,7 +112,7 @@ export class MetaMaskSnap {
         snapId: this.#snapId,
         request: {
           method: 'starkNet_signDeclareTransaction',
-          params: this.#getSnapParams({
+          params: await this.#getSnapParams({
             address,
             details,
             chainId,
@@ -141,7 +141,7 @@ export class MetaMaskSnap {
         snapId: this.#snapId,
         request: {
           method: 'starkNet_executeTxn',
-          params: this.#getSnapParams({
+          params: await this.#getSnapParams({
             address,
             calls,
             details,
@@ -170,7 +170,7 @@ export class MetaMaskSnap {
         snapId: this.#snapId,
         request: {
           method: 'starkNet_signMessage',
-          params: this.#getSnapParams({
+          params: await this.#getSnapParams({
             address,
             typedDataMessage,
             enableAuthorize,
@@ -198,7 +198,7 @@ export class MetaMaskSnap {
         snapId: this.#snapId,
         request: {
           method: 'starkNet_declareContract',
-          params: this.#getSnapParams({
+          params: await this.#getSnapParams({
             senderAddress,
             contractPayload,
             invocationsDetails,
@@ -256,7 +256,7 @@ export class MetaMaskSnap {
         snapId: this.#snapId,
         request: {
           method: 'starkNet_recoverAccounts',
-          params: this.#getSnapParams({
+          params: await this.#getSnapParams({
             startScanIndex,
             maxScanned,
             maxMissed,
@@ -331,7 +331,7 @@ export class MetaMaskSnap {
         snapId: this.#snapId,
         request: {
           method: 'starkNet_addErc20Token',
-          params: this.#getSnapParams({
+          params: await this.#getSnapParams({
             tokenAddress: address,
             tokenName: name,
             tokenSymbol: symbol,
