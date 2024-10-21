@@ -209,7 +209,8 @@ export class MetaMaskSnap {
     })) as DeclareContractResponse;
   }
 
-  async getNetwork({ chainId }: { chainId: string }): Promise<Network | undefined> {
+  // Method will be deprecated, replaced by get current network
+  async getNetwork(chainId): Promise<Network | undefined> {
     const response = (await this.#provider.request({
       method: 'wallet_invokeSnap',
       params: {
@@ -282,14 +283,25 @@ export class MetaMaskSnap {
     })) as boolean;
   }
 
-  async addStarknetChain(chainName: string, chainId: string, rpcUrl: string, explorerUrl: string): Promise<boolean> {
+  // Method to be deprecated, no longer supported
+  async addStarknetChain({
+    chainName,
+    chainId,
+    rpcUrl,
+    explorerUrl,
+  }: {
+    chainName: string;
+    chainId: string;
+    rpcUrl: string;
+    explorerUrl: string;
+  }): Promise<boolean> {
     return (await this.#provider.request({
       method: 'wallet_invokeSnap',
       params: {
         snapId: this.#snapId,
         request: {
           method: 'starkNet_addNetwork',
-          params: this.#getSnapParams({
+          params: this.#removeUndefined({
             networkName: chainName,
             networkChainId: chainId,
             networkNodeUrl: rpcUrl,
