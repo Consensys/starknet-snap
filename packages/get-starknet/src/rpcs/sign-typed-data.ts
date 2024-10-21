@@ -8,7 +8,7 @@ type Result = RpcTypeToMessageMap[WalletSignTypedDataMethod]['result'];
 
 export class WalletSignTypedData extends StarknetWalletRpc {
   async handleRequest(params: Params): Promise<Result> {
-    return (await this.wallet.snap.signMessage(
+    return (await this.snap.signMessage(
       // To form the `TypedData` object in a more specific way,
       // preventing the `params` contains other properties that we dont need
       {
@@ -19,7 +19,7 @@ export class WalletSignTypedData extends StarknetWalletRpc {
       },
       // Ensure there will be a dialog to confirm the sign operation
       true,
-      this.wallet.chainId,
+      this.wallet.selectedAddress,
     )) as unknown as Result;
   }
 }

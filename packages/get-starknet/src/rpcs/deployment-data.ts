@@ -8,6 +8,6 @@ type Result = RpcTypeToMessageMap[WalletDeploymentDataMethod]['result'];
 
 export class WalletDeploymentData extends StarknetWalletRpc {
   async handleRequest(_param: Params): Promise<Result> {
-    return await this.wallet.snap.getDeploymentData(this.wallet.chainId, this.wallet.selectedAddress);
+    return await this.snap.getDeploymentData(this.wallet.chainId, this.wallet.selectedAddress);
   }
 }

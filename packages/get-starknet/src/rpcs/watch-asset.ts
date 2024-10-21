@@ -13,6 +13,6 @@ export class WalletWatchAsset extends StarknetWalletRpc {
     // All parameters are required in the snap,
     // However, some are optional in get-starknet framework.
     // Therefore, we assigned default values to bypass the type issue, and let the snap throw the validation error.
-    return (await this.wallet.snap.watchAsset(address, name ?? '', symbol ?? '', decimals ?? 0)) as unknown as Result;
+    return (await this.snap.watchAsset(address, name ?? '', symbol ?? '', decimals ?? 0)) as unknown as Result;
   }
 }
