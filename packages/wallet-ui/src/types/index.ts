@@ -1,16 +1,42 @@
-import * as Types from '@consensys/starknet-snap/src/types/snapState';
 import { BigNumber } from 'ethers';
 
-export type Account = Pick<
-  Types.AccContract,
-  'address' | 'publicKey' | 'upgradeRequired' | 'deployRequired'
->;
-export type Network = Pick<
-  Types.Network,
-  'name' | 'chainId' | 'baseUrl' | 'nodeUrl'
->;
+export type Transaction = {
+  txnHash: string; // in hex
+  txnType: string;
+  chainId: string; // in hex
+  senderAddress: string; // in hex
+  contractAddress: string; // in hex
+  contractFuncName: string;
+  contractCallData: string[] | number[];
+  status?: TransactionStatus | string;
+  executionStatus?: TransactionStatus | string;
+  finalityStatus?: TransactionStatus | string;
+  failureReason: string;
+  eventIds: string[];
+  timestamp: number;
+};
 
-export interface Erc20TokenBalance extends Types.Erc20Token {
+export type Account = {
+  address: string;
+  publicKey: string;
+  upgradeRequired: boolean;
+  deployRequired: boolean;
+};
+
+export type Network = {
+  name: string;
+  chainId: string;
+};
+
+export interface Erc20Token {
+  address: string;
+  name: string;
+  symbol: string;
+  decimals: number;
+  chainId: string;
+}
+
+export interface Erc20TokenBalance extends Erc20Token {
   amount: BigNumber;
   usdPrice?: number;
 }
@@ -41,11 +67,6 @@ export enum BalanceType {
   Spendable = 'spendable',
   Total = 'total',
 }
-
-export type {
-  Erc20Token,
-  Transaction,
-} from '@consensys/starknet-snap/src/types/snapState';
 
 // Define the type for your token balances
 export interface TokenBalance {
