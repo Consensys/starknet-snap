@@ -136,7 +136,7 @@ describe('DeclareContractRpc', () => {
   });
 
   it('throws `InvalidRequestParamsError` when request parameter is not correct', async () => {
-    await expect(declareContract.execute({} as unknown as any)).rejects.toThrow(
+    await expect(declareContract.execute({} as unknown as DeclareContractParams)).rejects.toThrow(
       InvalidRequestParamsError,
     );
   });
