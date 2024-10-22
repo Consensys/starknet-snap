@@ -192,8 +192,7 @@ describe('DeclareContractRpc', () => {
 
     await declareContract.execute(request);
 
-    const calls = confirmDialogSpy.mock.calls[0][0];
-    expect(calls).toStrictEqual([
+    expect(confirmDialogSpy).toHaveBeenCalledWith([
       {
         type: 'heading',
         value: 'Do you want to sign this transaction?',
