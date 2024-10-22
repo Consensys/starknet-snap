@@ -107,6 +107,7 @@ describe('DeclareContractRpc', () => {
     const {
       account,
       request,
+      network,
       declareContractRespMock,
       confirmDialogSpy,
       declareContractUtilSpy,
@@ -118,7 +119,7 @@ describe('DeclareContractRpc', () => {
 
     expect(result).toStrictEqual(declareContractRespMock);
     expect(declareContractUtilSpy).toHaveBeenCalledWith(
-      STARKNET_SEPOLIA_TESTNET_NETWORK,
+      network,
       account.address,
       account.privateKey,
       request.payload,
@@ -202,7 +203,7 @@ describe('DeclareContractRpc', () => {
     const maxFeeInEth = utils.formatUnits(details.maxFee, 'ether');
     const transactionHash = '0x123';
 
-    const { request, confirmDialogSpy, account } =
+    const { request, network, confirmDialogSpy, account } =
       await prepareMockDeclareContract(transactionHash, payload, details);
 
     await declareContract.execute(request);
@@ -214,7 +215,7 @@ describe('DeclareContractRpc', () => {
       },
       buildRowComponent('Signer Address', account.address),
       buildDividerComponent(),
-      buildRowComponent('Network', STARKNET_SEPOLIA_TESTNET_NETWORK.name),
+      buildRowComponent('Network', network.name),
       buildDividerComponent(),
       buildRowComponent('Contract', toJson(payload.contract)),
       buildDividerComponent(),
