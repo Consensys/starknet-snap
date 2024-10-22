@@ -2214,23 +2214,6 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@consensys/starknet-snap@file:../starknet-snap::locator=wallet-ui%40workspace%3Apackages%2Fwallet-ui":
-  version: 2.9.0
-  resolution: "@consensys/starknet-snap@file:../starknet-snap#../starknet-snap::hash=e2922a&locator=wallet-ui%40workspace%3Apackages%2Fwallet-ui"
-  dependencies:
-    "@metamask/key-tree": 9.0.0
-    "@metamask/snaps-sdk": ^4.0.0
-    async-mutex: ^0.3.2
-    ethereum-unit-converter: ^0.0.17
-    ethers: ^5.5.1
-    starknet: 6.11.0
-    starknet_v4.22.0: "npm:starknet@4.22.0"
-    superstruct: ^2.0.2
-    uuid: ^10.0.0
-  checksum: 67b923b31e050b59a219a0484548aaf5e8ff5453215ed5e32cc2d62209f49aad0c9eb087fd750e2cfd14d0f40d20181976da16940bd8982f650829ff0db8b3df
-  languageName: node
-  linkType: hard
-
 "@consensys/starknet-snap@workspace:packages/starknet-snap":
   version: 0.0.0-use.local
   resolution: "@consensys/starknet-snap@workspace:packages/starknet-snap"
@@ -27472,7 +27455,6 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "wallet-ui@workspace:packages/wallet-ui"
   dependencies:
-    "@consensys/starknet-snap": "file:../starknet-snap"
     "@craco/craco": ^7.1.0
     "@emotion/react": ^11.9.0
     "@emotion/styled": ^11.8.1
