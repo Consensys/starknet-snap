@@ -6,20 +6,18 @@ import { constants, TransactionStatus, TransactionType } from 'starknet';
 import type { Infer } from 'superstruct';
 import { object, string, assign, optional, any } from 'superstruct';
 
-import { AccountStateManager } from '../state/account-state-manager';
 import { TokenStateManager } from '../state/token-state-manager';
-import { TransactionStateManager } from '../state/transaction-state-manager';
 import { FeeToken } from '../types/snapApi';
 import { VoyagerTransactionType, type Transaction } from '../types/snapState';
 import type { AccountRpcControllerOptions } from '../utils';
 import {
   AddressStruct,
   BaseRequestStruct,
-  AccountRpcController,
   confirmDialog,
   UniversalDetailsStruct,
   CallsStruct,
   mapDeprecatedParams,
+  AccountRpcControllerWithDeploy,
 } from '../utils';
 import { UserRejectedOpError } from '../utils/exceptions';
 import { logger } from '../utils/logger';
@@ -51,14 +49,10 @@ export type ExecuteTxnResponse = Infer<typeof ExecuteTxnResponseStruct>;
 /**
  * The RPC handler to execute a transaction.
  */
-export class ExecuteTxnRpc extends AccountRpcController<
+export class ExecuteTxnRpc extends AccountRpcControllerWithDeploy<
   ExecuteTxnParams,
   ExecuteTxnResponse
 > {
-  protected txnStateManager: TransactionStateManager;
-
-  protected accStateManager: AccountStateManager;
-
   protected tokenStateManager: TokenStateManager;
 
   protected requestStruct = ExecuteTxnRequestStruct;
@@ -67,8 +61,6 @@ export class ExecuteTxnRpc extends AccountRpcController<
 
   constructor(options?: AccountRpcControllerOptions) {
     super(options);
-    this.txnStateManager = new TransactionStateManager();
-    this.accStateManager = new AccountStateManager();
     this.tokenStateManager = new TokenStateManager();
   }
 
@@ -186,25 +178,6 @@ export class ExecuteTxnRpc extends AccountRpcController<
     );
 
     return executeTxnResp;
-  }
-
-  protected async updateAccountAsDeploy(
-    address: string,
-    transactionHash: string,
-  ): Promise<void> {
-    if (!transactionHash) {
-      throw new Error(`Failed to deploy account for address ${address}`);
-    }
-
-    await this.txnStateManager.addTransaction(
-      this.createDeployTxn(address, transactionHash),
-    );
-
-    await this.accStateManager.updateAccountAsDeploy({
-      address,
-      chainId: this.network.chainId,
-      transactionHash,
-    });
   }
 
   protected async getExecuteTxnConsensus(
@@ -336,27 +309,6 @@ export class ExecuteTxnRpc extends AccountRpcController<
     }
 
     return await confirmDialog(components);
-  }
-
-  protected createDeployTxn(
-    address: string,
-    transactionHash: string,
-  ): Transaction {
-    return {
-      txnHash: transactionHash,
-      txnType: VoyagerTransactionType.DEPLOY_ACCOUNT,
-      chainId: this.network.chainId,
-      senderAddress: address,
-      contractAddress: address,
-      contractFuncName: '',
-      contractCallData: [],
-      finalityStatus: TransactionStatus.RECEIVED,
-      executionStatus: TransactionStatus.RECEIVED,
-      status: '',
-      failureReason: '',
-      eventIds: [],
-      timestamp: Math.floor(Date.now() / 1000),
-    };
   }
 
   protected createInvokeTxn(
