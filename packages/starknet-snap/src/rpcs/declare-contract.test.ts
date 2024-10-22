@@ -121,7 +121,7 @@ describe('DeclareContractRpc', () => {
   it('throws UserRejectedOpError if user cancels the dialog', async () => {
     const payload = generateExpectedDeclareTransactionPayload();
     const details = { maxFee: BigNumber.from(1000000000000000).toString() };
-    const transactionHash = '0x123';
+    const transactionHash = '0x07f901c023bac6c874691244c4c2332c6825b916fb68d240c807c6156db84fd3';
 
     const { request, confirmDialogSpy } = await prepareMockDeclareContract(
       transactionHash,
