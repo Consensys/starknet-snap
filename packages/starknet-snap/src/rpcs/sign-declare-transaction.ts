@@ -1,10 +1,5 @@
 import type { Component } from '@metamask/snaps-sdk';
-import {
-  heading,
-  row,
-  text,
-  UserRejectedRequestError,
-} from '@metamask/snaps-sdk';
+import { heading, row, text } from '@metamask/snaps-sdk';
 import type { DeclareSignerDetails } from 'starknet';
 import type { Infer } from 'superstruct';
 import { array, object, string, assign } from 'superstruct';
@@ -16,7 +11,9 @@ import {
   BaseRequestStruct,
   AccountRpcController,
   DeclareSignDetailsStruct,
+  mapDeprecatedParams,
 } from '../utils';
+import { UserRejectedOpError } from '../utils/exceptions';
 import { signDeclareTransaction as signDeclareTransactionUtil } from '../utils/starknetUtils';
 
 export const SignDeclareTransactionRequestStruct = assign(
@@ -48,6 +45,22 @@ export class SignDeclareTransactionRpc extends AccountRpcController<
 
   protected responseStruct = SignDeclareTransactionResponseStruct;
 
+  protected async preExecute(
+    params: SignDeclareTransactionParams,
+  ): Promise<void> {
+    // Define mappings to ensure backward compatibility with previous versions of the API.
+    // These mappings replace deprecated parameter names with the updated equivalents,
+    // allowing older integrations to function without changes
+    const paramMappings: Record<string, string> = {
+      signerAddress: 'address',
+      transaction: 'details',
+    };
+
+    // Apply the mappings to params
+    mapDeprecatedParams(params, paramMappings);
+    await super.preExecute(params);
+  }
+
   /**
    * Execute the sign declare transaction request handler.
    * It will show a confirmation dialog to the user before signing the declare transaction.
@@ -70,7 +83,7 @@ export class SignDeclareTransactionRpc extends AccountRpcController<
   ): Promise<SignDeclareTransactionResponse> {
     const { details } = params;
     if (!(await this.getSignDeclareTransactionConsensus(details))) {
-      throw new UserRejectedRequestError() as unknown as Error;
+      throw new UserRejectedOpError() as unknown as Error;
     }
 
     return (await signDeclareTransactionUtil(

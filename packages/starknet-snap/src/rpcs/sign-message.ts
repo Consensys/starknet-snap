@@ -1,10 +1,5 @@
 import type { Component } from '@metamask/snaps-sdk';
-import {
-  heading,
-  row,
-  text,
-  UserRejectedRequestError,
-} from '@metamask/snaps-sdk';
+import { heading, row, text } from '@metamask/snaps-sdk';
 import type { Infer } from 'superstruct';
 import { array, object, string, assign } from 'superstruct';
 
@@ -16,7 +11,9 @@ import {
   AuthorizableStruct,
   BaseRequestStruct,
   AccountRpcController,
+  mapDeprecatedParams,
 } from '../utils';
+import { UserRejectedOpError } from '../utils/exceptions';
 import { signMessage as signMessageUtil } from '../utils/starknetUtils';
 
 export const SignMessageRequestStruct = assign(
@@ -45,6 +42,19 @@ export class SignMessageRpc extends AccountRpcController<
 
   protected responseStruct = SignMessageResponseStruct;
 
+  protected async preExecute(params: SignMessageParams): Promise<void> {
+    // Define mappings to ensure backward compatibility with previous versions of the API.
+    // These mappings replace deprecated parameter names with the updated equivalents,
+    // allowing older integrations to function without changes
+    const paramMappings: Record<string, string> = {
+      signerAddress: 'address',
+    };
+
+    // Apply the mappings to params
+    mapDeprecatedParams(params, paramMappings);
+    await super.preExecute(params);
+  }
+
   /**
    * Execute the sign message request handler.
    * It will show a confirmation dialog to the user before signing the message.
@@ -70,7 +80,7 @@ export class SignMessageRpc extends AccountRpcController<
       enableAuthorize &&
       !(await this.getSignMessageConsensus(typedDataMessage, address))
     ) {
-      throw new UserRejectedRequestError() as unknown as Error;
+      throw new UserRejectedOpError() as unknown as Error;
     }
 
     return await signMessageUtil(

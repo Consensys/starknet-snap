@@ -1,4 +1,3 @@
-import { InvalidParamsError } from '@metamask/snaps-sdk';
 import type { Invocations } from 'starknet';
 import { constants, TransactionType } from 'starknet';
 import type { Infer } from 'superstruct';
@@ -6,11 +5,12 @@ import type { Infer } from 'superstruct';
 import { getEstimateFees } from '../__tests__/helper';
 import { FeeTokenUnit } from '../types/snapApi';
 import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../utils/constants';
+import { InvalidRequestParamsError } from '../utils/exceptions';
 import * as starknetUtils from '../utils/starknetUtils';
 import type { TxVersionStruct } from '../utils/superstruct';
 import { mockAccount, prepareMockAccount } from './__tests__/helper';
-import { estimateFee } from './estimateFee';
-import type { EstimateFeeParams } from './estimateFee';
+import { estimateFee } from './estimate-fee';
+import type { EstimateFeeParams } from './estimate-fee';
 
 jest.mock('../utils/snap');
 jest.mock('../utils/logger');
@@ -101,9 +101,9 @@ describe('estimateFee', () => {
     });
   });
 
-  it('throws `InvalidParamsError` when request parameter is not correct', async () => {
+  it('throws `InvalidRequestParamsError` when request parameter is not correct', async () => {
     await expect(
       estimateFee.execute({} as unknown as EstimateFeeParams),
-    ).rejects.toThrow(InvalidParamsError);
+    ).rejects.toThrow(InvalidRequestParamsError);
   });
 });

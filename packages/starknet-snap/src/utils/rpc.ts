@@ -1,10 +1,10 @@
 import type { getBIP44ChangePathString } from '@metamask/key-tree/dist/types/utils';
 import type { Json } from '@metamask/snaps-sdk';
-import { InvalidParamsError, SnapError } from '@metamask/snaps-sdk';
 import type { Struct } from 'superstruct';
 import { assert } from 'superstruct';
 
 import type { Network, SnapState } from '../types/snapState';
+import { InvalidRequestParamsError, UnknownError } from './exceptions';
 import { logger } from './logger';
 import { getBip44Deriver, getStateData } from './snap';
 import {
@@ -19,13 +19,13 @@ import { getKeysFromAddress } from './starknetUtils';
  * @template Params - The expected structure of the request parameters.
  * @param requestParams - The request parameters to validate.
  * @param struct - The expected structure of the request parameters.
- * @throws {InvalidParamsError} If the request parameters do not conform to the expected structure.
+ * @throws {InvalidRequestParamsError} If the request parameters do not conform to the expected structure.
  */
 export function validateRequest<Params>(requestParams: Params, struct: Struct) {
   try {
     assert(requestParams, struct);
   } catch (error) {
-    throw new InvalidParamsError(error.message) as unknown as Error;
+    throw new InvalidRequestParamsError(error.message) as unknown as Error;
   }
 }
 
@@ -41,7 +41,7 @@ export function validateResponse<Params>(response: Params, struct: Struct) {
   try {
     assert(response, struct);
   } catch (error) {
-    throw new SnapError('Invalid Response') as unknown as Error;
+    throw new UnknownError('Invalid Response') as unknown as Error;
   }
 }
 
@@ -86,7 +86,7 @@ export abstract class RpcController<
 }
 
 // TODO: the Type should be moved to a common place
-export type AccountRpcParams = Json & {
+export type AccountRpcParams = {
   chainId: string;
   address: string;
 };

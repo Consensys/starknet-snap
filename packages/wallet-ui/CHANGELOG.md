@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
 
+## [1.24.0](https://github.com/Consensys/starknet-snap/compare/wallet-ui-v1.23.0...wallet-ui-v1.24.0) (2024-09-20)
+
+
+### Features
+
+* support STRK token for the gas fee in wallet-ui ([#271](https://github.com/Consensys/starknet-snap/issues/271)) ([8f50a33](https://github.com/Consensys/starknet-snap/commit/8f50a33ca7cdce88c6853ce1945cd7f7a7b24fae))
+* bump starknet.js to v6.11.0 ([#296](https://github.com/Consensys/starknet-snap/issues/296)) ([e298244](https://github.com/Consensys/starknet-snap/commit/e298244a5e68e2809ab6367330e104c53ca5c861))
+
+
+### Bug Fixes
+
+* update message for waiting deploy/upgrade txn complete ([#297](https://github.com/Consensys/starknet-snap/issues/297)) ([141fa20](https://github.com/Consensys/starknet-snap/commit/141fa2023911e8c6f2d1b495a2d78bec79a3e5d7))
+
 ## [1.23.0](https://github.com/Consensys/starknet-snap/compare/wallet-ui-v1.22.0...wallet-ui-v1.23.0) (2024-07-16)
 
 

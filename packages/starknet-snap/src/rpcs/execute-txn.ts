@@ -1,11 +1,5 @@
 import type { Component, Json } from '@metamask/snaps-sdk';
-import {
-  heading,
-  row,
-  UserRejectedRequestError,
-  text,
-  divider,
-} from '@metamask/snaps-sdk';
+import { heading, row, text, divider } from '@metamask/snaps-sdk';
 import convert from 'ethereum-unit-converter';
 import type { Call, Calldata } from 'starknet';
 import { constants, TransactionStatus, TransactionType } from 'starknet';
@@ -25,7 +19,9 @@ import {
   confirmDialog,
   UniversalDetailsStruct,
   CallsStruct,
+  mapDeprecatedParams,
 } from '../utils';
+import { UserRejectedOpError } from '../utils/exceptions';
 import { logger } from '../utils/logger';
 import {
   createAccount,
@@ -76,6 +72,21 @@ export class ExecuteTxnRpc extends AccountRpcController<
     this.tokenStateManager = new TokenStateManager();
   }
 
+  protected async preExecute(params: ExecuteTxnParams): Promise<void> {
+    // Define mappings to ensure backward compatibility with previous versions of the API.
+    // These mappings replace deprecated parameter names with the updated equivalents,
+    // allowing older integrations to function without changes
+    const paramMappings: Record<string, string> = {
+      senderAddress: 'address',
+      txnInvocation: 'calls',
+      invocationsDetails: 'details',
+    };
+
+    // Apply the mappings to params
+    mapDeprecatedParams(params, paramMappings);
+    await super.preExecute(params);
+  }
+
   /**
    * Execute the transaction request handler.
    *
@@ -124,7 +135,7 @@ export class ExecuteTxnRpc extends AccountRpcController<
         version,
       ))
     ) {
-      throw new UserRejectedRequestError() as unknown as Error;
+      throw new UserRejectedOpError() as unknown as Error;
     }
 
     if (!accountDeployed) {
@@ -165,8 +176,13 @@ export class ExecuteTxnRpc extends AccountRpcController<
       throw new Error('Failed to execute transaction');
     }
 
+    // Since the RPC supports the `calls` parameter either as a single `call` object or an array of `call` objects,
+    // and the current state data structure does not yet support multiple `call` objects in a single transaction,
+    // we need to convert `calls` into a single `call` object as a temporary fix.
+    const call = Array.isArray(calls) ? calls[0] : calls;
+
     await this.txnStateManager.addTransaction(
-      this.createInvokeTxn(address, executeTxnResp.transaction_hash, calls[0]),
+      this.createInvokeTxn(address, executeTxnResp.transaction_hash, call),
     );
 
     return executeTxnResp;

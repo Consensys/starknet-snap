@@ -30,7 +30,7 @@ export class TokenStateManager extends StateManager<Erc20Token> {
     return state.erc20Tokens;
   }
 
-  protected updateEntity(dataInState: Erc20Token, data: Erc20Token): void {
+  updateEntity(dataInState: Erc20Token, data: Erc20Token): void {
     assert(data.name, nonempty(string()));
     assert(data.symbol, nonempty(string()));
     assert(data.decimals, min(number(), 0));
@@ -240,6 +240,33 @@ export class TokenStateManager extends StateManager<Erc20Token> {
         return STRK_SEPOLIA_TESTNET.address;
       default:
         return '';
+    }
+  }
+
+  /**
+   * Upsert a Erc20Token object.
+   *
+   * @param token - The Erc20Token object to upsert.
+   */
+  async upsertToken(token: Erc20Token): Promise<void> {
+    try {
+      await this.update(async (state: SnapState) => {
+        const dataInState = await this.getToken(
+          {
+            address: token.address,
+            chainId: token.chainId,
+          },
+          state,
+        );
+        // eslint-disable-next-line no-negated-condition
+        if (!dataInState) {
+          state.erc20Tokens.push(token);
+        } else {
+          this.updateEntity(dataInState, token);
+        }
+      });
+    } catch (error) {
+      throw new StateManagerError(error.message);
     }
   }
 }

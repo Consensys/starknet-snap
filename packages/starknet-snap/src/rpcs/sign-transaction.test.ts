@@ -1,7 +1,3 @@
-import {
-  InvalidParamsError,
-  UserRejectedRequestError,
-} from '@metamask/snaps-sdk';
 import type { InvocationsSignerDetails } from 'starknet';
 import { constants } from 'starknet';
 
@@ -9,14 +5,18 @@ import transactionExample from '../__tests__/fixture/transactionExample.json'; /
 import type { SnapState } from '../types/snapState';
 import { toJson } from '../utils';
 import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../utils/constants';
+import {
+  UserRejectedOpError,
+  InvalidRequestParamsError,
+} from '../utils/exceptions';
 import * as starknetUtils from '../utils/starknetUtils';
 import {
   mockAccount,
   prepareMockAccount,
   prepareConfirmDialog,
 } from './__tests__/helper';
-import { signTransaction } from './signTransaction';
-import type { SignTransactionParams } from './signTransaction';
+import { signTransaction } from './sign-transaction';
+import type { SignTransactionParams } from './sign-transaction';
 
 jest.mock('../utils/logger');
 
@@ -118,7 +118,7 @@ describe('signTransaction', () => {
     expect(confirmDialogSpy).not.toHaveBeenCalled();
   });
 
-  it('throws `UserRejectedRequestError` if user denied the operation', async () => {
+  it('throws `UserRejectedOpError` if user denied the operation', async () => {
     const chainId = constants.StarknetChainId.SN_SEPOLIA;
     const account = await mockAccount(chainId);
     prepareMockAccount(account, state);
@@ -127,13 +127,13 @@ describe('signTransaction', () => {
     const request = createRequestParam(chainId, account.address, true);
 
     await expect(signTransaction.execute(request)).rejects.toThrow(
-      UserRejectedRequestError,
+      UserRejectedOpError,
     );
   });
 
-  it('throws `InvalidParamsError` when request parameter is not correct', async () => {
+  it('throws `InvalidRequestParamsError` when request parameter is not correct', async () => {
     await expect(
       signTransaction.execute({} as unknown as SignTransactionParams),
-    ).rejects.toThrow(InvalidParamsError);
+    ).rejects.toThrow(InvalidRequestParamsError);
   });
 });

@@ -3,20 +3,9 @@ import type {
   OnHomePageHandler,
   OnInstallHandler,
   OnUpdateHandler,
-  Component,
 } from '@metamask/snaps-sdk';
-import {
-  panel,
-  row,
-  divider,
-  text,
-  copyable,
-  SnapError,
-  MethodNotFoundError,
-} from '@metamask/snaps-sdk';
-import { ethers } from 'ethers';
+import { panel, text, MethodNotFoundError } from '@metamask/snaps-sdk';
 
-import { addErc20Token } from './addErc20Token';
 import { addNetwork } from './addNetwork';
 import { Config } from './config';
 import { createAccount } from './createAccount';
@@ -34,6 +23,7 @@ import { getStoredUserAccounts } from './getStoredUserAccounts';
 import { getTransactions } from './getTransactions';
 import { getTransactionStatus } from './getTransactionStatus';
 import { getValue } from './getValue';
+import { homePageController } from './on-home-page';
 import { recoverAccounts } from './recoverAccounts';
 import type {
   DisplayPrivateKeyParams,
@@ -43,6 +33,9 @@ import type {
   SignTransactionParams,
   SignDeclareTransactionParams,
   VerifySignatureParams,
+  SwitchNetworkParams,
+  GetDeploymentDataParams,
+  WatchAssetParams,
 } from './rpcs';
 import {
   displayPrivateKey,
@@ -52,10 +45,12 @@ import {
   signTransaction,
   signDeclareTransaction,
   verifySignature,
+  switchNetwork,
+  getDeploymentData,
+  watchAsset,
 } from './rpcs';
 import { sendTransaction } from './sendTransaction';
 import { signDeployAccountTransaction } from './signDeployAccountTransaction';
-import { switchNetwork } from './switchNetwork';
 import type {
   ApiParams,
   ApiParamsWithKeyDeriver,
@@ -66,13 +61,12 @@ import { upgradeAccContract } from './upgradeAccContract';
 import { getDappUrl, isSnapRpcError } from './utils';
 import {
   CAIRO_VERSION_LEGACY,
-  ETHER_MAINNET,
-  ETHER_SEPOLIA_TESTNET,
   PRELOADED_TOKENS,
   STARKNET_MAINNET_NETWORK,
   STARKNET_SEPOLIA_TESTNET_NETWORK,
   STARKNET_TESTNET_NETWORK,
 } from './utils/constants';
+import { UnknownError } from './utils/exceptions';
 import { getAddressKeyDeriver } from './utils/keyPair';
 import { acquireLock } from './utils/lock';
 import { logger } from './utils/logger';
@@ -82,18 +76,12 @@ import {
   upsertNetwork,
   removeNetwork,
 } from './utils/snapUtils';
-import {
-  getBalance,
-  getCorrectContractAddress,
-  getKeysFromAddressIndex,
-} from './utils/starknetUtils';
 
 declare const snap;
+logger.logLevel = parseInt(Config.logLevel, 10);
 
 export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
   const requestParams = request?.params as unknown as ApiRequestParams;
-
-  logger.logLevel = parseInt(Config.logLevel, 10);
 
   logger.log(`${request.method}:\nrequestParams: ${toJson(requestParams)}`);
 
@@ -237,7 +225,9 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
         );
 
       case 'starkNet_addErc20Token':
-        return await addErc20Token(apiParams);
+        return await watchAsset.execute(
+          apiParams.requestParams as unknown as WatchAssetParams,
+        );
 
       case 'starkNet_getStoredErc20Tokens':
         return await getStoredErc20Tokens(apiParams);
@@ -246,7 +236,9 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
         return await addNetwork(apiParams);
 
       case 'starkNet_switchNetwork':
-        return await switchNetwork(apiParams);
+        return await switchNetwork.execute(
+          apiParams.requestParams as unknown as SwitchNetworkParams,
+        );
 
       case 'starkNet_getCurrentNetwork':
         return await getCurrentNetwork(apiParams);
@@ -292,6 +284,11 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
       case 'starkNet_getStarkName':
         return await getStarkName(apiParams);
 
+      case 'starkNet_getDeploymentData':
+        return await getDeploymentData.execute(
+          apiParams as unknown as GetDeploymentDataParams,
+        );
+
       default:
         throw new MethodNotFoundError() as unknown as Error;
     }
@@ -299,7 +296,8 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
     let snapError = error;
 
     if (!isSnapRpcError(error)) {
-      snapError = new SnapError('Unable to execute the rpc request');
+      // To ensure the error meets both the SnapError format and WalletRpc format.
+      snapError = new UnknownError('Unable to execute the rpc request');
     }
     logger.error(
       `onRpcRequest error: ${JSON.stringify(snapError.toJSON(), null, 2)}`,
@@ -328,7 +326,11 @@ export const onInstall: OnInstallHandler = async () => {
 export const onUpdate: OnUpdateHandler = async () => {
   const component = panel([
     text('Features released with this update:'),
-    text('Cairo contract upgrade support.'),
+    text(
+      'Support STRK token for the gas fee in sending transaction and estimating fee.',
+    ),
+    text('Default network changed to mainnet.'),
+    text('Support for multiple consecutive transactions.'),
   ]);
 
   await snap.request({
@@ -341,70 +343,5 @@ export const onUpdate: OnUpdateHandler = async () => {
 };
 
 export const onHomePage: OnHomePageHandler = async () => {
-  try {
-    const state: SnapState = await snap.request({
-      method: 'snap_manageState',
-      params: {
-        operation: 'get',
-      },
-    });
-
-    if (!state) {
-      throw new Error('State not found.');
-    }
-
-    // default network is testnet
-    let network = STARKNET_SEPOLIA_TESTNET_NETWORK;
-
-    if (
-      state.currentNetwork &&
-      state.currentNetwork.chainId !== STARKNET_TESTNET_NETWORK.chainId
-    ) {
-      network = state.currentNetwork;
-    }
-
-    // we only support 1 address at this moment
-    const idx = 0;
-    const keyDeriver = await getAddressKeyDeriver(snap);
-    const { publicKey } = await getKeysFromAddressIndex(
-      keyDeriver,
-      network.chainId,
-      state,
-      idx,
-    );
-    const { address } = await getCorrectContractAddress(network, publicKey);
-
-    const ethToken =
-      network.chainId === ETHER_SEPOLIA_TESTNET.chainId
-        ? ETHER_SEPOLIA_TESTNET
-        : ETHER_MAINNET;
-    const balance =
-      (await getBalance(address, ethToken.address, network)) ?? BigInt(0);
-    const displayBalance = ethers.utils.formatUnits(
-      ethers.BigNumber.from(balance),
-      ethToken.decimals,
-    );
-
-    const panelItems: Component[] = [];
-    panelItems.push(text('Address'));
-    panelItems.push(copyable(`${address}`));
-    panelItems.push(row('Network', text(`${network.name}`)));
-    panelItems.push(row('Balance', text(`${displayBalance} ETH`)));
-    panelItems.push(divider());
-    panelItems.push(
-      text(
-        `Visit the [companion dapp for Starknet](${getDappUrl()}) to manage your account.`,
-      ),
-    );
-
-    return {
-      content: panel(panelItems),
-    };
-  } catch (error) {
-    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-    logger.error(`Error: ${error}`);
-    throw new SnapError(
-      'Unable to initialize Snap HomePage',
-    ) as unknown as Error;
-  }
+  return await homePageController.execute();
 };

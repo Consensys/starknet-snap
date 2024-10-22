@@ -1,10 +1,5 @@
 import type { DialogResult } from '@metamask/snaps-sdk';
-import {
-  heading,
-  row,
-  text,
-  UserRejectedRequestError,
-} from '@metamask/snaps-sdk';
+import { heading, row, text } from '@metamask/snaps-sdk';
 import type { Call, InvocationsSignerDetails } from 'starknet';
 import type { Infer } from 'superstruct';
 import { array, object, string, assign, any } from 'superstruct';
@@ -17,7 +12,9 @@ import {
   AccountRpcController,
   CallDataStruct,
   toJson,
+  mapDeprecatedParams,
 } from '../utils';
+import { UserRejectedOpError } from '../utils/exceptions';
 import { signTransactions } from '../utils/starknetUtils';
 
 export const SignTransactionRequestStruct = assign(
@@ -49,6 +46,19 @@ export class SignTransactionRpc extends AccountRpcController<
 
   protected responseStruct = SignTransactionResponseStruct;
 
+  protected async preExecute(params: SignTransactionParams): Promise<void> {
+    // Define mappings to ensure backward compatibility with previous versions of the API.
+    // These mappings replace deprecated parameter names with the updated equivalents,
+    // allowing older integrations to function without changes
+    const paramMappings: Record<string, string> = {
+      signerAddress: 'address',
+    };
+
+    // Apply the mappings to params
+    mapDeprecatedParams(params, paramMappings);
+    await super.preExecute(params);
+  }
+
   /**
    * Execute the sign transaction request handler.
    * It will show a confirmation dialog to the user before signing the transaction.
@@ -79,7 +89,7 @@ export class SignTransactionRpc extends AccountRpcController<
         transactions as unknown as Call[],
       ))
     ) {
-      throw new UserRejectedRequestError() as unknown as Error;
+      throw new UserRejectedOpError() as unknown as Error;
     }
 
     return (await signTransactions(

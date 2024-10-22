@@ -101,11 +101,6 @@ export class MetaMaskSnapWallet implements IStarknetWindowObject {
   }
 
   async #getWalletAddress(chainId: string) {
-    // address always same regardless network, only single address provided
-    if (this.selectedAddress) {
-      return this.selectedAddress;
-    }
-
     const accountResponse = await this.snap.recoverDefaultAccount(chainId);
 
     if (!accountResponse?.address) {
