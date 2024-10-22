@@ -12,6 +12,7 @@ import {
 import * as starknetUtils from '../utils/starknetUtils';
 import { executeTxn as executeTxnUtil } from '../utils/starknetUtils';
 import {
+  generateRandomFee,
   mockAccount,
   prepareConfirmDialog,
   prepareMockAccount,
@@ -54,8 +55,8 @@ const prepareMockExecuteTxn = async (
   const estimateResults = getEstimateFees();
 
   const getEstimatedFeesRepsMock = {
-    suggestedMaxFee: BigInt(1000000000000000).toString(10),
-    overallFee: BigInt(1000000000000000).toString(10),
+    suggestedMaxFee: generateRandomFee('1000000000000000', '2000000000000000'),
+    overallFee: generateRandomFee('1000000000000000', '2000000000000000'),
     includeDeploy: !accountDeployed,
     unit: 'wei' as FeeTokenUnit,
     estimateResults,

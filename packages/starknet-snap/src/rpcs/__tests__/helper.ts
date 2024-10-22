@@ -1,3 +1,4 @@
+import { BigNumber } from 'ethers';
 import type { constants } from 'starknet';
 
 import type { StarknetAccount } from '../../__tests__/helper';
@@ -82,3 +83,25 @@ export const buildDividerComponent = () => {
     type: 'divider',
   };
 };
+
+/**
+ *
+ * @param min
+ * @param max
+ * @param useBigInt
+ */
+export function generateRandomFee(
+  min = '10000000000',
+  max = '1000000000000000',
+  useBigInt = true,
+) {
+  const minFee = BigInt(min);
+  const maxFee = BigInt(max);
+
+  const randomFee =
+    minFee + BigInt(Math.floor(Math.random() * Number(maxFee - minFee)));
+
+  return useBigInt
+    ? randomFee.toString(10)
+    : BigNumber.from(randomFee).toString();
+}

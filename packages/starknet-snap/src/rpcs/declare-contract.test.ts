@@ -1,4 +1,4 @@
-import { BigNumber, utils } from 'ethers';
+import { utils } from 'ethers';
 import type { Abi, UniversalDetails } from 'starknet';
 import { constants } from 'starknet';
 import type { Infer } from 'superstruct';
@@ -14,6 +14,7 @@ import * as starknetUtils from '../utils/starknetUtils';
 import {
   buildDividerComponent,
   buildRowComponent,
+  generateRandomFee,
   mockAccount,
   prepareConfirmDialog,
   prepareMockAccount,
@@ -98,7 +99,9 @@ const prepareMockDeclareContract = async (
 describe('DeclareContractRpc', () => {
   it('declares a contract correctly if user confirms the dialog', async () => {
     const payload = generateExpectedDeclareTransactionPayload();
-    const details = { maxFee: BigNumber.from(1000000000000000).toString() };
+    const details = {
+      maxFee: generateRandomFee('1000000000000000', '2000000000000000'),
+    };
     const transactionHash = '0x123';
 
     const {
@@ -125,7 +128,9 @@ describe('DeclareContractRpc', () => {
 
   it('throws UserRejectedOpError if user cancels the dialog', async () => {
     const payload = generateExpectedDeclareTransactionPayload();
-    const details = { maxFee: BigNumber.from(1000000000000000).toString() };
+    const details = {
+      maxFee: generateRandomFee('1000000000000000', '2000000000000000'),
+    };
     const transactionHash =
       '0x07f901c023bac6c874691244c4c2332c6825b916fb68d240c807c6156db84fd3';
 
@@ -170,7 +175,9 @@ describe('DeclareContractRpc', () => {
     'throws `Unknown Error` when $testCase',
     async ({ declareContractRespMock }) => {
       const payload = generateExpectedDeclareTransactionPayload();
-      const details = { maxFee: BigNumber.from(1000000000000000).toString() };
+      const details = {
+        maxFee: generateRandomFee('1000000000000000', '2000000000000000'),
+      };
       const transactionHash = '0x123';
 
       const { request, declareContractUtilSpy } =
@@ -188,7 +195,9 @@ describe('DeclareContractRpc', () => {
 
   it('renders confirmation dialog', async () => {
     const payload = generateExpectedDeclareTransactionPayload();
-    const details = { maxFee: BigNumber.from(1000000000000000).toString() };
+    const details = {
+      maxFee: generateRandomFee('1000000000000000', '2000000000000000'),
+    };
     // Convert maxFee to ETH from Wei
     const maxFeeInEth = utils.formatUnits(details.maxFee, 'ether');
     const transactionHash = '0x123';
