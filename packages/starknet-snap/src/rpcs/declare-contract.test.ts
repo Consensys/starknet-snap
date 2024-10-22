@@ -3,7 +3,7 @@ import type { Abi } from 'starknet';
 import { constants } from 'starknet';
 import type { Infer } from 'superstruct';
 
-import type { DeclareContractPayloadStruct } from '../utils';
+import { toJson, type DeclareContractPayloadStruct } from '../utils';
 import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../utils/constants';
 import {
   UserRejectedOpError,
@@ -49,7 +49,7 @@ const generateExpectedDeclareTransactionPayload =
 
 const prepareMockDeclareContract = async (
   transactionHash: string,
-  contractPayload: DeclareContractPayload,
+  payload: DeclareContractPayload,
   details: any,
 ) => {
   const state = {
@@ -66,7 +66,7 @@ const prepareMockDeclareContract = async (
   const request = {
     chainId: state.networks[0].chainId as unknown as constants.StarknetChainId,
     address: account.address,
-    contractPayload,
+    payload,
     details,
   };
 
@@ -92,7 +92,7 @@ const prepareMockDeclareContract = async (
 
 describe('DeclareContractRpc', () => {
   it('declares a contract correctly if user confirms the dialog', async () => {
-    const contractPayload = generateExpectedDeclareTransactionPayload();
+    const payload = generateExpectedDeclareTransactionPayload();
     const details = { maxFee: BigNumber.from(1000000000000000).toString() };
     const transactionHash = '0x123';
 
@@ -102,11 +102,7 @@ describe('DeclareContractRpc', () => {
       declareContractRespMock,
       confirmDialogSpy,
       declareContractUtilSpy,
-    } = await prepareMockDeclareContract(
-      transactionHash,
-      contractPayload,
-      details,
-    );
+    } = await prepareMockDeclareContract(transactionHash, payload, details);
 
     confirmDialogSpy.mockResolvedValue(true);
 
@@ -117,19 +113,19 @@ describe('DeclareContractRpc', () => {
       STARKNET_SEPOLIA_TESTNET_NETWORK,
       account.address,
       account.privateKey,
-      request.contractPayload,
+      request.payload,
       request.details,
     );
   });
 
   it('throws UserRejectedOpError if user cancels the dialog', async () => {
-    const contractPayload = generateExpectedDeclareTransactionPayload();
+    const payload = generateExpectedDeclareTransactionPayload();
     const details = { maxFee: BigNumber.from(1000000000000000).toString() };
     const transactionHash = '0x123';
 
     const { request, confirmDialogSpy } = await prepareMockDeclareContract(
       transactionHash,
-      contractPayload,
+      payload,
       details,
     );
     confirmDialogSpy.mockResolvedValue(false);
@@ -167,16 +163,12 @@ describe('DeclareContractRpc', () => {
   ])(
     'throws `Unknown Error` when $testCase',
     async ({ declareContractRespMock }) => {
-      const contractPayload = generateExpectedDeclareTransactionPayload();
+      const payload = generateExpectedDeclareTransactionPayload();
       const details = { maxFee: BigNumber.from(1000000000000000).toString() };
       const transactionHash = '0x123';
 
       const { request, declareContractUtilSpy } =
-        await prepareMockDeclareContract(
-          transactionHash,
-          contractPayload,
-          details,
-        );
+        await prepareMockDeclareContract(transactionHash, payload, details);
 
       declareContractUtilSpy.mockResolvedValue(
         declareContractRespMock as unknown as DeclareContractResponse,
@@ -189,23 +181,23 @@ describe('DeclareContractRpc', () => {
   );
 
   it('renders confirmation dialog', async () => {
-    const contractPayload = generateExpectedDeclareTransactionPayload();
+    const payload = generateExpectedDeclareTransactionPayload();
     const details = { maxFee: BigNumber.from(1000000000000000).toString() };
     // Convert maxFee to ETH from Wei
     const maxFeeInEth = utils.formatUnits(details.maxFee, 'ether');
     const transactionHash = '0x123';
 
     const { request, confirmDialogSpy, account } =
-      await prepareMockDeclareContract(
-        transactionHash,
-        contractPayload,
-        details,
-      );
+      await prepareMockDeclareContract(transactionHash, payload, details);
 
     await declareContract.execute(request);
 
     const calls = confirmDialogSpy.mock.calls[0][0];
     expect(calls).toStrictEqual([
+      {
+        type: 'heading',
+        value: 'Do you want to sign this transaction?',
+      },
       {
         type: 'row',
         label: 'Signer Address',
@@ -214,6 +206,9 @@ describe('DeclareContractRpc', () => {
           markdown: false,
           type: 'text',
         },
+      },
+      {
+        type: 'divider',
       },
       {
         type: 'row',
@@ -225,31 +220,43 @@ describe('DeclareContractRpc', () => {
         },
       },
       {
+        type: 'divider',
+      },
+      {
         type: 'row',
         label: 'Contract',
         value: {
-          value: JSON.stringify(contractPayload.contract, null, 2),
+          value: toJson(payload.contract),
           markdown: false,
           type: 'text',
         },
+      },
+      {
+        type: 'divider',
       },
       {
         type: 'row',
         label: 'Compiled Class Hash',
         value: {
-          value: contractPayload.compiledClassHash,
+          value: payload.compiledClassHash,
           markdown: false,
           type: 'text',
         },
       },
       {
+        type: 'divider',
+      },
+      {
         type: 'row',
         label: 'Class Hash',
         value: {
-          value: contractPayload.classHash,
+          value: payload.classHash,
           markdown: false,
           type: 'text',
         },
+      },
+      {
+        type: 'divider',
       },
       {
         type: 'row',

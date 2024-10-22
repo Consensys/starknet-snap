@@ -1,5 +1,5 @@
 import type { Component } from '@metamask/snaps-sdk';
-import { row, text } from '@metamask/snaps-sdk';
+import { heading, divider, row, text } from '@metamask/snaps-sdk';
 import convert from 'ethereum-unit-converter';
 import type { Infer } from 'superstruct';
 import { assign, object, optional, string } from 'superstruct';
@@ -12,6 +12,7 @@ import {
   UniversalDetailsStruct,
   confirmDialog,
   AccountRpcController,
+  toJson,
 } from '../utils';
 import { UserRejectedOpError } from '../utils/exceptions';
 import { declareContract as declareContractUtil } from '../utils/starknetUtils';
@@ -56,7 +57,7 @@ export class DeclareContractRpc extends AccountRpcController<
     const paramMappings: Record<string, string> = {
       senderAddress: 'address',
       invocationsDetails: 'details',
-      contractPayload: 'payload'
+      contractPayload: 'payload',
     };
 
     // Apply the mappings to params
@@ -84,7 +85,7 @@ export class DeclareContractRpc extends AccountRpcController<
   protected async handleRequest(
     params: DeclareContractParams,
   ): Promise<DeclareContractResponse> {
-    const { contractPayload, details, address } = params;
+    const { payload, details, address } = params;
 
     if (!(await this.getDeclareContractConsensus(params))) {
       throw new UserRejectedOpError() as unknown as Error;
@@ -94,16 +95,16 @@ export class DeclareContractRpc extends AccountRpcController<
       this.network,
       address,
       this.account.privateKey,
-      contractPayload,
+      payload,
       details,
     )) as DeclareContractResponse;
   }
 
   protected async getDeclareContractConsensus(params: DeclareContractParams) {
-    const { contractPayload, details, address } = params;
+    const { payload, details, address } = params;
     const components: Component[] = [];
-   components.push(heading('Do you want to sign this transaction?'))
-    // Add the signer address
+    components.push(heading('Do you want to sign this transaction?'));
+
     components.push(
       row(
         'Signer Address',
@@ -114,7 +115,8 @@ export class DeclareContractRpc extends AccountRpcController<
       ),
     );
 
-    // Add network information
+    components.push(divider());
+
     components.push(
       row(
         'Network',
@@ -125,12 +127,12 @@ export class DeclareContractRpc extends AccountRpcController<
       ),
     );
 
-    // Add contract details, compiled class hash, and class hash
-    if (contractPayload.contract) {
+    if (payload.contract) {
+      components.push(divider());
       const contractDetails =
-        typeof contractPayload.contract === 'string'
-          ? contractPayload.contract
-          : toJson(contractPayload.contract);
+        typeof payload.contract === 'string'
+          ? payload.contract
+          : toJson(payload.contract);
       components.push(
         row(
           'Contract',
@@ -142,33 +144,35 @@ export class DeclareContractRpc extends AccountRpcController<
       );
     }
 
-    if (contractPayload.compiledClassHash) {
+    if (payload.compiledClassHash) {
+      components.push(divider());
       components.push(
         row(
           'Compiled Class Hash',
           text({
-            value: contractPayload.compiledClassHash,
+            value: payload.compiledClassHash,
             markdown: false,
           }),
         ),
       );
     }
 
-    if (contractPayload.classHash) {
+    if (payload.classHash) {
+      components.push(divider());
       components.push(
         row(
           'Class Hash',
           text({
-            value: contractPayload.classHash,
+            value: payload.classHash,
             markdown: false,
           }),
         ),
       );
     }
 
-    // Add Casm details if available
-    if (contractPayload.casm) {
-      const casmDetails = toJson(contractPayload.casm);
+    if (payload.casm) {
+      const casmDetails = toJson(payload.casm);
+      components.push(divider());
       components.push(
         row(
           'Casm',
@@ -180,38 +184,14 @@ export class DeclareContractRpc extends AccountRpcController<
       );
     }
 
-    // Add Max Fee in ETH, Nonce, and Version if they are available in details
     if (details?.maxFee) {
       const maxFeeInEth = convert(details.maxFee, 'wei', 'ether');
+      components.push(divider());
       components.push(
         row(
           'Max Fee (ETH)',
           text({
             value: maxFeeInEth,
-            markdown: false,
-          }),
-        ),
-      );
-    }
-
-    if (details?.nonce !== undefined) {
-      components.push(
-        row(
-          'Nonce',
-          text({
-            value: details.nonce.toString(),
-            markdown: false,
-          }),
-        ),
-      );
-    }
-
-    if (details?.version !== undefined) {
-      components.push(
-        row(
-          'Version',
-          text({
-            value: details.version.toString(),
             markdown: false,
           }),
         ),
