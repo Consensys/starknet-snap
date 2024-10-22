@@ -1,5 +1,5 @@
 import { BigNumber, utils } from 'ethers';
-import type { Abi } from 'starknet';
+import type { Abi, UniversalDetails } from 'starknet';
 import { constants } from 'starknet';
 import type { Infer } from 'superstruct';
 
@@ -12,12 +12,17 @@ import {
 } from '../utils/exceptions';
 import * as starknetUtils from '../utils/starknetUtils';
 import {
+  buildDividerComponent,
+  buildRowComponent,
   mockAccount,
   prepareConfirmDialog,
   prepareMockAccount,
 } from './__tests__/helper';
 import { declareContract } from './declare-contract';
-import type { DeclareContractResponse } from './declare-contract';
+import type {
+  DeclareContractParams,
+  DeclareContractResponse,
+} from './declare-contract';
 
 jest.mock('../utils/snap');
 jest.mock('../utils/logger');
@@ -50,7 +55,7 @@ const generateExpectedDeclareTransactionPayload =
 const prepareMockDeclareContract = async (
   transactionHash: string,
   payload: DeclareContractPayload,
-  details: UniversalDetails
+  details: UniversalDetails,
 ) => {
   const state = {
     accContracts: [],
@@ -121,7 +126,8 @@ describe('DeclareContractRpc', () => {
   it('throws UserRejectedOpError if user cancels the dialog', async () => {
     const payload = generateExpectedDeclareTransactionPayload();
     const details = { maxFee: BigNumber.from(1000000000000000).toString() };
-    const transactionHash = '0x07f901c023bac6c874691244c4c2332c6825b916fb68d240c807c6156db84fd3';
+    const transactionHash =
+      '0x07f901c023bac6c874691244c4c2332c6825b916fb68d240c807c6156db84fd3';
 
     const { request, confirmDialogSpy } = await prepareMockDeclareContract(
       transactionHash,
@@ -136,9 +142,9 @@ describe('DeclareContractRpc', () => {
   });
 
   it('throws `InvalidRequestParamsError` when request parameter is not correct', async () => {
-    await expect(declareContract.execute({} as unknown as DeclareContractParams)).rejects.toThrow(
-      InvalidRequestParamsError,
-    );
+    await expect(
+      declareContract.execute({} as unknown as DeclareContractParams),
+    ).rejects.toThrow(InvalidRequestParamsError);
   });
 
   it.each([
@@ -197,75 +203,17 @@ describe('DeclareContractRpc', () => {
         type: 'heading',
         value: 'Do you want to sign this transaction?',
       },
-      {
-        type: 'row',
-        label: 'Signer Address',
-        value: {
-          value: account.address,
-          markdown: false,
-          type: 'text',
-        },
-      },
-      {
-        type: 'divider',
-      },
-      {
-        type: 'row',
-        label: 'Network',
-        value: {
-          value: STARKNET_SEPOLIA_TESTNET_NETWORK.name,
-          markdown: false,
-          type: 'text',
-        },
-      },
-      {
-        type: 'divider',
-      },
-      {
-        type: 'row',
-        label: 'Contract',
-        value: {
-          value: toJson(payload.contract),
-          markdown: false,
-          type: 'text',
-        },
-      },
-      {
-        type: 'divider',
-      },
-      {
-        type: 'row',
-        label: 'Compiled Class Hash',
-        value: {
-          value: payload.compiledClassHash,
-          markdown: false,
-          type: 'text',
-        },
-      },
-      {
-        type: 'divider',
-      },
-      {
-        type: 'row',
-        label: 'Class Hash',
-        value: {
-          value: payload.classHash,
-          markdown: false,
-          type: 'text',
-        },
-      },
-      {
-        type: 'divider',
-      },
-      {
-        type: 'row',
-        label: 'Max Fee (ETH)',
-        value: {
-          value: maxFeeInEth,
-          markdown: false,
-          type: 'text',
-        },
-      },
+      buildRowComponent('Signer Address', account.address),
+      buildDividerComponent(),
+      buildRowComponent('Network', STARKNET_SEPOLIA_TESTNET_NETWORK.name),
+      buildDividerComponent(),
+      buildRowComponent('Contract', toJson(payload.contract)),
+      buildDividerComponent(),
+      buildRowComponent('Compiled Class Hash', payload.compiledClassHash ?? ''),
+      buildDividerComponent(),
+      buildRowComponent('Class Hash', payload.classHash ?? ''),
+      buildDividerComponent(),
+      buildRowComponent('Max Fee (ETH)', maxFeeInEth),
     ]);
   });
 });
