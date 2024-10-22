@@ -1,6 +1,7 @@
 export * from './display-private-key';
 export * from './estimate-fee';
 export * from './execute-txn';
+export * from './declare-contract';
 export * from './sign-message';
 export * from './sign-transaction';
 export * from './sign-declare-transaction';
