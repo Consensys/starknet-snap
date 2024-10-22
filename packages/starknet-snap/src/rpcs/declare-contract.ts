@@ -102,7 +102,7 @@ export class DeclareContractRpc extends AccountRpcController<
   protected async getDeclareContractConsensus(params: DeclareContractParams) {
     const { contractPayload, details, address } = params;
     const components: Component[] = [];
-
+   components.push(heading('Do you want to sign this transaction?'))
     // Add the signer address
     components.push(
       row(
