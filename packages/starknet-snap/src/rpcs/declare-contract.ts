@@ -168,7 +168,7 @@ export class DeclareContractRpc extends AccountRpcController<
 
     // Add Casm details if available
     if (contractPayload.casm) {
-      const casmDetails = JSON.stringify(contractPayload.casm, null, 2);
+      const casmDetails = toJson(contractPayload.casm);
       components.push(
         row(
           'Casm',
