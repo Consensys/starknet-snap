@@ -130,7 +130,7 @@ export class DeclareContractRpc extends AccountRpcController<
       const contractDetails =
         typeof contractPayload.contract === 'string'
           ? contractPayload.contract
-          : JSON.stringify(contractPayload.contract, null, 2);
+          : toJson(contractPayload.contract);
       components.push(
         row(
           'Contract',
