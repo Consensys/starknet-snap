@@ -9,6 +9,10 @@ type Result = RpcTypeToMessageMap[WalletAddDeclareTransactionMethod]['result'];
 
 export class WalletAddDeclareTransaction extends StarknetWalletRpc {
   async handleRequest(params: Params): Promise<Result> {
-    return await this.snap.declare(this.wallet.selectedAddress, formatDeclareTransaction(params));
+    return await this.snap.declare({
+      senderAddress: this.wallet.selectedAddress,
+      contractPayload: formatDeclareTransaction(params),
+      chainId: this.wallet.chainId,
+    });
   }
 }

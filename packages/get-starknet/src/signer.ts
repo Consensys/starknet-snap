@@ -24,11 +24,17 @@ export class MetaMaskSigner implements SignerInterface {
   }
 
   async getPubKey(): Promise<string> {
-    return this.#snap.getPubKey(this.#address);
+    return this.#snap.getPubKey({
+      userAddress: this.#address,
+    });
   }
 
-  async signMessage(typedData: TypedData, accountAddress: string): Promise<Signature> {
-    const result = (await this.#snap.signMessage(typedData, false, accountAddress)) as ArraySignatureType;
+  async signMessage(typedDataMessage: TypedData, address: string): Promise<Signature> {
+    const result = (await this.#snap.signMessage({
+      typedDataMessage,
+      enableAuthorize: false,
+      address,
+    })) as ArraySignatureType;
     return new ec.starkCurve.Signature(numUtils.toBigInt(result[0]), numUtils.toBigInt(result[1]));
   }
 
@@ -45,21 +51,27 @@ export class MetaMaskSigner implements SignerInterface {
     transactionsDetail: InvocationsSignerDetails,
     _abis?: Abi[] | undefined,
   ): Promise<Signature> {
-    const result = (await this.#snap.signTransaction(
-      this.#address,
+    const result = (await this.#snap.signTransaction({
+      address: this.#address,
       transactions,
       transactionsDetail,
-    )) as ArraySignatureType;
+    })) as ArraySignatureType;
     return new ec.starkCurve.Signature(numUtils.toBigInt(result[0]), numUtils.toBigInt(result[1]));
   }
 
   async signDeployAccountTransaction(transaction: DeployAccountSignerDetails): Promise<Signature> {
-    const result = (await this.#snap.signDeployAccountTransaction(this.#address, transaction)) as ArraySignatureType;
+    const result = (await this.#snap.signDeployAccountTransaction({
+      signerAddress: this.#address,
+      transaction,
+    })) as ArraySignatureType;
     return new ec.starkCurve.Signature(numUtils.toBigInt(result[0]), numUtils.toBigInt(result[1]));
   }
 
   async signDeclareTransaction(transaction: DeclareSignerDetails): Promise<Signature> {
-    const result = (await this.#snap.signDeclareTransaction(this.#address, transaction)) as ArraySignatureType;
+    const result = (await this.#snap.signDeclareTransaction({
+      address: this.#address,
+      details: transaction,
+    })) as ArraySignatureType;
     return new ec.starkCurve.Signature(numUtils.toBigInt(result[0]), numUtils.toBigInt(result[1]));
   }
 }
