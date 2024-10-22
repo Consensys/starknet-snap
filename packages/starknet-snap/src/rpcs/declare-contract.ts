@@ -20,7 +20,7 @@ import { declareContract as declareContractUtil } from '../utils/starknetUtils';
 export const DeclareContractRequestStruct = assign(
   object({
     address: AddressStruct, // Sender address
-    contractPayload: DeclareContractPayloadStruct, // Contract payload structure
+    payload: DeclareContractPayloadStruct, // Contract payload structure
     details: optional(UniversalDetailsStruct), // Optional invocation details
   }),
   BaseRequestStruct, // Base request struct, could include chainId, etc.
