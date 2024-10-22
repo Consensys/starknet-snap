@@ -56,6 +56,7 @@ export class DeclareContractRpc extends AccountRpcController<
     const paramMappings: Record<string, string> = {
       senderAddress: 'address',
       invocationsDetails: 'details',
+      contractPayload: 'payload'
     };
 
     // Apply the mappings to params
