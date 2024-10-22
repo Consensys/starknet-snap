@@ -1,10 +1,5 @@
 import type { Component } from '@metamask/snaps-sdk';
-import {
-  heading,
-  row,
-  text,
-  UserRejectedRequestError,
-} from '@metamask/snaps-sdk';
+import { heading, row, text } from '@metamask/snaps-sdk';
 import type { Infer } from 'superstruct';
 import { array, object, string, assign } from 'superstruct';
 
@@ -18,6 +13,7 @@ import {
   AccountRpcController,
   mapDeprecatedParams,
 } from '../utils';
+import { UserRejectedOpError } from '../utils/exceptions';
 import { signMessage as signMessageUtil } from '../utils/starknetUtils';
 
 export const SignMessageRequestStruct = assign(
@@ -84,7 +80,7 @@ export class SignMessageRpc extends AccountRpcController<
       enableAuthorize &&
       !(await this.getSignMessageConsensus(typedDataMessage, address))
     ) {
-      throw new UserRejectedRequestError() as unknown as Error;
+      throw new UserRejectedOpError() as unknown as Error;
     }
 
     return await signMessageUtil(

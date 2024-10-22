@@ -1,13 +1,13 @@
-import {
-  InvalidParamsError,
-  UserRejectedRequestError,
-} from '@metamask/snaps-sdk';
 import type { DeclareSignerDetails } from 'starknet';
 import { constants } from 'starknet';
 
 import type { SnapState } from '../types/snapState';
 import { toJson } from '../utils';
 import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../utils/constants';
+import {
+  UserRejectedOpError,
+  InvalidRequestParamsError,
+} from '../utils/exceptions';
 import * as starknetUtils from '../utils/starknetUtils';
 import {
   mockAccount,
@@ -108,7 +108,7 @@ describe('signDeclareTransaction', () => {
     ]);
   });
 
-  it('throws `UserRejectedRequestError` if user denied the operation', async () => {
+  it('throws `UserRejectedOpError` if user denied the operation', async () => {
     const chainId = constants.StarknetChainId.SN_SEPOLIA;
     const account = await mockAccount(chainId);
 
@@ -120,15 +120,15 @@ describe('signDeclareTransaction', () => {
     const request = createRequest(chainId, account.address);
 
     await expect(signDeclareTransaction.execute(request)).rejects.toThrow(
-      UserRejectedRequestError,
+      UserRejectedOpError,
     );
   });
 
-  it('throws `InvalidParamsError` when request parameter is not correct', async () => {
+  it('throws `InvalidRequestParamsError` when request parameter is not correct', async () => {
     await expect(
       signDeclareTransaction.execute(
         {} as unknown as SignDeclareTransactionParams,
       ),
-    ).rejects.toThrow(InvalidParamsError);
+    ).rejects.toThrow(InvalidRequestParamsError);
   });
 });
