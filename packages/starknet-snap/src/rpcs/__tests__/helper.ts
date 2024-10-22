@@ -1,7 +1,8 @@
+import { BigNumber } from 'ethers';
 import type { constants } from 'starknet';
 
 import type { StarknetAccount } from '../../__tests__/helper';
-import { generateAccounts } from '../../__tests__/helper';
+import { generateAccounts, generateRandomValue } from '../../__tests__/helper';
 import type { SnapState } from '../../types/snapState';
 import * as snapHelper from '../../utils/snap';
 import * as snapUtils from '../../utils/snapUtils';
@@ -82,3 +83,26 @@ export const buildDividerComponent = () => {
     type: 'divider',
   };
 };
+
+/**
+ *
+ * @param min
+ * @param max
+ * @param useBigInt
+ */
+export function generateRandomFee(
+  min = '100000000000000',
+  max = '1000000000000000',
+  useBigInt = false,
+) {
+  const minFee = BigInt(min);
+  const maxFee = BigInt(max);
+  const randomFactor = generateRandomValue();
+  const randomFee = BigInt(
+    Math.max(Number(minFee), Math.floor(randomFactor * Number(maxFee))),
+  );
+
+  return useBigInt
+    ? randomFee.toString(10)
+    : BigNumber.from(randomFee).toString();
+}

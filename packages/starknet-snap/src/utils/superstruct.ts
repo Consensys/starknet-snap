@@ -192,7 +192,7 @@ export const DeclareSignDetailsStruct = assign(
 /* eslint-disable */
 export const SierraContractEntryPointFieldsStruct = object({
   selector: string(),
-  function_idx: string(),
+  function_idx: number(),
 });
 
 export const ContractEntryPointFieldsStruct = object({
