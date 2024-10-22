@@ -1,9 +1,11 @@
 import type { Component } from '@metamask/snaps-sdk';
 import { heading, divider, row, text } from '@metamask/snaps-sdk';
 import convert from 'ethereum-unit-converter';
+import { constants, TransactionType } from 'starknet';
 import type { Infer } from 'superstruct';
 import { assign, object, optional, string } from 'superstruct';
 
+import { FeeToken } from '../types/snapApi';
 import {
   AddressStruct,
   BaseRequestStruct,
@@ -11,11 +13,15 @@ import {
   mapDeprecatedParams,
   UniversalDetailsStruct,
   confirmDialog,
-  AccountRpcController,
   toJson,
+  AccountRpcControllerWithDeploy,
 } from '../utils';
 import { UserRejectedOpError } from '../utils/exceptions';
-import { declareContract as declareContractUtil } from '../utils/starknetUtils';
+import {
+  createAccount,
+  declareContract as declareContractUtil,
+  getEstimatedFees,
+} from '../utils/starknetUtils';
 
 // Define the DeclareContractRequestStruct
 export const DeclareContractRequestStruct = assign(
@@ -42,7 +48,7 @@ export type DeclareContractResponse = Infer<
 /**
  * The RPC handler to declare a contract.
  */
-export class DeclareContractRpc extends AccountRpcController<
+export class DeclareContractRpc extends AccountRpcControllerWithDeploy<
   DeclareContractParams,
   DeclareContractResponse
 > {
@@ -86,9 +92,54 @@ export class DeclareContractRpc extends AccountRpcController<
     params: DeclareContractParams,
   ): Promise<DeclareContractResponse> {
     const { payload, details, address } = params;
+    const { privateKey, publicKey } = this.account;
 
-    if (!(await this.getDeclareContractConsensus(params))) {
+    const { includeDeploy, suggestedMaxFee, estimateResults } =
+      await getEstimatedFees(
+        this.network,
+        address,
+        privateKey,
+        publicKey,
+        [
+          {
+            type: TransactionType.DECLARE,
+            payload,
+          },
+        ],
+        details,
+      );
+
+    const accountDeployed = !includeDeploy;
+    const resourceBounds = estimateResults.map(
+      (result) => result.resourceBounds,
+    );
+
+    params.details = params.details ?? {};
+    params.details = {
+      ...params.details,
+      // Aways repect the input, unless the account is not deployed
+      // TODO: we may also need to increment the nonce base on the input, if the account is not deployed
+      nonce: accountDeployed ? params.details?.nonce : 1,
+      maxFee: suggestedMaxFee, // Override maxFee with suggestedMaxFee
+      resourceBounds: resourceBounds[resourceBounds.length - 1],
+    };
+
+    if (!(await this.getDeclareContractConsensus(params, accountDeployed))) {
       throw new UserRejectedOpError() as unknown as Error;
+    }
+
+    if (!accountDeployed) {
+      await createAccount({
+        network: this.network,
+        address,
+        publicKey,
+        privateKey,
+        waitMode: false,
+        callback: async (contractAddress: string, transactionHash: string) => {
+          await this.updateAccountAsDeploy(contractAddress, transactionHash);
+        },
+        version: details?.version as unknown as constants.TRANSACTION_VERSION,
+      });
     }
 
     return (await declareContractUtil(
@@ -100,9 +151,17 @@ export class DeclareContractRpc extends AccountRpcController<
     )) as DeclareContractResponse;
   }
 
-  protected async getDeclareContractConsensus(params: DeclareContractParams) {
+  protected async getDeclareContractConsensus(
+    params: DeclareContractParams,
+    accountDeployed: boolean,
+  ) {
     const { payload, details, address } = params;
     const components: Component[] = [];
+    const feeToken: FeeToken =
+      details?.version === constants.TRANSACTION_VERSION.V3
+        ? FeeToken.STRK
+        : FeeToken.ETH;
+
     components.push(heading('Do you want to sign this transaction?'));
 
     components.push(
@@ -115,7 +174,23 @@ export class DeclareContractRpc extends AccountRpcController<
       ),
     );
 
+    // Display a message to indicate the signed transaction will include an account deployment
+    if (!accountDeployed) {
+      components.push(heading(`The account will be deployed`));
+      components.push(divider());
+    }
+
     components.push(divider());
+
+    components.push(
+      row(
+        `Estimated Gas Fee (${feeToken})`,
+        text({
+          value: convert(params.details?.maxFee, 'wei', 'ether'),
+          markdown: false,
+        }),
+      ),
+    );
 
     components.push(
       row(

@@ -3,7 +3,15 @@ import type { Json } from '@metamask/snaps-sdk';
 import type { Struct } from 'superstruct';
 import { assert } from 'superstruct';
 
-import type { Network, SnapState } from '../types/snapState';
+import { AccountStateManager } from '../state/account-state-manager';
+import { TransactionStateManager } from '../state/transaction-state-manager';
+import {
+  TransactionStatus,
+  VoyagerTransactionType,
+  type Network,
+  type SnapState,
+  type Transaction,
+} from '../types/snapState';
 import { InvalidRequestParamsError, UnknownError } from './exceptions';
 import { logger } from './logger';
 import { getBip44Deriver, getStateData } from './snap';
@@ -151,5 +159,60 @@ export abstract class AccountRpcController<
       this.account.publicKey,
       showInvalidAccountAlert,
     );
+  }
+}
+
+export abstract class AccountRpcControllerWithDeploy<
+  Request extends AccountRpcParams,
+  Response extends Json,
+> extends AccountRpcController<Request, Response> {
+  protected txnStateManager: TransactionStateManager;
+
+  protected accStateManager: AccountStateManager;
+
+  constructor(options?: AccountRpcControllerOptions) {
+    super(options);
+    this.txnStateManager = new TransactionStateManager();
+    this.accStateManager = new AccountStateManager();
+  }
+
+  protected async updateAccountAsDeploy(
+    address: string,
+    transactionHash: string,
+  ): Promise<void> {
+    if (!transactionHash) {
+      throw new Error(`Failed to deploy account for address ${address}`);
+    }
+
+    await this.txnStateManager.addTransaction(
+      this.createDeployTxn(address, transactionHash),
+    );
+
+    await this.accStateManager.updateAccountAsDeploy({
+      address,
+      chainId: this.network.chainId,
+      transactionHash,
+    });
+  }
+
+  protected createDeployTxn(
+    address: string,
+    transactionHash: string,
+  ): Transaction {
+    return {
+      txnHash: transactionHash,
+      txnType: VoyagerTransactionType.DEPLOY_ACCOUNT,
+      chainId: this.network.chainId,
+      senderAddress: address,
+      contractAddress: address,
+      contractFuncName: '',
+      contractCallData: [],
+      finalityStatus: TransactionStatus.RECEIVED,
+      executionStatus: TransactionStatus.RECEIVED,
+      status: '',
+      failureReason: '',
+      eventIds: [],
+      timestamp: Math.floor(Date.now() / 1000),
+    };
   }
 }
