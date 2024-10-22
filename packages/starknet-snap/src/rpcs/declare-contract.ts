@@ -69,7 +69,11 @@ export class DeclareContractRpc extends AccountRpcController<
    * It will show a confirmation dialog to the user before signing the contract declaration.
    *
    * @param params - The parameters of the request.
-   * @returns the signature of the message in string array.
+   * @param params.address - The address of the request account.
+   * @param params.payload - The contract payload of the declare transaction.
+   * @param [params.details] - The declare transaction details.
+   * @param params.chainId - The chain id of the network.
+   * @returns A Promise that resolve the `DeclareContractResponse` object.
    */
   async execute(
     params: DeclareContractParams,
