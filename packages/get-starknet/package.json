@@ -39,7 +39,6 @@
     "eslint-plugin-prettier": "^4.2.1",
     "eslint-plugin-promise": "^6.1.1",
     "get-starknet-core": "^4.0.0",
-    "get-starknet-core-v3": "npm:get-starknet-core@3.3.0",
     "jest": "^29.5.0",
     "prettier": "^2.7.1",
     "rimraf": "^3.0.2",

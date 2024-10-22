@@ -2203,7 +2203,6 @@ __metadata:
     eslint-plugin-prettier: ^4.2.1
     eslint-plugin-promise: ^6.1.1
     get-starknet-core: ^4.0.0
-    get-starknet-core-v3: "npm:get-starknet-core@3.3.0"
     jest: ^29.5.0
     prettier: ^2.7.1
     rimraf: ^3.0.2
@@ -4798,22 +4797,6 @@ __metadata:
     semver: ^7.5.4
     uuid: ^9.0.1
   checksum: 01f2c71a8f06158d5335bfe96bfd2f3aa39ec6b2323c5d0ff1d3136071a3e8ff7c1804d640ba1d4e07f96f3e68a95ff7729ddfcd34b373e5fefd86d6ef12d034
-  languageName: node
-  linkType: hard
-
-"@module-federation/runtime@npm:^0.1.2":
-  version: 0.1.21
-  resolution: "@module-federation/runtime@npm:0.1.21"
-  dependencies:
-    "@module-federation/sdk": 0.1.21
-  checksum: ce4de8515b54f1cd07a3c7c4cbd35fea163294b9fb24be10827872f3ebb62cd5c289f3602efe4149d963282739f79b51947afa039ee6f36be7f66dea83d590fc
-  languageName: node
-  linkType: hard
-
-"@module-federation/sdk@npm:0.1.21":
-  version: 0.1.21
-  resolution: "@module-federation/sdk@npm:0.1.21"
-  checksum: 6856dcfe2ef5ae939890b82010aaad911fa6c4330a05f290ae054c316c9b532d3691456a1f9e176fe05f1df2d6f2d8c7e0c842ca5648a0fd7abf270e44ed9ecb
   languageName: node
   linkType: hard
 
@@ -15349,20 +15332,6 @@ __metadata:
   version: 0.1.0
   resolution: "get-package-type@npm:0.1.0"
   checksum: bba0811116d11e56d702682ddef7c73ba3481f114590e705fc549f4d868972263896af313c57a25c076e3c0d567e11d919a64ba1b30c879be985fc9d44f96148
-  languageName: node
-  linkType: hard
-
-"get-starknet-core-v3@npm:get-starknet-core@3.3.0":
-  version: 3.3.0
-  resolution: "get-starknet-core@npm:3.3.0"
-  dependencies:
-    "@module-federation/runtime": ^0.1.2
-  peerDependencies:
-    starknet: ^5.18.0
-  peerDependenciesMeta:
-    starknet:
-      optional: false
-  checksum: d8dd7a905170adffa7cde712a34a99f1e8231858366ef3b3117e109aed2cb3031b16156e285daeecf8466cd4523deeb95b6b1d26245d7ab14607c45851ac9ecd
   languageName: node
   linkType: hard
 
