@@ -50,7 +50,7 @@ const generateExpectedDeclareTransactionPayload =
 const prepareMockDeclareContract = async (
   transactionHash: string,
   payload: DeclareContractPayload,
-  details: any,
+  details: UniversalDetails
 ) => {
   const state = {
     accContracts: [],
