@@ -125,7 +125,7 @@ describe('formatDeclareTransaction', () => {
     expect(result).toStrictEqual(expected);
   });
 
-  it('handles undefined params correctly', () => {
+  it('returns undefined if the `AddDeclareParams` is undefined', () => {
     const result = formatDeclareTransaction(undefined as any);
 
     expect(result).toBeUndefined();
