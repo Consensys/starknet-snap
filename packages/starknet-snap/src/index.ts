@@ -185,7 +185,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
 
       case 'starkNet_signDeclareTransaction':
         return await signDeclareTransaction.execute(
-          apiParams as unknown as SignDeclareTransactionParams,
+          apiParams.requestParams as unknown as SignDeclareTransactionParams,
         );
 
       case 'starkNet_signDeployAccountTransaction':
@@ -196,7 +196,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
 
       case 'starkNet_verifySignedMessage':
         return await verifySignature.execute(
-          apiParams as unknown as VerifySignatureParams,
+          apiParams.requestParams as unknown as VerifySignatureParams,
         );
 
       case 'starkNet_getErc20TokenBalance':
@@ -278,7 +278,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
 
       case 'starkNet_declareContract':
         return await declareContract.execute(
-          apiParams as unknown as DeclareContractParams,
+          apiParams.requestParams as unknown as DeclareContractParams,
         );
 
       case 'starkNet_getStarkName':
@@ -286,7 +286,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
 
       case 'starkNet_getDeploymentData':
         return await getDeploymentData.execute(
-          apiParams as unknown as GetDeploymentDataParams,
+          apiParams.requestParams as unknown as GetDeploymentDataParams,
         );
 
       default:
