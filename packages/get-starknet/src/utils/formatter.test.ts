@@ -60,6 +60,12 @@ describe('formatCalls', () => {
 
     expect(result).toStrictEqual(expected);
   });
+
+  it('returns undefined if the `calls` is undefined', () => {
+    const result = formatCalls(undefined as unknown as any);
+
+    expect(result).toBeUndefined();
+  });
 });
 
 /* eslint-disable @typescript-eslint/naming-convention */
@@ -119,11 +125,48 @@ describe('formatDeclareTransaction', () => {
     expect(result).toStrictEqual(expected);
   });
 
-  it('remains `class_hash` undefined if it is undefined', () => {
-    const params = generateDeclareTransactionParams({ classHash: undefined });
-    const expected = generateExpectedDeclareTransactionPayload({ classHash: undefined });
+  it('returns undefined if the `AddDeclareParams` is undefined', () => {
+    const result = formatDeclareTransaction(undefined as any);
 
-    const result = formatDeclareTransaction(params);
+    expect(result).toBeUndefined();
+  });
+
+  it.each([
+    {
+      fieldName: 'compiled_class_hash',
+      paramKey: 'compiledClassHash',
+    },
+    {
+      fieldName: 'class_hash',
+      paramKey: 'classHash',
+    },
+    {
+      fieldName: 'contract_class',
+      paramKey: 'contract',
+    },
+  ])('remains undefined if the field - $fieldName is undefined', ({ fieldName, paramKey }) => {
+    const params = generateDeclareTransactionParams();
+
+    // Dynamically set the field to undefined
+    params[fieldName] = undefined as any;
+    const expected = generateExpectedDeclareTransactionPayload();
+
+    // Dynamically set the expected field to undefined
+    expected[paramKey] = undefined as any;
+
+    const result = formatDeclareTransaction(params as unknown as any);
+
+    expect(result).toStrictEqual(expected);
+  });
+
+  it('returns undefined if the `AddDeclareParams` is {}', () => {
+    const expected = {
+      classHash: undefined,
+      compiledClassHash: undefined,
+      contract: undefined,
+    };
+
+    const result = formatDeclareTransaction({} as unknown as any);
 
     expect(result).toStrictEqual(expected);
   });
