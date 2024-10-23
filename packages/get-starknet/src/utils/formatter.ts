@@ -16,6 +16,12 @@ import type { AddDeclareTransactionParameters, Call as CallGetStarknetV4 } from 
  * @returns The array of formatted calls in the `Call[]` format.
  */
 export const formatCalls = (calls: Call[] | CallGetStarknetV4[]): Call[] => {
+  if (calls === undefined) {
+    return [];
+  }
+  if (!Array.isArray(calls)) {
+    return [];
+  }
   return calls.map((call) => {
     const contractAddress = 'contract_address' in call ? call.contract_address : call.contractAddress;
     const entrypoint = 'entry_point' in call ? call.entry_point : call.entrypoint;
@@ -47,8 +53,8 @@ export const formatDeclareTransaction = (params: AddDeclareTransactionParameters
     compiledClassHash: compiled_class_hash,
     classHash: class_hash,
     contract: {
-      sierra_program: contract_class.sierra_program,
-      contract_class_version: contract_class.contract_class_version,
+      sierra_program: contract_class?.sierra_program,
+      contract_class_version: contract_class?.contract_class_version,
       entry_points_by_type: {
         CONSTRUCTOR: contract_class?.entry_points_by_type?.CONSTRUCTOR.map((ep) => ({
           selector: ep.selector,
@@ -63,7 +69,7 @@ export const formatDeclareTransaction = (params: AddDeclareTransactionParameters
           function_idx: ep.function_idx,
         })),
       },
-      abi: contract_class.abi as unknown as Abi, // Directly passing the string as `any`
+      abi: contract_class?.abi as unknown as Abi, // Directly passing the string as `any`
     },
   };
 };

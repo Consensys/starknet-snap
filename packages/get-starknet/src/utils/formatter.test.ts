@@ -60,6 +60,14 @@ describe('formatCalls', () => {
 
     expect(result).toStrictEqual(expected);
   });
+
+  it('returns empty array if calls is undefined', () => {
+    const expected = [];
+
+    const result = formatCalls(undefined as unknown as any);
+
+    expect(result).toStrictEqual(expected);
+  });
 });
 
 /* eslint-disable @typescript-eslint/naming-convention */
@@ -124,6 +132,27 @@ describe('formatDeclareTransaction', () => {
     const expected = generateExpectedDeclareTransactionPayload({ classHash: undefined });
 
     const result = formatDeclareTransaction(params);
+
+    expect(result).toStrictEqual(expected);
+  });
+
+  it('returns an object with undefined fields if param is {}', () => {
+    const expected = {
+      classHash: undefined,
+      compiledClassHash: undefined,
+      contract: {
+        abi: undefined,
+        contract_class_version: undefined,
+        entry_points_by_type: {
+          CONSTRUCTOR: undefined,
+          EXTERNAL: undefined,
+          L1_HANDLER: undefined,
+        },
+        sierra_program: undefined,
+      },
+    };
+
+    const result = formatDeclareTransaction({} as unknown as any);
 
     expect(result).toStrictEqual(expected);
   });
