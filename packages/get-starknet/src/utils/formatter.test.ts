@@ -200,8 +200,8 @@ describe('formatDeclareTransaction', () => {
 
   it('returns an object with undefined fields if param is {}', () => {
     const expected = {
-      classHash: '',
-      compiledClassHash: '',
+      classHash: undefined,
+      compiledClassHash: undefined,
       contract: {
         abi: undefined,
         contract_class_version: undefined,

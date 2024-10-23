@@ -50,32 +50,24 @@ export const formatDeclareTransaction = (params: AddDeclareTransactionParameters
   if (params === undefined) {
     return undefined as unknown as DeclareContractPayload;
   }
-  const { compiled_class_hash = '', class_hash = '', contract_class = {} as unknown as any } = params;
+  const {
+    compiled_class_hash = undefined,
+    class_hash = undefined,
+    contract_class = undefined as unknown as any,
+  } = params;
 
   return {
     compiledClassHash: compiled_class_hash,
     classHash: class_hash,
     contract: {
-      sierra_program: contract_class.sierra_program,
-      contract_class_version: contract_class.contract_class_version,
+      sierra_program: contract_class?.sierra_program,
+      contract_class_version: contract_class?.contract_class_version,
       entry_points_by_type: {
-        CONSTRUCTOR:
-          contract_class.entry_points_by_type?.CONSTRUCTOR?.map((ep) => ({
-            selector: ep.selector,
-            function_idx: ep.function_idx,
-          })) || [],
-        EXTERNAL:
-          contract_class.entry_points_by_type?.EXTERNAL?.map((ep) => ({
-            selector: ep.selector,
-            function_idx: ep.function_idx,
-          })) || [],
-        L1_HANDLER:
-          contract_class.entry_points_by_type?.L1_HANDLER?.map((ep) => ({
-            selector: ep.selector,
-            function_idx: ep.function_idx,
-          })) || [],
+        CONSTRUCTOR: contract_class?.entry_points_by_type?.CONSTRUCTOR || [],
+        EXTERNAL: contract_class?.entry_points_by_type?.EXTERNAL || [],
+        L1_HANDLER: contract_class?.entry_points_by_type?.L1_HANDLER || [],
       },
-      abi: contract_class.abi as unknown as Abi,
+      abi: contract_class?.abi as unknown as Abi,
     },
   };
 };
