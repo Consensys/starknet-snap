@@ -1,7 +1,9 @@
 /* eslint-disable @typescript-eslint/naming-convention, camelcase */
 import type { Call, DeclareContractPayload } from 'starknet';
-import type { AddDeclareTransactionParameters, Call as CallGetStarknetV4 } from 'starknet-types-07';
 
+import type { AddDeclareParams, AddInvokeTransactionParams } from '../rpcs';
+
+type CallGetStarknetV4 = AddInvokeTransactionParams['calls'][number];
 /**
  * Converts an array of calls from either the `CallGetStarknetV4[]` format
  * or the standard `Call[]` format into the standard `Call[]` format. If the input
@@ -16,10 +18,7 @@ import type { AddDeclareTransactionParameters, Call as CallGetStarknetV4 } from 
  * @returns The array of formatted calls in the `Call[]` format.
  */
 export const formatCalls = (calls: Call[] | CallGetStarknetV4[]): Call[] => {
-  if (calls === undefined) {
-    return undefined as unknown as Call[];
-  }
-  if (!Array.isArray(calls)) {
+  if (calls === undefined || !Array.isArray(calls)) {
     return undefined as unknown as Call[];
   }
   return calls.map((call) => {
@@ -46,7 +45,7 @@ export const formatCalls = (calls: Call[] | CallGetStarknetV4[]): Call[] => {
  * @param params - The object of `AddDeclareTransactionParameters`.
  * @returns The object in `DeclareContractPayload` format.
  */
-export const formatDeclareTransaction = (params: AddDeclareTransactionParameters): DeclareContractPayload => {
+export const formatDeclareTransaction = (params: AddDeclareParams): DeclareContractPayload => {
   if (params === undefined) {
     return undefined as unknown as DeclareContractPayload;
   }
