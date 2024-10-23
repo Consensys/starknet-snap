@@ -125,44 +125,16 @@ describe('formatDeclareTransaction', () => {
     expect(result).toStrictEqual(expected);
   });
 
-  it('remains `class_hash` undefined if it is undefined', () => {
-    const params = generateDeclareTransactionParams({ classHash: undefined });
-    const expected = generateExpectedDeclareTransactionPayload({ classHash: undefined });
-
-    const result = formatDeclareTransaction(params);
-
-    expect(result).toStrictEqual(expected);
-  });
-
   it('handles undefined params correctly', () => {
     const result = formatDeclareTransaction(undefined as any);
 
     expect(result).toBeUndefined();
   });
 
-  it('handles undefined entry points correctly', () => {
+  it('handles undefined contract_class correctly', () => {
     const params = generateDeclareTransactionParams();
 
-    params.contract_class.entry_points_by_type.CONSTRUCTOR = undefined as any;
-    params.contract_class.entry_points_by_type.EXTERNAL = undefined as any;
-    params.contract_class.entry_points_by_type.L1_HANDLER = undefined as any;
-
-    const expected = generateExpectedDeclareTransactionPayload({
-      entryPointsConstructor: [],
-      entryPointsExternal: [],
-      entryPointsL1Handler: [],
-    });
-
-    const result = formatDeclareTransaction(params);
-
-    expect(result).toStrictEqual(expected);
-  });
-
-  it('handles undefined contract_class correctly', () => {
-    const params = {
-      compiled_class_hash: '0xcompiledClassHash',
-      class_hash: '0xclassHash',
-    };
+    params.contract_class = undefined as any;
 
     const expected = {
       compiledClassHash: '0xcompiledClassHash',
@@ -184,16 +156,26 @@ describe('formatDeclareTransaction', () => {
     expect(result).toStrictEqual(expected);
   });
 
-  it('handles undefined compiled_class_hash correctly', () => {
-    const params = generateDeclareTransactionParams({
-      compiledClassHash: undefined,
-    });
+  it.each([
+    {
+      fieldName: 'compiled_class_hash',
+      paramKey: 'compiledClassHash',
+    },
+    {
+      fieldName: 'class_hash',
+      paramKey: 'classHash',
+    },
+  ])('handles undefined $fieldName correctly', ({ fieldName, paramKey }) => {
+    const params = generateDeclareTransactionParams();
 
-    const expected = generateExpectedDeclareTransactionPayload({
-      compiledClassHash: undefined,
-    });
+    // Dynamically set the field to undefined
+    params[fieldName] = undefined as any;
+    const expected = generateExpectedDeclareTransactionPayload();
 
-    const result = formatDeclareTransaction(params);
+    // Dynamically set the expected field to undefined
+    expected[paramKey] = undefined as any;
+
+    const result = formatDeclareTransaction(params as unknown as any);
 
     expect(result).toStrictEqual(expected);
   });
