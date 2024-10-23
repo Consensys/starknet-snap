@@ -61,12 +61,10 @@ describe('formatCalls', () => {
     expect(result).toStrictEqual(expected);
   });
 
-  it('returns empty array if calls is undefined', () => {
-    const expected = [];
-
+  it('returns undefined calls is undefined', () => {
     const result = formatCalls(undefined as unknown as any);
 
-    expect(result).toStrictEqual(expected);
+    expect(result).toBeUndefined();
   });
 });
 
@@ -139,20 +137,7 @@ describe('formatDeclareTransaction', () => {
   it('handles undefined params correctly', () => {
     const result = formatDeclareTransaction(undefined as any);
 
-    expect(result).toStrictEqual({
-      classHash: '',
-      compiledClassHash: '',
-      contract: {
-        abi: undefined,
-        contract_class_version: '',
-        entry_points_by_type: {
-          CONSTRUCTOR: [],
-          EXTERNAL: [],
-          L1_HANDLER: [],
-        },
-        sierra_program: [],
-      },
-    });
+    expect(result).toBeUndefined();
   });
 
   it('handles undefined entry points correctly', () => {
@@ -183,8 +168,8 @@ describe('formatDeclareTransaction', () => {
       compiledClassHash: '0xcompiledClassHash',
       classHash: '0xclassHash',
       contract: {
-        sierra_program: [],
-        contract_class_version: '',
+        sierra_program: undefined,
+        contract_class_version: undefined,
         entry_points_by_type: {
           CONSTRUCTOR: [],
           EXTERNAL: [],
@@ -219,13 +204,13 @@ describe('formatDeclareTransaction', () => {
       compiledClassHash: '',
       contract: {
         abi: undefined,
-        contract_class_version: '',
+        contract_class_version: undefined,
         entry_points_by_type: {
           CONSTRUCTOR: [],
           EXTERNAL: [],
           L1_HANDLER: [],
         },
-        sierra_program: [],
+        sierra_program: undefined,
       },
     };
 
