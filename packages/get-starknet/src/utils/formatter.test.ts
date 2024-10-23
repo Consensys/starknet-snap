@@ -61,7 +61,7 @@ describe('formatCalls', () => {
     expect(result).toStrictEqual(expected);
   });
 
-  it('returns undefined calls is undefined', () => {
+  it('returns undefined if the `calls` is undefined', () => {
     const result = formatCalls(undefined as unknown as any);
 
     expect(result).toBeUndefined();
