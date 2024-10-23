@@ -136,19 +136,96 @@ describe('formatDeclareTransaction', () => {
     expect(result).toStrictEqual(expected);
   });
 
-  it('returns an object with undefined fields if param is {}', () => {
-    const expected = {
-      classHash: undefined,
-      compiledClassHash: undefined,
+  it('handles undefined params correctly', () => {
+    const result = formatDeclareTransaction(undefined as any);
+
+    expect(result).toStrictEqual({
+      classHash: '',
+      compiledClassHash: '',
       contract: {
         abi: undefined,
-        contract_class_version: undefined,
+        contract_class_version: '',
         entry_points_by_type: {
-          CONSTRUCTOR: undefined,
-          EXTERNAL: undefined,
-          L1_HANDLER: undefined,
+          CONSTRUCTOR: [],
+          EXTERNAL: [],
+          L1_HANDLER: [],
         },
-        sierra_program: undefined,
+        sierra_program: [],
+      },
+    });
+  });
+
+  it('handles undefined entry points correctly', () => {
+    const params = generateDeclareTransactionParams();
+
+    params.contract_class.entry_points_by_type.CONSTRUCTOR = undefined as any;
+    params.contract_class.entry_points_by_type.EXTERNAL = undefined as any;
+    params.contract_class.entry_points_by_type.L1_HANDLER = undefined as any;
+
+    const expected = generateExpectedDeclareTransactionPayload({
+      entryPointsConstructor: [],
+      entryPointsExternal: [],
+      entryPointsL1Handler: [],
+    });
+
+    const result = formatDeclareTransaction(params);
+
+    expect(result).toStrictEqual(expected);
+  });
+
+  it('handles undefined contract_class correctly', () => {
+    const params = {
+      compiled_class_hash: '0xcompiledClassHash',
+      class_hash: '0xclassHash',
+    };
+
+    const expected = {
+      compiledClassHash: '0xcompiledClassHash',
+      classHash: '0xclassHash',
+      contract: {
+        sierra_program: [],
+        contract_class_version: '',
+        entry_points_by_type: {
+          CONSTRUCTOR: [],
+          EXTERNAL: [],
+          L1_HANDLER: [],
+        },
+        abi: undefined,
+      },
+    };
+
+    const result = formatDeclareTransaction(params as unknown as any);
+
+    expect(result).toStrictEqual(expected);
+  });
+
+  it('handles undefined compiled_class_hash correctly', () => {
+    const params = generateDeclareTransactionParams({
+      compiledClassHash: undefined,
+    });
+
+    const expected = generateExpectedDeclareTransactionPayload({
+      compiledClassHash: undefined,
+    });
+
+    const result = formatDeclareTransaction(params);
+
+    expect(result).toStrictEqual(expected);
+  });
+
+  it('returns an object with undefined fields if param is {}', () => {
+    const expected = {
+      classHash: '',
+      compiledClassHash: '',
+      contract: {
+        abi: undefined,
+        contract_class_version: '',
+        entry_points_by_type: {
+          CONSTRUCTOR: [],
+          EXTERNAL: [],
+          L1_HANDLER: [],
+        },
+        sierra_program: [],
       },
     };
 
