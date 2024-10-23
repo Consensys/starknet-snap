@@ -159,7 +159,7 @@ describe('formatDeclareTransaction', () => {
     expect(result).toStrictEqual(expected);
   });
 
-  it('returns undefined in contract if param is {}', () => {
+  it('returns undefined if the `AddDeclareParams` is {}', () => {
     const expected = {
       classHash: undefined,
       compiledClassHash: undefined,
