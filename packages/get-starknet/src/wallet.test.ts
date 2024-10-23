@@ -137,7 +137,7 @@ describe('MetaMaskSnapWallet', () => {
   });
 
   describe('on', () => {
-    it('throws `Method not supported` error', async () => {
+    it('does nothing and not throw any error', async () => {
       const wallet = createWallet();
 
       expect(() => wallet.on('accountsChanged', jest.fn())).not.toThrow();
