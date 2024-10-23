@@ -1,6 +1,7 @@
 import type { MutexInterface } from 'async-mutex';
 import { Mutex } from 'async-mutex';
-import { type RpcMessage, type WalletEvents, type StarknetWindowObject } from 'get-starknet-core';
+import type { WalletEventHandlers } from 'get-starknet-core';
+import { type RpcMessage, type StarknetWindowObject } from 'get-starknet-core';
 import type { AccountInterface, ProviderInterface } from 'starknet';
 import { Provider } from 'starknet';
 
@@ -208,12 +209,12 @@ export class MetaMaskSnapWallet implements StarknetWindowObject {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  on<Event extends WalletEvents>() {
-    throw new Error('Method not supported');
+  on<Event extends keyof WalletEventHandlers>(_event: Event, _handleEvent: WalletEventHandlers[Event]): void {
+    // No operation for now
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  off<Event extends WalletEvents>() {
-    throw new Error('Method not supported');
+  off<Event extends keyof WalletEventHandlers>(_event: Event, _handleEvent?: WalletEventHandlers[Event]): void {
+    // No operation for now
   }
 }
