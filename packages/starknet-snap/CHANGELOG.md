@@ -1,5 +1,22 @@
 # Changelog
 
+## [2.11.0](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v2.10.1...starknet-snap-v2.11.0) (2024-10-23)
+
+
+### Features
+
+* Add custom error code to meet get-starknet exception format ([e61eb8b](https://github.com/Consensys/starknet-snap/commit/e61eb8bb4b7b1e2af50ed02bbdd4dac517867710))
+* Add new RPC `starkNet_getDeploymentData` ([a034bcf](https://github.com/Consensys/starknet-snap/commit/a034bcfb3b60242559e57f7ffbba9a7359444f1f))
+* Refactor RPC `starkNet_addErc20Token` to have superstruct validation ([157b5ad](https://github.com/Consensys/starknet-snap/commit/157b5ad2930fe4dfa0c154596c942c295d9c4d99))
+* Refactor RPC `starkNet_declareContract` to have superstruct validation ([5617ccf](https://github.com/Consensys/starknet-snap/commit/5617ccf85af58943313ef81bf3a03deed0c4eb0f))
+* Refactor RPC `starkNet_switchNetwork` to have superstruct validation ([d0384bf](https://github.com/Consensys/starknet-snap/commit/d0384bf9c9476c2168586cf7dc48fe6adb965bcb))
+
+
+### Bug Fixes
+
+* Fix incorrect params passed to RPCs `starkNet_signDeclareTransaction`, `starkNet_verifySignedMessage`, `starkNet_declareContract` and `starkNet_getDeploymentData` ([a834beb](https://github.com/Consensys/starknet-snap/commit/a834beb4bc0bb42f2f21b50f1cbb5a961e938b1e))
+* Fix RPC `starkNet_executeTxn` storing in-correct state data if the params `calls`  is not an array ([508b958](https://github.com/Consensys/starknet-snap/commit/508b9584b534bd93235296fd36328fbaaa52334b))
+
 ## [2.10.1](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v2.10.0...starknet-snap-v2.10.1) (2024-10-02)
 
 

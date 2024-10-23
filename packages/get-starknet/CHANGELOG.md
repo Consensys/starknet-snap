@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.3.0](https://github.com/Consensys/starknet-snap/compare/get-starknet-v1.2.0...get-starknet-v1.3.0) (2024-10-23)
+
+
+### Features
+
+* Add get-starknet v4 support ([8bf8463](https://github.com/Consensys/starknet-snap/commit/8bf8463e0aefd3eb9e59f3cbcb44493e5de2fb5f))
+
+
+### Bug Fixes
+
+* **get-starknet:** address not update when network change in get-starknet ([#366](https://github.com/Consensys/starknet-snap/issues/366)) ([c96f75e](https://github.com/Consensys/starknet-snap/commit/c96f75eb6c95b76513e3a0488d7ccdb3d59e5a71))
+* **get-starknet:** fix undefined params handling in `formatters` utils ([#403](https://github.com/Consensys/starknet-snap/issues/403)) ([774cfb1](https://github.com/Consensys/starknet-snap/commit/774cfb1d5b979ae75a3cfa86fa9b44fa112ddf59))
+
 ## [1.2.0](https://github.com/Consensys/starknet-snap/compare/get-starknet-v1.1.0...get-starknet-v1.2.0) (2024-09-20)
 
 
