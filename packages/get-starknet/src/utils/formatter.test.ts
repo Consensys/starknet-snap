@@ -131,31 +131,6 @@ describe('formatDeclareTransaction', () => {
     expect(result).toBeUndefined();
   });
 
-  it('handles undefined contract_class correctly', () => {
-    const params = generateDeclareTransactionParams();
-
-    params.contract_class = undefined as any;
-
-    const expected = {
-      compiledClassHash: '0xcompiledClassHash',
-      classHash: '0xclassHash',
-      contract: {
-        sierra_program: undefined,
-        contract_class_version: undefined,
-        entry_points_by_type: {
-          CONSTRUCTOR: [],
-          EXTERNAL: [],
-          L1_HANDLER: [],
-        },
-        abi: undefined,
-      },
-    };
-
-    const result = formatDeclareTransaction(params as unknown as any);
-
-    expect(result).toStrictEqual(expected);
-  });
-
   it.each([
     {
       fieldName: 'compiled_class_hash',
@@ -164,6 +139,10 @@ describe('formatDeclareTransaction', () => {
     {
       fieldName: 'class_hash',
       paramKey: 'classHash',
+    },
+    {
+      fieldName: 'contract_class',
+      paramKey: 'contract',
     },
   ])('handles undefined $fieldName correctly', ({ fieldName, paramKey }) => {
     const params = generateDeclareTransactionParams();
@@ -180,20 +159,11 @@ describe('formatDeclareTransaction', () => {
     expect(result).toStrictEqual(expected);
   });
 
-  it('returns an object with undefined fields if param is {}', () => {
+  it('returns undefined in contract if param is {}', () => {
     const expected = {
       classHash: undefined,
       compiledClassHash: undefined,
-      contract: {
-        abi: undefined,
-        contract_class_version: undefined,
-        entry_points_by_type: {
-          CONSTRUCTOR: [],
-          EXTERNAL: [],
-          L1_HANDLER: [],
-        },
-        sierra_program: undefined,
-      },
+      contract: undefined,
     };
 
     const result = formatDeclareTransaction({} as unknown as any);

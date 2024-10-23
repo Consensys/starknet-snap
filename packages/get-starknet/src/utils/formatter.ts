@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/naming-convention, camelcase */
-import type { Abi, Call, DeclareContractPayload } from 'starknet';
+import type { Call, DeclareContractPayload } from 'starknet';
 import type { AddDeclareTransactionParameters, Call as CallGetStarknetV4 } from 'starknet-types-07';
 
 /**
@@ -59,15 +59,6 @@ export const formatDeclareTransaction = (params: AddDeclareTransactionParameters
   return {
     compiledClassHash: compiled_class_hash,
     classHash: class_hash,
-    contract: {
-      sierra_program: contract_class?.sierra_program,
-      contract_class_version: contract_class?.contract_class_version,
-      entry_points_by_type: {
-        CONSTRUCTOR: contract_class?.entry_points_by_type?.CONSTRUCTOR || [],
-        EXTERNAL: contract_class?.entry_points_by_type?.EXTERNAL || [],
-        L1_HANDLER: contract_class?.entry_points_by_type?.L1_HANDLER || [],
-      },
-      abi: contract_class?.abi as unknown as Abi,
-    },
+    contract: contract_class,
   };
 };
