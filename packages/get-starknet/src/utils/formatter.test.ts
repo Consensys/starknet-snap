@@ -144,7 +144,7 @@ describe('formatDeclareTransaction', () => {
       fieldName: 'contract_class',
       paramKey: 'contract',
     },
-  ])('handles undefined $fieldName correctly', ({ fieldName, paramKey }) => {
+  ])('remains undefined if the field - $fieldName is undefined', ({ fieldName, paramKey }) => {
     const params = generateDeclareTransactionParams();
 
     // Dynamically set the field to undefined
