@@ -1,3 +1,5 @@
+import { constants } from 'starknet';
+
 import type { Erc20Token, Network } from './types/snapState';
 import {
   SnapEnv,
@@ -20,6 +22,9 @@ export type SnapConfig = {
   defaultNetwork: Network;
   availableNetworks: Network[];
   preloadTokens: Erc20Token[];
+  explorer: {
+    [key: string]: string;
+  };
 };
 
 export const Config: SnapConfig = {
@@ -34,6 +39,15 @@ export const Config: SnapConfig = {
     STARKNET_MAINNET_NETWORK,
     STARKNET_SEPOLIA_TESTNET_NETWORK,
   ],
+
+  explorer: {
+    [constants.StarknetChainId.SN_MAIN]:
+      // eslint-disable-next-line no-template-curly-in-string
+      'https://voyager.online/contract/${address}',
+    [constants.StarknetChainId.SN_SEPOLIA]:
+      // eslint-disable-next-line no-template-curly-in-string
+      'https://sepolia.voyager.online/contract/${address}',
+  },
 
   preloadTokens: [
     ETHER_MAINNET,

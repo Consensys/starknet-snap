@@ -12,7 +12,9 @@ import {
   UserRejectedOpError,
 } from '../utils/exceptions';
 import {
+  buildAddressComponent,
   buildDividerComponent,
+  buildNetworkComponent,
   buildRowComponent,
   prepareConfirmDialog,
 } from './__tests__/helper';
@@ -109,9 +111,13 @@ describe('WatchAssetRpc', () => {
 
     expect(confirmDialogSpy).toHaveBeenCalledWith([
       { type: 'heading', value: 'Do you want to add this token?' },
-      buildRowComponent('Network', network.name),
+      buildNetworkComponent(network.name),
       buildDividerComponent(),
-      buildRowComponent('Token Address', request.tokenAddress),
+      buildAddressComponent(
+        'Token Address',
+        request.tokenAddress,
+        network.chainId,
+      ),
       buildDividerComponent(),
       buildRowComponent('Token Name', request.tokenName),
       buildDividerComponent(),

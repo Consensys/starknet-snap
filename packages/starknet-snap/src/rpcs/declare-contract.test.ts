@@ -13,7 +13,9 @@ import {
 import * as starknetUtils from '../utils/starknetUtils';
 import {
   buildDividerComponent,
+  buildNetworkComponent,
   buildRowComponent,
+  buildSignerComponent,
   generateRandomFee,
   mockAccount,
   prepareConfirmDialog,
@@ -213,9 +215,9 @@ describe('DeclareContractRpc', () => {
         type: 'heading',
         value: 'Do you want to sign this transaction?',
       },
-      buildRowComponent('Signer Address', account.address),
+      buildSignerComponent(account.address, network.chainId),
       buildDividerComponent(),
-      buildRowComponent('Network', network.name),
+      buildNetworkComponent(network.name),
       buildDividerComponent(),
       buildRowComponent('Contract', toJson(payload.contract)),
       buildDividerComponent(),

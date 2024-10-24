@@ -2,7 +2,6 @@ import type { DeclareSignerDetails } from 'starknet';
 import { constants } from 'starknet';
 
 import type { SnapState } from '../types/snapState';
-import { toJson } from '../utils';
 import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../utils/constants';
 import {
   UserRejectedOpError,
@@ -13,6 +12,9 @@ import {
   mockAccount,
   prepareMockAccount,
   prepareConfirmDialog,
+  buildSignerComponent,
+  buildNetworkComponent,
+  buildJsonDataComponent,
 } from './__tests__/helper';
 import { signDeclareTransaction } from './sign-declare-transaction';
 import type { SignDeclareTransactionParams } from './sign-declare-transaction';
@@ -67,44 +69,21 @@ describe('signDeclareTransaction', () => {
   it('renders confirmation dialog', async () => {
     const chainId = constants.StarknetChainId.SN_SEPOLIA;
     const account = await mockAccount(chainId);
+    const { address } = account;
 
     prepareMockAccount(account, state);
     const { confirmDialogSpy } = prepareConfirmDialog();
 
-    const request = createRequest(chainId, account.address);
+    const request = createRequest(chainId, address);
 
     await signDeclareTransaction.execute(request);
 
     const calls = confirmDialogSpy.mock.calls[0][0];
     expect(calls).toStrictEqual([
       { type: 'heading', value: 'Do you want to sign this transaction?' },
-      {
-        type: 'row',
-        label: 'Network',
-        value: {
-          value: STARKNET_SEPOLIA_TESTNET_NETWORK.name,
-          markdown: false,
-          type: 'text',
-        },
-      },
-      {
-        type: 'row',
-        label: 'Signer Address',
-        value: {
-          value: account.address,
-          markdown: false,
-          type: 'text',
-        },
-      },
-      {
-        type: 'row',
-        label: 'Declare Transaction Details',
-        value: {
-          value: toJson(request.details),
-          markdown: false,
-          type: 'text',
-        },
-      },
+      buildSignerComponent(address, chainId),
+      buildNetworkComponent(STARKNET_SEPOLIA_TESTNET_NETWORK.name),
+      buildJsonDataComponent('Declare Transaction Details', request.details),
     ]);
   });
 
