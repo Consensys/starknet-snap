@@ -1,5 +1,4 @@
 import type { Component } from '@metamask/snaps-sdk';
-import { heading, row, text } from '@metamask/snaps-sdk';
 import type { DeclareSignerDetails } from 'starknet';
 import type { Infer } from 'superstruct';
 import { array, object, string, assign } from 'superstruct';
@@ -7,11 +6,14 @@ import { array, object, string, assign } from 'superstruct';
 import {
   confirmDialog,
   AddressStruct,
-  toJson,
   BaseRequestStruct,
   AccountRpcController,
   DeclareSignDetailsStruct,
   mapDeprecatedParams,
+  signerUI,
+  networkUI,
+  jsonDataUI,
+  headerUI,
 } from '../utils';
 import { UserRejectedOpError } from '../utils/exceptions';
 import { signDeclareTransaction as signDeclareTransactionUtil } from '../utils/starknetUtils';
@@ -96,34 +98,26 @@ export class SignDeclareTransactionRpc extends AccountRpcController<
     details: Infer<typeof DeclareSignDetailsStruct>,
   ) {
     const components: Component[] = [];
-    components.push(heading('Do you want to sign this transaction?'));
+    components.push(headerUI('Do you want to sign this transaction?'));
+
     components.push(
-      row(
-        'Network',
-        text({
-          value: this.network.name,
-          markdown: false,
-        }),
-      ),
-    );
-    components.push(
-      row(
-        'Signer Address',
-        text({
-          value: details.senderAddress,
-          markdown: false,
-        }),
-      ),
+      signerUI({
+        address: details.senderAddress,
+        chainId: this.network.chainId,
+      }),
     );
 
     components.push(
-      row(
-        'Declare Transaction Details',
-        text({
-          value: toJson(details),
-          markdown: false,
-        }),
-      ),
+      networkUI({
+        networkName: this.network.name,
+      }),
+    );
+
+    components.push(
+      jsonDataUI({
+        label: 'Declare Transaction Details',
+        data: details,
+      }),
     );
 
     return await confirmDialog(components);

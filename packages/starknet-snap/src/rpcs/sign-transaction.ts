@@ -1,5 +1,4 @@
 import type { DialogResult } from '@metamask/snaps-sdk';
-import { heading, row, text } from '@metamask/snaps-sdk';
 import type { Call, InvocationsSignerDetails } from 'starknet';
 import type { Infer } from 'superstruct';
 import { array, object, string, assign, any } from 'superstruct';
@@ -11,8 +10,11 @@ import {
   BaseRequestStruct,
   AccountRpcController,
   CallDataStruct,
-  toJson,
   mapDeprecatedParams,
+  jsonDataUI,
+  signerUI,
+  networkUI,
+  headerUI,
 } from '../utils';
 import { UserRejectedOpError } from '../utils/exceptions';
 import { signTransactions } from '../utils/starknetUtils';
@@ -104,28 +106,18 @@ export class SignTransactionRpc extends AccountRpcController<
     transactions: Call[],
   ): Promise<DialogResult> {
     return await confirmDialog([
-      heading('Do you want to sign this transaction?'),
-      row(
-        'Network',
-        text({
-          value: this.network.name,
-          markdown: false,
-        }),
-      ),
-      row(
-        'Signer Address',
-        text({
-          value: address,
-          markdown: false,
-        }),
-      ),
-      row(
-        'Transactions',
-        text({
-          value: toJson(transactions),
-          markdown: false,
-        }),
-      ),
+      headerUI('Do you want to sign this transaction?'),
+      signerUI({
+        address,
+        chainId: this.network.chainId,
+      }),
+      networkUI({
+        networkName: this.network.name,
+      }),
+      jsonDataUI({
+        label: 'Transaction',
+        data: transactions,
+      }),
     ]);
   }
 }

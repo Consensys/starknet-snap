@@ -1,17 +1,18 @@
 import type { Component } from '@metamask/snaps-sdk';
-import { heading, row, text } from '@metamask/snaps-sdk';
 import type { Infer } from 'superstruct';
 import { array, object, string, assign } from 'superstruct';
 
 import {
   confirmDialog,
   AddressStruct,
-  toJson,
   TypeDataStruct,
   AuthorizableStruct,
   BaseRequestStruct,
   AccountRpcController,
   mapDeprecatedParams,
+  signerUI,
+  jsonDataUI,
+  headerUI,
 } from '../utils';
 import { UserRejectedOpError } from '../utils/exceptions';
 import { signMessage as signMessageUtil } from '../utils/starknetUtils';
@@ -95,24 +96,18 @@ export class SignMessageRpc extends AccountRpcController<
     address: string,
   ) {
     const components: Component[] = [];
-    components.push(heading('Do you want to sign this message?'));
+    components.push(headerUI('Do you want to sign this message?'));
     components.push(
-      row(
-        'Message',
-        text({
-          value: toJson(typedDataMessage),
-          markdown: false,
-        }),
-      ),
+      signerUI({
+        address,
+        chainId: this.network.chainId,
+      }),
     );
     components.push(
-      row(
-        'Signer Address',
-        text({
-          value: address,
-          markdown: false,
-        }),
-      ),
+      jsonDataUI({
+        label: 'Message',
+        data: typedDataMessage,
+      }),
     );
 
     return await confirmDialog(components);

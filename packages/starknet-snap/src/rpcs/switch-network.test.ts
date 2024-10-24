@@ -12,7 +12,12 @@ import {
   InvalidRequestParamsError,
   UserRejectedOpError,
 } from '../utils/exceptions';
-import { prepareConfirmDialog } from './__tests__/helper';
+import {
+  buildDividerComponent,
+  buildNetworkComponent,
+  buildRowComponent,
+  prepareConfirmDialog,
+} from './__tests__/helper';
 import { switchNetwork } from './switch-network';
 import type { SwitchNetworkParams } from './switch-network';
 
@@ -123,27 +128,9 @@ describe('switchNetwork', () => {
 
     expect(confirmDialogSpy).toHaveBeenCalledWith([
       { type: 'heading', value: 'Do you want to switch to this network?' },
-      {
-        type: 'row',
-        label: 'Chain Name',
-        value: {
-          value: requestNetwork.name,
-          markdown: false,
-          type: 'text',
-        },
-      },
-      {
-        type: 'divider',
-      },
-      {
-        type: 'row',
-        label: 'Chain ID',
-        value: {
-          value: requestNetwork.chainId,
-          markdown: false,
-          type: 'text',
-        },
-      },
+      buildNetworkComponent(requestNetwork.name),
+      buildDividerComponent(),
+      buildRowComponent('Chain ID', requestNetwork.chainId),
     ]);
   });
 

@@ -2,7 +2,6 @@ import { constants } from 'starknet';
 
 import typedDataExample from '../__tests__/fixture/typedDataExample.json';
 import type { SnapState } from '../types/snapState';
-import { toJson } from '../utils';
 import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../utils/constants';
 import {
   UserRejectedOpError,
@@ -13,6 +12,8 @@ import {
   mockAccount,
   prepareMockAccount,
   prepareConfirmDialog,
+  buildSignerComponent,
+  buildJsonDataComponent,
 } from './__tests__/helper';
 import { signMessage } from './sign-message';
 import type { SignMessageParams } from './sign-message';
@@ -52,13 +53,14 @@ describe('signMessage', () => {
 
   it('renders confirmation dialog', async () => {
     const account = await mockAccount(constants.StarknetChainId.SN_SEPOLIA);
+    const { address, chainId } = account;
 
     prepareMockAccount(account, state);
     const { confirmDialogSpy } = prepareConfirmDialog();
 
     const request = {
       chainId: constants.StarknetChainId.SN_SEPOLIA,
-      address: account.address,
+      address,
       typedDataMessage: typedDataExample,
       enableAuthorize: true,
     };
@@ -68,24 +70,8 @@ describe('signMessage', () => {
     const calls = confirmDialogSpy.mock.calls[0][0];
     expect(calls).toStrictEqual([
       { type: 'heading', value: 'Do you want to sign this message?' },
-      {
-        type: 'row',
-        label: 'Message',
-        value: {
-          value: toJson(typedDataExample),
-          markdown: false,
-          type: 'text',
-        },
-      },
-      {
-        type: 'row',
-        label: 'Signer Address',
-        value: {
-          value: account.address,
-          markdown: false,
-          type: 'text',
-        },
-      },
+      buildSignerComponent(address, chainId),
+      buildJsonDataComponent('Message', typedDataExample),
     ]);
   });
 
