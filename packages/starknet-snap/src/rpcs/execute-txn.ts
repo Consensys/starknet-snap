@@ -1,5 +1,4 @@
 import type { Component, Json } from '@metamask/snaps-sdk';
-import { heading, row, text, divider } from '@metamask/snaps-sdk';
 import convert from 'ethereum-unit-converter';
 import type { Call, Calldata } from 'starknet';
 import { constants, TransactionStatus, TransactionType } from 'starknet';
@@ -20,6 +19,13 @@ import {
   UniversalDetailsStruct,
   CallsStruct,
   mapDeprecatedParams,
+  addressUI,
+  signerUI,
+  networkUI,
+  jsonDataUI,
+  dividerUI,
+  headerUI,
+  rowUI,
 } from '../utils';
 import { UserRejectedOpError } from '../utils/exceptions';
 import { logger } from '../utils/logger';
@@ -214,6 +220,7 @@ export class ExecuteTxnRpc extends AccountRpcController<
     maxFee: string,
     version?: constants.TRANSACTION_VERSION,
   ) {
+    const { name: chainName, chainId } = this.network;
     const callsArray = Array.isArray(calls) ? calls : [calls];
 
     const components: Component[] = [];
@@ -222,72 +229,59 @@ export class ExecuteTxnRpc extends AccountRpcController<
         ? FeeToken.STRK
         : FeeToken.ETH;
 
+    components.push(headerUI('Do you want to sign this transaction?'));
     components.push(
-      row(
-        'Signer Address',
-        text({
-          value: address,
-          markdown: false,
-        }),
-      ),
+      signerUI({
+        address,
+        chainId,
+      }),
     );
 
     // Display a message to indicate the signed transaction will include an account deployment
     if (!accountDeployed) {
-      components.push(heading(`The account will be deployed`));
-      components.push(divider());
+      components.push(headerUI(`The account will be deployed`));
     }
 
+    components.push(dividerUI());
     components.push(
-      row(
-        `Estimated Gas Fee (${feeToken})`,
-        text({
-          value: convert(maxFee, 'wei', 'ether'),
-          markdown: false,
-        }),
-      ),
+      rowUI({
+        label: `Estimated Gas Fee (${feeToken})`,
+        value: convert(maxFee, 'wei', 'ether'),
+      }),
     );
 
+    components.push(dividerUI());
     components.push(
-      row(
-        'Network',
-        text({
-          value: this.network.name,
-          markdown: false,
-        }),
-      ),
+      networkUI({
+        networkName: chainName,
+      }),
     );
-    components.push(divider());
 
     // Iterate over each call in the calls array
     for (const call of callsArray) {
       const { contractAddress, calldata, entrypoint } = call;
-
+      components.push(dividerUI());
       components.push(
-        row(
-          'Contract',
-          text({
-            value: contractAddress,
-            markdown: false,
-          }),
-        ),
+        addressUI({
+          label: 'Contract',
+          address: contractAddress,
+          chainId,
+        }),
       );
 
       components.push(
-        row(
-          'Call Data',
-          text({
-            value: JSON.stringify(calldata, null, 2),
-            markdown: false,
-          }),
-        ),
+        jsonDataUI({
+          label: 'Call Data',
+          data: calldata,
+        }),
       );
 
       // If the contract is an ERC20 token and the function is 'transfer', display sender, recipient, and amount
       const token = await this.tokenStateManager.getToken({
         address: contractAddress,
-        chainId: this.network.chainId,
+        chainId,
       });
+
       if (token && entrypoint === 'transfer' && calldata) {
         try {
           const senderAddress = address;
@@ -301,29 +295,24 @@ export class ExecuteTxnRpc extends AccountRpcController<
               Number(calldata[1]) * Math.pow(10, -1 * token.decimals)
             ).toFixed(token.decimals);
           }
-
+          components.push(dividerUI());
           components.push(
-            row(
-              'Sender Address',
-              text({
-                value: senderAddress,
-                markdown: false,
-              }),
-            ),
-            row(
-              'Recipient Address',
-              text({
-                value: recipientAddress,
-                markdown: false,
-              }),
-            ),
-            row(
-              `Amount (${token.symbol})`,
-              text({
-                value: amount,
-                markdown: false,
-              }),
-            ),
+            addressUI({
+              label: 'Sender Address',
+              address: senderAddress,
+              chainId,
+            }),
+            dividerUI(),
+            addressUI({
+              label: 'Recipient Address',
+              address: recipientAddress,
+              chainId,
+            }),
+            dividerUI(),
+            rowUI({
+              label: `Amount (${token.symbol})`,
+              value: amount,
+            }),
           );
         } catch (error) {
           logger.warn(
@@ -332,7 +321,6 @@ export class ExecuteTxnRpc extends AccountRpcController<
           );
         }
       }
-      components.push(divider());
     }
 
     return await confirmDialog(components);

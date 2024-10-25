@@ -3,7 +3,6 @@ import { constants } from 'starknet';
 
 import transactionExample from '../__tests__/fixture/transactionExample.json'; // Assuming you have a similar fixture
 import type { SnapState } from '../types/snapState';
-import { toJson } from '../utils';
 import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../utils/constants';
 import {
   UserRejectedOpError,
@@ -14,6 +13,9 @@ import {
   mockAccount,
   prepareMockAccount,
   prepareConfirmDialog,
+  buildNetworkComponent,
+  buildSignerComponent,
+  buildJsonDataComponent,
 } from './__tests__/helper';
 import { signTransaction } from './sign-transaction';
 import type { SignTransactionParams } from './sign-transaction';
@@ -67,6 +69,7 @@ describe('signTransaction', () => {
   it('renders confirmation dialog', async () => {
     const chainId = constants.StarknetChainId.SN_SEPOLIA;
     const account = await mockAccount(chainId);
+    const { address } = account;
     prepareMockAccount(account, state);
     const { confirmDialogSpy } = prepareConfirmDialog();
     const request = createRequestParam(chainId, account.address, true);
@@ -76,33 +79,9 @@ describe('signTransaction', () => {
     const calls = confirmDialogSpy.mock.calls[0][0];
     expect(calls).toStrictEqual([
       { type: 'heading', value: 'Do you want to sign this transaction?' },
-      {
-        type: 'row',
-        label: 'Network',
-        value: {
-          value: STARKNET_SEPOLIA_TESTNET_NETWORK.name,
-          markdown: false,
-          type: 'text',
-        },
-      },
-      {
-        type: 'row',
-        label: 'Signer Address',
-        value: {
-          value: account.address,
-          markdown: false,
-          type: 'text',
-        },
-      },
-      {
-        type: 'row',
-        label: 'Transactions',
-        value: {
-          value: toJson(transactionExample.transactions),
-          markdown: false,
-          type: 'text',
-        },
-      },
+      buildSignerComponent(address, chainId),
+      buildNetworkComponent(STARKNET_SEPOLIA_TESTNET_NETWORK.name),
+      buildJsonDataComponent('Transaction', transactionExample.transactions),
     ]);
   });
 

@@ -1,5 +1,4 @@
 import type { Component } from '@metamask/snaps-sdk';
-import { heading, divider, row, text } from '@metamask/snaps-sdk';
 import convert from 'ethereum-unit-converter';
 import type { Infer } from 'superstruct';
 import { assign, object, optional, string } from 'superstruct';
@@ -12,7 +11,11 @@ import {
   UniversalDetailsStruct,
   confirmDialog,
   AccountRpcController,
-  toJson,
+  signerUI,
+  networkUI,
+  rowUI,
+  dividerUI,
+  headerUI,
 } from '../utils';
 import { UserRejectedOpError } from '../utils/exceptions';
 import { declareContract as declareContractUtil } from '../utils/starknetUtils';
@@ -103,98 +106,52 @@ export class DeclareContractRpc extends AccountRpcController<
   protected async getDeclareContractConsensus(params: DeclareContractParams) {
     const { payload, details, address } = params;
     const components: Component[] = [];
-    components.push(heading('Do you want to sign this transaction?'));
+    components.push(headerUI('Do you want to sign this transaction?'));
 
     components.push(
-      row(
-        'Signer Address',
-        text({
-          value: address,
-          markdown: false,
-        }),
-      ),
+      signerUI({
+        address,
+        chainId: this.network.chainId,
+      }),
     );
 
-    components.push(divider());
-
+    components.push(dividerUI());
     components.push(
-      row(
-        'Network',
-        text({
-          value: this.network.name,
-          markdown: false,
-        }),
-      ),
+      networkUI({
+        networkName: this.network.name,
+      }),
     );
 
-    if (payload.contract) {
-      components.push(divider());
-      const contractDetails =
-        typeof payload.contract === 'string'
-          ? payload.contract
-          : toJson(payload.contract);
+    const { compiledClassHash, classHash } = payload;
+
+    if (compiledClassHash) {
+      components.push(dividerUI());
       components.push(
-        row(
-          'Contract',
-          text({
-            value: contractDetails,
-            markdown: false,
-          }),
-        ),
+        rowUI({
+          label: 'Compiled Class Hash',
+          value: compiledClassHash,
+        }),
       );
     }
 
-    if (payload.compiledClassHash) {
-      components.push(divider());
+    if (classHash) {
+      components.push(dividerUI());
       components.push(
-        row(
-          'Compiled Class Hash',
-          text({
-            value: payload.compiledClassHash,
-            markdown: false,
-          }),
-        ),
-      );
-    }
-
-    if (payload.classHash) {
-      components.push(divider());
-      components.push(
-        row(
-          'Class Hash',
-          text({
-            value: payload.classHash,
-            markdown: false,
-          }),
-        ),
-      );
-    }
-
-    if (payload.casm) {
-      const casmDetails = toJson(payload.casm);
-      components.push(divider());
-      components.push(
-        row(
-          'Casm',
-          text({
-            value: casmDetails,
-            markdown: false,
-          }),
-        ),
+        rowUI({
+          label: 'Class Hash',
+          value: classHash,
+        }),
       );
     }
 
     if (details?.maxFee) {
       const maxFeeInEth = convert(details.maxFee, 'wei', 'ether');
-      components.push(divider());
+      components.push(dividerUI());
       components.push(
-        row(
-          'Max Fee (ETH)',
-          text({
-            value: maxFeeInEth,
-            markdown: false,
-          }),
-        ),
+        rowUI({
+          label: 'Max Fee (ETH)',
+          value: maxFeeInEth,
+        }),
       );
     }
 

@@ -1,5 +1,4 @@
 import type { Component } from '@metamask/snaps-sdk';
-import { divider, heading, row, text } from '@metamask/snaps-sdk';
 import type { Infer } from 'superstruct';
 import { assign, boolean } from 'superstruct';
 
@@ -9,6 +8,10 @@ import {
   AuthorizableStruct,
   BaseRequestStruct,
   RpcController,
+  networkUI,
+  rowUI,
+  dividerUI,
+  headerUI,
 } from '../utils';
 import { InvalidNetworkError, UserRejectedOpError } from '../utils/exceptions';
 
@@ -98,25 +101,18 @@ export class SwitchNetworkRpc extends RpcController<
     networkChainId: string,
   ) {
     const components: Component[] = [];
-    components.push(heading('Do you want to switch to this network?'));
+    components.push(headerUI('Do you want to switch to this network?'));
     components.push(
-      row(
-        'Chain Name',
-        text({
-          value: networkName,
-          markdown: false,
-        }),
-      ),
+      networkUI({
+        networkName,
+      }),
     );
-    components.push(divider());
+    components.push(dividerUI());
     components.push(
-      row(
-        'Chain ID',
-        text({
-          value: networkChainId,
-          markdown: false,
-        }),
-      ),
+      rowUI({
+        label: 'Chain ID',
+        value: networkChainId,
+      }),
     );
 
     return await confirmDialog(components);
