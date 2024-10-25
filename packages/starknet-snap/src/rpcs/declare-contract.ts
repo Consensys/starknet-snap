@@ -11,11 +11,9 @@ import {
   UniversalDetailsStruct,
   confirmDialog,
   AccountRpcController,
-  toJson,
   signerUI,
   networkUI,
   rowUI,
-  jsonDataUI,
   dividerUI,
   headerUI,
 } from '../utils';
@@ -118,26 +116,13 @@ export class DeclareContractRpc extends AccountRpcController<
     );
 
     components.push(dividerUI());
-
     components.push(
       networkUI({
         networkName: this.network.name,
       }),
     );
 
-    const { contract, compiledClassHash, classHash, casm } = payload;
-
-    if (contract) {
-      components.push(dividerUI());
-      const contractDetails =
-        typeof contract === 'string' ? contract : toJson(contract);
-      components.push(
-        rowUI({
-          label: 'Contract',
-          value: contractDetails,
-        }),
-      );
-    }
+    const { compiledClassHash, classHash } = payload;
 
     if (compiledClassHash) {
       components.push(dividerUI());
@@ -155,16 +140,6 @@ export class DeclareContractRpc extends AccountRpcController<
         rowUI({
           label: 'Class Hash',
           value: classHash,
-        }),
-      );
-    }
-
-    if (casm) {
-      components.push(dividerUI());
-      components.push(
-        jsonDataUI({
-          label: 'Casm',
-          data: casm,
         }),
       );
     }

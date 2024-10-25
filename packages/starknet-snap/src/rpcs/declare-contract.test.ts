@@ -3,7 +3,7 @@ import type { Abi, UniversalDetails } from 'starknet';
 import { constants } from 'starknet';
 import type { Infer } from 'superstruct';
 
-import { toJson, type DeclareContractPayloadStruct } from '../utils';
+import { type DeclareContractPayloadStruct } from '../utils';
 import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../utils/constants';
 import {
   UserRejectedOpError,
@@ -218,8 +218,6 @@ describe('DeclareContractRpc', () => {
       buildSignerComponent(account.address, network.chainId),
       buildDividerComponent(),
       buildNetworkComponent(network.name),
-      buildDividerComponent(),
-      buildRowComponent('Contract', toJson(payload.contract)),
       buildDividerComponent(),
       buildRowComponent('Compiled Class Hash', payload.compiledClassHash ?? ''),
       buildDividerComponent(),
