@@ -229,6 +229,7 @@ export class ExecuteTxnRpc extends AccountRpcController<
         ? FeeToken.STRK
         : FeeToken.ETH;
 
+    components.push(headerUI('Do you want to sign this transaction?'));
     components.push(
       signerUI({
         address,
@@ -240,7 +241,6 @@ export class ExecuteTxnRpc extends AccountRpcController<
     if (!accountDeployed) {
       components.push(headerUI(`The account will be deployed`));
     }
-    components.push(headerUI(`The account will be deployed`));
 
     components.push(dividerUI());
     components.push(
