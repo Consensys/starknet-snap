@@ -16,13 +16,17 @@ import type {
 import { Account } from 'starknet';
 
 import type { MetaMaskSnap } from './snap';
+import type { MetaMaskSnapWallet } from './wallet';
 
 export class MetaMaskAccount extends Account {
+  #wallet: MetaMaskSnapWallet;
+
   #snap: MetaMaskSnap;
 
   #address: string;
 
   constructor(
+    wallet: MetaMaskSnapWallet,
     snap: MetaMaskSnap,
     providerOrOptions: ProviderOptions | ProviderInterface,
     address: string,
@@ -30,8 +34,14 @@ export class MetaMaskAccount extends Account {
     cairoVersion?: CairoVersion,
   ) {
     super(providerOrOptions, address, pkOrSigner, cairoVersion);
+    this.#wallet = wallet;
     this.#snap = snap;
     this.#address = address;
+  }
+
+  async syncWallet() {
+    await this.#wallet.init(false);
+    this.#address = this.#wallet.selectedAddress;
   }
 
   async execute(
@@ -40,6 +50,7 @@ export class MetaMaskAccount extends Account {
     abisOrTransactionsDetail?: Abi[] | InvocationsDetails,
     details?: InvocationsDetails,
   ): Promise<InvokeFunctionResponse> {
+    await this.syncWallet();
     // if abisOrTransactionsDetail is an array, we assume it's an array of ABIs
     // otherwise, we assume it's an InvocationsDetails object
     if (Array.isArray(abisOrTransactionsDetail)) {
@@ -58,6 +69,7 @@ export class MetaMaskAccount extends Account {
   }
 
   async signMessage(typedDataMessage: TypedData): Promise<Signature> {
+    await this.syncWallet();
     return this.#snap.signMessage({
       typedDataMessage,
       address: this.#address,
@@ -69,6 +81,7 @@ export class MetaMaskAccount extends Account {
     contractPayload: DeclareContractPayload,
     invocationsDetails?: InvocationsDetails,
   ): Promise<DeclareContractResponse> {
+    await this.syncWallet();
     return this.#snap.declare({
       senderAddress: this.#address,
       contractPayload,
