@@ -426,7 +426,7 @@ export class MetaMaskSnap {
   async installIfNot(): Promise<boolean> {
     // if the snap is already installed, return true, to bypass the prompt
     if (await this.isInstalled()) {
-      return true
+      return true;
     }
 
     const response = (await this.#provider.request({
