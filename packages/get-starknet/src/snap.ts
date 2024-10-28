@@ -424,15 +424,23 @@ export class MetaMaskSnap {
   }
 
   async installIfNot(): Promise<boolean> {
+    // if the snap is already installed, return true, to bypass the prompt
+    if (await this.isInstalled()) {
+      return true
+    }
+
     const response = (await this.#provider.request({
       method: 'wallet_requestSnaps',
       params: {
         [this.#snapId]: { version: this.#version },
       },
     })) as RequestSnapResponse;
+
+    // if the snap installation is deined by end user, return false
     if (!response?.[this.#snapId]?.enabled) {
       return false;
     }
+
     return true;
   }
 
