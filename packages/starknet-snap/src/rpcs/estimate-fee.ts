@@ -60,11 +60,11 @@ export class EstimateFeeRpc extends AccountRpcController<
   protected async handleRequest(
     params: EstimateFeeParams,
   ): Promise<EstimateFeeResponse> {
-    const { address, invocations, details } = params;
+    const { invocations, details } = params;
 
     const estimateFeeResp = await getEstimatedFees(
       this.network,
-      address,
+      this.address,
       this.account.privateKey,
       this.account.publicKey,
       invocations,

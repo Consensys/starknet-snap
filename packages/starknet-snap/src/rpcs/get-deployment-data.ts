@@ -67,18 +67,17 @@ export class GetDeploymentDataRpc extends AccountRpcController<
   protected async handleRequest(
     params: GetDeploymentDataParams,
   ): Promise<GetDeploymentDataResponse> {
-    const { address } = params;
     // Due to AccountRpcController built-in validation,
     // if the account required to force deploy (Cairo 0 with balance), it will alert with a warning dialog.
     // if the account required to force upgrade (Cairo 0 without balance), it will alert with a warning dialog.
     // hence we can safely assume that the account is Cairo 1 account.
-    if (await isAccountDeployed(this.network, address)) {
+    if (await isAccountDeployed(this.network, this.address)) {
       throw new AccountAlreadyDeployedError();
     }
 
     // We only need to take care the deployment data for Cairo 1 account.
     return {
-      address: params.address,
+      address: this.address,
       // eslint-disable-next-line @typescript-eslint/naming-convention
       class_hash: ACCOUNT_CLASS_HASH,
       salt: this.account.publicKey,

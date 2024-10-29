@@ -110,13 +110,13 @@ export class ExecuteTxnRpc extends AccountRpcController<
   protected async handleRequest(
     params: ExecuteTxnParams,
   ): Promise<ExecuteTxnResponse> {
-    const { address, calls, abis, details } = params;
+    const { calls, abis, details } = params;
     const { privateKey, publicKey } = this.account;
 
     const { includeDeploy, suggestedMaxFee, estimateResults } =
       await getEstimatedFees(
         this.network,
-        address,
+        this.address,
         privateKey,
         publicKey,
         [
@@ -134,7 +134,7 @@ export class ExecuteTxnRpc extends AccountRpcController<
 
     if (
       !(await this.getExecuteTxnConsensus(
-        address,
+        this.address,
         accountDeployed,
         calls,
         suggestedMaxFee,
@@ -147,7 +147,7 @@ export class ExecuteTxnRpc extends AccountRpcController<
     if (!accountDeployed) {
       await createAccount({
         network: this.network,
-        address,
+        address: this.address,
         publicKey,
         privateKey,
         waitMode: false,
@@ -164,7 +164,7 @@ export class ExecuteTxnRpc extends AccountRpcController<
 
     const executeTxnResp = await executeTxnUtil(
       this.network,
-      address,
+      this.address,
       privateKey,
       calls,
       abis,
@@ -188,7 +188,7 @@ export class ExecuteTxnRpc extends AccountRpcController<
     const call = Array.isArray(calls) ? calls[0] : calls;
 
     await this.txnStateManager.addTransaction(
-      this.createInvokeTxn(address, executeTxnResp.transaction_hash, call),
+      this.createInvokeTxn(this.address, executeTxnResp.transaction_hash, call),
     );
 
     return executeTxnResp;

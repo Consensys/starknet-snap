@@ -81,13 +81,13 @@ export class SignTransactionRpc extends AccountRpcController<
   protected async handleRequest(
     params: SignTransactionParams,
   ): Promise<SignTransactionResponse> {
-    const { enableAuthorize, transactions, address } = params;
+    const { enableAuthorize, transactions } = params;
     if (
       // Get Starknet expected not to show the confirm dialog, therefore, `enableAuthorize` will set to false to bypass the confirmation
       // TODO: enableAuthorize should set default to true
       enableAuthorize &&
       !(await this.getSignTransactionConsensus(
-        address,
+        this.address,
         transactions as unknown as Call[],
       ))
     ) {

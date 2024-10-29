@@ -57,10 +57,10 @@ export class VerifySignatureRpc extends AccountRpcController<
   protected async handleRequest(
     params: VerifySignatureParams,
   ): Promise<VerifySignatureResponse> {
-    const { typedDataMessage, address, signature } = params;
+    const { typedDataMessage, signature } = params;
 
     return verifyTypedDataMessageSignature(
-      address,
+      this.address,
       this.account.privateKey,
       typedDataMessage,
       signature,

@@ -182,7 +182,7 @@ export const DeclareSignDetailsStruct = assign(
     classHash: nonempty(string()),
     // TODO: compiledClassHash should be a hex string
     compiledClassHash: optional(string()),
-    senderAddress: AddressStruct,
+    address: AddressStruct,
     chainId: ChainIdStruct,
     version: TxVersionStruct,
   }),

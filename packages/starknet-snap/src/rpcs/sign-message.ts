@@ -74,12 +74,12 @@ export class SignMessageRpc extends AccountRpcController<
   protected async handleRequest(
     params: SignMessageParams,
   ): Promise<SignMessageResponse> {
-    const { enableAuthorize, typedDataMessage, address } = params;
+    const { enableAuthorize, typedDataMessage } = params;
     if (
       // Get Starknet expected not to show the confirm dialog, therefore, `enableAuthorize` will set to false to bypass the confirmation
       // TODO: enableAuthorize should set default to true
       enableAuthorize &&
-      !(await this.getSignMessageConsensus(typedDataMessage, address))
+      !(await this.getSignMessageConsensus(typedDataMessage, this.address))
     ) {
       throw new UserRejectedOpError() as unknown as Error;
     }
@@ -87,7 +87,7 @@ export class SignMessageRpc extends AccountRpcController<
     return await signMessageUtil(
       this.account.privateKey,
       typedDataMessage,
-      address,
+      this.address,
     );
   }
 

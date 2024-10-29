@@ -88,15 +88,15 @@ export class DeclareContractRpc extends AccountRpcController<
   protected async handleRequest(
     params: DeclareContractParams,
   ): Promise<DeclareContractResponse> {
-    const { payload, details, address } = params;
+    const { payload, details } = params;
 
-    if (!(await this.getDeclareContractConsensus(params))) {
+    if (!(await this.getDeclareContractConsensus({...params, address: this.address}))) {
       throw new UserRejectedOpError() as unknown as Error;
     }
 
     return (await declareContractUtil(
       this.network,
-      address,
+      this.address,
       this.account.privateKey,
       payload,
       details,

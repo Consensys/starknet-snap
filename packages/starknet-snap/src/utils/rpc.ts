@@ -11,7 +11,7 @@ import {
   getNetworkFromChainId,
   verifyIfAccountNeedUpgradeOrDeploy,
 } from './snapUtils';
-import { getKeysFromAddress } from './starknetUtils';
+import { getCorrectContractAddress, getKeysFromAddress } from './starknetUtils';
 
 /**
  * Validates that the request parameters conform to the expected structure defined by the provided struct.
@@ -114,6 +114,8 @@ export abstract class AccountRpcController<
 
   protected options: AccountRpcControllerOptions;
 
+  protected address: string;
+
   protected defaultOptions: AccountRpcControllerOptions = {
     showInvalidAccountAlert: true,
   };
@@ -143,6 +145,13 @@ export abstract class AccountRpcController<
       state,
       address,
     );
+
+    // TODO: this logic should be fixed 
+    const {
+      address: contractAddress,
+    } = await getCorrectContractAddress(this.network, this.account.publicKey);
+    this.address = address;
+
 
     // TODO: rename this method to verifyAccount
     await verifyIfAccountNeedUpgradeOrDeploy(

@@ -84,7 +84,7 @@ export class SignDeclareTransactionRpc extends AccountRpcController<
     params: SignDeclareTransactionParams,
   ): Promise<SignDeclareTransactionResponse> {
     const { details } = params;
-    if (!(await this.getSignDeclareTransactionConsensus(details))) {
+    if (!(await this.getSignDeclareTransactionConsensus({...details, address: this.address}))) {
       throw new UserRejectedOpError() as unknown as Error;
     }
 
@@ -102,7 +102,7 @@ export class SignDeclareTransactionRpc extends AccountRpcController<
 
     components.push(
       signerUI({
-        address: details.senderAddress,
+        address: this.address,
         chainId: this.network.chainId,
       }),
     );
