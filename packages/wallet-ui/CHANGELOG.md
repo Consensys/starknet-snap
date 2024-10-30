@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
 
+## [1.24.1](https://github.com/Consensys/starknet-snap/compare/wallet-ui-v1.24.0...wallet-ui-v1.24.1) (2024-10-28)
+
+
+### Bug Fixes
+
+* Remove Snap dependency on Wallet UI package ([#397](https://github.com/Consensys/starknet-snap/issues/397)) ([c9c1aaf](https://github.com/Consensys/starknet-snap/commit/c9c1aafb45120b7d0767337f300e1ab6ff277ab3))
+
 ## [1.24.0](https://github.com/Consensys/starknet-snap/compare/wallet-ui-v1.23.0...wallet-ui-v1.24.0) (2024-09-20)
 
 
