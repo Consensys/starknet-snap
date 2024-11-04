@@ -1,5 +1,23 @@
 # Changelog
 
+## [2.11.0](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v2.10.1...starknet-snap-v2.11.0) (2024-10-28)
+
+
+### Features
+
+* Add custom error code to meet get-starknet v4 exception format ([#374](https://github.com/Consensys/starknet-snap/issues/374)) ([e61eb8b](https://github.com/Consensys/starknet-snap/commit/e61eb8bb4b7b1e2af50ed02bbdd4dac517867710))
+* Add new RPC `starkNet_getDeploymentData` to support get-starknet v4 ([#381](https://github.com/Consensys/starknet-snap/issues/381)) ([a034bcf](https://github.com/Consensys/starknet-snap/commit/a034bcfb3b60242559e57f7ffbba9a7359444f1f))
+* Add UI divider and hyperlink the address to the explorer on the UI dialog ([#405](https://github.com/Consensys/starknet-snap/issues/405), [#404](https://github.com/Consensys/starknet-snap/issues/404)) ([a77fede](https://github.com/Consensys/starknet-snap/commit/a77fedebcc3674549b117eb865d500c6d5209c7f))
+* Refactor RPC `starkNet_addErc20Token` to have superstruct validation ([#388](https://github.com/Consensys/starknet-snap/issues/388)) ([157b5ad](https://github.com/Consensys/starknet-snap/commit/157b5ad2930fe4dfa0c154596c942c295d9c4d99))
+* Refactor RPC `starkNet_declareContract` to have superstruct validation ([#398](https://github.com/Consensys/starknet-snap/issues/398)) ([5617ccf](https://github.com/Consensys/starknet-snap/commit/5617ccf85af58943313ef81bf3a03deed0c4eb0f))
+* Refactor RPC `starkNet_switchNetwork` to have superstruct validation ([#369](https://github.com/Consensys/starknet-snap/issues/369), [#373](https://github.com/Consensys/starknet-snap/issues/373), [#368](https://github.com/Consensys/starknet-snap/issues/368)) ([d0384bf](https://github.com/Consensys/starknet-snap/commit/d0384bf9c9476c2168586cf7dc48fe6adb965bcb))
+
+
+### Bug Fixes
+
+* Fix incorrect params passed to RPCs `starkNet_signDeclareTransaction`, `starkNet_verifySignedMessage`, `starkNet_declareContract` and `starkNet_getDeploymentData` ([#401](https://github.com/Consensys/starknet-snap/issues/401)) ([a834beb](https://github.com/Consensys/starknet-snap/commit/a834beb4bc0bb42f2f21b50f1cbb5a961e938b1e))
+* Fix RPC `starkNet_executeTxn` storing in-correct state data if the params `calls`  is not an array ([#376](https://github.com/Consensys/starknet-snap/issues/376)) ([508b958](https://github.com/Consensys/starknet-snap/commit/508b9584b534bd93235296fd36328fbaaa52334b))
+
 ## [2.10.1](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v2.10.0...starknet-snap-v2.10.1) (2024-10-02)
 
 
