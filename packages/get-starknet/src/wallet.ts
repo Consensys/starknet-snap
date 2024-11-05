@@ -1,6 +1,6 @@
 import type { MutexInterface } from 'async-mutex';
 import { Mutex } from 'async-mutex';
-import type { WalletEventHandlers } from 'get-starknet-core';
+import type { AccountChangeEventHandler, NetworkChangeEventHandler, WalletEventHandlers } from 'get-starknet-core';
 import { type RpcMessage, type StarknetWindowObject } from 'get-starknet-core';
 import type { AccountInterface, ProviderInterface } from 'starknet';
 import { Provider } from 'starknet';
@@ -49,11 +49,17 @@ export class MetaMaskSnapWallet implements StarknetWindowObject {
 
   #selectedAddress: string;
 
+  #latestAddress: string;
+
   #chainId: string;
 
   #network: Network;
 
   lock: MutexInterface;
+
+  #networkChangeController: AbortController | undefined;
+
+  #accountChangeController: AbortController | undefined;
 
   // eslint-disable-next-line @typescript-eslint/naming-convention, no-restricted-globals
   static readonly snapId = process.env.SNAP_ID ?? 'npm:@consensys/starknet-snap';
@@ -67,6 +73,7 @@ export class MetaMaskSnapWallet implements StarknetWindowObject {
     this.metamaskProvider = metamaskProvider;
     this.snap = new MetaMaskSnap(MetaMaskSnapWallet.snapId, snapVersion, this.metamaskProvider);
     this.isConnected = false;
+    this.#latestAddress = '0x';
 
     this.#rpcHandlers = new Map<string, IStarknetWalletRpc>([
       [RpcMethod.WalletSwitchStarknetChain, new WalletSwitchStarknetChain(this)],
@@ -184,6 +191,9 @@ export class MetaMaskSnapWallet implements StarknetWindowObject {
       this.#provider = undefined;
       // account is depends on address and provider, if network changes, address will update,
       // hence set account to undefine for reinitialization
+      // TODO : This should be removed. The walletAccount is created with the SWO as input.
+      // This means account is not managed from within the SWO but from outside.
+      // Event handling helps ensure that the correct address is set.
       this.#account = undefined;
     }
 
@@ -208,13 +218,113 @@ export class MetaMaskSnapWallet implements StarknetWindowObject {
     return true;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  on<Event extends keyof WalletEventHandlers>(_event: Event, _handleEvent: WalletEventHandlers[Event]): void {
-    // No operation for now
+  /**
+   * Registers an event handler for `accountsChanged` or `networkChanged`.
+   *
+   * @param event - The event name ('accountsChanged' or 'networkChanged')
+   * @param handleEvent - The event handler function
+   */
+  on<Event extends keyof WalletEventHandlers>(event: Event, handleEvent: WalletEventHandlers[Event]): void {
+    if (event === 'accountsChanged') {
+      this.onAccountChanged(handleEvent as AccountChangeEventHandler);
+    } else if (event === 'networkChanged') {
+      this.onNetworkChanged(handleEvent as NetworkChangeEventHandler);
+    } else {
+      throw new Error(`Unsupported event: ${String(event)}`);
+    }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  off<Event extends keyof WalletEventHandlers>(_event: Event, _handleEvent?: WalletEventHandlers[Event]): void {
-    // No operation for now
+  /**
+   * Removes an event handler for `accountsChanged` or `networkChanged`.
+   *
+   * @param event - The event name ('accountsChanged' or 'networkChanged')
+   * @param _handleEvent
+   */
+  off<Event extends keyof WalletEventHandlers>(event: Event, _handleEvent?: WalletEventHandlers[Event]): void {
+    if (event === 'accountsChanged') {
+      this.offAccountChanged();
+    } else if (event === 'networkChanged') {
+      this.offNetworkChanged();
+    } else {
+      throw new Error(`Unsupported event: ${String(event)}`);
+    }
+  }
+
+  /**
+   * Starts polling for account changes and calls the callback when a change is detected.
+   * @param callback - The function to call when an account change is detected.
+   */
+  onAccountChanged(callback: AccountChangeEventHandler): void {
+    // Set up an AbortController to manage the polling loop
+    this.#accountChangeController = new AbortController();
+    const { signal } = this.#accountChangeController;
+
+    const pollForAccountChange = async () => {
+      while (!signal.aborted) {
+        const previousNetwork = this.#network;
+        await this.#init();
+        if (previousNetwork.chainId !== this.#network.chainId || this.#latestAddress !== this.#selectedAddress) {
+          this.#latestAddress = this.#selectedAddress;
+          callback([this.#selectedAddress]);
+        }
+
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+      }
+    };
+
+    pollForAccountChange().catch((error) => {
+      if (!signal.aborted) {
+        console.error('Error in account change polling:', error);
+      }
+    });
+  }
+
+  /**
+   * Stops polling for account changes.
+   */
+  offAccountChanged(): void {
+    if (this.#accountChangeController) {
+      this.#accountChangeController.abort();
+      this.#accountChangeController = undefined;
+    }
+  }
+
+  /**
+   * Starts polling for network changes and calls the callback when a change is detected.
+   * @param callback - The function to call when a network change is detected.
+   */
+  onNetworkChanged(callback: NetworkChangeEventHandler): void {
+    // Set up an AbortController to manage the polling loop
+    this.#networkChangeController = new AbortController();
+    const { signal } = this.#networkChangeController;
+
+    const pollForNetworkChange = async () => {
+      while (!signal.aborted) {
+        const previousNetwork = this.#network;
+        await this.#init();
+
+        if (previousNetwork.chainId !== this.#network.chainId) {
+          callback(this.#network.chainId, [this.#selectedAddress]);
+        }
+
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+      }
+    };
+
+    pollForNetworkChange().catch((error) => {
+      if (!signal.aborted) {
+        console.error('Error in network change polling:', error);
+      }
+    });
+  }
+
+  /**
+   * Stops polling for network changes.
+   */
+  offNetworkChanged(): void {
+    if (this.#networkChangeController) {
+      this.#networkChangeController.abort();
+      this.#networkChangeController = undefined;
+    }
   }
 }
