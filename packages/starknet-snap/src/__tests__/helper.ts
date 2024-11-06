@@ -15,13 +15,20 @@ import {
   TransactionExecutionStatus,
   TransactionType,
 } from 'starknet';
+import { v4 as uuidv4 } from 'uuid';
 
-import type { AccContract, Transaction } from '../types/snapState';
+import type {
+  AccContract,
+  Transaction,
+  TransactionRequest,
+} from '../types/snapState';
 import {
   ACCOUNT_CLASS_HASH,
   ACCOUNT_CLASS_HASH_LEGACY,
+  ETHER_MAINNET,
   PRELOADED_TOKENS,
   PROXY_CONTRACT_HASH,
+  STRK_MAINNET,
 } from '../utils/constants';
 import { grindKey } from '../utils/keyPair';
 
@@ -285,6 +292,58 @@ export function generateTransactions({
   return transactions.sort((a, b) => b.timestamp - a.timestamp);
 }
 
+export function generateTransactionRequests({
+  chainId,
+  address,
+  contractAddresses = PRELOADED_TOKENS.map((token) => token.address),
+  cnt = 1,
+}: {
+  chainId: constants.StarknetChainId;
+  address: string;
+  contractAddresses?: string[];
+  cnt?: number;
+}): TransactionRequest[] {
+  const feeTokens = [STRK_MAINNET, ETHER_MAINNET];
+  const request = {
+    chainId: chainId,
+    id: '',
+    interfaceId: '',
+    type: '',
+    signer: '',
+    maxFee: '',
+    calls: [],
+    feeToken: '',
+  };
+  const requests: TransactionRequest[] = [];
+
+  for (let i = 0; i < cnt; i++) {
+    requests.push({
+      ...request,
+      id: uuidv4(),
+      interfaceId: uuidv4(),
+      type: TransactionType.INVOKE,
+      signer: address,
+      maxFee: '100',
+      feeToken:
+        feeTokens[Math.floor(generateRandomValue() * feeTokens.length)].symbol,
+      calls: [
+        {
+          contractAddress:
+            contractAddresses[
+              Math.floor(generateRandomValue() * contractAddresses.length)
+            ],
+          calldata: CallData.compile({
+            to: address,
+            amount: '1',
+          }),
+          entrypoint: 'transfer',
+        },
+      ],
+    });
+  }
+
+  return requests;
+}
 /**
  * Method to generate a mock estimate fee response.
  *

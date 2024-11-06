@@ -7,6 +7,22 @@ export type SnapState = {
   networks: Network[];
   transactions: Transaction[];
   currentNetwork?: Network;
+  transactionRequests?: TransactionRequest[];
+};
+
+export type TransactionRequest = {
+  id: string;
+  interfaceId: string;
+  type: string;
+  signer: string;
+  chainId: string;
+  maxFee: string;
+  calls: {
+    contractAddress: string;
+    calldata: RawCalldata;
+    entrypoint: string;
+  }[];
+  feeToken: string;
 };
 
 export type AccContract = {
