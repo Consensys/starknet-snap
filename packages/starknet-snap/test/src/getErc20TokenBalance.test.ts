@@ -7,7 +7,7 @@ import { getErc20TokenBalance } from '../../src/getErc20TokenBalance';
 import { SnapState } from '../../src/types/snapState';
 import {
   BlockIdentifierEnum,
-  STARKNET_SEPOLIA_TESTNET_NETWORK,
+  STARKNET_MAINNET_NETWORK,
 } from '../../src/utils/constants';
 import { Mutex } from 'async-mutex';
 import {
@@ -23,7 +23,7 @@ describe('Test function: getErc20TokenBalance', function () {
   const state: SnapState = {
     accContracts: [],
     erc20Tokens: [],
-    networks: [STARKNET_SEPOLIA_TESTNET_NETWORK],
+    networks: [STARKNET_MAINNET_NETWORK],
     transactions: [],
   };
   const apiParams: ApiParams = {

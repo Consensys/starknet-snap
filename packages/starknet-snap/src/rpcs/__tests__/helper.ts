@@ -1,8 +1,10 @@
+import { BigNumber } from 'ethers';
 import type { constants } from 'starknet';
 
 import type { StarknetAccount } from '../../__tests__/helper';
-import { generateAccounts } from '../../__tests__/helper';
+import { generateAccounts, generateRandomValue } from '../../__tests__/helper';
 import type { SnapState } from '../../types/snapState';
+import { getExplorerUrl, shortenAddress, toJson } from '../../utils';
 import * as snapHelper from '../../utils/snap';
 import * as snapUtils from '../../utils/snapUtils';
 import * as starknetUtils from '../../utils/starknetUtils';
@@ -65,4 +67,66 @@ export function prepareAlertDialog() {
   return {
     alertDialogSpy,
   };
+}
+
+export const buildRowComponent = (label: string, value: string) => ({
+  type: 'row',
+  label,
+  value: {
+    value,
+    markdown: false,
+    type: 'text',
+  },
+});
+
+export const buildDividerComponent = () => {
+  return {
+    type: 'divider',
+  };
+};
+
+export const buildAddressComponent = (
+  label: string,
+  address: string,
+  chainId: string,
+) => {
+  return buildRowComponent(
+    label,
+    `[${shortenAddress(address)}](${getExplorerUrl(address, chainId)})`,
+  );
+};
+
+export const buildSignerComponent = (value: string, chainId: string) => {
+  return buildAddressComponent('Signer Address', value, chainId);
+};
+
+export const buildNetworkComponent = (chainName: string) => {
+  return buildRowComponent('Network', chainName);
+};
+
+export const buildJsonDataComponent = (label: string, data: any) => {
+  return buildRowComponent(label, toJson(data));
+};
+
+/**
+ *
+ * @param min
+ * @param max
+ * @param useBigInt
+ */
+export function generateRandomFee(
+  min = '100000000000000',
+  max = '1000000000000000',
+  useBigInt = false,
+) {
+  const minFee = BigInt(min);
+  const maxFee = BigInt(max);
+  const randomFactor = generateRandomValue();
+  const randomFee = BigInt(
+    Math.max(Number(minFee), Math.floor(randomFactor * Number(maxFee))),
+  );
+
+  return useBigInt
+    ? randomFee.toString(10)
+    : BigNumber.from(randomFee).toString();
 }

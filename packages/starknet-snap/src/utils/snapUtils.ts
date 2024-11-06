@@ -14,11 +14,8 @@ import type {
   UniversalDetails,
 } from 'starknet';
 
-import {
-  FeeToken,
-  type AddErc20TokenRequestParams,
-  type AddNetworkRequestParams,
-} from '../types/snapApi';
+import { Config } from '../config';
+import { FeeToken, type AddNetworkRequestParams } from '../types/snapApi';
 import { TransactionStatus } from '../types/snapState';
 import type {
   Network,
@@ -30,20 +27,15 @@ import type {
 } from '../types/snapState';
 import {
   MAXIMUM_NETWORK_NAME_LENGTH,
-  MAXIMUM_TOKEN_NAME_LENGTH,
-  MAXIMUM_TOKEN_SYMBOL_LENGTH,
   PRELOADED_NETWORKS,
-  PRELOADED_TOKENS,
   STARKNET_SEPOLIA_TESTNET_NETWORK,
 } from './constants';
 import { DeployRequiredError, UpgradeRequiredError } from './exceptions';
 import { logger } from './logger';
 import { toJson } from './serializer';
 import { alertDialog } from './snap';
-import {
-  validateAccountRequireUpgradeOrDeploy,
-  validateAndParseAddress,
-} from './starknetUtils';
+import { validateAccountRequireUpgradeOrDeploy } from './starknetUtils';
+import { isValidAsciiStrField } from './string';
 import {
   filterTransactions,
   TimestampFilter,
@@ -90,27 +82,6 @@ async function setState(
  *
  * @param str
  */
-function hasOnlyAsciiChars(str: string) {
-  return /^[ -~]+$/u.test(str);
-}
-
-/**
- *
- * @param fieldStr
- * @param maxLength
- */
-function isValidAsciiStrField(fieldStr: string, maxLength: number) {
-  return (
-    hasOnlyAsciiChars(fieldStr) &&
-    fieldStr.trim().length > 0 &&
-    fieldStr.length <= maxLength
-  );
-}
-
-/**
- *
- * @param str
- */
 function isHexWithPrefix(str: string) {
   return /^0x[0-9a-fA-F]+$/u.test(str);
 }
@@ -131,72 +102,10 @@ function isValidHttpUrl(urlStr: string) {
 
 /**
  *
- * @param tokenName
- */
-function isValidTokenName(tokenName: string) {
-  return isValidAsciiStrField(tokenName, MAXIMUM_TOKEN_NAME_LENGTH);
-}
-
-/**
- *
- * @param tokenSymbol
- */
-function isValidTokenSymbol(tokenSymbol: string) {
-  return isValidAsciiStrField(tokenSymbol, MAXIMUM_TOKEN_SYMBOL_LENGTH);
-}
-
-/**
- *
  * @param networkName
  */
 function isValidNetworkName(networkName: string) {
   return isValidAsciiStrField(networkName, MAXIMUM_NETWORK_NAME_LENGTH);
-}
-
-/**
- *
- * @param tokenName
- * @param chainId
- */
-function isPreloadedTokenName(tokenName: string, chainId: string) {
-  return Boolean(
-    PRELOADED_TOKENS.find(
-      (token) =>
-        token.name.trim() === tokenName.trim() &&
-        isSameChainId(token.chainId, chainId),
-    ),
-  );
-}
-
-/**
- *
- * @param tokenSymbol
- * @param chainId
- */
-function isPreloadedTokenSymbol(tokenSymbol: string, chainId: string) {
-  return Boolean(
-    PRELOADED_TOKENS.find(
-      (token) =>
-        token.symbol.trim() === tokenSymbol.trim() &&
-        isSameChainId(token.chainId, chainId),
-    ),
-  );
-}
-
-/**
- *
- * @param tokenAddress
- * @param chainId
- */
-function isPreloadedTokenAddress(tokenAddress: string, chainId: string) {
-  const bigIntTokenAddress = numUtils.toBigInt(tokenAddress);
-  return Boolean(
-    PRELOADED_TOKENS.find(
-      (token) =>
-        numUtils.toBigInt(token.address) === bigIntTokenAddress &&
-        isSameChainId(token.chainId, chainId),
-    ),
-  );
 }
 
 /**
@@ -221,46 +130,6 @@ function isPreloadedNetworkName(networkName: string) {
       (network) => network.name.trim() === networkName.trim(),
     ),
   );
-}
-
-/**
- *
- * @param params
- * @param network
- */
-export function validateAddErc20TokenParams(
-  params: AddErc20TokenRequestParams,
-  network: Network,
-) {
-  try {
-    validateAndParseAddress(params.tokenAddress);
-  } catch (error) {
-    throw new Error(
-      `The given token address is invalid: ${params.tokenAddress}`,
-    );
-  }
-
-  if (!isValidTokenName(params.tokenName)) {
-    throw new Error(
-      `The given token name is invalid, needs to be in ASCII chars, not all spaces, and has length larger than ${MAXIMUM_TOKEN_NAME_LENGTH}: ${params.tokenName}`,
-    );
-  }
-
-  if (!isValidTokenSymbol(params.tokenSymbol)) {
-    throw new Error(
-      `The given token symbol is invalid, needs to be in ASCII chars, not all spaces, and has length larger than ${MAXIMUM_TOKEN_SYMBOL_LENGTH}: ${params.tokenSymbol}`,
-    );
-  }
-
-  if (
-    isPreloadedTokenAddress(params.tokenAddress, network.chainId) ||
-    isPreloadedTokenName(params.tokenName, network.chainId) ||
-    isPreloadedTokenSymbol(params.tokenSymbol, network.chainId)
-  ) {
-    throw new Error(
-      'The given token address, name, or symbol is the same as one of the preloaded tokens, and thus cannot be added',
-    );
-  }
 }
 
 /**
@@ -854,7 +723,7 @@ export function getNetworkFromChainId(
   state: SnapState,
   targerChainId: string | undefined,
 ) {
-  const chainId = targerChainId ?? STARKNET_SEPOLIA_TESTNET_NETWORK.chainId;
+  const chainId = targerChainId ?? Config.defaultNetwork.chainId;
   const network = getNetwork(state, chainId);
   if (network === undefined) {
     throw new Error(
@@ -1116,7 +985,7 @@ export async function removeAcceptedTransaction(
  * @param state
  */
 export function getCurrentNetwork(state: SnapState) {
-  return state.currentNetwork ?? STARKNET_SEPOLIA_TESTNET_NETWORK;
+  return state.currentNetwork ?? Config.defaultNetwork;
 }
 
 /**

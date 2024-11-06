@@ -2192,6 +2192,7 @@ __metadata:
     "@metamask/eslint-config-typescript": ^12.1.0
     "@typescript-eslint/eslint-plugin": ^5.42.1
     "@typescript-eslint/parser": ^5.42.1
+    async-mutex: ^0.3.2
     dotenv: ^16.4.5
     eslint: ^8.45.0
     eslint-config-prettier: ^8.5.0
@@ -2201,11 +2202,13 @@ __metadata:
     eslint-plugin-n: ^15.7.0
     eslint-plugin-prettier: ^4.2.1
     eslint-plugin-promise: ^6.1.1
-    get-starknet-core: ^3.2.0
+    get-starknet-core: ^4.0.0
+    jest: ^29.5.0
     prettier: ^2.7.1
     rimraf: ^3.0.2
     serve: 14.2.1
     starknet: 6.11.0
+    ts-jest: ^29.1.0
     ts-loader: ^9.5.1
     typescript: ^4.6.3
     webpack: ^5.91.0
@@ -4895,22 +4898,6 @@ __metadata:
     semver: ^7.5.4
     uuid: ^9.0.1
   checksum: 01f2c71a8f06158d5335bfe96bfd2f3aa39ec6b2323c5d0ff1d3136071a3e8ff7c1804d640ba1d4e07f96f3e68a95ff7729ddfcd34b373e5fefd86d6ef12d034
-  languageName: node
-  linkType: hard
-
-"@module-federation/runtime@npm:^0.1.2":
-  version: 0.1.21
-  resolution: "@module-federation/runtime@npm:0.1.21"
-  dependencies:
-    "@module-federation/sdk": 0.1.21
-  checksum: ce4de8515b54f1cd07a3c7c4cbd35fea163294b9fb24be10827872f3ebb62cd5c289f3602efe4149d963282739f79b51947afa039ee6f36be7f66dea83d590fc
-  languageName: node
-  linkType: hard
-
-"@module-federation/sdk@npm:0.1.21":
-  version: 0.1.21
-  resolution: "@module-federation/sdk@npm:0.1.21"
-  checksum: 6856dcfe2ef5ae939890b82010aaad911fa6c4330a05f290ae054c316c9b532d3691456a1f9e176fe05f1df2d6f2d8c7e0c842ca5648a0fd7abf270e44ed9ecb
   languageName: node
   linkType: hard
 
@@ -15460,21 +15447,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"get-starknet-core@npm:^3.2.0":
-  version: 3.3.0
-  resolution: "get-starknet-core@npm:3.3.0"
-  dependencies:
-    "@module-federation/runtime": ^0.1.2
-  peerDependencies:
-    starknet: ^5.18.0
-  peerDependenciesMeta:
-    starknet:
-      optional: false
-  checksum: d8dd7a905170adffa7cde712a34a99f1e8231858366ef3b3117e109aed2cb3031b16156e285daeecf8466cd4523deeb95b6b1d26245d7ab14607c45851ac9ecd
-  languageName: node
-  linkType: hard
-
-"get-starknet-core@npm:^4.0.0-next.3":
+"get-starknet-core@npm:^4.0.0, get-starknet-core@npm:^4.0.0-next.3":
   version: 4.0.0
   resolution: "get-starknet-core@npm:4.0.0"
   dependencies:
@@ -27567,7 +27540,6 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "wallet-ui@workspace:packages/wallet-ui"
   dependencies:
-    "@consensys/starknet-snap": "file:../starknet-snap"
     "@craco/craco": ^7.1.0
     "@emotion/react": ^11.9.0
     "@emotion/styled": ^11.8.1

@@ -104,6 +104,7 @@ describe('Test function: getTransactions', function () {
     const requestObject: GetTransactionsRequestParams = {
       senderAddress: txn4.senderAddress,
       pageSize: '10',
+      chainId: STARKNET_SEPOLIA_TESTNET_NETWORK.chainId,
     };
     apiParams.requestParams = requestObject;
 
@@ -118,6 +119,7 @@ describe('Test function: getTransactions', function () {
     const requestObject: GetTransactionsRequestParams = {
       senderAddress: txn4.senderAddress,
       pageSize: '10',
+      chainId: STARKNET_SEPOLIA_TESTNET_NETWORK.chainId,
     };
     apiParams.requestParams = requestObject;
 
@@ -146,6 +148,7 @@ describe('Test function: getTransactions', function () {
       senderAddress: txn4.senderAddress,
       pageSize: '10',
       onlyFromState: true,
+      chainId: STARKNET_SEPOLIA_TESTNET_NETWORK.chainId,
     };
     apiParams.requestParams = requestObject;
     const result = await getTransactions(apiParams);
@@ -159,6 +162,7 @@ describe('Test function: getTransactions', function () {
       senderAddress: txn4.senderAddress,
       pageSize: '10',
       withDeployTxn: true,
+      chainId: STARKNET_SEPOLIA_TESTNET_NETWORK.chainId,
     };
     apiParams.requestParams = requestObject;
     const result = await getTransactions(apiParams);
@@ -173,6 +177,7 @@ describe('Test function: getTransactions', function () {
       senderAddress: txn4.senderAddress,
       pageSize: '10',
       withDeployTxn: true,
+      chainId: STARKNET_SEPOLIA_TESTNET_NETWORK.chainId,
     };
     apiParams.requestParams = requestObject;
 
