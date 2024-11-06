@@ -1,7 +1,14 @@
 import type { BIP44AddressKeyDeriver } from '@metamask/key-tree';
 import { getBIP44AddressKeyDeriver } from '@metamask/key-tree';
 import type { Component, DialogResult, Json } from '@metamask/snaps-sdk';
-import { DialogType, panel, type SnapsProvider } from '@metamask/snaps-sdk';
+import {
+  DialogType,
+  panel,
+  text,
+  type SnapsProvider,
+} from '@metamask/snaps-sdk';
+
+import type { SnapState } from '../types/snapState';
 
 declare const snap: SnapsProvider;
 
@@ -93,3 +100,45 @@ export async function setStateData<State>(data: State) {
     },
   });
 }
+
+export const updateRequiredMetaMaskComponent = () => {
+  return panel([
+    text(
+      'You need to update your MetaMask to latest version to use this snap.',
+    ),
+  ]);
+};
+
+/**
+ * Ensures that JSX support is available in the MetaMask environment by attempting to render a component within a snap dialog.
+ * If MetaMask does not support JSX, an alert message is shown prompting the user to update MetaMask.
+ *
+ * @param component - The JSX component to display in the snap dialog.
+ *
+ * The function performs the following steps:
+ * 1. Tries to render the provided component using a `snap_dialog` method.
+ * 2. On success, it updates the `requireMMUpgrade` flag in the snap's state to `false`, indicating that JSX is supported.
+ * 3. If an error occurs (likely due to outdated MetaMask), it displays an alert dialog prompting the user to update MetaMask.
+ */
+export const ensureJsxSupport = async (component: Component) => {
+  try {
+    await snap.request({
+      method: 'snap_dialog',
+      params: {
+        type: 'alert',
+        content: component,
+      },
+    });
+    const state = await getStateData<SnapState>();
+    state.requireMMUpgrade = false;
+    await setStateData(state);
+  } catch {
+    await snap.request({
+      method: 'snap_dialog',
+      params: {
+        type: 'alert',
+        content: updateRequiredMetaMaskComponent(),
+      },
+    });
+  }
+};

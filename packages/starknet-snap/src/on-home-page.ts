@@ -50,7 +50,7 @@ export class HomePageController {
 
       const balance = await this.getBalance(network, address);
 
-      return this.buildComponenets(address, network, balance);
+      return this.buildComponents(address, network, balance);
     } catch (error) {
       // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
       logger.error('Failed to execute onHomePage', toJson(error));
@@ -97,7 +97,7 @@ export class HomePageController {
     );
   }
 
-  protected buildComponenets(
+  protected buildComponents(
     address: string,
     network: Network,
     balance: string,

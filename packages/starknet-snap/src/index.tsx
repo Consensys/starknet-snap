@@ -4,7 +4,8 @@ import type {
   OnInstallHandler,
   OnUpdateHandler,
 } from '@metamask/snaps-sdk';
-import { panel, text, MethodNotFoundError } from '@metamask/snaps-sdk';
+import { SnapError, MethodNotFoundError } from '@metamask/snaps-sdk';
+import { Box, Link, Text } from '@metamask/snaps-sdk/jsx';
 
 import { addNetwork } from './addNetwork';
 import { Config } from './config';
@@ -59,7 +60,14 @@ import type {
 } from './types/snapApi';
 import type { SnapState } from './types/snapState';
 import { upgradeAccContract } from './upgradeAccContract';
-import { getDappUrl, isSnapRpcError } from './utils';
+import {
+  ensureJsxSupport,
+  getDappUrl,
+  getStateData,
+  isSnapRpcError,
+  setStateData,
+  updateRequiredMetaMaskComponent,
+} from './utils';
 import {
   CAIRO_VERSION_LEGACY,
   PRELOADED_TOKENS,
@@ -93,12 +101,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
     }
 
     // TODO: this will causing racing condition, need to be fixed
-    let state: SnapState = await snap.request({
-      method: 'snap_manageState',
-      params: {
-        operation: 'get',
-      },
-    });
+    let state: SnapState = await getStateData<SnapState>();
     if (!state) {
       state = {
         accContracts: [],
@@ -107,13 +110,11 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
         transactions: [],
       };
       // initialize state if empty and set default data
-      await snap.request({
-        method: 'snap_manageState',
-        params: {
-          operation: 'update',
-          newState: state,
-        },
-      });
+      await setStateData(state);
+    }
+
+    if (state.requireMMUpgrade === undefined) {
+      throw SnapError;
     }
 
     // TODO: this can be remove, after state manager is implemented
@@ -307,12 +308,15 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
 };
 
 export const onInstall: OnInstallHandler = async () => {
-  const component = panel([
-    text('Your MetaMask wallet is now compatible with Starknet!'),
-    text(
-      `To manage your Starknet account and send and receive funds, visit the [companion dapp for Starknet](${getDappUrl()}).`,
-    ),
-  ]);
+  const component = await ensureJsxSupport(
+    <Box>
+      <Text>Your MetaMask wallet is now compatible with Starknet!</Text>
+      <Text>
+        To manage your Starknet account and send and receive funds, visit the{' '}
+        <Link href={getDappUrl()}>companion dapp for Starknet</Link>.
+      </Text>
+    </Box>,
+  );
 
   await snap.request({
     method: 'snap_dialog',
@@ -324,14 +328,15 @@ export const onInstall: OnInstallHandler = async () => {
 };
 
 export const onUpdate: OnUpdateHandler = async () => {
-  const component = panel([
-    text('Features released with this update:'),
-    text(
-      'Support STRK token for the gas fee in sending transaction and estimating fee.',
-    ),
-    text('Default network changed to mainnet.'),
-    text('Support for multiple consecutive transactions.'),
-  ]);
+  const component = await ensureJsxSupport(
+    <Box>
+      <Text>Your Starknet Snap is now up-to-date !</Text>
+      <Text>
+        As usual, to manage your Starknet account and send and receive funds,
+        visit the <Link href={getDappUrl()}>companion dapp for Starknet</Link>.
+      </Text>
+    </Box>,
+  );
 
   await snap.request({
     method: 'snap_dialog',
@@ -343,5 +348,13 @@ export const onUpdate: OnUpdateHandler = async () => {
 };
 
 export const onHomePage: OnHomePageHandler = async () => {
-  return await homePageController.execute();
+  const state = await getStateData<SnapState>();
+  state.requireMMUpgrade = false;
+  if (state.requireMMUpgrade !== undefined) {
+    return await homePageController.execute();
+  }
+
+  return {
+    content: updateRequiredMetaMaskComponent(),
+  };
 };
