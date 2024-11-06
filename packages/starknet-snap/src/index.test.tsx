@@ -4,14 +4,19 @@ import { onHomePage, onRpcRequest } from '.';
 import * as createAccountApi from './createAccount';
 import { HomePageController } from './on-home-page';
 import * as keyPairUtils from './utils/keyPair';
+import * as snapHelper from './utils/snap';
 
 jest.mock('./utils/logger');
+jest.mock('./utils/snap');
 
 describe('onRpcRequest', () => {
   const createMockSpy = () => {
+    const getStateDataSpy = jest.spyOn(snapHelper, 'getStateData');
+    getStateDataSpy.mockResolvedValue({ requireMMUpgrade: false });
     const createAccountSpy = jest.spyOn(createAccountApi, 'createAccount');
     const keyPairSpy = jest.spyOn(keyPairUtils, 'getAddressKeyDeriver');
     return {
+      getStateDataSpy,
       createAccountSpy,
       keyPairSpy,
     };
@@ -42,6 +47,7 @@ describe('onRpcRequest', () => {
   });
 
   it('throws `MethodNotFoundError` if the request method not found', async () => {
+    createMockSpy();
     await expect(
       onRpcRequest({
         ...createMockRequest(),
@@ -51,6 +57,31 @@ describe('onRpcRequest', () => {
         },
       }),
     ).rejects.toThrow(MethodNotFoundError);
+  });
+
+  it('throws `SnapError` on request if MetaMask needs update', async () => {
+    await expect(
+      onRpcRequest({
+        ...createMockRequest(),
+        request: {
+          ...createMockRequest().request,
+          method: 'ping',
+        },
+      }),
+    ).rejects.toThrow(SnapError);
+  });
+
+  it('requests gets executed if MetaMask does not needs update', async () => {
+    createMockSpy();
+    expect(
+      await onRpcRequest({
+        ...createMockRequest(),
+        request: {
+          ...createMockRequest().request,
+          method: 'ping',
+        },
+      }),
+    ).toBe('pong');
   });
 
   it('throws `SnapError` if the error is an instance of SnapError', async () => {
@@ -70,6 +101,8 @@ describe('onRpcRequest', () => {
 
 describe('onHomePage', () => {
   it('executes homePageController', async () => {
+    const getStateDataSpy = jest.spyOn(snapHelper, 'getStateData');
+    getStateDataSpy.mockResolvedValue({ requireMMUpgrade: true });
     const executeSpy = jest.spyOn(HomePageController.prototype, 'execute');
     executeSpy.mockResolvedValue({ content: text('test') });
 
