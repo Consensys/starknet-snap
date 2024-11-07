@@ -95,11 +95,6 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
   logger.log(`${request.method}:\nrequestParams: ${toJson(requestParams)}`);
 
   try {
-    if (request.method === 'ping') {
-      logger.log('pong');
-      return 'pong';
-    }
-
     // TODO: this will causing racing condition, need to be fixed
     let state: SnapState = await getStateData<SnapState>();
     if (!state) {
@@ -114,7 +109,13 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
     }
 
     if (state.requireMMUpgrade === undefined) {
+      console.log('hello');
       throw SnapError;
+    }
+
+    if (request.method === 'ping') {
+      logger.log('pong');
+      return 'pong';
     }
 
     // TODO: this can be remove, after state manager is implemented
@@ -349,7 +350,7 @@ export const onUpdate: OnUpdateHandler = async () => {
 
 export const onHomePage: OnHomePageHandler = async () => {
   const state = await getStateData<SnapState>();
-  state.requireMMUpgrade = false;
+  console.log(state);
   if (state.requireMMUpgrade !== undefined) {
     return await homePageController.execute();
   }
