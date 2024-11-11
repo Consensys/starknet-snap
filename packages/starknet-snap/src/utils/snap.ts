@@ -9,6 +9,7 @@ import {
 } from '@metamask/snaps-sdk';
 
 import type { SnapState } from '../types/snapState';
+import { acquireLock } from './lock';
 
 declare const snap: SnapsProvider;
 
@@ -122,6 +123,8 @@ export const updateRequiredMetaMaskComponent = () => {
  */
 export const ensureJsxSupport = async (component: Component) => {
   try {
+    const saveMutex = acquireLock();
+
     await snap.request({
       method: 'snap_dialog',
       params: {
@@ -129,9 +132,12 @@ export const ensureJsxSupport = async (component: Component) => {
         content: component,
       },
     });
-    const state = await getStateData<SnapState>();
-    state.requireMMUpgrade = false;
-    await setStateData(state);
+
+    const state: SnapState = await getStateData<SnapState>();
+    await saveMutex.runExclusive(async () => {
+      state.requireMMUpgrade = false;
+      await setStateData(state);
+    });
   } catch {
     await snap.request({
       method: 'snap_dialog',
