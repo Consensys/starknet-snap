@@ -337,8 +337,12 @@ export function generateTransactionRequests({
             amount: '1',
           }),
           entrypoint: 'transfer',
+          label: 'Transfer',
+          type: 'contract',
+          chainId: '123'
         },
       ],
+      includeDeploy: false
     });
   }
 
