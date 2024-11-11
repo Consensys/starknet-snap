@@ -95,10 +95,6 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
   logger.log(`${request.method}:\nrequestParams: ${toJson(requestParams)}`);
 
   try {
-    if (request.method === 'ping') {
-      logger.log('pong');
-      return 'pong';
-    }
     // TODO: this can be remove, after state manager is implemented
     const saveMutex = acquireLock();
 
@@ -118,8 +114,12 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
     });
 
     if (state.requireMMUpgrade === undefined) {
-      console.log('hello');
       throw SnapError;
+    }
+
+    if (request.method === 'ping') {
+      logger.log('pong');
+      return 'pong';
     }
 
     // pre-inserted the default networks and tokens
