@@ -95,31 +95,32 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
   logger.log(`${request.method}:\nrequestParams: ${toJson(requestParams)}`);
 
   try {
+    if (request.method === 'ping') {
+      logger.log('pong');
+      return 'pong';
+    }
+    // TODO: this can be remove, after state manager is implemented
+    const saveMutex = acquireLock();
+
     // TODO: this will causing racing condition, need to be fixed
     let state: SnapState = await getStateData<SnapState>();
-    if (!state) {
-      state = {
-        accContracts: [],
-        erc20Tokens: [],
-        networks: [],
-        transactions: [],
-      };
-      // initialize state if empty and set default data
-      await setStateData(state);
-    }
+    await saveMutex.runExclusive(async () => {
+      if (!state) {
+        state = {
+          accContracts: [],
+          erc20Tokens: [],
+          networks: [],
+          transactions: [],
+        };
+        // initialize state if empty and set default data
+        await setStateData(state);
+      }
+    });
 
     if (state.requireMMUpgrade === undefined) {
       console.log('hello');
       throw SnapError;
     }
-
-    if (request.method === 'ping') {
-      logger.log('pong');
-      return 'pong';
-    }
-
-    // TODO: this can be remove, after state manager is implemented
-    const saveMutex = acquireLock();
 
     // pre-inserted the default networks and tokens
     await upsertNetwork(STARKNET_MAINNET_NETWORK, snap, saveMutex, state);
@@ -309,7 +310,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
 };
 
 export const onInstall: OnInstallHandler = async () => {
-  const component = await ensureJsxSupport(
+  await ensureJsxSupport(
     <Box>
       <Text>Your MetaMask wallet is now compatible with Starknet!</Text>
       <Text>
@@ -318,18 +319,10 @@ export const onInstall: OnInstallHandler = async () => {
       </Text>
     </Box>,
   );
-
-  await snap.request({
-    method: 'snap_dialog',
-    params: {
-      type: 'alert',
-      content: component,
-    },
-  });
 };
 
 export const onUpdate: OnUpdateHandler = async () => {
-  const component = await ensureJsxSupport(
+  await ensureJsxSupport(
     <Box>
       <Text>Your Starknet Snap is now up-to-date !</Text>
       <Text>
@@ -338,14 +331,6 @@ export const onUpdate: OnUpdateHandler = async () => {
       </Text>
     </Box>,
   );
-
-  await snap.request({
-    method: 'snap_dialog',
-    params: {
-      type: 'alert',
-      content: component,
-    },
-  });
 };
 
 export const onHomePage: OnHomePageHandler = async () => {
