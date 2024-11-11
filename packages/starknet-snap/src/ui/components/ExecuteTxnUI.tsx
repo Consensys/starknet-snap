@@ -88,7 +88,6 @@ export const ExecuteTxnUI: SnapComponent<ExecuteTxnUIProps> = ({
     }
   }
 
-  console.log(calls);
   return (
     <Container>
       <Box>

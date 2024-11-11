@@ -28,8 +28,6 @@ export type FeeTokenSelectorProps = {
 export const FeeTokenSelector: SnapComponent<FeeTokenSelectorProps> = ({
   selectedToken,
 }) => {
-  Object.values(FeeToken).map((token) => console.log(token));
-  console.log(`Selected token ${selectedToken}`);
   return (
     <Form name="form-fee-token-selection">
       <Field label="Fee Token">
@@ -43,26 +41,7 @@ export const FeeTokenSelector: SnapComponent<FeeTokenSelectorProps> = ({
               <Card title={token} value={FeeTokenUnit[token]} />
             </SelectorOption>
           ))}
-          {/* <SelectorOption value="option-1">
-          <Card title="Option 1" value="First option" />
-        </SelectorOption>
-        <SelectorOption value="option-2">
-          <Card title="Option 2" value="Second option" />
-        </SelectorOption> */}
         </Selector>
-        {/* 
-      <Selector
-        name="feeTokenSelector"
-        title="Select Fee Token"
-        value={selectedToken}
-      >
-        {Object.values(FeeToken).map((token) => (
-          <SelectorOption key={token} value={token}>
-            <RowUI label={token} value={FeeTokenUnit[token]} />
-          </SelectorOption>
-        ))}
-      </Selector> 
-      */}
       </Field>
     </Form>
   );
