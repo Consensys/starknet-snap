@@ -25,7 +25,7 @@ describe('getBip44Deriver', () => {
 describe('confirmDialogInteractiveUI', () => {
   it('calls snap_dialog', async () => {
     const spy = jest.spyOn(snapUtil.getProvider(), 'request');
-    const interfaceId = "test";
+    const interfaceId = 'test';
 
     await snapUtil.confirmDialogInteractiveUI(interfaceId);
 

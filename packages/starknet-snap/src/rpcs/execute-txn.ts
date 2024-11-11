@@ -1,5 +1,4 @@
-import { DialogType, type Component, type Json } from '@metamask/snaps-sdk';
-import convert from 'ethereum-unit-converter';
+import { type Json } from '@metamask/snaps-sdk';
 import type { Call, Calldata } from 'starknet';
 import { constants, TransactionStatus, TransactionType } from 'starknet';
 import type { Infer } from 'superstruct';
@@ -159,9 +158,7 @@ export class ExecuteTxnRpc extends AccountRpcController<
     const stateManager = new TransactionRequestStateManager();
     await stateManager.upsertTransactionRequest(request);
 
-    if (
-      !await confirmDialogInteractiveUI(interfaceId)
-    ) {
+    if (!(await confirmDialogInteractiveUI(interfaceId))) {
       throw new UserRejectedOpError() as unknown as Error;
     }
 

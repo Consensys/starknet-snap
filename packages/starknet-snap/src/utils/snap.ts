@@ -37,7 +37,6 @@ export async function getBip44Deriver(): Promise<BIP44AddressKeyDeriver> {
   return getBIP44AddressKeyDeriver(bip44Node);
 }
 
-
 /**
  * Displays a confirmation dialog with the specified interface id.
  *
