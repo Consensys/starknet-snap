@@ -339,10 +339,10 @@ export function generateTransactionRequests({
           entrypoint: 'transfer',
           label: 'Transfer',
           type: 'contract',
-          chainId: '123'
+          chainId: '123',
         },
       ],
-      includeDeploy: false
+      includeDeploy: false,
     });
   }
 
