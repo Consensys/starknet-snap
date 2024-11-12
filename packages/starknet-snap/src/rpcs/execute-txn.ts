@@ -206,12 +206,10 @@ export class ExecuteTxnRpc extends AccountRpcController<
       throw new SnapError('Transaction Request not found in state');
     }
 
-    console.log(`Ressource bounds after2`);
-    console.log(request?.resourceBounds);
     details.version =
       request.feeToken === FeeToken.STRK
         ? constants.TRANSACTION_VERSION.V3
-        : undefined;
+        : constants.TRANSACTION_VERSION.V1;
     if (request.includeDeploy) {
       await createAccount({
         network: this.network,
@@ -230,13 +228,14 @@ export class ExecuteTxnRpc extends AccountRpcController<
       this.network,
       request.signer,
       privateKey,
-      request.calls,
+      request.calls.map(({ contractAddress, calldata, entrypoint }) => ({
+        contractAddress,
+        calldata,
+        entrypoint,
+      })),
       abis, // TODO add abi from params in request.
       {
-        version:
-          request.feeToken === FeeToken.STRK
-            ? constants.TRANSACTION_VERSION.V3
-            : undefined,
+        version: details.version as TransactionVersion,
         // Aways repect the input, unless the account is not deployed
         // TODO: we may also need to increment the nonce base on the input, if the account is not deployed
         nonce: request.includeDeploy ? 1 : details?.nonce,

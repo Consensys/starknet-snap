@@ -343,6 +343,18 @@ export function generateTransactionRequests({
         },
       ],
       includeDeploy: false,
+      resourceBounds: [
+        {
+          l1_gas: {
+            max_amount: '0',
+            max_price_per_unit: '0',
+          },
+          l2_gas: {
+            max_amount: '0',
+            max_price_per_unit: '0',
+          },
+        },
+      ],
     });
   }
 
