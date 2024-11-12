@@ -1,5 +1,5 @@
-import { type Json } from '@metamask/snaps-sdk';
-import type { Call, Calldata } from 'starknet';
+import { SnapError, type Json } from '@metamask/snaps-sdk';
+import type { Call, Calldata, UniversalDetails } from 'starknet';
 import { constants, TransactionStatus, TransactionType } from 'starknet';
 import type { Infer } from 'superstruct';
 import { object, string, assign, optional, any } from 'superstruct';
@@ -12,6 +12,7 @@ import { TransactionStateManager } from '../state/transaction-state-manager';
 import { FeeToken } from '../types/snapApi';
 import type { TransactionRequest } from '../types/snapState';
 import { VoyagerTransactionType, type Transaction } from '../types/snapState';
+import type { TransactionVersion } from '../types/starknet';
 import { generateExecuteTxnFlow } from '../ui/utils';
 import type { AccountRpcControllerOptions } from '../utils';
 import {
@@ -59,6 +60,8 @@ export class ExecuteTxnRpc extends AccountRpcController<
 > {
   protected txnStateManager: TransactionStateManager;
 
+  protected txnRequestStateManager: TransactionRequestStateManager;
+
   protected accStateManager: AccountStateManager;
 
   protected tokenStateManager: TokenStateManager;
@@ -70,6 +73,7 @@ export class ExecuteTxnRpc extends AccountRpcController<
   constructor(options?: AccountRpcControllerOptions) {
     super(options);
     this.txnStateManager = new TransactionStateManager();
+    this.txnRequestStateManager = new TransactionRequestStateManager();
     this.accStateManager = new AccountStateManager();
     this.tokenStateManager = new TokenStateManager();
   }
@@ -109,6 +113,15 @@ export class ExecuteTxnRpc extends AccountRpcController<
     const { address, calls, abis, details } = params;
     const { privateKey, publicKey } = this.account;
     const callsArray = Array.isArray(calls) ? calls : [calls];
+    const version =
+      details?.version as unknown as constants.TRANSACTION_VERSION;
+
+    const formattedCalls = await formatCallData(
+      callsArray,
+      this.network.chainId,
+      address,
+      this.tokenStateManager,
+    );
 
     const { includeDeploy, suggestedMaxFee, estimateResults } =
       await getEstimatedFees(
@@ -125,17 +138,6 @@ export class ExecuteTxnRpc extends AccountRpcController<
         details,
       );
 
-    const accountDeployed = !includeDeploy;
-    const version =
-      details?.version as unknown as constants.TRANSACTION_VERSION;
-
-    const formattedCalls = await formatCallData(
-      callsArray,
-      this.network.chainId,
-      address,
-      this.tokenStateManager,
-    );
-
     const request: TransactionRequest = {
       chainId: this.network.chainId,
       id: uuidv4(),
@@ -144,6 +146,7 @@ export class ExecuteTxnRpc extends AccountRpcController<
       signer: address,
       maxFee: suggestedMaxFee,
       calls: formattedCalls,
+      resourceBounds: estimateResults.map((result) => result.resourceBounds),
       feeToken:
         version === constants.TRANSACTION_VERSION.V3
           ? FeeToken.STRK
@@ -155,48 +158,23 @@ export class ExecuteTxnRpc extends AccountRpcController<
 
     request.interfaceId = interfaceId;
 
-    const stateManager = new TransactionRequestStateManager();
-    await stateManager.upsertTransactionRequest(request);
+    await this.txnRequestStateManager.upsertTransactionRequest(request);
 
     if (!(await confirmDialogInteractiveUI(interfaceId))) {
+      await this.txnRequestStateManager.removeTransactionRequest(request.id);
       throw new UserRejectedOpError() as unknown as Error;
     }
 
-    if (!accountDeployed) {
-      await createAccount({
-        network: this.network,
-        address,
-        publicKey,
-        privateKey,
-        waitMode: false,
-        callback: async (contractAddress: string, transactionHash: string) => {
-          await this.updateAccountAsDeploy(contractAddress, transactionHash);
-        },
-        version,
-      });
-    }
-
-    const resourceBounds = estimateResults.map(
-      (result) => result.resourceBounds,
-    );
-
-    const executeTxnResp = await executeTxnUtil(
-      this.network,
-      address,
-      privateKey,
-      calls,
+    // This part should be handled based on latest request only.
+    const executeTxnResp = await this.#execute(
+      request.id,
+      interfaceId,
+      details ?? {},
       abis,
-      {
-        ...details,
-        // Aways repect the input, unless the account is not deployed
-        // TODO: we may also need to increment the nonce base on the input, if the account is not deployed
-        nonce: accountDeployed ? details?.nonce : 1,
-        maxFee: suggestedMaxFee,
-        resourceBounds: resourceBounds[resourceBounds.length - 1],
-      },
     );
 
     if (!executeTxnResp?.transaction_hash) {
+      await this.txnRequestStateManager.removeTransactionRequest(request.id);
       throw new Error('Failed to execute transaction');
     }
 
@@ -209,7 +187,64 @@ export class ExecuteTxnRpc extends AccountRpcController<
       this.createInvokeTxn(address, executeTxnResp.transaction_hash, call),
     );
 
+    await this.txnRequestStateManager.removeTransactionRequest(request.id);
     return executeTxnResp;
+  }
+
+  async #execute(
+    requestId: string,
+    interfaceId: string,
+    details: UniversalDetails,
+    abis: any,
+  ) {
+    const { privateKey, publicKey } = this.account;
+    const request = await this.txnRequestStateManager.getTransactionRequest({
+      requestId,
+      interfaceId,
+    });
+    if (!request) {
+      throw new SnapError('Transaction Request not found in state');
+    }
+
+    console.log(`Ressource bounds after2`);
+    console.log(request?.resourceBounds);
+    details.version =
+      request.feeToken === FeeToken.STRK
+        ? constants.TRANSACTION_VERSION.V3
+        : undefined;
+    if (request.includeDeploy) {
+      await createAccount({
+        network: this.network,
+        address: request.signer,
+        publicKey,
+        privateKey,
+        waitMode: false,
+        callback: async (contractAddress: string, transactionHash: string) => {
+          await this.updateAccountAsDeploy(contractAddress, transactionHash);
+        },
+        version: details.version as TransactionVersion,
+      });
+    }
+
+    return await executeTxnUtil(
+      this.network,
+      request.signer,
+      privateKey,
+      request.calls,
+      abis, // TODO add abi from params in request.
+      {
+        version:
+          request.feeToken === FeeToken.STRK
+            ? constants.TRANSACTION_VERSION.V3
+            : undefined,
+        // Aways repect the input, unless the account is not deployed
+        // TODO: we may also need to increment the nonce base on the input, if the account is not deployed
+        nonce: request.includeDeploy ? 1 : details?.nonce,
+        maxFee: request.maxFee,
+        resourceBounds:
+          request.resourceBounds[request.resourceBounds.length - 1],
+      },
+    );
   }
 
   protected async updateAccountAsDeploy(

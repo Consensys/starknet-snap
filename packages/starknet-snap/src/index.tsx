@@ -3,9 +3,15 @@ import type {
   OnHomePageHandler,
   OnInstallHandler,
   OnUpdateHandler,
+  OnUserInputHandler,
 } from '@metamask/snaps-sdk';
-import { SnapError, MethodNotFoundError } from '@metamask/snaps-sdk';
-import { Box, Link, Text } from '@metamask/snaps-sdk/jsx';
+import {
+  SnapError,
+  MethodNotFoundError,
+  UserInputEventType,
+} from '@metamask/snaps-sdk';
+import { Box, Heading, Link, Spinner, Text } from '@metamask/snaps-sdk/jsx';
+import { constants, TransactionType } from 'starknet';
 
 import { addNetwork } from './addNetwork';
 import { Config } from './config';
@@ -53,15 +59,20 @@ import {
 } from './rpcs';
 import { sendTransaction } from './sendTransaction';
 import { signDeployAccountTransaction } from './signDeployAccountTransaction';
+import { NetworkStateManager } from './state/network-state-manager';
+import { TransactionRequestStateManager } from './state/request-state-manager';
 import type {
   ApiParams,
   ApiParamsWithKeyDeriver,
   ApiRequestParams,
 } from './types/snapApi';
+import { FeeToken } from './types/snapApi';
 import type { SnapState } from './types/snapState';
+import { ExecuteTxnUI } from './ui/components';
 import { upgradeAccContract } from './upgradeAccContract';
 import {
   ensureJsxSupport,
+  getBip44Deriver,
   getDappUrl,
   getStateData,
   isSnapRpcError,
@@ -85,6 +96,7 @@ import {
   upsertNetwork,
   removeNetwork,
 } from './utils/snapUtils';
+import { getEstimatedFees, getKeysFromAddress } from './utils/starknetUtils';
 
 declare const snap;
 logger.logLevel = parseInt(Config.logLevel, 10);
@@ -298,6 +310,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
   } catch (error) {
     let snapError = error;
 
+    console.log(error);
     if (!isSnapRpcError(error)) {
       // To ensure the error meets both the SnapError format and WalletRpc format.
       snapError = new UnknownError('Unable to execute the rpc request');
@@ -343,4 +356,109 @@ export const onHomePage: OnHomePageHandler = async () => {
   return {
     content: updateRequiredMetaMaskComponent(),
   };
+};
+
+/**
+ * Handle incoming user events coming from the MetaMask clients open interfaces.
+ *
+ * @param params - The event parameters.
+ * @param params.id - The Snap interface ID where the event was fired.
+ * @param params.event - The event object containing the event type, name, and
+ * value.
+ * @param params.context
+ * @see https://docs.metamask.io/snaps/reference/exports/#onuserinput
+ */
+export const onUserInput: OnUserInputHandler = async ({
+  id,
+  event,
+  context,
+}) => {
+  await snap.request({
+    method: 'snap_updateInterface',
+    params: {
+      id,
+      ui: (
+        <Box>
+          <Heading>Calculating fee, please wait...</Heading>
+          <Spinner />
+        </Box>
+      ),
+    },
+  });
+  const stateManager = new TransactionRequestStateManager();
+  try {
+    if (
+      event.type === UserInputEventType.InputChangeEvent &&
+      event.name === 'feeTokenSelector'
+    ) {
+      const feeToken = event.value as FeeToken;
+      if (context) {
+        const request = await stateManager.getTransactionRequest({
+          requestId: context?.id as string,
+          interfaceId: id,
+        });
+        if (request?.signer && request.calls) {
+          const details = {
+            version:
+              feeToken === FeeToken.STRK
+                ? constants.TRANSACTION_VERSION.V3
+                : undefined,
+          };
+          const networkStateMgr = new NetworkStateManager();
+          const network = await networkStateMgr.getCurrentNetwork();
+          const deriver = await getBip44Deriver();
+          // TODO: Instead of getting the state directly, we should implement state management to consolidate the state fetching
+          const state = await getStateData<SnapState>();
+          const account = await getKeysFromAddress(
+            deriver,
+            network,
+            state,
+            request.signer,
+          );
+          const { includeDeploy, suggestedMaxFee, estimateResults } =
+            await getEstimatedFees(
+              network,
+              request?.signer,
+              account.privateKey,
+              account.publicKey,
+              [
+                {
+                  type: TransactionType.INVOKE,
+                  payload: request.calls,
+                },
+              ],
+              details,
+            );
+
+          request.maxFee = suggestedMaxFee;
+          request.feeToken = feeToken;
+          request.includeDeploy = includeDeploy;
+          request.resourceBounds = estimateResults.map(
+            (result) => result.resourceBounds,
+          );
+
+          await stateManager.upsertTransactionRequest(request);
+          await snap.request({
+            method: 'snap_updateInterface',
+            params: {
+              id,
+              ui: (
+                <ExecuteTxnUI
+                  type={request.type}
+                  signer={request.signer}
+                  chainId={request.chainId}
+                  maxFee={request.maxFee}
+                  calls={request.calls}
+                  feeToken={feeToken}
+                  includeDeploy={includeDeploy}
+                />
+              ),
+            },
+          });
+        }
+      }
+    }
+  } catch {
+    await stateManager.removeTransactionRequest(context?.id as string);
+  }
 };
