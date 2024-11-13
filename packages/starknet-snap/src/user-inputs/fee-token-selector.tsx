@@ -11,8 +11,9 @@ import type { FeeTokenUnit } from '../types/snapApi';
 import { FeeToken } from '../types/snapApi';
 import type { TransactionRequest } from '../types/snapState';
 import { updateExecuteTxnFlow } from '../ui/utils';
-import { getEstimatedFees, hasSufficientFunds } from '../utils/starknetUtils';
+import { getEstimatedFees } from '../utils/starknetUtils';
 import { AccountUserInputController } from '../utils/user-input';
+import { hasSufficientFunds } from './utils';
 
 export class FeeTokenSelectorController extends AccountUserInputController {
   protected stateManager: TransactionRequestStateManager;

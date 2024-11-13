@@ -10,8 +10,8 @@ import { TransactionRequestStateManager } from '../state/request-state-manager';
 import type { SnapState } from '../types/snapState';
 import * as uiUtils from '../ui/utils';
 import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../utils/constants';
-import * as starknetUtils from '../utils/starknetUtils';
 import { feeTokenSelectorController } from './fee-token-selector';
+import * as userInputUtils from './utils';
 
 jest.mock('../state/token-state-manager');
 jest.mock('../state/request-state-manager');
@@ -53,7 +53,7 @@ describe('fee-token-selector', () => {
     );
     const getFeesSpy = jest.spyOn(feeTokenSelectorController as any, 'getFees');
     const hasSufficientFundsSpy = jest.spyOn(
-      starknetUtils as any,
+      userInputUtils as any,
       'hasSufficientFunds',
     );
 
@@ -136,7 +136,7 @@ describe('fee-token-selector', () => {
     expect(upsertTransactionRequestSpy).toHaveBeenCalledTimes(0);
   });
 
-  it('updates dialog with if enough to pay for fee', async () => {
+  it('updates dialog with and save states if enough to pay for fee', async () => {
     const {
       id,
       event,
