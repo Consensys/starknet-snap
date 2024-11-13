@@ -125,7 +125,7 @@ export const ExecuteTxnUI: SnapComponent<ExecuteTxnUIProps> = ({
                 />
                 <RowUI
                   label={`Amount`}
-                  value={`${call.amount as string} ${
+                  value={`${formatUnits(call.amount, call.decimals)} ${
                     call.tokenSymbol as string
                   }`}
                 />

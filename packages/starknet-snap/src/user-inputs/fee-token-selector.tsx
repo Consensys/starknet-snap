@@ -80,10 +80,18 @@ export class FeeTokenSelectorController extends AccountUserInputController {
 
         if (request?.calls) {
           const { includeDeploy, suggestedMaxFee, estimateResults } =
-            await this.getFees(this.account.publicKey, request.calls, feeToken);
+            await this.getFees(
+              request.signer,
+              request.calls.map((call) => ({
+                calldata: call.calldata,
+                contractAddress: call.contractAddress,
+                entrypoint: call.entrypoint,
+              })),
+              feeToken,
+            );
 
           const sufficientFunds = await hasSufficientFunds(
-            this.account.publicKey,
+            request.signer,
             this.network,
             request.calls,
             feeToken,
