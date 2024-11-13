@@ -142,17 +142,16 @@ export const updateRequiredMetaMaskComponent = () => {
 export const ensureJsxSupport = async (component: Component) => {
   try {
     const saveMutex = acquireLock();
-
-    await snap.request({
-      method: 'snap_dialog',
-      params: {
-        type: 'alert',
-        content: component,
-      },
-    });
-
     const state: SnapState = await getStateData<SnapState>();
     await saveMutex.runExclusive(async () => {
+      await snap.request({
+        method: 'snap_dialog',
+        params: {
+          type: 'alert',
+          content: component,
+        },
+      });
+
       state.requireMMUpgrade = false;
       await setStateData(state);
     });

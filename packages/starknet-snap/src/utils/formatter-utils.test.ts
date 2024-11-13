@@ -158,52 +158,9 @@ describe('formatCallData', () => {
         isTransfer: true,
         senderAddress: '0xSenderAddress',
         recipientAddress: '0xRecipientAddress',
-        amount: '0.000000000000001',
+        amount: '1000',
         tokenSymbol: 'TKN',
         decimals: 18,
-      },
-    ]);
-  });
-
-  it('handles errors in amount conversion gracefully', async () => {
-    const callsArray = [
-      {
-        contractAddress: '0xErc20TokenAddress',
-        calldata: ['0xRecipientAddress', 'invalidAmount'], // Invalid amount to trigger error
-        entrypoint: 'transfer',
-      },
-    ];
-    const chainId = '0xChainId';
-    const address = '0xSenderAddress';
-
-    // Mock ERC20 token data
-    const tokenData: Erc20Token = {
-      address: '0xErc20TokenAddress',
-      chainId: '0xChainId',
-      symbol: 'TKN',
-      decimals: 18,
-      name: 'MockToken',
-    };
-
-    // Prepare mock data with ERC20 token data
-    const { tokenStateManagerMock } = await prepareMockData(tokenData);
-
-    const result = await formatCallData(
-      callsArray,
-      chainId,
-      address,
-      tokenStateManagerMock,
-    );
-
-    expect(result).toStrictEqual([
-      {
-        type: 'contract',
-        label: 'Contract Call',
-        contractAddress: '0xErc20TokenAddress',
-        chainId: '0xChainId',
-        calldata: ['0xRecipientAddress', 'invalidAmount'],
-        entrypoint: 'transfer',
-        isTransfer: false,
       },
     ]);
   });

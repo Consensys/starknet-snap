@@ -12,7 +12,7 @@ import {
   MethodNotFoundError,
   UserInputEventType,
 } from '@metamask/snaps-sdk';
-import { Box, Heading, Link, Spinner, Text } from '@metamask/snaps-sdk/jsx';
+import { Box, Link, Text } from '@metamask/snaps-sdk/jsx';
 
 import { addNetwork } from './addNetwork';
 import { Config } from './config';
@@ -373,18 +373,6 @@ export const onUserInput: OnUserInputHandler = async ({
 }): Promise<void> => {
   const generateEventKey = (type: UserInputEventType, name: string) =>
     `${type}_${name}`;
-  await snap.request({
-    method: 'snap_updateInterface',
-    params: {
-      id,
-      ui: (
-        <Box>
-          <Heading>Calculating fee, please wait...</Heading>
-          <Spinner />
-        </Box>
-      ),
-    },
-  });
   const eventKey = generateEventKey(event.type, event.name ?? '');
 
   switch (eventKey) {
