@@ -39,8 +39,6 @@ export const AddressUI: SnapComponent<AddressUIProps> = ({
   const displayValue = shortern ? shortenAddress(address) : address;
   const explorerUrl = chainId ? getExplorerUrl(address, chainId) : null;
   let content;
-  console.log(svgIcon)
-  console.log(icons[svgIcon ?? ""])
   if (svgIcon && icons[svgIcon]) {
     content = <Image src={icons[svgIcon]} />;
   } else if (explorerUrl) {
