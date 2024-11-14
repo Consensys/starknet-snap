@@ -42,21 +42,21 @@ export class InitSnapStateManager extends StateManager<SnapState> {
     const retryInterval = 200; // Set an interval in milliseconds between retries
 
     while (state.requireMMUpgrade === undefined && retries < maxRetries) {
-        // The state can be undefined only if onInstall or onUpdate hook did not complete.
-        // Waiting for the state to become defined, as there is no other way to proceed.
-        await new Promise(resolve => setTimeout(resolve, retryInterval)); // Wait before retrying
-        state = await this.get();
-        retries++;
+      // The state can be undefined only if onInstall or onUpdate hook did not complete.
+      // Waiting for the state to become defined, as there is no other way to proceed.
+      await new Promise((resolve) => setTimeout(resolve, retryInterval)); // Wait before retrying
+      state = await this.get();
+      retries += 1;
     }
 
     if (state.requireMMUpgrade === undefined) {
-        throw new StateManagerError(
-          'MetaMask compatibility state not initialized',
-        );
+      throw new StateManagerError(
+        'MetaMask compatibility state not initialized',
+      );
     }
 
     return state.requireMMUpgrade;
-}
+  }
 
   /**
    * Ensures that JSX support is available in the MetaMask environment by attempting to render a component within a snap dialog.

@@ -324,8 +324,7 @@ export const onUpdate: OnUpdateHandler = async () => {
 
 export const onHomePage: OnHomePageHandler = async () => {
   const initSnapStateManager = new InitSnapStateManager();
-  const requireMMUpgrade =
-    await initSnapStateManager.requireMetaMaskUpgrade();
+  const requireMMUpgrade = await initSnapStateManager.requireMetaMaskUpgrade();
   if (requireMMUpgrade) {
     return {
       content: updateRequiredMetaMaskComponent(),
