@@ -3,20 +3,29 @@ import { text, MethodNotFoundError, SnapError } from '@metamask/snaps-sdk';
 import { onHomePage, onRpcRequest } from '.';
 import * as createAccountApi from './createAccount';
 import { HomePageController } from './on-home-page';
+import { InitSnapStateManager } from './state/init-snap-state-manager';
+import { updateRequiredMetaMaskComponent } from './utils';
 import * as keyPairUtils from './utils/keyPair';
-import * as snapHelper from './utils/snap';
 
 jest.mock('./utils/logger');
 jest.mock('./utils/snap');
 
+jest.mock('./utils', () => ({
+  ...jest.requireActual('./utils'),
+  updateRequiredMetaMaskComponent: jest.fn(),
+}));
+
 describe('onRpcRequest', () => {
   const createMockSpy = () => {
-    const getStateDataSpy = jest.spyOn(snapHelper, 'getStateData');
-    getStateDataSpy.mockResolvedValue({ requireMMUpgrade: false });
+    const getJsxSupportRequirementSpy = jest.spyOn(
+      InitSnapStateManager.prototype,
+      'getJsxSupportRequirement',
+    );
+    getJsxSupportRequirementSpy.mockResolvedValue(false);
     const createAccountSpy = jest.spyOn(createAccountApi, 'createAccount');
     const keyPairSpy = jest.spyOn(keyPairUtils, 'getAddressKeyDeriver');
     return {
-      getStateDataSpy,
+      getJsxSupportRequirementSpy,
       createAccountSpy,
       keyPairSpy,
     };
@@ -60,12 +69,14 @@ describe('onRpcRequest', () => {
   });
 
   it('throws `SnapError` on request if MetaMask needs update', async () => {
+    const { getJsxSupportRequirementSpy } = createMockSpy();
+    getJsxSupportRequirementSpy.mockResolvedValue(true);
     await expect(
       onRpcRequest({
         ...createMockRequest(),
         request: {
           ...createMockRequest().request,
-          method: 'ping',
+          method: 'executeTxn',
         },
       }),
     ).rejects.toThrow(SnapError);
@@ -100,9 +111,12 @@ describe('onRpcRequest', () => {
 });
 
 describe('onHomePage', () => {
-  it('executes homePageController', async () => {
-    const getStateDataSpy = jest.spyOn(snapHelper, 'getStateData');
-    getStateDataSpy.mockResolvedValue({ requireMMUpgrade: true });
+  it('executes homePageController normally if jsxSupport is not required', async () => {
+    const getJsxSupportRequirementSpy = jest.spyOn(
+      InitSnapStateManager.prototype,
+      'getJsxSupportRequirement',
+    );
+    getJsxSupportRequirementSpy.mockResolvedValue(false);
     const executeSpy = jest.spyOn(HomePageController.prototype, 'execute');
     executeSpy.mockResolvedValue({ content: text('test') });
 
@@ -115,5 +129,20 @@ describe('onHomePage', () => {
         value: 'test',
       },
     });
+  });
+  it('renders updateRequiredMetaMaskComponent when jsx support is lacking', async () => {
+    const getJsxSupportRequirementSpy = jest.spyOn(
+      InitSnapStateManager.prototype,
+      'getJsxSupportRequirement',
+    );
+    getJsxSupportRequirementSpy.mockResolvedValue(true);
+    const updateRequiredMetaMaskComponentSpy =
+      updateRequiredMetaMaskComponent as jest.Mock;
+    const executeSpy = jest.spyOn(HomePageController.prototype, 'execute');
+
+    await onHomePage();
+
+    expect(executeSpy).toHaveBeenCalledTimes(0);
+    expect(updateRequiredMetaMaskComponentSpy).toHaveBeenCalledTimes(1);
   });
 });

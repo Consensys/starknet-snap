@@ -4,7 +4,7 @@ import type {
   OnInstallHandler,
   OnUpdateHandler,
 } from '@metamask/snaps-sdk';
-import { SnapError, MethodNotFoundError } from '@metamask/snaps-sdk';
+import { MethodNotFoundError } from '@metamask/snaps-sdk';
 import { Box, Link, Text } from '@metamask/snaps-sdk/jsx';
 
 import { addNetwork } from './addNetwork';
@@ -53,19 +53,16 @@ import {
 } from './rpcs';
 import { sendTransaction } from './sendTransaction';
 import { signDeployAccountTransaction } from './signDeployAccountTransaction';
+import { InitSnapStateManager } from './state/init-snap-state-manager';
 import type {
   ApiParams,
   ApiParamsWithKeyDeriver,
   ApiRequestParams,
 } from './types/snapApi';
-import type { SnapState } from './types/snapState';
 import { upgradeAccContract } from './upgradeAccContract';
 import {
-  ensureJsxSupport,
   getDappUrl,
-  getStateData,
   isSnapRpcError,
-  setStateData,
   updateRequiredMetaMaskComponent,
 } from './utils';
 import {
@@ -94,33 +91,23 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
 
   logger.log(`${request.method}:\nrequestParams: ${toJson(requestParams)}`);
 
+  if (request.method === 'ping') {
+    logger.log('pong');
+    return 'pong';
+  }
+
   try {
+    const initSnapStateManager = new InitSnapStateManager();
+    const requireMMUpgrade =
+      await initSnapStateManager.getJsxSupportRequirement();
+    if (requireMMUpgrade) {
+      throw new Error('MetaMask upgrade required for compatibility');
+    }
+
+    const state = await initSnapStateManager.get();
+
     // TODO: this can be remove, after state manager is implemented
     const saveMutex = acquireLock();
-
-    // TODO: this will causing racing condition, need to be fixed
-    let state: SnapState = await getStateData<SnapState>();
-    await saveMutex.runExclusive(async () => {
-      if (!state) {
-        state = {
-          accContracts: [],
-          erc20Tokens: [],
-          networks: [],
-          transactions: [],
-        };
-        // initialize state if empty and set default data
-        await setStateData(state);
-      }
-    });
-
-    if (state.requireMMUpgrade === undefined) {
-      throw SnapError;
-    }
-
-    if (request.method === 'ping') {
-      logger.log('pong');
-      return 'pong';
-    }
 
     // pre-inserted the default networks and tokens
     await upsertNetwork(STARKNET_MAINNET_NETWORK, snap, saveMutex, state);
@@ -310,7 +297,8 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
 };
 
 export const onInstall: OnInstallHandler = async () => {
-  await ensureJsxSupport(
+  const initSnapStateManager = new InitSnapStateManager();
+  await initSnapStateManager.ensureJsxSupport(
     <Box>
       <Text>Your MetaMask wallet is now compatible with Starknet!</Text>
       <Text>
@@ -322,7 +310,8 @@ export const onInstall: OnInstallHandler = async () => {
 };
 
 export const onUpdate: OnUpdateHandler = async () => {
-  await ensureJsxSupport(
+  const initSnapStateManager = new InitSnapStateManager();
+  await initSnapStateManager.ensureJsxSupport(
     <Box>
       <Text>Your Starknet Snap is now up-to-date !</Text>
       <Text>
@@ -334,13 +323,13 @@ export const onUpdate: OnUpdateHandler = async () => {
 };
 
 export const onHomePage: OnHomePageHandler = async () => {
-  const state = await getStateData<SnapState>();
-  console.log(state);
-  if (state.requireMMUpgrade !== undefined) {
-    return await homePageController.execute();
+  const initSnapStateManager = new InitSnapStateManager();
+  const requireMMUpgrade =
+    await initSnapStateManager.getJsxSupportRequirement();
+  if (requireMMUpgrade) {
+    return {
+      content: updateRequiredMetaMaskComponent(),
+    };
   }
-
-  return {
-    content: updateRequiredMetaMaskComponent(),
-  };
+  return await homePageController.execute();
 };
