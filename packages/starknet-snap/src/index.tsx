@@ -93,9 +93,6 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
   logger.log(`${request.method}:\nrequestParams: ${toJson(requestParams)}`);
 
   try {
-    // TODO: this can be remove, after state manager is implemented
-    const saveMutex = acquireLock();
-
     // TODO: this will causing racing condition, need to be fixed
     let state: SnapState = await getStateData<SnapState>();
     if (!state) {
@@ -113,6 +110,9 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
       logger.log('pong');
       return 'pong';
     }
+
+    // TODO: this can be remove, after state manager is implemented
+    const saveMutex = acquireLock();
 
     // pre-inserted the default networks and tokens
     await upsertNetwork(STARKNET_MAINNET_NETWORK, snap, saveMutex, state);
