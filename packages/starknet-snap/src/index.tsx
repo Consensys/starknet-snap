@@ -99,7 +99,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
   try {
     const initSnapStateManager = new InitSnapStateManager();
     const requireMMUpgrade =
-      await initSnapStateManager.getJsxSupportRequirement();
+      await initSnapStateManager.requireMetaMaskUpgrade();
     if (requireMMUpgrade) {
       throw new Error('MetaMask upgrade required for compatibility');
     }
@@ -325,7 +325,7 @@ export const onUpdate: OnUpdateHandler = async () => {
 export const onHomePage: OnHomePageHandler = async () => {
   const initSnapStateManager = new InitSnapStateManager();
   const requireMMUpgrade =
-    await initSnapStateManager.getJsxSupportRequirement();
+    await initSnapStateManager.requireMetaMaskUpgrade();
   if (requireMMUpgrade) {
     return {
       content: updateRequiredMetaMaskComponent(),

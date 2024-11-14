@@ -17,15 +17,15 @@ jest.mock('./utils', () => ({
 
 describe('onRpcRequest', () => {
   const createMockSpy = () => {
-    const getJsxSupportRequirementSpy = jest.spyOn(
+    const requireMetaMaskUpgradeSpy = jest.spyOn(
       InitSnapStateManager.prototype,
-      'getJsxSupportRequirement',
+      'requireMetaMaskUpgrade',
     );
-    getJsxSupportRequirementSpy.mockResolvedValue(false);
+    requireMetaMaskUpgradeSpy.mockResolvedValue(false);
     const createAccountSpy = jest.spyOn(createAccountApi, 'createAccount');
     const keyPairSpy = jest.spyOn(keyPairUtils, 'getAddressKeyDeriver');
     return {
-      getJsxSupportRequirementSpy,
+      requireMetaMaskUpgradeSpy,
       createAccountSpy,
       keyPairSpy,
     };
@@ -69,8 +69,8 @@ describe('onRpcRequest', () => {
   });
 
   it('throws `SnapError` on request if MetaMask needs update', async () => {
-    const { getJsxSupportRequirementSpy } = createMockSpy();
-    getJsxSupportRequirementSpy.mockResolvedValue(true);
+    const { requireMetaMaskUpgradeSpy } = createMockSpy();
+    requireMetaMaskUpgradeSpy.mockResolvedValue(true);
     await expect(
       onRpcRequest({
         ...createMockRequest(),
@@ -112,11 +112,11 @@ describe('onRpcRequest', () => {
 
 describe('onHomePage', () => {
   it('executes homePageController normally if jsxSupport is not required', async () => {
-    const getJsxSupportRequirementSpy = jest.spyOn(
+    const requireMetaMaskUpgradeSpy = jest.spyOn(
       InitSnapStateManager.prototype,
-      'getJsxSupportRequirement',
+      'requireMetaMaskUpgrade',
     );
-    getJsxSupportRequirementSpy.mockResolvedValue(false);
+    requireMetaMaskUpgradeSpy.mockResolvedValue(false);
     const executeSpy = jest.spyOn(HomePageController.prototype, 'execute');
     executeSpy.mockResolvedValue({ content: text('test') });
 
@@ -131,11 +131,11 @@ describe('onHomePage', () => {
     });
   });
   it('renders updateRequiredMetaMaskComponent when jsx support is lacking', async () => {
-    const getJsxSupportRequirementSpy = jest.spyOn(
+    const requireMetaMaskUpgradeSpy = jest.spyOn(
       InitSnapStateManager.prototype,
-      'getJsxSupportRequirement',
+      'requireMetaMaskUpgrade',
     );
-    getJsxSupportRequirementSpy.mockResolvedValue(true);
+    requireMetaMaskUpgradeSpy.mockResolvedValue(true);
     const updateRequiredMetaMaskComponentSpy =
       updateRequiredMetaMaskComponent as jest.Mock;
     const executeSpy = jest.spyOn(HomePageController.prototype, 'execute');

@@ -35,16 +35,28 @@ export class InitSnapStateManager extends StateManager<SnapState> {
     }
   }
 
-  // Retrieves the current `requireMMUpgrade` flag value
-  async getJsxSupportRequirement(): Promise<boolean> {
-    const state = await this.get();
-    if (state.requireMMUpgrade === undefined) {
-      throw new StateManagerError(
-        'MetaMask compatibility state not initialized',
-      );
+  async requireMetaMaskUpgrade(): Promise<boolean> {
+    let state = await this.get();
+    const maxRetries = 10; // Define a maximum number of retries to avoid infinite loop
+    let retries = 0;
+    const retryInterval = 200; // Set an interval in milliseconds between retries
+
+    while (state.requireMMUpgrade === undefined && retries < maxRetries) {
+        // The state can be undefined only if onInstall or onUpdate hook did not complete.
+        // Waiting for the state to become defined, as there is no other way to proceed.
+        await new Promise(resolve => setTimeout(resolve, retryInterval)); // Wait before retrying
+        state = await this.get();
+        retries++;
     }
+
+    if (state.requireMMUpgrade === undefined) {
+        throw new StateManagerError(
+          'MetaMask compatibility state not initialized',
+        );
+    }
+
     return state.requireMMUpgrade;
-  }
+}
 
   /**
    * Ensures that JSX support is available in the MetaMask environment by attempting to render a component within a snap dialog.
@@ -68,6 +80,7 @@ export class InitSnapStateManager extends StateManager<SnapState> {
           content: component,
         },
       });
+      await this.setJsxSupport(true);
     } catch {
       await this.setJsxSupport(false);
       await snap.request({
