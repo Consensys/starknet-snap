@@ -7,12 +7,7 @@ import type {
   UserInputEvent,
   InterfaceContext,
 } from '@metamask/snaps-sdk';
-import {
-  SnapError,
-  MethodNotFoundError,
-  UserInputEventType,
-} from '@metamask/snaps-sdk';
-import { MethodNotFoundError } from '@metamask/snaps-sdk';
+import { MethodNotFoundError, UserInputEventType } from '@metamask/snaps-sdk';
 import { Box, Link, Text } from '@metamask/snaps-sdk/jsx';
 
 import { addNetwork } from './addNetwork';
