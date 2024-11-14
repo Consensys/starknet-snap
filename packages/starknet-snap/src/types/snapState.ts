@@ -24,6 +24,7 @@ export type FormattedCallData = {
   amount?: string;
   decimals?: number;
   tokenSymbol?: string;
+  icon?: string;
 };
 
 type ResourceBounds = Pick<EstimateFee, 'resourceBounds'>['resourceBounds'];
@@ -59,6 +60,7 @@ export type Erc20Token = {
   symbol: string;
   decimals: number;
   chainId: string; // in hex
+  icon?: string;
 };
 
 export type Network = {

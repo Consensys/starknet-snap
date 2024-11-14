@@ -7,6 +7,7 @@ import {
 } from '@metamask/snaps-sdk/jsx';
 
 import { getExplorerUrl, shortenAddress } from '../../utils';
+import { icons } from '../icons';
 
 export type AddressUIProps = {
   label: string;
@@ -37,10 +38,11 @@ export const AddressUI: SnapComponent<AddressUIProps> = ({
 }: AddressUIProps) => {
   const displayValue = shortern ? shortenAddress(address) : address;
   const explorerUrl = chainId ? getExplorerUrl(address, chainId) : null;
-
   let content;
-  if (svgIcon) {
-    content = <Image src={svgIcon} />;
+  console.log(svgIcon)
+  console.log(icons[svgIcon ?? ""])
+  if (svgIcon && icons[svgIcon]) {
+    content = <Image src={icons[svgIcon]} />;
   } else if (explorerUrl) {
     content = <Link href={explorerUrl}>{displayValue}</Link>;
   } else {

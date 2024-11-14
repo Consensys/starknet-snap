@@ -155,6 +155,7 @@ describe('formatCallData', () => {
         chainId: '0xChainId',
         calldata: ['0xRecipientAddress', '1000'],
         entrypoint: 'transfer',
+        icon: undefined,
         isTransfer: true,
         senderAddress: '0xSenderAddress',
         recipientAddress: '0xRecipientAddress',

@@ -107,7 +107,7 @@ export const ExecuteTxnUI: SnapComponent<ExecuteTxnUIProps> = ({
               label={call.label}
               address={call.contractAddress}
               chainId={chainId}
-              svgIcon={call.svgIcon}
+              svgIcon={call.icon}
             />
             {call.isTransfer ? (
               <Section>

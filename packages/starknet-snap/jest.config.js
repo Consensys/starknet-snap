@@ -31,4 +31,8 @@ module.exports = {
   coverageProvider: 'babel',
   // A list of reporter names that Jest uses when writing coverage reports
   coverageReporters: ['html', 'json-summary', 'text'],
+  // Map .svg files to a mock module
+  moduleNameMapper: {
+    '\\.svg$': '<rootDir>/test/svg.mock.ts',
+  },
 };

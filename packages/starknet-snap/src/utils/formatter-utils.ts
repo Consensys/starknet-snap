@@ -99,6 +99,7 @@ export const formatCallData = async (
         callData.tokenSymbol = token.symbol;
         callData.decimals = token.decimals;
         callData.label = 'Token Transfer';
+        callData.icon = token.icon;
       } catch (error) {
         // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
         console.warn(`Error in amount conversion: ${error}`);
