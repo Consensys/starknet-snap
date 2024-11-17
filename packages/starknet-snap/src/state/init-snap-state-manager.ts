@@ -73,7 +73,6 @@ export class InitSnapStateManager extends StateManager<SnapState> {
     await this.get();
     try {
       await this.setJsxSupport(true);
-      // Try rendering the JSX component to test compatibility
       await snap.request({
         method: 'snap_dialog',
         params: {
