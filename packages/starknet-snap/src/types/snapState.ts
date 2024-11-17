@@ -1,4 +1,4 @@
-import type { Calldata, RawArgs, RawCalldata } from 'starknet';
+import type { Calldata, EstimateFee, RawArgs, RawCalldata } from 'starknet';
 
 /* eslint-disable */
 export type SnapState = {
@@ -25,6 +25,8 @@ export type FormattedCallData = {
   tokenSymbol?: string;
 };
 
+type ResourceBounds = Pick<EstimateFee, 'resourceBounds'>['resourceBounds'];
+
 export type TransactionRequest = {
   id: string;
   interfaceId: string;
@@ -33,6 +35,7 @@ export type TransactionRequest = {
   chainId: string;
   maxFee: string;
   calls: FormattedCallData[];
+  resourceBounds: ResourceBounds[];
   feeToken: string;
   includeDeploy: boolean;
 };

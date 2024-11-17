@@ -7,6 +7,7 @@ import {
   Value,
   Text,
   Icon,
+  Divider,
 } from '@metamask/snaps-sdk/jsx';
 import { formatUnits } from 'ethers/lib/utils';
 
@@ -23,8 +24,6 @@ import { FeeTokenSelector } from '../fragments/FeeTokenSelector';
  * @property fees - The error for the fees.
  */
 export type ExecuteTxnUIErrors = {
-  to?: string;
-  amount?: string;
   fees?: string;
 };
 
@@ -50,6 +49,7 @@ export type ExecuteTxnUIProps = {
  * @param props.feeToken - The token used for fees.
  * @param props.includeDeploy - Whether to include account deployment in the transaction.
  * //param props.errors : TODO : add this param
+ * @param props.errors
  * @returns The ExecuteTxnUI component.
  */
 export const ExecuteTxnUI: SnapComponent<ExecuteTxnUIProps> = ({
@@ -59,6 +59,7 @@ export const ExecuteTxnUI: SnapComponent<ExecuteTxnUIProps> = ({
   calls,
   feeToken,
   includeDeploy,
+  errors,
   // errors, // TODO: include this later
 }) => {
   const tokenTotals: Record<string, { amount: number; decimals: number }> = {};
@@ -69,7 +70,10 @@ export const ExecuteTxnUI: SnapComponent<ExecuteTxnUIProps> = ({
       if (!tokenTotals[call.tokenSymbol]) {
         tokenTotals[call.tokenSymbol] = { amount: 0, decimals: call.decimals };
       }
-      tokenTotals[call.tokenSymbol].amount += parseFloat(call.amount);
+
+      tokenTotals[call.tokenSymbol].amount += parseFloat(
+        formatUnits(call.amount, call.decimals),
+      );
     }
   });
 
@@ -121,7 +125,7 @@ export const ExecuteTxnUI: SnapComponent<ExecuteTxnUIProps> = ({
                 />
                 <RowUI
                   label={`Amount`}
-                  value={`${call.amount as string} ${
+                  value={`${formatUnits(call.amount, call.decimals)} ${
                     call.tokenSymbol as string
                   }`}
                 />
@@ -131,30 +135,31 @@ export const ExecuteTxnUI: SnapComponent<ExecuteTxnUIProps> = ({
             )}
           </Section>
         ))}
-        <FeeTokenSelector selectedToken={feeToken as FeeToken} />
+        <FeeTokenSelector
+          selectedToken={feeToken as FeeToken}
+          error={errors?.fees}
+        />
         <Section>
-          <Box direction="horizontal">
-            <Icon name="gas" size="md" />
-            <Row label="Estimated network fee">
-              <Value
-                value={`${formatUnits(
-                  maxFee,
-                  DEFAULT_DECIMAL_PLACES,
-                )} ${feeToken}`}
-                extra={`$0`}
-              />
-            </Row>
+          <Icon name="gas" size="md" />
+          <Row label="Estimated network fee">
+            <Value
+              value={`${formatUnits(
+                maxFee,
+                DEFAULT_DECIMAL_PLACES,
+              )} ${feeToken}`}
+              extra={`$0`}
+            />
+          </Row>
+          <Divider />
+          <Icon name="money" size="md" />
+          <Box direction="vertical">
+            {Object.entries(tokenTotals).map(([tokenSymbol, { amount }]) => (
+              <Row key={tokenSymbol} label={`Total for ${tokenSymbol}`}>
+                <Value value={`${amount} ${tokenSymbol}`} extra={`$0`} />
+              </Row>
+            ))}
           </Box>
-          <Box direction="horizontal">
-            <Icon name="money" size="md" />
-            <Box direction="vertical">
-              {Object.entries(tokenTotals).map(([tokenSymbol, { amount }]) => (
-                <Row key={tokenSymbol} label={`Total for ${tokenSymbol}`}>
-                  <Value value={`${amount} ${tokenSymbol}`} extra={`$0`} />
-                </Row>
-              ))}
-            </Box>
-          </Box>
+          {includeDeploy ? <Divider /> : null}
           {includeDeploy ? (
             <Box direction="horizontal">
               <Icon name="warning" size="md" />

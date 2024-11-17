@@ -3,8 +3,11 @@ import type {
   OnHomePageHandler,
   OnInstallHandler,
   OnUpdateHandler,
+  OnUserInputHandler,
+  UserInputEvent,
+  InterfaceContext,
 } from '@metamask/snaps-sdk';
-import { MethodNotFoundError } from '@metamask/snaps-sdk';
+import { MethodNotFoundError, UserInputEventType } from '@metamask/snaps-sdk';
 import { Box, Link, Text } from '@metamask/snaps-sdk/jsx';
 
 import { addNetwork } from './addNetwork';
@@ -60,6 +63,7 @@ import type {
 } from './types/snapApi';
 import type { SnapState } from './types/snapState';
 import { upgradeAccContract } from './upgradeAccContract';
+import { feeTokenSelectorController } from './user-inputs';
 import {
   getDappUrl,
   getStateData,
@@ -340,4 +344,39 @@ export const onUpdate: OnUpdateHandler = async () => {
 
 export const onHomePage: OnHomePageHandler = async () => {
   return await homePageController.execute();
+};
+
+/**
+ * Handle incoming user events coming from the MetaMask clients open interfaces.
+ *
+ * @param params - The event parameters.
+ * @param params.id - The Snap interface ID where the event was fired.
+ * @param params.event - The event object containing the event type, name, and
+ * value.
+ * @param params.context
+ * @see https://docs.metamask.io/snaps/reference/exports/#onuserinput
+ */
+export const onUserInput: OnUserInputHandler = async ({
+  id,
+  event,
+  context,
+}: {
+  id: string;
+  event: UserInputEvent;
+  context: InterfaceContext | null;
+}): Promise<void> => {
+  const generateEventKey = (type: UserInputEventType, name: string) =>
+    `${type}_${name}`;
+  const eventKey = generateEventKey(event.type, event.name ?? '');
+
+  switch (eventKey) {
+    case generateEventKey(
+      UserInputEventType.InputChangeEvent,
+      'feeTokenSelector',
+    ):
+      await feeTokenSelectorController.execute(id, event, context);
+      break;
+    default:
+      throw new MethodNotFoundError() as unknown as Error;
+  }
 };

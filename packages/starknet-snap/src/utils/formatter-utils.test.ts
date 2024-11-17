@@ -1,4 +1,8 @@
-import { mapDeprecatedParams } from './formatter-utils';
+import { TokenStateManager } from '../state/token-state-manager';
+import type { Erc20Token } from '../types/snapState';
+import { formatCallData, mapDeprecatedParams } from './formatter-utils';
+
+jest.mock('../state/token-state-manager');
 
 describe('mapDeprecatedParams', () => {
   it('maps deprecated parameters to their new equivalents', () => {
@@ -63,5 +67,101 @@ describe('mapDeprecatedParams', () => {
     mapDeprecatedParams(requestParams, mappings);
 
     expect(requestParams).toStrictEqual(expected);
+  });
+});
+
+describe('formatCallData', () => {
+  const prepareMockData = async (tokenData: Erc20Token | null) => {
+    const tokenStateManagerMock =
+      new TokenStateManager() as jest.Mocked<TokenStateManager>;
+
+    // Mock getToken method to return the provided tokenData
+    tokenStateManagerMock.getToken.mockResolvedValue(tokenData);
+
+    return {
+      tokenStateManagerMock,
+    };
+  };
+
+  it('formats calls array without transfers', async () => {
+    const callsArray = [
+      {
+        contractAddress: '0xContractAddress1',
+        calldata: ['0xRecipientAddress', '1000'],
+        entrypoint: 'someOtherEntrypoint',
+      },
+    ];
+    const chainId = '0xChainId';
+    const address = '0xSenderAddress';
+
+    // Prepare mock data with no token data to simulate non-ERC20 contract
+    const { tokenStateManagerMock } = await prepareMockData(null);
+
+    const result = await formatCallData(
+      callsArray,
+      chainId,
+      address,
+      tokenStateManagerMock,
+    );
+
+    expect(result).toStrictEqual([
+      {
+        type: 'contract',
+        label: 'Contract Call',
+        contractAddress: '0xContractAddress1',
+        chainId: '0xChainId',
+        calldata: ['0xRecipientAddress', '1000'],
+        entrypoint: 'someOtherEntrypoint',
+        isTransfer: false,
+      },
+    ]);
+  });
+
+  it('formats ERC20 transfer call data', async () => {
+    const callsArray = [
+      {
+        contractAddress: '0xErc20TokenAddress',
+        calldata: ['0xRecipientAddress', '1000'],
+        entrypoint: 'transfer',
+      },
+    ];
+    const chainId = '0xChainId';
+    const address = '0xSenderAddress';
+
+    // Mock ERC20 token data
+    const tokenData: Erc20Token = {
+      address: '0xErc20TokenAddress',
+      chainId: '0xChainId',
+      symbol: 'TKN',
+      decimals: 18,
+      name: 'MockToken',
+    };
+
+    // Prepare mock data with ERC20 token data
+    const { tokenStateManagerMock } = await prepareMockData(tokenData);
+
+    const result = await formatCallData(
+      callsArray,
+      chainId,
+      address,
+      tokenStateManagerMock,
+    );
+
+    expect(result).toStrictEqual([
+      {
+        type: 'contract',
+        label: 'Token Transfer',
+        contractAddress: '0xErc20TokenAddress',
+        chainId: '0xChainId',
+        calldata: ['0xRecipientAddress', '1000'],
+        entrypoint: 'transfer',
+        isTransfer: true,
+        senderAddress: '0xSenderAddress',
+        recipientAddress: '0xRecipientAddress',
+        amount: '1000',
+        tokenSymbol: 'TKN',
+        decimals: 18,
+      },
+    ]);
   });
 });

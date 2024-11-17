@@ -141,6 +141,7 @@ describe('ExecuteTxn', () => {
     'stores transaction in state correctly if the params `calls` is $testCaseTitle',
     async ({ calls }: { calls: any }) => {
       const call = Array.isArray(calls.calls) ? calls.calls[0] : calls.calls;
+      const callsArray = ([] as Call[]).concat(calls.calls);
       const {
         account,
         createAccountSpy,
@@ -163,7 +164,7 @@ describe('ExecuteTxn', () => {
         STARKNET_SEPOLIA_TESTNET_NETWORK,
         account.address,
         account.privateKey,
-        request.calls,
+        callsArray,
         undefined,
         {
           ...calls.details,
