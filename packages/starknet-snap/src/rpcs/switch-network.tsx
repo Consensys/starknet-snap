@@ -1,18 +1,11 @@
-import type { Component } from '@metamask/snaps-sdk';
+import { Bold, Box, Copyable, Heading } from '@metamask/snaps-sdk/jsx';
 import type { Infer } from 'superstruct';
 import { assign, boolean } from 'superstruct';
 
 import { NetworkStateManager } from '../state/network-state-manager';
-import {
-  confirmDialog,
-  AuthorizableStruct,
-  BaseRequestStruct,
-  RpcController,
-  networkUI,
-  rowUI,
-  dividerUI,
-  headerUI,
-} from '../utils';
+import { NetworkUI } from '../ui/fragments';
+import { confirmDialog } from '../ui/utils';
+import { AuthorizableStruct, BaseRequestStruct, RpcController } from '../utils';
 import { InvalidNetworkError, UserRejectedOpError } from '../utils/exceptions';
 
 export const SwitchNetworkRequestStruct = assign(
@@ -100,22 +93,18 @@ export class SwitchNetworkRpc extends RpcController<
     networkName: string,
     networkChainId: string,
   ) {
-    const components: Component[] = [];
-    components.push(headerUI('Do you want to switch to this network?'));
-    components.push(
-      networkUI({
-        networkName,
-      }),
-    );
-    components.push(dividerUI());
-    components.push(
-      rowUI({
-        label: 'Chain ID',
-        value: networkChainId,
-      }),
-    );
-
-    return await confirmDialog(components);
+    return await confirmDialog({
+      children: (
+        <Box>
+          <Heading>Do you want to switch to this network?</Heading>
+          <NetworkUI networkName={networkName} />
+          <Box direction="horizontal" alignment="space-between">
+            <Bold>Chain ID</Bold>
+            <Copyable value={networkChainId} />
+          </Box>
+        </Box>
+      ),
+    });
   }
 }
 
