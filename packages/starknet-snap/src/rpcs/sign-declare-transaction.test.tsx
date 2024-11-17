@@ -1,7 +1,9 @@
+import { Box, Heading, Section } from '@metamask/snaps-sdk/jsx';
 import type { DeclareSignerDetails } from 'starknet';
 import { constants } from 'starknet';
 
 import type { SnapState } from '../types/snapState';
+import { AddressUI, JsonDataUI, NetworkUI } from '../ui/fragments';
 import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../utils/constants';
 import {
   UserRejectedOpError,
@@ -11,10 +13,7 @@ import * as starknetUtils from '../utils/starknetUtils';
 import {
   mockAccount,
   prepareMockAccount,
-  prepareConfirmDialog,
-  buildSignerComponent,
-  buildNetworkComponent,
-  buildJsonDataComponent,
+  prepareConfirmDialogJsx as prepareConfirmDialog,
 } from './__tests__/helper';
 import { signDeclareTransaction } from './sign-declare-transaction';
 import type { SignDeclareTransactionParams } from './sign-declare-transaction';
@@ -79,12 +78,21 @@ describe('signDeclareTransaction', () => {
     await signDeclareTransaction.execute(request);
 
     const calls = confirmDialogSpy.mock.calls[0][0];
-    expect(calls).toStrictEqual([
-      { type: 'heading', value: 'Do you want to sign this transaction?' },
-      buildSignerComponent(address, chainId),
-      buildNetworkComponent(STARKNET_SEPOLIA_TESTNET_NETWORK.name),
-      buildJsonDataComponent('Declare Transaction Details', request.details),
-    ]);
+    expect(calls).toStrictEqual({
+      children: (
+        <Box>
+          <Heading>Do you want to sign this transaction?</Heading>
+          <Section>
+            <AddressUI label="Signer" address={address} chainId={chainId} />
+            <NetworkUI networkName={STARKNET_SEPOLIA_TESTNET_NETWORK.name} />
+            <JsonDataUI
+              label={'Declare Transaction Details'}
+              data={request.details}
+            />
+          </Section>
+        </Box>
+      ),
+    });
   });
 
   it('throws `UserRejectedOpError` if user denied the operation', async () => {

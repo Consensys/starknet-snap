@@ -1,20 +1,18 @@
 import type { DialogResult } from '@metamask/snaps-sdk';
+import { Box, Heading, Section } from '@metamask/snaps-sdk/jsx';
 import type { Call, InvocationsSignerDetails } from 'starknet';
 import type { Infer } from 'superstruct';
 import { array, object, string, assign, any } from 'superstruct';
 
+import { AddressUI, JsonDataUI, NetworkUI } from '../ui/fragments';
+import { confirmDialog } from '../ui/utils';
 import {
-  confirmDialog,
   AddressStruct,
   AuthorizableStruct,
   BaseRequestStruct,
   AccountRpcController,
   CallDataStruct,
   mapDeprecatedParams,
-  jsonDataUI,
-  signerUI,
-  networkUI,
-  headerUI,
 } from '../utils';
 import { UserRejectedOpError } from '../utils/exceptions';
 import { signTransactions } from '../utils/starknetUtils';
@@ -105,20 +103,22 @@ export class SignTransactionRpc extends AccountRpcController<
     address: string,
     transactions: Call[],
   ): Promise<DialogResult> {
-    return await confirmDialog([
-      headerUI('Do you want to sign this transaction?'),
-      signerUI({
-        address,
-        chainId: this.network.chainId,
-      }),
-      networkUI({
-        networkName: this.network.name,
-      }),
-      jsonDataUI({
-        label: 'Transaction',
-        data: transactions,
-      }),
-    ]);
+    return await confirmDialog({
+      children: (
+        <Box>
+          <Heading>Do you want to sign this transaction?</Heading>
+          <Section>
+            <AddressUI
+              label="Signer"
+              address={address}
+              chainId={this.network.chainId}
+            />
+            <NetworkUI networkName={this.network.name} />
+            <JsonDataUI label={'Transactions'} data={transactions} />
+          </Section>
+        </Box>
+      ),
+    });
   }
 }
 
