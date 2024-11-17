@@ -56,19 +56,18 @@ import {
 } from './rpcs';
 import { sendTransaction } from './sendTransaction';
 import { signDeployAccountTransaction } from './signDeployAccountTransaction';
+import { InitSnapStateManager } from './state/init-snap-state-manager';
 import type {
   ApiParams,
   ApiParamsWithKeyDeriver,
   ApiRequestParams,
 } from './types/snapApi';
-import type { SnapState } from './types/snapState';
 import { upgradeAccContract } from './upgradeAccContract';
 import { feeTokenSelectorController } from './user-inputs';
 import {
   getDappUrl,
-  getStateData,
   isSnapRpcError,
-  setStateData,
+  updateRequiredMetaMaskComponent,
 } from './utils';
 import {
   CAIRO_VERSION_LEGACY,
@@ -96,24 +95,20 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
 
   logger.log(`${request.method}:\nrequestParams: ${toJson(requestParams)}`);
 
+  if (request.method === 'ping') {
+    logger.log('pong');
+    return 'pong';
+  }
+
   try {
-    // TODO: this will causing racing condition, need to be fixed
-    let state: SnapState = await getStateData<SnapState>();
-    if (!state) {
-      state = {
-        accContracts: [],
-        erc20Tokens: [],
-        networks: [],
-        transactions: [],
-      };
-      // initialize state if empty and set default data
-      await setStateData(state);
+    const initSnapStateManager = new InitSnapStateManager();
+    const requireMMUpgrade =
+      await initSnapStateManager.requireMetaMaskUpgrade();
+    if (requireMMUpgrade) {
+      throw new Error('MetaMask upgrade required for compatibility');
     }
 
-    if (request.method === 'ping') {
-      logger.log('pong');
-      return 'pong';
-    }
+    const state = await initSnapStateManager.get();
 
     // TODO: this can be remove, after state manager is implemented
     const saveMutex = acquireLock();
@@ -306,43 +301,39 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
 };
 
 export const onInstall: OnInstallHandler = async () => {
-  await snap.request({
-    method: 'snap_dialog',
-    params: {
-      type: 'alert',
-      content: (
-        <Box>
-          <Text>Your MetaMask wallet is now compatible with Starknet!</Text>
-          <Text>
-            To manage your Starknet account and send and receive funds, visit
-            the <Link href={getDappUrl()}>companion dapp for Starknet</Link>.
-          </Text>
-        </Box>
-      ),
-    },
-  });
+  const initSnapStateManager = new InitSnapStateManager();
+  await initSnapStateManager.ensureJsxSupport(
+    <Box>
+      <Text>Your MetaMask wallet is now compatible with Starknet!</Text>
+      <Text>
+        To manage your Starknet account and send and receive funds, visit the{' '}
+        <Link href={getDappUrl()}>companion dapp for Starknet</Link>.
+      </Text>
+    </Box>,
+  );
 };
 
 export const onUpdate: OnUpdateHandler = async () => {
-  await snap.request({
-    method: 'snap_dialog',
-    params: {
-      type: 'alert',
-      content: (
-        <Box>
-          <Text>Your Starknet Snap is now up-to-date !</Text>
-          <Text>
-            As usual, to manage your Starknet account and send and receive
-            funds, visit the{' '}
-            <Link href={getDappUrl()}>companion dapp for Starknet</Link>.
-          </Text>
-        </Box>
-      ),
-    },
-  });
+  const initSnapStateManager = new InitSnapStateManager();
+  await initSnapStateManager.ensureJsxSupport(
+    <Box>
+      <Text>Your Starknet Snap is now up-to-date !</Text>
+      <Text>
+        As usual, to manage your Starknet account and send and receive funds,
+        visit the <Link href={getDappUrl()}>companion dapp for Starknet</Link>.
+      </Text>
+    </Box>,
+  );
 };
 
 export const onHomePage: OnHomePageHandler = async () => {
+  const initSnapStateManager = new InitSnapStateManager();
+  const requireMMUpgrade = await initSnapStateManager.requireMetaMaskUpgrade();
+  if (requireMMUpgrade) {
+    return {
+      content: updateRequiredMetaMaskComponent(),
+    };
+  }
   return await homePageController.execute();
 };
 

@@ -1,7 +1,12 @@
 import type { BIP44AddressKeyDeriver } from '@metamask/key-tree';
 import { getBIP44AddressKeyDeriver } from '@metamask/key-tree';
 import type { Component, DialogResult, Json } from '@metamask/snaps-sdk';
-import { DialogType, panel, type SnapsProvider } from '@metamask/snaps-sdk';
+import {
+  DialogType,
+  panel,
+  text,
+  type SnapsProvider,
+} from '@metamask/snaps-sdk';
 
 declare const snap: SnapsProvider;
 
@@ -111,3 +116,11 @@ export async function setStateData<State>(data: State) {
     },
   });
 }
+
+export const updateRequiredMetaMaskComponent = () => {
+  return panel([
+    text(
+      'You need to update your MetaMask to latest version to use this snap.',
+    ),
+  ]);
+};
