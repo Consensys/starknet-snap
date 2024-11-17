@@ -1,5 +1,9 @@
 import { DialogType } from '@metamask/snaps-sdk';
 
+import type { TransactionRequest } from '../types/snapState';
+import type { ExecuteTxnUIErrors } from './components';
+import { ExecuteTxnUI } from './components';
+
 /**
  *
  * @param options0
@@ -29,9 +33,6 @@ export async function confirmDialog({ children }) {
     },
   });
 }
-import type { TransactionRequest } from '../types/snapState';
-import type { ExecuteTxnUIErrors } from './components';
-import { ExecuteTxnUI } from './components';
 
 /**
  * Generate the execute transaction flow interface.
