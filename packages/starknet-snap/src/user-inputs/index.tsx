@@ -1,1 +1,1 @@
-export * from './fee-token-selector';
+export * from './execute-fee-token-selector';

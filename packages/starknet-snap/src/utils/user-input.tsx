@@ -2,6 +2,7 @@ import type { InterfaceContext, UserInputEvent } from '@metamask/snaps-sdk';
 import { Box, Heading, Spinner } from '@metamask/snaps-sdk/jsx';
 
 import { NetworkStateManager } from '../state/network-state-manager';
+import type { RequestStateManager } from '../state/request-state-manager';
 import type { Network, SnapState } from '../types/snapState';
 import { updateInterface } from '../ui/utils';
 import { logger } from './logger';
@@ -52,7 +53,11 @@ export abstract class UserInputController {
   }
 }
 
-export abstract class AccountUserInputController extends UserInputController {
+export abstract class AccountUserInputController<
+  RequestState extends RequestStateManager<any>,
+> extends UserInputController {
+  protected abstract stateManager: RequestState;
+
   protected networkStateMgr: NetworkStateManager;
 
   protected network: Network;
@@ -64,11 +69,20 @@ export abstract class AccountUserInputController extends UserInputController {
     this.networkStateMgr = new NetworkStateManager();
   }
 
-  protected abstract getSigner(
+  async getSigner(
     id: string,
-    event: UserInputEvent,
+    _event: UserInputEvent,
     context: InterfaceContext | null,
-  ): Promise<string>;
+  ): Promise<string> {
+    const request = await this.stateManager.getRequest({
+      id: context?.id as string,
+      interfaceId: id,
+    });
+    if (request?.signer) {
+      return request?.signer;
+    }
+    throw new Error('No signer found in stored request state');
+  }
 
   protected async preExecute(
     id: string,

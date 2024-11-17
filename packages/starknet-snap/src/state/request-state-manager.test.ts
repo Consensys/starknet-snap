@@ -56,8 +56,8 @@ describe('TransactionRequestStateManager', () => {
       } = await prepareMockData();
 
       const stateManager = new TransactionRequestStateManager();
-      const result = await stateManager.getTransactionRequest({
-        requestId: transactionRequest.id,
+      const result = await stateManager.getRequest({
+        id: transactionRequest.id,
       });
 
       expect(result).toStrictEqual(transactionRequest);
@@ -69,7 +69,7 @@ describe('TransactionRequestStateManager', () => {
       } = await prepareMockData();
 
       const stateManager = new TransactionRequestStateManager();
-      const result = await stateManager.getTransactionRequest({
+      const result = await stateManager.getRequest({
         interfaceId: transactionRequest.interfaceId,
       });
 
@@ -81,8 +81,8 @@ describe('TransactionRequestStateManager', () => {
 
       const stateManager = new TransactionRequestStateManager();
 
-      const result = await stateManager.getTransactionRequest({
-        requestId: 'something',
+      const result = await stateManager.getRequest({
+        id: 'something',
       });
       expect(result).toBeNull();
     });
@@ -90,7 +90,7 @@ describe('TransactionRequestStateManager', () => {
     it('throws a `At least one search condition must be provided` error if no search criteria given', async () => {
       const stateManager = new TransactionRequestStateManager();
 
-      await expect(stateManager.getTransactionRequest({})).rejects.toThrow(
+      await expect(stateManager.getRequest({})).rejects.toThrow(
         'At least one search condition must be provided',
       );
     });
@@ -105,7 +105,7 @@ describe('TransactionRequestStateManager', () => {
       const entity = getUpdateEntity(transactionRequest);
 
       const stateManager = new TransactionRequestStateManager();
-      await stateManager.upsertTransactionRequest(entity);
+      await stateManager.upsertRequest(entity);
 
       expect(
         state.transactionRequests.find(
@@ -120,7 +120,7 @@ describe('TransactionRequestStateManager', () => {
       const orgLength = state.transactionRequests.length;
 
       const stateManager = new TransactionRequestStateManager();
-      await stateManager.upsertTransactionRequest(entity);
+      await stateManager.upsertRequest(entity);
 
       expect(state.transactionRequests).toHaveLength(orgLength + 1);
       expect(
@@ -135,9 +135,9 @@ describe('TransactionRequestStateManager', () => {
 
       const stateManager = new TransactionRequestStateManager();
 
-      await expect(
-        stateManager.upsertTransactionRequest(entity),
-      ).rejects.toThrow(StateManagerError);
+      await expect(stateManager.upsertRequest(entity)).rejects.toThrow(
+        StateManagerError,
+      );
     });
   });
 
@@ -149,7 +149,7 @@ describe('TransactionRequestStateManager', () => {
       } = await prepareMockData();
       const stateManager = new TransactionRequestStateManager();
 
-      await stateManager.removeTransactionRequest(id);
+      await stateManager.removeRequest(id);
 
       expect(
         state.transactionRequests.filter((req) => req.id === id),
@@ -165,7 +165,7 @@ describe('TransactionRequestStateManager', () => {
 
       const stateManager = new TransactionRequestStateManager();
 
-      await expect(stateManager.removeTransactionRequest(id)).rejects.toThrow(
+      await expect(stateManager.removeRequest(id)).rejects.toThrow(
         StateManagerError,
       );
     });

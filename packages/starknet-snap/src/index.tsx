@@ -63,7 +63,7 @@ import type {
 } from './types/snapApi';
 import type { SnapState } from './types/snapState';
 import { upgradeAccContract } from './upgradeAccContract';
-import { feeTokenSelectorController } from './user-inputs';
+import { executeFeeTokenSelectorController } from './user-inputs';
 import {
   getDappUrl,
   getStateData,
@@ -372,9 +372,9 @@ export const onUserInput: OnUserInputHandler = async ({
   switch (eventKey) {
     case generateEventKey(
       UserInputEventType.InputChangeEvent,
-      'feeTokenSelector',
+      'executeFeeTokenSelector',
     ):
-      await feeTokenSelectorController.execute(id, event, context);
+      await executeFeeTokenSelectorController.execute(id, event, context);
       break;
     default:
       throw new MethodNotFoundError() as unknown as Error;

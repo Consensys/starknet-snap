@@ -13,7 +13,8 @@ import { FeeToken } from '../types/snapApi';
 import type { TransactionRequest } from '../types/snapState';
 import { VoyagerTransactionType, type Transaction } from '../types/snapState';
 import type { TransactionVersion } from '../types/starknet';
-import { generateExecuteTxnFlow } from '../ui/utils';
+import { ExecuteTxnUI } from '../ui/components';
+import { generateFlow } from '../ui/utils';
 import type { AccountRpcControllerOptions } from '../utils';
 import {
   AddressStruct,
@@ -154,14 +155,14 @@ export class ExecuteTxnRpc extends AccountRpcController<
       includeDeploy,
     };
 
-    const interfaceId = await generateExecuteTxnFlow(request);
+    const interfaceId = await generateFlow(ExecuteTxnUI, request);
 
     request.interfaceId = interfaceId;
 
-    await this.txnRequestStateManager.upsertTransactionRequest(request);
+    await this.txnRequestStateManager.upsertRequest(request);
 
     if (!(await confirmDialogInteractiveUI(interfaceId))) {
-      await this.txnRequestStateManager.removeTransactionRequest(request.id);
+      await this.txnRequestStateManager.removeRequest(request.id);
       throw new UserRejectedOpError() as unknown as Error;
     }
 
@@ -174,7 +175,7 @@ export class ExecuteTxnRpc extends AccountRpcController<
     );
 
     if (!executeTxnResp?.transaction_hash) {
-      await this.txnRequestStateManager.removeTransactionRequest(request.id);
+      await this.txnRequestStateManager.removeRequest(request.id);
       throw new Error('Failed to execute transaction');
     }
 
@@ -187,7 +188,7 @@ export class ExecuteTxnRpc extends AccountRpcController<
       this.createInvokeTxn(address, executeTxnResp.transaction_hash, call),
     );
 
-    await this.txnRequestStateManager.removeTransactionRequest(request.id);
+    await this.txnRequestStateManager.removeRequest(request.id);
     return executeTxnResp;
   }
 
@@ -198,8 +199,8 @@ export class ExecuteTxnRpc extends AccountRpcController<
     abis: any,
   ) {
     const { privateKey, publicKey } = this.account;
-    const request = await this.txnRequestStateManager.getTransactionRequest({
-      requestId,
+    const request = await this.txnRequestStateManager.getRequest({
+      id: requestId,
       interfaceId,
     });
     if (!request) {
