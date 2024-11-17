@@ -39,12 +39,12 @@ describe('fee-token-selector', () => {
 
     const getTransactionRequestSpy = jest.spyOn(
       TransactionRequestStateManager.prototype,
-      'getTransactionRequest',
+      'getRequest',
     );
 
     const upsertTransactionRequestSpy = jest.spyOn(
       TransactionRequestStateManager.prototype,
-      'upsertTransactionRequest',
+      'upsertRequest',
     );
 
     const handleUserInputSpy = jest.spyOn(
