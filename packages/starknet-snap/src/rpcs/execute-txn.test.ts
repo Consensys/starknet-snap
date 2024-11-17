@@ -14,7 +14,7 @@ import { executeTxn as executeTxnUtil } from '../utils/starknetUtils';
 import {
   generateRandomFee,
   mockAccount,
-  prepareConfirmDialog,
+  prepareConfirmDialogInteractiveUI,
   prepareMockAccount,
 } from './__tests__/helper';
 import type { ExecuteTxnParams } from './execute-txn';
@@ -35,7 +35,7 @@ const prepareMockExecuteTxn = async (
     networks: [STARKNET_SEPOLIA_TESTNET_NETWORK],
     transactions: [],
   };
-  const { confirmDialogSpy } = prepareConfirmDialog();
+  const { confirmDialogSpy } = prepareConfirmDialogInteractiveUI();
 
   const account = await mockAccount(constants.StarknetChainId.SN_SEPOLIA);
   prepareMockAccount(account, state);

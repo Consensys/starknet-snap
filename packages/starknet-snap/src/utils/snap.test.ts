@@ -22,6 +22,23 @@ describe('getBip44Deriver', () => {
   });
 });
 
+describe('confirmDialogInteractiveUI', () => {
+  it('calls snap_dialog', async () => {
+    const spy = jest.spyOn(snapUtil.getProvider(), 'request');
+    const interfaceId = 'test';
+
+    await snapUtil.confirmDialogInteractiveUI(interfaceId);
+
+    expect(spy).toHaveBeenCalledWith({
+      method: 'snap_dialog',
+      params: {
+        type: 'confirmation',
+        id: interfaceId,
+      },
+    });
+  });
+});
+
 describe('confirmDialog', () => {
   it('calls snap_dialog', async () => {
     const spy = jest.spyOn(snapUtil.getProvider(), 'request');

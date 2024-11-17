@@ -30,6 +30,24 @@ export async function getBip44Deriver(): Promise<BIP44AddressKeyDeriver> {
 }
 
 /**
+ * Displays a confirmation dialog with the specified interface id.
+ *
+ * @param interfaceId - A string representing the id of the interface.
+ * @returns A Promise that resolves to the result of the dialog.
+ */
+export async function confirmDialogInteractiveUI(
+  interfaceId: string,
+): Promise<DialogResult> {
+  return snap.request({
+    method: 'snap_dialog',
+    params: {
+      type: DialogType.Confirmation,
+      id: interfaceId,
+    },
+  });
+}
+
+/**
  * Displays a confirmation dialog with the specified components.
  *
  * @param components - An array of components to display in the dialog.
