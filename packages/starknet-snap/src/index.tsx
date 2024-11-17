@@ -4,7 +4,8 @@ import type {
   OnInstallHandler,
   OnUpdateHandler,
 } from '@metamask/snaps-sdk';
-import { panel, text, MethodNotFoundError } from '@metamask/snaps-sdk';
+import { MethodNotFoundError } from '@metamask/snaps-sdk';
+import { Box, Link, Text } from '@metamask/snaps-sdk/jsx';
 
 import { addNetwork } from './addNetwork';
 import { Config } from './config';
@@ -59,7 +60,12 @@ import type {
 } from './types/snapApi';
 import type { SnapState } from './types/snapState';
 import { upgradeAccContract } from './upgradeAccContract';
-import { getDappUrl, isSnapRpcError } from './utils';
+import {
+  getDappUrl,
+  getStateData,
+  isSnapRpcError,
+  setStateData,
+} from './utils';
 import {
   CAIRO_VERSION_LEGACY,
   PRELOADED_TOKENS,
@@ -87,18 +93,8 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
   logger.log(`${request.method}:\nrequestParams: ${toJson(requestParams)}`);
 
   try {
-    if (request.method === 'ping') {
-      logger.log('pong');
-      return 'pong';
-    }
-
     // TODO: this will causing racing condition, need to be fixed
-    let state: SnapState = await snap.request({
-      method: 'snap_manageState',
-      params: {
-        operation: 'get',
-      },
-    });
+    let state: SnapState = await getStateData<SnapState>();
     if (!state) {
       state = {
         accContracts: [],
@@ -107,13 +103,12 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
         transactions: [],
       };
       // initialize state if empty and set default data
-      await snap.request({
-        method: 'snap_manageState',
-        params: {
-          operation: 'update',
-          newState: state,
-        },
-      });
+      await setStateData(state);
+    }
+
+    if (request.method === 'ping') {
+      logger.log('pong');
+      return 'pong';
     }
 
     // TODO: this can be remove, after state manager is implemented
@@ -307,37 +302,38 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
 };
 
 export const onInstall: OnInstallHandler = async () => {
-  const component = panel([
-    text('Your MetaMask wallet is now compatible with Starknet!'),
-    text(
-      `To manage your Starknet account and send and receive funds, visit the [companion dapp for Starknet](${getDappUrl()}).`,
-    ),
-  ]);
-
   await snap.request({
     method: 'snap_dialog',
     params: {
       type: 'alert',
-      content: component,
+      content: (
+        <Box>
+          <Text>Your MetaMask wallet is now compatible with Starknet!</Text>
+          <Text>
+            To manage your Starknet account and send and receive funds, visit
+            the <Link href={getDappUrl()}>companion dapp for Starknet</Link>.
+          </Text>
+        </Box>
+      ),
     },
   });
 };
 
 export const onUpdate: OnUpdateHandler = async () => {
-  const component = panel([
-    text('Features released with this update:'),
-    text(
-      'Support STRK token for the gas fee in sending transaction and estimating fee.',
-    ),
-    text('Default network changed to mainnet.'),
-    text('Support for multiple consecutive transactions.'),
-  ]);
-
   await snap.request({
     method: 'snap_dialog',
     params: {
       type: 'alert',
-      content: component,
+      content: (
+        <Box>
+          <Text>Your Starknet Snap is now up-to-date !</Text>
+          <Text>
+            As usual, to manage your Starknet account and send and receive
+            funds, visit the{' '}
+            <Link href={getDappUrl()}>companion dapp for Starknet</Link>.
+          </Text>
+        </Box>
+      ),
     },
   });
 };
