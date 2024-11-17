@@ -1,4 +1,4 @@
-import type { RawCalldata } from 'starknet';
+import type { Calldata, RawArgs, RawCalldata } from 'starknet';
 
 /* eslint-disable */
 export type SnapState = {
@@ -10,6 +10,21 @@ export type SnapState = {
   transactionRequests?: TransactionRequest[];
 };
 
+export type FormattedCallData = {
+  type: 'contract';
+  label: string;
+  contractAddress: string;
+  chainId: string;
+  calldata?: RawArgs | Calldata;
+  entrypoint: string;
+  isTransfer?: boolean; // Flag to indicate if this call is a transfer
+  senderAddress?: string;
+  recipientAddress?: string;
+  amount?: string;
+  decimals?: number;
+  tokenSymbol?: string;
+};
+
 export type TransactionRequest = {
   id: string;
   interfaceId: string;
@@ -17,12 +32,9 @@ export type TransactionRequest = {
   signer: string;
   chainId: string;
   maxFee: string;
-  calls: {
-    contractAddress: string;
-    calldata: RawCalldata;
-    entrypoint: string;
-  }[];
+  calls: FormattedCallData[];
   feeToken: string;
+  includeDeploy: boolean;
 };
 
 export type AccContract = {

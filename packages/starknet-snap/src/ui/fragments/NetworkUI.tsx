@@ -1,6 +1,6 @@
 import type { SnapComponent } from '@metamask/snaps-sdk/jsx';
 
-import { RowUI } from '../fragments';
+import { RowUI } from '.';
 
 export type NetworkUIProps = {
   networkName: string;
