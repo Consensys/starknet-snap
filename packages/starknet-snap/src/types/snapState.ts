@@ -8,6 +8,7 @@ export type SnapState = {
   transactions: Transaction[];
   currentNetwork?: Network;
   transactionRequests?: TransactionRequest[];
+  requireMMUpgrade?: boolean;
 };
 
 export type FormattedCallData = {
