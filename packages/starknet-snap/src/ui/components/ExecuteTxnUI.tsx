@@ -35,6 +35,7 @@ export type ExecuteTxnUIProps = {
   calls: FormattedCallData[];
   selectedFeeToken: string;
   includeDeploy: boolean;
+  errors?: ExecuteTxnUIErrors;
 };
 
 type TokenTotals = Record<

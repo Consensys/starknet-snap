@@ -1,4 +1,4 @@
-import type { Calldata, EstimateFee, RawArgs, RawCalldata } from 'starknet';
+import type { EstimateFee, RawCalldata } from 'starknet';
 
 /* eslint-disable */
 export type SnapState = {

@@ -1,14 +1,11 @@
-import type { TransactionRequest } from '../types/snapState';
-import type { ExecuteTxnUIErrors } from './components';
-
 /**
- * Generate the interface for an interactive ui flow.
+ * Generate the interface for an interactive UI flow.
  *
  * This function creates a UI interface for a specific ui flow by dynamically rendering
- * the provided React component with the given props. The component and props are passed as parameters,
- * ensuring type safety and flexibility for various interactive ui flows.
+ * the provided JSX Component with the given props. The component and props are passed as parameters,
+ * ensuring type safety and flexibility for various interactive UI flows.
  *
- * @template Props - The type of props expected by the React component.
+ * @template Props - The type of props expected by the JSX Component.
  * @param Component - The JSX component to render, which is expected to handle the UI for the flow.
  * It should accept props of type `Props`.
  * @param request - An object containing the properties required by the `Component` along with an `id` field.
@@ -27,6 +24,36 @@ export async function generateFlow<Props>(
       context: {
         id: request.id,
       },
+    },
+  });
+}
+
+/**
+ * Updates the Interactive UI interface.
+ *
+ * This function updates the UI for a interactive UI flow using a provided JSX component and its associated props.
+ * It dynamically renders the updated UI and associates it with the specified interface ID.
+ *
+ * @template Props - The type of props expected by the JSX Component.
+ * @param Component - The JSX Component to render, representing the updated UI for the interative UI flow.
+ * It should accept props of type `Props`.
+ * @param params - The parameters for the Interactive UI update.
+ * Must include `interfaceId` for referencing the current flow and `id` for context.
+ * @param params.interfaceId - The unique identifier for the existing interface to update.
+ * @param errors - Optional errors to display in the updated interface.
+ * @returns A Promise that resolves when the interface has been successfully updated.
+ */
+export async function updateFlow<Props>(
+  Component: any, // Generic Component expecting props of type Props
+  params: Props & { id: string; interfaceId: string }, // Props must include `id` and `interfaceId`
+  errors?: Partial<Props>, // Optional partial props for error handling or overrides
+) {
+  // Perform the interface update
+  await snap.request({
+    method: 'snap_updateInterface',
+    params: {
+      id: params.interfaceId,
+      ui: <Component {...params} {...errors} />,
     },
   });
 }
