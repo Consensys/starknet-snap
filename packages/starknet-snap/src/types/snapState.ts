@@ -12,9 +12,9 @@ export type SnapState = {
 
 export type FormattedCallData = {
   contractAddress: string;
-  calldata?: RawCalldata;
+  calldata?: string[];
   entrypoint: string;
-  isTransfer?: boolean; // Flag to indicate if this call is a transfer
+  isTransfer: boolean; // Flag to indicate if this call is a transfer
   senderAddress?: string;
   recipientAddress?: string;
   amount?: string;

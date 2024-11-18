@@ -45,9 +45,9 @@ type TokenTotals = Record<
 export const calculateTotals = (
   calls: {
     isTransfer: boolean;
-    tokenSymbol: string;
-    amount: string; // Amount as a string BigInt
-    decimals: number;
+    tokenSymbol?: string;
+    amount?: string; // Amount as a string BigInt
+    decimals?: number;
   }[],
   maxFee: string,
   selectedFeeToken: string,
@@ -56,7 +56,7 @@ export const calculateTotals = (
 
   // Sum up transfer amounts for each token
   calls.forEach((call) => {
-    if (call.isTransfer) {
+    if (call.amount && call.tokenSymbol && call.decimals && call.isTransfer) {
       const amount = BigInt(call.amount); // Convert to BigInt
       if (!tokenTotals[call.tokenSymbol]) {
         tokenTotals[call.tokenSymbol] = {
@@ -134,7 +134,10 @@ export const ExecuteTxnUI: SnapComponent<ExecuteTxnUIProps> = ({
                 chainId={chainId}
               />
             )}
-            {call.amount && call.isTransfer ? (
+            {call.amount &&
+            call.senderAddress &&
+            call.recipientAddress &&
+            call.isTransfer ? (
               <Section>
                 {call.senderAddress === signer ? null : (
                   <AddressUI
