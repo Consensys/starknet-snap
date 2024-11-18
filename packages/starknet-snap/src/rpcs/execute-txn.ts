@@ -208,7 +208,7 @@ export class ExecuteTxnRpc extends AccountRpcController<
     }
 
     details.version =
-      request.feeToken === FeeToken.STRK
+      request.selectedFeeToken === FeeToken.STRK
         ? constants.TRANSACTION_VERSION.V3
         : constants.TRANSACTION_VERSION.V1;
     if (request.includeDeploy) {
