@@ -17,14 +17,30 @@ import { getEstimatedFees } from '../utils/starknetUtils';
 import { AccountUserInputController } from '../utils/user-input';
 import { hasSufficientFunds } from './utils';
 
+/**
+ * Controller for handling fee token selection in user interactions.
+ * Extends `AccountUserInputController` to provide functionality specific to
+ * selecting and validating fee tokens for transactions.
+ */
 export class FeeTokenSelectorController extends AccountUserInputController {
   protected stateManager: TransactionRequestStateManager;
 
+  /**
+   * Initializes the FeeTokenSelectorController.
+   * Sets up the state manager to retrieve and manage associated transaction requests.
+   */
   constructor() {
     super();
     this.stateManager = new TransactionRequestStateManager();
   }
 
+  /**
+   * Retrieves the estimated fees for the provided calls and fee token.
+   * @param signer - The signer of the transaction.
+   * @param calls - The list of contract calls for the transaction.
+   * @param feeToken - The selected fee token (e.g., STRK or ETH).
+   * @returns An object containing fee details such as suggested max fee, overall fee, and estimate results.
+   */
   protected async getFees(
     signer: string,
     calls: Call[],
@@ -66,6 +82,14 @@ export class FeeTokenSelectorController extends AccountUserInputController {
     throw new Error('No signer found in stored request state');
   }
 
+  /**
+   * Handles user input to select and validate fee tokens for a transaction.
+   * Updates the transaction request state and user interface accordingly.
+   * @param id - The unique identifier for the interface.
+   * @param event - The user input event containing the selected fee token.
+   * @param context - Additional context from the interface.
+   * @returns A promise that resolves when user input handling is complete.
+   */
   protected async handleUserInput(
     id: string,
     event: InputChangeEvent,
