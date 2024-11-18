@@ -70,11 +70,8 @@ export const formatCallData = async (
 
     // Base data object for each call, with transfer fields left as optional
     const callData: FormattedCallData = {
-      type: 'contract',
-      label: 'Contract Call',
       contractAddress,
-      chainId,
-      calldata,
+      calldata: calldata as string[],
       entrypoint,
       isTransfer: false, // Set default to false
     };
@@ -93,12 +90,11 @@ export const formatCallData = async (
 
         // Populate transfer-specific fields
         callData.isTransfer = true;
-        callData.senderAddress = senderAddress;
-        callData.recipientAddress = recipientAddress;
-        callData.amount = amount;
-        callData.tokenSymbol = token.symbol;
-        callData.decimals = token.decimals;
-        callData.label = 'Token Transfer';
+        callData.transferSenderAddress = senderAddress;
+        callData.transferRecipientAddress = recipientAddress;
+        callData.transferAmount = amount;
+        callData.transferTokenSymbol = token.symbol;
+        callData.transferTokenDecimals = token.decimals;
       } catch (error) {
         // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
         console.warn(`Error in amount conversion: ${error}`);

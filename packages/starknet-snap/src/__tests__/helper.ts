@@ -324,7 +324,7 @@ export function generateTransactionRequests({
       type: TransactionType.INVOKE,
       signer: address,
       maxFee: '100',
-      feeToken:
+      selectedFeeToken:
         feeTokens[Math.floor(generateRandomValue() * feeTokens.length)].symbol,
       calls: [
         {
@@ -337,9 +337,7 @@ export function generateTransactionRequests({
             amount: '1',
           }),
           entrypoint: 'transfer',
-          label: 'Transfer',
-          type: 'contract',
-          chainId: '123',
+          isTransfer: true,
         },
       ],
       includeDeploy: false,

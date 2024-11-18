@@ -31,7 +31,7 @@ export class TransactionRequestStateManager extends StateManager<TransactionRequ
   ): void {
     // This is the only field that can be updated
     dataInState.maxFee = data.maxFee;
-    dataInState.feeToken = data.feeToken;
+    dataInState.selectedFeeToken = data.selectedFeeToken;
     dataInState.resourceBounds = [...data.resourceBounds];
   }
 

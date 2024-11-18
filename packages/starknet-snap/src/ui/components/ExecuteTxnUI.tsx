@@ -4,7 +4,6 @@ import {
   Container,
   Row,
   Section,
-  Value,
   Text,
   Icon,
   Divider,
@@ -12,8 +11,9 @@ import {
 import { formatUnits } from 'ethers/lib/utils';
 
 import type { FeeToken } from '../../types/snapApi';
+import type { FormattedCallData } from '../../types/snapState';
 import { DEFAULT_DECIMAL_PLACES } from '../../utils/constants';
-import { AddressUI, JsonDataUI, RowUI } from '../fragments';
+import { AddressUI, JsonDataUI } from '../fragments';
 import { FeeTokenSelector } from '../fragments/FeeTokenSelector';
 
 /**
@@ -32,10 +32,73 @@ export type ExecuteTxnUIProps = {
   signer: string;
   chainId: string;
   maxFee: string;
-  calls: any[];
-  feeToken: string;
+  calls: FormattedCallData[];
+  selectedFeeToken: string;
   includeDeploy: boolean;
-  errors?: ExecuteTxnUIErrors;
+};
+
+type TokenTotals = Record<
+  string,
+  {
+    amount: bigint; // Use BigInt for precise calculations
+    decimals: number;
+  }
+>;
+
+/**
+ * Calculates the totals for all tokens involved in calls and fees.
+ *
+ * @param calls - The transaction calls.
+ * @param maxFee - The maximum fee as a string BigInt.
+ * @param selectedFeeToken - The token symbol used for fees.
+ * @returns The calculated totals for each token.
+ */
+export const calculateTotals = (
+  calls: {
+    isTransfer: boolean;
+    transferAmount?: string; // Amount as a string BigInt
+    transferTokenSymbol?: string;
+    transferTokenDecimals?: number;
+  }[],
+  maxFee: string,
+  selectedFeeToken: string,
+): TokenTotals => {
+  const tokenTotals: TokenTotals = {};
+
+  // Sum up transfer amounts for each token
+  calls.forEach((call) => {
+    if (
+      call.transferAmount &&
+      call.transferTokenSymbol &&
+      call.transferTokenDecimals &&
+      call.isTransfer
+    ) {
+      const amount = BigInt(call.transferAmount); // Convert to BigInt
+      if (!tokenTotals[call.transferTokenSymbol]) {
+        tokenTotals[call.transferTokenSymbol] = {
+          amount: BigInt(0),
+          decimals: call.transferTokenDecimals,
+        };
+      }
+      tokenTotals[call.transferTokenSymbol].amount += amount;
+    }
+  });
+
+  // Add the fee to the corresponding token
+  const feeTokenAmount = BigInt(maxFee);
+  if (tokenTotals[selectedFeeToken]) {
+    tokenTotals[selectedFeeToken].amount += feeTokenAmount;
+  } else {
+    // We derive decimals based on the fee token. Currently, both supported fee tokens, ETH and STRK, use the standard 18 decimals.
+    // Therefore, we use DEFAULT_DECIMAL_PLACES set to 18 here. If additional fee tokens with different decimals are introduced,
+    // this logic should be updated to handle token-specific decimals dynamically.
+    tokenTotals[selectedFeeToken] = {
+      amount: feeTokenAmount,
+      decimals: DEFAULT_DECIMAL_PLACES,
+    };
+  }
+
+  return tokenTotals;
 };
 
 /**
@@ -46,7 +109,7 @@ export type ExecuteTxnUIProps = {
  * @param props.chainId - The ID of the chain for the transaction.
  * @param props.maxFee - The maximum fee allowed for the transaction.
  * @param props.calls - The calls involved in the transaction.
- * @param props.feeToken - The token used for fees.
+ * @param props.selectedFeeToken - The token used for fees.
  * @param props.includeDeploy - Whether to include account deployment in the transaction.
  * //param props.errors : TODO : add this param
  * @param props.errors
@@ -57,40 +120,13 @@ export const ExecuteTxnUI: SnapComponent<ExecuteTxnUIProps> = ({
   chainId,
   maxFee,
   calls,
-  feeToken,
+  selectedFeeToken,
   includeDeploy,
   errors,
   // errors, // TODO: include this later
 }) => {
-  const tokenTotals: Record<string, { amount: number; decimals: number }> = {};
-
-  // Sum up each call's transfer amount, converting to float
-  calls.forEach((call) => {
-    if (call.isTransfer) {
-      if (!tokenTotals[call.tokenSymbol]) {
-        tokenTotals[call.tokenSymbol] = { amount: 0, decimals: call.decimals };
-      }
-
-      tokenTotals[call.tokenSymbol].amount += parseFloat(
-        formatUnits(call.amount, call.decimals),
-      );
-    }
-  });
-
-  // Convert maxFee (BigNumber) to float and add to feeToken's total if it's present
-  const feeTokenAmount = parseFloat(
-    formatUnits(maxFee, DEFAULT_DECIMAL_PLACES),
-  );
-  if (feeToken) {
-    if (tokenTotals[feeToken] === undefined) {
-      tokenTotals[feeToken] = {
-        amount: feeTokenAmount,
-        decimals: DEFAULT_DECIMAL_PLACES,
-      };
-    } else {
-      tokenTotals[feeToken].amount += feeTokenAmount;
-    }
-  }
+  // Calculate the totals using the helper
+  const tokenTotals = calculateTotals(calls, maxFee, selectedFeeToken);
 
   return (
     <Container>
@@ -103,32 +139,42 @@ export const ExecuteTxnUI: SnapComponent<ExecuteTxnUIProps> = ({
 
         {calls.map((call) => (
           <Section>
-            <AddressUI
-              label={call.label}
-              address={call.contractAddress}
-              chainId={chainId}
-              svgIcon={call.svgIcon}
-            />
             {call.isTransfer ? (
+              <AddressUI
+                label="Token Transfer"
+                address={call.contractAddress}
+                chainId={chainId}
+              />
+            ) : (
+              <AddressUI
+                label="Contract Interaction"
+                address={call.contractAddress}
+                chainId={chainId}
+              />
+            )}
+            {call.transferAmount &&
+            call.transferSenderAddress &&
+            call.transferRecipientAddress &&
+            call.isTransfer ? (
               <Section>
-                {call.senderAddress === signer ? null : (
+                {call.transferSenderAddress === signer ? null : (
                   <AddressUI
                     label="Sender Address"
-                    address={call.senderAddress}
+                    address={call.transferSenderAddress}
                     chainId={chainId}
                   />
                 )}
                 <AddressUI
                   label="Recipient Address"
-                  address={call.recipientAddress}
+                  address={call.transferRecipientAddress}
                   chainId={chainId}
                 />
-                <RowUI
-                  label={`Amount`}
-                  value={`${formatUnits(call.amount, call.decimals)} ${
-                    call.tokenSymbol as string
-                  }`}
-                />
+                <Row label={`Amount`}>
+                  <Text>{`${formatUnits(
+                    call.transferAmount,
+                    call.transferTokenDecimals,
+                  )} ${call.transferTokenSymbol as string}`}</Text>
+                </Row>
               </Section>
             ) : (
               <JsonDataUI label="Call Data" data={call.calldata} />
@@ -136,28 +182,32 @@ export const ExecuteTxnUI: SnapComponent<ExecuteTxnUIProps> = ({
           </Section>
         ))}
         <FeeTokenSelector
-          selectedToken={feeToken as FeeToken}
+          selectedToken={selectedFeeToken as FeeToken}
           error={errors?.fees}
         />
         <Section>
           <Icon name="gas" size="md" />
           <Row label="Estimated network fee">
-            <Value
-              value={`${formatUnits(
+            <Text>
+              {`${formatUnits(
                 maxFee,
                 DEFAULT_DECIMAL_PLACES,
-              )} ${feeToken}`}
-              extra={`$0`}
-            />
+              )} ${selectedFeeToken}`}
+            </Text>
           </Row>
           <Divider />
           <Icon name="money" size="md" />
           <Box direction="vertical">
-            {Object.entries(tokenTotals).map(([tokenSymbol, { amount }]) => (
-              <Row key={tokenSymbol} label={`Total for ${tokenSymbol}`}>
-                <Value value={`${amount} ${tokenSymbol}`} extra={`$0`} />
-              </Row>
-            ))}
+            {Object.entries(tokenTotals).map(
+              ([tokenSymbol, { amount, decimals }]) => (
+                <Row key={tokenSymbol} label={`Total for ${tokenSymbol}`}>
+                  <Text>{`${formatUnits(
+                    amount,
+                    decimals,
+                  )} ${tokenSymbol}`}</Text>
+                </Row>
+              ),
+            )}
           </Box>
           {includeDeploy ? <Divider /> : null}
           {includeDeploy ? (

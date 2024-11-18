@@ -11,18 +11,15 @@ export type SnapState = {
 };
 
 export type FormattedCallData = {
-  type: 'contract';
-  label: string;
   contractAddress: string;
-  chainId: string;
-  calldata?: RawArgs | Calldata;
+  calldata?: string[];
   entrypoint: string;
-  isTransfer?: boolean; // Flag to indicate if this call is a transfer
-  senderAddress?: string;
-  recipientAddress?: string;
-  amount?: string;
-  decimals?: number;
-  tokenSymbol?: string;
+  isTransfer: boolean; // Flag to indicate if this call is a transfer
+  transferSenderAddress?: string;
+  transferRecipientAddress?: string;
+  transferAmount?: string;
+  transferTokenDecimals?: number;
+  transferTokenSymbol?: string;
 };
 
 type ResourceBounds = Pick<EstimateFee, 'resourceBounds'>['resourceBounds'];
@@ -36,7 +33,7 @@ export type TransactionRequest = {
   maxFee: string;
   calls: FormattedCallData[];
   resourceBounds: ResourceBounds[];
-  feeToken: string;
+  selectedFeeToken: string;
   includeDeploy: boolean;
 };
 
