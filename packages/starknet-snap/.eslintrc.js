@@ -19,6 +19,13 @@ module.exports = {
         'jsdoc/require-returns': 'off',
         'jsdoc/require-param-description': 'off',
         'jsdoc/match-description': 'off',
+        // This allows importing the `Text` JSX component.
+        '@typescript-eslint/no-shadow': [
+          'error',
+          {
+            allow: ['Text'],
+          },
+        ],
       },
     },
     {

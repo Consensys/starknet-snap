@@ -2233,6 +2233,8 @@ __metadata:
     "@metamask/utils": ^9.1.0
     "@types/chai": ^4.3.1
     "@types/chai-as-promised": ^7.1.5
+    "@types/react": 18.2.4
+    "@types/react-dom": 18.2.4
     "@types/sinon": ^10.0.11
     "@types/sinon-chai": ^3.2.8
     "@typescript-eslint/eslint-plugin": ^5.42.1
@@ -7949,6 +7951,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/react-dom@npm:18.2.4":
+  version: 18.2.4
+  resolution: "@types/react-dom@npm:18.2.4"
+  dependencies:
+    "@types/react": "*"
+  checksum: 8301f35cf1cbfec8c723e9477aecf87774e3c168bd457d353b23c45064737213d3e8008b067c6767b7b08e4f2b3823ee239242a6c225fc91e7f8725ef8734124
+  languageName: node
+  linkType: hard
+
 "@types/react-dom@npm:^18.0.0, @types/react-dom@npm:^18.0.5":
   version: 18.3.0
   resolution: "@types/react-dom@npm:18.3.0"
@@ -7977,6 +7988,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/react@npm:18.2.4":
+  version: 18.2.4
+  resolution: "@types/react@npm:18.2.4"
+  dependencies:
+    "@types/prop-types": "*"
+    "@types/scheduler": "*"
+    csstype: ^3.0.2
+  checksum: d920fc93832fe50d5e8175a0ba233086c97a9e238ff7327c8319b8dec57409618f491d6f71be2374c3132f40a8fc428b3e406c1e2a5f1dc32ccd6d47051786d2
+  languageName: node
+  linkType: hard
+
 "@types/resolve@npm:1.17.1":
   version: 1.17.1
   resolution: "@types/resolve@npm:1.17.1"
@@ -7997,6 +8019,13 @@ __metadata:
   version: 0.12.2
   resolution: "@types/retry@npm:0.12.2"
   checksum: e5675035717b39ce4f42f339657cae9637cf0c0051cf54314a6a2c44d38d91f6544be9ddc0280587789b6afd056be5d99dbe3e9f4df68c286c36321579b1bf4a
+  languageName: node
+  linkType: hard
+
+"@types/scheduler@npm:*":
+  version: 0.23.0
+  resolution: "@types/scheduler@npm:0.23.0"
+  checksum: 874d753aa65c17760dfc460a91e6df24009bde37bfd427a031577b30262f7770c1b8f71a21366c7dbc76111967384cf4090a31d65315155180ef14bd7acccb32
   languageName: node
   linkType: hard
 
