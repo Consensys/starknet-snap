@@ -56,8 +56,8 @@ export class FeeTokenSelectorController extends AccountUserInputController {
     _event: UserInputEvent,
     context: InterfaceContext | null,
   ): Promise<string> {
-    const request = await this.stateManager.getTransactionRequest({
-      requestId: context?.id as string,
+    const request = await this.stateManager.getRequest({
+      id: context?.id as string,
       interfaceId: id,
     });
     if (request?.signer) {
@@ -75,8 +75,8 @@ export class FeeTokenSelectorController extends AccountUserInputController {
     try {
       const feeToken = event.value as FeeToken;
       if (context) {
-        request = await this.stateManager.getTransactionRequest({
-          requestId: context.id as string,
+        request = await this.stateManager.getRequest({
+          id: context.id as string,
           interfaceId: id,
         });
 
@@ -111,7 +111,7 @@ export class FeeTokenSelectorController extends AccountUserInputController {
             (result) => result.resourceBounds,
           );
 
-          await this.stateManager.upsertTransactionRequest(request);
+          await this.stateManager.upsertRequest(request);
 
           await updateFlow(ExecuteTxnUI, request);
         }

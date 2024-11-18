@@ -1,66 +1,45 @@
-import type { TransactionRequest, SnapState } from '../types/snapState';
+import type { SnapState, TransactionRequest } from '../types/snapState';
 import { logger } from '../utils';
 import type { IFilter } from './filter';
 import { StringFllter } from './filter';
 import { StateManager, StateManagerError } from './state-manager';
 
-export type ITransactionRequestFilter = IFilter<TransactionRequest>;
+type BaseRequestState = {
+  id: string;
+};
 
-export class IdFilter
-  extends StringFllter<TransactionRequest>
-  implements ITransactionRequestFilter
+export type IRequestFilter<RequestState> = IFilter<RequestState>;
+
+export class IdFilter<RequestState>
+  extends StringFllter<RequestState>
+  implements IRequestFilter<RequestState>
 {
   dataKey = 'id';
 }
 
-export class InterfaceIdFilter
-  extends StringFllter<TransactionRequest>
-  implements ITransactionRequestFilter
+export class InterfaceIdFilter<RequestState>
+  extends StringFllter<RequestState>
+  implements IRequestFilter<RequestState>
 {
   dataKey = 'interfaceId';
 }
 
-export class TransactionRequestStateManager extends StateManager<TransactionRequest> {
-  protected getCollection(state: SnapState): TransactionRequest[] {
-    return state.transactionRequests ?? [];
-  }
+export abstract class RequestStateManager<
+  RequestState extends BaseRequestState,
+> extends StateManager<RequestState> {
+  protected abstract getCollection(state: SnapState): RequestState[];
 
-  protected updateEntity(
-    dataInState: TransactionRequest,
-    data: TransactionRequest,
-  ): void {
-    // This is the only field that can be updated
-    dataInState.maxFee = data.maxFee;
-    dataInState.selectedFeeToken = data.selectedFeeToken;
-    dataInState.resourceBounds = [...data.resourceBounds];
-  }
+  protected abstract updateEntity(
+    dataInState: RequestState,
+    data: RequestState,
+  ): void;
 
-  /**
-   * Finds a `TransactionRequest` object based on the given requestId or interfaceId.
-   *
-   * @param param - The param object.
-   * @param param.requestId - The requestId to search for.
-   * @param param.interfaceId - The interfaceId to search for.
-   * @param [state] - The optional SnapState object.
-   * @returns A Promise that resolves with the `TransactionRequest` object if found, or null if not found.
-   */
-  async getTransactionRequest(
-    {
-      requestId,
-      interfaceId,
-    }: {
-      requestId?: string;
-      interfaceId?: string;
-    },
+  protected abstract getStateKey(): keyof SnapState;
+
+  async findRequest(
+    filters: IRequestFilter<RequestState>[],
     state?: SnapState,
-  ): Promise<TransactionRequest | null> {
-    const filters: ITransactionRequestFilter[] = [];
-    if (requestId) {
-      filters.push(new IdFilter([requestId]));
-    }
-    if (interfaceId) {
-      filters.push(new InterfaceIdFilter([interfaceId]));
-    }
+  ): Promise<RequestState | null> {
     if (filters.length === 0) {
       throw new StateManagerError(
         'At least one search condition must be provided',
@@ -69,19 +48,11 @@ export class TransactionRequestStateManager extends StateManager<TransactionRequ
     return await this.find(filters, state);
   }
 
-  /**
-   * Upsert a `TransactionRequest` in the state with the given data.
-   *
-   * @param data - The `TransactionRequest` object.
-   * @returns A Promise that resolves when the upsert is complete.
-   */
-  async upsertTransactionRequest(data: TransactionRequest): Promise<void> {
+  async upsertRequest(data: RequestState & { id: string }): Promise<void> {
     try {
       await this.update(async (state: SnapState) => {
-        const dataInState = await this.getTransactionRequest(
-          {
-            requestId: data.id,
-          },
+        const dataInState = await this.findRequest(
+          [new IdFilter<RequestState>([data.id])],
           state,
         );
 
@@ -96,29 +67,77 @@ export class TransactionRequestStateManager extends StateManager<TransactionRequ
     }
   }
 
-  /**
-   * Removes the `TransactionRequest` objects in the state with the given requestId.
-   *
-   * @param requestId - The requestId to search for.
-   * @returns A Promise that resolves when the remove is complete.
-   */
-  async removeTransactionRequest(requestId: string): Promise<void> {
+  async removeRequest(id: string): Promise<void> {
     try {
       await this.update(async (state: SnapState) => {
-        const sizeOfTransactionRequests = this.getCollection(state).length;
+        const collection = this.getCollection(state);
+        const initialSize = collection.length;
 
-        state.transactionRequests = this.getCollection(state).filter((req) => {
-          return req.id !== requestId;
-        });
+        // Filter out the request with the given id
+        const updatedCollection = collection.filter((item) => item.id !== id);
 
-        // Check if the TransactionRequest was removed
-        if (sizeOfTransactionRequests === this.getCollection(state).length) {
-          // If the TransactionRequest does not exist, log a warning instead of throwing an error
-          logger.warn(`TransactionRequest with id ${requestId} does not exist`);
+        // Update the state with the filtered collection
+        if (Array.isArray(updatedCollection)) {
+          const stateKey = this.getStateKey();
+          state[stateKey] = updatedCollection as any;
+        }
+
+        // Log a warning if no items were removed
+        if (initialSize === updatedCollection.length) {
+          logger.warn(`Request with id ${id} does not exist`);
         }
       });
     } catch (error) {
       throw new StateManagerError(error.message);
     }
+  }
+
+  /**
+   * Finds a single object in the collection based on its ID or other filters.
+   *
+   * @param param - The object containing search parameters.
+   * @param param.id - The ID to search for.
+   * @param param.interfaceId - (Optional) An additional search parameter.
+   * @param state - The current SnapState (optional, uses default state if not provided).
+   * @returns A Promise that resolves to the found object or null if not found.
+   */
+  async getRequest(
+    { id, interfaceId }: { id?: string; interfaceId?: string },
+    state?: SnapState,
+  ): Promise<RequestState | null> {
+    const filters: IRequestFilter<RequestState>[] = [];
+    if (id) {
+      filters.push(new IdFilter<RequestState>([id]));
+    }
+    if (interfaceId) {
+      filters.push(new InterfaceIdFilter<RequestState>([interfaceId]));
+    }
+
+    if (filters.length === 0) {
+      throw new StateManagerError(
+        'At least one search condition must be provided',
+      );
+    }
+
+    return await this.find(filters, state);
+  }
+}
+
+export class TransactionRequestStateManager extends RequestStateManager<TransactionRequest> {
+  protected getCollection(state: SnapState): TransactionRequest[] {
+    return state.transactionRequests ?? [];
+  }
+
+  protected updateEntity(
+    dataInState: TransactionRequest,
+    data: TransactionRequest,
+  ): void {
+    dataInState.maxFee = data.maxFee;
+    dataInState.selectedFeeToken = data.selectedFeeToken;
+    dataInState.resourceBounds = [...data.resourceBounds];
+  }
+
+  protected getStateKey(): keyof SnapState {
+    return 'transactionRequests';
   }
 }

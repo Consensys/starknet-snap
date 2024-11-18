@@ -38,14 +38,14 @@ describe('fee-token-selector', () => {
 
     const updateFlowSpy = jest.spyOn(uiUtils, 'updateFlow');
 
-    const getTransactionRequestSpy = jest.spyOn(
+    const getRequestSpy = jest.spyOn(
       TransactionRequestStateManager.prototype,
-      'getTransactionRequest',
+      'getRequest',
     );
 
-    const upsertTransactionRequestSpy = jest.spyOn(
+    const upsertRequestSpy = jest.spyOn(
       TransactionRequestStateManager.prototype,
-      'upsertTransactionRequest',
+      'upsertRequest',
     );
 
     const handleUserInputSpy = jest.spyOn(
@@ -58,7 +58,7 @@ describe('fee-token-selector', () => {
       'hasSufficientFunds',
     );
 
-    const transactionRequests = generateTransactionRequests({
+    const Requests = generateTransactionRequests({
       chainId,
       address: account.address,
       cnt: 10,
@@ -70,11 +70,11 @@ describe('fee-token-selector', () => {
       context,
       handleUserInputSpy,
       updateFlowSpy,
-      transactionRequests,
+      Requests,
       getFeesSpy,
       hasSufficientFundsSpy,
-      getTransactionRequestSpy,
-      upsertTransactionRequestSpy,
+      getRequestSpy,
+      upsertRequestSpy,
     };
   };
 
@@ -83,18 +83,18 @@ describe('fee-token-selector', () => {
       id,
       event,
       context,
-      transactionRequests,
+      Requests,
       handleUserInputSpy,
       updateFlowSpy,
       getFeesSpy,
-      getTransactionRequestSpy,
-      upsertTransactionRequestSpy,
+      getRequestSpy,
+      upsertRequestSpy,
     } = await prepareMockData();
-    const request = transactionRequests[0];
+    const request = Requests[0];
 
     getFeesSpy.mockRejectedValue('');
 
-    getTransactionRequestSpy.mockResolvedValue(request);
+    getRequestSpy.mockResolvedValue(request);
 
     await feeTokenSelectorController.execute(id, event, context);
 
@@ -104,7 +104,7 @@ describe('fee-token-selector', () => {
         fees: 'Error calculating fees',
       },
     });
-    expect(upsertTransactionRequestSpy).toHaveBeenCalledTimes(0);
+    expect(upsertRequestSpy).toHaveBeenCalledTimes(0);
   });
 
   it('updates dialog with error message if not enough to pay for fee', async () => {
@@ -112,16 +112,16 @@ describe('fee-token-selector', () => {
       id,
       event,
       context,
-      transactionRequests,
+      Requests,
       handleUserInputSpy,
       updateFlowSpy,
       getFeesSpy,
-      getTransactionRequestSpy,
-      upsertTransactionRequestSpy,
+      getRequestSpy,
+      upsertRequestSpy,
     } = await prepareMockData();
-    const request = transactionRequests[0];
+    const request = Requests[0];
 
-    getTransactionRequestSpy.mockResolvedValue(request);
+    getRequestSpy.mockResolvedValue(request);
 
     const estimateResults = getEstimateFees();
     getFeesSpy.mockResolvedValue({
@@ -138,7 +138,7 @@ describe('fee-token-selector', () => {
         fees: 'Not enough funds to pay for fee',
       },
     });
-    expect(upsertTransactionRequestSpy).toHaveBeenCalledTimes(0);
+    expect(upsertRequestSpy).toHaveBeenCalledTimes(0);
   });
 
   it('updates dialog with and save states if enough to pay for fee', async () => {
@@ -146,17 +146,17 @@ describe('fee-token-selector', () => {
       id,
       event,
       context,
-      transactionRequests,
+      Requests,
       handleUserInputSpy,
       updateFlowSpy,
       hasSufficientFundsSpy,
       getFeesSpy,
-      getTransactionRequestSpy,
-      upsertTransactionRequestSpy,
+      getRequestSpy,
+      upsertRequestSpy,
     } = await prepareMockData();
-    const request = transactionRequests[0];
+    const request = Requests[0];
 
-    getTransactionRequestSpy.mockResolvedValue(request);
+    getRequestSpy.mockResolvedValue(request);
 
     const estimateResults = getEstimateFees();
     getFeesSpy.mockResolvedValue({
@@ -170,7 +170,7 @@ describe('fee-token-selector', () => {
 
     expect(handleUserInputSpy).toHaveBeenCalledWith(id, event, context);
     expect(updateFlowSpy).toHaveBeenCalledWith(ExecuteTxnUI, request);
-    expect(upsertTransactionRequestSpy).toHaveBeenCalledWith(request);
+    expect(upsertRequestSpy).toHaveBeenCalledWith(request);
   });
 
   it('throws error if no signer in request state', async () => {
