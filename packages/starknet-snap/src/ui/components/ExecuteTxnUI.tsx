@@ -16,15 +16,6 @@ import { DEFAULT_DECIMAL_PLACES } from '../../utils/constants';
 import { AddressUI, JsonDataUI } from '../fragments';
 import { FeeTokenSelector } from '../fragments/FeeTokenSelector';
 
-/**
- * The form errors.
- *
- * @property fees - The error for the fees.
- */
-export type ExecuteTxnUIErrors = {
-  fees?: string;
-};
-
 export type ExecuteTxnUIProps = {
   type: string;
   signer: string;
@@ -33,7 +24,6 @@ export type ExecuteTxnUIProps = {
   calls: FormattedCallData[];
   selectedFeeToken: string;
   includeDeploy: boolean;
-  errors?: ExecuteTxnUIErrors;
 };
 
 type TokenTotals = Record<
