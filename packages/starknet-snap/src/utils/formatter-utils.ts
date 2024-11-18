@@ -1,4 +1,3 @@
-import { formatUnits } from 'ethers/lib/utils';
 import type { Call } from 'starknet';
 
 import type { TokenStateManager } from '../state/token-state-manager';
