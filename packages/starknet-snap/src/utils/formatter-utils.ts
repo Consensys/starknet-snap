@@ -90,11 +90,11 @@ export const formatCallData = async (
 
         // Populate transfer-specific fields
         callData.isTransfer = true;
-        callData.senderAddress = senderAddress;
-        callData.recipientAddress = recipientAddress;
-        callData.amount = amount;
-        callData.tokenSymbol = token.symbol;
-        callData.decimals = token.decimals;
+        callData.transferSenderAddress = senderAddress;
+        callData.transferRecipientAddress = recipientAddress;
+        callData.transferAmount = amount;
+        callData.transferTokenSymbol = token.symbol;
+        callData.transferTokenDecimals = token.decimals;
       } catch (error) {
         // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
         console.warn(`Error in amount conversion: ${error}`);
