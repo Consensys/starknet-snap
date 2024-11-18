@@ -1,6 +1,5 @@
 import type { SnapComponent } from '@metamask/snaps-sdk/jsx';
-
-import { RowUI } from '.';
+import { Text } from '@metamask/snaps-sdk/jsx';
 
 export type NetworkUIProps = {
   networkName: string;
@@ -15,4 +14,8 @@ export type NetworkUIProps = {
  */
 export const NetworkUI: SnapComponent<NetworkUIProps> = ({
   networkName,
-}: NetworkUIProps) => <RowUI label="Network" value={networkName} />;
+}: NetworkUIProps) => (
+  <Row label="Network">
+    <Text>{networkName}</Text>
+  </Row>
+);

@@ -35,7 +35,7 @@ export async function generateExecuteTxnFlow({
           chainId={chainId}
           maxFee={maxFee}
           calls={calls}
-          feeToken={feeToken}
+          selectedFeeToken={feeToken}
           includeDeploy={includeDeploy}
         />
       ),

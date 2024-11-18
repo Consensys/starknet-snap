@@ -1,4 +1,4 @@
-import type { Calldata, RawArgs, RawCalldata } from 'starknet';
+import type { RawCalldata } from 'starknet';
 
 /* eslint-disable */
 export type SnapState = {
@@ -11,11 +11,8 @@ export type SnapState = {
 };
 
 export type FormattedCallData = {
-  type: 'contract';
-  label: string;
   contractAddress: string;
-  chainId: string;
-  calldata?: RawArgs | Calldata;
+  calldata?: RawCalldata;
   entrypoint: string;
   isTransfer?: boolean; // Flag to indicate if this call is a transfer
   senderAddress?: string;

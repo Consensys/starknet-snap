@@ -36,11 +36,12 @@ export const FeeTokenSelector: SnapComponent<FeeTokenSelectorProps> = ({
           title="Select Fee Token"
           value={selectedToken}
         >
-          {Object.values(FeeToken).map((token) => (
-            <SelectorOption value={token}>
-              <Card title={token} value={FeeTokenUnit[token]} />
-            </SelectorOption>
-          ))}
+          <SelectorOption value={FeeToken.ETH}>
+            <Card title="ETH" value={FeeTokenUnit.ETH} />
+          </SelectorOption>
+          <SelectorOption value={FeeToken.STRK}>
+            <Card title="STRK" value={FeeTokenUnit.STRK} />
+          </SelectorOption>
         </Selector>
       </Field>
     </Form>
