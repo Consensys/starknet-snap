@@ -90,7 +90,7 @@ export const formatCallData = async (
       try {
         const senderAddress = address;
         const recipientAddress = calldata[0]; // Assuming calldata[0] is the recipient address
-        const amount = formatUnits(calldata[1], token.decimals); // Convert amount using token decimals
+        const amount = calldata[1]; // Convert amount using token decimals
 
         // Populate transfer-specific fields
         callData.isTransfer = true;
@@ -99,7 +99,6 @@ export const formatCallData = async (
         callData.amount = amount;
         callData.tokenSymbol = token.symbol;
         callData.decimals = token.decimals;
-        callData.label = 'Token Transfer';
       } catch (error) {
         // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
         console.warn(`Error in amount conversion: ${error}`);
