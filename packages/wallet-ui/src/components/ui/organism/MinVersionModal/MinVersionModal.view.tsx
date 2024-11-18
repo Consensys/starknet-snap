@@ -11,37 +11,21 @@ export const MinVersionModalView = () => {
       <StarknetLogo />
       <Title>A new version of the Starknet Snap is available</Title>
       <Description>
-        To use this dApp, please:
+        To use this dapp, please install the latest version by following those
+        steps:
         <ul>
           <li>
-            Ensure you have the latest version of{' '}
-            <a href="https://metamask.io">MetaMask</a> installed (v12.5 or
-            higher is required).
+            Delete the current version in MetaMask by going in Settings {'>'}{' '}
+            Snaps {'>'} @consensys/starknet-snap {'>'} See details {'>'} Remove
+            Snap
           </li>
+          <li>Refresh the page</li>
           <li>
-            Install the latest version of the Starknet Snap by following these
-            steps:
-            <ul>
-              <li>
-                Remove the current version in MetaMask by navigating to{' '}
-                <strong>
-                  Settings {'>'} Snaps {'>'} @consensys/starknet-snap {'>'} See
-                  Details {'>'} Remove Snap
-                </strong>
-                .
-              </li>
-              <li>Refresh the page.</li>
-              <li>
-                Click <strong>Connect</strong>, the new version will be proposed
-                for installation.
-              </li>
-            </ul>
+            Click on connect, the new version will be proposed for installation.
           </li>
         </ul>
-        <p>
-          <strong>Note</strong>: Your account will be automatically recovered,
-          and future upgrades will be managed automatically.
-        </p>
+        Note: Your account will be automatically recovered. Future upgrades will
+        be managed automatically
       </Description>
     </Wrapper>
   );
