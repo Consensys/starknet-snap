@@ -2234,7 +2234,6 @@ __metadata:
     "@types/chai": ^4.3.1
     "@types/chai-as-promised": ^7.1.5
     "@types/react": 18.2.4
-    "@types/react-dom": 18.2.4
     "@types/sinon": ^10.0.11
     "@types/sinon-chai": ^3.2.8
     "@typescript-eslint/eslint-plugin": ^5.42.1
@@ -7951,15 +7950,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react-dom@npm:18.2.4":
-  version: 18.2.4
-  resolution: "@types/react-dom@npm:18.2.4"
-  dependencies:
-    "@types/react": "*"
-  checksum: 8301f35cf1cbfec8c723e9477aecf87774e3c168bd457d353b23c45064737213d3e8008b067c6767b7b08e4f2b3823ee239242a6c225fc91e7f8725ef8734124
-  languageName: node
-  linkType: hard
-
 "@types/react-dom@npm:^18.0.0, @types/react-dom@npm:^18.0.5":
   version: 18.3.0
   resolution: "@types/react-dom@npm:18.3.0"
@@ -7985,17 +7975,6 @@ __metadata:
     "@types/prop-types": "*"
     csstype: ^3.0.2
   checksum: c63d6a78163244e2022b01ef79b0baec4fe4da3475dc4a90bb8accefad35ef0c43560fd0312e5974f92a0f1108aa4d669ac72d73d66396aa060ea03b5d2e3873
-  languageName: node
-  linkType: hard
-
-"@types/react@npm:18.0.15":
-  version: 18.0.15
-  resolution: "@types/react@npm:18.0.15"
-  dependencies:
-    "@types/prop-types": "*"
-    "@types/scheduler": "*"
-    csstype: ^3.0.2
-  checksum: e22cc388d1c145aa184787e44dc28db4789976c704cd5db475c170bb76a560eb81def5f346cfe750949bb3d43ad88822b8cbb9f19b1286e3795892a8263e7715
   languageName: node
   linkType: hard
 
@@ -25247,7 +25226,6 @@ __metadata:
     "@commitlint/config-conventional": ^17.0.3
     "@lavamoat/allow-scripts": ^3.0.0
     "@lavamoat/preinstall-always-fail": ^2.0.0
-    "@types/react": 18.0.15
     husky: ^8.0.0
   languageName: unknown
   linkType: soft
