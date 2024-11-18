@@ -93,6 +93,11 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
   logger.log(`${request.method}:\nrequestParams: ${toJson(requestParams)}`);
 
   try {
+    if (request.method === 'ping') {
+      logger.log('pong');
+      return 'pong';
+    }
+
     // TODO: this will causing racing condition, need to be fixed
     let state: SnapState = await getStateData<SnapState>();
     if (!state) {
@@ -104,11 +109,6 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
       };
       // initialize state if empty and set default data
       await setStateData(state);
-    }
-
-    if (request.method === 'ping') {
-      logger.log('pong');
-      return 'pong';
     }
 
     // TODO: this can be remove, after state manager is implemented
