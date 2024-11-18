@@ -7,6 +7,7 @@ import {
   Value,
   Text,
   Icon,
+  Divider,
 } from '@metamask/snaps-sdk/jsx';
 import { formatUnits } from 'ethers/lib/utils';
 
@@ -123,18 +124,18 @@ export const ExecuteTxnUI: SnapComponent<ExecuteTxnUIProps> = ({
           <Section>
             {call.isTransfer ? (
               <AddressUI
-                label="Transfer"
+                label="Token Transfer"
                 address={call.contractAddress}
                 chainId={chainId}
               />
             ) : (
               <AddressUI
-                label="Contract"
+                label="Contract Interaction"
                 address={call.contractAddress}
                 chainId={chainId}
               />
             )}
-            {call.isTransfer ? (
+            {call.amount && call.isTransfer ? (
               <Section>
                 {call.senderAddress === signer ? null : (
                   <AddressUI
@@ -149,7 +150,7 @@ export const ExecuteTxnUI: SnapComponent<ExecuteTxnUIProps> = ({
                   chainId={chainId}
                 />
                 <Row label={`Amount`}>
-                  <Text>{`${call.amount as string} ${
+                  <Text>{`${formatUnits(call.amount, call.decimals)} ${
                     call.tokenSymbol as string
                   }`}</Text>
                 </Row>
@@ -161,28 +162,26 @@ export const ExecuteTxnUI: SnapComponent<ExecuteTxnUIProps> = ({
         ))}
         <FeeTokenSelector selectedToken={selectedFeeToken as FeeToken} />
         <Section>
-          <Box direction="horizontal">
-            <Icon name="gas" size="md" />
-            <Row label="Estimated network fee">
-              <Value
-                value={`${formatUnits(
-                  maxFee,
-                  DEFAULT_DECIMAL_PLACES,
-                )} ${selectedFeeToken}`}
-                extra={`$0`}
-              />
-            </Row>
+          <Icon name="gas" size="md" />
+          <Row label="Estimated network fee">
+            <Value
+              value={`${formatUnits(
+                maxFee,
+                DEFAULT_DECIMAL_PLACES,
+              )} ${selectedFeeToken}`}
+              extra={`$0`}
+            />
+          </Row>
+          <Divider />
+          <Icon name="money" size="md" />
+          <Box direction="vertical">
+            {Object.entries(tokenTotals).map(([tokenSymbol, { amount }]) => (
+              <Row key={tokenSymbol} label={`Total for ${tokenSymbol}`}>
+                <Value value={`${amount} ${tokenSymbol}`} extra={`$0`} />
+              </Row>
+            ))}
           </Box>
-          <Box direction="horizontal">
-            <Icon name="money" size="md" />
-            <Box direction="vertical">
-              {Object.entries(tokenTotals).map(([tokenSymbol, { amount }]) => (
-                <Row key={tokenSymbol} label={`Total for ${tokenSymbol}`}>
-                  <Value value={`${amount} ${tokenSymbol}`} extra={`$0`} />
-                </Row>
-              ))}
-            </Box>
-          </Box>
+          {includeDeploy ? <Divider /> : null}
           {includeDeploy ? (
             <Box direction="horizontal">
               <Icon name="warning" size="md" />
