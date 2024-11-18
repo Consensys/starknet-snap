@@ -1,8 +1,4 @@
-import type {
-  InputChangeEvent,
-  InterfaceContext,
-  UserInputEvent,
-} from '@metamask/snaps-sdk';
+import type { InputChangeEvent, InterfaceContext } from '@metamask/snaps-sdk';
 import type { Call, EstimateFee } from 'starknet';
 import { constants, TransactionType } from 'starknet';
 
@@ -17,7 +13,7 @@ import { getEstimatedFees } from '../utils/starknetUtils';
 import { AccountUserInputController } from '../utils/user-input';
 import { hasSufficientFunds } from './utils';
 
-export class FeeTokenSelectorController extends AccountUserInputController {
+export class FeeTokenSelectorController extends AccountUserInputController<TransactionRequestStateManager> {
   protected stateManager: TransactionRequestStateManager;
 
   constructor() {
@@ -49,21 +45,6 @@ export class FeeTokenSelectorController extends AccountUserInputController {
             : undefined,
       },
     );
-  }
-
-  async getSigner(
-    id: string,
-    _event: UserInputEvent,
-    context: InterfaceContext | null,
-  ): Promise<string> {
-    const request = await this.stateManager.getRequest({
-      id: context?.id as string,
-      interfaceId: id,
-    });
-    if (request?.signer) {
-      return request?.signer;
-    }
-    throw new Error('No signer found in stored request state');
   }
 
   protected async handleUserInput(

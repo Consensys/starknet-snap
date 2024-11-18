@@ -6,6 +6,7 @@ import { constants } from 'starknet';
 
 import { generateAccounts } from '../__tests__/helper';
 import { NetworkStateManager } from '../state/network-state-manager';
+import { TransactionRequestStateManager } from '../state/request-state-manager';
 import type { SnapState } from '../types/snapState';
 import * as uiUtils from '../ui/utils';
 import { logger } from './logger';
@@ -71,7 +72,14 @@ describe('UserInputController', () => {
 });
 
 describe('AccountUserInputController', () => {
-  class MockAccountUserInputController extends AccountUserInputController {
+  class MockAccountUserInputController extends AccountUserInputController<TransactionRequestStateManager> {
+    protected stateManager: TransactionRequestStateManager;
+
+    constructor() {
+      super();
+      this.stateManager = new TransactionRequestStateManager();
+    }
+
     async getSigner(
       _id: string,
       _event: UserInputEvent,
