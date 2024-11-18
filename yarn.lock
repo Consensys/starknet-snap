@@ -2230,10 +2230,12 @@ __metadata:
     "@metamask/snaps-cli": ^6.2.1
     "@metamask/snaps-jest": ^8.2.0
     "@metamask/snaps-sdk": ^6.1.1
+    "@metamask/snaps-sdk": ^6.1.1
     "@metamask/utils": ^9.1.0
     "@types/chai": ^4.3.1
     "@types/chai-as-promised": ^7.1.5
     "@types/react": 18.2.4
+    "@types/react-dom": 18.2.4
     "@types/sinon": ^10.0.11
     "@types/sinon-chai": ^3.2.8
     "@typescript-eslint/eslint-plugin": ^5.42.1
@@ -7947,6 +7949,15 @@ __metadata:
   version: 1.2.7
   resolution: "@types/range-parser@npm:1.2.7"
   checksum: 95640233b689dfbd85b8c6ee268812a732cf36d5affead89e806fe30da9a430767af8ef2cd661024fd97e19d61f3dec75af2df5e80ec3bea000019ab7028629a
+  languageName: node
+  linkType: hard
+
+"@types/react-dom@npm:18.2.4":
+  version: 18.2.4
+  resolution: "@types/react-dom@npm:18.2.4"
+  dependencies:
+    "@types/react": "*"
+  checksum: 8301f35cf1cbfec8c723e9477aecf87774e3c168bd457d353b23c45064737213d3e8008b067c6767b7b08e4f2b3823ee239242a6c225fc91e7f8725ef8734124
   languageName: node
   linkType: hard
 
