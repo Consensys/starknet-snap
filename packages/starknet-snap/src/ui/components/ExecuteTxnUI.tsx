@@ -4,7 +4,6 @@ import {
   Container,
   Row,
   Section,
-  Value,
   Text,
   Icon,
   Divider,
@@ -164,22 +163,26 @@ export const ExecuteTxnUI: SnapComponent<ExecuteTxnUIProps> = ({
         <Section>
           <Icon name="gas" size="md" />
           <Row label="Estimated network fee">
-            <Value
-              value={`${formatUnits(
+            <Text>
+              {`${formatUnits(
                 maxFee,
                 DEFAULT_DECIMAL_PLACES,
               )} ${selectedFeeToken}`}
-              extra={`$0`}
-            />
+            </Text>
           </Row>
           <Divider />
           <Icon name="money" size="md" />
           <Box direction="vertical">
-            {Object.entries(tokenTotals).map(([tokenSymbol, { amount }]) => (
-              <Row key={tokenSymbol} label={`Total for ${tokenSymbol}`}>
-                <Value value={`${amount} ${tokenSymbol}`} extra={`$0`} />
-              </Row>
-            ))}
+            {Object.entries(tokenTotals).map(
+              ([tokenSymbol, { amount, decimals }]) => (
+                <Row key={tokenSymbol} label={`Total for ${tokenSymbol}`}>
+                  <Text>{`${formatUnits(
+                    amount,
+                    decimals,
+                  )} ${tokenSymbol}`}</Text>
+                </Row>
+              ),
+            )}
           </Box>
           {includeDeploy ? <Divider /> : null}
           {includeDeploy ? (
