@@ -8012,13 +8012,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/scheduler@npm:*":
-  version: 0.23.0
-  resolution: "@types/scheduler@npm:0.23.0"
-  checksum: 874d753aa65c17760dfc460a91e6df24009bde37bfd427a031577b30262f7770c1b8f71a21366c7dbc76111967384cf4090a31d65315155180ef14bd7acccb32
-  languageName: node
-  linkType: hard
-
 "@types/semver@npm:^7.3.10, @types/semver@npm:^7.3.12":
   version: 7.5.8
   resolution: "@types/semver@npm:7.5.8"
