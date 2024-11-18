@@ -55,6 +55,7 @@ export type Erc20Token = {
   symbol: string;
   decimals: number;
   chainId: string; // in hex
+  icon?: string;
 };
 
 export type Network = {

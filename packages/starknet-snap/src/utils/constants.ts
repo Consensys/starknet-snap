@@ -65,6 +65,7 @@ export const ETHER_MAINNET: Erc20Token = {
   symbol: 'ETH',
   decimals: 18,
   chainId: STARKNET_MAINNET_NETWORK.chainId,
+  icon: 'ethIcon',
 };
 
 export const ETHER_SEPOLIA_TESTNET: Erc20Token = {
@@ -73,6 +74,7 @@ export const ETHER_SEPOLIA_TESTNET: Erc20Token = {
   symbol: 'ETH',
   decimals: 18,
   chainId: SN_SEPOLIA.chainId,
+  icon: 'ethIcon',
 };
 
 export const DAI_MAINNET: Erc20Token = {
@@ -81,6 +83,7 @@ export const DAI_MAINNET: Erc20Token = {
   symbol: 'DAI',
   decimals: 18,
   chainId: STARKNET_MAINNET_NETWORK.chainId,
+  icon: 'daiIcon',
 };
 
 export const DAI_SEPOLIA_TESTNET: Erc20Token = {
@@ -89,6 +92,7 @@ export const DAI_SEPOLIA_TESTNET: Erc20Token = {
   symbol: 'DAI',
   decimals: 18,
   chainId: SN_SEPOLIA.chainId,
+  icon: 'daiIcon',
 };
 
 export const STRK_MAINNET: Erc20Token = {
@@ -97,6 +101,7 @@ export const STRK_MAINNET: Erc20Token = {
   symbol: 'STRK',
   decimals: 18,
   chainId: STARKNET_MAINNET_NETWORK.chainId,
+  icon: 'strkIcon',
 };
 
 export const STRK_SEPOLIA_TESTNET: Erc20Token = {
@@ -105,6 +110,7 @@ export const STRK_SEPOLIA_TESTNET: Erc20Token = {
   symbol: 'STRK',
   decimals: 18,
   chainId: SN_SEPOLIA.chainId,
+  icon: 'strkIcon',
 };
 
 export const USDC_MAINNET: Erc20Token = {
@@ -113,6 +119,7 @@ export const USDC_MAINNET: Erc20Token = {
   symbol: 'USDC',
   decimals: 6,
   chainId: STARKNET_MAINNET_NETWORK.chainId,
+  icon: 'usdcIcon',
 };
 
 export const USDC_SEPOLIA_TESTNET: Erc20Token = {
@@ -121,6 +128,7 @@ export const USDC_SEPOLIA_TESTNET: Erc20Token = {
   symbol: 'USDC',
   decimals: 6,
   chainId: SN_SEPOLIA.chainId,
+  icon: 'usdcIcon',
 };
 
 export const USDT_MAINNET: Erc20Token = {
@@ -129,6 +137,7 @@ export const USDT_MAINNET: Erc20Token = {
   symbol: 'USDT',
   decimals: 6,
   chainId: STARKNET_MAINNET_NETWORK.chainId,
+  icon: 'usdtIcon',
 };
 
 export const USDT_SEPOLIA_TESTNET: Erc20Token = {
@@ -137,6 +146,7 @@ export const USDT_SEPOLIA_TESTNET: Erc20Token = {
   symbol: 'USDT',
   decimals: 6,
   chainId: SN_SEPOLIA.chainId,
+  icon: 'usdtIcon',
 };
 
 export const TEST_TOKEN_MAINNET: Erc20Token = {

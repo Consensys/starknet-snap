@@ -39,5 +39,6 @@ module.exports = {
     '**/public',
     '**/.cache',
     '**/example',
+    '**/svg.d.ts',
   ],
 };
