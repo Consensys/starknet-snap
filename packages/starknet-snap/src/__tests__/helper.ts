@@ -324,7 +324,7 @@ export function generateTransactionRequests({
       type: TransactionType.INVOKE,
       signer: address,
       maxFee: '100',
-      feeToken:
+      selectedFeeToken:
         feeTokens[Math.floor(generateRandomValue() * feeTokens.length)].symbol,
       calls: [
         {

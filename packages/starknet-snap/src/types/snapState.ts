@@ -30,7 +30,7 @@ export type TransactionRequest = {
   chainId: string;
   maxFee: string;
   calls: FormattedCallData[];
-  feeToken: string;
+  selectedFeeToken: string;
   includeDeploy: boolean;
 };
 

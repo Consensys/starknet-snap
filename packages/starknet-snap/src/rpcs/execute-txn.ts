@@ -12,7 +12,8 @@ import { TransactionStateManager } from '../state/transaction-state-manager';
 import { FeeToken } from '../types/snapApi';
 import type { TransactionRequest } from '../types/snapState';
 import { VoyagerTransactionType, type Transaction } from '../types/snapState';
-import { generateExecuteTxnFlow } from '../ui/utils';
+import { ExecuteTxnUI } from '../ui/components';
+import { generateFlow } from '../ui/utils';
 import type { AccountRpcControllerOptions } from '../utils';
 import {
   AddressStruct,
@@ -144,14 +145,14 @@ export class ExecuteTxnRpc extends AccountRpcController<
       signer: address,
       maxFee: suggestedMaxFee,
       calls: formattedCalls,
-      feeToken:
+      selectedFeeToken:
         version === constants.TRANSACTION_VERSION.V3
           ? FeeToken.STRK
           : FeeToken.ETH,
       includeDeploy,
     };
 
-    const interfaceId = await generateExecuteTxnFlow(request);
+    const interfaceId = await generateFlow(ExecuteTxnUI, request);
 
     request.interfaceId = interfaceId;
 
