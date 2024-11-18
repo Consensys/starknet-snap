@@ -1,7 +1,12 @@
 import type { constants } from 'starknet';
 
 import { generateAccounts, type StarknetAccount } from '../../__tests__/helper';
-import type { Erc20Token, Network, Transaction } from '../../types/snapState';
+import type {
+  Erc20Token,
+  Network,
+  Transaction,
+  TransactionRequest,
+} from '../../types/snapState';
 import * as snapHelper from '../../utils/snap';
 
 jest.mock('../../utils/snap');
@@ -20,12 +25,14 @@ export const mockState = async ({
   networks,
   transactions,
   currentNetwork,
+  transactionRequests,
 }: {
   accounts?: StarknetAccount[];
   tokens?: Erc20Token[];
   networks?: Network[];
   transactions?: Transaction[];
   currentNetwork?: Network;
+  transactionRequests?: TransactionRequest[];
 }) => {
   const getDataSpy = jest.spyOn(snapHelper, 'getStateData');
   const setDataSpy = jest.spyOn(snapHelper, 'setStateData');
@@ -35,6 +42,7 @@ export const mockState = async ({
     networks: networks ?? [],
     transactions: transactions ?? [],
     currentNetwork,
+    transactionRequests: transactionRequests ?? [],
   };
   getDataSpy.mockResolvedValue(state);
   return {

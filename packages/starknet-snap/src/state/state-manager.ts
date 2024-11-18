@@ -15,7 +15,12 @@ export abstract class StateManager<Entity> extends SnapStateManager<SnapState> {
           networks: [],
           transactions: [],
           requireMMUpgrade: undefined,
+          transactionRequests: [],
         };
+      }
+
+      if (!state.transactionRequests) {
+        state.transactionRequests = [];
       }
 
       if (!state.accContracts) {
