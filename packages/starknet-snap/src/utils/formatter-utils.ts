@@ -70,11 +70,8 @@ export const formatCallData = async (
 
     // Base data object for each call, with transfer fields left as optional
     const callData: FormattedCallData = {
-      type: 'contract',
-      label: 'Contract Call',
       contractAddress,
-      chainId,
-      calldata,
+      calldata: calldata as string[],
       entrypoint,
       isTransfer: false, // Set default to false
     };
