@@ -15,11 +15,11 @@ export type FormattedCallData = {
   calldata?: string[];
   entrypoint: string;
   isTransfer: boolean; // Flag to indicate if this call is a transfer
-  senderAddress?: string;
-  recipientAddress?: string;
-  amount?: string;
-  decimals?: number;
-  tokenSymbol?: string;
+  transferSenderAddress?: string;
+  transferRecipientAddress?: string;
+  transferAmount?: string;
+  transferTokenDecimals?: number;
+  transferTokenSymbol?: string;
 };
 
 export type TransactionRequest = {
