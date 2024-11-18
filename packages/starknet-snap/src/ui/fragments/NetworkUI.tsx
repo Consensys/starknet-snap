@@ -1,5 +1,5 @@
 import type { SnapComponent } from '@metamask/snaps-sdk/jsx';
-import { Text } from '@metamask/snaps-sdk/jsx';
+import { Row, Text } from '@metamask/snaps-sdk/jsx';
 
 export type NetworkUIProps = {
   networkName: string;

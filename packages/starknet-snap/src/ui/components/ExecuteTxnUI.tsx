@@ -45,9 +45,9 @@ type TokenTotals = Record<
 export const calculateTotals = (
   calls: {
     isTransfer: boolean;
-    tokenSymbol: string;
-    amount: string; // Amount as a string BigInt
-    decimals: number;
+    transferAmount?: string; // Amount as a string BigInt
+    transferTokenSymbol?: string;
+    transferTokenDecimals?: number;
   }[],
   maxFee: string,
   selectedFeeToken: string,
@@ -56,15 +56,20 @@ export const calculateTotals = (
 
   // Sum up transfer amounts for each token
   calls.forEach((call) => {
-    if (call.isTransfer) {
-      const amount = BigInt(call.amount); // Convert to BigInt
-      if (!tokenTotals[call.tokenSymbol]) {
-        tokenTotals[call.tokenSymbol] = {
+    if (
+      call.transferAmount &&
+      call.transferTokenSymbol &&
+      call.transferTokenDecimals &&
+      call.isTransfer
+    ) {
+      const amount = BigInt(call.transferAmount); // Convert to BigInt
+      if (!tokenTotals[call.transferTokenSymbol]) {
+        tokenTotals[call.transferTokenSymbol] = {
           amount: BigInt(0),
-          decimals: call.decimals,
+          decimals: call.transferTokenDecimals,
         };
       }
-      tokenTotals[call.tokenSymbol].amount += amount;
+      tokenTotals[call.transferTokenSymbol].amount += amount;
     }
   });
 
@@ -134,24 +139,28 @@ export const ExecuteTxnUI: SnapComponent<ExecuteTxnUIProps> = ({
                 chainId={chainId}
               />
             )}
-            {call.amount && call.isTransfer ? (
+            {call.transferAmount &&
+            call.transferSenderAddress &&
+            call.transferRecipientAddress &&
+            call.isTransfer ? (
               <Section>
-                {call.senderAddress === signer ? null : (
+                {call.transferSenderAddress === signer ? null : (
                   <AddressUI
                     label="Sender Address"
-                    address={call.senderAddress}
+                    address={call.transferSenderAddress}
                     chainId={chainId}
                   />
                 )}
                 <AddressUI
                   label="Recipient Address"
-                  address={call.recipientAddress}
+                  address={call.transferRecipientAddress}
                   chainId={chainId}
                 />
                 <Row label={`Amount`}>
-                  <Text>{`${formatUnits(call.amount, call.decimals)} ${
-                    call.tokenSymbol as string
-                  }`}</Text>
+                  <Text>{`${formatUnits(
+                    call.transferAmount,
+                    call.transferTokenDecimals,
+                  )} ${call.transferTokenSymbol as string}`}</Text>
                 </Row>
               </Section>
             ) : (
