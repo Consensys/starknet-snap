@@ -133,7 +133,7 @@ export class TransactionRequestStateManager extends RequestStateManager<Transact
     data: TransactionRequest,
   ): void {
     dataInState.maxFee = data.maxFee;
-    dataInState.feeToken = data.feeToken;
+    dataInState.selectedFeeToken = data.selectedFeeToken;
     dataInState.resourceBounds = [...data.resourceBounds];
   }
 

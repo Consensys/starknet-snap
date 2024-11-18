@@ -1,20 +1,12 @@
-import {
-  Link,
-  Row,
-  Text,
-  Image,
-  type SnapComponent,
-} from '@metamask/snaps-sdk/jsx';
+import { Link, Row, Text, type SnapComponent } from '@metamask/snaps-sdk/jsx';
 
 import { getExplorerUrl, shortenAddress } from '../../utils';
-import { icons } from '../icons';
 
 export type AddressUIProps = {
   label: string;
   address: string;
   chainId?: string;
   shortern?: boolean;
-  svgIcon?: string;
 };
 
 /**
@@ -26,22 +18,18 @@ export type AddressUIProps = {
  * @param params.address - The address.
  * @param [params.chainId] - The chain ID; if set, an explorer URL link will be generated.
  * @param [params.shortern] - Whether to shorten the address. Default is true.
- * @param [params.svgIcon] - An optional SVG icon to display instead of the address text.
  * @returns A row component with the address or icon.
  */
 export const AddressUI: SnapComponent<AddressUIProps> = ({
   label,
   address,
   chainId,
-  svgIcon,
   shortern = true,
 }: AddressUIProps) => {
   const displayValue = shortern ? shortenAddress(address) : address;
   const explorerUrl = chainId ? getExplorerUrl(address, chainId) : null;
   let content;
-  if (svgIcon && icons[svgIcon]) {
-    content = <Image src={icons[svgIcon]} />;
-  } else if (explorerUrl) {
+  if (explorerUrl) {
     content = <Link href={explorerUrl}>{displayValue}</Link>;
   } else {
     content = <Text>{displayValue}</Text>;

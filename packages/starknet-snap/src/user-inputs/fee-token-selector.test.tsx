@@ -8,6 +8,7 @@ import {
 import { mockAccount, prepareMockAccount } from '../rpcs/__tests__/helper';
 import { TransactionRequestStateManager } from '../state/request-state-manager';
 import type { SnapState } from '../types/snapState';
+import { ExecuteTxnUI } from '../ui/components';
 import * as uiUtils from '../ui/utils';
 import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../utils/constants';
 import { feeTokenSelectorController } from './fee-token-selector';
@@ -35,7 +36,7 @@ describe('fee-token-selector', () => {
     const account = await mockAccount(constants.StarknetChainId.SN_SEPOLIA);
     prepareMockAccount(account, state);
 
-    const updateExecuteTxnFlowSpy = jest.spyOn(uiUtils, 'updateExecuteTxnFlow');
+    const updateFlowSpy = jest.spyOn(uiUtils, 'updateFlow');
 
     const getTransactionRequestSpy = jest.spyOn(
       TransactionRequestStateManager.prototype,
@@ -68,7 +69,7 @@ describe('fee-token-selector', () => {
       event,
       context,
       handleUserInputSpy,
-      updateExecuteTxnFlowSpy,
+      updateFlowSpy,
       transactionRequests,
       getFeesSpy,
       hasSufficientFundsSpy,
@@ -84,7 +85,7 @@ describe('fee-token-selector', () => {
       context,
       transactionRequests,
       handleUserInputSpy,
-      updateExecuteTxnFlowSpy,
+      updateFlowSpy,
       getFeesSpy,
       getTransactionRequestSpy,
       upsertTransactionRequestSpy,
@@ -98,8 +99,10 @@ describe('fee-token-selector', () => {
     await feeTokenSelectorController.execute(id, event, context);
 
     expect(handleUserInputSpy).toHaveBeenCalledWith(id, event, context);
-    expect(updateExecuteTxnFlowSpy).toHaveBeenCalledWith(request, {
-      fees: 'Error calculating fees',
+    expect(updateFlowSpy).toHaveBeenCalledWith(ExecuteTxnUI, request, {
+      errors: {
+        fees: 'Error calculating fees',
+      },
     });
     expect(upsertTransactionRequestSpy).toHaveBeenCalledTimes(0);
   });
@@ -111,7 +114,7 @@ describe('fee-token-selector', () => {
       context,
       transactionRequests,
       handleUserInputSpy,
-      updateExecuteTxnFlowSpy,
+      updateFlowSpy,
       getFeesSpy,
       getTransactionRequestSpy,
       upsertTransactionRequestSpy,
@@ -130,8 +133,10 @@ describe('fee-token-selector', () => {
     await feeTokenSelectorController.execute(id, event, context);
 
     expect(handleUserInputSpy).toHaveBeenCalledWith(id, event, context);
-    expect(updateExecuteTxnFlowSpy).toHaveBeenCalledWith(request, {
-      fees: 'Not enough funds to pay for fee',
+    expect(updateFlowSpy).toHaveBeenCalledWith(ExecuteTxnUI, request, {
+      errors: {
+        fees: 'Not enough funds to pay for fee',
+      },
     });
     expect(upsertTransactionRequestSpy).toHaveBeenCalledTimes(0);
   });
@@ -143,7 +148,7 @@ describe('fee-token-selector', () => {
       context,
       transactionRequests,
       handleUserInputSpy,
-      updateExecuteTxnFlowSpy,
+      updateFlowSpy,
       hasSufficientFundsSpy,
       getFeesSpy,
       getTransactionRequestSpy,
@@ -164,7 +169,7 @@ describe('fee-token-selector', () => {
     await feeTokenSelectorController.execute(id, event, context);
 
     expect(handleUserInputSpy).toHaveBeenCalledWith(id, event, context);
-    expect(updateExecuteTxnFlowSpy).toHaveBeenCalledWith(request);
+    expect(updateFlowSpy).toHaveBeenCalledWith(ExecuteTxnUI, request);
     expect(upsertTransactionRequestSpy).toHaveBeenCalledWith(request);
   });
 

@@ -6,6 +6,7 @@ import { TransactionRequestStateManager } from '../state/request-state-manager';
 import type { FeeTokenUnit } from '../types/snapApi';
 import { FeeToken } from '../types/snapApi';
 import type { TransactionRequest } from '../types/snapState';
+import type { ExecuteTxnUIProps } from '../ui/components';
 import { ExecuteTxnUI } from '../ui/components';
 import { updateFlow } from '../ui/utils';
 import { getEstimatedFees } from '../utils/starknetUtils';
@@ -53,7 +54,7 @@ export class ExecuteFeeTokenSelectorController extends AccountUserInputControlle
   ): Promise<void> {
     let request: TransactionRequest | null = null;
     try {
-      const feeToken = event.value as FeeToken;
+      const selectedFeeToken = event.value as FeeToken;
       if (context) {
         request = await this.stateManager.getRequest({
           id: context.id as string,
@@ -69,14 +70,14 @@ export class ExecuteFeeTokenSelectorController extends AccountUserInputControlle
                 contractAddress: call.contractAddress,
                 entrypoint: call.entrypoint,
               })),
-              feeToken,
+              selectedFeeToken,
             );
 
           const sufficientFunds = await hasSufficientFunds(
             request.signer,
             this.network,
             request.calls,
-            feeToken,
+            selectedFeeToken,
             suggestedMaxFee,
           );
 
@@ -85,7 +86,7 @@ export class ExecuteFeeTokenSelectorController extends AccountUserInputControlle
           }
 
           request.maxFee = suggestedMaxFee;
-          request.feeToken = feeToken;
+          request.selectedFeeToken = selectedFeeToken;
           request.includeDeploy = includeDeploy;
           request.resourceBounds = estimateResults.map(
             (result) => result.resourceBounds,
@@ -103,7 +104,7 @@ export class ExecuteFeeTokenSelectorController extends AccountUserInputControlle
           : 'Error calculating fees';
       // On failure, display ExecuteTxnUI with an error message
       if (request) {
-        await updateFlow(ExecuteTxnUI, request, {
+        await updateFlow<ExecuteTxnUIProps>(ExecuteTxnUI, request, {
           errors: { fees: errorMessage },
         });
       } else {

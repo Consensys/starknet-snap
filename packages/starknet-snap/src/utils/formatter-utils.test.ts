@@ -106,10 +106,7 @@ describe('formatCallData', () => {
 
     expect(result).toStrictEqual([
       {
-        type: 'contract',
-        label: 'Contract Call',
         contractAddress: '0xContractAddress1',
-        chainId: '0xChainId',
         calldata: ['0xRecipientAddress', '1000'],
         entrypoint: 'someOtherEntrypoint',
         isTransfer: false,
@@ -149,19 +146,15 @@ describe('formatCallData', () => {
 
     expect(result).toStrictEqual([
       {
-        type: 'contract',
-        label: 'Token Transfer',
         contractAddress: '0xErc20TokenAddress',
-        chainId: '0xChainId',
         calldata: ['0xRecipientAddress', '1000'],
         entrypoint: 'transfer',
-        icon: undefined,
         isTransfer: true,
-        senderAddress: '0xSenderAddress',
-        recipientAddress: '0xRecipientAddress',
-        amount: '1000',
-        tokenSymbol: 'TKN',
-        decimals: 18,
+        transferSenderAddress: '0xSenderAddress',
+        transferRecipientAddress: '0xRecipientAddress',
+        transferAmount: '1000',
+        transferTokenSymbol: 'TKN',
+        transferTokenDecimals: 18,
       },
     ]);
   });
