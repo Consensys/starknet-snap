@@ -60,13 +60,16 @@ describe('accumulateTotals', () => {
         },
       },
     },
-  ])('sums up transfer amounts for $selectedFeeToken', ({ selectedFeeToken, expectedResult }) => {
-    const calls = mockCalls();
-  
-    const result = accumulateTotals(calls, mockMaxFee, selectedFeeToken);
-  
-    expect(result).toStrictEqual(expectedResult);
-  });
+  ])(
+    'sums up transfer amounts for $selectedFeeToken',
+    ({ selectedFeeToken, expectedResult }) => {
+      const calls = mockCalls();
+
+      const result = accumulateTotals(calls, mockMaxFee, selectedFeeToken);
+
+      expect(result).toStrictEqual(expectedResult);
+    },
+  );
 
   it('creates a new token entry if the fee token was not part of calls', () => {
     const calls = mockCalls();
