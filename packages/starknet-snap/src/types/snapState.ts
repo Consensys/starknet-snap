@@ -17,6 +17,7 @@ export type TokenTransferData = {
   decimals: number;
   symbol: string;
 };
+
 export type FormattedCallData = {
   contractAddress: string;
   calldata?: string[];
