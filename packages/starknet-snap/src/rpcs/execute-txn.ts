@@ -21,7 +21,7 @@ import {
   UniversalDetailsStruct,
   CallsStruct,
   mapDeprecatedParams,
-  confirmDialogInteractiveUI,
+  createInteractiveConfirmDialog,
   callToTransactionReqCall,
 } from '../utils';
 import { UserRejectedOpError } from '../utils/exceptions';
@@ -160,7 +160,7 @@ export class ExecuteTxnRpc extends AccountRpcController<
 
     request.interfaceId = interfaceId;
 
-    if (!(await confirmDialogInteractiveUI(interfaceId))) {
+    if (!(await createInteractiveConfirmDialog(interfaceId))) {
       throw new UserRejectedOpError() as unknown as Error;
     }
 
