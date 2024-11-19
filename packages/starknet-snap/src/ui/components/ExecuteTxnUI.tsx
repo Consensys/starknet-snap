@@ -20,6 +20,7 @@ export type ExecuteTxnUIProps = {
   type: string;
   signer: string;
   chainId: string;
+  networkName: string;
   maxFee: string;
   calls: FormattedCallData[];
   selectedFeeToken: string;
@@ -32,6 +33,7 @@ export type ExecuteTxnUIProps = {
  * @param props - The component props.
  * @param props.signer - The signer for the transaction.
  * @param props.chainId - The ID of the chain for the transaction.
+ * @param props.networkName - The ID of the chain for the transaction.
  * @param props.maxFee - The maximum fee allowed for the transaction.
  * @param props.calls - The calls involved in the transaction.
  * @param props.selectedFeeToken - The token used for fees.
@@ -42,6 +44,7 @@ export type ExecuteTxnUIProps = {
 export const ExecuteTxnUI: SnapComponent<ExecuteTxnUIProps> = ({
   signer,
   chainId,
+  networkName,
   maxFee,
   calls,
   selectedFeeToken,
@@ -50,12 +53,12 @@ export const ExecuteTxnUI: SnapComponent<ExecuteTxnUIProps> = ({
 }) => {
   // Calculate the totals using the helper
   const tokenTotals = accumulateTotals(calls, maxFee, selectedFeeToken);
-
   return (
     <Container>
       <Box>
         <Section>
-          <AddressUI label="Signer" address={signer} chainId={chainId} />
+          <NetworkUI networkName={networkName} />
+          <SignerUI address={signer} chainId={chainId} />
         </Section>
 
         {/* Loop through each call and render based on `tokenTransferData` */}
