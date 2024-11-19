@@ -1,18 +1,16 @@
-import type { Component } from '@metamask/snaps-sdk';
+import { Box, Heading, Section } from '@metamask/snaps-sdk/jsx';
 import type { Infer } from 'superstruct';
 import { array, object, string, assign } from 'superstruct';
 
+import { JsonDataUI, SignerUI } from '../ui/fragments';
+import { confirmDialog } from '../ui/utils';
 import {
-  confirmDialog,
   AddressStruct,
   TypeDataStruct,
   AuthorizableStruct,
   BaseRequestStruct,
   AccountRpcController,
   mapDeprecatedParams,
-  signerUI,
-  jsonDataUI,
-  headerUI,
 } from '../utils';
 import { UserRejectedOpError } from '../utils/exceptions';
 import { signMessage as signMessageUtil } from '../utils/starknetUtils';
@@ -95,22 +93,17 @@ export class SignMessageRpc extends AccountRpcController<
     typedDataMessage: Infer<typeof TypeDataStruct>,
     address: string,
   ) {
-    const components: Component[] = [];
-    components.push(headerUI('Do you want to sign this message?'));
-    components.push(
-      signerUI({
-        address,
-        chainId: this.network.chainId,
-      }),
-    );
-    components.push(
-      jsonDataUI({
-        label: 'Message',
-        data: typedDataMessage,
-      }),
-    );
-
-    return await confirmDialog(components);
+    return await confirmDialog({
+      children: (
+        <Box>
+          <Heading>Do you want to sign this message?</Heading>
+          <Section>
+            <SignerUI address={address} chainId={this.network.chainId} />
+            <JsonDataUI label="Message" data={typedDataMessage} />
+          </Section>
+        </Box>
+      ),
+    });
   }
 }
 

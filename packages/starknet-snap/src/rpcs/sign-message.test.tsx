@@ -1,7 +1,9 @@
+import { Box, Heading, Section } from '@metamask/snaps-sdk/jsx';
 import { constants } from 'starknet';
 
 import typedDataExample from '../__tests__/fixture/typedDataExample.json';
 import type { SnapState } from '../types/snapState';
+import { JsonDataUI, SignerUI } from '../ui/fragments';
 import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../utils/constants';
 import {
   UserRejectedOpError,
@@ -11,9 +13,7 @@ import * as starknetUtils from '../utils/starknetUtils';
 import {
   mockAccount,
   prepareMockAccount,
-  prepareConfirmDialog,
-  buildSignerComponent,
-  buildJsonDataComponent,
+  prepareConfirmDialogJsx as prepareConfirmDialog,
 } from './__tests__/helper';
 import { signMessage } from './sign-message';
 import type { SignMessageParams } from './sign-message';
@@ -59,7 +59,7 @@ describe('signMessage', () => {
     const { confirmDialogSpy } = prepareConfirmDialog();
 
     const request = {
-      chainId: constants.StarknetChainId.SN_SEPOLIA,
+      chainId: chainId as constants.StarknetChainId,
       address,
       typedDataMessage: typedDataExample,
       enableAuthorize: true,
@@ -68,11 +68,17 @@ describe('signMessage', () => {
     await signMessage.execute(request);
 
     const calls = confirmDialogSpy.mock.calls[0][0];
-    expect(calls).toStrictEqual([
-      { type: 'heading', value: 'Do you want to sign this message?' },
-      buildSignerComponent(address, chainId),
-      buildJsonDataComponent('Message', typedDataExample),
-    ]);
+    expect(calls).toStrictEqual({
+      children: (
+        <Box>
+          <Heading>Do you want to sign this message?</Heading>
+          <Section>
+            <SignerUI address={address} chainId={chainId} />
+            <JsonDataUI label="Message" data={typedDataExample} />
+          </Section>
+        </Box>
+      ),
+    });
   });
 
   it('throws `UserRejectedOpError` if user denied the operation', async () => {
