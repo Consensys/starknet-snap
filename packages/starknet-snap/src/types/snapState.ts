@@ -34,7 +34,7 @@ export type TransactionRequest = {
   networkName: string;
   maxFee: string;
   calls: FormattedCallData[];
-  feeToken: string;
+  selectedFeeToken: string;
   includeDeploy: boolean;
 };
 
