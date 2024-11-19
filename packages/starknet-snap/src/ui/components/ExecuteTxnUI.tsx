@@ -17,7 +17,6 @@ import { FeeTokenSelector } from '../fragments/FeeTokenSelector';
 import { accumulateTotals } from '../utils';
 
 export type ExecuteTxnUIProps = {
-  type: string;
   signer: string;
   chainId: string;
   networkName: string;
