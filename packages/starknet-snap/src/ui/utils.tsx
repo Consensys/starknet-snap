@@ -15,41 +15,30 @@ export const accumulateTotals = (
   maxFee: string,
   selectedFeeToken: string,
 ): TokenTotals => {
-  const tokenTotals: TokenTotals = {};
-
-  // Sum up transfer amounts for each token
-  calls.forEach((call) => {
-    if (
-      call.transferAmount &&
-      call.transferTokenSymbol &&
-      call.transferTokenDecimals &&
-      call.isTransfer
-    ) {
-      const amount = BigInt(call.transferAmount); // Convert to BigInt
-      if (!tokenTotals[call.transferTokenSymbol]) {
-        tokenTotals[call.transferTokenSymbol] = {
-          amount: BigInt(0),
-          decimals: call.transferTokenDecimals,
-        };
+  return calls.reduce(
+    (acc, call) => {
+      if (call.tokenTransferData) {
+        const amount = BigInt(call.tokenTransferData.amount); // Convert to BigInt
+        if (!acc[call.tokenTransferData.symbol]) {
+          acc[call.tokenTransferData.symbol] = {
+            amount: BigInt(0),
+            decimals: call.tokenTransferData.decimals,
+          };
+        }
+        acc[call.tokenTransferData.symbol].amount += amount;
       }
-      tokenTotals[call.transferTokenSymbol].amount += amount;
-    }
-  });
-  // Add the fee to the corresponding token
-  const feeTokenAmount = BigInt(maxFee);
-  if (tokenTotals[selectedFeeToken]) {
-    tokenTotals[selectedFeeToken].amount += feeTokenAmount;
-  } else {
-    // We derive decimals based on the fee token. Currently, both supported fee tokens, ETH and STRK, use the standard 18 decimals.
-    // Therefore, we use DEFAULT_DECIMAL_PLACES set to 18 here. If additional fee tokens with different decimals are introduced,
-    // this logic should be updated to handle token-specific decimals dynamically.
-    tokenTotals[selectedFeeToken] = {
-      amount: feeTokenAmount,
-      decimals: DEFAULT_DECIMAL_PLACES,
-    };
-  }
-
-  return tokenTotals;
+      return acc;
+    },
+    {
+      // We derive decimals based on the fee token. Currently, both supported fee tokens, ETH and STRK, use the standard 18 decimals.
+      // Therefore, we use DEFAULT_DECIMAL_PLACES set to 18 here. If additional fee tokens with different decimals are introduced,
+      // this logic should be updated to handle token-specific decimals dynamically.
+      [selectedFeeToken]: {
+        amount: BigInt(maxFee),
+        decimals: DEFAULT_DECIMAL_PLACES,
+      },
+    },
+  );
 };
 /**
  * Generate the interface for an interactive ui flow.

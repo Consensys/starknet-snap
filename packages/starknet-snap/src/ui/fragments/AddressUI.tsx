@@ -27,14 +27,13 @@ export const AddressUI: SnapComponent<AddressUIProps> = ({
   shortern = true,
 }: AddressUIProps) => {
   const displayValue = shortern ? shortenAddress(address) : address;
-  const explorerUrl = chainId ? getExplorerUrl(address, chainId) : null;
-
-  let content;
-  if (explorerUrl) {
-    content = <Link href={explorerUrl}>{displayValue}</Link>;
-  } else {
-    content = <Text>{displayValue}</Text>;
-  }
-
-  return <Row label={label}>{content}</Row>;
+  return (
+    <Row label={label}>
+      {chainId ? (
+        <Link href={getExplorerUrl(address, chainId)}>{displayValue}</Link>
+      ) : (
+        <Text>{displayValue}</Text>
+      )}
+    </Row>
+  );
 };

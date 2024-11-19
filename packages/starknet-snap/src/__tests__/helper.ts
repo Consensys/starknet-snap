@@ -337,7 +337,6 @@ export function generateTransactionRequests({
             amount: '1',
           }),
           entrypoint: 'transfer',
-          isTransfer: true,
         },
       ],
       includeDeploy: false,

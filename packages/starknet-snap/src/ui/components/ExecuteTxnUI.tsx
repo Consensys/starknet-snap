@@ -62,7 +62,7 @@ export const ExecuteTxnUI: SnapComponent<ExecuteTxnUIProps> = ({
 
         {calls.map((call) => (
           <Section>
-            {call.isTransfer ? (
+            {call.tokenTransferData ? (
               <AddressUI
                 label="Token Transfer"
                 address={call.contractAddress}
@@ -75,29 +75,18 @@ export const ExecuteTxnUI: SnapComponent<ExecuteTxnUIProps> = ({
                 chainId={chainId}
               />
             )}
-            {call.transferAmount &&
-            call.transferTokenDecimals &&
-            call.transferSenderAddress &&
-            call.transferRecipientAddress &&
-            call.isTransfer ? (
+            {call.tokenTransferData ? (
               <Section>
-                {call.transferSenderAddress === signer ? null : (
-                  <AddressUI
-                    label="Sender Address"
-                    address={call.transferSenderAddress}
-                    chainId={chainId}
-                  />
-                )}
                 <AddressUI
                   label="Recipient Address"
-                  address={call.transferRecipientAddress}
+                  address={call.tokenTransferData.recipientAddress}
                   chainId={chainId}
                 />
                 <Amount
                   label={`Amount`}
-                  amount={call.transferAmount}
-                  decimals={call.transferTokenDecimals}
-                  symbol={call.transferTokenSymbol as string}
+                  amount={call.tokenTransferData.amount}
+                  decimals={call.tokenTransferData.decimals}
+                  symbol={call.tokenTransferData.symbol}
                 />
               </Section>
             ) : (
@@ -110,9 +99,9 @@ export const ExecuteTxnUI: SnapComponent<ExecuteTxnUIProps> = ({
           <Icon name="gas" size="md" />
           <Amount
             label="Estimated network fee"
-            amount="maxFee"
+            amount={maxFee}
             decimals={DEFAULT_DECIMAL_PLACES}
-            symbol="selectedFeeToken"
+            symbol={selectedFeeToken}
           />
           <Divider />
           <Icon name="money" size="md" />
@@ -121,7 +110,7 @@ export const ExecuteTxnUI: SnapComponent<ExecuteTxnUIProps> = ({
               ([tokenSymbol, { amount, decimals }]) => (
                 <Amount
                   label={`Total for ${tokenSymbol}`}
-                  amount={amount}
+                  amount={amount.toString()}
                   decimals={decimals}
                   symbol={tokenSymbol}
                 />
