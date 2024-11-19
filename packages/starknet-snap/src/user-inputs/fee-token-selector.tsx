@@ -6,7 +6,6 @@ import type {
 import type { Call, EstimateFee } from 'starknet';
 import { constants, TransactionType } from 'starknet';
 
-import { TransactionRequestStateManager } from '../state/request-state-manager';
 import type { FeeTokenUnit } from '../types/snapApi';
 import { FeeToken } from '../types/snapApi';
 import type { TransactionRequest } from '../types/snapState';
@@ -23,17 +22,6 @@ import { hasSufficientFunds } from './utils';
  * selecting and validating fee tokens for transactions.
  */
 export class FeeTokenSelectorController extends AccountUserInputController {
-  protected stateManager: TransactionRequestStateManager;
-
-  /**
-   * Initializes the FeeTokenSelectorController.
-   * Sets up the state manager to retrieve and manage associated transaction requests.
-   */
-  constructor() {
-    super();
-    this.stateManager = new TransactionRequestStateManager();
-  }
-
   /**
    * Retrieves the estimated fees for the provided calls and fee token.
    * @param signer - The signer of the transaction.
@@ -68,14 +56,11 @@ export class FeeTokenSelectorController extends AccountUserInputController {
   }
 
   async getSigner(
-    id: string,
+    _id: string,
     _event: UserInputEvent,
     context: InterfaceContext | null,
   ): Promise<string> {
-    const request = await this.stateManager.getTransactionRequest({
-      requestId: context?.id as string,
-      interfaceId: id,
-    });
+    const request = context?.request as TransactionRequest;
     if (request?.signer) {
       return request?.signer;
     }
@@ -99,11 +84,7 @@ export class FeeTokenSelectorController extends AccountUserInputController {
     try {
       const feeToken = event.value as FeeToken;
       if (context) {
-        request = await this.stateManager.getTransactionRequest({
-          requestId: context.id as string,
-          interfaceId: id,
-        });
-
+        request = context?.request as TransactionRequest;
         if (request?.calls) {
           const { includeDeploy, suggestedMaxFee, estimateResults } =
             await this.getFees(
@@ -115,7 +96,6 @@ export class FeeTokenSelectorController extends AccountUserInputController {
               })),
               feeToken,
             );
-
           const sufficientFunds = await hasSufficientFunds(
             request.signer,
             this.network,
@@ -123,11 +103,9 @@ export class FeeTokenSelectorController extends AccountUserInputController {
             feeToken,
             suggestedMaxFee,
           );
-
           if (!sufficientFunds) {
             throw new Error('Not enough funds to pay for fee');
           }
-
           request.maxFee = suggestedMaxFee;
           request.selectedFeeToken = feeToken;
           request.includeDeploy = includeDeploy;
@@ -135,9 +113,7 @@ export class FeeTokenSelectorController extends AccountUserInputController {
             (result) => result.resourceBounds,
           );
 
-          await this.stateManager.upsertTransactionRequest(request);
-
-          await updateFlow(ExecuteTxnUI, request);
+          await updateFlow(id, ExecuteTxnUI, request);
         }
       }
     } catch (error) {
@@ -147,7 +123,7 @@ export class FeeTokenSelectorController extends AccountUserInputController {
           : 'Error calculating fees';
       // On failure, display ExecuteTxnUI with an error message
       if (request) {
-        await updateFlow<ExecuteTxnUIProps>(ExecuteTxnUI, request, {
+        await updateFlow<ExecuteTxnUIProps>(id, ExecuteTxnUI, request, {
           errors: { fees: errorMessage },
         });
       } else {

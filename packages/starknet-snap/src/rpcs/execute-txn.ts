@@ -165,11 +165,7 @@ export class ExecuteTxnRpc extends AccountRpcController<
     }
 
     // This part should be handled based on latest request only.
-    const executeTxnResp = await this.#execute(
-      request,
-      details ?? {},
-      abis,
-    );
+    const executeTxnResp = await this.#execute(request, details ?? {}, abis);
 
     if (!executeTxnResp?.transaction_hash) {
       throw new Error('Failed to execute transaction');

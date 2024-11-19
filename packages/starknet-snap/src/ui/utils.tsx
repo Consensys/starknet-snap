@@ -79,24 +79,24 @@ export async function generateFlow<Props extends JsonObject>(
  * It dynamically renders the updated UI and associates it with the specified interface ID.
  *
  * @template Props - The type of props expected by the JSX Component.
+ * @param id
  * @param Component - The JSX Component to render, representing the updated UI for the interative UI flow.
  * It should accept props of type `Props`.
  * @param params - The parameters for the Interactive UI update.
- * Must include `interfaceId` for referencing the current flow and `id` for context.
- * @param params.interfaceId - The unique identifier for the existing interface to update.
  * @param errors - Optional errors to display in the updated interface.
  * @returns A Promise that resolves when the interface has been successfully updated.
  */
-export async function updateFlow<Props>(
-  Component: any, // Generic Component expecting props of type Props
-  params: Props & { id: string; interfaceId: string }, // Props must include `id` and `interfaceId`
+export async function updateFlow<Props extends JsonObject>(
+  id: string, // Interface Id to update
+  Component: SnapComponent<Props>, // Generic Component expecting props of type Props
+  params: Props, // Props must include `id` and `interfaceId`
   errors?: Partial<Props>, // Optional partial props for error handling or overrides
 ) {
   // Perform the interface update
   await snap.request({
     method: 'snap_updateInterface',
     params: {
-      id: params.interfaceId,
+      id,
       ui: <Component {...params} {...errors} />,
     },
   });
