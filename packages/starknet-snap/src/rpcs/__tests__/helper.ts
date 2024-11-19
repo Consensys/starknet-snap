@@ -4,6 +4,7 @@ import type { constants } from 'starknet';
 import type { StarknetAccount } from '../../__tests__/helper';
 import { generateAccounts, generateRandomValue } from '../../__tests__/helper';
 import type { SnapState } from '../../types/snapState';
+import * as snapUiUtils from '../../ui/utils';
 import { getExplorerUrl, shortenAddress, toJson } from '../../utils';
 import * as snapHelper from '../../utils/snap';
 import * as snapUtils from '../../utils/snapUtils';
@@ -55,6 +56,28 @@ export function prepareConfirmDialog() {
   confirmDialogSpy.mockResolvedValue(true);
   return {
     confirmDialogSpy,
+  };
+}
+
+/**
+ *
+ */
+export function prepareConfirmDialogJsx() {
+  const confirmDialogSpy = jest.spyOn(snapUiUtils, 'confirmDialog');
+  confirmDialogSpy.mockResolvedValue(true);
+  return {
+    confirmDialogSpy,
+  };
+}
+
+/**
+ *
+ */
+export function prepareAlertDialogJsx() {
+  const alertDialogSpy = jest.spyOn(snapUiUtils, 'alertDialog');
+  alertDialogSpy.mockResolvedValue(true);
+  return {
+    alertDialogSpy,
   };
 }
 

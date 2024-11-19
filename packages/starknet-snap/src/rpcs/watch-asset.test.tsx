@@ -1,9 +1,18 @@
+import {
+  Box,
+  Divider,
+  Heading,
+  Row,
+  Section,
+  Text,
+} from '@metamask/snaps-sdk/jsx';
 import { constants } from 'starknet';
 
 import { Config } from '../config';
 import { NetworkStateManager } from '../state/network-state-manager';
 import { TokenStateManager } from '../state/token-state-manager';
 import type { Network } from '../types/snapState';
+import { AddressUI, NetworkUI } from '../ui/fragments';
 import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../utils/constants';
 import {
   InvalidRequestParamsError,
@@ -11,13 +20,7 @@ import {
   InvalidNetworkError,
   UserRejectedOpError,
 } from '../utils/exceptions';
-import {
-  buildAddressComponent,
-  buildDividerComponent,
-  buildNetworkComponent,
-  buildRowComponent,
-  prepareConfirmDialog,
-} from './__tests__/helper';
+import { prepareConfirmDialogJsx as prepareConfirmDialog } from './__tests__/helper';
 import type { WatchAssetParams } from './watch-asset';
 import { watchAsset } from './watch-asset';
 
@@ -109,22 +112,33 @@ describe('WatchAssetRpc', () => {
 
     await watchAsset.execute(request);
 
-    expect(confirmDialogSpy).toHaveBeenCalledWith([
-      { type: 'heading', value: 'Do you want to add this token?' },
-      buildNetworkComponent(network.name),
-      buildDividerComponent(),
-      buildAddressComponent(
-        'Token Address',
-        request.tokenAddress,
-        network.chainId,
+    expect(confirmDialogSpy).toHaveBeenCalledWith({
+      children: (
+        <Box>
+          <Heading>Do you want to add this token?</Heading>
+          <Divider />
+          <NetworkUI networkName={network.name} />
+          <Section>
+            <AddressUI
+              label="Token"
+              address={request.tokenAddress}
+              chainId={network.chainId}
+            />
+            <Section>
+              <Row label="Name">
+                <Text>{request.tokenName}</Text>
+              </Row>
+              <Row label="Symbol">
+                <Text>{request.tokenSymbol}</Text>
+              </Row>
+              <Row label="Decimals">
+                <Text>{request.tokenDecimals.toString()}</Text>
+              </Row>
+            </Section>
+          </Section>
+        </Box>
       ),
-      buildDividerComponent(),
-      buildRowComponent('Token Name', request.tokenName),
-      buildDividerComponent(),
-      buildRowComponent('Token Symbol', request.tokenSymbol),
-      buildDividerComponent(),
-      buildRowComponent('Token Decimals', request.tokenDecimals.toString()),
-    ]);
+    });
   });
 
   it('throws `InvalidNetworkError` if the network can not be found', async () => {

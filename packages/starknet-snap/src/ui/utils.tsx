@@ -1,7 +1,39 @@
+import { DialogType } from '@metamask/snaps-sdk';
+
 import type { FormattedCallData, TransactionRequest } from '../types/snapState';
 import { DEFAULT_DECIMAL_PLACES } from '../utils/constants';
 import { ExecuteTxnUI } from './components';
 import type { TokenTotals } from './types';
+
+/**
+ *
+ * @param options0
+ * @param options0.children
+ */
+export async function alertDialog({ children }) {
+  return await snap.request({
+    method: 'snap_dialog',
+    params: {
+      type: DialogType.Alert,
+      content: children,
+    },
+  });
+}
+
+/**
+ *
+ * @param options0
+ * @param options0.children
+ */
+export async function confirmDialog({ children }) {
+  return await snap.request({
+    method: 'snap_dialog',
+    params: {
+      type: DialogType.Confirmation,
+      content: children,
+    },
+  });
+}
 
 /**
  * Accumulate the total amount for all tokens involved in calls and fees.

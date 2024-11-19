@@ -1,23 +1,26 @@
-import type { Component } from '@metamask/snaps-sdk';
+import {
+  Box,
+  Divider,
+  Heading,
+  Row,
+  Section,
+  Text,
+} from '@metamask/snaps-sdk/jsx';
 import type { Infer } from 'superstruct';
 import { assign, boolean, min, number, object, optional } from 'superstruct';
 
 import { NetworkStateManager } from '../state/network-state-manager';
 import { TokenStateManager } from '../state/token-state-manager';
 import type { Erc20Token, Network } from '../types/snapState';
+import { NetworkUI, AddressUI } from '../ui/fragments';
+import { confirmDialog } from '../ui/utils';
 import {
-  confirmDialog,
   BaseRequestStruct,
   RpcController,
   AddressStruct,
   TokenNameStruct,
   TokenSymbolStruct,
   isPreloadedToken,
-  addressUI,
-  networkUI,
-  rowUI,
-  dividerUI,
-  headerUI,
 } from '../utils';
 import { DEFAULT_DECIMAL_PLACES } from '../utils/constants';
 import {
@@ -156,58 +159,35 @@ export class WatchAssetRpc extends RpcController<
     erc20Token: Erc20Token,
   ) {
     const { address, name, symbol, decimals } = erc20Token;
-
-    const componentPairs: {
-      label?: string;
-      value?: string;
-      component?: Component;
-    }[] = [
-      {
-        component: networkUI({
-          networkName,
-        }),
-      },
-      {
-        component: addressUI({
-          label: 'Token Address',
-          address,
-          chainId,
-        }),
-      },
-      {
-        label: 'Token Name',
-        value: name,
-      },
-      {
-        label: 'Token Symbol',
-        value: symbol,
-      },
-      {
-        label: 'Token Decimals',
-        value: decimals.toString(),
-      },
-    ];
-
-    const components: Component[] = [];
-    components.push(headerUI('Do you want to add this token?'));
-
-    componentPairs.forEach(({ label, value, component }, idx) => {
-      if (component) {
-        components.push(component);
-      } else if (label && value) {
-        components.push(
-          rowUI({
-            label,
-            value,
-          }),
-        );
-      }
-
-      if (idx < componentPairs.length - 1) {
-        components.push(dividerUI());
-      }
+    return await confirmDialog({
+      children: (
+        <Box>
+          <Heading>Do you want to add this token?</Heading>
+          <Divider />
+          <NetworkUI networkName={networkName} />
+          <Section>
+            <AddressUI label="Token" address={address} chainId={chainId} />
+            <Section>
+              {name ? (
+                <Row label="Name">
+                  <Text>{name}</Text>
+                </Row>
+              ) : null}
+              {symbol ? (
+                <Row label="Symbol">
+                  <Text>{symbol}</Text>
+                </Row>
+              ) : null}
+              {decimals !== null && (
+                <Row label="Decimals">
+                  <Text>{decimals.toString()}</Text>
+                </Row>
+              )}
+            </Section>
+          </Section>
+        </Box>
+      ),
     });
-    return await confirmDialog(components);
   }
 }
 

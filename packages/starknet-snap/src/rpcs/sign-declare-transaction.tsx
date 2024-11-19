@@ -1,19 +1,16 @@
-import type { Component } from '@metamask/snaps-sdk';
+import { Box, Heading, Section } from '@metamask/snaps-sdk/jsx';
 import type { DeclareSignerDetails } from 'starknet';
 import type { Infer } from 'superstruct';
 import { array, object, string, assign } from 'superstruct';
 
+import { AddressUI, JsonDataUI, NetworkUI } from '../ui/fragments';
+import { confirmDialog } from '../ui/utils';
 import {
-  confirmDialog,
   AddressStruct,
   BaseRequestStruct,
   AccountRpcController,
   DeclareSignDetailsStruct,
   mapDeprecatedParams,
-  signerUI,
-  networkUI,
-  jsonDataUI,
-  headerUI,
 } from '../utils';
 import { UserRejectedOpError } from '../utils/exceptions';
 import { signDeclareTransaction as signDeclareTransactionUtil } from '../utils/starknetUtils';
@@ -97,30 +94,22 @@ export class SignDeclareTransactionRpc extends AccountRpcController<
   protected async getSignDeclareTransactionConsensus(
     details: Infer<typeof DeclareSignDetailsStruct>,
   ) {
-    const components: Component[] = [];
-    components.push(headerUI('Do you want to sign this transaction?'));
-
-    components.push(
-      signerUI({
-        address: details.senderAddress,
-        chainId: this.network.chainId,
-      }),
-    );
-
-    components.push(
-      networkUI({
-        networkName: this.network.name,
-      }),
-    );
-
-    components.push(
-      jsonDataUI({
-        label: 'Declare Transaction Details',
-        data: details,
-      }),
-    );
-
-    return await confirmDialog(components);
+    return await confirmDialog({
+      children: (
+        <Box>
+          <Heading>Do you want to sign this transaction?</Heading>
+          <Section>
+            <AddressUI
+              label="Signer"
+              address={details.senderAddress}
+              chainId={this.network.chainId}
+            />
+            <NetworkUI networkName={this.network.name} />
+            <JsonDataUI label={'Declare Transaction Details'} data={details} />
+          </Section>
+        </Box>
+      ),
+    });
   }
 }
 

@@ -1,8 +1,10 @@
+import { Bold, Box, Copyable, Heading } from '@metamask/snaps-sdk/jsx';
 import type { constants } from 'starknet';
 
 import { Config } from '../config';
 import { NetworkStateManager } from '../state/network-state-manager';
 import type { Network } from '../types/snapState';
+import { NetworkUI } from '../ui/fragments';
 import {
   STARKNET_SEPOLIA_TESTNET_NETWORK,
   STARKNET_MAINNET_NETWORK,
@@ -12,12 +14,7 @@ import {
   InvalidRequestParamsError,
   UserRejectedOpError,
 } from '../utils/exceptions';
-import {
-  buildDividerComponent,
-  buildNetworkComponent,
-  buildRowComponent,
-  prepareConfirmDialog,
-} from './__tests__/helper';
+import { prepareConfirmDialogJsx as prepareConfirmDialog } from './__tests__/helper';
 import { switchNetwork } from './switch-network';
 import type { SwitchNetworkParams } from './switch-network';
 
@@ -126,12 +123,18 @@ describe('switchNetwork', () => {
 
     await switchNetwork.execute(request);
 
-    expect(confirmDialogSpy).toHaveBeenCalledWith([
-      { type: 'heading', value: 'Do you want to switch to this network?' },
-      buildNetworkComponent(requestNetwork.name),
-      buildDividerComponent(),
-      buildRowComponent('Chain ID', requestNetwork.chainId),
-    ]);
+    expect(confirmDialogSpy).toHaveBeenCalledWith({
+      children: (
+        <Box>
+          <Heading>Do you want to switch to this network?</Heading>
+          <NetworkUI networkName={requestNetwork.name} />
+          <Box direction="horizontal" alignment="space-between">
+            <Bold>Chain ID</Bold>
+            <Copyable value={requestNetwork.chainId} />
+          </Box>
+        </Box>
+      ),
+    });
   });
 
   it('throws `UserRejectedRequestError` if user denied the operation', async () => {
