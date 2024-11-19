@@ -51,7 +51,7 @@ describe('accumulateTotals', () => {
     });
   });
 
-  it('handles fee-only transactions when there are no transfers', () => {
+  it('returns the TokenTotals for the fee token only if there is no transfer type callData', () => {
     const calls = mockCalls();
     // simulate the case when the callData is not a transfer callData 
     calls.forEach(call => call.data = undefined)
