@@ -2,19 +2,19 @@ import type { SnapComponent } from '@metamask/snaps-sdk/jsx';
 import {
   Box,
   Container,
-  Row,
   Section,
   Text,
   Icon,
   Divider,
 } from '@metamask/snaps-sdk/jsx';
-import { formatUnits } from 'ethers/lib/utils';
 
 import type { FeeToken } from '../../types/snapApi';
 import type { FormattedCallData } from '../../types/snapState';
 import { DEFAULT_DECIMAL_PLACES } from '../../utils/constants';
 import { AddressUI, JsonDataUI } from '../fragments';
+import { Amount } from '../fragments/Amount';
 import { FeeTokenSelector } from '../fragments/FeeTokenSelector';
+import { accumulateTotals } from '../utils';
 
 export type ExecuteTxnUIProps = {
   type: string;
@@ -24,70 +24,6 @@ export type ExecuteTxnUIProps = {
   calls: FormattedCallData[];
   selectedFeeToken: string;
   includeDeploy: boolean;
-};
-
-type TokenTotals = Record<
-  string,
-  {
-    amount: bigint; // Use BigInt for precise calculations
-    decimals: number;
-  }
->;
-
-/**
- * Calculates the totals for all tokens involved in calls and fees.
- *
- * @param calls - The transaction calls.
- * @param maxFee - The maximum fee as a string BigInt.
- * @param selectedFeeToken - The token symbol used for fees.
- * @returns The calculated totals for each token.
- */
-export const calculateTotals = (
-  calls: {
-    isTransfer: boolean;
-    transferAmount?: string; // Amount as a string BigInt
-    transferTokenSymbol?: string;
-    transferTokenDecimals?: number;
-  }[],
-  maxFee: string,
-  selectedFeeToken: string,
-): TokenTotals => {
-  const tokenTotals: TokenTotals = {};
-
-  // Sum up transfer amounts for each token
-  calls.forEach((call) => {
-    if (
-      call.transferAmount &&
-      call.transferTokenSymbol &&
-      call.transferTokenDecimals &&
-      call.isTransfer
-    ) {
-      const amount = BigInt(call.transferAmount); // Convert to BigInt
-      if (!tokenTotals[call.transferTokenSymbol]) {
-        tokenTotals[call.transferTokenSymbol] = {
-          amount: BigInt(0),
-          decimals: call.transferTokenDecimals,
-        };
-      }
-      tokenTotals[call.transferTokenSymbol].amount += amount;
-    }
-  });
-
-  // Add the fee to the corresponding token
-  const feeTokenAmount = BigInt(maxFee);
-  if (tokenTotals[selectedFeeToken]) {
-    tokenTotals[selectedFeeToken].amount += feeTokenAmount;
-  } else {
-    // We derive decimals based on the fee token. Currently, both supported fee tokens, ETH and STRK, use the standard 18 decimals.
-    // Therefore, we use DEFAULT_DECIMAL_PLACES set to 18 here. If additional fee tokens with different decimals are introduced,
-    // this logic should be updated to handle token-specific decimals dynamically.
-    tokenTotals[selectedFeeToken] = {
-      amount: feeTokenAmount,
-      decimals: DEFAULT_DECIMAL_PLACES,
-    };
-  }
-
-  return tokenTotals;
 };
 
 /**
@@ -113,7 +49,7 @@ export const ExecuteTxnUI: SnapComponent<ExecuteTxnUIProps> = ({
   // errors, // TODO: include this later
 }) => {
   // Calculate the totals using the helper
-  const tokenTotals = calculateTotals(calls, maxFee, selectedFeeToken);
+  const tokenTotals = accumulateTotals(calls, maxFee, selectedFeeToken);
 
   return (
     <Container>
@@ -140,6 +76,7 @@ export const ExecuteTxnUI: SnapComponent<ExecuteTxnUIProps> = ({
               />
             )}
             {call.transferAmount &&
+            call.transferTokenDecimals &&
             call.transferSenderAddress &&
             call.transferRecipientAddress &&
             call.isTransfer ? (
@@ -156,12 +93,12 @@ export const ExecuteTxnUI: SnapComponent<ExecuteTxnUIProps> = ({
                   address={call.transferRecipientAddress}
                   chainId={chainId}
                 />
-                <Row label={`Amount`}>
-                  <Text>{`${formatUnits(
-                    call.transferAmount,
-                    call.transferTokenDecimals,
-                  )} ${call.transferTokenSymbol as string}`}</Text>
-                </Row>
+                <Amount
+                  label={`Amount`}
+                  amount={call.transferAmount}
+                  decimals={call.transferTokenDecimals}
+                  symbol={call.transferTokenSymbol as string}
+                />
               </Section>
             ) : (
               <JsonDataUI label="Call Data" data={call.calldata} />
@@ -171,25 +108,23 @@ export const ExecuteTxnUI: SnapComponent<ExecuteTxnUIProps> = ({
         <FeeTokenSelector selectedToken={selectedFeeToken as FeeToken} />
         <Section>
           <Icon name="gas" size="md" />
-          <Row label="Estimated network fee">
-            <Text>
-              {`${formatUnits(
-                maxFee,
-                DEFAULT_DECIMAL_PLACES,
-              )} ${selectedFeeToken}`}
-            </Text>
-          </Row>
+          <Amount
+            label="Estimated network fee"
+            amount="maxFee"
+            decimals={DEFAULT_DECIMAL_PLACES}
+            symbol="selectedFeeToken"
+          />
           <Divider />
           <Icon name="money" size="md" />
           <Box direction="vertical">
             {Object.entries(tokenTotals).map(
               ([tokenSymbol, { amount, decimals }]) => (
-                <Row key={tokenSymbol} label={`Total for ${tokenSymbol}`}>
-                  <Text>{`${formatUnits(
-                    amount,
-                    decimals,
-                  )} ${tokenSymbol}`}</Text>
-                </Row>
+                <Amount
+                  label={`Total for ${tokenSymbol}`}
+                  amount={amount}
+                  decimals={decimals}
+                  symbol={tokenSymbol}
+                />
               ),
             )}
           </Box>
