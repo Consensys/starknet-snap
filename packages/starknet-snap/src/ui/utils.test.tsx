@@ -2,7 +2,7 @@ import type { FormattedCallData } from '../types/snapState';
 import { DEFAULT_DECIMAL_PLACES } from '../utils/constants';
 import { accumulateTotals } from './utils';
 
-describe('calculateTotals', () => {
+describe('accumulateTotals', () => {
   const mockCalls = (overrides = [{}]) =>
     [
       {
