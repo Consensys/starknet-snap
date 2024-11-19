@@ -156,7 +156,7 @@ export class ExecuteTxnRpc extends AccountRpcController<
       includeDeploy,
     };
 
-    const interfaceId = await generateExecuteTxnFlow(ExecuteTxnUI, request);
+    const interfaceId = await generateExecuteTxnFlow(request);
 
     request.interfaceId = interfaceId;
 
