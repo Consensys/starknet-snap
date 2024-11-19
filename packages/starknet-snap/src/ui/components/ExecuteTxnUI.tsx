@@ -11,7 +11,7 @@ import {
 import type { FeeToken } from '../../types/snapApi';
 import type { FormattedCallData } from '../../types/snapState';
 import { DEFAULT_DECIMAL_PLACES } from '../../utils/constants';
-import { AddressUI, JsonDataUI } from '../fragments';
+import { AddressUI, JsonDataUI, NetworkUI, SignerUI } from '../fragments';
 import { Amount } from '../fragments/Amount';
 import { FeeTokenSelector } from '../fragments/FeeTokenSelector';
 import { accumulateTotals } from '../utils';

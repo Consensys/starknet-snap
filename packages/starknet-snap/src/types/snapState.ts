@@ -31,6 +31,7 @@ export type TransactionRequest = {
   type: string;
   signer: string;
   chainId: string;
+  networkName: string;
   maxFee: string;
   calls: FormattedCallData[];
   selectedFeeToken: string;
