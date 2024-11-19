@@ -324,6 +324,7 @@ export function generateTransactionRequests({
       type: TransactionType.INVOKE,
       networkName: 'Sepolia',
       signer: address,
+      addressIndex: 0,
       maxFee: '100',
       selectedFeeToken:
         feeTokens[Math.floor(generateRandomValue() * feeTokens.length)].symbol,

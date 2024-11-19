@@ -145,6 +145,7 @@ export class ExecuteTxnRpc extends AccountRpcController<
       interfaceId: '',
       type: TransactionType.INVOKE,
       signer: address,
+      addressIndex: this.account.addressIndex,
       maxFee: suggestedMaxFee,
       calls: formattedCalls,
       resourceBounds: estimateResults.map((result) => result.resourceBounds),

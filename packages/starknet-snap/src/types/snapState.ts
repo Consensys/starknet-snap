@@ -32,6 +32,7 @@ export type TransactionRequest = {
   interfaceId: string;
   type: string;
   signer: string;
+  addressIndex: number;
   chainId: string;
   networkName: string;
   maxFee: string;

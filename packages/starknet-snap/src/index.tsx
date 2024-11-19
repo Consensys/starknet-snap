@@ -6,9 +6,11 @@ import type {
   OnUserInputHandler,
   UserInputEvent,
   InterfaceContext,
+  InputChangeEvent,
 } from '@metamask/snaps-sdk';
 import { MethodNotFoundError, UserInputEventType } from '@metamask/snaps-sdk';
-import { Box, Link, Text } from '@metamask/snaps-sdk/jsx';
+import { Box, Heading, Link, Spinner, Text } from '@metamask/snaps-sdk/jsx';
+import { constants, ec, num as numUtils, TransactionType } from 'starknet';
 
 import { addNetwork } from './addNetwork';
 import { Config } from './config';
@@ -56,15 +58,22 @@ import {
 } from './rpcs';
 import { sendTransaction } from './sendTransaction';
 import { signDeployAccountTransaction } from './signDeployAccountTransaction';
+import { NetworkStateManager } from './state/network-state-manager';
+import { FeeToken } from './types/snapApi';
 import type {
   ApiParams,
   ApiParamsWithKeyDeriver,
   ApiRequestParams,
 } from './types/snapApi';
-import type { SnapState } from './types/snapState';
-import { upgradeAccContract } from './upgradeAccContract';
-import { feeTokenSelectorController } from './user-inputs';
+import type { SnapState, TransactionRequest } from './types/snapState';
 import {
+  hasSufficientFunds,
+  updateExecuteTxnFlow,
+  updateInterface,
+} from './ui/utils';
+import { upgradeAccContract } from './upgradeAccContract';
+import {
+  getBip44Deriver,
   getDappUrl,
   getStateData,
   isSnapRpcError,
@@ -78,7 +87,7 @@ import {
   STARKNET_TESTNET_NETWORK,
 } from './utils/constants';
 import { UnknownError } from './utils/exceptions';
-import { getAddressKeyDeriver } from './utils/keyPair';
+import { getAddressKey, getAddressKeyDeriver } from './utils/keyPair';
 import { acquireLock } from './utils/lock';
 import { logger } from './utils/logger';
 import { toJson } from './utils/serializer';
@@ -87,6 +96,7 @@ import {
   upsertNetwork,
   removeNetwork,
 } from './utils/snapUtils';
+import { getEstimatedFees } from './utils/starknetUtils';
 
 declare const snap;
 logger.logLevel = parseInt(Config.logLevel, 10);
@@ -369,13 +379,87 @@ export const onUserInput: OnUserInputHandler = async ({
     `${type}_${name}`;
   const eventKey = generateEventKey(event.type, event.name ?? '');
 
+  await updateInterface(
+    id,
+    <Box alignment="space-between" center={true}>
+      <Heading>please wait...</Heading>
+      <Spinner />
+    </Box>,
+  );
+
   switch (eventKey) {
     case generateEventKey(
       UserInputEventType.InputChangeEvent,
       'feeTokenSelector',
-    ):
-      await feeTokenSelectorController.execute(id, event, context);
+    ): {
+      const networkStateMgr = new NetworkStateManager();
+      const network = await networkStateMgr.getCurrentNetwork();
+      const feeToken = (event as InputChangeEvent).value as FeeToken;
+      const request = context?.request as TransactionRequest;
+      const deriver = await getBip44Deriver();
+      const { addressKey } = await getAddressKey(deriver, request.addressIndex);
+      const publicKey = ec.starkCurve.getStarkKey(addressKey);
+      const privateKey = numUtils.toHex(addressKey);
+      try {
+        if (request?.calls) {
+          const { includeDeploy, suggestedMaxFee, estimateResults } =
+            await getEstimatedFees(
+              network,
+              request.signer,
+              privateKey,
+              publicKey,
+              [
+                {
+                  type: TransactionType.INVOKE,
+                  payload: request.calls.map((call) => ({
+                    calldata: call.calldata,
+                    contractAddress: call.contractAddress,
+                    entrypoint: call.entrypoint,
+                  })),
+                },
+              ],
+              {
+                version:
+                  feeToken === FeeToken.STRK
+                    ? constants.TRANSACTION_VERSION.V3
+                    : undefined,
+              },
+            );
+          const sufficientFunds = await hasSufficientFunds(
+            request.signer,
+            network,
+            request.calls,
+            feeToken,
+            suggestedMaxFee,
+          );
+          if (!sufficientFunds) {
+            throw new Error('Not enough funds to pay for fee');
+          }
+          request.maxFee = suggestedMaxFee;
+          request.selectedFeeToken = feeToken;
+          request.includeDeploy = includeDeploy;
+          request.resourceBounds = estimateResults.map(
+            (result) => result.resourceBounds,
+          );
+
+          await updateExecuteTxnFlow(id, request);
+        }
+      } catch (error) {
+        const errorMessage =
+          error.message === 'Not enough funds to pay for fee'
+            ? 'Not enough funds to pay for fee'
+            : 'Error calculating fees';
+        // On failure, display ExecuteTxnUI with an error message
+        if (request) {
+          await updateExecuteTxnFlow(id, request, {
+            errors: { fees: errorMessage },
+          });
+        } else {
+          throw error;
+        }
+      }
       break;
+    }
     default:
       throw new MethodNotFoundError() as unknown as Error;
   }
