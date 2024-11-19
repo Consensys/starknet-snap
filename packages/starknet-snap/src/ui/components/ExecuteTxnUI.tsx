@@ -58,7 +58,7 @@ export const ExecuteTxnUI: SnapComponent<ExecuteTxnUIProps> = ({
           <AddressUI label="Signer" address={signer} chainId={chainId} />
         </Section>
 
-        {/* Loop through each call and render based on isTransfer */}
+        {/* Loop through each call and render based on `tokenTransferData` */}
 
         {calls.map((call) => (
           <Section>
