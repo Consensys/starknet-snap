@@ -2,7 +2,7 @@ import type { FormattedCallData } from '../types/snapState';
 import { DEFAULT_DECIMAL_PLACES } from '../utils/constants';
 import { accumulateTotals } from './utils';
 
-describe('calculateTotals', () => {
+describe('accumulateTotals', () => {
   const mockCalls = (overrides = [{}]) =>
     [
       {
@@ -51,11 +51,10 @@ describe('calculateTotals', () => {
     });
   });
 
-  it('handles fee-only transactions when there are no transfers', () => {
+  it('returns the TokenTotals for the fee token only if there is no transfer type callData', () => {
     const calls = mockCalls();
-    calls[0].tokenTransferData = undefined;
-    calls[1].tokenTransferData = undefined;
-    calls[2].tokenTransferData = undefined;
+    // simulate the case when the callData is not a transfer callData 
+    calls.forEach(call => call.data = undefined)
     const selectedFeeToken = 'STRK';
     const result = accumulateTotals(calls, mockMaxFee, selectedFeeToken);
 
