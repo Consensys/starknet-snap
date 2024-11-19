@@ -62,7 +62,10 @@ export function prepareConfirmDialog() {
  *
  */
 export function prepareConfirmDialogInteractiveUI() {
-  const confirmDialogSpy = jest.spyOn(snapHelper, 'createInteractiveConfirmDialog');
+  const confirmDialogSpy = jest.spyOn(
+    snapHelper,
+    'createInteractiveConfirmDialog',
+  );
   confirmDialogSpy.mockResolvedValue(true);
   return {
     confirmDialogSpy,
