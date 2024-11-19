@@ -1,5 +1,5 @@
-import { SnapError, type Json } from '@metamask/snaps-sdk';
-import type { Call, Calldata, UniversalDetails } from 'starknet';
+import { type Json } from '@metamask/snaps-sdk';
+import type { Call, Calldata } from 'starknet';
 import { constants, TransactionStatus, TransactionType } from 'starknet';
 import type { Infer } from 'superstruct';
 import { object, string, assign, optional, any } from 'superstruct';
@@ -11,7 +11,6 @@ import { TransactionStateManager } from '../state/transaction-state-manager';
 import { FeeToken } from '../types/snapApi';
 import type { TransactionRequest } from '../types/snapState';
 import { VoyagerTransactionType, type Transaction } from '../types/snapState';
-import type { TransactionVersion } from '../types/starknet';
 import { generateExecuteTxnFlow } from '../ui/utils';
 import type { AccountRpcControllerOptions } from '../utils';
 import {
@@ -109,8 +108,6 @@ export class ExecuteTxnRpc extends AccountRpcController<
     const { address, calls, abis, details } = params;
     const { privateKey, publicKey } = this.account;
     const callsArray = Array.isArray(calls) ? calls : [calls];
-    const version =
-      details?.version as unknown as constants.TRANSACTION_VERSION;
 
     const { includeDeploy, suggestedMaxFee, estimateResults } =
       await getEstimatedFees(
@@ -126,6 +123,10 @@ export class ExecuteTxnRpc extends AccountRpcController<
         ],
         details,
       );
+
+    const accountDeployed = !includeDeploy;
+    const version =
+      details?.version as unknown as constants.TRANSACTION_VERSION;
 
     const formattedCalls = await Promise.all(
       callsArray.map(async (call) =>
@@ -164,8 +165,39 @@ export class ExecuteTxnRpc extends AccountRpcController<
       throw new UserRejectedOpError() as unknown as Error;
     }
 
-    // This part should be handled based on latest request only.
-    const executeTxnResp = await this.#execute(request, details ?? {}, abis);
+    if (!accountDeployed) {
+      await createAccount({
+        network: this.network,
+        address,
+        publicKey,
+        privateKey,
+        waitMode: false,
+        callback: async (contractAddress: string, transactionHash: string) => {
+          await this.updateAccountAsDeploy(contractAddress, transactionHash);
+        },
+        version,
+      });
+    }
+
+    const resourceBounds = estimateResults.map(
+      (result) => result.resourceBounds,
+    );
+
+    const executeTxnResp = await executeTxnUtil(
+      this.network,
+      address,
+      privateKey,
+      calls,
+      abis,
+      {
+        ...details,
+        // Aways repect the input, unless the account is not deployed
+        // TODO: we may also need to increment the nonce base on the input, if the account is not deployed
+        nonce: accountDeployed ? details?.nonce : 1,
+        maxFee: suggestedMaxFee,
+        resourceBounds: resourceBounds[resourceBounds.length - 1],
+      },
+    );
 
     if (!executeTxnResp?.transaction_hash) {
       throw new Error('Failed to execute transaction');
@@ -181,56 +213,6 @@ export class ExecuteTxnRpc extends AccountRpcController<
     );
 
     return executeTxnResp;
-  }
-
-  async #execute(
-    request: TransactionRequest,
-    details: UniversalDetails,
-    abis: any,
-  ) {
-    const { privateKey, publicKey } = this.account;
-    if (!request) {
-      throw new SnapError('Transaction Request not found in state');
-    }
-
-    details.version =
-      request.selectedFeeToken === FeeToken.STRK
-        ? constants.TRANSACTION_VERSION.V3
-        : constants.TRANSACTION_VERSION.V1;
-    if (request.includeDeploy) {
-      await createAccount({
-        network: this.network,
-        address: request.signer,
-        publicKey,
-        privateKey,
-        waitMode: false,
-        callback: async (contractAddress: string, transactionHash: string) => {
-          await this.updateAccountAsDeploy(contractAddress, transactionHash);
-        },
-        version: details.version as TransactionVersion,
-      });
-    }
-
-    return await executeTxnUtil(
-      this.network,
-      request.signer,
-      privateKey,
-      request.calls.map(({ contractAddress, calldata, entrypoint }) => ({
-        contractAddress,
-        calldata,
-        entrypoint,
-      })),
-      abis, // TODO add abi from params in request.
-      {
-        version: details.version as TransactionVersion,
-        // Aways repect the input, unless the account is not deployed
-        // TODO: we may also need to increment the nonce base on the input, if the account is not deployed
-        nonce: request.includeDeploy ? 1 : details?.nonce,
-        maxFee: request.maxFee,
-        resourceBounds:
-          request.resourceBounds[request.resourceBounds.length - 1],
-      },
-    );
   }
 
   protected async updateAccountAsDeploy(
