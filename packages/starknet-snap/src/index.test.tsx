@@ -4,7 +4,6 @@ import { onHomePage, onRpcRequest } from '.';
 import * as createAccountApi from './createAccount';
 import { HomePageController } from './on-home-page';
 import { InitSnapStateManager } from './state/init-snap-state-manager';
-import { updateRequiredMetaMaskComponent } from './utils';
 import * as keyPairUtils from './utils/keyPair';
 
 jest.mock('./utils/logger');
