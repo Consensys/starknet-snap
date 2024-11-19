@@ -130,19 +130,4 @@ describe('onHomePage', () => {
       },
     });
   });
-  it('renders updateRequiredMetaMaskComponent when jsx support is lacking', async () => {
-    const requireMetaMaskUpgradeSpy = jest.spyOn(
-      InitSnapStateManager.prototype,
-      'requireMetaMaskUpgrade',
-    );
-    requireMetaMaskUpgradeSpy.mockResolvedValue(true);
-    const updateRequiredMetaMaskComponentSpy =
-      updateRequiredMetaMaskComponent as jest.Mock;
-    const executeSpy = jest.spyOn(HomePageController.prototype, 'execute');
-
-    await onHomePage();
-
-    expect(executeSpy).toHaveBeenCalledTimes(0);
-    expect(updateRequiredMetaMaskComponentSpy).toHaveBeenCalledTimes(1);
-  });
 });

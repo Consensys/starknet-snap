@@ -53,17 +53,19 @@ import {
 } from './rpcs';
 import { sendTransaction } from './sendTransaction';
 import { signDeployAccountTransaction } from './signDeployAccountTransaction';
-import { InitSnapStateManager } from './state/init-snap-state-manager';
 import type {
   ApiParams,
   ApiParamsWithKeyDeriver,
   ApiRequestParams,
 } from './types/snapApi';
+import type { SnapState } from './types/snapState';
 import { upgradeAccContract } from './upgradeAccContract';
 import {
+  ensureJsxSupport,
   getDappUrl,
+  getStateData,
   isSnapRpcError,
-  updateRequiredMetaMaskComponent,
+  setStateData,
 } from './utils';
 import {
   CAIRO_VERSION_LEGACY,
@@ -90,21 +92,25 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
   const requestParams = request?.params as unknown as ApiRequestParams;
 
   logger.log(`${request.method}:\nrequestParams: ${toJson(requestParams)}`);
-  try {
-    const initSnapStateManager = new InitSnapStateManager();
 
+  try {
     if (request.method === 'ping') {
       logger.log('pong');
       return 'pong';
     }
 
-    const requireMMUpgrade =
-      await initSnapStateManager.requireMetaMaskUpgrade();
-    if (requireMMUpgrade) {
-      throw new Error('MetaMask upgrade required for compatibility');
+    // TODO: this will causing racing condition, need to be fixed
+    let state: SnapState = await getStateData<SnapState>();
+    if (!state) {
+      state = {
+        accContracts: [],
+        erc20Tokens: [],
+        networks: [],
+        transactions: [],
+      };
+      // initialize state if empty and set default data
+      await setStateData(state);
     }
-
-    const state = await initSnapStateManager.get();
 
     // TODO: this can be remove, after state manager is implemented
     const saveMutex = acquireLock();
@@ -297,8 +303,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
 };
 
 export const onInstall: OnInstallHandler = async () => {
-  const initSnapStateManager = new InitSnapStateManager();
-  await initSnapStateManager.ensureJsxSupport(
+  await ensureJsxSupport(
     <Box>
       <Text>Your MetaMask wallet is now compatible with Starknet!</Text>
       <Text>
@@ -310,8 +315,7 @@ export const onInstall: OnInstallHandler = async () => {
 };
 
 export const onUpdate: OnUpdateHandler = async () => {
-  const initSnapStateManager = new InitSnapStateManager();
-  await initSnapStateManager.ensureJsxSupport(
+  await ensureJsxSupport(
     <Box>
       <Text>Your Starknet Snap is now up-to-date !</Text>
       <Text>
@@ -323,12 +327,5 @@ export const onUpdate: OnUpdateHandler = async () => {
 };
 
 export const onHomePage: OnHomePageHandler = async () => {
-  const initSnapStateManager = new InitSnapStateManager();
-  const requireMMUpgrade = await initSnapStateManager.requireMetaMaskUpgrade();
-  if (requireMMUpgrade) {
-    return {
-      content: updateRequiredMetaMaskComponent(),
-    };
-  }
   return await homePageController.execute();
 };
