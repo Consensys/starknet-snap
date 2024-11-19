@@ -78,7 +78,7 @@ export const ExecuteTxnUI: SnapComponent<ExecuteTxnUIProps> = ({
             {call.tokenTransferData ? (
               <Section>
                 <AddressUI
-                  label="Recipient Address"
+                  label="Recipient"
                   address={call.tokenTransferData.recipientAddress}
                   chainId={chainId}
                 />
