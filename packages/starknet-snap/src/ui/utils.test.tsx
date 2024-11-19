@@ -53,9 +53,8 @@ describe('accumulateTotals', () => {
 
   it('handles fee-only transactions when there are no transfers', () => {
     const calls = mockCalls();
-    calls[0].tokenTransferData = undefined;
-    calls[1].tokenTransferData = undefined;
-    calls[2].tokenTransferData = undefined;
+    // simulate the case when the callData is not a transfer callData 
+    calls.forEach(call => call.data = undefined)
     const selectedFeeToken = 'STRK';
     const result = accumulateTotals(calls, mockMaxFee, selectedFeeToken);
 
