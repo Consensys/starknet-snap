@@ -6,7 +6,6 @@ import { object, string, assign, optional, any } from 'superstruct';
 import { v4 as uuidv4 } from 'uuid';
 
 import { AccountStateManager } from '../state/account-state-manager';
-import { TransactionRequestStateManager } from '../state/request-state-manager';
 import { TokenStateManager } from '../state/token-state-manager';
 import { TransactionStateManager } from '../state/transaction-state-manager';
 import { FeeToken } from '../types/snapApi';
@@ -22,8 +21,8 @@ import {
   UniversalDetailsStruct,
   CallsStruct,
   mapDeprecatedParams,
-  formatCallData,
-  confirmDialogInteractiveUI,
+  createInteractiveConfirmDialog,
+  callToTransactionReqCall,
 } from '../utils';
 import { UserRejectedOpError } from '../utils/exceptions';
 import {
@@ -130,11 +129,15 @@ export class ExecuteTxnRpc extends AccountRpcController<
     const version =
       details?.version as unknown as constants.TRANSACTION_VERSION;
 
-    const formattedCalls = await formatCallData(
-      callsArray,
-      this.network.chainId,
-      address,
-      this.tokenStateManager,
+    const formattedCalls = await Promise.all(
+      callsArray.map(async (call) =>
+        callToTransactionReqCall(
+          call,
+          this.network.chainId,
+          address,
+          this.tokenStateManager,
+        ),
+      ),
     );
 
     const request: TransactionRequest = {
@@ -156,10 +159,7 @@ export class ExecuteTxnRpc extends AccountRpcController<
 
     request.interfaceId = interfaceId;
 
-    const stateManager = new TransactionRequestStateManager();
-    await stateManager.upsertTransactionRequest(request);
-
-    if (!(await confirmDialogInteractiveUI(interfaceId))) {
+    if (!(await createInteractiveConfirmDialog(interfaceId))) {
       throw new UserRejectedOpError() as unknown as Error;
     }
 
