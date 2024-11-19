@@ -1,7 +1,10 @@
 import type { Call } from 'starknet';
+import { assert } from 'superstruct';
 
 import type { TokenStateManager } from '../state/token-state-manager';
 import type { FormattedCallData } from '../types/snapState';
+import { logger } from './logger';
+import { AddressStruct, NumberStringStruct } from './superstruct';
 
 export const hexToString = (hexStr) => {
   let str = '';
@@ -43,66 +46,46 @@ export const mapDeprecatedParams = <Params>(
   });
 };
 
-/**
- * Extracts and formats call data from an array of calls, returning an array where each item
- * corresponds directly to an item in the original callsArray. If the call involves an ERC20
- * 'transfer' entrypoint, additional fields are included to provide details about the transfer.
- *
- * @param callsArray - The array of call objects, each containing contract address, calldata, and entrypoint.
- * @param chainId - The chain ID associated with the calls.
- * @param address - The sender address.
- * @param tokenStateManager - The token state manager used to retrieve token details.
- * @returns A promise that resolves to an array of FormattedCallData objects, each representing
- * formatted call data, with one-to-one correspondence with the original callsArray.
- * @example
- * const callDataArray = await extractCallData(calls, chainId, senderAddress, tokenStateManager);
- */
-export const formatCallData = async (
-  callsArray: Call[],
+export const callToTransactionReqCall = async (
+  call: Call,
   chainId: string,
   address: string,
   tokenStateManager: TokenStateManager,
-): Promise<FormattedCallData[]> => {
-  const dataArray: FormattedCallData[] = [];
+): Promise<FormattedCallData> => {
+  const { contractAddress, calldata, entrypoint } = call;
+  // Base data object for each call, with transfer fields left as optional
+  const formattedCall: FormattedCallData = {
+    contractAddress,
+    calldata: calldata as string[],
+    entrypoint,
+  };
+  // Check if the contract is an ERC20 token and entrypoint is 'transfer' to populate transfer fields
+  const token = await tokenStateManager.getToken({
+    address: contractAddress,
+    chainId,
+  });
+  if (token && entrypoint === 'transfer' && calldata) {
+    try {
+      const senderAddress = address;
 
-  for (const call of callsArray) {
-    const { contractAddress, calldata, entrypoint } = call;
-
-    // Base data object for each call, with transfer fields left as optional
-    const callData: FormattedCallData = {
-      contractAddress,
-      calldata: calldata as string[],
-      entrypoint,
-      isTransfer: false, // Set default to false
-    };
-
-    // Check if the contract is an ERC20 token and entrypoint is 'transfer' to populate transfer fields
-    const token = await tokenStateManager.getToken({
-      address: contractAddress,
-      chainId,
-    });
-
-    if (token && entrypoint === 'transfer' && calldata) {
-      try {
-        const senderAddress = address;
-        const recipientAddress = calldata[0]; // Assuming calldata[0] is the recipient address
-        const amount = calldata[1]; // Convert amount using token decimals
-
-        // Populate transfer-specific fields
-        callData.isTransfer = true;
-        callData.transferSenderAddress = senderAddress;
-        callData.transferRecipientAddress = recipientAddress;
-        callData.transferAmount = amount;
-        callData.transferTokenSymbol = token.symbol;
-        callData.transferTokenDecimals = token.decimals;
-      } catch (error) {
-        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-        console.warn(`Error in amount conversion: ${error}`);
-      }
+      // ensure the data is in correct format,
+      // if an error occur, it will catch and not to format it
+      assert(calldata[0], AddressStruct);
+      assert(calldata[1], NumberStringStruct);
+      const recipientAddress = calldata[0]; // Assuming calldata[0] is the recipient address
+      const amount = calldata[1];
+      // Populate transfer-specific fields
+      formattedCall.tokenTransferData = {
+        senderAddress,
+        recipientAddress,
+        amount: typeof amount === 'number' ? amount.toString() : amount,
+        symbol: token.symbol,
+        decimals: token.decimals,
+      };
+    } catch (error) {
+      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+      logger.warn(`Error in amount conversion: ${error.message}`);
     }
-
-    dataArray.push(callData);
   }
-
-  return dataArray;
+  return formattedCall;
 };

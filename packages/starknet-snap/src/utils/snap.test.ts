@@ -22,12 +22,12 @@ describe('getBip44Deriver', () => {
   });
 });
 
-describe('confirmDialogInteractiveUI', () => {
+describe('createInteractiveConfirmDialog', () => {
   it('calls snap_dialog', async () => {
     const spy = jest.spyOn(snapUtil.getProvider(), 'request');
     const interfaceId = 'test';
 
-    await snapUtil.confirmDialogInteractiveUI(interfaceId);
+    await snapUtil.createInteractiveConfirmDialog(interfaceId);
 
     expect(spy).toHaveBeenCalledWith({
       method: 'snap_dialog',

@@ -6,7 +6,6 @@ import { object, string, assign, optional, any } from 'superstruct';
 import { v4 as uuidv4 } from 'uuid';
 
 import { AccountStateManager } from '../state/account-state-manager';
-import { TransactionRequestStateManager } from '../state/request-state-manager';
 import { TokenStateManager } from '../state/token-state-manager';
 import { TransactionStateManager } from '../state/transaction-state-manager';
 import { FeeToken } from '../types/snapApi';
@@ -23,8 +22,8 @@ import {
   UniversalDetailsStruct,
   CallsStruct,
   mapDeprecatedParams,
-  formatCallData,
-  confirmDialogInteractiveUI,
+  createInteractiveConfirmDialog,
+  callToTransactionReqCall,
 } from '../utils';
 import { UserRejectedOpError } from '../utils/exceptions';
 import {
@@ -61,8 +60,6 @@ export class ExecuteTxnRpc extends AccountRpcController<
 > {
   protected txnStateManager: TransactionStateManager;
 
-  protected txnRequestStateManager: TransactionRequestStateManager;
-
   protected accStateManager: AccountStateManager;
 
   protected tokenStateManager: TokenStateManager;
@@ -74,7 +71,6 @@ export class ExecuteTxnRpc extends AccountRpcController<
   constructor(options?: AccountRpcControllerOptions) {
     super(options);
     this.txnStateManager = new TransactionStateManager();
-    this.txnRequestStateManager = new TransactionRequestStateManager();
     this.accStateManager = new AccountStateManager();
     this.tokenStateManager = new TokenStateManager();
   }
@@ -117,13 +113,6 @@ export class ExecuteTxnRpc extends AccountRpcController<
     const version =
       details?.version as unknown as constants.TRANSACTION_VERSION;
 
-    const formattedCalls = await formatCallData(
-      callsArray,
-      this.network.chainId,
-      address,
-      this.tokenStateManager,
-    );
-
     const { includeDeploy, suggestedMaxFee, estimateResults } =
       await getEstimatedFees(
         this.network,
@@ -139,8 +128,20 @@ export class ExecuteTxnRpc extends AccountRpcController<
         details,
       );
 
+    const formattedCalls = await Promise.all(
+      callsArray.map(async (call) =>
+        callToTransactionReqCall(
+          call,
+          this.network.chainId,
+          address,
+          this.tokenStateManager,
+        ),
+      ),
+    );
+
     const request: TransactionRequest = {
       chainId: this.network.chainId,
+      networkName: this.network.name,
       id: uuidv4(),
       interfaceId: '',
       type: TransactionType.INVOKE,
@@ -159,23 +160,18 @@ export class ExecuteTxnRpc extends AccountRpcController<
 
     request.interfaceId = interfaceId;
 
-    await this.txnRequestStateManager.upsertTransactionRequest(request);
-
-    if (!(await confirmDialogInteractiveUI(interfaceId))) {
-      await this.txnRequestStateManager.removeTransactionRequest(request.id);
+    if (!(await createInteractiveConfirmDialog(interfaceId))) {
       throw new UserRejectedOpError() as unknown as Error;
     }
 
     // This part should be handled based on latest request only.
     const executeTxnResp = await this.#execute(
-      request.id,
-      interfaceId,
+      request,
       details ?? {},
       abis,
     );
 
     if (!executeTxnResp?.transaction_hash) {
-      await this.txnRequestStateManager.removeTransactionRequest(request.id);
       throw new Error('Failed to execute transaction');
     }
 
@@ -188,21 +184,15 @@ export class ExecuteTxnRpc extends AccountRpcController<
       this.createInvokeTxn(address, executeTxnResp.transaction_hash, call),
     );
 
-    await this.txnRequestStateManager.removeTransactionRequest(request.id);
     return executeTxnResp;
   }
 
   async #execute(
-    requestId: string,
-    interfaceId: string,
+    request: TransactionRequest,
     details: UniversalDetails,
     abis: any,
   ) {
     const { privateKey, publicKey } = this.account;
-    const request = await this.txnRequestStateManager.getTransactionRequest({
-      requestId,
-      interfaceId,
-    });
     if (!request) {
       throw new SnapError('Transaction Request not found in state');
     }
