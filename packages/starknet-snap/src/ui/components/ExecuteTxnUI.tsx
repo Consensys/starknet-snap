@@ -98,7 +98,7 @@ export const ExecuteTxnUI: SnapComponent<ExecuteTxnUIProps> = ({
         <Section>
           <Icon name="gas" size="md" />
           <Amount
-            label="Estimated network fee"
+            label="Network fee"
             amount={maxFee}
             decimals={DEFAULT_DECIMAL_PLACES}
             symbol={selectedFeeToken}
