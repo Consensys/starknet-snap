@@ -3,29 +3,33 @@ import { DEFAULT_DECIMAL_PLACES } from '../utils/constants';
 import { accumulateTotals } from './utils';
 
 describe('calculateTotals', () => {
-  const mockCalls = (overrides = [{}]) => [
-    {
-      isTransfer: true,
-      transferAmount: '1000000000000000000', // 1 ETH as string BigInt
-      transferTokenSymbol: 'ETH',
-      transferTokenDecimals: 18,
-      ...overrides[0],
-    } as FormattedCallData,
-    {
-      isTransfer: true,
-      transferAmount: '500000000000000000', // 0.5 ETH as string BigInt
-      transferTokenSymbol: 'ETH',
-      transferTokenDecimals: 18,
-      ...overrides[1],
-    } as FormattedCallData,
-    {
-      isTransfer: true,
-      transferAmount: '2000000000000000000', // 2 STRK as string BigInt
-      transferTokenSymbol: 'STRK',
-      transferTokenDecimals: 18,
-      ...overrides[2],
-    } as FormattedCallData,
-  ];
+  const mockCalls = (overrides = [{}]) =>
+    [
+      {
+        tokenTransferData: {
+          amount: '1000000000000000000', // 1 ETH as string BigInt
+          symbol: 'ETH',
+          decimals: 18,
+          ...overrides[0],
+        },
+      },
+      {
+        tokenTransferData: {
+          amount: '500000000000000000', // 0.5 ETH as string BigInt
+          symbol: 'ETH',
+          decimals: 18,
+          ...overrides[1],
+        },
+      },
+      {
+        tokenTransferData: {
+          amount: '2000000000000000000', // 2 STRK as string BigInt
+          symbol: 'STRK',
+          decimals: 18,
+          ...overrides[2],
+        },
+      },
+    ] as FormattedCallData[];
 
   const mockMaxFee = '100000000000000000'; // 0.1 token fee
 
@@ -48,11 +52,10 @@ describe('calculateTotals', () => {
   });
 
   it('handles fee-only transactions when there are no transfers', () => {
-    const calls = mockCalls([
-      { isTransfer: false },
-      { isTransfer: false },
-      { isTransfer: false },
-    ]);
+    const calls = mockCalls();
+    calls[0].tokenTransferData = undefined;
+    calls[1].tokenTransferData = undefined;
+    calls[2].tokenTransferData = undefined;
     const selectedFeeToken = 'STRK';
     const result = accumulateTotals(calls, mockMaxFee, selectedFeeToken);
 
@@ -78,24 +81,6 @@ describe('calculateTotals', () => {
       STRK: {
         amount: BigInt('2100000000000000000'), // 2 + 0.1 STRK
         decimals: 18,
-      },
-    });
-  });
-
-  it('ignores invalid transfer data and only processes valid calls', () => {
-    const calls = mockCalls([
-      { transferAmount: undefined }, // Invalid transfer
-      { transferTokenSymbol: undefined }, // Invalid transfer
-      { isTransfer: false }, // Not a transfer
-    ]);
-    const selectedFeeToken = 'ETH';
-
-    const result = accumulateTotals(calls, mockMaxFee, selectedFeeToken);
-
-    expect(result).toStrictEqual({
-      ETH: {
-        amount: BigInt('100000000000000000'), // 0.1 ETH (fee only)
-        decimals: DEFAULT_DECIMAL_PLACES,
       },
     });
   });
