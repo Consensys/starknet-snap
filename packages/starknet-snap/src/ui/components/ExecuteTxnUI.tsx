@@ -62,19 +62,11 @@ export const ExecuteTxnUI: SnapComponent<ExecuteTxnUIProps> = ({
 
         {calls.map((call) => (
           <Section>
-            {call.tokenTransferData ? (
-              <AddressUI
-                label="Token Transfer"
-                address={call.contractAddress}
-                chainId={chainId}
-              />
-            ) : (
-              <AddressUI
-                label="Contract Interaction"
-                address={call.contractAddress}
-                chainId={chainId}
-              />
-            )}
+          <AddressUI
+            label="Contract"
+            address={call.contractAddress}
+            chainId={chainId}
+          />
             {call.tokenTransferData ? (
               <Section>
                 <AddressUI
