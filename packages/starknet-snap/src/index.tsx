@@ -90,14 +90,14 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
   const requestParams = request?.params as unknown as ApiRequestParams;
 
   logger.log(`${request.method}:\nrequestParams: ${toJson(requestParams)}`);
-
-  if (request.method === 'ping') {
-    logger.log('pong');
-    return 'pong';
-  }
-
   try {
     const initSnapStateManager = new InitSnapStateManager();
+
+    if (request.method === 'ping') {
+      logger.log('pong');
+      return 'pong';
+    }
+
     const requireMMUpgrade =
       await initSnapStateManager.requireMetaMaskUpgrade();
     if (requireMMUpgrade) {
