@@ -12,7 +12,7 @@ import { FeeToken } from '../types/snapApi';
 import type { TransactionRequest } from '../types/snapState';
 import { VoyagerTransactionType, type Transaction } from '../types/snapState';
 import { ExecuteTxnUI } from '../ui/components';
-import { generateFlow } from '../ui/utils';
+import { generateExecuteTxnFlow } from '../ui/utils';
 import type { AccountRpcControllerOptions } from '../utils';
 import {
   AddressStruct,
@@ -156,7 +156,7 @@ export class ExecuteTxnRpc extends AccountRpcController<
       includeDeploy,
     };
 
-    const interfaceId = await generateFlow(ExecuteTxnUI, request);
+    const interfaceId = await generateExecuteTxnFlow(ExecuteTxnUI, request);
 
     request.interfaceId = interfaceId;
 
