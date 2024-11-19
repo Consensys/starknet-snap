@@ -1,5 +1,6 @@
 import type { FormattedCallData, TransactionRequest } from '../types/snapState';
 import { DEFAULT_DECIMAL_PLACES } from '../utils/constants';
+import type { ExecuteTxnUIErrors } from './components';
 import { ExecuteTxnUI } from './components';
 import type { TokenTotals } from './types';
 
@@ -41,6 +42,7 @@ export const accumulateTotals = (
     },
   );
 };
+
 /**
  * Generate the interface for a ExecuteTxnUI
  *
@@ -82,31 +84,43 @@ export async function generateExecuteTxnFlow(
 }
 
 /**
- * Updates the Interactive UI interface.
+ * Update the interface for a ExecuteTxnUI
  *
- * This function updates the UI for a interactive UI flow using a provided JSX component and its associated props.
- * It dynamically renders the updated UI and associates it with the specified interface ID.
- *
- * @template Props - The type of props expected by the JSX Component.
- * @param id
- * @param Component - The JSX Component to render, representing the updated UI for the interative UI flow.
- * It should accept props of type `Props`.
- * @param params - The parameters for the Interactive UI update.
- * @param errors - Optional errors to display in the updated interface.
- * @returns A Promise that resolves when the interface has been successfully updated.
+ * @param id - Interface Id
+ * @param request - TransactionRequest
+ * @param errors
  */
-export async function updateFlow<Props extends JsonObject>(
+export async function updateExecuteTxnFlow(
   id: string, // Interface Id to update
-  Component: SnapComponent<Props>, // Generic Component expecting props of type Props
-  params: Props, // Props must include `id` and `interfaceId`
-  errors?: Partial<Props>, // Optional partial props for error handling or overrides
+  request: TransactionRequest, // Props must include `id` and `interfaceId`
+  errors?: ExecuteTxnUIErrors, // Optional partial props for error handling or overrides
 ) {
+  const {
+    signer,
+    chainId,
+    networkName,
+    maxFee,
+    calls,
+    selectedFeeToken,
+    includeDeploy,
+  } = request;
   // Perform the interface update
   await snap.request({
     method: 'snap_updateInterface',
     params: {
       id,
-      ui: <Component {...params} {...errors} />,
+      ui: (
+        <ExecuteTxnUI
+          signer={signer}
+          chainId={chainId}
+          networkName={networkName}
+          maxFee={maxFee}
+          calls={calls}
+          selectedFeeToken={selectedFeeToken}
+          includeDeploy={includeDeploy}
+          {...errors}
+        />
+      ),
     },
   });
 }

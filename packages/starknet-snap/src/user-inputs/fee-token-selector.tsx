@@ -11,7 +11,7 @@ import { FeeToken } from '../types/snapApi';
 import type { TransactionRequest } from '../types/snapState';
 import type { ExecuteTxnUIProps } from '../ui/components';
 import { ExecuteTxnUI } from '../ui/components';
-import { updateFlow } from '../ui/utils';
+import { updateExecuteTxnFlow } from '../ui/utils';
 import { getEstimatedFees } from '../utils/starknetUtils';
 import { AccountUserInputController } from '../utils/user-input';
 import { hasSufficientFunds } from './utils';
@@ -113,7 +113,7 @@ export class FeeTokenSelectorController extends AccountUserInputController {
             (result) => result.resourceBounds,
           );
 
-          await updateFlow(id, ExecuteTxnUI, request);
+          await updateExecuteTxnFlow(id, ExecuteTxnUI, request);
         }
       }
     } catch (error) {
@@ -123,9 +123,14 @@ export class FeeTokenSelectorController extends AccountUserInputController {
           : 'Error calculating fees';
       // On failure, display ExecuteTxnUI with an error message
       if (request) {
-        await updateFlow<ExecuteTxnUIProps>(id, ExecuteTxnUI, request, {
-          errors: { fees: errorMessage },
-        });
+        await updateExecuteTxnFlow<ExecuteTxnUIProps>(
+          id,
+          ExecuteTxnUI,
+          request,
+          {
+            errors: { fees: errorMessage },
+          },
+        );
       } else {
         throw error;
       }
