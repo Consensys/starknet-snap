@@ -21,7 +21,7 @@ import {
   UniversalDetailsStruct,
   CallsStruct,
   mapDeprecatedParams,
-  createInteractiveConfirmDialog,
+  confirmDialogInteractiveUI,
   callToTransactionReqCall,
 } from '../utils';
 import { UserRejectedOpError } from '../utils/exceptions';
@@ -142,6 +142,7 @@ export class ExecuteTxnRpc extends AccountRpcController<
 
     const request: TransactionRequest = {
       chainId: this.network.chainId,
+      networkName: this.network.name,
       id: uuidv4(),
       interfaceId: '',
       type: TransactionType.INVOKE,
@@ -159,7 +160,7 @@ export class ExecuteTxnRpc extends AccountRpcController<
 
     request.interfaceId = interfaceId;
 
-    if (!(await createInteractiveConfirmDialog(interfaceId))) {
+    if (!(await confirmDialogInteractiveUI(interfaceId))) {
       throw new UserRejectedOpError() as unknown as Error;
     }
 
