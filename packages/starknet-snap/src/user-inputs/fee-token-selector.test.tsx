@@ -7,7 +7,6 @@ import {
 } from '../__tests__/helper';
 import { mockAccount, prepareMockAccount } from '../rpcs/__tests__/helper';
 import type { SnapState } from '../types/snapState';
-import { ExecuteTxnUI } from '../ui/components';
 import * as uiUtils from '../ui/utils';
 import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../utils/constants';
 import { feeTokenSelectorController } from './fee-token-selector';
@@ -33,7 +32,7 @@ describe('fee-token-selector', () => {
     const account = await mockAccount(constants.StarknetChainId.SN_SEPOLIA);
     prepareMockAccount(account, state);
 
-    const updateFlowSpy = jest.spyOn(uiUtils, 'updateFlow');
+    const updateExecuteTxnFlowSpy = jest.spyOn(uiUtils, 'updateExecuteTxnFlow');
 
     const handleUserInputSpy = jest.spyOn(
       feeTokenSelectorController as any,
@@ -58,7 +57,7 @@ describe('fee-token-selector', () => {
       event,
       context,
       handleUserInputSpy,
-      updateFlowSpy,
+      updateExecuteTxnFlowSpy,
       transactionRequests,
       getFeesSpy,
       hasSufficientFundsSpy,
@@ -72,7 +71,7 @@ describe('fee-token-selector', () => {
       context,
       transactionRequests,
       handleUserInputSpy,
-      updateFlowSpy,
+      updateExecuteTxnFlowSpy,
       getFeesSpy,
     } = await prepareMockData();
     const request = transactionRequests[0];
@@ -82,7 +81,7 @@ describe('fee-token-selector', () => {
     await feeTokenSelectorController.execute(id, event, context);
 
     expect(handleUserInputSpy).toHaveBeenCalledWith(id, event, context);
-    expect(updateFlowSpy).toHaveBeenCalledWith(id, ExecuteTxnUI, request, {
+    expect(updateExecuteTxnFlowSpy).toHaveBeenCalledWith(id, request, {
       errors: {
         fees: 'Error calculating fees',
       },
@@ -96,7 +95,7 @@ describe('fee-token-selector', () => {
       context,
       transactionRequests,
       handleUserInputSpy,
-      updateFlowSpy,
+      updateExecuteTxnFlowSpy,
       getFeesSpy,
     } = await prepareMockData();
     const request = transactionRequests[0];
@@ -111,7 +110,7 @@ describe('fee-token-selector', () => {
     await feeTokenSelectorController.execute(id, event, context);
 
     expect(handleUserInputSpy).toHaveBeenCalledWith(id, event, context);
-    expect(updateFlowSpy).toHaveBeenCalledWith(id, ExecuteTxnUI, request, {
+    expect(updateExecuteTxnFlowSpy).toHaveBeenCalledWith(id, request, {
       errors: {
         fees: 'Not enough funds to pay for fee',
       },
@@ -125,7 +124,7 @@ describe('fee-token-selector', () => {
       context,
       transactionRequests,
       handleUserInputSpy,
-      updateFlowSpy,
+      updateExecuteTxnFlowSpy,
       hasSufficientFundsSpy,
       getFeesSpy,
     } = await prepareMockData();
@@ -142,6 +141,6 @@ describe('fee-token-selector', () => {
     await feeTokenSelectorController.execute(id, event, context);
 
     expect(handleUserInputSpy).toHaveBeenCalledWith(id, event, context);
-    expect(updateFlowSpy).toHaveBeenCalledWith(id, ExecuteTxnUI, request);
+    expect(updateExecuteTxnFlowSpy).toHaveBeenCalledWith(id, request);
   });
 });

@@ -89,11 +89,12 @@ export async function generateExecuteTxnFlow(
  * @param id - Interface Id
  * @param request - TransactionRequest
  * @param errors
+ * @param errors.errors
  */
 export async function updateExecuteTxnFlow(
   id: string, // Interface Id to update
   request: TransactionRequest, // Props must include `id` and `interfaceId`
-  errors?: ExecuteTxnUIErrors, // Optional partial props for error handling or overrides
+  errors?: { errors: ExecuteTxnUIErrors }, // Optional partial props for error handling or overrides
 ) {
   const {
     signer,

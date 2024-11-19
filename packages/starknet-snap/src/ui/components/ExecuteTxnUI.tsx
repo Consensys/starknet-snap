@@ -28,7 +28,6 @@ export type ExecuteTxnUIErrors = {
 };
 
 export type ExecuteTxnUIProps = {
-  type: string;
   signer: string;
   chainId: string;
   networkName: string;

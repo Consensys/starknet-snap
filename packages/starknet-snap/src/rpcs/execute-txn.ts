@@ -12,7 +12,6 @@ import { FeeToken } from '../types/snapApi';
 import type { TransactionRequest } from '../types/snapState';
 import { VoyagerTransactionType, type Transaction } from '../types/snapState';
 import type { TransactionVersion } from '../types/starknet';
-import { ExecuteTxnUI } from '../ui/components';
 import { generateExecuteTxnFlow } from '../ui/utils';
 import type { AccountRpcControllerOptions } from '../utils';
 import {
