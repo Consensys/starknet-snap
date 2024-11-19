@@ -59,7 +59,7 @@ export const accumulateTotals = (
  */
 export async function generateFlow<Props extends JsonObject>(
   Component: SnapComponent<Props>, // Generic Component expecting props of type P
-  request: Props & { id: string }, // Request must match props and include an `id`
+  request: Props, // Request must match props and include an `id`
 ) {
   return await snap.request({
     method: 'snap_createInterface',
