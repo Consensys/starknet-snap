@@ -12,6 +12,7 @@ import {
 import { getBalance } from '../utils/starknetUtils';
 import type { ExecuteTxnUIErrors } from './components';
 import { ExecuteTxnUI } from './components';
+import { LoadingUI } from './fragments/LoadingUI';
 import type { TokenTotals } from './types';
 
 /**
@@ -157,6 +158,14 @@ export async function updateInterface(
       ui,
     },
   });
+}
+
+/**
+ *
+ * @param id
+ */
+export async function renderLoading(id: string): Promise<void> {
+  await updateInterface(id, <LoadingUI />);
 }
 
 /**
