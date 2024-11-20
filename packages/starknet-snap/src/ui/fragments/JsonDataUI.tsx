@@ -1,7 +1,6 @@
-import type { SnapComponent } from '@metamask/snaps-sdk/jsx';
+import { Row, Text, type SnapComponent } from '@metamask/snaps-sdk/jsx';
 
 import { toJson } from '../../utils';
-import { RowUI } from './RowUI';
 
 export type JsonDataUIProps = {
   label: string;
@@ -18,4 +17,8 @@ export type JsonDataUIProps = {
 export const JsonDataUI: SnapComponent<JsonDataUIProps> = ({
   label,
   data,
-}: JsonDataUIProps) => <RowUI label={label} value={toJson(data)} />;
+}: JsonDataUIProps) => (
+  <Row label={label}>
+    <Text>{toJson(data)}</Text>
+  </Row>
+);

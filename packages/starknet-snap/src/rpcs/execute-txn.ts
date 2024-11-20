@@ -1,34 +1,29 @@
-import type { Component, Json } from '@metamask/snaps-sdk';
-import convert from 'ethereum-unit-converter';
+import { type Json } from '@metamask/snaps-sdk';
 import type { Call, Calldata } from 'starknet';
 import { constants, TransactionStatus, TransactionType } from 'starknet';
 import type { Infer } from 'superstruct';
 import { object, string, assign, optional, any } from 'superstruct';
+import { v4 as uuidv4 } from 'uuid';
 
 import { AccountStateManager } from '../state/account-state-manager';
 import { TokenStateManager } from '../state/token-state-manager';
 import { TransactionStateManager } from '../state/transaction-state-manager';
 import { FeeToken } from '../types/snapApi';
+import type { TransactionRequest } from '../types/snapState';
 import { VoyagerTransactionType, type Transaction } from '../types/snapState';
+import { generateExecuteTxnFlow } from '../ui/utils';
 import type { AccountRpcControllerOptions } from '../utils';
 import {
   AddressStruct,
   BaseRequestStruct,
   AccountRpcController,
-  confirmDialog,
   UniversalDetailsStruct,
   CallsStruct,
   mapDeprecatedParams,
-  addressUI,
-  signerUI,
-  networkUI,
-  jsonDataUI,
-  dividerUI,
-  headerUI,
-  rowUI,
+  createInteractiveConfirmDialog,
+  callToTransactionReqCall,
 } from '../utils';
 import { UserRejectedOpError } from '../utils/exceptions';
-import { logger } from '../utils/logger';
 import {
   createAccount,
   executeTxn as executeTxnUtil,
@@ -112,6 +107,7 @@ export class ExecuteTxnRpc extends AccountRpcController<
   ): Promise<ExecuteTxnResponse> {
     const { address, calls, abis, details } = params;
     const { privateKey, publicKey } = this.account;
+    const callsArray = Array.isArray(calls) ? calls : [calls];
 
     const { includeDeploy, suggestedMaxFee, estimateResults } =
       await getEstimatedFees(
@@ -132,15 +128,38 @@ export class ExecuteTxnRpc extends AccountRpcController<
     const version =
       details?.version as unknown as constants.TRANSACTION_VERSION;
 
-    if (
-      !(await this.getExecuteTxnConsensus(
-        address,
-        accountDeployed,
-        calls,
-        suggestedMaxFee,
-        version,
-      ))
-    ) {
+    const formattedCalls = await Promise.all(
+      callsArray.map(async (call) =>
+        callToTransactionReqCall(
+          call,
+          this.network.chainId,
+          address,
+          this.tokenStateManager,
+        ),
+      ),
+    );
+
+    const request: TransactionRequest = {
+      chainId: this.network.chainId,
+      networkName: this.network.name,
+      id: uuidv4(),
+      interfaceId: '',
+      type: TransactionType.INVOKE,
+      signer: address,
+      maxFee: suggestedMaxFee,
+      calls: formattedCalls,
+      selectedFeeToken:
+        version === constants.TRANSACTION_VERSION.V3
+          ? FeeToken.STRK
+          : FeeToken.ETH,
+      includeDeploy,
+    };
+
+    const interfaceId = await generateExecuteTxnFlow(request);
+
+    request.interfaceId = interfaceId;
+
+    if (!(await createInteractiveConfirmDialog(interfaceId))) {
       throw new UserRejectedOpError() as unknown as Error;
     }
 
@@ -211,119 +230,6 @@ export class ExecuteTxnRpc extends AccountRpcController<
       chainId: this.network.chainId,
       transactionHash,
     });
-  }
-
-  protected async getExecuteTxnConsensus(
-    address: string,
-    accountDeployed: boolean,
-    calls: Call[] | Call,
-    maxFee: string,
-    version?: constants.TRANSACTION_VERSION,
-  ) {
-    const { name: chainName, chainId } = this.network;
-    const callsArray = Array.isArray(calls) ? calls : [calls];
-
-    const components: Component[] = [];
-    const feeToken: FeeToken =
-      version === constants.TRANSACTION_VERSION.V3
-        ? FeeToken.STRK
-        : FeeToken.ETH;
-
-    components.push(headerUI('Do you want to sign this transaction?'));
-    components.push(
-      signerUI({
-        address,
-        chainId,
-      }),
-    );
-
-    // Display a message to indicate the signed transaction will include an account deployment
-    if (!accountDeployed) {
-      components.push(headerUI(`The account will be deployed`));
-    }
-
-    components.push(dividerUI());
-    components.push(
-      rowUI({
-        label: `Estimated Gas Fee (${feeToken})`,
-        value: convert(maxFee, 'wei', 'ether'),
-      }),
-    );
-
-    components.push(dividerUI());
-    components.push(
-      networkUI({
-        networkName: chainName,
-      }),
-    );
-
-    // Iterate over each call in the calls array
-    for (const call of callsArray) {
-      const { contractAddress, calldata, entrypoint } = call;
-      components.push(dividerUI());
-      components.push(
-        addressUI({
-          label: 'Contract',
-          address: contractAddress,
-          chainId,
-        }),
-      );
-
-      components.push(
-        jsonDataUI({
-          label: 'Call Data',
-          data: calldata,
-        }),
-      );
-
-      // If the contract is an ERC20 token and the function is 'transfer', display sender, recipient, and amount
-      const token = await this.tokenStateManager.getToken({
-        address: contractAddress,
-        chainId,
-      });
-
-      if (token && entrypoint === 'transfer' && calldata) {
-        try {
-          const senderAddress = address;
-          const recipientAddress = calldata[0]; // Assuming the first element in calldata is the recipient
-          let amount = '';
-
-          if ([3, 6, 9, 12, 15, 18].includes(token.decimals)) {
-            amount = convert(calldata[1], -1 * token.decimals, 'ether');
-          } else {
-            amount = (
-              Number(calldata[1]) * Math.pow(10, -1 * token.decimals)
-            ).toFixed(token.decimals);
-          }
-          components.push(dividerUI());
-          components.push(
-            addressUI({
-              label: 'Sender Address',
-              address: senderAddress,
-              chainId,
-            }),
-            dividerUI(),
-            addressUI({
-              label: 'Recipient Address',
-              address: recipientAddress,
-              chainId,
-            }),
-            dividerUI(),
-            rowUI({
-              label: `Amount (${token.symbol})`,
-              value: amount,
-            }),
-          );
-        } catch (error) {
-          logger.warn(
-            // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-            `error found in amount conversion: ${error}`,
-          );
-        }
-      }
-    }
-
-    return await confirmDialog(components);
   }
 
   protected createDeployTxn(
