@@ -3,7 +3,7 @@ import type {
   InterfaceContext,
   UserInputEvent,
 } from '@metamask/snaps-sdk';
-import { UserInputEventType } from '@metamask/snaps-sdk';
+import { SnapError, UserInputEventType } from '@metamask/snaps-sdk';
 import type { TransactionType } from 'starknet';
 import { constants, ec, num as numUtils } from 'starknet';
 
@@ -20,6 +20,12 @@ import {
   renderLoading,
   updateExecuteTxnFlow,
 } from '../utils';
+
+class InsufficientFundsError extends SnapError {
+  constructor(message?: string) {
+    super(message ?? 'Insufficient Funds');
+  }
+}
 
 const FeeTokenSelectorEventKey = {
   FeeTokenChange: `feeTokenSelector_${UserInputEventType.InputChangeEvent}`,
@@ -132,12 +138,11 @@ export class UserInputEventController {
   protected async handleFeeTokenChange() {
     const request = this.context?.request as TransactionRequest;
     const { addressIndex, calls, signer, chainId } = request;
+    const feeToken = (this.event as InputChangeEvent)
+      .value as unknown as FeeToken;
 
     try {
       const network = await this.getNetwork(chainId);
-
-      const feeToken = (this.event as InputChangeEvent)
-        .value as unknown as FeeToken;
 
       const { publicKey, privateKey } = await this.deriveAccount(addressIndex);
 
@@ -172,7 +177,7 @@ export class UserInputEventController {
         suggestedMaxFee,
       });
       if (!sufficientFunds) {
-        throw new Error('Not enough funds to pay for fee');
+        throw new InsufficientFundsError();
       }
 
       request.maxFee = suggestedMaxFee;
@@ -186,11 +191,11 @@ export class UserInputEventController {
       await this.reqStateMgr.upsertTransactionRequest(request);
     } catch (error) {
       const errorMessage =
-        error.message === 'Not enough funds to pay for fee'
-          ? 'Not enough funds to pay for fee'
+        error instanceof InsufficientFundsError
+          ? `Not enough ${feeToken} to pay for fee`
           : 'Error calculating fees';
-      // On failure, display ExecuteTxnUI with an error message
 
+      // On failure, display ExecuteTxnUI with an error message
       await updateExecuteTxnFlow(this.eventId, request, {
         errors: { fees: errorMessage },
       });
