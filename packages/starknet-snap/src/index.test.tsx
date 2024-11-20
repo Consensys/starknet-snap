@@ -3,7 +3,6 @@ import { text, MethodNotFoundError, SnapError } from '@metamask/snaps-sdk';
 import { onHomePage, onRpcRequest } from '.';
 import * as createAccountApi from './createAccount';
 import { HomePageController } from './on-home-page';
-import { InitSnapStateManager } from './state/init-snap-state-manager';
 import * as keyPairUtils from './utils/keyPair';
 
 jest.mock('./utils/logger');
@@ -16,15 +15,9 @@ jest.mock('./utils', () => ({
 
 describe('onRpcRequest', () => {
   const createMockSpy = () => {
-    const requireMetaMaskUpgradeSpy = jest.spyOn(
-      InitSnapStateManager.prototype,
-      'requireMetaMaskUpgrade',
-    );
-    requireMetaMaskUpgradeSpy.mockResolvedValue(false);
     const createAccountSpy = jest.spyOn(createAccountApi, 'createAccount');
     const keyPairSpy = jest.spyOn(keyPairUtils, 'getAddressKeyDeriver');
     return {
-      requireMetaMaskUpgradeSpy,
       createAccountSpy,
       keyPairSpy,
     };
@@ -67,20 +60,6 @@ describe('onRpcRequest', () => {
     ).rejects.toThrow(MethodNotFoundError);
   });
 
-  it('throws `SnapError` on request if MetaMask needs update', async () => {
-    const { requireMetaMaskUpgradeSpy } = createMockSpy();
-    requireMetaMaskUpgradeSpy.mockResolvedValue(true);
-    await expect(
-      onRpcRequest({
-        ...createMockRequest(),
-        request: {
-          ...createMockRequest().request,
-          method: 'executeTxn',
-        },
-      }),
-    ).rejects.toThrow(SnapError);
-  });
-
   it('requests gets executed if MetaMask does not needs update', async () => {
     createMockSpy();
     expect(
@@ -111,11 +90,6 @@ describe('onRpcRequest', () => {
 
 describe('onHomePage', () => {
   it('executes homePageController normally if jsxSupport is not required', async () => {
-    const requireMetaMaskUpgradeSpy = jest.spyOn(
-      InitSnapStateManager.prototype,
-      'requireMetaMaskUpgrade',
-    );
-    requireMetaMaskUpgradeSpy.mockResolvedValue(false);
     const executeSpy = jest.spyOn(HomePageController.prototype, 'execute');
     executeSpy.mockResolvedValue({ content: text('test') });
 
