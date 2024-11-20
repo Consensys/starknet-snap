@@ -1,7 +1,9 @@
-import { Box, Copyable, Heading, Icon, Text } from '@metamask/snaps-sdk/jsx';
 import { type Infer, object, literal, assign } from 'superstruct';
 
-import { alertDialog, confirmDialog } from '../ui/utils';
+import {
+  renderDisplayPrivateKeyAlertUI,
+  renderDisplayPrivateKeyConfirmUI,
+} from '../ui/utils';
 import {
   AccountRpcController,
   AddressStruct,
@@ -55,37 +57,11 @@ export class DisplayPrivateKeyRpc extends AccountRpcController<
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     params: DisplayPrivateKeyParams,
   ): Promise<DisplayPrivateKeyResponse> {
-    if (
-      !(await confirmDialog({
-        children: (
-          <Box>
-            <Heading>Are you sure you want to reveal your private key?</Heading>
-            <Box direction="horizontal">
-              <Icon name="warning" size="md" />
-              <Text>
-                Confirming this action will display your private key. Ensure you
-                are in a secure environment.
-              </Text>
-            </Box>
-          </Box>
-        ),
-      }))
-    ) {
+    if (!(await renderDisplayPrivateKeyConfirmUI())) {
       throw new UserRejectedOpError() as unknown as Error;
     }
 
-    await alertDialog({
-      children: (
-        <Box>
-          <Heading>Starknet Account Private Key</Heading>
-          <Text>
-            Below is your Starknet Account private key. Keep it confidential.
-          </Text>
-          <Copyable value={this.account.privateKey} />
-        </Box>
-      ),
-    });
-
+    await renderDisplayPrivateKeyAlertUI(this.account.privateKey);
     return null;
   }
 }

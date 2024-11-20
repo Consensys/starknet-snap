@@ -1,10 +1,8 @@
-import { Box, Heading, Section } from '@metamask/snaps-sdk/jsx';
 import type { InvocationsSignerDetails } from 'starknet';
 import { constants } from 'starknet';
 
 import transactionExample from '../__tests__/fixture/transactionExample.json'; // Assuming you have a similar fixture
 import type { SnapState } from '../types/snapState';
-import { AddressUI, JsonDataUI, NetworkUI } from '../ui/fragments';
 import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../utils/constants';
 import {
   UserRejectedOpError,
@@ -14,7 +12,7 @@ import * as starknetUtils from '../utils/starknetUtils';
 import {
   mockAccount,
   prepareMockAccount,
-  prepareConfirmDialogJsx as prepareConfirmDialog,
+  prepareRenderSignTransactionUI,
 } from './__tests__/helper';
 import { signTransaction } from './sign-transaction';
 import type { SignTransactionParams } from './sign-transaction';
@@ -51,7 +49,7 @@ describe('signTransaction', () => {
     const chainId = constants.StarknetChainId.SN_SEPOLIA;
     const account = await mockAccount(chainId);
     prepareMockAccount(account, state);
-    prepareConfirmDialog();
+    prepareRenderSignTransactionUI();
     const request = createRequestParam(chainId, account.address);
 
     const expectedResult = await starknetUtils.signTransactions(
@@ -70,26 +68,15 @@ describe('signTransaction', () => {
     const account = await mockAccount(chainId);
     const { address } = account;
     prepareMockAccount(account, state);
-    const { confirmDialogSpy } = prepareConfirmDialog();
+    const { confirmDialogSpy } = prepareRenderSignTransactionUI();
     const request = createRequestParam(chainId, account.address, true);
 
     await signTransaction.execute(request);
-
-    const calls = confirmDialogSpy.mock.calls[0][0];
-    expect(calls).toStrictEqual({
-      children: (
-        <Box>
-          <Heading>Do you want to sign this transaction?</Heading>
-          <Section>
-            <AddressUI label="Signer" address={address} chainId={chainId} />
-            <NetworkUI networkName={STARKNET_SEPOLIA_TESTNET_NETWORK.name} />
-            <JsonDataUI
-              label={'Transactions'}
-              data={transactionExample.transactions}
-            />
-          </Section>
-        </Box>
-      ),
+    expect(confirmDialogSpy).toHaveBeenCalledWith({
+      senderAddress: address,
+      chainId,
+      networkName: STARKNET_SEPOLIA_TESTNET_NETWORK.name,
+      details: request.transactions,
     });
   });
 
@@ -97,7 +84,7 @@ describe('signTransaction', () => {
     const chainId = constants.StarknetChainId.SN_SEPOLIA;
     const account = await mockAccount(chainId);
     prepareMockAccount(account, state);
-    const { confirmDialogSpy } = prepareConfirmDialog();
+    const { confirmDialogSpy } = prepareRenderSignTransactionUI();
     const request = createRequestParam(chainId, account.address, false);
 
     await signTransaction.execute(request);
@@ -109,7 +96,7 @@ describe('signTransaction', () => {
     const chainId = constants.StarknetChainId.SN_SEPOLIA;
     const account = await mockAccount(chainId);
     prepareMockAccount(account, state);
-    const { confirmDialogSpy } = prepareConfirmDialog();
+    const { confirmDialogSpy } = prepareRenderSignTransactionUI();
     confirmDialogSpy.mockResolvedValue(false);
     const request = createRequestParam(chainId, account.address, true);
 

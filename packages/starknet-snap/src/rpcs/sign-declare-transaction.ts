@@ -1,10 +1,8 @@
-import { Box, Heading, Section } from '@metamask/snaps-sdk/jsx';
 import type { DeclareSignerDetails } from 'starknet';
 import type { Infer } from 'superstruct';
 import { array, object, string, assign } from 'superstruct';
 
-import { AddressUI, JsonDataUI, NetworkUI } from '../ui/fragments';
-import { confirmDialog } from '../ui/utils';
+import { renderSignDeclareTransactionUI } from '../ui/utils';
 import {
   AddressStruct,
   BaseRequestStruct,
@@ -81,7 +79,14 @@ export class SignDeclareTransactionRpc extends AccountRpcController<
     params: SignDeclareTransactionParams,
   ): Promise<SignDeclareTransactionResponse> {
     const { details } = params;
-    if (!(await this.getSignDeclareTransactionConsensus(details))) {
+    if (
+      !(await renderSignDeclareTransactionUI({
+        senderAddress: details.senderAddress,
+        networkName: this.network.name,
+        chainId: this.network.chainId,
+        details,
+      }))
+    ) {
       throw new UserRejectedOpError() as unknown as Error;
     }
 
@@ -89,27 +94,6 @@ export class SignDeclareTransactionRpc extends AccountRpcController<
       this.account.privateKey,
       details as unknown as DeclareSignerDetails,
     )) as unknown as SignDeclareTransactionResponse;
-  }
-
-  protected async getSignDeclareTransactionConsensus(
-    details: Infer<typeof DeclareSignDetailsStruct>,
-  ) {
-    return await confirmDialog({
-      children: (
-        <Box>
-          <Heading>Do you want to sign this transaction?</Heading>
-          <Section>
-            <AddressUI
-              label="Signer"
-              address={details.senderAddress}
-              chainId={this.network.chainId}
-            />
-            <NetworkUI networkName={this.network.name} />
-            <JsonDataUI label={'Declare Transaction Details'} data={details} />
-          </Section>
-        </Box>
-      ),
-    });
   }
 }
 

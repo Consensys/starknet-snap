@@ -1,9 +1,7 @@
-import { Box, Heading, Section } from '@metamask/snaps-sdk/jsx';
 import type { Infer } from 'superstruct';
 import { array, object, string, assign } from 'superstruct';
 
-import { JsonDataUI, SignerUI } from '../ui/fragments';
-import { confirmDialog } from '../ui/utils';
+import { renderSignMessageUI } from '../ui/utils';
 import {
   AddressStruct,
   TypeDataStruct,
@@ -77,7 +75,11 @@ export class SignMessageRpc extends AccountRpcController<
       // Get Starknet expected not to show the confirm dialog, therefore, `enableAuthorize` will set to false to bypass the confirmation
       // TODO: enableAuthorize should set default to true
       enableAuthorize &&
-      !(await this.getSignMessageConsensus(typedDataMessage, address))
+      !(await renderSignMessageUI({
+        address,
+        typedDataMessage,
+        chainId: this.network.chainId,
+      }))
     ) {
       throw new UserRejectedOpError() as unknown as Error;
     }
@@ -87,23 +89,6 @@ export class SignMessageRpc extends AccountRpcController<
       typedDataMessage,
       address,
     );
-  }
-
-  protected async getSignMessageConsensus(
-    typedDataMessage: Infer<typeof TypeDataStruct>,
-    address: string,
-  ) {
-    return await confirmDialog({
-      children: (
-        <Box>
-          <Heading>Do you want to sign this message?</Heading>
-          <Section>
-            <SignerUI address={address} chainId={this.network.chainId} />
-            <JsonDataUI label="Message" data={typedDataMessage} />
-          </Section>
-        </Box>
-      ),
-    });
   }
 }
 

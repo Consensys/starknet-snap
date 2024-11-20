@@ -1,11 +1,8 @@
-import type { DialogResult } from '@metamask/snaps-sdk';
-import { Box, Heading, Section } from '@metamask/snaps-sdk/jsx';
-import type { Call, InvocationsSignerDetails } from 'starknet';
+import type { InvocationsSignerDetails } from 'starknet';
 import type { Infer } from 'superstruct';
 import { array, object, string, assign, any } from 'superstruct';
 
-import { AddressUI, JsonDataUI, NetworkUI } from '../ui/fragments';
-import { confirmDialog } from '../ui/utils';
+import { renderSignTransactionUI } from '../ui/utils';
 import {
   AddressStruct,
   AuthorizableStruct,
@@ -84,10 +81,12 @@ export class SignTransactionRpc extends AccountRpcController<
       // Get Starknet expected not to show the confirm dialog, therefore, `enableAuthorize` will set to false to bypass the confirmation
       // TODO: enableAuthorize should set default to true
       enableAuthorize &&
-      !(await this.getSignTransactionConsensus(
-        address,
-        transactions as unknown as Call[],
-      ))
+      !(await renderSignTransactionUI({
+        senderAddress: address,
+        networkName: this.network.name,
+        chainId: this.network.chainId,
+        details: transactions,
+      }))
     ) {
       throw new UserRejectedOpError() as unknown as Error;
     }
@@ -97,28 +96,6 @@ export class SignTransactionRpc extends AccountRpcController<
       transactions,
       params.transactionsDetail as unknown as InvocationsSignerDetails,
     )) as SignTransactionResponse;
-  }
-
-  protected async getSignTransactionConsensus(
-    address: string,
-    transactions: Call[],
-  ): Promise<DialogResult> {
-    return await confirmDialog({
-      children: (
-        <Box>
-          <Heading>Do you want to sign this transaction?</Heading>
-          <Section>
-            <AddressUI
-              label="Signer"
-              address={address}
-              chainId={this.network.chainId}
-            />
-            <NetworkUI networkName={this.network.name} />
-            <JsonDataUI label={'Transactions'} data={transactions} />
-          </Section>
-        </Box>
-      ),
-    });
   }
 }
 

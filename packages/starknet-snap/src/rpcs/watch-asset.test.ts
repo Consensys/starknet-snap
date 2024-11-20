@@ -1,18 +1,9 @@
-import {
-  Box,
-  Divider,
-  Heading,
-  Row,
-  Section,
-  Text,
-} from '@metamask/snaps-sdk/jsx';
 import { constants } from 'starknet';
 
 import { Config } from '../config';
 import { NetworkStateManager } from '../state/network-state-manager';
 import { TokenStateManager } from '../state/token-state-manager';
 import type { Network } from '../types/snapState';
-import { AddressUI, NetworkUI } from '../ui/fragments';
 import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../utils/constants';
 import {
   InvalidRequestParamsError,
@@ -20,7 +11,7 @@ import {
   InvalidNetworkError,
   UserRejectedOpError,
 } from '../utils/exceptions';
-import { prepareConfirmDialogJsx as prepareConfirmDialog } from './__tests__/helper';
+import { prepareRenderWatchAssetUI } from './__tests__/helper';
 import type { WatchAssetParams } from './watch-asset';
 import { watchAsset } from './watch-asset';
 
@@ -80,7 +71,7 @@ describe('WatchAssetRpc', () => {
     const request = createRequest({
       chainId: network.chainId as unknown as constants.StarknetChainId,
     });
-    const { confirmDialogSpy } = prepareConfirmDialog();
+    const { confirmDialogSpy } = prepareRenderWatchAssetUI();
     const { getNetworkSpy } = mockNetworkStateManager({
       network,
     });
@@ -111,33 +102,16 @@ describe('WatchAssetRpc', () => {
     });
 
     await watchAsset.execute(request);
-
     expect(confirmDialogSpy).toHaveBeenCalledWith({
-      children: (
-        <Box>
-          <Heading>Do you want to add this token?</Heading>
-          <Divider />
-          <NetworkUI networkName={network.name} />
-          <Section>
-            <AddressUI
-              label="Token"
-              address={request.tokenAddress}
-              chainId={network.chainId}
-            />
-            <Section>
-              <Row label="Name">
-                <Text>{request.tokenName}</Text>
-              </Row>
-              <Row label="Symbol">
-                <Text>{request.tokenSymbol}</Text>
-              </Row>
-              <Row label="Decimals">
-                <Text>{request.tokenDecimals.toString()}</Text>
-              </Row>
-            </Section>
-          </Section>
-        </Box>
-      ),
+      chainId: network.chainId,
+      networkName: network.name,
+      token: {
+        address: request.tokenAddress,
+        chainId: request.chainId,
+        decimals: request.tokenDecimals,
+        name: request.tokenName,
+        symbol: request.tokenSymbol,
+      },
     });
   });
 

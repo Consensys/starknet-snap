@@ -1,9 +1,133 @@
+import type { DialogResult } from '@metamask/snaps-sdk';
 import { DialogType } from '@metamask/snaps-sdk';
 
 import type { FormattedCallData, TransactionRequest } from '../types/snapState';
 import { DEFAULT_DECIMAL_PLACES } from '../utils/constants';
 import { ExecuteTxnUI } from './components';
+import {
+  DisplayPrivateKeyAlertUI,
+  DisplayPrivateKeyDialogUI,
+} from './components/DisplayPrivateKeyUI';
+import type { SignDeclareTransactionUIProps } from './components/SignDeclareTransactionUI';
+import { SignDeclareTransactionUI } from './components/SignDeclareTransactionUI';
+import type { SignMessageUIProps } from './components/SignMessageUI';
+import { SignMessageUI } from './components/SignMessageUI';
+import type { SignTransactionUIProps } from './components/SignTransactionUI';
+import { SignTransactionUI } from './components/SignTransactionUI';
+import type { SwitchNetworkUIProps } from './components/SwitchNetworkUI';
+import { SwitchNetworkUI } from './components/SwitchNetworkUI';
+import type { WatchAssetUIProps } from './components/WatchAssetUI';
+import { WatchAssetUI } from './components/WatchAssetUI';
 import type { TokenTotals } from './types';
+
+/**
+ *
+ * @param props
+ */
+export async function renderWatchAssetUI(
+  props: WatchAssetUIProps,
+): Promise<DialogResult> {
+  return await snap.request({
+    method: 'snap_dialog',
+    params: {
+      type: DialogType.Confirmation,
+      content: <WatchAssetUI {...props} />,
+    },
+  });
+}
+
+/**
+ *
+ * @param props
+ */
+export async function renderSwitchNetworkUI(
+  props: SwitchNetworkUIProps,
+): Promise<DialogResult> {
+  return await snap.request({
+    method: 'snap_dialog',
+    params: {
+      type: DialogType.Confirmation,
+      content: <SwitchNetworkUI {...props} />,
+    },
+  });
+}
+
+/**
+ *
+ * @param props
+ */
+export async function renderSignTransactionUI(
+  props: SignTransactionUIProps,
+): Promise<DialogResult> {
+  return await snap.request({
+    method: 'snap_dialog',
+    params: {
+      type: DialogType.Confirmation,
+      content: <SignTransactionUI {...props} />,
+    },
+  });
+}
+
+/**
+ *
+ * @param props
+ */
+export async function renderSignMessageUI(
+  props: SignMessageUIProps,
+): Promise<DialogResult> {
+  return await snap.request({
+    method: 'snap_dialog',
+    params: {
+      type: DialogType.Confirmation,
+      content: <SignMessageUI {...props} />,
+    },
+  });
+}
+
+/**
+ *
+ * @param props
+ */
+export async function renderSignDeclareTransactionUI(
+  props: SignDeclareTransactionUIProps,
+): Promise<DialogResult> {
+  return await snap.request({
+    method: 'snap_dialog',
+    params: {
+      type: DialogType.Confirmation,
+      content: <SignDeclareTransactionUI {...props} />,
+    },
+  });
+}
+
+/**
+ *
+ */
+export async function renderDisplayPrivateKeyConfirmUI(): Promise<DialogResult> {
+  return await snap.request({
+    method: 'snap_dialog',
+    params: {
+      type: DialogType.Confirmation,
+      content: <DisplayPrivateKeyDialogUI />,
+    },
+  });
+}
+
+/**
+ *
+ * @param privateKey
+ */
+export async function renderDisplayPrivateKeyAlertUI(
+  privateKey: string,
+): Promise<void> {
+  await snap.request({
+    method: 'snap_dialog',
+    params: {
+      type: DialogType.Alert,
+      content: <DisplayPrivateKeyAlertUI privateKey={privateKey} />,
+    },
+  });
+}
 
 /**
  *

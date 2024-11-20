@@ -1,4 +1,3 @@
-import { Box, Copyable, Heading, Icon, Text } from '@metamask/snaps-sdk/jsx';
 import { constants } from 'starknet';
 
 import type { SnapState } from '../types/snapState';
@@ -10,8 +9,8 @@ import {
 import {
   mockAccount,
   prepareMockAccount,
-  prepareConfirmDialogJsx,
-  prepareAlertDialogJsx,
+  prepareRenderDisplayPrivateKeyAlertUI,
+  prepareRenderDisplayPrivateKeyConfirmUI,
 } from './__tests__/helper';
 import { displayPrivateKey } from './display-private-key';
 import type { DisplayPrivateKeyParams } from './display-private-key';
@@ -41,67 +40,36 @@ describe('displayPrivateKey', () => {
     const chainId = constants.StarknetChainId.SN_SEPOLIA;
     const account = await mockAccount(chainId);
     prepareMockAccount(account, state);
-    prepareConfirmDialogJsx();
-    const { alertDialogSpy } = prepareAlertDialogJsx();
+    prepareRenderDisplayPrivateKeyConfirmUI();
+    const { alertDialogSpy } = prepareRenderDisplayPrivateKeyAlertUI();
 
     const request = createRequestParam(chainId, account.address);
 
     await displayPrivateKey.execute(request);
 
-    expect(alertDialogSpy).toHaveBeenCalledTimes(1);
-
-    const calls = alertDialogSpy.mock.calls[0][0];
-
-    expect(calls).toStrictEqual({
-      children: (
-        <Box>
-          <Heading>Starknet Account Private Key</Heading>
-          <Text>
-            Below is your Starknet Account private key. Keep it confidential.
-          </Text>
-          <Copyable value={account.privateKey} />
-        </Box>
-      ),
-    });
+    expect(alertDialogSpy).toHaveBeenCalledWith(account.privateKey);
   });
 
   it('renders confirmation dialog', async () => {
     const chainId = constants.StarknetChainId.SN_SEPOLIA;
     const account = await mockAccount(chainId);
     prepareMockAccount(account, state);
-    const { confirmDialogSpy } = prepareConfirmDialogJsx();
-    prepareAlertDialogJsx();
+    const { confirmDialogSpy } = prepareRenderDisplayPrivateKeyConfirmUI();
+    prepareRenderDisplayPrivateKeyAlertUI();
 
     const request = createRequestParam(chainId, account.address);
 
     await displayPrivateKey.execute(request);
 
     expect(confirmDialogSpy).toHaveBeenCalledTimes(1);
-
-    const calls = confirmDialogSpy.mock.calls[0][0];
-
-    expect(calls).toStrictEqual({
-      children: (
-        <Box>
-          <Heading>Are you sure you want to reveal your private key?</Heading>
-          <Box direction="horizontal">
-            <Icon name="warning" size="md" />
-            <Text>
-              Confirming this action will display your private key. Ensure you
-              are in a secure environment.
-            </Text>
-          </Box>
-        </Box>
-      ),
-    });
   });
 
   it('throws `UserRejectedOpError` if user denies the operation', async () => {
     const chainId = constants.StarknetChainId.SN_SEPOLIA;
     const account = await mockAccount(chainId);
     prepareMockAccount(account, state);
-    const { confirmDialogSpy } = prepareConfirmDialogJsx();
-    prepareAlertDialogJsx();
+    const { confirmDialogSpy } = prepareRenderDisplayPrivateKeyConfirmUI();
+    prepareRenderDisplayPrivateKeyAlertUI();
 
     confirmDialogSpy.mockResolvedValue(false);
 

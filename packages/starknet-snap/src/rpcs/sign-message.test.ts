@@ -1,9 +1,7 @@
-import { Box, Heading, Section } from '@metamask/snaps-sdk/jsx';
 import { constants } from 'starknet';
 
 import typedDataExample from '../__tests__/fixture/typedDataExample.json';
 import type { SnapState } from '../types/snapState';
-import { JsonDataUI, SignerUI } from '../ui/fragments';
 import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../utils/constants';
 import {
   UserRejectedOpError,
@@ -13,7 +11,7 @@ import * as starknetUtils from '../utils/starknetUtils';
 import {
   mockAccount,
   prepareMockAccount,
-  prepareConfirmDialogJsx as prepareConfirmDialog,
+  prepareRenderSignMessageUI,
 } from './__tests__/helper';
 import { signMessage } from './sign-message';
 import type { SignMessageParams } from './sign-message';
@@ -33,7 +31,7 @@ describe('signMessage', () => {
     const account = await mockAccount(constants.StarknetChainId.SN_SEPOLIA);
 
     prepareMockAccount(account, state);
-    prepareConfirmDialog();
+    prepareRenderSignMessageUI();
 
     const expectedResult = await starknetUtils.signMessage(
       account.privateKey,
@@ -56,7 +54,7 @@ describe('signMessage', () => {
     const { address, chainId } = account;
 
     prepareMockAccount(account, state);
-    const { confirmDialogSpy } = prepareConfirmDialog();
+    const { confirmDialogSpy } = prepareRenderSignMessageUI();
 
     const request = {
       chainId: chainId as constants.StarknetChainId,
@@ -66,18 +64,10 @@ describe('signMessage', () => {
     };
 
     await signMessage.execute(request);
-
-    const calls = confirmDialogSpy.mock.calls[0][0];
-    expect(calls).toStrictEqual({
-      children: (
-        <Box>
-          <Heading>Do you want to sign this message?</Heading>
-          <Section>
-            <SignerUI address={address} chainId={chainId} />
-            <JsonDataUI label="Message" data={typedDataExample} />
-          </Section>
-        </Box>
-      ),
+    expect(confirmDialogSpy).toHaveBeenCalledWith({
+      address,
+      chainId,
+      typedDataMessage: typedDataExample,
     });
   });
 
@@ -85,7 +75,7 @@ describe('signMessage', () => {
     const account = await mockAccount(constants.StarknetChainId.SN_SEPOLIA);
 
     prepareMockAccount(account, state);
-    const { confirmDialogSpy } = prepareConfirmDialog();
+    const { confirmDialogSpy } = prepareRenderSignMessageUI();
 
     confirmDialogSpy.mockResolvedValue(false);
 

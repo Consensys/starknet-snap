@@ -62,6 +62,91 @@ export function prepareConfirmDialog() {
 /**
  *
  */
+export function prepareRenderWatchAssetUI() {
+  const confirmDialogSpy = jest.spyOn(snapUiUtils, 'renderWatchAssetUI');
+  confirmDialogSpy.mockResolvedValue(true);
+  return {
+    confirmDialogSpy,
+  };
+}
+
+/**
+ *
+ */
+export function prepareRenderSwitchNetworkUI() {
+  const confirmDialogSpy = jest.spyOn(snapUiUtils, 'renderSwitchNetworkUI');
+  confirmDialogSpy.mockResolvedValue(true);
+  return {
+    confirmDialogSpy,
+  };
+}
+
+/**
+ *
+ */
+export function prepareRenderSignMessageUI() {
+  const confirmDialogSpy = jest.spyOn(snapUiUtils, 'renderSignMessageUI');
+  confirmDialogSpy.mockResolvedValue(true);
+  return {
+    confirmDialogSpy,
+  };
+}
+
+/**
+ *
+ */
+export function prepareRenderSignTransactionUI() {
+  const confirmDialogSpy = jest.spyOn(snapUiUtils, 'renderSignTransactionUI');
+  confirmDialogSpy.mockResolvedValue(true);
+  return {
+    confirmDialogSpy,
+  };
+}
+
+/**
+ *
+ */
+export function prepareRenderSignDeclareTransactionUI() {
+  const confirmDialogSpy = jest.spyOn(
+    snapUiUtils,
+    'renderSignDeclareTransactionUI',
+  );
+  confirmDialogSpy.mockResolvedValue(true);
+  return {
+    confirmDialogSpy,
+  };
+}
+
+/**
+ *
+ */
+export function prepareRenderDisplayPrivateKeyConfirmUI() {
+  const confirmDialogSpy = jest.spyOn(
+    snapUiUtils,
+    'renderDisplayPrivateKeyConfirmUI',
+  );
+  confirmDialogSpy.mockResolvedValue(true);
+  return {
+    confirmDialogSpy,
+  };
+}
+
+/**
+ *
+ */
+export function prepareRenderDisplayPrivateKeyAlertUI() {
+  const alertDialogSpy = jest.spyOn(
+    snapUiUtils,
+    'renderDisplayPrivateKeyAlertUI',
+  );
+  return {
+    alertDialogSpy,
+  };
+}
+
+/**
+ *
+ */
 export function prepareConfirmDialogJsx() {
   const confirmDialogSpy = jest.spyOn(snapUiUtils, 'confirmDialog');
   confirmDialogSpy.mockResolvedValue(true);

@@ -1,19 +1,10 @@
-import {
-  Box,
-  Divider,
-  Heading,
-  Row,
-  Section,
-  Text,
-} from '@metamask/snaps-sdk/jsx';
 import type { Infer } from 'superstruct';
 import { assign, boolean, min, number, object, optional } from 'superstruct';
 
 import { NetworkStateManager } from '../state/network-state-manager';
 import { TokenStateManager } from '../state/token-state-manager';
 import type { Erc20Token, Network } from '../types/snapState';
-import { NetworkUI, AddressUI } from '../ui/fragments';
-import { confirmDialog } from '../ui/utils';
+import { renderWatchAssetUI } from '../ui/utils';
 import {
   BaseRequestStruct,
   RpcController,
@@ -139,11 +130,11 @@ export class WatchAssetRpc extends RpcController<
     const network = await this.getNetworkFromChainId(chainId);
 
     if (
-      !(await this.getWatchAssetConsensus(
-        network.name,
-        network.chainId,
-        erc20Token,
-      ))
+      !(await renderWatchAssetUI({
+        networkName: network.name,
+        chainId: network.chainId,
+        token: erc20Token,
+      }))
     ) {
       throw new UserRejectedOpError() as unknown as Error;
     }
@@ -151,43 +142,6 @@ export class WatchAssetRpc extends RpcController<
     await this.tokenStateMgr.upsertToken(erc20Token);
 
     return true;
-  }
-
-  protected async getWatchAssetConsensus(
-    networkName: string,
-    chainId: string,
-    erc20Token: Erc20Token,
-  ) {
-    const { address, name, symbol, decimals } = erc20Token;
-    return await confirmDialog({
-      children: (
-        <Box>
-          <Heading>Do you want to add this token?</Heading>
-          <Divider />
-          <NetworkUI networkName={networkName} />
-          <Section>
-            <AddressUI label="Token" address={address} chainId={chainId} />
-            <Section>
-              {name ? (
-                <Row label="Name">
-                  <Text>{name}</Text>
-                </Row>
-              ) : null}
-              {symbol ? (
-                <Row label="Symbol">
-                  <Text>{symbol}</Text>
-                </Row>
-              ) : null}
-              {decimals !== null && (
-                <Row label="Decimals">
-                  <Text>{decimals.toString()}</Text>
-                </Row>
-              )}
-            </Section>
-          </Section>
-        </Box>
-      ),
-    });
   }
 }
 
