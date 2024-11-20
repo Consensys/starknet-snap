@@ -4,25 +4,29 @@ import type {
   UserInputEvent,
 } from '@metamask/snaps-sdk';
 import { UserInputEventType } from '@metamask/snaps-sdk';
-import { constants, ec, num as numUtils, TransactionType } from 'starknet';
+import type { TransactionType } from 'starknet';
+import { constants, ec, num as numUtils } from 'starknet';
 
 import { NetworkStateManager } from '../../state/network-state-manager';
 import { TransactionRequestStateManager } from '../../state/request-state-manager';
+import { TokenStateManager } from '../../state/token-state-manager';
 import { FeeToken } from '../../types/snapApi';
 import type { Network, TransactionRequest } from '../../types/snapState';
 import { getBip44Deriver, logger } from '../../utils';
 import { getAddressKey } from '../../utils/keyPair';
 import { getEstimatedFees } from '../../utils/starknetUtils';
 import {
-  hasSufficientFunds,
+  hasSufficientFundsForFee,
   renderLoading,
   updateExecuteTxnFlow,
-  updateInterface,
 } from '../utils';
 
-export enum FeeTokenSelectorEventKey {
-  FeeTokenChange = `feeTokenSelector_${UserInputEventType.InputChangeEvent}`,
-}
+const FeeTokenSelectorEventKey = {
+  FeeTokenChange: `feeTokenSelector_${UserInputEventType.InputChangeEvent}`,
+} as const;
+
+type FeeTokenSelectorEventKey =
+  (typeof FeeTokenSelectorEventKey)[keyof typeof FeeTokenSelectorEventKey];
 
 export class UserInputEventController {
   context: InterfaceContext | null;
@@ -35,6 +39,8 @@ export class UserInputEventController {
 
   networkStateMgr: NetworkStateManager;
 
+  tokenStateMgr: TokenStateManager;
+
   constructor(
     eventId: string,
     event: UserInputEvent,
@@ -45,6 +51,7 @@ export class UserInputEventController {
     this.eventId = eventId;
     this.reqStateMgr = new TransactionRequestStateManager();
     this.networkStateMgr = new NetworkStateManager();
+    this.tokenStateMgr = new TokenStateManager();
   }
 
   async handleEvent() {
@@ -61,7 +68,7 @@ export class UserInputEventController {
 
       await renderLoading(this.eventId);
 
-      const eventKey = `${this.event.name}_${this.event.type}`;
+      const eventKey = `${this.event.name ?? ''}_${this.event.type}`;
 
       switch (eventKey) {
         case FeeTokenSelectorEventKey.FeeTokenChange:
@@ -103,6 +110,25 @@ export class UserInputEventController {
     return network;
   }
 
+  protected async getTokenAddress(
+    chainId: string,
+    feeToken: FeeToken,
+  ): Promise<string> {
+    const token =
+      feeToken === FeeToken.STRK
+        ? await this.tokenStateMgr.getStrkToken({
+            chainId,
+          })
+        : await this.tokenStateMgr.getEthToken({
+            chainId,
+          });
+    if (!token) {
+      throw new Error('Token not found');
+    }
+
+    return token.address;
+  }
+
   protected async handleFeeTokenChange() {
     const request = this.context?.request as TransactionRequest;
     const { addressIndex, calls, signer, chainId } = request;
@@ -125,7 +151,7 @@ export class UserInputEventController {
           publicKey,
           [
             {
-              type: TransactionType.INVOKE,
+              type: request.type as TransactionType.INVOKE,
               payload: calls.map((call) => ({
                 calldata: call.calldata,
                 contractAddress: call.contractAddress,
@@ -138,13 +164,13 @@ export class UserInputEventController {
           },
         );
 
-      const sufficientFunds = await hasSufficientFunds(
-        signer,
+      const sufficientFunds = await hasSufficientFundsForFee({
+        address: signer,
         network,
         calls,
-        feeToken,
+        feeTokenAddress: await this.getTokenAddress(network.chainId, feeToken),
         suggestedMaxFee,
-      );
+      });
       if (!sufficientFunds) {
         throw new Error('Not enough funds to pay for fee');
       }

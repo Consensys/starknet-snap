@@ -56,22 +56,15 @@ import {
 } from './rpcs';
 import { sendTransaction } from './sendTransaction';
 import { signDeployAccountTransaction } from './signDeployAccountTransaction';
-import { NetworkStateManager } from './state/network-state-manager';
-import { FeeToken } from './types/snapApi';
 import type {
   ApiParams,
   ApiParamsWithKeyDeriver,
   ApiRequestParams,
 } from './types/snapApi';
-import type { SnapState, TransactionRequest } from './types/snapState';
-import {
-  hasSufficientFunds,
-  updateExecuteTxnFlow,
-  updateInterface,
-} from './ui/utils';
+import type { SnapState } from './types/snapState';
+import { UserInputEventController } from './ui/controllers/user-input-event-controller';
 import { upgradeAccContract } from './upgradeAccContract';
 import {
-  getBip44Deriver,
   getDappUrl,
   getStateData,
   isSnapRpcError,
@@ -85,7 +78,7 @@ import {
   STARKNET_TESTNET_NETWORK,
 } from './utils/constants';
 import { UnknownError } from './utils/exceptions';
-import { getAddressKey, getAddressKeyDeriver } from './utils/keyPair';
+import { getAddressKeyDeriver } from './utils/keyPair';
 import { acquireLock } from './utils/lock';
 import { logger } from './utils/logger';
 import { toJson } from './utils/serializer';
@@ -94,8 +87,6 @@ import {
   upsertNetwork,
   removeNetwork,
 } from './utils/snapUtils';
-import { getEstimatedFees } from './utils/starknetUtils';
-import { UserInputEventController } from './ui/controllers/user-input-event-controller';
 
 declare const snap;
 logger.logLevel = parseInt(Config.logLevel, 10);

@@ -1,11 +1,6 @@
 import { type Json } from '@metamask/snaps-sdk';
 import type { Call, Calldata } from 'starknet';
-import {
-  constants,
-  transaction,
-  TransactionStatus,
-  TransactionType,
-} from 'starknet';
+import { constants, TransactionStatus, TransactionType } from 'starknet';
 import type { Infer } from 'superstruct';
 import { object, string, assign, optional, any } from 'superstruct';
 import { v4 as uuidv4 } from 'uuid';
@@ -201,7 +196,9 @@ export class ExecuteTxnRpc extends AccountRpcController<
             await this.updateAccountAsDeploy(contractAddress, transactionHash);
           },
           version:
-            updatedRequest.transactionVersion as unknown as constants.TRANSACTION_VERSION,
+            updatedRequest.selectedFeeToken === FeeToken.STRK
+              ? constants.TRANSACTION_VERSION.V3
+              : constants.TRANSACTION_VERSION.V1,
         });
       }
 
@@ -218,7 +215,7 @@ export class ExecuteTxnRpc extends AccountRpcController<
         version:
           updatedRequest.selectedFeeToken === FeeToken.STRK
             ? constants.TRANSACTION_VERSION.V3
-            : undefined,
+            : constants.TRANSACTION_VERSION.V1,
       };
 
       const executeTxnResp = await executeTxnUtil(
@@ -244,8 +241,6 @@ export class ExecuteTxnRpc extends AccountRpcController<
       );
 
       return executeTxnResp;
-    } catch (error) {
-      throw error;
     } finally {
       await this.reqStateManager.removeTransactionRequest(requestId);
     }

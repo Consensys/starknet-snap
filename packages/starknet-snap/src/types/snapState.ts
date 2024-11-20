@@ -1,4 +1,8 @@
-import type { EstimateFee, RawCalldata } from 'starknet';
+import type {
+  EstimateFee,
+  RawCalldata,
+  TransactionType as StarknetTransactionType,
+} from 'starknet';
 
 /* eslint-disable */
 export type SnapState = {
@@ -30,7 +34,7 @@ type ResourceBounds = Pick<EstimateFee, 'resourceBounds'>['resourceBounds'];
 export type TransactionRequest = {
   id: string;
   interfaceId: string;
-  type: string;
+  type: StarknetTransactionType;
   signer: string;
   addressIndex: number;
   chainId: string;
