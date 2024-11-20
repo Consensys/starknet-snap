@@ -64,3 +64,5 @@ export const MIN_ACC_CONTRACT_VERSION = [0, 3, 0];
 export const DUMMY_ADDRESS = '0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx';
 
 export const DEFAULT_FEE_TOKEN = FeeToken.ETH;
+
+export const MIN_METAMASK_VERSION = '12.5.0';

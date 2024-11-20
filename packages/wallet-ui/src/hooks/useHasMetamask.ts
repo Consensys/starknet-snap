@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useAppDispatch } from 'hooks/redux';
 import { setProvider } from 'slices/walletSlice';
+import { setMinVersionModalVisible } from 'slices/modalSlice';
 import { enableLoadingWithMessage, disableLoading } from 'slices/UISlice';
+import { MIN_METAMASK_VERSION } from 'utils/constants';
 
 interface MetaMaskProvider {
   isMetaMask: boolean;
@@ -96,10 +98,14 @@ export const useHasMetamask = () => {
         dispatch(enableLoadingWithMessage('Detecting Metamask...'));
         const provider = await detectMetamaskSupport(window);
         // Use the new detection method
+        //window.ethereum = provider ?? null;
 
         if (provider && (await isSupportSnap(provider))) {
           dispatch(setProvider(provider));
           setHasMetamask(provider != null);
+          if (await isMetaMaskUpgradeRequired(provider)) {
+            dispatch(setMinVersionModalVisible(true));
+          }
         } else {
           dispatch(setProvider(null));
           setHasMetamask(false);
@@ -117,6 +123,27 @@ export const useHasMetamask = () => {
   return {
     hasMetamask,
   };
+};
+
+const isMetaMaskUpgradeRequired = async (
+  provider: any,
+  requiredVersion = MIN_METAMASK_VERSION,
+) => {
+  const clientVersion = await provider.request({
+    method: 'web3_clientVersion',
+    params: [],
+  });
+  const versionMatch = clientVersion.match(/MetaMask\/v(\d+\.\d+\.\d+)/);
+  const currentVersion = versionMatch[1];
+  if (
+    currentVersion.localeCompare(requiredVersion, undefined, {
+      numeric: true,
+    }) >= 0
+  ) {
+    return false;
+  } else {
+    return true;
+  }
 };
 
 const isSupportSnap = async (provider: any) => {

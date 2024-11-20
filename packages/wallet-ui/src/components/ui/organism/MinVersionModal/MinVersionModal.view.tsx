@@ -1,3 +1,4 @@
+import { MIN_METAMASK_VERSION } from 'utils/constants';
 import {
   Description,
   StarknetLogo,
@@ -15,8 +16,8 @@ export const MinVersionModalView = () => {
         <ul>
           <li>
             Ensure you have the latest version of{' '}
-            <a href="https://metamask.io">MetaMask</a> installed (v12.5 or
-            higher is required).
+            <a href="https://metamask.io">MetaMask</a> installed (v
+            {MIN_METAMASK_VERSION} or higher is required).
           </li>
           <li>
             Install the latest version of the Starknet Snap by following these

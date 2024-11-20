@@ -81,7 +81,10 @@ function App() {
         >
           <ConnectModal />
         </PopIn>
-        <PopIn isOpen={infoModalVisible} showClose={false}>
+        <PopIn
+          isOpen={infoModalVisible && !minVersionModalVisible}
+          showClose={false}
+        >
           <ConnectInfoModal address={address} />
         </PopIn>
         <PopIn
