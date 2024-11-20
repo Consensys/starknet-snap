@@ -11,6 +11,7 @@ export type SnapState = {
   networks: Network[];
   transactions: Transaction[];
   currentNetwork?: Network;
+  requireMMUpgrade?: boolean;
   transactionRequests?: TransactionRequest[];
 };
 

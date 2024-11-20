@@ -65,6 +65,7 @@ import type { SnapState } from './types/snapState';
 import { UserInputEventController } from './ui/controllers/user-input-event-controller';
 import { upgradeAccContract } from './upgradeAccContract';
 import {
+  ensureJsxSupport,
   getDappUrl,
   getStateData,
   isSnapRpcError,
@@ -306,40 +307,27 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
 };
 
 export const onInstall: OnInstallHandler = async () => {
-  await snap.request({
-    method: 'snap_dialog',
-    params: {
-      type: 'alert',
-      content: (
-        <Box>
-          <Text>Your MetaMask wallet is now compatible with Starknet!</Text>
-          <Text>
-            To manage your Starknet account and send and receive funds, visit
-            the <Link href={getDappUrl()}>companion dapp for Starknet</Link>.
-          </Text>
-        </Box>
-      ),
-    },
-  });
+  await ensureJsxSupport(
+    <Box>
+      <Text>Your MetaMask wallet is now compatible with Starknet!</Text>
+      <Text>
+        To manage your Starknet account and send and receive funds, visit the{' '}
+        <Link href={getDappUrl()}>companion dapp for Starknet</Link>.
+      </Text>
+    </Box>,
+  );
 };
 
 export const onUpdate: OnUpdateHandler = async () => {
-  await snap.request({
-    method: 'snap_dialog',
-    params: {
-      type: 'alert',
-      content: (
-        <Box>
-          <Text>Your Starknet Snap is now up-to-date !</Text>
-          <Text>
-            As usual, to manage your Starknet account and send and receive
-            funds, visit the{' '}
-            <Link href={getDappUrl()}>companion dapp for Starknet</Link>.
-          </Text>
-        </Box>
-      ),
-    },
-  });
+  await ensureJsxSupport(
+    <Box>
+      <Text>Your Starknet Snap is now up-to-date !</Text>
+      <Text>
+        As usual, to manage your Starknet account and send and receive funds,
+        visit the <Link href={getDappUrl()}>companion dapp for Starknet</Link>.
+      </Text>
+    </Box>,
+  );
 };
 
 export const onHomePage: OnHomePageHandler = async () => {

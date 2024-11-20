@@ -6,6 +6,12 @@ import { HomePageController } from './on-home-page';
 import * as keyPairUtils from './utils/keyPair';
 
 jest.mock('./utils/logger');
+jest.mock('./utils/snap');
+
+jest.mock('./utils', () => ({
+  ...jest.requireActual('./utils'),
+  updateRequiredMetaMaskComponent: jest.fn(),
+}));
 
 describe('onRpcRequest', () => {
   const createMockSpy = () => {
@@ -42,6 +48,7 @@ describe('onRpcRequest', () => {
   });
 
   it('throws `MethodNotFoundError` if the request method not found', async () => {
+    createMockSpy();
     await expect(
       onRpcRequest({
         ...createMockRequest(),
@@ -51,6 +58,19 @@ describe('onRpcRequest', () => {
         },
       }),
     ).rejects.toThrow(MethodNotFoundError);
+  });
+
+  it('requests gets executed if MetaMask does not needs update', async () => {
+    createMockSpy();
+    expect(
+      await onRpcRequest({
+        ...createMockRequest(),
+        request: {
+          ...createMockRequest().request,
+          method: 'ping',
+        },
+      }),
+    ).toBe('pong');
   });
 
   it('throws `SnapError` if the error is an instance of SnapError', async () => {
@@ -69,7 +89,7 @@ describe('onRpcRequest', () => {
 });
 
 describe('onHomePage', () => {
-  it('executes homePageController', async () => {
+  it('executes homePageController normally if jsxSupport is not required', async () => {
     const executeSpy = jest.spyOn(HomePageController.prototype, 'execute');
     executeSpy.mockResolvedValue({ content: text('test') });
 
