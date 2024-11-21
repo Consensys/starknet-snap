@@ -12,8 +12,7 @@ import { ConnectButton } from '../ConnectModal/ConnectModal.style';
 export const MinVersionModalView = () => {
   const { metaMaskUpgradeRequired } = useHasMetamask();
   const handleUpdateMetaMask = () => {
-    const newWindow = window.open('https://metamask.io', '_blank', 'noopener,noreferrer');
-    if (newWindow) newWindow.focus();
+    window.open('https://metamask.io', '_blank')?.focus();
   };
   return (
     <Wrapper>
