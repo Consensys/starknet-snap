@@ -1,5 +1,6 @@
 import styled from 'styled-components';
 import starknetSrc from 'assets/images/starknet-logo.svg';
+import metamaskSrc from 'assets/images/metamask-fox-icon.svg';
 
 export const Wrapper = styled.div`
   display: flex;
@@ -21,6 +22,13 @@ export const StarknetLogo = styled.img.attrs(() => ({
   width: 158px;
   height: 32px;
   margin-bottom: 32px;
+`;
+
+export const MetaMaskLogo = styled.img.attrs(() => ({
+  src: metamaskSrc,
+}))`
+  width: 32px;
+  height: 32px;
 `;
 
 export const Title = styled.div`
