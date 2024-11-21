@@ -9,17 +9,16 @@ export type SwitchNetworkUIProps = {
 };
 
 /**
- * Builds a loading UI component.
+ * Builds a UI component for confirming a network switch.
  *
- * @param options0
- * @param options0.name
- * @param options0.chainId
- * @returns A loading component.
+ * @param options - The options to configure the component.
+ * @param options.name - The name of the blockchain network to switch to.
+ * @param options.chainId - The chain ID of the target blockchain network.
+ * @returns A JSX component for the user to confirm the network switch.
  */
 export const SwitchNetworkUI: SnapComponent<SwitchNetworkUIProps> = ({
   name,
   chainId,
-  // errors, // TODO: include this later
 }) => {
   return (
     <Box>

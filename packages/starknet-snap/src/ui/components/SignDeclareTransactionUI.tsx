@@ -13,14 +13,14 @@ export type SignDeclareTransactionUIProps = {
 };
 
 /**
- * Builds a loading UI component.
+ * Builds a UI component for confirming the signing of a Declare transaction.
  *
- * @param options0
- * @param options0.senderAddress
- * @param options0.networkName
- * @param options0.chainId
- * @param options0.details
- * @returns A loading component.
+ * @param options - The options to configure the component.
+ * @param options.senderAddress - The address of the sender initiating the transaction.
+ * @param options.networkName - The name of the blockchain network where the transaction will occur.
+ * @param options.chainId - The chain ID of the blockchain network.
+ * @param options.details - The details of the Declare transaction, conforming to the `DeclareSignDetailsStruct` structure.
+ * @returns A JSX component for the user to review and confirm the Declare transaction signing.
  */
 export const SignDeclareTransactionUI: SnapComponent<
   SignDeclareTransactionUIProps

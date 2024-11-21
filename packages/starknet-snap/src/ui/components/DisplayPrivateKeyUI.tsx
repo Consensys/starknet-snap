@@ -2,9 +2,9 @@ import type { SnapComponent } from '@metamask/snaps-sdk/jsx';
 import { Box, Icon, Text, Heading, Copyable } from '@metamask/snaps-sdk/jsx';
 
 /**
- * Builds a loading UI component.
+ * Builds a UI component to confirm the action of revealing the private key.
  *
- * @returns A loading component.
+ * @returns A JSX component prompting the user to confirm revealing their private key.
  */
 export const DisplayPrivateKeyDialogUI: SnapComponent = () => {
   return (
@@ -26,18 +26,15 @@ export type DisplayPrivateKeyAlertUIProps = {
 };
 
 /**
- * Builds a loading UI component.
+ * Builds a UI component to display the private key securely.
  *
- * @param options0
- * @param options0.privateKey
- * @returns A loading component.
+ * @param options - The options to configure the component.
+ * @param options.privateKey - The private key to be displayed.
+ * @returns A JSX component for securely displaying the private key with a copyable option.
  */
 export const DisplayPrivateKeyAlertUI: SnapComponent<
   DisplayPrivateKeyAlertUIProps
-> = ({
-  privateKey,
-  // errors, // TODO: include this later
-}) => {
+> = ({ privateKey }) => {
   return (
     <Box>
       <Heading>Starknet Account Private Key</Heading>

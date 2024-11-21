@@ -48,7 +48,6 @@ export const ExecuteTxnUI: SnapComponent<ExecuteTxnUIProps> = ({
   calls,
   selectedFeeToken,
   includeDeploy,
-  // errors, // TODO: include this later
 }) => {
   // Calculate the totals using the helper
   const tokenTotals = accumulateTotals(calls, maxFee, selectedFeeToken);

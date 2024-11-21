@@ -18,13 +18,13 @@ export type WatchAssetUIProps = {
 };
 
 /**
- * Builds a loading UI component.
+ * Builds a UI component for confirming the addition of an ERC-20 token.
  *
- * @param options0
- * @param options0.networkName
- * @param options0.chainId
- * @param options0.token
- * @returns A loading component.
+ * @param options - The options to configure the component.
+ * @param options.networkName - The name of the blockchain network (e.g., Ethereum, Binance Smart Chain).
+ * @param options.chainId - The chain ID of the blockchain network.
+ * @param options.token - The ERC-20 token details, including its name, symbol, address, and decimals.
+ * @returns A JSX component for the user to confirm adding the token.
  */
 export const WatchAssetUI: SnapComponent<WatchAssetUIProps> = ({
   networkName,

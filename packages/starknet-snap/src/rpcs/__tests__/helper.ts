@@ -147,28 +147,6 @@ export function prepareRenderDisplayPrivateKeyAlertUI() {
 /**
  *
  */
-export function prepareConfirmDialogJsx() {
-  const confirmDialogSpy = jest.spyOn(snapUiUtils, 'confirmDialog');
-  confirmDialogSpy.mockResolvedValue(true);
-  return {
-    confirmDialogSpy,
-  };
-}
-
-/**
- *
- */
-export function prepareAlertDialogJsx() {
-  const alertDialogSpy = jest.spyOn(snapUiUtils, 'alertDialog');
-  alertDialogSpy.mockResolvedValue(true);
-  return {
-    alertDialogSpy,
-  };
-}
-
-/**
- *
- */
 export function prepareConfirmDialogInteractiveUI() {
   const confirmDialogSpy = jest.spyOn(
     snapHelper,
