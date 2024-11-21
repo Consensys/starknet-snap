@@ -1,6 +1,17 @@
-import type { FormattedCallData } from '../types/snapState';
-import { DEFAULT_DECIMAL_PLACES } from '../utils/constants';
-import { accumulateTotals } from './utils';
+import type { constants } from 'starknet';
+
+import { generateAccounts } from '../__tests__/helper';
+import type { Erc20Token, FormattedCallData } from '../types/snapState';
+import {
+  DEFAULT_DECIMAL_PLACES,
+  BlockIdentifierEnum,
+  ETHER_MAINNET,
+  ETHER_SEPOLIA_TESTNET,
+  STARKNET_SEPOLIA_TESTNET_NETWORK,
+  USDC_SEPOLIA_TESTNET,
+} from '../utils/constants';
+import * as starknetUtils from '../utils/starknetUtils';
+import { accumulateTotals, hasSufficientFundsForFee } from './utils';
 
 describe('accumulateTotals', () => {
   const mockCalls = (overrides = [{}]) =>
@@ -102,4 +113,129 @@ describe('accumulateTotals', () => {
       },
     });
   });
+});
+
+describe('hasSufficientFundsForFee', () => {
+  const prepareSpy = () => {
+    const getBalanceSpy = jest.spyOn(starknetUtils, 'getBalance');
+    return { getBalanceSpy };
+  };
+
+  const generateFormattedCallData = (
+    cnt: number,
+    {
+      token = ETHER_MAINNET,
+      amount = '1000',
+      senderAddress = '',
+      recipientAddress = '',
+    }: {
+      token?: Erc20Token;
+      amount?: string;
+      senderAddress?: string;
+      recipientAddress?: string;
+    },
+  ): FormattedCallData[] => {
+    const calls: FormattedCallData[] = [];
+    for (let i = 0; i < cnt; i++) {
+      calls.push({
+        entrypoint: 'transfer',
+        contractAddress: token.address,
+        tokenTransferData: {
+          amount,
+          senderAddress,
+          recipientAddress,
+          decimals: token.decimals,
+          symbol: token.symbol,
+        },
+      });
+    }
+    return calls;
+  };
+
+  const prepareExecution = async ({
+    calls,
+    maxFee = '1000',
+    feeToken = ETHER_SEPOLIA_TESTNET,
+  }: {
+    calls: FormattedCallData[];
+    maxFee?: string;
+    feeToken?: Erc20Token;
+  }) => {
+    const network = STARKNET_SEPOLIA_TESTNET_NETWORK;
+    const [{ address }] = await generateAccounts(
+      network.chainId as unknown as constants.StarknetChainId,
+      1,
+    );
+
+    return {
+      feeTokenAddress: feeToken.address,
+      suggestedMaxFee: maxFee,
+      network,
+      address,
+      calls,
+    };
+  };
+
+  it.each([
+    {
+      calls: generateFormattedCallData(1, {
+        amount: '1500',
+        token: ETHER_SEPOLIA_TESTNET,
+      }),
+      feeToken: ETHER_SEPOLIA_TESTNET,
+      tokenInCalls: ETHER_SEPOLIA_TESTNET,
+    },
+    {
+      calls: generateFormattedCallData(1, {
+        amount: '1500',
+        token: USDC_SEPOLIA_TESTNET,
+      }),
+      feeToken: ETHER_SEPOLIA_TESTNET,
+      tokenInCalls: USDC_SEPOLIA_TESTNET,
+    },
+    {
+      calls: [],
+      feeToken: ETHER_SEPOLIA_TESTNET,
+      tokenInCalls: USDC_SEPOLIA_TESTNET,
+    },
+  ])(
+    'returns true if the fee token balance covers both the calls and fee - feeToken: $feeToken.name, callData length: $calls.length, tokenInCalls: $tokenInCalls.name',
+    async ({ calls, feeToken }) => {
+      const { getBalanceSpy } = prepareSpy();
+
+      getBalanceSpy.mockResolvedValueOnce('3000'); // Mock fee token balance
+
+      const args = await prepareExecution({
+        calls,
+        feeToken,
+      });
+
+      const result = await hasSufficientFundsForFee(args);
+
+      expect(result).toBe(true);
+      expect(getBalanceSpy).toHaveBeenCalledWith(
+        args.address,
+        args.feeTokenAddress,
+        args.network,
+        BlockIdentifierEnum.Pending,
+      );
+    },
+  );
+
+  it.each(['2000', '0'])(
+    'returns false when balance for fee token is insufficient - balance: %s',
+    async (balance) => {
+      const { getBalanceSpy } = prepareSpy();
+
+      getBalanceSpy.mockResolvedValueOnce(balance); // Mock fee token balance
+
+      const args = await prepareExecution({
+        calls: generateFormattedCallData(1, { amount: '1500' }),
+      });
+
+      const result = await hasSufficientFundsForFee(args);
+
+      expect(result).toBe(false);
+    },
+  );
 });

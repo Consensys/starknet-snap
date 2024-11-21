@@ -3,6 +3,9 @@ import type {
   OnHomePageHandler,
   OnInstallHandler,
   OnUpdateHandler,
+  OnUserInputHandler,
+  UserInputEvent,
+  InterfaceContext,
 } from '@metamask/snaps-sdk';
 import { MethodNotFoundError } from '@metamask/snaps-sdk';
 import { Box, Link, Text } from '@metamask/snaps-sdk/jsx';
@@ -59,8 +62,10 @@ import type {
   ApiRequestParams,
 } from './types/snapApi';
 import type { SnapState } from './types/snapState';
+import { UserInputEventController } from './ui/controllers/user-input-event-controller';
 import { upgradeAccContract } from './upgradeAccContract';
 import {
+  ensureJsxSupport,
   getDappUrl,
   getStateData,
   isSnapRpcError,
@@ -302,42 +307,52 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
 };
 
 export const onInstall: OnInstallHandler = async () => {
-  await snap.request({
-    method: 'snap_dialog',
-    params: {
-      type: 'alert',
-      content: (
-        <Box>
-          <Text>Your MetaMask wallet is now compatible with Starknet!</Text>
-          <Text>
-            To manage your Starknet account and send and receive funds, visit
-            the <Link href={getDappUrl()}>companion dapp for Starknet</Link>.
-          </Text>
-        </Box>
-      ),
-    },
-  });
+  await ensureJsxSupport(
+    <Box>
+      <Text>Your MetaMask wallet is now compatible with Starknet!</Text>
+      <Text>
+        To manage your Starknet account and send and receive funds, visit the{' '}
+        <Link href={getDappUrl()}>companion dapp for Starknet</Link>.
+      </Text>
+    </Box>,
+  );
 };
 
 export const onUpdate: OnUpdateHandler = async () => {
-  await snap.request({
-    method: 'snap_dialog',
-    params: {
-      type: 'alert',
-      content: (
-        <Box>
-          <Text>Your Starknet Snap is now up-to-date !</Text>
-          <Text>
-            As usual, to manage your Starknet account and send and receive
-            funds, visit the{' '}
-            <Link href={getDappUrl()}>companion dapp for Starknet</Link>.
-          </Text>
-        </Box>
-      ),
-    },
-  });
+  await ensureJsxSupport(
+    <Box>
+      <Text>Your Starknet Snap is now up-to-date !</Text>
+      <Text>
+        As usual, to manage your Starknet account and send and receive funds,
+        visit the <Link href={getDappUrl()}>companion dapp for Starknet</Link>.
+      </Text>
+    </Box>,
+  );
 };
 
 export const onHomePage: OnHomePageHandler = async () => {
   return await homePageController.execute();
+};
+
+/**
+ * Handle incoming user events coming from the MetaMask clients open interfaces.
+ *
+ * @param params - The event parameters.
+ * @param params.id - The Snap interface ID where the event was fired.
+ * @param params.event - The event object containing the event type, name, and
+ * value.
+ * @param params.context
+ * @see https://docs.metamask.io/snaps/reference/exports/#onuserinput
+ */
+export const onUserInput: OnUserInputHandler = async ({
+  id,
+  event,
+  context,
+}: {
+  id: string;
+  event: UserInputEvent;
+  context: InterfaceContext | null;
+}): Promise<void> => {
+  const controller = new UserInputEventController(id, event, context);
+  await controller.handleEvent();
 };
