@@ -97,8 +97,6 @@ export const useHasMetamask = () => {
       try {
         dispatch(enableLoadingWithMessage('Detecting Metamask...'));
         const provider = await detectMetamaskSupport(window);
-        // Use the new detection method
-        //window.ethereum = provider ?? null;
 
         if (provider && (await isSupportSnap(provider))) {
           dispatch(setProvider(provider));
