@@ -48,7 +48,6 @@ describe('onRpcRequest', () => {
   });
 
   it('throws `MethodNotFoundError` if the request method not found', async () => {
-    createMockSpy();
     await expect(
       onRpcRequest({
         ...createMockRequest(),
