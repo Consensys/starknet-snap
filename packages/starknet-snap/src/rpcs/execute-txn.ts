@@ -174,6 +174,8 @@ export class ExecuteTxnRpc extends AccountRpcController<
         throw new UserRejectedOpError() as unknown as Error;
       }
 
+      // Retrieve the updated transaction request,
+      // the transaction request may have been updated during the confirmation process.
       const updatedRequest = await this.reqStateManager.getTransactionRequest({
         requestId,
       });

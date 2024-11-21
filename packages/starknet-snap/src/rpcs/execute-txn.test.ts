@@ -14,6 +14,7 @@ import { executeTxn as executeTxnUtil } from '../utils/starknetUtils';
 import {
   generateRandomFee,
   mockAccount,
+  mockTransactionRequestStateManager,
   prepareConfirmDialogInteractiveUI,
   prepareMockAccount,
 } from './__tests__/helper';
@@ -88,6 +89,7 @@ const prepareMockExecuteTxn = async (
     executeTxnUtilSpy,
     getEstimatedFeesSpy,
     getEstimatedFeesRepsMock,
+    ...mockTransactionRequestStateManager(),
   };
 };
 
@@ -100,6 +102,8 @@ describe('ExecuteTxn', () => {
       executeTxnRespMock,
       getEstimatedFeesSpy,
       getEstimatedFeesRepsMock,
+      upsertTransactionRequestSpy,
+      getTransactionRequestSpy,
       request,
     } = await prepareMockExecuteTxn(
       calls.hash,
@@ -126,6 +130,8 @@ describe('ExecuteTxn', () => {
     );
     expect(getEstimatedFeesSpy).toHaveBeenCalled();
     expect(createAccountSpy).not.toHaveBeenCalled();
+    expect(upsertTransactionRequestSpy).toHaveBeenCalled();
+    expect(getTransactionRequestSpy).toHaveBeenCalled();
   });
 
   it.each([
@@ -232,6 +238,58 @@ describe('ExecuteTxn', () => {
             getEstimatedFeesRepsMock.estimateResults[0].resourceBounds,
         },
       );
+    },
+  );
+
+  it('throws `Failed to retrieve the updated transaction request` error the transaction request can not retrieve after confirmation', async () => {
+    const calls = callsExamples.multipleCalls;
+    const { getTransactionRequestSpy, request } = await prepareMockExecuteTxn(
+      calls.hash,
+      calls.calls,
+      calls.details,
+      true,
+    );
+
+    getTransactionRequestSpy.mockResolvedValue(null);
+
+    await expect(executeTxn.execute(request)).rejects.toThrow(
+      'Failed to retrieve the updated transaction request',
+    );
+  });
+
+  it.each([
+    {
+      executeTxnResult: callsExamples.multipleCalls.hash,
+      testCase: 'the transaction executed successfully',
+    },
+    {
+      // Simulate the case where the transaction execution failed and does not return a transaction hash
+      // An error `Failed to execute transaction` will be thrown in this case
+      executeTxnResult: '',
+      testCase: 'the transaction failed to execute',
+    },
+  ])(
+    'removes the transaction request from state if $testCase.',
+    async ({ executeTxnResult }) => {
+      const calls = callsExamples.multipleCalls;
+      const { executeTxnUtilSpy, removeTransactionRequestSpy, request } =
+        await prepareMockExecuteTxn(
+          executeTxnResult,
+          calls.calls,
+          calls.details,
+          true,
+        );
+
+      executeTxnUtilSpy.mockResolvedValue({
+        transaction_hash: executeTxnResult,
+      });
+
+      try {
+        await executeTxn.execute(request);
+      } catch (_) {
+      } finally {
+        expect(removeTransactionRequestSpy).toHaveBeenCalled();
+      }
     },
   );
 
