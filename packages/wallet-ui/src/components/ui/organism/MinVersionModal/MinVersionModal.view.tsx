@@ -11,9 +11,6 @@ import { ConnectButton } from '../ConnectModal/ConnectModal.style';
 
 export const MinVersionModalView = () => {
   const { metaMaskUpgradeRequired } = useHasMetamask();
-  const handleUpdateMetaMask = () => {
-    window.open('https://metamask.io', '_blank')?.focus();
-  };
   return (
     <Wrapper>
       <StarknetLogo />
@@ -25,12 +22,11 @@ export const MinVersionModalView = () => {
             Please update to MetaMask Version {MIN_METAMASK_VERSION} or higher.
           </Description>
           <br />
-          <ConnectButton
-            customIconLeft={<MetaMaskLogo />}
-            onClick={handleUpdateMetaMask}
-          >
-            Go to MetaMask Website
-          </ConnectButton>
+          <a href="https://metamask.io" target="_blank" rel="noreferrer">
+            <ConnectButton customIconLeft={<MetaMaskLogo />} onClick={() => {}}>
+              Go to MetaMask Website
+            </ConnectButton>
+          </a>
         </>
       ) : (
         <>
