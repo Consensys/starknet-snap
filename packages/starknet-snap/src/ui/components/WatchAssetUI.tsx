@@ -1,5 +1,12 @@
 import type { SnapComponent } from '@metamask/snaps-sdk/jsx';
-import { Box, Divider, Heading, Section, Text, Row } from '@metamask/snaps-sdk/jsx';
+import {
+  Box,
+  Divider,
+  Heading,
+  Section,
+  Text,
+  Row,
+} from '@metamask/snaps-sdk/jsx';
 
 import type { Erc20Token } from '../../types/snapState';
 import { AddressUI, NetworkUI } from '../fragments';
