@@ -89,7 +89,7 @@ describe('onRpcRequest', () => {
 });
 
 describe('onHomePage', () => {
-  it('executes homePageController normally if jsxSupport is not required', async () => {
+  it('executes homePageController', async () => {
     const executeSpy = jest.spyOn(HomePageController.prototype, 'execute');
     executeSpy.mockResolvedValue({ content: text('test') });
 
