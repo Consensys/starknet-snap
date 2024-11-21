@@ -16,6 +16,7 @@ import { FeeToken, FeeTokenUnit } from '../../types/snapApi';
  */
 export type FeeTokenSelectorProps = {
   selectedToken: FeeToken;
+  error?: string;
 };
 
 /**
@@ -23,14 +24,16 @@ export type FeeTokenSelectorProps = {
  *
  * @param props - The component props.
  * @param props.selectedToken - The currently selected fee token.
+ * @param [props.error] - The error message for fee token selection.
  * @returns The FeeTokenSelector component.
  */
 export const FeeTokenSelector: SnapComponent<FeeTokenSelectorProps> = ({
   selectedToken,
+  error,
 }) => {
   return (
     <Form name="form-fee-token-selection">
-      <Field label="Fee Token">
+      <Field label="Fee Token" error={error}>
         <Selector
           name="feeTokenSelector"
           title="Select Fee Token"

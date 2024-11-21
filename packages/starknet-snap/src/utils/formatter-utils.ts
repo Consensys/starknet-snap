@@ -59,29 +59,33 @@ export const callToTransactionReqCall = async (
     calldata: calldata as string[],
     entrypoint,
   };
-  // Check if the contract is an ERC20 token and entrypoint is 'transfer' to populate transfer fields
-  const token = await tokenStateManager.getToken({
-    address: contractAddress,
-    chainId,
-  });
-  if (token && entrypoint === 'transfer' && calldata) {
-    try {
-      const senderAddress = address;
 
-      // ensure the data is in correct format,
-      // if an error occur, it will catch and not to format it
-      assert(calldata[0], AddressStruct);
-      assert(calldata[1], NumberStringStruct);
-      const recipientAddress = calldata[0]; // Assuming calldata[0] is the recipient address
-      const amount = calldata[1];
-      // Populate transfer-specific fields
-      formattedCall.tokenTransferData = {
-        senderAddress,
-        recipientAddress,
-        amount: typeof amount === 'number' ? amount.toString() : amount,
-        symbol: token.symbol,
-        decimals: token.decimals,
-      };
+  // Check if the entrypoint is 'transfer' and the populate transfer fields
+  if (entrypoint === 'transfer' && calldata) {
+    try {
+      const token = await tokenStateManager.getToken({
+        address: contractAddress,
+        chainId,
+      });
+
+      if (token) {
+        const senderAddress = address;
+
+        // ensure the data is in correct format,
+        // if an error occur, it will catch and not to format it
+        assert(calldata[0], AddressStruct);
+        assert(calldata[1], NumberStringStruct);
+        const recipientAddress = calldata[0]; // Assuming calldata[0] is the recipient address
+        const amount = calldata[1];
+        // Populate transfer-specific fields
+        formattedCall.tokenTransferData = {
+          senderAddress,
+          recipientAddress,
+          amount: typeof amount === 'number' ? amount.toString() : amount,
+          symbol: token.symbol,
+          decimals: token.decimals,
+        };
+      }
     } catch (error) {
       // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
       logger.warn(`Error in amount conversion: ${error.message}`);

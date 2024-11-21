@@ -16,6 +16,17 @@ import { Amount } from '../fragments/Amount';
 import { FeeTokenSelector } from '../fragments/FeeTokenSelector';
 import { accumulateTotals } from '../utils';
 
+/**
+ * The form errors.
+ *
+ * @property to - The error for the receiving address.
+ * @property amount - The error for the amount.
+ * @property fees - The error for the fees.
+ */
+export type ExecuteTxnUIErrors = {
+  fees?: string;
+};
+
 export type ExecuteTxnUIProps = {
   signer: string;
   chainId: string;
@@ -24,6 +35,7 @@ export type ExecuteTxnUIProps = {
   calls: FormattedCallData[];
   selectedFeeToken: string;
   includeDeploy: boolean;
+  errors?: ExecuteTxnUIErrors;
 };
 
 /**
@@ -37,7 +49,7 @@ export type ExecuteTxnUIProps = {
  * @param props.calls - The calls involved in the transaction.
  * @param props.selectedFeeToken - The token used for fees.
  * @param props.includeDeploy - Whether to include account deployment in the transaction.
- * //param props.errors : TODO : add this param
+ * @param [props.errors] - The object contains the error message for fee token selection.
  * @returns The ExecuteTxnUI component.
  */
 export const ExecuteTxnUI: SnapComponent<ExecuteTxnUIProps> = ({
@@ -48,10 +60,11 @@ export const ExecuteTxnUI: SnapComponent<ExecuteTxnUIProps> = ({
   calls,
   selectedFeeToken,
   includeDeploy,
-  // errors, // TODO: include this later
+  errors,
 }) => {
   // Calculate the totals using the helper
   const tokenTotals = accumulateTotals(calls, maxFee, selectedFeeToken);
+
   return (
     <Container>
       <Box>
@@ -61,7 +74,6 @@ export const ExecuteTxnUI: SnapComponent<ExecuteTxnUIProps> = ({
         </Section>
 
         {/* Loop through each call and render based on `tokenTransferData` */}
-
         {calls.map((call) => (
           <Section>
             <AddressUI
@@ -88,7 +100,10 @@ export const ExecuteTxnUI: SnapComponent<ExecuteTxnUIProps> = ({
             )}
           </Section>
         ))}
-        <FeeTokenSelector selectedToken={selectedFeeToken as FeeToken} />
+        <FeeTokenSelector
+          selectedToken={selectedFeeToken as FeeToken}
+          error={errors?.fees}
+        />
         <Section>
           <Icon name="gas" size="md" />
           <Amount

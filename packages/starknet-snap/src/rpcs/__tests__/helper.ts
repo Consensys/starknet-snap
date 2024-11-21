@@ -3,11 +3,33 @@ import type { constants } from 'starknet';
 
 import type { StarknetAccount } from '../../__tests__/helper';
 import { generateAccounts, generateRandomValue } from '../../__tests__/helper';
+import { TransactionRequestStateManager } from '../../state/request-state-manager';
 import type { SnapState } from '../../types/snapState';
 import { getExplorerUrl, shortenAddress, toJson } from '../../utils';
 import * as snapHelper from '../../utils/snap';
 import * as snapUtils from '../../utils/snapUtils';
 import * as starknetUtils from '../../utils/starknetUtils';
+
+export const mockTransactionRequestStateManager = () => {
+  const upsertTransactionRequestSpy = jest.spyOn(
+    TransactionRequestStateManager.prototype,
+    'upsertTransactionRequest',
+  );
+  const getTransactionRequestSpy = jest.spyOn(
+    TransactionRequestStateManager.prototype,
+    'getTransactionRequest',
+  );
+  const removeTransactionRequestSpy = jest.spyOn(
+    TransactionRequestStateManager.prototype,
+    'removeTransactionRequest',
+  );
+
+  return {
+    upsertTransactionRequestSpy,
+    getTransactionRequestSpy,
+    removeTransactionRequestSpy,
+  };
+};
 
 /**
  *
