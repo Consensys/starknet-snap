@@ -127,7 +127,6 @@ export const useHasMetamask = () => {
 
 const isMetaMaskUpgradeRequired = async (
   provider: any,
-  requiredVersion = MIN_METAMASK_VERSION,
 ) => {
   const clientVersion = await provider.request({
     method: 'web3_clientVersion',
