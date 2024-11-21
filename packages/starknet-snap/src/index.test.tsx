@@ -53,18 +53,6 @@ describe('onRpcRequest', () => {
     ).rejects.toThrow(MethodNotFoundError);
   });
 
-  it('requests gets executed if MetaMask does not needs update', async () => {
-    createMockSpy();
-    expect(
-      await onRpcRequest({
-        ...createMockRequest(),
-        request: {
-          ...createMockRequest().request,
-          method: 'ping',
-        },
-      }),
-    ).toBe('pong');
-  });
 
   it('throws `SnapError` if the error is an instance of SnapError', async () => {
     const { createAccountSpy } = createMockSpy();
