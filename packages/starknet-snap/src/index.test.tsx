@@ -6,12 +6,6 @@ import { HomePageController } from './on-home-page';
 import * as keyPairUtils from './utils/keyPair';
 
 jest.mock('./utils/logger');
-jest.mock('./utils/snap');
-
-jest.mock('./utils', () => ({
-  ...jest.requireActual('./utils'),
-  updateRequiredMetaMaskComponent: jest.fn(),
-}));
 
 describe('onRpcRequest', () => {
   const createMockSpy = () => {
