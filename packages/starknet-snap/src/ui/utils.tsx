@@ -1,9 +1,18 @@
 import type { DialogResult } from '@metamask/snaps-sdk';
 import { DialogType } from '@metamask/snaps-sdk';
 
-import type { FormattedCallData, Network, TransactionRequest } from '../types/snapState';
+import type {
+  FormattedCallData,
+  Network,
+  TransactionRequest,
+} from '../types/snapState';
 import {
-  BlockIdentifierEnum, DEFAULT_DECIMAL_PLACES } from '../utils/constants';
+  BlockIdentifierEnum,
+  DEFAULT_DECIMAL_PLACES,
+} from '../utils/constants';
+import { getBalance } from '../utils/starknetUtils';
+import type { ExecuteTxnUIErrors } from './components';
+import { ExecuteTxnUI } from './components';
 import {
   DisplayPrivateKeyAlertUI,
   DisplayPrivateKeyDialogUI,
@@ -18,10 +27,6 @@ import type { SwitchNetworkUIProps } from './components/SwitchNetworkUI';
 import { SwitchNetworkUI } from './components/SwitchNetworkUI';
 import type { WatchAssetUIProps } from './components/WatchAssetUI';
 import { WatchAssetUI } from './components/WatchAssetUI';
-
-import { getBalance } from '../utils/starknetUtils';
-import type { ExecuteTxnUIErrors } from './components';
-import { ExecuteTxnUI } from './components';
 import { LoadingUI } from './fragments/LoadingUI';
 import type { TokenTotals } from './types';
 
