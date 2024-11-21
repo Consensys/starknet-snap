@@ -14,7 +14,6 @@ export abstract class StateManager<Entity> extends SnapStateManager<SnapState> {
           erc20Tokens: [],
           networks: [],
           transactions: [],
-          requireMMUpgrade: undefined,
           transactionRequests: [],
         };
       }
