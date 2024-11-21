@@ -3,9 +3,8 @@ import type {
   InterfaceContext,
   UserInputEvent,
 } from '@metamask/snaps-sdk';
-import { SnapError, UserInputEventType } from '@metamask/snaps-sdk';
-import type { TransactionType } from 'starknet';
-import { constants, ec, num as numUtils } from 'starknet';
+import { UserInputEventType } from '@metamask/snaps-sdk';
+import { constants, ec, num as numUtils, TransactionType } from 'starknet';
 
 import { NetworkStateManager } from '../../state/network-state-manager';
 import { TransactionRequestStateManager } from '../../state/request-state-manager';
@@ -13,6 +12,7 @@ import { TokenStateManager } from '../../state/token-state-manager';
 import { FeeToken } from '../../types/snapApi';
 import type { Network, TransactionRequest } from '../../types/snapState';
 import { getBip44Deriver, logger } from '../../utils';
+import { InsufficientFundsError } from '../../utils/exceptions';
 import { getAddressKey } from '../../utils/keyPair';
 import { getEstimatedFees } from '../../utils/starknetUtils';
 import {
@@ -20,12 +20,6 @@ import {
   renderLoading,
   updateExecuteTxnFlow,
 } from '../utils';
-
-class InsufficientFundsError extends SnapError {
-  constructor(message?: string) {
-    super(message ?? 'Insufficient Funds');
-  }
-}
 
 const FeeTokenSelectorEventKey = {
   FeeTokenChange: `feeTokenSelector_${UserInputEventType.InputChangeEvent}`,
@@ -128,6 +122,7 @@ export class UserInputEventController {
         : await this.tokenStateMgr.getEthToken({
             chainId,
           });
+
     if (!token) {
       throw new Error('Token not found');
     }
@@ -156,7 +151,7 @@ export class UserInputEventController {
           publicKey,
           [
             {
-              type: request.type as TransactionType.INVOKE,
+              type: TransactionType.INVOKE,
               payload: calls.map((call) => ({
                 calldata: call.calldata,
                 contractAddress: call.contractAddress,
@@ -169,14 +164,18 @@ export class UserInputEventController {
           },
         );
 
-      const sufficientFunds = await hasSufficientFundsForFee({
-        address: signer,
-        network,
-        calls,
-        feeTokenAddress: await this.getTokenAddress(network.chainId, feeToken),
-        suggestedMaxFee,
-      });
-      if (!sufficientFunds) {
+      if (
+        !(await hasSufficientFundsForFee({
+          address: signer,
+          network,
+          calls,
+          feeTokenAddress: await this.getTokenAddress(
+            network.chainId,
+            feeToken,
+          ),
+          suggestedMaxFee,
+        }))
+      ) {
         throw new InsufficientFundsError();
       }
 
@@ -193,7 +192,7 @@ export class UserInputEventController {
       const errorMessage =
         error instanceof InsufficientFundsError
           ? `Not enough ${feeToken} to pay for fee`
-          : 'Error calculating fees';
+          : 'Fail to calculate the fees';
 
       // On failure, display ExecuteTxnUI with an error message
       await updateExecuteTxnFlow(this.eventId, request, {

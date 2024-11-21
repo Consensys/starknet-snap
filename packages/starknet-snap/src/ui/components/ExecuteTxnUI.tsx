@@ -49,8 +49,7 @@ export type ExecuteTxnUIProps = {
  * @param props.calls - The calls involved in the transaction.
  * @param props.selectedFeeToken - The token used for fees.
  * @param props.includeDeploy - Whether to include account deployment in the transaction.
- * //param props.errors : TODO : add this param
- * @param props.errors
+ * @param [props.errors] - The object contains the error message for fee token selection.
  * @returns The ExecuteTxnUI component.
  */
 export const ExecuteTxnUI: SnapComponent<ExecuteTxnUIProps> = ({
@@ -62,10 +61,10 @@ export const ExecuteTxnUI: SnapComponent<ExecuteTxnUIProps> = ({
   selectedFeeToken,
   includeDeploy,
   errors,
-  // errors, // TODO: include this later
 }) => {
   // Calculate the totals using the helper
   const tokenTotals = accumulateTotals(calls, maxFee, selectedFeeToken);
+
   return (
     <Container>
       <Box>
@@ -75,7 +74,6 @@ export const ExecuteTxnUI: SnapComponent<ExecuteTxnUIProps> = ({
         </Section>
 
         {/* Loop through each call and render based on `tokenTransferData` */}
-
         {calls.map((call) => (
           <Section>
             <AddressUI

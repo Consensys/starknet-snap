@@ -24,7 +24,7 @@ export type FeeTokenSelectorProps = {
  *
  * @param props - The component props.
  * @param props.selectedToken - The currently selected fee token.
- * @param props.error
+ * @param [props.error] - The error message for fee token selection.
  * @returns The FeeTokenSelector component.
  */
 export const FeeTokenSelector: SnapComponent<FeeTokenSelectorProps> = ({

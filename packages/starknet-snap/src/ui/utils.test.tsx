@@ -1,7 +1,14 @@
-import type { FormattedCallData, Network } from '../types/snapState';
+import type { constants } from 'starknet';
+
+import { generateAccounts } from '../__tests__/helper';
+import type { Erc20Token, FormattedCallData } from '../types/snapState';
 import {
   DEFAULT_DECIMAL_PLACES,
   BlockIdentifierEnum,
+  ETHER_MAINNET,
+  ETHER_SEPOLIA_TESTNET,
+  STARKNET_SEPOLIA_TESTNET_NETWORK,
+  USDC_SEPOLIA_TESTNET,
 } from '../utils/constants';
 import * as starknetUtils from '../utils/starknetUtils';
 import { accumulateTotals, hasSufficientFundsForFee } from './utils';
@@ -109,151 +116,126 @@ describe('accumulateTotals', () => {
 });
 
 describe('hasSufficientFundsForFee', () => {
-  const mockAddress = '0xTestAddress';
-  const mockNetwork = { chainId: '1' } as Network;
-  const mockSuggestedMaxFee = '1000';
-  const mockFeeTokenAddress = '0xFeeTokenAddress';
-
-  // Utility function to prepare and return spies
-  /**
-   *
-   */
-  function prepareSpy() {
+  const prepareSpy = () => {
     const getBalanceSpy = jest.spyOn(starknetUtils, 'getBalance');
     return { getBalanceSpy };
-  }
+  };
 
-  it('returns true when balance for fee token is sufficient for calls and fee', async () => {
-    const { getBalanceSpy } = prepareSpy();
-
-    getBalanceSpy.mockResolvedValueOnce('3000'); // Mock fee token balance
-
-    const result = await hasSufficientFundsForFee({
-      feeTokenAddress: mockFeeTokenAddress,
-      suggestedMaxFee: mockSuggestedMaxFee,
-      network: mockNetwork,
-      address: mockAddress,
-      calls: [
-        {
-          entrypoint: 'transfer',
-          contractAddress: mockFeeTokenAddress,
-          tokenTransferData: {
-            amount: '1500',
-            senderAddress: '',
-            recipientAddress: '',
-            decimals: 18,
-            symbol: 'ETH',
-          },
+  const generateFormattedCallData = (
+    cnt: number,
+    {
+      token = ETHER_MAINNET,
+      amount = '1000',
+      senderAddress = '',
+      recipientAddress = '',
+    }: {
+      token?: Erc20Token;
+      amount?: string;
+      senderAddress?: string;
+      recipientAddress?: string;
+    },
+  ): FormattedCallData[] => {
+    const calls: FormattedCallData[] = [];
+    for (let i = 0; i < cnt; i++) {
+      calls.push({
+        entrypoint: 'transfer',
+        contractAddress: token.address,
+        tokenTransferData: {
+          amount,
+          senderAddress,
+          recipientAddress,
+          decimals: token.decimals,
+          symbol: token.symbol,
         },
-      ],
-    });
+      });
+    }
+    return calls;
+  };
 
-    expect(result).toBe(true);
-    expect(getBalanceSpy).toHaveBeenCalledWith(
-      mockAddress,
-      mockFeeTokenAddress,
-      mockNetwork,
-      BlockIdentifierEnum.Pending,
+  const prepareExecution = async ({
+    calls,
+    maxFee = '1000',
+    feeToken = ETHER_SEPOLIA_TESTNET,
+  }: {
+    calls: FormattedCallData[];
+    maxFee?: string;
+    feeToken?: Erc20Token;
+  }) => {
+    const network = STARKNET_SEPOLIA_TESTNET_NETWORK;
+    const [{ address }] = await generateAccounts(
+      network.chainId as unknown as constants.StarknetChainId,
+      1,
     );
-  });
 
-  it('returns false when balance for fee token is insufficient', async () => {
-    const { getBalanceSpy } = prepareSpy();
+    return {
+      feeTokenAddress: feeToken.address,
+      suggestedMaxFee: maxFee,
+      network,
+      address,
+      calls,
+    };
+  };
 
-    getBalanceSpy.mockResolvedValueOnce('2000'); // Mock fee token balance
+  it.each([
+    {
+      calls: generateFormattedCallData(1, {
+        amount: '1500',
+        token: ETHER_SEPOLIA_TESTNET,
+      }),
+      feeToken: ETHER_SEPOLIA_TESTNET,
+      tokenInCalls: ETHER_SEPOLIA_TESTNET,
+    },
+    {
+      calls: generateFormattedCallData(1, {
+        amount: '1500',
+        token: USDC_SEPOLIA_TESTNET,
+      }),
+      feeToken: ETHER_SEPOLIA_TESTNET,
+      tokenInCalls: USDC_SEPOLIA_TESTNET,
+    },
+    {
+      calls: [],
+      feeToken: ETHER_SEPOLIA_TESTNET,
+      tokenInCalls: USDC_SEPOLIA_TESTNET,
+    },
+  ])(
+    'returns true if the fee token balance covers both the calls and fee - feeToken: $feeToken.name, callData length: $calls.length, tokenInCalls: $tokenInCalls.name',
+    async ({ calls, feeToken }) => {
+      const { getBalanceSpy } = prepareSpy();
 
-    const result = await hasSufficientFundsForFee({
-      feeTokenAddress: mockFeeTokenAddress,
-      suggestedMaxFee: mockSuggestedMaxFee,
-      network: mockNetwork,
-      address: mockAddress,
-      calls: [
-        {
-          entrypoint: 'transfer',
-          contractAddress: mockFeeTokenAddress,
-          tokenTransferData: {
-            amount: '1500',
-            senderAddress: '',
-            recipientAddress: '',
-            decimals: 18,
-            symbol: 'ETH',
-          },
-        },
-      ],
-    });
+      getBalanceSpy.mockResolvedValueOnce('3000'); // Mock fee token balance
 
-    expect(result).toBe(false);
-  });
+      const args = await prepareExecution({
+        calls,
+        feeToken,
+      });
 
-  it('returns true when no calls are made and balance is sufficient for fee', async () => {
-    const { getBalanceSpy } = prepareSpy();
+      const result = await hasSufficientFundsForFee(args);
 
-    getBalanceSpy.mockResolvedValueOnce('2000'); // Mock fee token balance
+      expect(result).toBe(true);
+      expect(getBalanceSpy).toHaveBeenCalledWith(
+        args.address,
+        args.feeTokenAddress,
+        args.network,
+        BlockIdentifierEnum.Pending,
+      );
+    },
+  );
 
-    const result = await hasSufficientFundsForFee({
-      feeTokenAddress: mockFeeTokenAddress,
-      suggestedMaxFee: mockSuggestedMaxFee,
-      network: mockNetwork,
-      address: mockAddress,
-      calls: [], // No calls
-    });
+  it.each(['2000', '0'])(
+    'returns false when balance for fee token is insufficient - balance: %s',
+    async (balance) => {
+      const { getBalanceSpy } = prepareSpy();
 
-    expect(result).toBe(true);
-  });
+      getBalanceSpy.mockResolvedValueOnce(balance); // Mock fee token balance
 
-  it('returns false when no balance is available for fee token', async () => {
-    const { getBalanceSpy } = prepareSpy();
+      const args = await prepareExecution({
+        calls: generateFormattedCallData(1, { amount: '1500' }),
+      });
 
-    getBalanceSpy.mockResolvedValueOnce('0'); // Mock fee token balance
+      const result = await hasSufficientFundsForFee(args);
 
-    const result = await hasSufficientFundsForFee({
-      feeTokenAddress: mockFeeTokenAddress,
-      suggestedMaxFee: mockSuggestedMaxFee,
-      network: mockNetwork,
-      address: mockAddress,
-      calls: [
-        {
-          entrypoint: 'transfer',
-          contractAddress: mockFeeTokenAddress,
-          tokenTransferData: {
-            amount: '1500',
-            senderAddress: '',
-            recipientAddress: '',
-            decimals: 18,
-            symbol: 'ETH',
-          },
-        },
-      ],
-    });
-
-    expect(result).toBe(false);
-  });
-
-  it('ignores calls not involving the fee token address', async () => {
-    const { getBalanceSpy } = prepareSpy();
-
-    getBalanceSpy.mockResolvedValueOnce('2000'); // Mock fee token balance
-
-    const result = await hasSufficientFundsForFee({
-      feeTokenAddress: mockFeeTokenAddress,
-      suggestedMaxFee: mockSuggestedMaxFee,
-      network: mockNetwork,
-      address: mockAddress,
-      calls: [
-        {
-          entrypoint: 'transfer',
-          contractAddress: 'OtherToken',
-          tokenTransferData: {
-            amount: '1500',
-            senderAddress: '',
-            recipientAddress: '',
-            decimals: 18,
-            symbol: 'ETH',
-          },
-        },
-      ],
-    });
-
-    expect(result).toBe(true); // Fee token balance is not affected by unrelated calls
-  });
+      expect(result).toBe(false);
+    },
+  );
 });

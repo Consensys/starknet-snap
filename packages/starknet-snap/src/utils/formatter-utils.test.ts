@@ -1,11 +1,17 @@
+import { constants } from 'starknet';
+
+import { singleCall } from '../__tests__/fixture/callsExamples.json';
+import { generateAccounts } from '../__tests__/helper';
 import { TokenStateManager } from '../state/token-state-manager';
 import type { Erc20Token } from '../types/snapState';
+import { ETHER_SEPOLIA_TESTNET } from './constants';
 import {
   callToTransactionReqCall,
   mapDeprecatedParams,
 } from './formatter-utils';
+import { logger } from './logger';
 
-jest.mock('../state/token-state-manager');
+jest.mock('./logger');
 
 describe('mapDeprecatedParams', () => {
   it('maps deprecated parameters to their new equivalents', () => {
@@ -74,89 +80,129 @@ describe('mapDeprecatedParams', () => {
 });
 
 describe('callToTransactionReqCall', () => {
-  const prepareMockData = async (tokenData: Erc20Token | null) => {
-    const tokenStateManagerMock =
-      new TokenStateManager() as jest.Mocked<TokenStateManager>;
+  const chainId = constants.StarknetChainId.SN_SEPOLIA;
 
+  const mockGetToken = async (tokenData: Erc20Token | null) => {
+    const getTokenSpy = jest.spyOn(TokenStateManager.prototype, 'getToken');
     // Mock getToken method to return the provided tokenData
-    tokenStateManagerMock.getToken.mockResolvedValue(tokenData);
+    getTokenSpy.mockResolvedValue(tokenData);
 
     return {
-      tokenStateManagerMock,
+      getTokenSpy,
     };
   };
 
-  it('formats calls array without transfers', async () => {
-    const call = {
-      contractAddress: '0xContractAddress1',
-      calldata: ['0xRecipientAddress', '1000'],
-      entrypoint: 'someOtherEntrypoint',
+  const getSenderAndRecipient = async () => {
+    const [{ address }, { address: receipientAddress }] =
+      await generateAccounts(chainId, 2);
+    return {
+      senderAddress: address,
+      recipientAddress: receipientAddress,
     };
-    const chainId = '0xChainId';
-    const address = '0xSenderAddress';
+  };
 
-    // Prepare mock data with no token data to simulate non-ERC20 contract
-    const { tokenStateManagerMock } = await prepareMockData(null);
+  it('returns a formatted `call` object without `tokenTransferData` if no ERC20 transfer calldata is present.', async () => {
+    const call = singleCall.calls;
+    const { senderAddress } = await getSenderAndRecipient();
+
+    // The getToken method should not be called, so we prepare the spy with null
+    const { getTokenSpy } = await mockGetToken(null);
 
     const result = await callToTransactionReqCall(
       call,
       chainId,
-      address,
-      tokenStateManagerMock,
+      senderAddress,
+      new TokenStateManager(),
     );
 
+    expect(getTokenSpy).not.toHaveBeenCalled();
     expect(result).toStrictEqual({
-      contractAddress: '0xContractAddress1',
-      calldata: ['0xRecipientAddress', '1000'],
-      entrypoint: 'someOtherEntrypoint',
+      contractAddress: call.contractAddress,
+      calldata: call.calldata,
+      entrypoint: call.entrypoint,
     });
   });
 
-  it('formats ERC20 transfer call data', async () => {
+  it('returns a formatted `call` object without `tokenTransferData` if the Erc20Token can not be found.', async () => {
+    const { senderAddress, recipientAddress } = await getSenderAndRecipient();
     const call = {
-      contractAddress: '0xErc20TokenAddress',
-      calldata: [
-        '0x25ec026985a3bf9d0cc1fe17326b245dfdc3ff89b8fde106542a3ea56c5a918',
-        '1000',
-      ],
+      ...singleCall.calls,
       entrypoint: 'transfer',
-    };
-    const chainId = '0xChainId';
-    const address = '0xSenderAddress';
-
-    // Mock ERC20 token data
-    const tokenData: Erc20Token = {
-      address: '0xErc20TokenAddress',
-      chainId: '0xChainId',
-      symbol: 'TKN',
-      decimals: 18,
-      name: 'MockToken',
+      calldata: [recipientAddress, '1000'],
     };
 
-    // Prepare mock data with ERC20 token data
-    const { tokenStateManagerMock } = await prepareMockData(tokenData);
+    // Simulate the case where the token can not be found
+    await mockGetToken(null);
 
     const result = await callToTransactionReqCall(
       call,
       chainId,
-      address,
-      tokenStateManagerMock,
+      senderAddress,
+      new TokenStateManager(),
     );
 
     expect(result).toStrictEqual({
-      contractAddress: '0xErc20TokenAddress',
-      calldata: [
-        '0x25ec026985a3bf9d0cc1fe17326b245dfdc3ff89b8fde106542a3ea56c5a918',
-        '1000',
-      ],
+      contractAddress: call.contractAddress,
+      calldata: call.calldata,
+      entrypoint: call.entrypoint,
+    });
+  });
+
+  it('returns a formatted `call` object without `tokenTransferData` if the calldata is not in the expected format', async () => {
+    const { senderAddress } = await getSenderAndRecipient();
+    const call = { ...singleCall.calls, entrypoint: 'transfer', calldata: [] };
+    const loggerSpy = jest.spyOn(logger, 'warn');
+
+    await mockGetToken(ETHER_SEPOLIA_TESTNET);
+
+    const result = await callToTransactionReqCall(
+      call,
+      chainId,
+      senderAddress,
+      new TokenStateManager(),
+    );
+
+    expect(loggerSpy).toHaveBeenCalled();
+    expect(result).toStrictEqual({
+      contractAddress: call.contractAddress,
+      calldata: call.calldata,
+      entrypoint: call.entrypoint,
+    });
+  });
+
+  it('returns a formatted `call` object with `tokenTransferData` if ERC20 transfer calldata is present', async () => {
+    const { senderAddress, recipientAddress } = await getSenderAndRecipient();
+    const transferAmt = '1000';
+    const call = {
+      ...singleCall.calls,
       entrypoint: 'transfer',
+      calldata: [recipientAddress, transferAmt],
+    };
+    const token = ETHER_SEPOLIA_TESTNET;
+
+    const { getTokenSpy } = await mockGetToken(token);
+
+    const result = await callToTransactionReqCall(
+      call,
+      chainId,
+      senderAddress,
+      new TokenStateManager(),
+    );
+
+    expect(getTokenSpy).toHaveBeenCalledWith({
+      address: call.contractAddress,
+      chainId,
+    });
+    expect(result).toStrictEqual({
+      contractAddress: call.contractAddress,
+      calldata: call.calldata,
+      entrypoint: call.entrypoint,
       tokenTransferData: {
-        senderAddress: '0xSenderAddress',
-        recipientAddress:
-          '0x25ec026985a3bf9d0cc1fe17326b245dfdc3ff89b8fde106542a3ea56c5a918',
-        amount: '1000',
-        symbol: 'TKN',
-        decimals: 18,
+        senderAddress,
+        recipientAddress,
+        amount: transferAmt,
+        symbol: token.symbol,
+        decimals: token.decimals,
       },
     });
   });
