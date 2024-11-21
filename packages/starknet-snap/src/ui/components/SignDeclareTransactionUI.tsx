@@ -9,7 +9,7 @@ export type SignDeclareTransactionUIProps = {
   senderAddress: string;
   networkName: string;
   chainId: string;
-  details: Infer<typeof DeclareSignDetailsStruct>;
+  declareTransactions: Infer<typeof DeclareSignDetailsStruct>;
 };
 
 /**
@@ -19,19 +19,22 @@ export type SignDeclareTransactionUIProps = {
  * @param options.senderAddress - The address of the sender initiating the transaction.
  * @param options.networkName - The name of the blockchain network where the transaction will occur.
  * @param options.chainId - The chain ID of the blockchain network.
- * @param options.details - The details of the Declare transaction, conforming to the `DeclareSignDetailsStruct` structure.
+ * @param options.declareTransactions - The details of the Declare transaction.
  * @returns A JSX component for the user to review and confirm the Declare transaction signing.
  */
 export const SignDeclareTransactionUI: SnapComponent<
   SignDeclareTransactionUIProps
-> = ({ senderAddress, networkName, chainId, details }) => {
+> = ({ senderAddress, networkName, chainId, declareTransactions }) => {
   return (
     <Box>
       <Heading>Do you want to sign this transaction?</Heading>
       <Section>
         <AddressUI label="Signer" address={senderAddress} chainId={chainId} />
         <NetworkUI networkName={networkName} />
-        <JsonDataUI label={'Declare Transaction Details'} data={details} />
+        <JsonDataUI
+          label={'Declare Transaction Details'}
+          data={declareTransactions}
+        />
       </Section>
     </Box>
   );

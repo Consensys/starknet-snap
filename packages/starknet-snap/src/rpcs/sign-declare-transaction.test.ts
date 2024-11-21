@@ -79,7 +79,7 @@ describe('signDeclareTransaction', () => {
       senderAddress: address,
       chainId,
       networkName: STARKNET_SEPOLIA_TESTNET_NETWORK.name,
-      details: request.details,
+      declareTransactions: request.details,
     });
   });
 

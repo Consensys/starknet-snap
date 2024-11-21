@@ -84,7 +84,7 @@ export class SignDeclareTransactionRpc extends AccountRpcController<
         senderAddress: details.senderAddress,
         networkName: this.network.name,
         chainId: this.network.chainId,
-        details,
+        declareTransactions: details,
       }))
     ) {
       throw new UserRejectedOpError() as unknown as Error;

@@ -17,7 +17,7 @@ export type SignMessageUIProps = {
  * @param options - The options to configure the component.
  * @param options.address - The address of the signer.
  * @param options.chainId - The chain ID of the blockchain network.
- * @param options.typedDataMessage - The typed data message to be signed, conforming to the `TypeDataStruct` structure.
+ * @param options.typedDataMessage - The typed data message to be signed.
  * @returns A JSX component for the user to review and confirm the message signing.
  */
 export const SignMessageUI: SnapComponent<SignMessageUIProps> = ({
