@@ -20,21 +20,16 @@ export const MinVersionModalView = () => {
       {metaMaskUpgradeRequired ? (
         <>
           <Title>An upgrade of MetaMask is needed to use this dApp</Title>
+          <br />
           <Description>
-            To use this dApp, please:
-            <ul>
-              <li>
-                Ensure you have the latest version of{' '}
-                <a href="https://metamask.io">MetaMask</a> installed (v
-                {MIN_METAMASK_VERSION} or higher is required).
-              </li>
-            </ul>
+            Please update to MetaMask Version {MIN_METAMASK_VERSION} or higher.
           </Description>
+          <br />
           <ConnectButton
             customIconLeft={<MetaMaskLogo />}
             onClick={handleUpdateMetaMask}
           >
-            Upgrade your MetaMask
+            Go to MetaMask Website
           </ConnectButton>
         </>
       ) : (
