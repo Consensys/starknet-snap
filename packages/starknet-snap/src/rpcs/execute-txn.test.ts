@@ -281,12 +281,14 @@ describe('ExecuteTxn', () => {
         );
 
       executeTxnUtilSpy.mockResolvedValue({
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         transaction_hash: executeTxnResult,
       });
 
       try {
         await executeTxn.execute(request);
-      } catch (_) {
+      } catch (error) {
+        // eslint-disable-next-line no-empty
       } finally {
         expect(removeTransactionRequestSpy).toHaveBeenCalled();
       }
