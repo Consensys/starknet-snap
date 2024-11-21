@@ -4,6 +4,7 @@ import { setProvider } from 'slices/walletSlice';
 import { setMinVersionModalVisible } from 'slices/modalSlice';
 import { enableLoadingWithMessage, disableLoading } from 'slices/UISlice';
 import { MIN_METAMASK_VERSION } from 'utils/constants';
+import semver from 'semver/preload';
 
 interface MetaMaskProvider {
   isMetaMask: boolean;
@@ -123,16 +124,14 @@ export const useHasMetamask = () => {
   };
 };
 
-const isMetaMaskUpgradeRequired = async (
-  provider: any,
-) => {
+const isMetaMaskUpgradeRequired = async (provider: any) => {
   const clientVersion = await provider.request({
     method: 'web3_clientVersion',
     params: [],
   });
   const versionMatch = clientVersion.match(/MetaMask\/v(\d+\.\d+\.\d+)/);
   const currentVersion = versionMatch[1];
-   return semver.lt(currentVersion, MIN_METAMASK_VERSION);
+  return semver.lt(currentVersion, MIN_METAMASK_VERSION);
 };
 
 const isSupportSnap = async (provider: any) => {
