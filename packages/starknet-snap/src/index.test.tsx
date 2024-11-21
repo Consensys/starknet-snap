@@ -53,7 +53,6 @@ describe('onRpcRequest', () => {
     ).rejects.toThrow(MethodNotFoundError);
   });
 
-
   it('throws `SnapError` if the error is an instance of SnapError', async () => {
     const { createAccountSpy } = createMockSpy();
     createAccountSpy.mockRejectedValue(new SnapError('error'));
