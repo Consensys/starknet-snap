@@ -135,15 +135,7 @@ const isMetaMaskUpgradeRequired = async (
   });
   const versionMatch = clientVersion.match(/MetaMask\/v(\d+\.\d+\.\d+)/);
   const currentVersion = versionMatch[1];
-  if (
-    currentVersion.localeCompare(requiredVersion, undefined, {
-      numeric: true,
-    }) >= 0
-  ) {
-    return false;
-  } else {
-    return true;
-  }
+   return semver.lt(currentVersion, MIN_METAMASK_VERSION);
 };
 
 const isSupportSnap = async (provider: any) => {
