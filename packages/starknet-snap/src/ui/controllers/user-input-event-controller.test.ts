@@ -12,7 +12,7 @@ import { NetworkStateManager } from '../../state/network-state-manager';
 import { TransactionRequestStateManager } from '../../state/request-state-manager';
 import { TokenStateManager } from '../../state/token-state-manager';
 import { FeeToken, FeeTokenUnit } from '../../types/snapApi';
-import type { TransactionRequest } from '../../types/snapState';
+import type { Erc20Token, TransactionRequest } from '../../types/snapState';
 import {
   ETHER_SEPOLIA_TESTNET,
   STARKNET_TESTNET_NETWORK,
@@ -145,13 +145,18 @@ describe('UserInputEventController', () => {
     eventValue = FeeToken.ETH,
     eventType = UserInputEventType.InputChangeEvent,
     eventName = 'feeTokenSelector',
+  }: {
+    transactionRequest: TransactionRequest;
+    eventValue?: string;
+    eventType?: UserInputEventType;
+    eventName?: string;
   }) => {
     return {
       event: {
         name: eventName,
         type: eventType,
         value: eventValue,
-      },
+      } as unknown as UserInputEvent,
       context: {
         request: transactionRequest,
       },
@@ -186,7 +191,7 @@ describe('UserInputEventController', () => {
         transactionVersion: undefined,
       },
     ])(
-      'returns transactionVersion: $transactionVersion if fee token is $feeToken',
+      'returns transaction version $transactionVersion if the fee token is $feeToken',
       ({ feeToken, transactionVersion }) => {
         const controller = createMockController({});
         expect(controller.feeTokenToTransactionVersion(feeToken)).toStrictEqual(
@@ -247,7 +252,7 @@ describe('UserInputEventController', () => {
       const controller = createMockController({});
       const result = await controller.getNetwork(network.chainId);
 
-      expect(result).toStrictEqual(STARKNET_TESTNET_NETWORK);
+      expect(result).toStrictEqual(network);
     });
 
     it('throws `Network not found` error if the network is not found', async () => {
@@ -276,17 +281,16 @@ describe('UserInputEventController', () => {
 
     const prepareHandleEvent = async () => {
       const { chainId } = STARKNET_TESTNET_NETWORK;
-      const feeToken = FeeToken.STRK;
       const transactionRequest = await generateTransactionRequest({ chainId });
-      const event = generateEvent({ transactionRequest, eventValue: feeToken });
+      const event = generateEvent({
+        transactionRequest,
+        eventValue: FeeToken.STRK,
+      });
       const { getTransactionRequestSpy } =
         mockTransactionRequestStateManager(transactionRequest);
       const { handleFeeTokenChangeSpy } = mockHandleFeeTokenChange();
 
-      const controller = createMockController({
-        event: event.event as unknown as UserInputEvent,
-        context: event.context,
-      });
+      const controller = createMockController(event);
 
       return {
         controller,
@@ -322,21 +326,18 @@ describe('UserInputEventController', () => {
       );
     });
 
-    it.each([undefined, 'other-event'])('does nothing if the event key is not `FeeTokenSelectorEventKey.FeeTokenChange` -  event name: %s', async (eventName) => {
-      const { handleFeeTokenChangeSpy, event } = await prepareHandleEvent();
+    it.each([undefined, 'other-event'])(
+      'does nothing if the event key is not `FeeTokenSelectorEventKey.FeeTokenChange` -  event name: %s',
+      async (eventName) => {
+        const { handleFeeTokenChangeSpy, event } = await prepareHandleEvent();
 
-      const controller = createMockController({
-        event: {
-          type: event.event.type,
-          value: event.event.value,
-          name: eventName
-        } as unknown as UserInputEvent,
-        context: event.context,
-      });
-      await controller.handleEvent();
+        event.event.name = eventName;
+        const controller = createMockController(event);
+        await controller.handleEvent();
 
-      expect(handleFeeTokenChangeSpy).toHaveBeenCalledTimes(0);
-    });
+        expect(handleFeeTokenChangeSpy).toHaveBeenCalledTimes(0);
+      },
+    );
   });
 
   describe('handleFeeTokenChange', () => {
@@ -400,10 +401,11 @@ describe('UserInputEventController', () => {
       };
     };
 
-    const prepareHandleFeeTokenChange = async () => {
+    const prepareHandleFeeTokenChange = async (
+      feeToken: FeeToken = FeeToken.STRK,
+    ) => {
       const network = STARKNET_TESTNET_NETWORK;
       const { chainId } = network;
-      const feeToken = FeeToken.STRK;
 
       const [account] = await generateAccounts(chainId, 1);
 
@@ -430,64 +432,66 @@ describe('UserInputEventController', () => {
       };
     };
 
-    it('updates the transaction request with the updated estimated fee', async () => {
-      const {
-        event,
-        account,
-        network,
-        getEstimatedFeesSpy,
-        hasSufficientFundsForFeeSpy,
-        updateExecuteTxnFlowSpy,
-        mockGetEstimatedFeesResponse,
-        upsertTransactionRequestSpy,
-        transactionRequest,
-        feeToken,
-      } = await prepareHandleFeeTokenChange();
+    it.each([STRK_SEPOLIA_TESTNET, ETHER_SEPOLIA_TESTNET])(
+      'updates the transaction request with the updated estimated fee: feeToken - %symbol',
+      async (token: Erc20Token) => {
+        const feeToken = FeeToken[token.symbol];
+        const {
+          event,
+          account,
+          network,
+          getEstimatedFeesSpy,
+          hasSufficientFundsForFeeSpy,
+          updateExecuteTxnFlowSpy,
+          mockGetEstimatedFeesResponse,
+          upsertTransactionRequestSpy,
+          transactionRequest,
+        } = await prepareHandleFeeTokenChange(feeToken);
+        const feeTokenAddress = token.address;
+        const { signer, calls } = transactionRequest;
+        const { publicKey, privateKey, address } = account;
+        const { suggestedMaxFee } = mockGetEstimatedFeesResponse;
 
-      const controller = createMockController({
-        event: event.event as unknown as UserInputEvent,
-        context: event.context,
-      });
-      await controller.handleFeeTokenChange();
+        const controller = createMockController(event);
+        await controller.handleFeeTokenChange();
 
-      expect(getEstimatedFeesSpy).toHaveBeenCalledWith(
-        network,
-        transactionRequest.signer,
-        account.privateKey,
-        account.publicKey,
-        [
+        expect(getEstimatedFeesSpy).toHaveBeenCalledWith(
+          network,
+          signer,
+          privateKey,
+          publicKey,
+          [
+            {
+              type: TransactionType.INVOKE,
+              payload: calls.map((call) => ({
+                calldata: call.calldata,
+                contractAddress: call.contractAddress,
+                entrypoint: call.entrypoint,
+              })),
+            },
+          ],
           {
-            type: TransactionType.INVOKE,
-            payload: transactionRequest.calls.map((call) => ({
-              calldata: call.calldata,
-              contractAddress: call.contractAddress,
-              entrypoint: call.entrypoint,
-            })),
+            version: controller.feeTokenToTransactionVersion(feeToken),
           },
-        ],
-        {
-          version: controller.feeTokenToTransactionVersion(feeToken),
-        },
-      );
-      expect(hasSufficientFundsForFeeSpy).toHaveBeenCalledWith({
-        address: account.address,
-        network,
-        calls: transactionRequest.calls,
-        feeTokenAddress: STRK_SEPOLIA_TESTNET.address,
-        suggestedMaxFee: mockGetEstimatedFeesResponse.suggestedMaxFee,
-      });
-      // transactionRequest will be pass by reference, so we can use this to check the updated value
-      expect(transactionRequest.maxFee).toStrictEqual(
-        mockGetEstimatedFeesResponse.suggestedMaxFee,
-      );
-      expect(updateExecuteTxnFlowSpy).toHaveBeenCalledWith(
-        controller.eventId,
-        transactionRequest,
-      );
-      expect(upsertTransactionRequestSpy).toHaveBeenCalledWith(
-        transactionRequest,
-      );
-    });
+        );
+        expect(hasSufficientFundsForFeeSpy).toHaveBeenCalledWith({
+          address,
+          network,
+          calls,
+          feeTokenAddress,
+          suggestedMaxFee,
+        });
+        // transactionRequest will be pass by reference, so we can use this to check the updated value
+        expect(transactionRequest.maxFee).toStrictEqual(suggestedMaxFee);
+        expect(updateExecuteTxnFlowSpy).toHaveBeenCalledWith(
+          controller.eventId,
+          transactionRequest,
+        );
+        expect(upsertTransactionRequestSpy).toHaveBeenCalledWith(
+          transactionRequest,
+        );
+      },
+    );
 
     it('updates the transaction request with an insufficient funds error message if the account balance is insufficient to cover the fee.', async () => {
       const {
@@ -500,10 +504,7 @@ describe('UserInputEventController', () => {
       } = await prepareHandleFeeTokenChange();
       hasSufficientFundsForFeeSpy.mockResolvedValue(false);
 
-      const controller = createMockController({
-        event: event.event as unknown as UserInputEvent,
-        context: event.context,
-      });
+      const controller = createMockController(event);
       await controller.handleFeeTokenChange();
 
       expect(upsertTransactionRequestSpy).not.toHaveBeenCalled();
@@ -529,10 +530,7 @@ describe('UserInputEventController', () => {
       // Simulate an error thrown to test the error handling
       hasSufficientFundsForFeeSpy.mockRejectedValue(false);
 
-      const controller = createMockController({
-        event: event.event as unknown as UserInputEvent,
-        context: event.context,
-      });
+      const controller = createMockController(event);
       await controller.handleFeeTokenChange();
 
       expect(upsertTransactionRequestSpy).not.toHaveBeenCalled();
