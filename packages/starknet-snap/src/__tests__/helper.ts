@@ -83,7 +83,7 @@ export async function generateBip44Entropy(
  * @returns An array of StarknetAccount object.
  */
 export async function generateAccounts(
-  network: constants.StarknetChainId,
+  network: constants.StarknetChainId | string,
   cnt: number = 1,
   cairoVersion = '1',
   mnemonic?: string,
@@ -298,7 +298,7 @@ export function generateTransactionRequests({
   contractAddresses = PRELOADED_TOKENS.map((token) => token.address),
   cnt = 1,
 }: {
-  chainId: constants.StarknetChainId;
+  chainId: constants.StarknetChainId | string;
   address: string;
   contractAddresses?: string[];
   cnt?: number;
@@ -359,12 +359,13 @@ export function generateTransactionRequests({
 
   return requests;
 }
+
 /**
  * Method to generate a mock estimate fee response.
  *
  * @returns An array containing a mock EstimateFee object.
  */
-export function getEstimateFees() {
+export function generateEstimateFeesResponse() {
   return [
     {
       // eslint-disable-next-line @typescript-eslint/naming-convention

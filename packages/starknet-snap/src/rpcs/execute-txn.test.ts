@@ -2,7 +2,7 @@ import type { UniversalDetails, Call, InvokeFunctionResponse } from 'starknet';
 import { constants } from 'starknet';
 
 import callsExamples from '../__tests__/fixture/callsExamples.json'; // Assuming you have a similar fixture
-import { getEstimateFees } from '../__tests__/helper';
+import { generateEstimateFeesResponse } from '../__tests__/helper';
 import type { FeeTokenUnit } from '../types/snapApi';
 import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../utils/constants';
 import {
@@ -53,7 +53,7 @@ const prepareMockExecuteTxn = async (
     transaction_hash: transactionHash,
   };
 
-  const estimateResults = getEstimateFees();
+  const estimateResults = generateEstimateFeesResponse();
 
   const getEstimatedFeesRepsMock = {
     suggestedMaxFee: generateRandomFee('1000000000000000', '2000000000000000'),

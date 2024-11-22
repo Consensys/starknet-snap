@@ -2,7 +2,7 @@ import type { Invocations } from 'starknet';
 import { constants, TransactionType } from 'starknet';
 import type { Infer } from 'superstruct';
 
-import { getEstimateFees } from '../__tests__/helper';
+import { generateEstimateFeesResponse } from '../__tests__/helper';
 import { FeeTokenUnit } from '../types/snapApi';
 import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../utils/constants';
 import { InvalidRequestParamsError } from '../utils/exceptions';
@@ -45,7 +45,7 @@ const prepareMockEstimateFee = ({
     details: { version },
   } as unknown as EstimateFeeParams;
 
-  const estimateResults = getEstimateFees();
+  const estimateResults = generateEstimateFeesResponse();
 
   const estimateBulkFeeRespMock = {
     suggestedMaxFee: BigInt(1000000000000000).toString(10),
