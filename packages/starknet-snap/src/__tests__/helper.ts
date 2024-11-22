@@ -2,6 +2,8 @@ import {
   BIP44CoinTypeNode,
   getBIP44AddressKeyDeriver,
 } from '@metamask/key-tree';
+import type { UserInputEvent } from '@metamask/snaps-sdk';
+import { UserInputEventType } from '@metamask/snaps-sdk';
 import { generateMnemonic } from 'bip39';
 import { getRandomValues } from 'crypto';
 import type { constants, EstimateFee } from 'starknet';
@@ -17,6 +19,7 @@ import {
 } from 'starknet';
 import { v4 as uuidv4 } from 'uuid';
 
+import { FeeToken } from '../types/snapApi';
 import type {
   AccContract,
   Transaction,
@@ -393,4 +396,37 @@ export function generateEstimateFeesResponse() {
       },
     } as unknown as EstimateFee,
   ];
+}
+
+/**
+ * Method to generate a mock input event.
+ *
+ * @param params - The parameter for generate the mock input event.
+ * @param params.transactionRequest - The transaction request object.
+ * @param [params.eventValue] - The value of the event.
+ * @param [params.eventType] - The type of the event.
+ * @param [params.eventName] - The name of the event.
+ * @returns An array containing a mock input event object.
+ */
+export function generateInputEvent({
+  transactionRequest,
+  eventValue = FeeToken.ETH,
+  eventType = UserInputEventType.InputChangeEvent,
+  eventName = 'feeTokenSelector',
+}: {
+  transactionRequest: TransactionRequest;
+  eventValue?: string;
+  eventType?: UserInputEventType;
+  eventName?: string;
+}) {
+  return {
+    event: {
+      name: eventName,
+      type: eventType,
+      value: eventValue,
+    } as unknown as UserInputEvent,
+    context: {
+      request: transactionRequest,
+    },
+  };
 }

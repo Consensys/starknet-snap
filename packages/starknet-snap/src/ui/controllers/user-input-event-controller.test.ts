@@ -1,5 +1,4 @@
 import type { InterfaceContext, UserInputEvent } from '@metamask/snaps-sdk';
-import { UserInputEventType } from '@metamask/snaps-sdk';
 import { constants, ec, num as numUtils, TransactionType } from 'starknet';
 
 import type { StarknetAccount } from '../../__tests__/helper';
@@ -7,12 +6,15 @@ import {
   generateAccounts,
   generateTransactionRequests,
   generateEstimateFeesResponse,
+  generateInputEvent,
 } from '../../__tests__/helper';
-import { NetworkStateManager } from '../../state/network-state-manager';
-import { TransactionRequestStateManager } from '../../state/request-state-manager';
-import { TokenStateManager } from '../../state/token-state-manager';
+import {
+  mockTransactionRequestStateManager,
+  mockNetworkStateManager,
+  mockTokenStateManager,
+} from '../../state/__tests__/helper';
 import { FeeToken, FeeTokenUnit } from '../../types/snapApi';
-import type { Erc20Token, TransactionRequest } from '../../types/snapState';
+import type { Erc20Token } from '../../types/snapState';
 import {
   ETHER_SEPOLIA_TESTNET,
   STARKNET_TESTNET_NETWORK,
@@ -72,94 +74,71 @@ describe('UserInputEventController', () => {
     };
   };
 
-  const mockNetworkStateManager = (network) => {
-    const getNetworkSpy = jest.spyOn(
-      NetworkStateManager.prototype,
-      'getNetwork',
+  const mockDeriveAccount = (account: StarknetAccount) => {
+    const deriveAccountSpy = jest.spyOn(
+      MockUserInputEventController.prototype,
+      'deriveAccount',
     );
-    getNetworkSpy.mockResolvedValue(network);
-    return {
-      getNetworkSpy,
-    };
-  };
-
-  const mockTokenStateManager = () => {
-    const getEthTokenSpy = jest.spyOn(
-      TokenStateManager.prototype,
-      'getEthToken',
-    );
-    const getStrkTokenSpy = jest.spyOn(
-      TokenStateManager.prototype,
-      'getStrkToken',
-    );
-    getStrkTokenSpy.mockResolvedValue(STRK_SEPOLIA_TESTNET);
-    getEthTokenSpy.mockResolvedValue(ETHER_SEPOLIA_TESTNET);
-
-    return {
-      getEthTokenSpy,
-      getStrkTokenSpy,
-    };
-  };
-
-  const mockTransactionRequestStateManager = (
-    transactionRequest: TransactionRequest | null,
-  ) => {
-    const getTransactionRequestSpy = jest.spyOn(
-      TransactionRequestStateManager.prototype,
-      'getTransactionRequest',
-    );
-    const upsertTransactionRequestSpy = jest.spyOn(
-      TransactionRequestStateManager.prototype,
-      'upsertTransactionRequest',
-    );
-
-    getTransactionRequestSpy.mockResolvedValue(transactionRequest);
-
-    return {
-      getTransactionRequestSpy,
-      upsertTransactionRequestSpy,
-    };
-  };
-
-  const generateTransactionRequest = async ({
-    chainId,
-    account,
-  }: {
-    chainId: string;
-    account?: StarknetAccount;
-  }) => {
-    const address = account
-      ? account.address
-      : (await generateAccounts(chainId, 1))[0].address;
-
-    const [transactionRequest] = generateTransactionRequests({
-      chainId,
-      address,
+    deriveAccountSpy.mockResolvedValue({
+      publicKey: account.publicKey,
+      privateKey: account.privateKey,
     });
-
-    return transactionRequest;
+    return {
+      deriveAccountSpy,
+    };
   };
 
-  const generateEvent = ({
-    transactionRequest,
-    eventValue = FeeToken.ETH,
-    eventType = UserInputEventType.InputChangeEvent,
-    eventName = 'feeTokenSelector',
-  }: {
-    transactionRequest: TransactionRequest;
-    eventValue?: string;
-    eventType?: UserInputEventType;
-    eventName?: string;
-  }) => {
+  const mockEstimateFee = (feeToken: FeeToken) => {
+    const getEstimatedFeesSpy = jest.spyOn(StarknetUtils, 'getEstimatedFees');
+    const mockEstimateFeeResponse = generateEstimateFeesResponse();
+    const concatedFee = StarknetUtils.addFeesFromAllTransactions(
+      mockEstimateFeeResponse,
+    );
+
+    const mockGetEstimatedFeesResponse = {
+      suggestedMaxFee: concatedFee.suggestedMaxFee.toString(10),
+      overallFee: concatedFee.overall_fee.toString(10),
+      unit: FeeTokenUnit[feeToken],
+      includeDeploy: true,
+      estimateResults: mockEstimateFeeResponse,
+    };
+
+    getEstimatedFeesSpy.mockResolvedValue(mockGetEstimatedFeesResponse);
+
     return {
-      event: {
-        name: eventName,
-        type: eventType,
-        value: eventValue,
-      } as unknown as UserInputEvent,
-      context: {
-        request: transactionRequest,
-      },
+      getEstimatedFeesSpy,
+      mockGetEstimatedFeesResponse,
+    };
+  };
+
+  const mockUpdateExecuteTxnFlow = () => {
+    const updateExecuteTxnFlowSpy = jest.spyOn(UiUtils, 'updateExecuteTxnFlow');
+    updateExecuteTxnFlowSpy.mockReturnThis();
+    return {
+      updateExecuteTxnFlowSpy,
+    };
+  };
+
+  const mockHasSufficientFundsForFee = (result = true) => {
+    const hasSufficientFundsForFeeSpy = jest.spyOn(
+      UiUtils,
+      'hasSufficientFundsForFee',
+    );
+    hasSufficientFundsForFeeSpy.mockResolvedValue(result);
+
+    return {
+      hasSufficientFundsForFeeSpy,
+    };
+  };
+
+  const mockHandleFeeTokenChange = () => {
+    const handleFeeTokenChangeSpy = jest.spyOn(
+      MockUserInputEventController.prototype,
+      'handleFeeTokenChange',
+    );
+    handleFeeTokenChangeSpy.mockReturnThis();
+    return {
+      handleFeeTokenChangeSpy,
     };
   };
 
@@ -268,26 +247,21 @@ describe('UserInputEventController', () => {
   });
 
   describe('handleEvent', () => {
-    const mockHandleFeeTokenChange = () => {
-      const handleFeeTokenChangeSpy = jest.spyOn(
-        MockUserInputEventController.prototype,
-        'handleFeeTokenChange',
-      );
-      handleFeeTokenChangeSpy.mockReturnThis();
-      return {
-        handleFeeTokenChangeSpy,
-      };
-    };
-
     const prepareHandleEvent = async () => {
       const { chainId } = STARKNET_TESTNET_NETWORK;
-      const transactionRequest = await generateTransactionRequest({ chainId });
-      const event = generateEvent({
+      const [account] = await generateAccounts(chainId, 1);
+      const [transactionRequest] = generateTransactionRequests({
+        chainId,
+        address: account.address,
+      });
+
+      const event = generateInputEvent({
         transactionRequest,
         eventValue: FeeToken.STRK,
       });
-      const { getTransactionRequestSpy } =
-        mockTransactionRequestStateManager(transactionRequest);
+      const { getTransactionRequestSpy } = mockTransactionRequestStateManager();
+      getTransactionRequestSpy.mockResolvedValue(transactionRequest);
+
       const { handleFeeTokenChangeSpy } = mockHandleFeeTokenChange();
 
       const controller = createMockController(event);
@@ -341,66 +315,6 @@ describe('UserInputEventController', () => {
   });
 
   describe('handleFeeTokenChange', () => {
-    const mockDeriveAccount = (account: StarknetAccount) => {
-      const deriveAccountSpy = jest.spyOn(
-        MockUserInputEventController.prototype,
-        'deriveAccount',
-      );
-      deriveAccountSpy.mockResolvedValue({
-        publicKey: account.publicKey,
-        privateKey: account.privateKey,
-      });
-      return {
-        deriveAccountSpy,
-      };
-    };
-
-    const mockEstimateFee = (feeToken: FeeToken) => {
-      const getEstimatedFeesSpy = jest.spyOn(StarknetUtils, 'getEstimatedFees');
-      const mockEstimateFeeResponse = generateEstimateFeesResponse();
-      const concatedFee = StarknetUtils.addFeesFromAllTransactions(
-        mockEstimateFeeResponse,
-      );
-
-      const mockGetEstimatedFeesResponse = {
-        suggestedMaxFee: concatedFee.suggestedMaxFee.toString(10),
-        overallFee: concatedFee.overall_fee.toString(10),
-        unit: FeeTokenUnit[feeToken],
-        includeDeploy: true,
-        estimateResults: mockEstimateFeeResponse,
-      };
-
-      getEstimatedFeesSpy.mockResolvedValue(mockGetEstimatedFeesResponse);
-
-      return {
-        getEstimatedFeesSpy,
-        mockGetEstimatedFeesResponse,
-      };
-    };
-
-    const mockUpdateExecuteTxnFlow = () => {
-      const updateExecuteTxnFlowSpy = jest.spyOn(
-        UiUtils,
-        'updateExecuteTxnFlow',
-      );
-      updateExecuteTxnFlowSpy.mockReturnThis();
-      return {
-        updateExecuteTxnFlowSpy,
-      };
-    };
-
-    const mockHasSufficientFundsForFee = (result = true) => {
-      const hasSufficientFundsForFeeSpy = jest.spyOn(
-        UiUtils,
-        'hasSufficientFundsForFee',
-      );
-      hasSufficientFundsForFeeSpy.mockResolvedValue(result);
-
-      return {
-        hasSufficientFundsForFeeSpy,
-      };
-    };
-
     const prepareHandleFeeTokenChange = async (
       feeToken: FeeToken = FeeToken.STRK,
     ) => {
@@ -408,12 +322,15 @@ describe('UserInputEventController', () => {
       const { chainId } = network;
 
       const [account] = await generateAccounts(chainId, 1);
-
-      const transactionRequest = await generateTransactionRequest({
+      const [transactionRequest] = generateTransactionRequests({
         chainId,
-        account,
+        address: account.address,
       });
-      const event = generateEvent({ transactionRequest, eventValue: feeToken });
+
+      const event = generateInputEvent({
+        transactionRequest,
+        eventValue: feeToken,
+      });
 
       mockNetworkStateManager(network);
       mockDeriveAccount(account);
@@ -423,7 +340,7 @@ describe('UserInputEventController', () => {
         ...mockHasSufficientFundsForFee(),
         ...mockUpdateExecuteTxnFlow(),
         ...mockEstimateFee(feeToken),
-        ...mockTransactionRequestStateManager(null),
+        ...mockTransactionRequestStateManager(),
         event,
         transactionRequest,
         account,
