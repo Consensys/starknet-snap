@@ -95,7 +95,7 @@ export const mockTransactionRequestStateManager = () => {
   };
 };
 
-export const mockNetworkStateManager = (network) => {
+export const mockNetworkStateManager = (network: Network) => {
   const getNetworkSpy = jest.spyOn(NetworkStateManager.prototype, 'getNetwork');
   getNetworkSpy.mockResolvedValue(network);
   return {
