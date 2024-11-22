@@ -3,11 +3,34 @@ import type { constants } from 'starknet';
 
 import type { StarknetAccount } from '../../__tests__/helper';
 import { generateAccounts, generateRandomValue } from '../../__tests__/helper';
+import { TransactionRequestStateManager } from '../../state/request-state-manager';
 import type { SnapState } from '../../types/snapState';
+import * as snapUiUtils from '../../ui/utils';
 import { getExplorerUrl, shortenAddress, toJson } from '../../utils';
 import * as snapHelper from '../../utils/snap';
 import * as snapUtils from '../../utils/snapUtils';
 import * as starknetUtils from '../../utils/starknetUtils';
+
+export const mockTransactionRequestStateManager = () => {
+  const upsertTransactionRequestSpy = jest.spyOn(
+    TransactionRequestStateManager.prototype,
+    'upsertTransactionRequest',
+  );
+  const getTransactionRequestSpy = jest.spyOn(
+    TransactionRequestStateManager.prototype,
+    'getTransactionRequest',
+  );
+  const removeTransactionRequestSpy = jest.spyOn(
+    TransactionRequestStateManager.prototype,
+    'removeTransactionRequest',
+  );
+
+  return {
+    upsertTransactionRequestSpy,
+    getTransactionRequestSpy,
+    removeTransactionRequestSpy,
+  };
+};
 
 /**
  *
@@ -52,6 +75,105 @@ export function prepareMockAccount(account: StarknetAccount, state: SnapState) {
  */
 export function prepareConfirmDialog() {
   const confirmDialogSpy = jest.spyOn(snapHelper, 'confirmDialog');
+  confirmDialogSpy.mockResolvedValue(true);
+  return {
+    confirmDialogSpy,
+  };
+}
+
+/**
+ *
+ */
+export function prepareRenderWatchAssetUI() {
+  const confirmDialogSpy = jest.spyOn(snapUiUtils, 'renderWatchAssetUI');
+  confirmDialogSpy.mockResolvedValue(true);
+  return {
+    confirmDialogSpy,
+  };
+}
+
+/**
+ *
+ */
+export function prepareRenderSwitchNetworkUI() {
+  const confirmDialogSpy = jest.spyOn(snapUiUtils, 'renderSwitchNetworkUI');
+  confirmDialogSpy.mockResolvedValue(true);
+  return {
+    confirmDialogSpy,
+  };
+}
+
+/**
+ *
+ */
+export function prepareRenderSignMessageUI() {
+  const confirmDialogSpy = jest.spyOn(snapUiUtils, 'renderSignMessageUI');
+  confirmDialogSpy.mockResolvedValue(true);
+  return {
+    confirmDialogSpy,
+  };
+}
+
+/**
+ *
+ */
+export function prepareRenderSignTransactionUI() {
+  const confirmDialogSpy = jest.spyOn(snapUiUtils, 'renderSignTransactionUI');
+  confirmDialogSpy.mockResolvedValue(true);
+  return {
+    confirmDialogSpy,
+  };
+}
+
+/**
+ *
+ */
+export function prepareRenderSignDeclareTransactionUI() {
+  const confirmDialogSpy = jest.spyOn(
+    snapUiUtils,
+    'renderSignDeclareTransactionUI',
+  );
+  confirmDialogSpy.mockResolvedValue(true);
+  return {
+    confirmDialogSpy,
+  };
+}
+
+/**
+ *
+ */
+export function prepareRenderDisplayPrivateKeyConfirmUI() {
+  const confirmDialogSpy = jest.spyOn(
+    snapUiUtils,
+    'renderDisplayPrivateKeyConfirmUI',
+  );
+  confirmDialogSpy.mockResolvedValue(true);
+  return {
+    confirmDialogSpy,
+  };
+}
+
+/**
+ *
+ */
+export function prepareRenderDisplayPrivateKeyAlertUI() {
+  const alertDialogSpy = jest.spyOn(
+    snapUiUtils,
+    'renderDisplayPrivateKeyAlertUI',
+  );
+  return {
+    alertDialogSpy,
+  };
+}
+
+/**
+ *
+ */
+export function prepareConfirmDialogInteractiveUI() {
+  const confirmDialogSpy = jest.spyOn(
+    snapHelper,
+    'createInteractiveConfirmDialog',
+  );
   confirmDialogSpy.mockResolvedValue(true);
   return {
     confirmDialogSpy,

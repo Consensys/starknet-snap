@@ -322,9 +322,11 @@ export function generateTransactionRequests({
       id: uuidv4(),
       interfaceId: uuidv4(),
       type: TransactionType.INVOKE,
+      networkName: 'Sepolia',
       signer: address,
+      addressIndex: 0,
       maxFee: '100',
-      feeToken:
+      selectedFeeToken:
         feeTokens[Math.floor(generateRandomValue() * feeTokens.length)].symbol,
       calls: [
         {
@@ -337,6 +339,19 @@ export function generateTransactionRequests({
             amount: '1',
           }),
           entrypoint: 'transfer',
+        },
+      ],
+      includeDeploy: false,
+      resourceBounds: [
+        {
+          l1_gas: {
+            max_amount: '0',
+            max_price_per_unit: '0',
+          },
+          l2_gas: {
+            max_amount: '0',
+            max_price_per_unit: '0',
+          },
         },
       ],
     });
