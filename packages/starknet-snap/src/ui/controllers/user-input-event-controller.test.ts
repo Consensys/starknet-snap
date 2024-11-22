@@ -24,7 +24,6 @@ import * as UiUtils from '../utils';
 import { UserInputEventController } from './user-input-event-controller';
 
 jest.mock('../../utils/logger');
-jest.mock('../../state/token-state-manager');
 
 class MockUserInputEventController extends UserInputEventController {
   async deriveAccount(index: number) {
