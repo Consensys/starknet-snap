@@ -28,7 +28,7 @@ export const AssetListItemView = ({
       <Left>
         <DoubleIcons
           tokenName={asset.name}
-          icon1={getAssetIcon(asset.name)}
+          icon1={getAssetIcon(asset.symbol)}
           icon2={getAssetIcon('')}
         />
         <Column>
