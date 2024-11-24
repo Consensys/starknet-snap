@@ -191,8 +191,8 @@ export class UserInputEventController {
     } catch (error) {
       const errorMessage =
         error instanceof InsufficientFundsError
-          ? `Not enough ${feeToken} to pay for fee`
-          : 'Fail to calculate the fees';
+          ? `Not enough ${feeToken} to pay for fee, switching back to ${request.selectedFeeToken}`
+          : `Failed to calculate the fees, switching back to ${request.selectedFeeToken}`;
 
       // On failure, display ExecuteTxnUI with an error message
       await updateExecuteTxnFlow(this.eventId, request, {
