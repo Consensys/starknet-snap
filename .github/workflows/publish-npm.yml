@@ -2,14 +2,9 @@ name: Publish NPM
 
 on:
   workflow_dispatch:
-    inputs:
-      environment:
-        description: 'Environment to deploy'
-        type: environment
-        required: true
 jobs:
   prepare-deployment:
-    environment: ${{ inputs.environment }}
+    environment: production
     permissions:
       contents: write
     runs-on: ubuntu-latest
@@ -27,33 +22,13 @@ jobs:
           BASE=$(node -p "require('./packages/starknet-snap/package.json').version")
           HASH=$(git rev-parse --short HEAD)
           DATE=$(date +%Y%m%d)
-          ENV=${{ inputs.environment }}
-
-          if [[ $ENV == "dev" ]]; then
-            {
-              echo "VERSION=${BASE}-dev-${HASH}-${DATE}"
-              echo "TAG=dev"
-              echo "ENV=dev"
-              echo "LOG_LEVEL=6"
-            } >> "$GITHUB_OUTPUT"
-          elif [[ $ENV  == "staging" ]]; then
-            {
-              echo "VERSION=${BASE}-staging"
-              echo "TAG=staging"
-              echo "ENV=staging"
-              echo "LOG_LEVEL=0"
-            } >> "$GITHUB_OUTPUT"
-          elif [[ $ENV  == "production" ]]; then
-            {
-              echo "VERSION=${BASE}"
-              echo "TAG=latest"
-              echo "ENV=prod"
-              echo "LOG_LEVEL=0"
-            } >> "$GITHUB_OUTPUT"
-          else
-            echo "Invalid environment"
-            exit 1
-          fi
+          ENV=${{ inputs.environment }}   
+          {
+            echo "VERSION=${BASE}"
+            echo "TAG=latest"
+            echo "ENV=prod"
+            echo "LOG_LEVEL=0"
+          } >> "$GITHUB_OUTPUT"     
     outputs:
       VERSION: ${{ steps.prepare_parameters.outputs.VERSION }}
       TAG: ${{ steps.prepare_parameters.outputs.TAG }}
