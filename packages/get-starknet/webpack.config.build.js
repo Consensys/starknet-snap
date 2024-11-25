@@ -23,6 +23,7 @@ module.exports = (env) =>
     plugins: [
       new webpack.DefinePlugin({
         'process.env.SNAP_ID': JSON.stringify(process.env.SNAP_ID || 'npm:@consensys/starknet-snap'),
+        'process.env.SNAP_VERSION': JSON.stringify(process.env.SNAP_VERSION || '*'),
       }),
       new ModuleFederationPlugin({
         name: 'MetaMaskStarknetSnapWallet',
