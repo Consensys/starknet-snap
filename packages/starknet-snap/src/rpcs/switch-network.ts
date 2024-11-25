@@ -1,18 +1,9 @@
-import type { Component } from '@metamask/snaps-sdk';
 import type { Infer } from 'superstruct';
 import { assign, boolean } from 'superstruct';
 
 import { NetworkStateManager } from '../state/network-state-manager';
-import {
-  confirmDialog,
-  AuthorizableStruct,
-  BaseRequestStruct,
-  RpcController,
-  networkUI,
-  rowUI,
-  dividerUI,
-  headerUI,
-} from '../utils';
+import { renderSwitchNetworkUI } from '../ui/utils';
+import { AuthorizableStruct, BaseRequestStruct, RpcController } from '../utils';
 import { InvalidNetworkError, UserRejectedOpError } from '../utils/exceptions';
 
 export const SwitchNetworkRequestStruct = assign(
@@ -85,7 +76,10 @@ export class SwitchNetworkRpc extends RpcController<
         // Get Starknet expected show the confirm dialog, while the companion doesnt needed,
         // therefore, `enableAuthorize` is to enable/disable the confirmation
         enableAuthorize &&
-        !(await this.getSwitchNetworkConsensus(network.name, network.chainId))
+        !(await renderSwitchNetworkUI({
+          name: network.name,
+          chainId: network.chainId,
+        }))
       ) {
         throw new UserRejectedOpError() as unknown as Error;
       }
@@ -94,28 +88,6 @@ export class SwitchNetworkRpc extends RpcController<
 
       return true;
     });
-  }
-
-  protected async getSwitchNetworkConsensus(
-    networkName: string,
-    networkChainId: string,
-  ) {
-    const components: Component[] = [];
-    components.push(headerUI('Do you want to switch to this network?'));
-    components.push(
-      networkUI({
-        networkName,
-      }),
-    );
-    components.push(dividerUI());
-    components.push(
-      rowUI({
-        label: 'Chain ID',
-        value: networkChainId,
-      }),
-    );
-
-    return await confirmDialog(components);
   }
 }
 

@@ -60,7 +60,7 @@ export class UserInputEventController {
 
       if (
         !(await this.reqStateMgr.getTransactionRequest({
-          requestId: request.id,
+          requestId: request?.id,
         }))
       ) {
         throw new Error('Transaction request not found');
@@ -165,6 +165,7 @@ export class UserInputEventController {
         );
 
       if (
+        // TODO: we should create a payment controller class to handle this
         !(await hasSufficientFundsForFee({
           address: signer,
           network,
