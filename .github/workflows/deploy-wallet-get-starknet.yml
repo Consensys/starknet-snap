@@ -20,8 +20,6 @@ jobs:
         id: prepare_parameters
         run: |
           BASE=$(node -p "require('./packages/starknet-snap/package.json').version")
-          HASH=$(git rev-parse --short HEAD)
-          DATE=$(date +%Y%m%d)
           ENV=production
 
           {
@@ -32,7 +30,6 @@ jobs:
             echo "VERSION=${BASE}"
             echo "TAG=latest"
             echo "ENV=prod"
-            echo "LOG_LEVEL=0"
           } >> "$GITHUB_OUTPUT"
     outputs:
       VERSION: ${{ steps.prepare_parameters.outputs.VERSION }}
@@ -42,8 +39,7 @@ jobs:
       AWS_CLOUDFRONT_DISTRIBUTIONS_ID: ${{ steps.prepare_parameters.outputs.AWS_CLOUDFRONT_DISTRIBUTIONS_ID }}
       AWS_S3_URL: ${{ steps.prepare_parameters.outputs.AWS_S3_URL }}
       GET_STARKNET_PUBLIC_PATH: ${{ steps.prepare_parameters.outputs.GET_STARKNET_PUBLIC_PATH }}
-      CACHE_KEY: ${{ github.sha }}-${{ steps.prepare_parameters.outputs.ENV }}
-      LOG_LEVEL: ${{ steps.prepare_parameters.outputs.LOG_LEVEL }}
+      CACHE_KEY: ${{ github.sha }}-${{ steps.prepare_parameters.outputs.ENV }}-UI_N_GET_STARKNET
 
   install-build:
     needs: 
@@ -73,12 +69,8 @@ jobs:
 
           SNAP_VERSION="${VERSION}$" GET_STARKNET_PUBLIC_PATH=$GET_STARKNET_PUBLIC_PATH yarn workspace @consensys/get-starknet build
         env:
-          SNAP_ENV: ${{ needs.prepare-deployment.outputs.ENV }}
           VERSION: ${{ needs.prepare-deployment.outputs.VERSION }}
-          VOYAGER_API_KEY: ${{ secrets.VOYAGER_API_KEY }}
-          ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
           GET_STARKNET_PUBLIC_PATH: ${{ needs.prepare-deployment.outputs.GET_STARKNET_PUBLIC_PATH }}
-          LOG_LEVEL: ${{ needs.prepare-deployment.outputs.LOG_LEVEL }}
       - name: Cache Build
         uses: actions/cache@v3
         id: cache

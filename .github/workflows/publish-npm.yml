@@ -20,20 +20,20 @@ jobs:
         id: prepare_parameters
         run: |
           BASE=$(node -p "require('./packages/starknet-snap/package.json').version")
-          HASH=$(git rev-parse --short HEAD)
-          DATE=$(date +%Y%m%d)
-          ENV=${{ inputs.environment }}   
+          ENV=production
+   
           {
             echo "VERSION=${BASE}"
             echo "TAG=latest"
             echo "ENV=prod"
             echo "LOG_LEVEL=0"
-          } >> "$GITHUB_OUTPUT"     
+          } >> "$GITHUB_OUTPUT"
+        
     outputs:
       VERSION: ${{ steps.prepare_parameters.outputs.VERSION }}
       TAG: ${{ steps.prepare_parameters.outputs.TAG }}
       ENV: ${{ steps.prepare_parameters.outputs.ENV }}
-      CACHE_KEY: ${{ github.sha }}-${{ steps.prepare_parameters.outputs.ENV }}-npm
+      CACHE_KEY: ${{ github.sha }}-${{ steps.prepare_parameters.outputs.ENV }}-SANP
       LOG_LEVEL: ${{ steps.prepare_parameters.outputs.LOG_LEVEL }}
 
   install-build:
@@ -72,6 +72,8 @@ jobs:
           SNAP_ENV: ${{ needs.prepare-deployment.outputs.ENV }}
           VERSION: ${{ needs.prepare-deployment.outputs.VERSION }}
           LOG_LEVEL: ${{ needs.prepare-deployment.outputs.LOG_LEVEL }}
+          VOYAGER_API_KEY: ${{ secrets.VOYAGER_API_KEY }}
+          ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
       - name: Cache Build
         uses: actions/cache@v3
         id: cache
