@@ -102,9 +102,6 @@ jobs:
           path: |
             ./packages/get-starknet/dist/webpack
             ./packages/wallet-ui/build
-            ./packages/starknet-snap/package.json
-            ./packages/starknet-snap/dist
-            ./packages/starknet-snap/snap.manifest.json
             ./node_modules/.yarn-state.yml
           key: ${{ needs.prepare-deployment.outputs.CACHE_KEY }}
       - name: Deploy to AWS

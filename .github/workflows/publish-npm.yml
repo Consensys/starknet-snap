@@ -134,8 +134,6 @@ jobs:
         with:
           # add /packages/snap/snap.manifest.json to include an updated shasum from build due to version update in auto PR
           path: |
-            ./packages/get-starknet/dist/webpack
-            ./packages/wallet-ui/build
             ./packages/starknet-snap/package.json
             ./packages/starknet-snap/dist
             ./packages/starknet-snap/snap.manifest.json
