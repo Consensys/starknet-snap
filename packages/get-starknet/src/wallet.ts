@@ -64,7 +64,7 @@ export class MetaMaskSnapWallet implements StarknetWindowObject {
   /**
    * Initializes a new instance of the MetaMaskSnapWallet class.
    *
-   * The Snap version is now enforced globally via a static `snapVersion` property, 
+   * The Snap version is now enforced globally via a static `snapVersion` property,
    * this ensures consistent versioning across all instances and removes the need for consumers to specify it.
    *
    * @param metamaskProvider - The MetaMask Wallet Provider.
