@@ -48,12 +48,10 @@ export const FeeTokenSelector: SnapComponent<FeeTokenSelectorProps> = ({
           </SelectorOption>
         </Selector>
       </Field>
-      {error ? null : (
-        <Text color="muted">
-          If the chosen token has no funds, the system will automatically switch
-          to a funded token.
-        </Text>
-      )}
+      <Text color="muted">
+        If the chosen token has no funds, the system will automatically switch
+        to a funded token.
+      </Text>
     </Form>
   );
 };

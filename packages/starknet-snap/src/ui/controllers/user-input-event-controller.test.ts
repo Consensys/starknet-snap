@@ -430,7 +430,7 @@ describe('UserInputEventController', () => {
         transactionRequest,
         {
           errors: {
-            fees: `Not enough ${feeToken} to pay for fee`,
+            fees: `Not enough ${feeToken} to pay for fee, switching back to ${transactionRequest.selectedFeeToken}`,
           },
         },
       );
@@ -456,7 +456,7 @@ describe('UserInputEventController', () => {
         transactionRequest,
         {
           errors: {
-            fees: `Fail to calculate the fees`,
+            fees: `Failed to calculate the fees, switching back to ${transactionRequest.selectedFeeToken}`,
           },
         },
       );
