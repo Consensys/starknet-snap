@@ -130,8 +130,20 @@ export class UserInputEventController {
     return token.address;
   }
 
+  protected createRollbackSnapshot(
+    request: TransactionRequest,
+  ): Partial<TransactionRequest> {
+    return {
+      maxFee: request.maxFee,
+      selectedFeeToken: request.selectedFeeToken,
+      includeDeploy: request.includeDeploy,
+      resourceBounds: [...request.resourceBounds],
+    };
+  }
+
   protected async handleFeeTokenChange() {
     const request = this.context?.request as TransactionRequest;
+    const rollbackSnapshot = this.createRollbackSnapshot(request);
     const { addressIndex, calls, signer, chainId } = request;
     const feeToken = (this.event as InputChangeEvent)
       .value as unknown as FeeToken;
@@ -196,9 +208,13 @@ export class UserInputEventController {
           : `Failed to calculate the fees, switching back to ${request.selectedFeeToken}`;
 
       // On failure, display ExecuteTxnUI with an error message
-      await updateExecuteTxnFlow(this.eventId, request, {
-        errors: { fees: errorMessage },
-      });
+      await updateExecuteTxnFlow(
+        this.eventId,
+        { ...request, ...rollbackSnapshot },
+        {
+          errors: { fees: errorMessage },
+        },
+      );
     }
   }
 }

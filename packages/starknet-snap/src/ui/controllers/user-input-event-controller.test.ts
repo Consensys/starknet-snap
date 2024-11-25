@@ -410,6 +410,84 @@ describe('UserInputEventController', () => {
       },
     );
 
+    it.each([STRK_SEPOLIA_TESTNET, ETHER_SEPOLIA_TESTNET])(
+      'rollsback the transaction request with the original request state if state update fails: feeToken - %symbol',
+      async (token: Erc20Token) => {
+        const feeToken = FeeToken[token.symbol];
+        const {
+          event,
+          account,
+          network,
+          getEstimatedFeesSpy,
+          hasSufficientFundsForFeeSpy,
+          updateExecuteTxnFlowSpy,
+          mockGetEstimatedFeesResponse,
+          upsertTransactionRequestSpy,
+          transactionRequest,
+        } = await prepareHandleFeeTokenChange(feeToken);
+        const feeTokenAddress = token.address;
+        const { signer, calls } = transactionRequest;
+        const { publicKey, privateKey, address } = account;
+        const { suggestedMaxFee } = mockGetEstimatedFeesResponse;
+        const rollbackSnapshot = {
+          maxFee: transactionRequest.maxFee,
+          selectedFeeToken: transactionRequest.selectedFeeToken,
+          includeDeploy: transactionRequest.includeDeploy,
+          resourceBounds: [...transactionRequest.resourceBounds],
+        };
+
+        upsertTransactionRequestSpy.mockRejectedValue(new Error('Failed!'));
+
+        const controller = createMockController(event);
+        await controller.handleFeeTokenChange();
+
+        expect(getEstimatedFeesSpy).toHaveBeenCalledWith(
+          network,
+          signer,
+          privateKey,
+          publicKey,
+          [
+            {
+              type: TransactionType.INVOKE,
+              payload: calls.map((call) => ({
+                calldata: call.calldata,
+                contractAddress: call.contractAddress,
+                entrypoint: call.entrypoint,
+              })),
+            },
+          ],
+          {
+            version: controller.feeTokenToTransactionVersion(feeToken),
+          },
+        );
+        expect(hasSufficientFundsForFeeSpy).toHaveBeenCalledWith({
+          address,
+          network,
+          calls,
+          feeTokenAddress,
+          suggestedMaxFee,
+        });
+        // transactionRequest will be pass by reference, so we can use this to check the updated value
+        expect(transactionRequest.maxFee).toStrictEqual(suggestedMaxFee);
+        expect(updateExecuteTxnFlowSpy).toHaveBeenCalledWith(
+          controller.eventId,
+          transactionRequest,
+        );
+        expect(upsertTransactionRequestSpy).toHaveBeenCalledWith(
+          transactionRequest,
+        );
+        expect(updateExecuteTxnFlowSpy).toHaveBeenCalledWith(
+          controller.eventId,
+          { ...transactionRequest, ...rollbackSnapshot },
+          {
+            errors: {
+              fees: `Failed to calculate the fees, switching back to ${transactionRequest.selectedFeeToken}`,
+            },
+          },
+        );
+      },
+    );
+
     it('updates the transaction request with an insufficient funds error message if the account balance is insufficient to cover the fee.', async () => {
       const {
         event,
