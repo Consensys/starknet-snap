@@ -58,14 +58,26 @@ export class MetaMaskSnapWallet implements StarknetWindowObject {
   // eslint-disable-next-line @typescript-eslint/naming-convention, no-restricted-globals
   static readonly snapId = process.env.SNAP_ID ?? 'npm:@consensys/starknet-snap';
 
-  constructor(metamaskProvider: MetaMaskProvider, snapVersion = '*') {
+  // eslint-disable-next-line @typescript-eslint/naming-convention, no-restricted-globals
+  static readonly snapVersion = process.env.SNAP_VERSION ?? '*';
+
+  /**
+   * Initializes a new instance of the MetaMaskSnapWallet class.
+   *
+   * The Snap version is now enforced globally via a static `snapVersion` property,
+   * this ensures consistent versioning across all instances and removes the need for consumers to specify it.
+   *
+   * @param metamaskProvider - The MetaMask Wallet Provider.
+   * @param _snapVersion - The `_snapVersion` parameter remains to maintain compatibility with existing usage.
+   */
+  constructor(metamaskProvider: MetaMaskProvider, _snapVersion = '*') {
     this.id = 'metamask';
     this.name = 'Metamask';
     this.version = 'v2.0.0';
     this.icon = WalletIconMetaData;
     this.lock = new Mutex();
     this.metamaskProvider = metamaskProvider;
-    this.snap = new MetaMaskSnap(MetaMaskSnapWallet.snapId, snapVersion, this.metamaskProvider);
+    this.snap = new MetaMaskSnap(MetaMaskSnapWallet.snapId, MetaMaskSnapWallet.snapVersion, this.metamaskProvider);
     this.isConnected = false;
 
     this.#rpcHandlers = new Map<string, IStarknetWalletRpc>([
