@@ -111,7 +111,7 @@ jobs:
 
           echo "Building Get Starknet with GET_STARKNET_PUBLIC_PATH=$GET_STARKNET_PUBLIC_PATH" 
 
-          GET_STARKNET_PUBLIC_PATH=$GET_STARKNET_PUBLIC_PATH yarn workspace @consensys/get-starknet build
+          SNAP_VERSION="${VERSION}" GET_STARKNET_PUBLIC_PATH=$GET_STARKNET_PUBLIC_PATH yarn workspace @consensys/get-starknet build
         env:
           SNAP_ENV: ${{ needs.prepare-deployment.outputs.ENV }}
           VERSION: ${{ needs.prepare-deployment.outputs.VERSION }}
