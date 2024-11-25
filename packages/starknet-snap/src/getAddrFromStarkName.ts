@@ -1,9 +1,16 @@
-import { toJson } from './utils/serializer';
-import { getAddrFromStarkNameUtil } from '../src/utils/starknetUtils';
-import { ApiParams, GetAddrFromStarkNameRequestParam } from './types/snapApi';
-import { getNetworkFromChainId } from './utils/snapUtils';
+import type {
+  ApiParams,
+  GetAddrFromStarkNameRequestParam,
+} from './types/snapApi';
 import { logger } from './utils/logger';
+import { toJson } from './utils/serializer';
+import { getNetworkFromChainId } from './utils/snapUtils';
+import { getAddrFromStarkNameUtil } from './utils/starknetUtils';
 
+/**
+ *
+ * @param params
+ */
 export async function getAddrFromStarkName(params: ApiParams) {
   try {
     const { state, requestParams } = params;
@@ -25,8 +32,8 @@ export async function getAddrFromStarkName(params: ApiParams) {
     logger.log(`getAddrFromStarkName: addr:\n${toJson(resp)}`);
 
     return resp;
-  } catch (err) {
-    logger.error(`Problem found: ${err}`);
-    throw err;
+  } catch (error) {
+    logger.error(`Problem found:`, error);
+    throw error;
   }
 }
