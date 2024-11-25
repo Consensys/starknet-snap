@@ -24,7 +24,7 @@ export async function getAddrFromStarkName(params: ApiParams) {
       );
     }
 
-    const starkName = requestParamsObj.starkName;
+    const { starkName } = requestParamsObj;
 
     const network = getNetworkFromChainId(state, requestParamsObj.chainId);
 
