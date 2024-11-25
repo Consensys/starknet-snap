@@ -329,7 +329,9 @@ export function generateTransactionRequests({
       addressIndex: 0,
       maxFee: '100',
       selectedFeeToken:
-      selectedFeeTokens[Math.floor(generateRandomValue() * selectedFeeTokens.length)],
+        selectedFeeTokens[
+          Math.floor(generateRandomValue() * selectedFeeTokens.length)
+        ],
       calls: [
         {
           contractAddress:
