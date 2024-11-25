@@ -1367,3 +1367,11 @@ export const validateAccountRequireUpgradeOrDeploy = async (
     throw new DeployRequiredError();
   }
 };
+
+export const getAddrFromStarkNameUtil = async (
+  network: Network,
+  starkName: string,
+) => {
+  const provider = getProvider(network);
+  return Account.getAddressFromStarkName(provider, starkName);
+};

@@ -15,11 +15,12 @@ import {
 import { useAppSelector } from 'hooks/redux';
 import { ethers } from 'ethers';
 import { AddressInput } from 'components/ui/molecule/AddressInput';
-import { isValidAddress } from 'utils/utils';
+import { isValidAddress, isValidStarkName } from 'utils/utils';
 import { Bold, Normal } from '../../ConnectInfoModal/ConnectInfoModal.style';
 import { DropDown } from 'components/ui/molecule/DropDown';
 import { DEFAULT_FEE_TOKEN } from 'utils/constants';
 import { FeeToken } from 'types';
+import { useStarkNetSnap } from 'services';
 
 interface Props {
   closeModal?: () => void;
@@ -27,7 +28,9 @@ interface Props {
 
 export const SendModalView = ({ closeModal }: Props) => {
   const networks = useAppSelector((state) => state.networks);
+  const chainId = networks?.items[networks.activeNetwork]?.chainId;
   const wallet = useAppSelector((state) => state.wallet);
+  const { getAddrFromStarkName } = useStarkNetSnap();
   const [summaryModalOpen, setSummaryModalOpen] = useState(false);
   const [fields, setFields] = useState({
     amount: '',
@@ -39,6 +42,7 @@ export const SendModalView = ({ closeModal }: Props) => {
     feeToken: DEFAULT_FEE_TOKEN, // Default fee token
   });
   const [errors, setErrors] = useState({ amount: '', address: '' });
+  const [resolvedAddress, setResolvedAddress] = useState('');
 
   const handleChange = (fieldName: string, fieldValue: string) => {
     //Check if input amount does not exceed user balance
@@ -64,7 +68,20 @@ export const SendModalView = ({ closeModal }: Props) => {
         break;
       case 'address':
         if (fieldValue !== '') {
-          if (!isValidAddress(fieldValue)) {
+          if (isValidAddress(fieldValue)) {
+            break;
+          } else if (isValidStarkName(fieldValue)) {
+            getAddrFromStarkName(fieldValue, chainId).then((address) => {
+              if (isValidAddress(address)) {
+                setResolvedAddress(address);
+              } else {
+                setErrors((prevErrors) => ({
+                  ...prevErrors,
+                  address: '.stark name doesn’t exist',
+                }));
+              }
+            });
+          } else {
             setErrors((prevErrors) => ({
               ...prevErrors,
               address: 'Invalid address format',
@@ -108,8 +125,9 @@ export const SendModalView = ({ closeModal }: Props) => {
             </Network>
             <AddressInput
               label="To"
-              placeholder="Paste recipient address here"
+              placeholder="Paste recipient address or .stark name here"
               onChange={(value) => handleChange('address', value.target.value)}
+              onResolvedAddress={(address) => setResolvedAddress(address)}
             />
             <SeparatorSmall />
             <MessageAlert
@@ -161,7 +179,7 @@ export const SendModalView = ({ closeModal }: Props) => {
       {summaryModalOpen && (
         <SendSummaryModal
           closeModal={closeModal}
-          address={fields.address}
+          address={resolvedAddress}
           amount={fields.amount}
           chainId={fields.chainId}
           selectedFeeToken={fields.feeToken} // Pass the selected fee token

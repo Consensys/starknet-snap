@@ -183,4 +183,9 @@ export enum FeeTokenUnit {
   ETH = 'wei',
   STRK = 'fri',
 }
+
+export type GetAddrFromStarkNameRequestParam = {
+  starkName: string;
+} & BaseRequestParams;
+
 /* eslint-enable */

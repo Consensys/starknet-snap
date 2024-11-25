@@ -19,6 +19,7 @@ import { extractPublicKey } from './extractPublicKey';
 import { getCurrentNetwork } from './getCurrentNetwork';
 import { getErc20TokenBalance } from './getErc20TokenBalance';
 import { getStarkName } from './getStarkName';
+import { getAddrFromStarkName } from './getAddrFromStarkName';
 import { getStoredErc20Tokens } from './getStoredErc20Tokens';
 import { getStoredNetworks } from './getStoredNetworks';
 import { getStoredTransactions } from './getStoredTransactions';
@@ -288,6 +289,9 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
         return await getDeploymentData.execute(
           apiParams.requestParams as unknown as GetDeploymentDataParams,
         );
+
+      case 'starkNet_getAddrFromStarkName':
+        return await getAddrFromStarkName(apiParams);
 
       default:
         throw new MethodNotFoundError() as unknown as Error;

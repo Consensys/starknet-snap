@@ -6,11 +6,17 @@ import {
   Dispatch,
   SetStateAction,
 } from 'react';
-import { isSpecialInputKey, isValidAddress } from 'utils/utils';
+import {
+  isSpecialInputKey,
+  isValidAddress,
+  isValidStarkName,
+  shortenAddress,
+} from 'utils/utils';
 import { HelperText } from 'components/ui/atom/HelperText';
 import { Label } from 'components/ui/atom/Label';
 import {
   Icon,
+  InfoText,
   Input,
   InputContainer,
   Left,
@@ -18,10 +24,13 @@ import {
   Wrapper,
 } from './AddressInput.style';
 import { STARKNET_ADDRESS_LENGTH } from 'utils/constants';
+import { useStarkNetSnap } from 'services';
+import { useAppSelector } from 'hooks/redux';
 
 interface Props extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   setIsValidAddress?: Dispatch<SetStateAction<boolean>>;
+  onResolvedAddress?: (address: string) => void;
 }
 
 export const AddressInputView = ({
@@ -29,12 +38,17 @@ export const AddressInputView = ({
   onChange,
   label,
   setIsValidAddress,
+  onResolvedAddress,
   ...otherProps
 }: Props) => {
+  const networks = useAppSelector((state) => state.networks);
+  const chainId = networks?.items[networks.activeNetwork]?.chainId;
+  const { getAddrFromStarkName } = useStarkNetSnap();
   const [focused, setFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState('');
   const [valid, setValid] = useState(false);
+  const [info, setInfo] = useState('');
 
   const displayIcon = () => {
     return valid || error !== '';
@@ -62,9 +76,27 @@ export const AddressInputView = ({
     if (isValid) {
       setValid(true);
       setError('');
+      onResolvedAddress?.(inputRef.current.value);
+    } else if (isValidStarkName(inputRef.current.value)) {
+      setValid(false);
+      setError('');
+
+      getAddrFromStarkName(inputRef.current.value, chainId).then((address) => {
+        if (isValidAddress(address)) {
+          setValid(true);
+          setError('');
+          setInfo(shortenAddress(address as string, 12) as string);
+          onResolvedAddress?.(address as string);
+        } else {
+          setValid(false);
+          setError('.stark name not found');
+          setInfo('');
+        }
+      });
     } else {
       setValid(false);
       setError('Invalid address format');
+      setInfo('');
     }
 
     if (setIsValidAddress) {
@@ -106,6 +138,7 @@ export const AddressInputView = ({
         </Left>
       </InputContainer>
       {error && <HelperText>{error}</HelperText>}
+      {info && <InfoText>{info}</InfoText>}
     </Wrapper>
   );
 };
