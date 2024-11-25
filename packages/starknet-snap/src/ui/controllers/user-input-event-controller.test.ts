@@ -315,23 +315,47 @@ describe('UserInputEventController', () => {
   });
 
   describe('handleFeeTokenChange', () => {
+    type PrepareHandleFeeTokenChangeArg = {
+      feeToken: {
+        // The fee token that we change from
+        changeFrom: FeeToken;
+        // The fee token that we change to
+        changeTo: FeeToken;
+      };
+    };
+
     const prepareHandleFeeTokenChange = async (
-      feeToken: FeeToken = FeeToken.STRK,
-      selectedFeeToken?: Erc20Token,
+      arg: PrepareHandleFeeTokenChangeArg = {
+        feeToken: {
+          changeFrom: FeeToken.STRK,
+          changeTo: FeeToken.ETH,
+        },
+      },
     ) => {
       const network = STARKNET_TESTNET_NETWORK;
       const { chainId } = network;
+      const { feeToken } = arg;
 
       const [account] = await generateAccounts(chainId, 1);
       const [transactionRequest] = generateTransactionRequests({
         chainId,
         address: account.address,
-        selectedFeeToken,
+        selectedFeeTokens: [feeToken.changeFrom],
       });
+
+      // Create a copy of the original transaction request, for testing if the transaction request is updated / rolled back
+      const originalTransactionRequest = {
+        ...transactionRequest,
+        // Since only `maxFee`, `selectedFeeToken`, `includeDeploy` and `resourceBounds` has been updated, hence we only need to copy these fields
+        maxFee: transactionRequest.maxFee,
+        selectedFeeToken: transactionRequest.selectedFeeToken,
+        includeDeploy: transactionRequest.includeDeploy,
+        resourceBounds: [...transactionRequest.resourceBounds],
+      };
 
       const event = generateInputEvent({
         transactionRequest,
-        eventValue: feeToken,
+        eventValue: feeToken.changeTo,
       });
 
       mockNetworkStateManager(network);
@@ -341,24 +365,23 @@ describe('UserInputEventController', () => {
       return {
         ...mockHasSufficientFundsForFee(),
         ...mockUpdateExecuteTxnFlow(),
-        ...mockEstimateFee(feeToken),
+        ...mockEstimateFee(feeToken.changeTo),
         ...mockTransactionRequestStateManager(),
         event,
+        originalTransactionRequest,
         transactionRequest,
         account,
         network,
-        feeToken,
+        feeToken: feeToken.changeTo,
       };
     };
 
     it.each([STRK_SEPOLIA_TESTNET, ETHER_SEPOLIA_TESTNET])(
-      'updates the transaction request with the updated estimated fee: feeToken - %symbol',
+      'updates the transaction request with the updated estimated fee: feeToken - $symbol',
       async (token: Erc20Token) => {
-        const feeToken = FeeToken[token.symbol];
-        const selectedFeeToken =
-          token.symbol === FeeToken.ETH
-            ? STRK_SEPOLIA_TESTNET
-            : ETHER_SEPOLIA_TESTNET;
+        const feeTokenChangeTo = FeeToken[token.symbol];
+        const feeTokenChangeFrom =
+          token.symbol === FeeToken.ETH ? FeeToken.STRK : FeeToken.ETH;
         const {
           event,
           account,
@@ -369,7 +392,13 @@ describe('UserInputEventController', () => {
           mockGetEstimatedFeesResponse,
           upsertTransactionRequestSpy,
           transactionRequest,
-        } = await prepareHandleFeeTokenChange(feeToken, selectedFeeToken);
+        } = await prepareHandleFeeTokenChange({
+          feeToken: {
+            changeFrom: feeTokenChangeFrom,
+            changeTo: feeTokenChangeTo,
+          },
+        });
+
         const feeTokenAddress = token.address;
         const { signer, calls } = transactionRequest;
         const { publicKey, privateKey, address } = account;
@@ -394,7 +423,7 @@ describe('UserInputEventController', () => {
             },
           ],
           {
-            version: controller.feeTokenToTransactionVersion(feeToken),
+            version: controller.feeTokenToTransactionVersion(feeTokenChangeTo),
           },
         );
         expect(hasSufficientFundsForFeeSpy).toHaveBeenCalledWith({
@@ -410,9 +439,10 @@ describe('UserInputEventController', () => {
           controller.eventId,
           transactionRequest,
         );
+        // Make sure the `selectedFeeToken` transaction request has been updated
         expect(upsertTransactionRequestSpy).toHaveBeenCalledWith({
           ...transactionRequest,
-          selectedFeeToken: feeToken,
+          selectedFeeToken: feeTokenChangeTo,
         });
       },
     );
@@ -421,53 +451,67 @@ describe('UserInputEventController', () => {
       const {
         event,
         hasSufficientFundsForFeeSpy,
-        transactionRequest,
+        originalTransactionRequest,
         updateExecuteTxnFlowSpy,
         upsertTransactionRequestSpy,
         feeToken,
-      } = await prepareHandleFeeTokenChange();
+      } = await prepareHandleFeeTokenChange({
+        feeToken: {
+          changeFrom: FeeToken.STRK,
+          changeTo: FeeToken.ETH,
+        },
+      });
       hasSufficientFundsForFeeSpy.mockResolvedValue(false);
 
       const controller = createMockController(event);
       await controller.handleFeeTokenChange();
 
       expect(upsertTransactionRequestSpy).not.toHaveBeenCalled();
+      expect(feeToken).not.toStrictEqual(
+        originalTransactionRequest.selectedFeeToken,
+      );
+      // If the account balance is insufficient to cover the fee, the transaction request should be rolled back or not updated.
       expect(updateExecuteTxnFlowSpy).toHaveBeenCalledWith(
         controller.eventId,
-        transactionRequest,
+        originalTransactionRequest,
         {
           errors: {
-            fees: `Not enough ${feeToken} to pay for fee, switching back to ${transactionRequest.selectedFeeToken}`,
+            fees: `Not enough ${feeToken} to pay for fee, switching back to ${originalTransactionRequest.selectedFeeToken}`,
           },
         },
       );
     });
 
-    it('rollback the transaction request and show a general error message if other error was thrown.', async () => {
+    it('rollbacks the transaction request with a general error message if another Error was thrown.', async () => {
       const {
         event,
-        transactionRequest,
+        originalTransactionRequest,
         updateExecuteTxnFlowSpy,
         upsertTransactionRequestSpy,
-      } = await prepareHandleFeeTokenChange();
+        feeToken,
+      } = await prepareHandleFeeTokenChange({
+        feeToken: {
+          changeFrom: FeeToken.STRK,
+          changeTo: FeeToken.ETH,
+        },
+      });
+
       // Simulate an error thrown to test the error handling
       upsertTransactionRequestSpy.mockRejectedValue(new Error('Failed!'));
-      const rollbackSnapshot = {
-        maxFee: transactionRequest.maxFee,
-        selectedFeeToken: transactionRequest.selectedFeeToken,
-        includeDeploy: transactionRequest.includeDeploy,
-        resourceBounds: [...transactionRequest.resourceBounds],
-      };
 
       const controller = createMockController(event);
       await controller.handleFeeTokenChange();
 
+      expect(feeToken).not.toStrictEqual(
+        originalTransactionRequest.selectedFeeToken,
+      );
+      // if any Error was thrown, the transaction request should be rolled back or not updated.
       expect(updateExecuteTxnFlowSpy).toHaveBeenCalledWith(
         controller.eventId,
-        { ...transactionRequest, ...rollbackSnapshot },
+        originalTransactionRequest,
         {
           errors: {
-            fees: `Failed to calculate the fees, switching back to ${transactionRequest.selectedFeeToken}`,
+            fees: `Failed to calculate the fees, switching back to ${originalTransactionRequest.selectedFeeToken}`,
           },
         },
       );
