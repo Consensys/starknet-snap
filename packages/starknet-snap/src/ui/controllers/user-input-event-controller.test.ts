@@ -317,6 +317,7 @@ describe('UserInputEventController', () => {
   describe('handleFeeTokenChange', () => {
     const prepareHandleFeeTokenChange = async (
       feeToken: FeeToken = FeeToken.STRK,
+      selectedFeeToken?: Erc20Token,
     ) => {
       const network = STARKNET_TESTNET_NETWORK;
       const { chainId } = network;
@@ -325,6 +326,7 @@ describe('UserInputEventController', () => {
       const [transactionRequest] = generateTransactionRequests({
         chainId,
         address: account.address,
+        selectedFeeToken,
       });
 
       const event = generateInputEvent({
@@ -353,6 +355,10 @@ describe('UserInputEventController', () => {
       'updates the transaction request with the updated estimated fee: feeToken - %symbol',
       async (token: Erc20Token) => {
         const feeToken = FeeToken[token.symbol];
+        const selectedFeeToken =
+          token.symbol === FeeToken.ETH
+            ? STRK_SEPOLIA_TESTNET
+            : ETHER_SEPOLIA_TESTNET;
         const {
           event,
           account,
@@ -363,7 +369,7 @@ describe('UserInputEventController', () => {
           mockGetEstimatedFeesResponse,
           upsertTransactionRequestSpy,
           transactionRequest,
-        } = await prepareHandleFeeTokenChange(feeToken);
+        } = await prepareHandleFeeTokenChange(feeToken, selectedFeeToken);
         const feeTokenAddress = token.address;
         const { signer, calls } = transactionRequest;
         const { publicKey, privateKey, address } = account;
@@ -404,87 +410,10 @@ describe('UserInputEventController', () => {
           controller.eventId,
           transactionRequest,
         );
-        expect(upsertTransactionRequestSpy).toHaveBeenCalledWith(
-          transactionRequest,
-        );
-      },
-    );
-
-    it.each([STRK_SEPOLIA_TESTNET, ETHER_SEPOLIA_TESTNET])(
-      'rollsback the transaction request with the original request state if state update fails: feeToken - %symbol',
-      async (token: Erc20Token) => {
-        const feeToken = FeeToken[token.symbol];
-        const {
-          event,
-          account,
-          network,
-          getEstimatedFeesSpy,
-          hasSufficientFundsForFeeSpy,
-          updateExecuteTxnFlowSpy,
-          mockGetEstimatedFeesResponse,
-          upsertTransactionRequestSpy,
-          transactionRequest,
-        } = await prepareHandleFeeTokenChange(feeToken);
-        const feeTokenAddress = token.address;
-        const { signer, calls } = transactionRequest;
-        const { publicKey, privateKey, address } = account;
-        const { suggestedMaxFee } = mockGetEstimatedFeesResponse;
-        const rollbackSnapshot = {
-          maxFee: transactionRequest.maxFee,
-          selectedFeeToken: transactionRequest.selectedFeeToken,
-          includeDeploy: transactionRequest.includeDeploy,
-          resourceBounds: [...transactionRequest.resourceBounds],
-        };
-
-        upsertTransactionRequestSpy.mockRejectedValue(new Error('Failed!'));
-
-        const controller = createMockController(event);
-        await controller.handleFeeTokenChange();
-
-        expect(getEstimatedFeesSpy).toHaveBeenCalledWith(
-          network,
-          signer,
-          privateKey,
-          publicKey,
-          [
-            {
-              type: TransactionType.INVOKE,
-              payload: calls.map((call) => ({
-                calldata: call.calldata,
-                contractAddress: call.contractAddress,
-                entrypoint: call.entrypoint,
-              })),
-            },
-          ],
-          {
-            version: controller.feeTokenToTransactionVersion(feeToken),
-          },
-        );
-        expect(hasSufficientFundsForFeeSpy).toHaveBeenCalledWith({
-          address,
-          network,
-          calls,
-          feeTokenAddress,
-          suggestedMaxFee,
+        expect(upsertTransactionRequestSpy).toHaveBeenCalledWith({
+          ...transactionRequest,
+          selectedFeeToken: feeToken,
         });
-        // transactionRequest will be pass by reference, so we can use this to check the updated value
-        expect(transactionRequest.maxFee).toStrictEqual(suggestedMaxFee);
-        expect(updateExecuteTxnFlowSpy).toHaveBeenCalledWith(
-          controller.eventId,
-          transactionRequest,
-        );
-        expect(upsertTransactionRequestSpy).toHaveBeenCalledWith(
-          transactionRequest,
-        );
-        expect(updateExecuteTxnFlowSpy).toHaveBeenCalledWith(
-          controller.eventId,
-          { ...transactionRequest, ...rollbackSnapshot },
-          {
-            errors: {
-              fees: `Failed to calculate the fees, switching back to ${transactionRequest.selectedFeeToken}`,
-            },
-          },
-        );
       },
     );
 
@@ -514,24 +443,28 @@ describe('UserInputEventController', () => {
       );
     });
 
-    it('updates the transaction request with an general error message if other error was thrown.', async () => {
+    it('rollback the transaction request and show a general error message if other error was thrown.', async () => {
       const {
         event,
-        hasSufficientFundsForFeeSpy,
         transactionRequest,
         updateExecuteTxnFlowSpy,
         upsertTransactionRequestSpy,
       } = await prepareHandleFeeTokenChange();
       // Simulate an error thrown to test the error handling
-      hasSufficientFundsForFeeSpy.mockRejectedValue(false);
+      upsertTransactionRequestSpy.mockRejectedValue(new Error('Failed!'));
+      const rollbackSnapshot = {
+        maxFee: transactionRequest.maxFee,
+        selectedFeeToken: transactionRequest.selectedFeeToken,
+        includeDeploy: transactionRequest.includeDeploy,
+        resourceBounds: [...transactionRequest.resourceBounds],
+      };
 
       const controller = createMockController(event);
       await controller.handleFeeTokenChange();
 
-      expect(upsertTransactionRequestSpy).not.toHaveBeenCalled();
       expect(updateExecuteTxnFlowSpy).toHaveBeenCalledWith(
         controller.eventId,
-        transactionRequest,
+        { ...transactionRequest, ...rollbackSnapshot },
         {
           errors: {
             fees: `Failed to calculate the fees, switching back to ${transactionRequest.selectedFeeToken}`,

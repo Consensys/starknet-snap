@@ -22,6 +22,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { FeeToken } from '../types/snapApi';
 import type {
   AccContract,
+  Erc20Token,
   Transaction,
   TransactionRequest,
 } from '../types/snapState';
@@ -298,11 +299,13 @@ export function generateTransactions({
 export function generateTransactionRequests({
   chainId,
   address,
+  selectedFeeToken,
   contractAddresses = PRELOADED_TOKENS.map((token) => token.address),
   cnt = 1,
 }: {
   chainId: constants.StarknetChainId | string;
   address: string;
+  selectedFeeToken?: Erc20Token;
   contractAddresses?: string[];
   cnt?: number;
 }): TransactionRequest[] {
@@ -330,6 +333,7 @@ export function generateTransactionRequests({
       addressIndex: 0,
       maxFee: '100',
       selectedFeeToken:
+        selectedFeeToken?.symbol ??
         feeTokens[Math.floor(generateRandomValue() * feeTokens.length)].symbol,
       calls: [
         {
