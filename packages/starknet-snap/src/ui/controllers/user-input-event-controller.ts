@@ -60,7 +60,7 @@ export class UserInputEventController {
 
       if (
         !(await this.reqStateMgr.getTransactionRequest({
-          requestId: request.id,
+          requestId: request?.id,
         }))
       ) {
         throw new Error('Transaction request not found');
@@ -130,8 +130,21 @@ export class UserInputEventController {
     return token.address;
   }
 
+  protected createRollbackSnapshot(
+    request: TransactionRequest,
+  ): TransactionRequest {
+    return {
+      ...request,
+      maxFee: request.maxFee,
+      selectedFeeToken: request.selectedFeeToken,
+      includeDeploy: request.includeDeploy,
+      resourceBounds: [...request.resourceBounds],
+    };
+  }
+
   protected async handleFeeTokenChange() {
     const request = this.context?.request as TransactionRequest;
+    const originalRequest = this.createRollbackSnapshot(request);
     const { addressIndex, calls, signer, chainId } = request;
     const feeToken = (this.event as InputChangeEvent)
       .value as unknown as FeeToken;
@@ -165,6 +178,7 @@ export class UserInputEventController {
         );
 
       if (
+        // TODO: we should create a payment controller class to handle this
         !(await hasSufficientFundsForFee({
           address: signer,
           network,
@@ -191,11 +205,10 @@ export class UserInputEventController {
     } catch (error) {
       const errorMessage =
         error instanceof InsufficientFundsError
-          ? `Not enough ${feeToken} to pay for fee`
-          : 'Fail to calculate the fees';
-
+          ? `Not enough ${feeToken} to pay for fee, switching back to ${originalRequest.selectedFeeToken}`
+          : `Failed to calculate the fees, switching back to ${originalRequest.selectedFeeToken}`;
       // On failure, display ExecuteTxnUI with an error message
-      await updateExecuteTxnFlow(this.eventId, request, {
+      await updateExecuteTxnFlow(this.eventId, originalRequest, {
         errors: { fees: errorMessage },
       });
     }

@@ -1,3 +1,6 @@
+import type { DialogResult } from '@metamask/snaps-sdk';
+import { DialogType } from '@metamask/snaps-sdk';
+
 import type {
   FormattedCallData,
   Network,
@@ -10,8 +13,145 @@ import {
 import { getBalance } from '../utils/starknetUtils';
 import type { ExecuteTxnUIErrors } from './components';
 import { ExecuteTxnUI } from './components';
+import {
+  DisplayPrivateKeyAlertUI,
+  DisplayPrivateKeyDialogUI,
+} from './components/DisplayPrivateKeyUI';
+import type { SignDeclareTransactionUIProps } from './components/SignDeclareTransactionUI';
+import { SignDeclareTransactionUI } from './components/SignDeclareTransactionUI';
+import type { SignMessageUIProps } from './components/SignMessageUI';
+import { SignMessageUI } from './components/SignMessageUI';
+import type { SignTransactionUIProps } from './components/SignTransactionUI';
+import { SignTransactionUI } from './components/SignTransactionUI';
+import type { SwitchNetworkUIProps } from './components/SwitchNetworkUI';
+import { SwitchNetworkUI } from './components/SwitchNetworkUI';
+import type { WatchAssetUIProps } from './components/WatchAssetUI';
+import { WatchAssetUI } from './components/WatchAssetUI';
 import { LoadingUI } from './fragments/LoadingUI';
 import type { TokenTotals } from './types';
+
+/**
+ * Renders a confirmation dialog for adding a token to the wallet.
+ *
+ * @param props - The properties for the WatchAssetUI component.
+ * @returns A promise that resolves to the user's decision in the dialog.
+ */
+export async function renderWatchAssetUI(
+  props: WatchAssetUIProps,
+): Promise<DialogResult> {
+  return await snap.request({
+    method: 'snap_dialog',
+    params: {
+      type: DialogType.Confirmation,
+      content: <WatchAssetUI {...props} />,
+    },
+  });
+}
+
+/**
+ * Renders a confirmation dialog for switching to a different network.
+ *
+ * @param props - The properties for the SwitchNetworkUI component.
+ * @returns A promise that resolves to the user's decision in the dialog.
+ */
+export async function renderSwitchNetworkUI(
+  props: SwitchNetworkUIProps,
+): Promise<DialogResult> {
+  return await snap.request({
+    method: 'snap_dialog',
+    params: {
+      type: DialogType.Confirmation,
+      content: <SwitchNetworkUI {...props} />,
+    },
+  });
+}
+
+/**
+ * Renders a confirmation dialog for signing a transaction.
+ *
+ * @param props - The properties for the SignTransactionUI component.
+ * @returns A promise that resolves to the user's decision in the dialog.
+ */
+export async function renderSignTransactionUI(
+  props: SignTransactionUIProps,
+): Promise<DialogResult> {
+  return await snap.request({
+    method: 'snap_dialog',
+    params: {
+      type: DialogType.Confirmation,
+      content: <SignTransactionUI {...props} />,
+    },
+  });
+}
+
+/**
+ * Renders a confirmation dialog for signing a message.
+ *
+ * @param props - The properties for the SignMessageUI component.
+ * @returns A promise that resolves to the user's decision in the dialog.
+ */
+export async function renderSignMessageUI(
+  props: SignMessageUIProps,
+): Promise<DialogResult> {
+  return await snap.request({
+    method: 'snap_dialog',
+    params: {
+      type: DialogType.Confirmation,
+      content: <SignMessageUI {...props} />,
+    },
+  });
+}
+
+/**
+ * Renders a confirmation dialog for signing a Declare transaction.
+ *
+ * @param props - The properties for the SignDeclareTransactionUI component.
+ * @returns A promise that resolves to the user's decision in the dialog.
+ */
+export async function renderSignDeclareTransactionUI(
+  props: SignDeclareTransactionUIProps,
+): Promise<DialogResult> {
+  return await snap.request({
+    method: 'snap_dialog',
+    params: {
+      type: DialogType.Confirmation,
+      content: <SignDeclareTransactionUI {...props} />,
+    },
+  });
+}
+
+/**
+ * Renders a confirmation dialog asking the user to confirm displaying their private key.
+ *
+ * @returns A promise that resolves to the user's decision in the dialog.
+ */
+export async function renderDisplayPrivateKeyConfirmUI(): Promise<DialogResult> {
+  return await snap.request({
+    method: 'snap_dialog',
+    params: {
+      type: DialogType.Confirmation,
+      content: <DisplayPrivateKeyDialogUI />,
+    },
+  });
+}
+
+/**
+ * Renders an alert dialog displaying the user's private key securely.
+ *
+ * @param privateKey - The private key to display in the alert dialog.
+ * @returns A promise that resolves when the dialog is dismissed.
+ */
+export async function renderDisplayPrivateKeyAlertUI(
+  privateKey: string,
+): Promise<void> {
+  await snap.request({
+    method: 'snap_dialog',
+    params: {
+      type: DialogType.Alert,
+      content: <DisplayPrivateKeyAlertUI privateKey={privateKey} />,
+    },
+  });
+}
 
 /**
  * Accumulate the total amount for all tokens involved in calls and fees.

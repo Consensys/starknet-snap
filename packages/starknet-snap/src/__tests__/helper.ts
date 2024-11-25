@@ -2,6 +2,8 @@ import {
   BIP44CoinTypeNode,
   getBIP44AddressKeyDeriver,
 } from '@metamask/key-tree';
+import type { UserInputEvent } from '@metamask/snaps-sdk';
+import { UserInputEventType } from '@metamask/snaps-sdk';
 import { generateMnemonic } from 'bip39';
 import { getRandomValues } from 'crypto';
 import type { constants, EstimateFee } from 'starknet';
@@ -17,6 +19,7 @@ import {
 } from 'starknet';
 import { v4 as uuidv4 } from 'uuid';
 
+import { FeeToken } from '../types/snapApi';
 import type {
   AccContract,
   Transaction,
@@ -25,10 +28,8 @@ import type {
 import {
   ACCOUNT_CLASS_HASH,
   ACCOUNT_CLASS_HASH_LEGACY,
-  ETHER_MAINNET,
   PRELOADED_TOKENS,
   PROXY_CONTRACT_HASH,
-  STRK_MAINNET,
 } from '../utils/constants';
 import { grindKey } from '../utils/keyPair';
 
@@ -83,7 +84,7 @@ export async function generateBip44Entropy(
  * @returns An array of StarknetAccount object.
  */
 export async function generateAccounts(
-  network: constants.StarknetChainId,
+  network: constants.StarknetChainId | string,
   cnt: number = 1,
   cairoVersion = '1',
   mnemonic?: string,
@@ -295,15 +296,16 @@ export function generateTransactions({
 export function generateTransactionRequests({
   chainId,
   address,
+  selectedFeeTokens = Object.values(FeeToken),
   contractAddresses = PRELOADED_TOKENS.map((token) => token.address),
   cnt = 1,
 }: {
-  chainId: constants.StarknetChainId;
+  chainId: constants.StarknetChainId | string;
   address: string;
+  selectedFeeTokens?: FeeToken[];
   contractAddresses?: string[];
   cnt?: number;
 }): TransactionRequest[] {
-  const feeTokens = [STRK_MAINNET, ETHER_MAINNET];
   const request = {
     chainId: chainId,
     id: '',
@@ -327,7 +329,9 @@ export function generateTransactionRequests({
       addressIndex: 0,
       maxFee: '100',
       selectedFeeToken:
-        feeTokens[Math.floor(generateRandomValue() * feeTokens.length)].symbol,
+        selectedFeeTokens[
+          Math.floor(generateRandomValue() * selectedFeeTokens.length)
+        ],
       calls: [
         {
           contractAddress:
@@ -359,12 +363,13 @@ export function generateTransactionRequests({
 
   return requests;
 }
+
 /**
  * Method to generate a mock estimate fee response.
  *
  * @returns An array containing a mock EstimateFee object.
  */
-export function getEstimateFees() {
+export function generateEstimateFeesResponse() {
   return [
     {
       // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -392,4 +397,37 @@ export function getEstimateFees() {
       },
     } as unknown as EstimateFee,
   ];
+}
+
+/**
+ * Method to generate a mock input event.
+ *
+ * @param params - The parameter for generate the mock input event.
+ * @param params.transactionRequest - The transaction request object.
+ * @param [params.eventValue] - The value of the event.
+ * @param [params.eventType] - The type of the event.
+ * @param [params.eventName] - The name of the event.
+ * @returns An array containing a mock input event object.
+ */
+export function generateInputEvent({
+  transactionRequest,
+  eventValue = FeeToken.ETH,
+  eventType = UserInputEventType.InputChangeEvent,
+  eventName = 'feeTokenSelector',
+}: {
+  transactionRequest: TransactionRequest;
+  eventValue?: string;
+  eventType?: UserInputEventType;
+  eventName?: string;
+}) {
+  return {
+    event: {
+      name: eventName,
+      type: eventType,
+      value: eventValue,
+    } as unknown as UserInputEvent,
+    context: {
+      request: transactionRequest,
+    },
+  };
 }

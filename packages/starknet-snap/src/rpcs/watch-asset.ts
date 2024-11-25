@@ -1,23 +1,17 @@
-import type { Component } from '@metamask/snaps-sdk';
 import type { Infer } from 'superstruct';
 import { assign, boolean, min, number, object, optional } from 'superstruct';
 
 import { NetworkStateManager } from '../state/network-state-manager';
 import { TokenStateManager } from '../state/token-state-manager';
 import type { Erc20Token, Network } from '../types/snapState';
+import { renderWatchAssetUI } from '../ui/utils';
 import {
-  confirmDialog,
   BaseRequestStruct,
   RpcController,
   AddressStruct,
   TokenNameStruct,
   TokenSymbolStruct,
   isPreloadedToken,
-  addressUI,
-  networkUI,
-  rowUI,
-  dividerUI,
-  headerUI,
 } from '../utils';
 import { DEFAULT_DECIMAL_PLACES } from '../utils/constants';
 import {
@@ -136,11 +130,11 @@ export class WatchAssetRpc extends RpcController<
     const network = await this.getNetworkFromChainId(chainId);
 
     if (
-      !(await this.getWatchAssetConsensus(
-        network.name,
-        network.chainId,
-        erc20Token,
-      ))
+      !(await renderWatchAssetUI({
+        networkName: network.name,
+        chainId: network.chainId,
+        token: erc20Token,
+      }))
     ) {
       throw new UserRejectedOpError() as unknown as Error;
     }
@@ -148,66 +142,6 @@ export class WatchAssetRpc extends RpcController<
     await this.tokenStateMgr.upsertToken(erc20Token);
 
     return true;
-  }
-
-  protected async getWatchAssetConsensus(
-    networkName: string,
-    chainId: string,
-    erc20Token: Erc20Token,
-  ) {
-    const { address, name, symbol, decimals } = erc20Token;
-
-    const componentPairs: {
-      label?: string;
-      value?: string;
-      component?: Component;
-    }[] = [
-      {
-        component: networkUI({
-          networkName,
-        }),
-      },
-      {
-        component: addressUI({
-          label: 'Token Address',
-          address,
-          chainId,
-        }),
-      },
-      {
-        label: 'Token Name',
-        value: name,
-      },
-      {
-        label: 'Token Symbol',
-        value: symbol,
-      },
-      {
-        label: 'Token Decimals',
-        value: decimals.toString(),
-      },
-    ];
-
-    const components: Component[] = [];
-    components.push(headerUI('Do you want to add this token?'));
-
-    componentPairs.forEach(({ label, value, component }, idx) => {
-      if (component) {
-        components.push(component);
-      } else if (label && value) {
-        components.push(
-          rowUI({
-            label,
-            value,
-          }),
-        );
-      }
-
-      if (idx < componentPairs.length - 1) {
-        components.push(dividerUI());
-      }
-    });
-    return await confirmDialog(components);
   }
 }
 

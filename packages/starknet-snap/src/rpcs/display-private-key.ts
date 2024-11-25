@@ -1,11 +1,12 @@
-import { copyable, text } from '@metamask/snaps-sdk';
 import { type Infer, object, literal, assign } from 'superstruct';
 
 import {
+  renderDisplayPrivateKeyAlertUI,
+  renderDisplayPrivateKeyConfirmUI,
+} from '../ui/utils';
+import {
   AccountRpcController,
   AddressStruct,
-  confirmDialog,
-  alertDialog,
   BaseRequestStruct,
 } from '../utils';
 import { UserRejectedOpError } from '../utils/exceptions';
@@ -56,19 +57,11 @@ export class DisplayPrivateKeyRpc extends AccountRpcController<
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     params: DisplayPrivateKeyParams,
   ): Promise<DisplayPrivateKeyResponse> {
-    const confirmComponents = [text('Do you want to export your private key?')];
-
-    if (!(await confirmDialog(confirmComponents))) {
+    if (!(await renderDisplayPrivateKeyConfirmUI())) {
       throw new UserRejectedOpError() as unknown as Error;
     }
 
-    const alertComponents = [
-      text('Starknet Account Private Key'),
-      copyable(this.account.privateKey),
-    ];
-
-    await alertDialog(alertComponents);
-
+    await renderDisplayPrivateKeyAlertUI(this.account.privateKey);
     return null;
   }
 }
