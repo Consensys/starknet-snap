@@ -1,0 +1,82 @@
+name: Deploy Wallet-UI and Get-starknet
+
+on:
+  workflow_dispatch:
+jobs:
+  prepare-deployment:
+    environment: production
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.sha }}
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20.x
+      - name: Prepare Parameters 
+        id: prepare_parameters
+        run: |
+          BASE=$(node -p "require('./packages/starknet-snap/package.json').version")
+          ENV=production
+
+          {
+            echo "AWS_CLOUDFRONT_DISTRIBUTIONS_ID=${{ vars.AWS_CLOUDFRONT_DISTRIBUTIONS_ID }}"
+            echo "AWS_S3_GET_STARKNET_URL=${{ vars.AWS_S3_GET_STARKNET_URL }}"
+            echo "AWS_S3_URL=${{ vars.AWS_S3_URL }}"
+            echo "GET_STARKNET_PUBLIC_PATH=${{ vars.GET_STARKNET_PUBLIC_PATH }}"
+            echo "VERSION=${BASE}"
+            echo "TAG=latest"
+            echo "ENV=prod"
+          } >> "$GITHUB_OUTPUT"
+    outputs:
+      VERSION: ${{ steps.prepare_parameters.outputs.VERSION }}
+      TAG: ${{ steps.prepare_parameters.outputs.TAG }}
+      ENV: ${{ steps.prepare_parameters.outputs.ENV }}
+      AWS_S3_GET_STARKNET_URL: ${{ steps.prepare_parameters.outputs.AWS_S3_GET_STARKNET_URL }}
+      AWS_CLOUDFRONT_DISTRIBUTIONS_ID: ${{ steps.prepare_parameters.outputs.AWS_CLOUDFRONT_DISTRIBUTIONS_ID }}
+      AWS_S3_URL: ${{ steps.prepare_parameters.outputs.AWS_S3_URL }}
+      GET_STARKNET_PUBLIC_PATH: ${{ steps.prepare_parameters.outputs.GET_STARKNET_PUBLIC_PATH }}
+      CACHE_KEY: ${{ github.sha }}-${{ steps.prepare_parameters.outputs.ENV }}-UI_N_GET_STARKNET
+
+  install-build:
+    needs: 
+      - prepare-deployment
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.sha }}
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20.x
+      - name: Install
+        run: |
+          yarn --no-immutable
+          yarn allow-scripts
+      - name: Build Snap
+        run: |
+          echo "Building UI with version $VERSION"
+          
+          REACT_APP_SNAP_VERSION="${VERSION}" yarn workspace wallet-ui build
+
+          echo "Building Get Starknet with GET_STARKNET_PUBLIC_PATH=$GET_STARKNET_PUBLIC_PATH" 
+
+          SNAP_VERSION="${VERSION}$" GET_STARKNET_PUBLIC_PATH=$GET_STARKNET_PUBLIC_PATH yarn workspace @consensys/get-starknet build
+        env:
+          VERSION: ${{ needs.prepare-deployment.outputs.VERSION }}
+          GET_STARKNET_PUBLIC_PATH: ${{ needs.prepare-deployment.outputs.GET_STARKNET_PUBLIC_PATH }}
+      - name: Cache Build
+        uses: actions/cache@v3
+        id: cache
+        with:
+          path: |
+            ./packages/get-starknet/dist/webpack
+            ./packages/wallet-ui/build
+            ./node_modules/.yarn-state.yml
+          key: ${{ needs.prepare-deployment.outputs.CACHE_KEY }}

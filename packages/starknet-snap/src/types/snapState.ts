@@ -1,4 +1,8 @@
-import type { RawCalldata } from 'starknet';
+import type {
+  EstimateFee,
+  RawCalldata,
+  TransactionType as StarknetTransactionType,
+} from 'starknet';
 
 /* eslint-disable */
 export type SnapState = {
@@ -7,6 +11,39 @@ export type SnapState = {
   networks: Network[];
   transactions: Transaction[];
   currentNetwork?: Network;
+  transactionRequests?: TransactionRequest[];
+};
+
+export type TokenTransferData = {
+  senderAddress: string;
+  recipientAddress: string;
+  amount: string;
+  decimals: number;
+  symbol: string;
+};
+
+export type FormattedCallData = {
+  contractAddress: string;
+  calldata?: string[];
+  entrypoint: string;
+  tokenTransferData?: TokenTransferData;
+};
+
+type ResourceBounds = Pick<EstimateFee, 'resourceBounds'>['resourceBounds'];
+
+export type TransactionRequest = {
+  id: string;
+  interfaceId: string;
+  type: StarknetTransactionType;
+  signer: string;
+  addressIndex: number;
+  chainId: string;
+  networkName: string;
+  maxFee: string;
+  calls: FormattedCallData[];
+  resourceBounds: ResourceBounds[];
+  selectedFeeToken: string;
+  includeDeploy: boolean;
 };
 
 export type AccContract = {
