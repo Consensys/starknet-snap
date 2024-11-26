@@ -25,8 +25,8 @@ jobs:
       - name: Prepare Parameters 
         id: prepare_parameters
         run: |
-          ENV=${{ inputs.environment }}
           BASE=$(node -p "require('./packages/starknet-snap/package.json').version")
+          ENV=${{ inputs.environment }}
           if [[ $ENV == "dev" ]]; then
             HASH=$(git rev-parse --short HEAD)
             DATE=$(date +%Y%m%d)
