@@ -32,7 +32,6 @@ jobs:
           } >> "$GITHUB_OUTPUT"
     outputs:
       VERSION: ${{ steps.prepare_parameters.outputs.VERSION }}
-      TAG: ${{ steps.prepare_parameters.outputs.TAG }}
       AWS_S3_GET_STARKNET_URL: ${{ steps.prepare_parameters.outputs.AWS_S3_GET_STARKNET_URL }}
       AWS_CLOUDFRONT_DISTRIBUTIONS_ID: ${{ steps.prepare_parameters.outputs.AWS_CLOUDFRONT_DISTRIBUTIONS_ID }}
       AWS_S3_URL: ${{ steps.prepare_parameters.outputs.AWS_S3_URL }}
