@@ -11,9 +11,7 @@ import * as starknetUtils from '../utils/starknetUtils';
 import {
   mockAccount,
   prepareMockAccount,
-  prepareConfirmDialog,
-  buildSignerComponent,
-  buildJsonDataComponent,
+  prepareRenderSignMessageUI,
 } from './__tests__/helper';
 import { signMessage } from './sign-message';
 import type { SignMessageParams } from './sign-message';
@@ -33,7 +31,7 @@ describe('signMessage', () => {
     const account = await mockAccount(constants.StarknetChainId.SN_SEPOLIA);
 
     prepareMockAccount(account, state);
-    prepareConfirmDialog();
+    prepareRenderSignMessageUI();
 
     const expectedResult = await starknetUtils.signMessage(
       account.privateKey,
@@ -56,30 +54,28 @@ describe('signMessage', () => {
     const { address, chainId } = account;
 
     prepareMockAccount(account, state);
-    const { confirmDialogSpy } = prepareConfirmDialog();
+    const { confirmDialogSpy } = prepareRenderSignMessageUI();
 
     const request = {
-      chainId: constants.StarknetChainId.SN_SEPOLIA,
+      chainId: chainId as constants.StarknetChainId,
       address,
       typedDataMessage: typedDataExample,
       enableAuthorize: true,
     };
 
     await signMessage.execute(request);
-
-    const calls = confirmDialogSpy.mock.calls[0][0];
-    expect(calls).toStrictEqual([
-      { type: 'heading', value: 'Do you want to sign this message?' },
-      buildSignerComponent(address, chainId),
-      buildJsonDataComponent('Message', typedDataExample),
-    ]);
+    expect(confirmDialogSpy).toHaveBeenCalledWith({
+      address,
+      chainId,
+      typedDataMessage: typedDataExample,
+    });
   });
 
   it('throws `UserRejectedOpError` if user denied the operation', async () => {
     const account = await mockAccount(constants.StarknetChainId.SN_SEPOLIA);
 
     prepareMockAccount(account, state);
-    const { confirmDialogSpy } = prepareConfirmDialog();
+    const { confirmDialogSpy } = prepareRenderSignMessageUI();
 
     confirmDialogSpy.mockResolvedValue(false);
 

@@ -72,3 +72,9 @@ export class TokenIsPreloadedError extends SnapError {
     );
   }
 }
+
+export class InsufficientFundsError extends SnapError {
+  constructor(message?: string) {
+    super(message ?? 'Insufficient Funds');
+  }
+}

@@ -12,10 +12,7 @@ import * as starknetUtils from '../utils/starknetUtils';
 import {
   mockAccount,
   prepareMockAccount,
-  prepareConfirmDialog,
-  buildNetworkComponent,
-  buildSignerComponent,
-  buildJsonDataComponent,
+  prepareRenderSignTransactionUI,
 } from './__tests__/helper';
 import { signTransaction } from './sign-transaction';
 import type { SignTransactionParams } from './sign-transaction';
@@ -52,7 +49,7 @@ describe('signTransaction', () => {
     const chainId = constants.StarknetChainId.SN_SEPOLIA;
     const account = await mockAccount(chainId);
     prepareMockAccount(account, state);
-    prepareConfirmDialog();
+    prepareRenderSignTransactionUI();
     const request = createRequestParam(chainId, account.address);
 
     const expectedResult = await starknetUtils.signTransactions(
@@ -71,25 +68,23 @@ describe('signTransaction', () => {
     const account = await mockAccount(chainId);
     const { address } = account;
     prepareMockAccount(account, state);
-    const { confirmDialogSpy } = prepareConfirmDialog();
+    const { confirmDialogSpy } = prepareRenderSignTransactionUI();
     const request = createRequestParam(chainId, account.address, true);
 
     await signTransaction.execute(request);
-
-    const calls = confirmDialogSpy.mock.calls[0][0];
-    expect(calls).toStrictEqual([
-      { type: 'heading', value: 'Do you want to sign this transaction?' },
-      buildSignerComponent(address, chainId),
-      buildNetworkComponent(STARKNET_SEPOLIA_TESTNET_NETWORK.name),
-      buildJsonDataComponent('Transaction', transactionExample.transactions),
-    ]);
+    expect(confirmDialogSpy).toHaveBeenCalledWith({
+      senderAddress: address,
+      chainId,
+      networkName: STARKNET_SEPOLIA_TESTNET_NETWORK.name,
+      transactions: request.transactions,
+    });
   });
 
   it('does not render the confirmation dialog if enableAuthorize is false', async () => {
     const chainId = constants.StarknetChainId.SN_SEPOLIA;
     const account = await mockAccount(chainId);
     prepareMockAccount(account, state);
-    const { confirmDialogSpy } = prepareConfirmDialog();
+    const { confirmDialogSpy } = prepareRenderSignTransactionUI();
     const request = createRequestParam(chainId, account.address, false);
 
     await signTransaction.execute(request);
@@ -101,7 +96,7 @@ describe('signTransaction', () => {
     const chainId = constants.StarknetChainId.SN_SEPOLIA;
     const account = await mockAccount(chainId);
     prepareMockAccount(account, state);
-    const { confirmDialogSpy } = prepareConfirmDialog();
+    const { confirmDialogSpy } = prepareRenderSignTransactionUI();
     confirmDialogSpy.mockResolvedValue(false);
     const request = createRequestParam(chainId, account.address, true);
 

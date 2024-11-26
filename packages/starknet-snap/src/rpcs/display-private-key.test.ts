@@ -8,9 +8,9 @@ import {
 } from '../utils/exceptions';
 import {
   mockAccount,
-  prepareAlertDialog,
   prepareMockAccount,
-  prepareConfirmDialog,
+  prepareRenderDisplayPrivateKeyAlertUI,
+  prepareRenderDisplayPrivateKeyConfirmUI,
 } from './__tests__/helper';
 import { displayPrivateKey } from './display-private-key';
 import type { DisplayPrivateKeyParams } from './display-private-key';
@@ -40,49 +40,36 @@ describe('displayPrivateKey', () => {
     const chainId = constants.StarknetChainId.SN_SEPOLIA;
     const account = await mockAccount(chainId);
     prepareMockAccount(account, state);
-    prepareConfirmDialog();
-    const { alertDialogSpy } = prepareAlertDialog();
+    prepareRenderDisplayPrivateKeyConfirmUI();
+    const { alertDialogSpy } = prepareRenderDisplayPrivateKeyAlertUI();
 
     const request = createRequestParam(chainId, account.address);
 
     await displayPrivateKey.execute(request);
 
-    expect(alertDialogSpy).toHaveBeenCalledTimes(1);
-
-    const calls = alertDialogSpy.mock.calls[0][0];
-
-    expect(calls).toStrictEqual([
-      { type: 'text', value: 'Starknet Account Private Key' },
-      { type: 'copyable', value: account.privateKey },
-    ]);
+    expect(alertDialogSpy).toHaveBeenCalledWith(account.privateKey);
   });
 
   it('renders confirmation dialog', async () => {
     const chainId = constants.StarknetChainId.SN_SEPOLIA;
     const account = await mockAccount(chainId);
     prepareMockAccount(account, state);
-    const { confirmDialogSpy } = prepareConfirmDialog();
-    prepareAlertDialog();
+    const { confirmDialogSpy } = prepareRenderDisplayPrivateKeyConfirmUI();
+    prepareRenderDisplayPrivateKeyAlertUI();
 
     const request = createRequestParam(chainId, account.address);
 
     await displayPrivateKey.execute(request);
 
     expect(confirmDialogSpy).toHaveBeenCalledTimes(1);
-
-    const calls = confirmDialogSpy.mock.calls[0][0];
-
-    expect(calls).toStrictEqual([
-      { type: 'text', value: 'Do you want to export your private key?' },
-    ]);
   });
 
   it('throws `UserRejectedOpError` if user denies the operation', async () => {
     const chainId = constants.StarknetChainId.SN_SEPOLIA;
     const account = await mockAccount(chainId);
     prepareMockAccount(account, state);
-    const { confirmDialogSpy } = prepareConfirmDialog();
-    prepareAlertDialog();
+    const { confirmDialogSpy } = prepareRenderDisplayPrivateKeyConfirmUI();
+    prepareRenderDisplayPrivateKeyAlertUI();
 
     confirmDialogSpy.mockResolvedValue(false);
 
