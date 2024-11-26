@@ -24,7 +24,7 @@ export const MinVersionModalView = () => {
           <br />
           <a href="https://metamask.io" target="_blank" rel="noreferrer">
             <ConnectButton customIconLeft={<MetaMaskLogo />} onClick={() => {}}>
-              Go to MetaMask Website 
+              Go to MetaMask Website
             </ConnectButton>
           </a>
         </>
