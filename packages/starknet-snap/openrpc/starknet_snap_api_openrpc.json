@@ -1,7 +1,7 @@
 {
   "openrpc": "1.0.0-rc1",
   "info": {
-    "version": "3.0.0",
+    "version": "4.0.0",
     "title": "Starknet MetaMask Snap API",
     "license": {}
   },
@@ -1366,7 +1366,12 @@
         "properties": {
           "type": {
             "type": "string",
-            "enum": ["DECLARE", "DEPLOY", "DEPLOY_ACCOUNT", "INVOKE_FUNCTION"]
+            "enum": [
+              "DECLARE",
+              "DEPLOY",
+              "DEPLOY_ACCOUNT",
+              "INVOKE_FUNCTION"
+            ]
           },
           "payload": {
             "$ref": "#/components/schemas/INVOCATION_PAYLOAD"
@@ -1464,12 +1469,18 @@
       },
       "VOYAGER_TXN_TYPE": {
         "type": "string",
-        "enum": ["invoke", "deploy"],
+        "enum": [
+          "invoke",
+          "deploy"
+        ],
         "description": "The txn type of the transaction from Voyager. May not be a full list here and subject to change"
       },
       "VOYAGER_TXN_STATUS": {
         "type": "string",
-        "enum": ["Accepted on L2", "Accepted on L1"],
+        "enum": [
+          "Accepted on L2",
+          "Accepted on L1"
+        ],
         "description": "The status of the transaction. May be unknown in case node is not aware of it"
       },
       "TYPED_DATA_SIGNATURE": {
