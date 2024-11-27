@@ -16,7 +16,6 @@ import { createAccount } from './createAccount';
 import { estimateAccDeployFee } from './estimateAccountDeployFee';
 import { estimateFees } from './estimateFees';
 import { extractPublicKey } from './extractPublicKey';
-import { getAddrFromStarkName } from './getAddrFromStarkName';
 import { getCurrentNetwork } from './getCurrentNetwork';
 import { getErc20TokenBalance } from './getErc20TokenBalance';
 import { getStarkName } from './getStarkName';
@@ -41,6 +40,7 @@ import type {
   GetDeploymentDataParams,
   DeclareContractParams,
   WatchAssetParams,
+  GetAddrFromStarkNameParams,
 } from './rpcs';
 import {
   displayPrivateKey,
@@ -54,6 +54,7 @@ import {
   switchNetwork,
   getDeploymentData,
   watchAsset,
+  getAddrFromStarkName,
 } from './rpcs';
 import { sendTransaction } from './sendTransaction';
 import { signDeployAccountTransaction } from './signDeployAccountTransaction';
@@ -291,7 +292,9 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
         );
 
       case 'starkNet_getAddrFromStarkName':
-        return await getAddrFromStarkName(apiParams);
+        return await getAddrFromStarkName.execute(
+          apiParams.requestParams as unknown as GetAddrFromStarkNameParams,
+        );
 
       default:
         throw new MethodNotFoundError() as unknown as Error;
