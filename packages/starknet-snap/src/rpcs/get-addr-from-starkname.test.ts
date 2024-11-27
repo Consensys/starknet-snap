@@ -1,6 +1,5 @@
 import { constants } from 'starknet';
 
-import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../utils/constants';
 import { InvalidRequestParamsError } from '../utils/exceptions';
 import * as starknetUtils from '../utils/starknetUtils';
 import {
