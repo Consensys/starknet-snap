@@ -2,13 +2,13 @@ import type { Infer } from 'superstruct';
 import { assign, object } from 'superstruct';
 
 import { NetworkStateManager } from '../state/network-state-manager';
+import type { Network } from '../types/snapState';
 import {
   AddressStruct,
   BaseRequestStruct,
   RpcController,
   StarkNameStruct,
 } from '../utils';
-import { Network } from '../types/snapState';
 import { InvalidNetworkError } from '../utils/exceptions';
 import { getAddrFromStarkNameUtil } from '../utils/starknetUtils';
 
@@ -32,7 +32,7 @@ export type GetAddrFromStarkNameResponse = Infer<
 /**
  * The RPC handler to add a ERC20 asset.
  */
-export class getAddrFromStarkNameRpc extends RpcController<
+export class GetAddrFromStarkNameRpc extends RpcController<
   GetAddrFromStarkNameParams,
   GetAddrFromStarkNameResponse
 > {
@@ -87,4 +87,4 @@ export class getAddrFromStarkNameRpc extends RpcController<
   }
 }
 
-export const getAddrFromStarkName = new getAddrFromStarkNameRpc();
+export const getAddrFromStarkName = new GetAddrFromStarkNameRpc();

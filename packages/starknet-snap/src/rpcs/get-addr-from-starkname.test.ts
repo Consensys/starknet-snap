@@ -5,7 +5,7 @@ import { InvalidRequestParamsError } from '../utils/exceptions';
 import * as starknetUtils from '../utils/starknetUtils';
 import {
   getAddrFromStarkName,
-  GetAddrFromStarkNameParams,
+  type GetAddrFromStarkNameParams,
 } from './get-addr-from-starkname';
 
 jest.mock('../utils/snap');
@@ -33,29 +33,20 @@ const prepareMockGetAddrFromStarkName = ({
 
   return {
     request,
-    getAddrFromStarkNameSpy,
   };
 };
 
 describe('getAddrFromStarkName', () => {
-  const state = {
-    accContracts: [],
-    erc20Tokens: [],
-    networks: [STARKNET_SEPOLIA_TESTNET_NETWORK],
-    transactions: [],
-  };
-
   it('get address from stark name correctly', async () => {
     const chainId = constants.StarknetChainId.SN_SEPOLIA;
-    const { request, getAddrFromStarkNameSpy } =
-      prepareMockGetAddrFromStarkName({
-        chainId,
-        starkName: 'testname.stark',
-      });
+    const { request } = prepareMockGetAddrFromStarkName({
+      chainId,
+      starkName: 'testname.stark',
+    });
 
     const result = await getAddrFromStarkName.execute(request);
 
-    expect(result).toStrictEqual(
+    expect(result).toBe(
       '0x01c744953f1d671673f46a9179a58a7e58d9299499b1e076cdb908e7abffe69f',
     );
   });
