@@ -1,4 +1,4 @@
-import { KeyboardEvent, ChangeEvent } from 'react';
+import { KeyboardEvent, ChangeEvent, useEffect } from 'react';
 import {
   InputHTMLAttributes,
   useRef,
@@ -24,13 +24,11 @@ import {
   Wrapper,
 } from './AddressInput.style';
 import { STARKNET_ADDRESS_LENGTH } from 'utils/constants';
-import { useStarkNetSnap } from 'services';
-import { useAppSelector } from 'hooks/redux';
 
 interface Props extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   setIsValidAddress?: Dispatch<SetStateAction<boolean>>;
-  onResolvedAddress?: (address: string) => void;
+  resolvedAddress?: string;
 }
 
 export const AddressInputView = ({
@@ -38,17 +36,29 @@ export const AddressInputView = ({
   onChange,
   label,
   setIsValidAddress,
-  onResolvedAddress,
+  resolvedAddress,
   ...otherProps
 }: Props) => {
-  const networks = useAppSelector((state) => state.networks);
-  const chainId = networks?.items[networks.activeNetwork]?.chainId;
-  const { getAddrFromStarkName } = useStarkNetSnap();
   const [focused, setFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState('');
   const [valid, setValid] = useState(false);
   const [info, setInfo] = useState('');
+
+  useEffect(() => {
+    if (!inputRef.current || !resolvedAddress) {
+      return;
+    }
+
+    const { valid, error, info } = validateAddress(
+      inputRef.current.value,
+      resolvedAddress,
+    );
+
+    setValid(valid);
+    setError(error);
+    setInfo(info);
+  }, [resolvedAddress]);
 
   const displayIcon = () => {
     return valid || error !== '';
@@ -68,39 +78,37 @@ export const AddressInputView = ({
     //Check if valid address
     onChange && onChange(event);
 
-    if (!inputRef.current) {
-      return;
-    }
-    const isValid =
-      inputRef.current.value !== '' && isValidAddress(inputRef.current.value);
-    if (isValid) {
-      setValid(true);
-      setError('');
-      onResolvedAddress?.(inputRef.current.value);
-    } else if (isValidStarkName(inputRef.current.value)) {
-      setValid(false);
-      setError('');
+    if (!inputRef.current) return;
 
-      getAddrFromStarkName(inputRef.current.value, chainId).then((address) => {
-        if (isValidAddress(address)) {
-          setValid(true);
-          setError('');
-          setInfo(shortenAddress(address as string, 12) as string);
-          onResolvedAddress?.(address as string);
-        } else {
-          setValid(false);
-          setError('.stark name not found');
-          setInfo('');
-        }
-      });
-    } else {
-      setValid(false);
-      setError('Invalid address format');
-      setInfo('');
-    }
+    const { valid, error, info } = validateAddress(
+      inputRef.current.value,
+      resolvedAddress,
+    );
+
+    setValid(valid);
+    setError(error);
+    setInfo(info);
 
     if (setIsValidAddress) {
-      setIsValidAddress(isValid);
+      setIsValidAddress(valid);
+    }
+  };
+
+  const validateAddress = (value: string, addr: string | undefined) => {
+    if (value !== '' && isValidAddress(value)) {
+      return { valid: true, error: '', info: '' };
+    } else if (isValidStarkName(value)) {
+      if (addr && isValidAddress(addr)) {
+        return {
+          valid: true,
+          error: '',
+          info: shortenAddress(addr, 12) as string,
+        };
+      } else {
+        return { valid: false, error: '.stark name not found', info: '' };
+      }
+    } else {
+      return { valid: false, error: 'Invalid address format', info: '' };
     }
   };
 

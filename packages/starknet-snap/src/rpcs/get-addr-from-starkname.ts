@@ -30,7 +30,7 @@ export type GetAddrFromStarkNameResponse = Infer<
 >;
 
 /**
- * The RPC handler to add a ERC20 asset.
+ * The RPC handler to get a StarkName by a Starknet address.
  */
 export class GetAddrFromStarkNameRpc extends RpcController<
   GetAddrFromStarkNameParams,
@@ -81,9 +81,10 @@ export class GetAddrFromStarkNameRpc extends RpcController<
     const { chainId, starkName } = params;
 
     const network = await this.getNetworkFromChainId(chainId);
-    const getAddressResp = await getAddrFromStarkNameUtil(network, starkName);
 
-    return getAddressResp;
+    const address = await getAddrFromStarkNameUtil(network, starkName);
+
+    return address;
   }
 }
 

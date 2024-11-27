@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { AmountInput } from 'components/ui/molecule/AmountInput';
 import { SendSummaryModal } from '../SendSummaryModal';
 import {
@@ -43,6 +43,7 @@ export const SendModalView = ({ closeModal }: Props) => {
   });
   const [errors, setErrors] = useState({ amount: '', address: '' });
   const [resolvedAddress, setResolvedAddress] = useState('');
+  const controllerRef = useRef<AbortController | null>(null);
 
   const handleChange = (fieldName: string, fieldValue: string) => {
     //Check if input amount does not exceed user balance
@@ -69,19 +70,46 @@ export const SendModalView = ({ closeModal }: Props) => {
       case 'address':
         if (fieldValue !== '') {
           if (isValidAddress(fieldValue)) {
+            setResolvedAddress(fieldValue);
             break;
           } else if (isValidStarkName(fieldValue)) {
-            getAddrFromStarkName(fieldValue, chainId).then((address) => {
-              if (isValidAddress(address)) {
-                setResolvedAddress(address);
-              } else {
-                setErrors((prevErrors) => ({
-                  ...prevErrors,
-                  address: '.stark name doesn’t exist',
-                }));
-              }
-            });
+            // Cancel previous request
+            controllerRef.current?.abort();
+
+            // Create a new AbortController for this request
+            const abortController = new AbortController();
+            controllerRef.current = abortController;
+
+            getAddrFromStarkNameQuery(fieldValue, {
+              signal: abortController.signal,
+            })
+              .then((address) => {
+                if (abortController.signal.aborted) return;
+                if (isValidAddress(address)) {
+                  setResolvedAddress(address);
+                } else {
+                  setResolvedAddress('');
+                  setErrors((prevErrors) => ({
+                    ...prevErrors,
+                    address: '.stark name doesn’t exist',
+                  }));
+                }
+              })
+              .catch((error) => {
+                if (error.name !== 'AbortError') {
+                  setResolvedAddress('');
+                  setErrors((prevErrors) => ({
+                    ...prevErrors,
+                    address: '.stark name doesn’t exist',
+                  }));
+                }
+              })
+              .finally(() => {
+                if (controllerRef.current === abortController)
+                  controllerRef.current = null;
+              });
           } else {
+            setResolvedAddress('');
             setErrors((prevErrors) => ({
               ...prevErrors,
               address: 'Invalid address format',
@@ -111,6 +139,33 @@ export const SendModalView = ({ closeModal }: Props) => {
     );
   };
 
+  const getAddrFromStarkNameQuery = async (
+    starkName: string,
+    options?: { signal?: AbortSignal },
+  ): Promise<string> => {
+    const { signal } = options || {};
+
+    return new Promise((resolve, reject) => {
+      // Check if the request is already aborted
+      if (signal?.aborted) {
+        return reject(new DOMException('Request aborted', 'AbortError'));
+      }
+
+      const abortHandler = () => {
+        reject(new DOMException('Request aborted', 'AbortError'));
+      };
+
+      signal?.addEventListener('abort', abortHandler);
+
+      getAddrFromStarkName(starkName, chainId)
+        .then(resolve)
+        .catch(reject)
+        .finally(() => {
+          signal?.removeEventListener('abort', abortHandler);
+        });
+    });
+  };
+
   return (
     <>
       {!summaryModalOpen && (
@@ -127,7 +182,7 @@ export const SendModalView = ({ closeModal }: Props) => {
               label="To"
               placeholder="Paste recipient address or .stark name here"
               onChange={(value) => handleChange('address', value.target.value)}
-              onResolvedAddress={(address) => setResolvedAddress(address)}
+              resolvedAddress={resolvedAddress}
             />
             <SeparatorSmall />
             <MessageAlert
