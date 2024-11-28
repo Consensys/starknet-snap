@@ -15,12 +15,13 @@ import {
 import { useAppSelector } from 'hooks/redux';
 import { ethers } from 'ethers';
 import { AddressInput } from 'components/ui/molecule/AddressInput';
-import { isValidAddress, isValidStarkName } from 'utils/utils';
+import { isValidAddress, isValidStarkName, shortenAddress } from 'utils/utils';
 import { Bold, Normal } from '../../ConnectInfoModal/ConnectInfoModal.style';
 import { DropDown } from 'components/ui/molecule/DropDown';
 import { DEFAULT_FEE_TOKEN } from 'utils/constants';
 import { FeeToken } from 'types';
 import { useStarkNetSnap } from 'services';
+import { InfoText } from 'components/ui/molecule/AddressInput/AddressInput.style';
 
 interface Props {
   closeModal?: () => void;
@@ -43,7 +44,8 @@ export const SendModalView = ({ closeModal }: Props) => {
   });
   const [errors, setErrors] = useState({ amount: '', address: '' });
   const [resolvedAddress, setResolvedAddress] = useState('');
-  const controllerRef = useRef<AbortController | null>(null);
+  const debounceRef = useRef<NodeJS.Timeout | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (fieldName: string, fieldValue: string) => {
     //Check if input amount does not exceed user balance
@@ -69,45 +71,39 @@ export const SendModalView = ({ closeModal }: Props) => {
         break;
       case 'address':
         if (fieldValue !== '') {
+          if (debounceRef.current) clearTimeout(debounceRef.current);
+
           if (isValidAddress(fieldValue)) {
             setResolvedAddress(fieldValue);
             break;
           } else if (isValidStarkName(fieldValue)) {
-            // Cancel previous request
-            controllerRef.current?.abort();
-
-            // Create a new AbortController for this request
-            const abortController = new AbortController();
-            controllerRef.current = abortController;
-
-            getAddrFromStarkNameQuery(fieldValue, {
-              signal: abortController.signal,
-            })
-              .then((address) => {
-                if (abortController.signal.aborted) return;
-                if (isValidAddress(address)) {
-                  setResolvedAddress(address);
-                } else {
-                  setResolvedAddress('');
-                  setErrors((prevErrors) => ({
-                    ...prevErrors,
-                    address: '.stark name doesn’t exist',
-                  }));
-                }
-              })
-              .catch((error) => {
-                if (error.name !== 'AbortError') {
-                  setResolvedAddress('');
-                  setErrors((prevErrors) => ({
-                    ...prevErrors,
-                    address: '.stark name doesn’t exist',
-                  }));
-                }
-              })
-              .finally(() => {
-                if (controllerRef.current === abortController)
-                  controllerRef.current = null;
-              });
+            debounceRef.current = setTimeout(() => {
+              setLoading(true);
+              getAddrFromStarkName(fieldValue, chainId)
+                .then((address) => {
+                  if (isValidAddress(address)) {
+                    setResolvedAddress(address);
+                  } else {
+                    setResolvedAddress('');
+                    setErrors((prevErrors) => ({
+                      ...prevErrors,
+                      address: '.stark name doesn’t exist',
+                    }));
+                  }
+                })
+                .catch((error) => {
+                  if (error.name !== 'AbortError') {
+                    setResolvedAddress('');
+                    setErrors((prevErrors) => ({
+                      ...prevErrors,
+                      address: '.stark name doesn’t exist',
+                    }));
+                  }
+                })
+                .finally(() => {
+                  setLoading(false);
+                });
+            }, 300);
           } else {
             setResolvedAddress('');
             setErrors((prevErrors) => ({
@@ -130,40 +126,23 @@ export const SendModalView = ({ closeModal }: Props) => {
     }));
   };
 
+  const isValidAddrField = () => {
+    return (
+      (isValidAddress(fields.address) || isValidStarkName(fields.address)) &&
+      !errors.address &&
+      !loading &&
+      isValidAddress(resolvedAddress)
+    );
+  };
+
   const confirmEnabled = () => {
     return (
       !errors.address &&
       !errors.amount &&
       fields.amount.length > 0 &&
-      fields.address.length > 0
+      fields.address.length > 0 &&
+      !loading
     );
-  };
-
-  const getAddrFromStarkNameQuery = async (
-    starkName: string,
-    options?: { signal?: AbortSignal },
-  ): Promise<string> => {
-    const { signal } = options || {};
-
-    return new Promise((resolve, reject) => {
-      // Check if the request is already aborted
-      if (signal?.aborted) {
-        return reject(new DOMException('Request aborted', 'AbortError'));
-      }
-
-      const abortHandler = () => {
-        reject(new DOMException('Request aborted', 'AbortError'));
-      };
-
-      signal?.addEventListener('abort', abortHandler);
-
-      getAddrFromStarkName(starkName, chainId)
-        .then(resolve)
-        .catch(reject)
-        .finally(() => {
-          signal?.removeEventListener('abort', abortHandler);
-        });
-    });
   };
 
   return (
@@ -182,8 +161,13 @@ export const SendModalView = ({ closeModal }: Props) => {
               label="To"
               placeholder="Paste recipient address or .stark name here"
               onChange={(value) => handleChange('address', value.target.value)}
-              resolvedAddress={resolvedAddress}
+              disableValidate
+              validateError={errors.address}
+              validInput={isValidAddrField()}
             />
+            {isValidStarkName(fields.address) && resolvedAddress && (
+              <InfoText>{shortenAddress(resolvedAddress, 12)}</InfoText>
+            )}
             <SeparatorSmall />
             <MessageAlert
               variant="info"

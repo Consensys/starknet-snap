@@ -6,17 +6,11 @@ import {
   Dispatch,
   SetStateAction,
 } from 'react';
-import {
-  isSpecialInputKey,
-  isValidAddress,
-  isValidStarkName,
-  shortenAddress,
-} from 'utils/utils';
+import { isSpecialInputKey, isValidAddress } from 'utils/utils';
 import { HelperText } from 'components/ui/atom/HelperText';
 import { Label } from 'components/ui/atom/Label';
 import {
   Icon,
-  InfoText,
   Input,
   InputContainer,
   Left,
@@ -28,7 +22,9 @@ import { STARKNET_ADDRESS_LENGTH } from 'utils/constants';
 interface Props extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   setIsValidAddress?: Dispatch<SetStateAction<boolean>>;
-  resolvedAddress?: string;
+  disableValidate?: boolean;
+  validateError?: string;
+  validInput?: boolean;
 }
 
 export const AddressInputView = ({
@@ -36,29 +32,21 @@ export const AddressInputView = ({
   onChange,
   label,
   setIsValidAddress,
-  resolvedAddress,
+  disableValidate,
+  validateError,
+  validInput,
   ...otherProps
 }: Props) => {
   const [focused, setFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState('');
   const [valid, setValid] = useState(false);
-  const [info, setInfo] = useState('');
 
   useEffect(() => {
-    if (!inputRef.current || !resolvedAddress) {
-      return;
-    }
-
-    const { valid, error, info } = validateAddress(
-      inputRef.current.value,
-      resolvedAddress,
-    );
-
-    setValid(valid);
-    setError(error);
-    setInfo(info);
-  }, [resolvedAddress]);
+    if (!disableValidate || !inputRef.current) return;
+    setValid(validInput ?? false);
+    setError(validateError || '');
+  }, [disableValidate, validateError, validInput]);
 
   const displayIcon = () => {
     return valid || error !== '';
@@ -80,35 +68,20 @@ export const AddressInputView = ({
 
     if (!inputRef.current) return;
 
-    const { valid, error, info } = validateAddress(
-      inputRef.current.value,
-      resolvedAddress,
-    );
+    if (disableValidate) return;
 
-    setValid(valid);
-    setError(error);
-    setInfo(info);
+    const isValid =
+      inputRef.current.value !== '' && isValidAddress(inputRef.current.value);
+    if (isValid) {
+      setValid(true);
+      setError('');
+    } else {
+      setValid(false);
+      setError('Invalid address format');
+    }
 
     if (setIsValidAddress) {
-      setIsValidAddress(valid);
-    }
-  };
-
-  const validateAddress = (value: string, addr: string | undefined) => {
-    if (value !== '' && isValidAddress(value)) {
-      return { valid: true, error: '', info: '' };
-    } else if (isValidStarkName(value)) {
-      if (addr && isValidAddress(addr)) {
-        return {
-          valid: true,
-          error: '',
-          info: shortenAddress(addr, 12) as string,
-        };
-      } else {
-        return { valid: false, error: '.stark name not found', info: '' };
-      }
-    } else {
-      return { valid: false, error: 'Invalid address format', info: '' };
+      setIsValidAddress(isValid);
     }
   };
 
@@ -146,7 +119,6 @@ export const AddressInputView = ({
         </Left>
       </InputContainer>
       {error && <HelperText>{error}</HelperText>}
-      {info && <InfoText>{info}</InfoText>}
     </Wrapper>
   );
 };
