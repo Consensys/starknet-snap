@@ -7,12 +7,12 @@ import {
   AddressStruct,
   AuthorizableStruct,
   BaseRequestStruct,
-  AccountRpcController,
   CallDataStruct,
   mapDeprecatedParams,
 } from '../utils';
 import { UserRejectedOpError } from '../utils/exceptions';
 import { signTransactions } from '../utils/starknetUtils';
+import { AccountRpcController } from './abstract/account-rpc-controller';
 
 export const SignTransactionRequestStruct = assign(
   object({

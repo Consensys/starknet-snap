@@ -10,7 +10,6 @@ import {
   mapDeprecatedParams,
   UniversalDetailsStruct,
   confirmDialog,
-  AccountRpcController,
   signerUI,
   networkUI,
   rowUI,
@@ -19,6 +18,7 @@ import {
 } from '../utils';
 import { UserRejectedOpError } from '../utils/exceptions';
 import { declareContract as declareContractUtil } from '../utils/starknetUtils';
+import { AccountRpcController } from './abstract/account-rpc-controller';
 
 // Define the DeclareContractRequestStruct
 export const DeclareContractRequestStruct = assign(

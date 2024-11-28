@@ -1,18 +1,14 @@
 import type { Infer } from 'superstruct';
 import { object, string, assign, array } from 'superstruct';
 
-import {
-  AddressStruct,
-  BaseRequestStruct,
-  AccountRpcController,
-  CairoVersionStruct,
-} from '../utils';
+import { AddressStruct, BaseRequestStruct, CairoVersionStruct } from '../utils';
 import { ACCOUNT_CLASS_HASH, CAIRO_VERSION } from '../utils/constants';
 import { AccountAlreadyDeployedError } from '../utils/exceptions';
 import {
   getDeployAccountCallData,
   isAccountDeployed,
 } from '../utils/starknetUtils';
+import { AccountRpcController } from './abstract/account-rpc-controller';
 
 export const GetDeploymentDataRequestStruct = assign(
   object({

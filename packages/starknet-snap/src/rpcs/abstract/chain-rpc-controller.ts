@@ -3,7 +3,7 @@ import type { Json } from '@metamask/snaps-sdk';
 import { NetworkStateManager } from '../../state/network-state-manager';
 import type { Network } from '../../types/snapState';
 import { InvalidNetworkError } from '../../utils/exceptions';
-import { RpcController } from '../../utils/rpc';
+import { RpcController } from './base-rpc-controller';
 
 /**
  * A base class for all RPC controllers that require a chainId to be provided in the request parameters.
