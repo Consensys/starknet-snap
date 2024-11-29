@@ -7,11 +7,11 @@ import {
   TypeDataStruct,
   AuthorizableStruct,
   BaseRequestStruct,
-  AccountRpcController,
   mapDeprecatedParams,
 } from '../utils';
 import { UserRejectedOpError } from '../utils/exceptions';
 import { signMessage as signMessageUtil } from '../utils/starknetUtils';
+import { AccountRpcController } from './abstract/account-rpc-controller';
 
 export const SignMessageRequestStruct = assign(
   object({

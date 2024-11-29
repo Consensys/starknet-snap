@@ -2,13 +2,9 @@ import { HexStruct } from '@metamask/utils';
 import type { Infer } from 'superstruct';
 import { object, assign, boolean, array } from 'superstruct';
 
-import {
-  AddressStruct,
-  TypeDataStruct,
-  BaseRequestStruct,
-  AccountRpcController,
-} from '../utils';
+import { AddressStruct, TypeDataStruct, BaseRequestStruct } from '../utils';
 import { verifyTypedDataMessageSignature } from '../utils/starknetUtils';
+import { AccountRpcController } from './abstract/account-rpc-controller';
 
 export const VerifySignatureRequestStruct = assign(
   object({
