@@ -160,6 +160,7 @@ export type V2Transaction = {
   version: 'V2';
 };
 
-export type Transaction = LegacyTransaction | V2Transaction;
+// for backward compatibility before StarkScan implmented in get transactions
+export type Transaction = LegacyTransaction | (V2Transaction & { status?: TransactionStatus | string });
 
 /* eslint-disable */
