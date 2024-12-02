@@ -160,7 +160,7 @@ export type V2Transaction = {
   version: 'V2';
 };
 
-// for backward compatibility before StarkScan implmented in get transactions
+// FIXME: temp solution for backward compatibility before StarkScan implemented in get transactions
 export type Transaction = LegacyTransaction | (V2Transaction & { status?: TransactionStatus | string });
 
 /* eslint-disable */
