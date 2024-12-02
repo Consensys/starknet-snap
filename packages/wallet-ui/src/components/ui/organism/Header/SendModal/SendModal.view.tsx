@@ -81,15 +81,7 @@ export const SendModalView = ({ closeModal }: Props) => {
               setLoading(true);
               getAddrFromStarkName(fieldValue, chainId)
                 .then((address) => {
-                  if (isValidAddress(address)) {
-                    setResolvedAddress(address);
-                  } else {
-                    setResolvedAddress('');
-                    setErrors((prevErrors) => ({
-                      ...prevErrors,
-                      address: '.stark name doesn’t exist',
-                    }));
-                  }
+                  setResolvedAddress(address);
                 })
                 .catch(() => {
                   setResolvedAddress('');
