@@ -1,13 +1,14 @@
-import type {  Infer } from 'superstruct';
-import { assign,  nonempty, object, enums, optional } from 'superstruct';
-
+import { HexStruct } from '@metamask/utils';
 import {
-  BaseRequestStruct,
-} from '../utils';
+  TransactionExecutionStatus,
+  TransactionFinalityStatus,
+} from 'starknet';
+import type { Infer } from 'superstruct';
+import { assign, nonempty, object, enums, optional } from 'superstruct';
+
+import { BaseRequestStruct } from '../utils';
 import { getTransactionStatus as getTransactionStatusFn } from '../utils/starknetUtils';
 import { ChainRpcController } from './abstract/chain-rpc-controller';
-import { HexStruct } from '@metamask/utils';
-import { TransactionExecutionStatus, TransactionFinalityStatus } from 'starknet';
 
 export const GetTransactionStatusRequestStruct = assign(
   object({
@@ -16,14 +17,18 @@ export const GetTransactionStatusRequestStruct = assign(
   BaseRequestStruct,
 );
 
-export const GetTransactionStatusResponseStruct =object({
-    executionStatus: optional(enums(Object.values(TransactionExecutionStatus))),
-    finalityStatus: optional(enums(Object.values(TransactionFinalityStatus))),
-})
+export const GetTransactionStatusResponseStruct = object({
+  executionStatus: optional(enums(Object.values(TransactionExecutionStatus))),
+  finalityStatus: optional(enums(Object.values(TransactionFinalityStatus))),
+});
 
-export type GetTransactionStatusParams = Infer<typeof GetTransactionStatusRequestStruct>;
+export type GetTransactionStatusParams = Infer<
+  typeof GetTransactionStatusRequestStruct
+>;
 
-export type GetTransactionStatusResponse = Infer<typeof GetTransactionStatusResponseStruct>;
+export type GetTransactionStatusResponse = Infer<
+  typeof GetTransactionStatusResponseStruct
+>;
 
 /**
  * The RPC handler to get a transaction status by the given transaction hash.
@@ -42,9 +47,11 @@ export class GetTransactionStatusRpc extends ChainRpcController<
    * @param params - The parameters of the request.
    * @param params.transactionHash - The transaction hash to enquire the transaction status.
    * @param params.chainId - The chain id of the transaction.
-   * @returns A promise that resolves to a GetTransactionStatusResponse object.
+   * @returns A promise that resolves to a GetTransactionStatusResponse object that contains executionStatus and finalityStatus.
    */
-  async execute(params: GetTransactionStatusParams): Promise<GetTransactionStatusResponse> {
+  async execute(
+    params: GetTransactionStatusParams,
+  ): Promise<GetTransactionStatusResponse> {
     return super.execute(params);
   }
 
@@ -53,11 +60,8 @@ export class GetTransactionStatusRpc extends ChainRpcController<
   ): Promise<GetTransactionStatusResponse> {
     const { transactionHash } = params;
 
-    const resp = await getTransactionStatusFn(
-      transactionHash,
-      this.network,
-    );
-    
+    const resp = await getTransactionStatusFn(transactionHash, this.network);
+
     return resp;
   }
 }
