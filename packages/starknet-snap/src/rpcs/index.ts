@@ -9,3 +9,4 @@ export * from './verify-signature';
 export * from './switch-network';
 export * from './get-deployment-data';
 export * from './watch-asset';
+export * from './get-transaction-status';

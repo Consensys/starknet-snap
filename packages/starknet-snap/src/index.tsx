@@ -23,7 +23,6 @@ import { getStoredNetworks } from './getStoredNetworks';
 import { getStoredTransactions } from './getStoredTransactions';
 import { getStoredUserAccounts } from './getStoredUserAccounts';
 import { getTransactions } from './getTransactions';
-import { getTransactionStatus } from './getTransactionStatus';
 import { getValue } from './getValue';
 import { homePageController } from './on-home-page';
 import { recoverAccounts } from './recoverAccounts';
@@ -39,6 +38,7 @@ import type {
   GetDeploymentDataParams,
   DeclareContractParams,
   WatchAssetParams,
+  GetTransactionStatusParams,
 } from './rpcs';
 import {
   displayPrivateKey,
@@ -52,6 +52,7 @@ import {
   switchNetwork,
   getDeploymentData,
   watchAsset,
+  getTransactionStatus,
 } from './rpcs';
 import { signDeployAccountTransaction } from './signDeployAccountTransaction';
 import type {
@@ -201,7 +202,9 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
         return await getErc20TokenBalance(apiParams);
 
       case 'starkNet_getTransactionStatus':
-        return await getTransactionStatus(apiParams);
+        return await getTransactionStatus.execute(
+          apiParams.requestParams as unknown as GetTransactionStatusParams,
+        );
 
       case 'starkNet_getValue':
         return await getValue(apiParams);
