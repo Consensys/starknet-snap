@@ -127,32 +127,39 @@ export type TranscationAccountCall = {
   amount?: string;
 };
 
-export type Transaction = {
+export type LegacyTransaction = {
   txnHash: string; // in hex
-  // TEMP: add StarkNetTransactionType as optional to support the legacy data
-  txnType: VoyagerTransactionType | string | StarkNetTransactionType;
+  txnType: VoyagerTransactionType | string;
   chainId: string; // in hex
-  // TODO: rename it to address to sync with the same naming convention in the AccContract
   senderAddress: string; // in hex
   contractAddress: string; // in hex
   contractFuncName: string;
   contractCallData: RawCalldata;
   status?: TransactionStatus | string;
-  // TEMP: add TransactionFinalityStatus as optional to support the legacy data
-  executionStatus?: TransactionStatus | string | TransactionFinalityStatus;
-  // TEMP: add TransactionExecutionStatus as optional to support the legacy data
-  finalityStatus?: TransactionStatus | string | TransactionExecutionStatus;
-  failureReason?: string;
-  // TEMP: add it as optional to support the legacy data
-  eventIds?: string[];
+  executionStatus?: TransactionStatus | string;
+  finalityStatus?: TransactionStatus | string;
+  failureReason: string;
+  eventIds: string[];
   timestamp: number;
+};
 
-  // New fields
-  // TEMP: put those new fields as optional to support the legacy data
+export type V2Transaction = {
+  txnHash: string; // in hex
+  txnType: StarkNetTransactionType;
+  chainId: string; // in hex
+  senderAddress: string; // in hex
+  contractAddress: string; // in hex
+  executionStatus?: TransactionExecutionStatus | string;
+  finalityStatus?: TransactionFinalityStatus | string;
+  failureReason: string;
+  timestamp: number;
   maxFee?: string | null;
   actualFee?: string | null;
   // using Record<string, TranscationAccountCall[]> to support O(1) searching
   accountCalls?: Record<string, TranscationAccountCall[]> | null;
+  version: 'V2';
 };
+
+export type Transaction = LegacyTransaction | V2Transaction;
 
 /* eslint-disable */

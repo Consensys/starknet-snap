@@ -9,8 +9,16 @@ import {
   STARKNET_MAINNET_NETWORK,
   STARKNET_SEPOLIA_TESTNET_NETWORK,
 } from '../../utils/constants';
-import type { StarkScanOptions, StarkScanTransaction } from './starkscan.type';
+import { InvalidNetworkError } from '../../utils/exceptions';
 import { StarkScanClient } from './starkscan';
+import {
+  StarkScanTransactionsResponseStruct,
+  type StarkScanOptions,
+  type StarkScanTransaction,
+  type StarkScanTransactionsResponse,
+} from './starkscan.type';
+
+jest.mock('../../utils/logger');
 
 describe('StarkScanClient', () => {
   class MockStarkScanClient extends StarkScanClient {
@@ -22,8 +30,12 @@ describe('StarkScanClient', () => {
       return super.baseUrl;
     }
 
-    async submitGetApiRequest<ApiResponse>(request): Promise<ApiResponse> {
-      return await super.submitGetApiRequest<ApiResponse>(request);
+    async sendApiRequest<ApiResponse>(request): Promise<ApiResponse> {
+      return await super.sendApiRequest<ApiResponse>(request);
+    }
+
+    getSenderAddress(tx: StarkScanTransaction): string {
+      return super.getSenderAddress(tx);
     }
   }
 
@@ -61,7 +73,36 @@ describe('StarkScanClient', () => {
     return account;
   };
 
-  const mSecsFor24Hours = 1000 * 60 * 60 * 24;
+  const mockApiSuccess = ({
+    fetchSpy,
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    response = { data: [], next_url: null },
+  }: {
+    fetchSpy: jest.SpyInstance;
+    response?: StarkScanTransactionsResponse;
+  }) => {
+    fetchSpy.mockResolvedValueOnce({
+      ok: true,
+      json: jest.fn().mockResolvedValue(response),
+    });
+  };
+
+  const mockApiFailure = ({ fetchSpy }: { fetchSpy: jest.SpyInstance }) => {
+    fetchSpy.mockResolvedValueOnce({
+      ok: false,
+      statusText: 'error',
+    });
+  };
+
+  const mockTxByType = (txnType: TransactionType, address: string) => {
+    const mockResponse = generateStarkScanTranscations({
+      address,
+      txnTypes: [txnType],
+      cnt: 1,
+    });
+    const tx = mockResponse.data[0];
+    return tx;
+  };
 
   describe('baseUrl', () => {
     it.each([
@@ -84,7 +125,7 @@ describe('StarkScanClient', () => {
       },
     );
 
-    it('throws `Invalid Network` error if the chain id is invalid', () => {
+    it('throws `InvalidNetworkError` if the chain id is invalid', () => {
       const invalidNetwork: Network = {
         name: 'Invalid Network',
         chainId: '0x534e5f474f45524c49',
@@ -97,30 +138,35 @@ describe('StarkScanClient', () => {
         network: invalidNetwork,
       });
 
-      expect(() => client.baseUrl).toThrow('Invalid Network');
+      expect(() => client.baseUrl).toThrow(InvalidNetworkError);
     });
   });
 
-  describe('get', () => {
+  describe('sendApiRequest', () => {
+    const mockRequest = () => {
+      return {
+        apiUrl: `/url`,
+        responseStruct: StarkScanTransactionsResponseStruct,
+        requestName: 'getTransactions',
+      };
+    };
+
     it('fetches data', async () => {
       const { fetchSpy } = createMockFetch();
-      fetchSpy.mockResolvedValueOnce({
-        ok: true,
-        json: jest.fn().mockResolvedValue({ data: 'data' }),
-      });
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      const expectedResponse = { data: [], next_url: null };
+      mockApiSuccess({ fetchSpy, response: expectedResponse });
 
       const client = createMockClient();
-      const result = await client.get(`${client.baseUrl}/url`);
+      const result = await client.sendApiRequest(mockRequest());
 
-      expect(result).toStrictEqual({ data: 'data' });
+      expect(result).toStrictEqual(expectedResponse);
     });
 
-    it('append api key to header', async () => {
+    it('appends a api key to header', async () => {
       const { fetchSpy } = createMockFetch();
-      fetchSpy.mockResolvedValueOnce({
-        ok: true,
-        json: jest.fn().mockResolvedValue({ data: 'data' }),
-      });
+      mockApiSuccess({ fetchSpy });
+
       const apiKey = 'ABCDEFG-API-KEY';
 
       const client = createMockClient({
@@ -128,32 +174,32 @@ describe('StarkScanClient', () => {
           apiKey,
         },
       });
-      await client.get(`${client.baseUrl}/url`);
+      await client.sendApiRequest(mockRequest());
 
-      expect(fetchSpy).toHaveBeenCalledWith(`${client.baseUrl}/url`, {
+      expect(fetchSpy).toHaveBeenCalledWith(`/url`, {
         method: 'GET',
+        body: undefined,
         headers: {
+          'Content-Type': 'application/json',
           'x-api-key': apiKey,
         },
       });
     });
 
-    it('throws `Failed to fetch data` error if the response.ok is falsy', async () => {
+    it('throws `API response error: response body can not be deserialised.` error if the response.ok is falsy', async () => {
       const { fetchSpy } = createMockFetch();
-      fetchSpy.mockResolvedValueOnce({
-        ok: false,
-        statusText: 'error',
-      });
+      mockApiFailure({ fetchSpy });
 
       const client = createMockClient();
-
-      await expect(client.get(`${client.baseUrl}/url`)).rejects.toThrow(
-        `Failed to fetch data: error`,
+      await expect(client.sendApiRequest(mockRequest())).rejects.toThrow(
+        `API response error: response body can not be deserialised.`,
       );
     });
   });
 
   describe('getTransactions', () => {
+    const mSecsFor24Hours = 1000 * 60 * 60 * 24;
+
     const getFromAndToTimestamp = (tillToInDay: number) => {
       const from = Math.floor(Date.now() / 1000);
       const to = from - tillToInDay * 24 * 60 * 60;
@@ -171,12 +217,8 @@ describe('StarkScanClient', () => {
       const mockResponse = generateStarkScanTranscations({
         address: account.address,
         startFrom: from,
-        timestampReduction: mSecsFor24Hours,
       });
-      fetchSpy.mockResolvedValueOnce({
-        ok: true,
-        json: jest.fn().mockResolvedValue(mockResponse),
-      });
+      mockApiSuccess({ fetchSpy, response: mockResponse });
 
       const client = createMockClient();
       const result = await client.getTransactions(account.address, to);
@@ -200,26 +242,10 @@ describe('StarkScanClient', () => {
       const account = await mockAccount();
       const { fetchSpy } = createMockFetch();
       const { to } = getFromAndToTimestamp(5);
-      // generate 0 transactions
-      const mockInvokeResponse = generateStarkScanTranscations({
-        address: account.address,
-        cnt: 0,
-        txnTypes: [TransactionType.INVOKE],
-      });
-      // generate 0 transactions
-      const mockDeployResponse = generateStarkScanTranscations({
-        address: account.address,
-        cnt: 0,
-        txnTypes: [TransactionType.INVOKE],
-      });
-      fetchSpy.mockResolvedValueOnce({
-        ok: true,
-        json: jest.fn().mockResolvedValue(mockInvokeResponse),
-      });
-      fetchSpy.mockResolvedValue({
-        ok: true,
-        json: jest.fn().mockResolvedValue(mockDeployResponse),
-      });
+      // mock the get invoke transactions response with empty data
+      mockApiSuccess({ fetchSpy });
+      // mock the get deploy transaction response with empty data
+      mockApiSuccess({ fetchSpy });
 
       const client = createMockClient();
       const result = await client.getTransactions(account.address, to);
@@ -232,81 +258,75 @@ describe('StarkScanClient', () => {
       const { fetchSpy } = createMockFetch();
       // generate the to timestamp which is 100 days ago
       const { to } = getFromAndToTimestamp(100);
-      // generate 10 invoke transactions within 100 days if the timestamp is not provided
       const mockPage1Response = generateStarkScanTranscations({
         address: account.address,
         txnTypes: [TransactionType.INVOKE],
         cnt: 10,
       });
-      // generate another 10 invoke + deploy transactions within 100 days if the timestamp is not provided
       const mockPage2Response = generateStarkScanTranscations({
         address: account.address,
         cnt: 10,
       });
       const firstPageUrl = `https://api-sepolia.starkscan.co/api/v0/transactions?contract_address=${account.address}&order_by=desc&limit=100`;
       const nextPageUrl = `https://api-sepolia.starkscan.co/api/v0/transactions?contract_address=${account.address}&order_by=desc&cursor=MTcyNDc1OTQwNzAwMDAwNjAwMDAwMA%3D%3D`;
-      const fetchOptions = {
-        method: 'GET',
-        headers: {
-          'x-api-key': 'api-key',
-        },
-      };
 
-      fetchSpy.mockResolvedValueOnce({
-        ok: true,
-        json: jest.fn().mockResolvedValue({
+      // mock the first page response, which contains the next_url
+      mockApiSuccess({
+        fetchSpy,
+        response: {
           data: mockPage1Response.data,
           // eslint-disable-next-line @typescript-eslint/naming-convention
           next_url: nextPageUrl,
-        }),
+        },
       });
-      fetchSpy.mockResolvedValueOnce({
-        ok: true,
-        json: jest.fn().mockResolvedValue(mockPage2Response),
-      });
+      // mock the send page response
+      mockApiSuccess({ fetchSpy, response: mockPage2Response });
 
       const client = createMockClient();
       await client.getTransactions(account.address, to);
 
       expect(fetchSpy).toHaveBeenCalledTimes(2);
-      expect(fetchSpy).toHaveBeenNthCalledWith(1, firstPageUrl, fetchOptions);
-      expect(fetchSpy).toHaveBeenNthCalledWith(2, nextPageUrl, fetchOptions);
+      expect(fetchSpy).toHaveBeenNthCalledWith(
+        1,
+        firstPageUrl,
+        expect.any(Object),
+      );
+      expect(fetchSpy).toHaveBeenNthCalledWith(
+        2,
+        nextPageUrl,
+        expect.any(Object),
+      );
     });
 
     it('fetchs the deploy transaction if it is not present', async () => {
       const account = await mockAccount();
       const { fetchSpy } = createMockFetch();
+      // generate the to timestamp which is 5 days ago
       const { from, to } = getFromAndToTimestamp(5);
-      // generate 10 invoke transactions
+      // generate 10 invoke transactions, and 1 day time gap between each transaction
       const mockInvokeResponse = generateStarkScanTranscations({
         address: account.address,
         startFrom: from,
         timestampReduction: mSecsFor24Hours,
         txnTypes: [TransactionType.INVOKE],
       });
-      // generate 5 invoke transactions + deploy transactions
+      // generate another 5 invoke transactions + deploy transactions for testing the fallback case
       const mockDeployResponse = generateStarkScanTranscations({
         address: account.address,
         // generate transactions that start from 100 days ago, to ensure not overlap with above invoke transactions
-        startFrom: from - mSecsFor24Hours * 100,
+        startFrom: mSecsFor24Hours * 100,
         timestampReduction: mSecsFor24Hours,
         txnTypes: [TransactionType.INVOKE, TransactionType.DEPLOY_ACCOUNT],
         cnt: 5,
       });
-      fetchSpy.mockResolvedValueOnce({
-        ok: true,
-        json: jest.fn().mockResolvedValue(mockInvokeResponse),
-      });
-      fetchSpy.mockResolvedValue({
-        ok: true,
-        json: jest.fn().mockResolvedValue(mockDeployResponse),
-      });
+      mockApiSuccess({ fetchSpy, response: mockInvokeResponse });
+      mockApiSuccess({ fetchSpy, response: mockDeployResponse });
 
       const client = createMockClient();
       // We only fetch the transactions from the last 5 days
       const result = await client.getTransactions(account.address, to);
 
-      // However the result should include a deploy transaction, even the deploy transaction is not in the last 5 days
+      // The result should include a deploy transaction, even it is not from the last 5 days
       expect(
         result.find((tx) => tx.txnType === TransactionType.DEPLOY_ACCOUNT),
       ).toBeDefined();
@@ -314,16 +334,6 @@ describe('StarkScanClient', () => {
   });
 
   describe('toTransaction', () => {
-    const mockTxByType = (txnType: TransactionType, address: string) => {
-      const mockResponse = generateStarkScanTranscations({
-        address,
-        txnTypes: [txnType],
-        cnt: 1,
-      });
-      const tx = mockResponse.data[0];
-      return tx;
-    };
-
     it('converts an invoke type starkscan transaction to a transaction object', async () => {
       const account = await mockAccount();
       const mockTx = mockTxByType(TransactionType.INVOKE, account.address);
@@ -343,8 +353,6 @@ describe('StarkScanClient', () => {
         chainId: STARKNET_SEPOLIA_TESTNET_NETWORK.chainId,
         senderAddress: account.address,
         contractAddress: '',
-        contractFuncName: '',
-        contractCallData: mockTx.calldata,
         timestamp: mockTx.timestamp,
         finalityStatus: mockTx.transaction_finality_status,
         executionStatus: mockTx.transaction_execution_status,
@@ -362,6 +370,7 @@ describe('StarkScanClient', () => {
             },
           ],
         },
+        version: 'V2',
       });
     });
 
@@ -381,8 +390,6 @@ describe('StarkScanClient', () => {
         chainId: STARKNET_SEPOLIA_TESTNET_NETWORK.chainId,
         senderAddress: account.address,
         contractAddress: account.address,
-        contractFuncName: '',
-        contractCallData: [],
         timestamp: mockTx.timestamp,
         finalityStatus: mockTx.transaction_finality_status,
         executionStatus: mockTx.transaction_execution_status,
@@ -390,6 +397,7 @@ describe('StarkScanClient', () => {
         maxFee: mockTx.max_fee,
         actualFee: mockTx.actual_fee,
         accountCalls: null,
+        version: 'V2',
       });
     });
   });
@@ -403,10 +411,7 @@ describe('StarkScanClient', () => {
         address: account.address,
         cnt: 5,
       });
-      fetchSpy.mockResolvedValueOnce({
-        ok: true,
-        json: jest.fn().mockResolvedValue(mockResponse),
-      });
+      mockApiSuccess({ fetchSpy, response: mockResponse });
 
       const client = createMockClient();
       const result = await client.getDeployTransaction(account.address);
@@ -424,15 +429,50 @@ describe('StarkScanClient', () => {
         cnt: 1,
         txnTypes: [TransactionType.INVOKE],
       });
-      fetchSpy.mockResolvedValueOnce({
-        ok: true,
-        json: jest.fn().mockResolvedValue(mockResponse),
-      });
+      mockApiSuccess({ fetchSpy, response: mockResponse });
 
       const client = createMockClient();
       const result = await client.getDeployTransaction(account.address);
 
       expect(result).toBeNull();
+    });
+  });
+
+  describe('getSenderAddress', () => {
+    const prepareMockTx = async (transactionType = TransactionType.INVOKE) => {
+      const account = await mockAccount();
+      const mockTx = mockTxByType(transactionType, account.address);
+      return mockTx;
+    };
+
+    it('returns the sender address', async () => {
+      const mockTx = await prepareMockTx();
+
+      const client = createMockClient();
+      expect(client.getSenderAddress(mockTx)).toStrictEqual(
+        mockTx.sender_address,
+      );
+    });
+
+    it('returns the contract address if it is a deploy transaction', async () => {
+      const mockTx = await prepareMockTx(TransactionType.DEPLOY_ACCOUNT);
+
+      const client = createMockClient();
+      expect(client.getSenderAddress(mockTx)).toStrictEqual(
+        mockTx.contract_address,
+      );
+    });
+
+    it('returns an empty string if the sender address is null', async () => {
+      const mockTx = await prepareMockTx();
+
+      const client = createMockClient();
+      expect(
+        client.getSenderAddress({
+          ...mockTx,
+          sender_address: null,
+        }),
+      ).toBe('');
     });
   });
 });

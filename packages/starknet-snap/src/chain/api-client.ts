@@ -1,7 +1,8 @@
 import type { Json } from '@metamask/snaps-sdk';
-import { logger } from 'ethers';
 import type { Struct } from 'superstruct';
 import { mask } from 'superstruct';
+
+import { logger } from '../utils/logger';
 
 export enum HttpMethod {
   Get = 'GET',
@@ -31,7 +32,7 @@ export abstract class ApiClient {
    * @param response - The HTTP response to verify and convert.
    * @returns A promise that resolves to the API response.
    */
-  protected async getResponse<ApiResponse>(
+  protected async parseResponse<ApiResponse>(
     response: HttpResponse,
   ): Promise<ApiResponse> {
     try {
@@ -79,7 +80,7 @@ export abstract class ApiClient {
   }
 
   /**
-   * An internal method used to submit the API request.
+   * An internal method used to send a HTTP request.
    *
    * @param params - The request parameters.
    * @param [params.requestName] - The name of the request (optional).
@@ -87,7 +88,7 @@ export abstract class ApiClient {
    * @param params.responseStruct - The superstruct used to verify the API response.
    * @returns A promise that resolves to a JSON object.
    */
-  protected async submitHttpRequest<ApiResponse>({
+  protected async sendHttpRequest<ApiResponse>({
     requestName = '',
     request,
     responseStruct,
@@ -109,7 +110,7 @@ export abstract class ApiClient {
 
       const httpResponse = await fetch(request.url, fetchRequest);
 
-      const jsonResponse = await this.getResponse<ApiResponse>(httpResponse);
+      const jsonResponse = await this.parseResponse<ApiResponse>(httpResponse);
 
       logger.debug(`${logPrefix} response:`, JSON.stringify(jsonResponse));
 

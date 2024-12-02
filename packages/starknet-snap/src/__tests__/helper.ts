@@ -22,7 +22,7 @@ import { v4 as uuidv4 } from 'uuid';
 import type {
   StarkScanTransaction,
   StarkScanTransactionsResponse,
-} from '../chain/data-client/starkscan';
+} from '../chain/data-client/starkscan.type';
 import { FeeToken } from '../types/snapApi';
 import type {
   AccContract,
