@@ -1,5 +1,5 @@
 {
-  "packages/starknet-snap": "2.10.1",
-  "packages/wallet-ui": "1.24.0",
-  "packages/get-starknet": "1.2.0"
+  "packages/starknet-snap": "3.0.0",
+  "packages/wallet-ui": "1.25.0",
+  "packages/get-starknet": "1.3.0"
 }

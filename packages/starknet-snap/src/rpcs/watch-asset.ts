@@ -1,15 +1,12 @@
-import type { Component } from '@metamask/snaps-sdk';
-import { divider, heading, row, text } from '@metamask/snaps-sdk';
 import type { Infer } from 'superstruct';
 import { assign, boolean, min, number, object, optional } from 'superstruct';
 
 import { NetworkStateManager } from '../state/network-state-manager';
 import { TokenStateManager } from '../state/token-state-manager';
 import type { Erc20Token, Network } from '../types/snapState';
+import { renderWatchAssetUI } from '../ui/utils';
 import {
-  confirmDialog,
   BaseRequestStruct,
-  RpcController,
   AddressStruct,
   TokenNameStruct,
   TokenSymbolStruct,
@@ -22,6 +19,7 @@ import {
   UserRejectedOpError,
 } from '../utils/exceptions';
 import { getValidNumber } from '../utils/snapUtils';
+import { RpcController } from './abstract/base-rpc-controller';
 
 export const WatchAssetRequestStruct = assign(
   object({
@@ -131,60 +129,19 @@ export class WatchAssetRpc extends RpcController<
     const erc20Token: Erc20Token = this.buildErc20Token(params);
     const network = await this.getNetworkFromChainId(chainId);
 
-    if (!(await this.getWatchAssetConsensus(network.name, erc20Token))) {
+    if (
+      !(await renderWatchAssetUI({
+        networkName: network.name,
+        chainId: network.chainId,
+        token: erc20Token,
+      }))
+    ) {
       throw new UserRejectedOpError() as unknown as Error;
     }
 
     await this.tokenStateMgr.upsertToken(erc20Token);
 
     return true;
-  }
-
-  protected async getWatchAssetConsensus(
-    networkName: string,
-    erc20Token: Erc20Token,
-  ) {
-    const { address, name, symbol, decimals } = erc20Token;
-
-    const componentPairs = [
-      {
-        label: 'Network',
-        value: networkName,
-      },
-      {
-        label: 'Token Address',
-        value: address,
-      },
-      {
-        label: 'Token Name',
-        value: name,
-      },
-      {
-        label: 'Token Symbol',
-        value: symbol,
-      },
-      {
-        label: 'Token Decimals',
-        value: decimals.toString(),
-      },
-    ];
-    const components: Component[] = [];
-    components.push(heading('Do you want to add this token?'));
-    componentPairs.forEach(({ label, value }, idx) => {
-      components.push(
-        row(
-          label,
-          text({
-            value,
-            markdown: false,
-          }),
-        ),
-      );
-      if (idx < componentPairs.length - 1) {
-        components.push(divider());
-      }
-    });
-    return await confirmDialog(components);
   }
 }
 

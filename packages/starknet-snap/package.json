@@ -1,6 +1,6 @@
 {
   "name": "@consensys/starknet-snap",
-  "version": "2.10.1",
+  "version": "3.0.0",
   "keywords": [],
   "repository": {
     "type": "git",
@@ -22,9 +22,9 @@
     "cover:report": "nyc report --reporter=lcov --reporter=text",
     "jest": "jest --passWithNoTests",
     "lint": "yarn lint:eslint && yarn lint:misc --check",
-    "lint:eslint": "eslint . --cache --ext js,ts",
+    "lint:eslint": "eslint . --cache --ext js,ts,tsx",
     "lint:fix": "yarn lint:eslint --fix && yarn lint:misc --write",
-    "lint:misc": "prettier '**/*.ts' '**/*.json' '**/*.md' '!CHANGELOG.md' --ignore-path .gitignore",
+    "lint:misc": "prettier '**/*.ts' '**/*.tsx' '**/*.json' '**/*.md' '!CHANGELOG.md' --ignore-path .gitignore",
     "serve": "mm-snap serve",
     "start": "mm-snap watch",
     "test": "yarn run test:unit && yarn run cover:report && yarn run jest",
@@ -39,7 +39,7 @@
   },
   "dependencies": {
     "@metamask/key-tree": "9.0.0",
-    "@metamask/snaps-sdk": "^4.0.0",
+    "@metamask/snaps-sdk": "^6.1.1",
     "@metamask/utils": "^9.1.0",
     "async-mutex": "^0.3.2",
     "ethereum-unit-converter": "^0.0.17",
@@ -59,6 +59,8 @@
     "@metamask/snaps-jest": "^8.2.0",
     "@types/chai": "^4.3.1",
     "@types/chai-as-promised": "^7.1.5",
+    "@types/react": "18.2.4",
+    "@types/react-dom": "18.2.4",
     "@types/sinon": "^10.0.11",
     "@types/sinon-chai": "^3.2.8",
     "@typescript-eslint/eslint-plugin": "^5.42.1",

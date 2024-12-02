@@ -3,15 +3,17 @@ import type {
   OnHomePageHandler,
   OnInstallHandler,
   OnUpdateHandler,
+  OnUserInputHandler,
+  UserInputEvent,
+  InterfaceContext,
 } from '@metamask/snaps-sdk';
-import { panel, text, MethodNotFoundError } from '@metamask/snaps-sdk';
+import { MethodNotFoundError } from '@metamask/snaps-sdk';
+import { Box, Link, Text } from '@metamask/snaps-sdk/jsx';
 
 import { addNetwork } from './addNetwork';
 import { Config } from './config';
 import { createAccount } from './createAccount';
-import { declareContract } from './declareContract';
 import { estimateAccDeployFee } from './estimateAccountDeployFee';
-import { estimateFees } from './estimateFees';
 import { extractPublicKey } from './extractPublicKey';
 import { getCurrentNetwork } from './getCurrentNetwork';
 import { getErc20TokenBalance } from './getErc20TokenBalance';
@@ -35,12 +37,14 @@ import type {
   VerifySignatureParams,
   SwitchNetworkParams,
   GetDeploymentDataParams,
+  DeclareContractParams,
   WatchAssetParams,
 } from './rpcs';
 import {
   displayPrivateKey,
   estimateFee,
   executeTxn,
+  declareContract,
   signMessage,
   signTransaction,
   signDeclareTransaction,
@@ -49,7 +53,6 @@ import {
   getDeploymentData,
   watchAsset,
 } from './rpcs';
-import { sendTransaction } from './sendTransaction';
 import { signDeployAccountTransaction } from './signDeployAccountTransaction';
 import type {
   ApiParams,
@@ -57,8 +60,15 @@ import type {
   ApiRequestParams,
 } from './types/snapApi';
 import type { SnapState } from './types/snapState';
+import { UserInputEventController } from './ui/controllers/user-input-event-controller';
 import { upgradeAccContract } from './upgradeAccContract';
-import { getDappUrl, isSnapRpcError } from './utils';
+import {
+  ensureJsxSupport,
+  getDappUrl,
+  getStateData,
+  isSnapRpcError,
+  setStateData,
+} from './utils';
 import {
   CAIRO_VERSION_LEGACY,
   PRELOADED_TOKENS,
@@ -92,12 +102,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
     }
 
     // TODO: this will causing racing condition, need to be fixed
-    let state: SnapState = await snap.request({
-      method: 'snap_manageState',
-      params: {
-        operation: 'get',
-      },
-    });
+    let state: SnapState = await getStateData<SnapState>();
     if (!state) {
       state = {
         accContracts: [],
@@ -106,13 +111,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
         transactions: [],
       };
       // initialize state if empty and set default data
-      await snap.request({
-        method: 'snap_manageState',
-        params: {
-          operation: 'update',
-          newState: state,
-        },
-      });
+      await setStateData(state);
     }
 
     // TODO: this can be remove, after state manager is implemented
@@ -184,7 +183,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
 
       case 'starkNet_signDeclareTransaction':
         return await signDeclareTransaction.execute(
-          apiParams as unknown as SignDeclareTransactionParams,
+          apiParams.requestParams as unknown as SignDeclareTransactionParams,
         );
 
       case 'starkNet_signDeployAccountTransaction':
@@ -195,7 +194,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
 
       case 'starkNet_verifySignedMessage':
         return await verifySignature.execute(
-          apiParams as unknown as VerifySignatureParams,
+          apiParams.requestParams as unknown as VerifySignatureParams,
         );
 
       case 'starkNet_getErc20TokenBalance':
@@ -203,12 +202,6 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
 
       case 'starkNet_getTransactionStatus':
         return await getTransactionStatus(apiParams);
-
-      case 'starkNet_sendTransaction':
-        apiParams.keyDeriver = await getAddressKeyDeriver(snap);
-        return await sendTransaction(
-          apiParams as unknown as ApiParamsWithKeyDeriver,
-        );
 
       case 'starkNet_getValue':
         return await getValue(apiParams);
@@ -263,12 +256,6 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
           apiParams.requestParams as unknown as ExecuteTxnParams,
         );
 
-      case 'starkNet_estimateFees':
-        apiParams.keyDeriver = await getAddressKeyDeriver(snap);
-        return await estimateFees(
-          apiParams as unknown as ApiParamsWithKeyDeriver,
-        );
-
       case 'starkNet_upgradeAccContract':
         apiParams.keyDeriver = await getAddressKeyDeriver(snap);
         return upgradeAccContract(
@@ -276,9 +263,8 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
         );
 
       case 'starkNet_declareContract':
-        apiParams.keyDeriver = await getAddressKeyDeriver(snap);
-        return await declareContract(
-          apiParams as unknown as ApiParamsWithKeyDeriver,
+        return await declareContract.execute(
+          apiParams.requestParams as unknown as DeclareContractParams,
         );
 
       case 'starkNet_getStarkName':
@@ -286,7 +272,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
 
       case 'starkNet_getDeploymentData':
         return await getDeploymentData.execute(
-          apiParams as unknown as GetDeploymentDataParams,
+          apiParams.requestParams as unknown as GetDeploymentDataParams,
         );
 
       default:
@@ -307,41 +293,52 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
 };
 
 export const onInstall: OnInstallHandler = async () => {
-  const component = panel([
-    text('Your MetaMask wallet is now compatible with Starknet!'),
-    text(
-      `To manage your Starknet account and send and receive funds, visit the [companion dapp for Starknet](${getDappUrl()}).`,
-    ),
-  ]);
-
-  await snap.request({
-    method: 'snap_dialog',
-    params: {
-      type: 'alert',
-      content: component,
-    },
-  });
+  await ensureJsxSupport(
+    <Box>
+      <Text>Your MetaMask wallet is now compatible with Starknet!</Text>
+      <Text>
+        To manage your Starknet account and send and receive funds, visit the{' '}
+        <Link href={getDappUrl()}>companion dapp for Starknet</Link>.
+      </Text>
+    </Box>,
+  );
 };
 
 export const onUpdate: OnUpdateHandler = async () => {
-  const component = panel([
-    text('Features released with this update:'),
-    text(
-      'Support STRK token for the gas fee in sending transaction and estimating fee.',
-    ),
-    text('Default network changed to mainnet.'),
-    text('Support for multiple consecutive transactions.'),
-  ]);
-
-  await snap.request({
-    method: 'snap_dialog',
-    params: {
-      type: 'alert',
-      content: component,
-    },
-  });
+  await ensureJsxSupport(
+    <Box>
+      <Text>Your Starknet Snap is now up-to-date !</Text>
+      <Text>
+        As usual, to manage your Starknet account and send and receive funds,
+        visit the <Link href={getDappUrl()}>companion dapp for Starknet</Link>.
+      </Text>
+    </Box>,
+  );
 };
 
 export const onHomePage: OnHomePageHandler = async () => {
   return await homePageController.execute();
+};
+
+/**
+ * Handle incoming user events coming from the MetaMask clients open interfaces.
+ *
+ * @param params - The event parameters.
+ * @param params.id - The Snap interface ID where the event was fired.
+ * @param params.event - The event object containing the event type, name, and
+ * value.
+ * @param params.context
+ * @see https://docs.metamask.io/snaps/reference/exports/#onuserinput
+ */
+export const onUserInput: OnUserInputHandler = async ({
+  id,
+  event,
+  context,
+}: {
+  id: string;
+  event: UserInputEvent;
+  context: InterfaceContext | null;
+}): Promise<void> => {
+  const controller = new UserInputEventController(id, event, context);
+  await controller.handleEvent();
 };

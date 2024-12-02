@@ -1,21 +1,18 @@
-import type { DialogResult } from '@metamask/snaps-sdk';
-import { heading, row, text } from '@metamask/snaps-sdk';
-import type { Call, InvocationsSignerDetails } from 'starknet';
+import type { InvocationsSignerDetails } from 'starknet';
 import type { Infer } from 'superstruct';
 import { array, object, string, assign, any } from 'superstruct';
 
+import { renderSignTransactionUI } from '../ui/utils';
 import {
-  confirmDialog,
   AddressStruct,
   AuthorizableStruct,
   BaseRequestStruct,
-  AccountRpcController,
   CallDataStruct,
-  toJson,
   mapDeprecatedParams,
 } from '../utils';
 import { UserRejectedOpError } from '../utils/exceptions';
 import { signTransactions } from '../utils/starknetUtils';
+import { AccountRpcController } from './abstract/account-rpc-controller';
 
 export const SignTransactionRequestStruct = assign(
   object({
@@ -84,10 +81,12 @@ export class SignTransactionRpc extends AccountRpcController<
       // Get Starknet expected not to show the confirm dialog, therefore, `enableAuthorize` will set to false to bypass the confirmation
       // TODO: enableAuthorize should set default to true
       enableAuthorize &&
-      !(await this.getSignTransactionConsensus(
-        address,
-        transactions as unknown as Call[],
-      ))
+      !(await renderSignTransactionUI({
+        senderAddress: address,
+        networkName: this.network.name,
+        chainId: this.network.chainId,
+        transactions,
+      }))
     ) {
       throw new UserRejectedOpError() as unknown as Error;
     }
@@ -97,36 +96,6 @@ export class SignTransactionRpc extends AccountRpcController<
       transactions,
       params.transactionsDetail as unknown as InvocationsSignerDetails,
     )) as SignTransactionResponse;
-  }
-
-  protected async getSignTransactionConsensus(
-    address: string,
-    transactions: Call[],
-  ): Promise<DialogResult> {
-    return await confirmDialog([
-      heading('Do you want to sign this transaction?'),
-      row(
-        'Network',
-        text({
-          value: this.network.name,
-          markdown: false,
-        }),
-      ),
-      row(
-        'Signer Address',
-        text({
-          value: address,
-          markdown: false,
-        }),
-      ),
-      row(
-        'Transactions',
-        text({
-          value: toJson(transactions),
-          markdown: false,
-        }),
-      ),
-    ]);
   }
 }
 

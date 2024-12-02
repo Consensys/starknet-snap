@@ -1,0 +1,168 @@
+name: Deploy Wallet-UI and Get-starknet
+
+on:
+  workflow_dispatch:
+
+jobs:
+  prepare-deployment:
+    environment: production
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.sha }}
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20.x
+      - name: Prepare Parameters 
+        id: prepare_parameters
+        run: |
+          BASE=$(node -p "require('./packages/starknet-snap/package.json').version")
+          
+          {
+            echo "VERSION=${BASE}"
+            echo "ENV=prod"
+            echo "AWS_CLOUDFRONT_DISTRIBUTIONS_ID=${{ vars.AWS_CLOUDFRONT_DISTRIBUTIONS_ID }}"
+            echo "AWS_S3_GET_STARKNET_URL=${{ vars.AWS_S3_GET_STARKNET_URL }}"
+            echo "AWS_S3_URL=${{ vars.AWS_S3_URL }}"
+            echo "GET_STARKNET_PUBLIC_PATH=${{ vars.GET_STARKNET_PUBLIC_PATH }}"
+          } >> "$GITHUB_OUTPUT"
+    outputs:
+      VERSION: ${{ steps.prepare_parameters.outputs.VERSION }}
+      AWS_S3_GET_STARKNET_URL: ${{ steps.prepare_parameters.outputs.AWS_S3_GET_STARKNET_URL }}
+      AWS_CLOUDFRONT_DISTRIBUTIONS_ID: ${{ steps.prepare_parameters.outputs.AWS_CLOUDFRONT_DISTRIBUTIONS_ID }}
+      AWS_S3_URL: ${{ steps.prepare_parameters.outputs.AWS_S3_URL }}
+      GET_STARKNET_PUBLIC_PATH: ${{ steps.prepare_parameters.outputs.GET_STARKNET_PUBLIC_PATH }}
+      CACHE_KEY: ${{ github.sha }}-${{ steps.prepare_parameters.outputs.ENV }}-UI_N_GET_STARKNET
+
+  install-build:
+    needs: 
+      - prepare-deployment
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.sha }}
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20.x
+      - name: Install
+        run: |
+          yarn --no-immutable
+          yarn allow-scripts
+      - name: Build Snap
+        run: |
+          echo "Building UI with version $VERSION"
+          
+          REACT_APP_SNAP_VERSION="${VERSION}" yarn workspace wallet-ui build
+
+          echo "Building Get Starknet with GET_STARKNET_PUBLIC_PATH=$GET_STARKNET_PUBLIC_PATH" 
+
+          SNAP_VERSION="${VERSION}" GET_STARKNET_PUBLIC_PATH=$GET_STARKNET_PUBLIC_PATH yarn workspace @consensys/get-starknet build
+        env:
+          VERSION: ${{ needs.prepare-deployment.outputs.VERSION }}
+          GET_STARKNET_PUBLIC_PATH: ${{ needs.prepare-deployment.outputs.GET_STARKNET_PUBLIC_PATH }}
+      - name: Cache Build
+        uses: actions/cache@v3
+        id: cache
+        with:
+          path: |
+            ./packages/get-starknet/dist/webpack
+            ./packages/wallet-ui/build
+            ./node_modules/.yarn-state.yml
+          key: ${{ needs.prepare-deployment.outputs.CACHE_KEY }}
+
+  deploy-wallet-ui:
+    runs-on: ubuntu-latest
+    needs: 
+      - prepare-deployment
+      - install-build
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-central-1
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.sha }}
+      - name: Restore Cached Build 
+        uses: actions/cache@v3
+        id: restore-build
+        with:
+          path: |
+            ./packages/get-starknet/dist/webpack
+            ./packages/wallet-ui/build
+            ./node_modules/.yarn-state.yml
+          key: ${{ needs.prepare-deployment.outputs.CACHE_KEY }}
+      - name: Deploy to AWS
+        run: | 
+          echo "Deployed Dapp to : $AWS_S3_URL"
+          aws s3 sync ./packages/wallet-ui/build "$AWS_S3_URL"
+        env:
+          AWS_S3_URL: ${{ needs.prepare-deployment.outputs.AWS_S3_URL }}
+
+  deploy-get-starknet:
+    runs-on: ubuntu-latest
+    needs: 
+      - prepare-deployment
+      - install-build
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-central-1
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.sha }}
+      - name: Restore Cached Build 
+        uses: actions/cache@v3
+        id: restore-build
+        with:
+          path: |
+            ./packages/get-starknet/dist/webpack
+            ./packages/wallet-ui/build
+            ./node_modules/.yarn-state.yml
+          key: ${{ needs.prepare-deployment.outputs.CACHE_KEY }}
+      - name: Deploy to AWS
+        run: | 
+          echo "Deployed get Starknet to : $AWS_S3_GET_STARKNET_URL"
+          aws s3 sync ./packages/get-starknet/dist/webpack "$AWS_S3_GET_STARKNET_URL"
+        env:
+          AWS_S3_GET_STARKNET_URL: ${{ needs.prepare-deployment.outputs.AWS_S3_GET_STARKNET_URL }}
+
+  invalid-aws-cdn-cache:
+    runs-on: ubuntu-latest
+    needs: 
+      - deploy-wallet-ui
+      - deploy-get-starknet
+      - prepare-deployment
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-central-1
+      - name: Invalid AWS CDN Cache
+        run: |
+          echo "Distribution ID : $AWS_CLOUDFRONT_DISTRIBUTIONS_ID"
+          echo "$AWS_CLOUDFRONT_DISTRIBUTIONS_ID" | tr ',' '\n' | while read -r DISTRIBUTIONS_ID  
+          do
+              echo "Processing Distribution ID : $DISTRIBUTIONS_ID"
+              INVALIDED_ID="$(aws cloudfront create-invalidation --distribution-id "$DISTRIBUTIONS_ID" --paths "/starknet/*" | grep Id | awk -F'"' '{ print $4}')"
+              echo "Waiting for invalidation $INVALIDED_ID"
+              aws cloudfront wait invalidation-completed --id "$INVALIDED_ID" --distribution-id "$DISTRIBUTIONS_ID"
+              echo "Invalidation $INVALIDED_ID completed"
+          done
+        env: 
+          AWS_CLOUDFRONT_DISTRIBUTIONS_ID: ${{ needs.prepare-deployment.outputs.AWS_CLOUDFRONT_DISTRIBUTIONS_ID }}

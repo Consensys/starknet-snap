@@ -1,20 +1,17 @@
-import type { Component } from '@metamask/snaps-sdk';
-import { heading, row, text } from '@metamask/snaps-sdk';
 import type { Infer } from 'superstruct';
 import { array, object, string, assign } from 'superstruct';
 
+import { renderSignMessageUI } from '../ui/utils';
 import {
-  confirmDialog,
   AddressStruct,
-  toJson,
   TypeDataStruct,
   AuthorizableStruct,
   BaseRequestStruct,
-  AccountRpcController,
   mapDeprecatedParams,
 } from '../utils';
 import { UserRejectedOpError } from '../utils/exceptions';
 import { signMessage as signMessageUtil } from '../utils/starknetUtils';
+import { AccountRpcController } from './abstract/account-rpc-controller';
 
 export const SignMessageRequestStruct = assign(
   object({
@@ -78,7 +75,11 @@ export class SignMessageRpc extends AccountRpcController<
       // Get Starknet expected not to show the confirm dialog, therefore, `enableAuthorize` will set to false to bypass the confirmation
       // TODO: enableAuthorize should set default to true
       enableAuthorize &&
-      !(await this.getSignMessageConsensus(typedDataMessage, address))
+      !(await renderSignMessageUI({
+        address,
+        typedDataMessage,
+        chainId: this.network.chainId,
+      }))
     ) {
       throw new UserRejectedOpError() as unknown as Error;
     }
@@ -88,34 +89,6 @@ export class SignMessageRpc extends AccountRpcController<
       typedDataMessage,
       address,
     );
-  }
-
-  protected async getSignMessageConsensus(
-    typedDataMessage: Infer<typeof TypeDataStruct>,
-    address: string,
-  ) {
-    const components: Component[] = [];
-    components.push(heading('Do you want to sign this message?'));
-    components.push(
-      row(
-        'Message',
-        text({
-          value: toJson(typedDataMessage),
-          markdown: false,
-        }),
-      ),
-    );
-    components.push(
-      row(
-        'Signer Address',
-        text({
-          value: address,
-          markdown: false,
-        }),
-      ),
-    );
-
-    return await confirmDialog(components);
   }
 }
 

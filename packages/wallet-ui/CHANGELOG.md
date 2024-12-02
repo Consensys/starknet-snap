@@ -3,6 +3,25 @@
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
 
+## [1.25.0](https://github.com/Consensys/starknet-snap/compare/wallet-ui-v1.24.1...wallet-ui-v1.25.0) (2024-11-26)
+
+
+### Features
+
+* Add minimum MetaMask version requirements detection. ([#424](https://github.com/Consensys/starknet-snap/issues/424)) ([f6cde30](https://github.com/Consensys/starknet-snap/commit/f6cde302f491f6f2bd4322ce996a699e046fe9ee))
+
+
+### Bug Fixes
+
+* Add missing asset icon for `USDC`, `USDT` and `STRK` token ([#428](https://github.com/Consensys/starknet-snap/issues/428)) ([9f43a22](https://github.com/Consensys/starknet-snap/commit/9f43a228e844ab200984a0b5a1f8ff7bb0d8288d))
+
+## [1.24.1](https://github.com/Consensys/starknet-snap/compare/wallet-ui-v1.24.0...wallet-ui-v1.24.1) (2024-10-28)
+
+
+### Bug Fixes
+
+* Remove Snap dependency on Wallet UI package ([#397](https://github.com/Consensys/starknet-snap/issues/397)) ([c9c1aaf](https://github.com/Consensys/starknet-snap/commit/c9c1aafb45120b7d0767337f300e1ab6ff277ab3))
+
 ## [1.24.0](https://github.com/Consensys/starknet-snap/compare/wallet-ui-v1.23.0...wallet-ui-v1.24.0) (2024-09-20)
 
 

@@ -11,11 +11,7 @@ import {
   InvalidNetworkError,
   UserRejectedOpError,
 } from '../utils/exceptions';
-import {
-  buildDividerComponent,
-  buildRowComponent,
-  prepareConfirmDialog,
-} from './__tests__/helper';
+import { prepareRenderWatchAssetUI } from './__tests__/helper';
 import type { WatchAssetParams } from './watch-asset';
 import { watchAsset } from './watch-asset';
 
@@ -75,7 +71,7 @@ describe('WatchAssetRpc', () => {
     const request = createRequest({
       chainId: network.chainId as unknown as constants.StarknetChainId,
     });
-    const { confirmDialogSpy } = prepareConfirmDialog();
+    const { confirmDialogSpy } = prepareRenderWatchAssetUI();
     const { getNetworkSpy } = mockNetworkStateManager({
       network,
     });
@@ -106,19 +102,17 @@ describe('WatchAssetRpc', () => {
     });
 
     await watchAsset.execute(request);
-
-    expect(confirmDialogSpy).toHaveBeenCalledWith([
-      { type: 'heading', value: 'Do you want to add this token?' },
-      buildRowComponent('Network', network.name),
-      buildDividerComponent(),
-      buildRowComponent('Token Address', request.tokenAddress),
-      buildDividerComponent(),
-      buildRowComponent('Token Name', request.tokenName),
-      buildDividerComponent(),
-      buildRowComponent('Token Symbol', request.tokenSymbol),
-      buildDividerComponent(),
-      buildRowComponent('Token Decimals', request.tokenDecimals.toString()),
-    ]);
+    expect(confirmDialogSpy).toHaveBeenCalledWith({
+      chainId: network.chainId,
+      networkName: network.name,
+      token: {
+        address: request.tokenAddress,
+        chainId: request.chainId,
+        decimals: request.tokenDecimals,
+        name: request.tokenName,
+        symbol: request.tokenSymbol,
+      },
+    });
   });
 
   it('throws `InvalidNetworkError` if the network can not be found', async () => {

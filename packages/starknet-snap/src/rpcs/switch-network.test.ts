@@ -12,7 +12,7 @@ import {
   InvalidRequestParamsError,
   UserRejectedOpError,
 } from '../utils/exceptions';
-import { prepareConfirmDialog } from './__tests__/helper';
+import { prepareRenderSwitchNetworkUI } from './__tests__/helper';
 import { switchNetwork } from './switch-network';
 import type { SwitchNetworkParams } from './switch-network';
 
@@ -116,35 +116,15 @@ describe('switchNetwork', () => {
       currentNetwork,
       network: requestNetwork,
     });
-    const { confirmDialogSpy } = prepareConfirmDialog();
+    const { confirmDialogSpy } = prepareRenderSwitchNetworkUI();
     const request = createRequestParam(requestNetwork.chainId, true);
 
     await switchNetwork.execute(request);
 
-    expect(confirmDialogSpy).toHaveBeenCalledWith([
-      { type: 'heading', value: 'Do you want to switch to this network?' },
-      {
-        type: 'row',
-        label: 'Chain Name',
-        value: {
-          value: requestNetwork.name,
-          markdown: false,
-          type: 'text',
-        },
-      },
-      {
-        type: 'divider',
-      },
-      {
-        type: 'row',
-        label: 'Chain ID',
-        value: {
-          value: requestNetwork.chainId,
-          markdown: false,
-          type: 'text',
-        },
-      },
-    ]);
+    expect(confirmDialogSpy).toHaveBeenCalledWith({
+      chainId: requestNetwork.chainId,
+      name: requestNetwork.name,
+    });
   });
 
   it('throws `UserRejectedRequestError` if user denied the operation', async () => {
@@ -154,7 +134,7 @@ describe('switchNetwork', () => {
       currentNetwork,
       network: requestNetwork,
     });
-    const { confirmDialogSpy } = prepareConfirmDialog();
+    const { confirmDialogSpy } = prepareRenderSwitchNetworkUI();
     confirmDialogSpy.mockResolvedValue(false);
     const request = createRequestParam(requestNetwork.chainId, true);
 
