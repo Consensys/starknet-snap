@@ -470,6 +470,7 @@ describe('StarkScanClient', () => {
       expect(
         client.getSenderAddress({
           ...mockTx,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           sender_address: null,
         }),
       ).toBe('');
