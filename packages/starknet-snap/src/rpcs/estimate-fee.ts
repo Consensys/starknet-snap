@@ -6,11 +6,11 @@ import { FeeTokenUnit } from '../types/snapApi';
 import {
   AddressStruct,
   BaseRequestStruct,
-  AccountRpcController,
   UniversalDetailsStruct,
   InvocationsStruct,
 } from '../utils';
 import { getEstimatedFees } from '../utils/starknetUtils';
+import { AccountRpcController } from './abstract/account-rpc-controller';
 
 export const EstimateFeeRequestStruct = assign(
   object({

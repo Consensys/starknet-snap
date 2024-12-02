@@ -1,5 +1,16 @@
 # Changelog
 
+## [3.0.0](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v2.11.0...starknet-snap-v3.0.0) (2024-11-26)
+
+
+### ⚠ BREAKING CHANGES
+
+* Enable JSX support, 1) Allow users to select the fee token in the execute transaction dialog (#417, #418, #419, #420). 2) Add JSX support and detection (#415, #416). 3) Replace RPC dialogs with JSX-based components ([#422](https://github.com/Consensys/starknet-snap/issues/422))
+
+### Features
+
+* Enable JSX support, 1) Allow users to select the fee token in the execute transaction dialog ([#417](https://github.com/Consensys/starknet-snap/issues/417), [#418](https://github.com/Consensys/starknet-snap/issues/418), [#419](https://github.com/Consensys/starknet-snap/issues/419), [#420](https://github.com/Consensys/starknet-snap/issues/420)). 2) Add JSX support and detection ([#415](https://github.com/Consensys/starknet-snap/issues/415), [#416](https://github.com/Consensys/starknet-snap/issues/416)). 3) Replace RPC dialogs with JSX-based components ([#422](https://github.com/Consensys/starknet-snap/issues/422)) ([abfc0e5](https://github.com/Consensys/starknet-snap/commit/abfc0e52cc5c9c4fc7ec7e04a9ff667acbf99813))
+
 ## [2.11.0](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v2.10.1...starknet-snap-v2.11.0) (2024-10-28)
 
 

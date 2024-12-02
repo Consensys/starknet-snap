@@ -6,12 +6,12 @@ import { renderSignDeclareTransactionUI } from '../ui/utils';
 import {
   AddressStruct,
   BaseRequestStruct,
-  AccountRpcController,
   DeclareSignDetailsStruct,
   mapDeprecatedParams,
 } from '../utils';
 import { UserRejectedOpError } from '../utils/exceptions';
 import { signDeclareTransaction as signDeclareTransactionUtil } from '../utils/starknetUtils';
+import { AccountRpcController } from './abstract/account-rpc-controller';
 
 export const SignDeclareTransactionRequestStruct = assign(
   object({

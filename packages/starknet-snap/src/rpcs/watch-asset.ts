@@ -7,7 +7,6 @@ import type { Erc20Token, Network } from '../types/snapState';
 import { renderWatchAssetUI } from '../ui/utils';
 import {
   BaseRequestStruct,
-  RpcController,
   AddressStruct,
   TokenNameStruct,
   TokenSymbolStruct,
@@ -20,6 +19,7 @@ import {
   UserRejectedOpError,
 } from '../utils/exceptions';
 import { getValidNumber } from '../utils/snapUtils';
+import { RpcController } from './abstract/base-rpc-controller';
 
 export const WatchAssetRequestStruct = assign(
   object({

@@ -18,6 +18,8 @@ module.exports = (env) =>
   merge(common, {
     mode: 'production',
     output: {
+      filename: '[name].[contenthash].js?v=[fullhash]', // Appends a cache-busting query string
+      chunkFilename: '[name].[contenthash].js?v=[fullhash]', // For dynamically imported chunks
       publicPath: process.env.GET_STARKNET_PUBLIC_PATH || 'https://snaps.consensys.io/starknet/get-starknet/v1/',
     },
     plugins: [
