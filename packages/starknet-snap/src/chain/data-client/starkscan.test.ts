@@ -9,8 +9,8 @@ import {
   STARKNET_MAINNET_NETWORK,
   STARKNET_SEPOLIA_TESTNET_NETWORK,
 } from '../../utils/constants';
-import type { StarkScanOptions } from './starkscan';
-import { StarkScanClient, type StarkScanTransaction } from './starkscan';
+import type { StarkScanOptions, StarkScanTransaction } from './starkscan.type';
+import { StarkScanClient } from './starkscan';
 
 describe('StarkScanClient', () => {
   class MockStarkScanClient extends StarkScanClient {
@@ -22,8 +22,8 @@ describe('StarkScanClient', () => {
       return super.baseUrl;
     }
 
-    async get<Resp>(url: string): Promise<Resp> {
-      return super.get<Resp>(url);
+    async submitGetApiRequest<ApiResponse>(request): Promise<ApiResponse> {
+      return await super.submitGetApiRequest<ApiResponse>(request);
     }
   }
 
