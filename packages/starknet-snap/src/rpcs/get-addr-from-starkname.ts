@@ -3,14 +3,10 @@ import { assign, object } from 'superstruct';
 
 import { NetworkStateManager } from '../state/network-state-manager';
 import type { Network } from '../types/snapState';
-import {
-  AddressStruct,
-  BaseRequestStruct,
-  RpcController,
-  StarkNameStruct,
-} from '../utils';
+import { AddressStruct, BaseRequestStruct, StarkNameStruct } from '../utils';
 import { InvalidNetworkError } from '../utils/exceptions';
 import { getAddrFromStarkNameUtil } from '../utils/starknetUtils';
+import { RpcController } from './abstract/base-rpc-controller';
 
 export const GetAddrFromStarkNameRequestStruct = assign(
   object({
