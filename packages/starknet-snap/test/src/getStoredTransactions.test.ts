@@ -55,7 +55,9 @@ describe('Test function: getStoredTransactions', function () {
   });
 
   it('should get the stored transactions of SN_SEPOLIA correctly', async function () {
-    const requestObject: GetStoredTransactionsRequestParams = {};
+    const requestObject: GetStoredTransactionsRequestParams = {
+      chainId: STARKNET_SEPOLIA_TESTNET_NETWORK.chainId,
+    };
     apiParams.requestParams = requestObject;
     const result = await getStoredTransactions(apiParams);
 
@@ -65,9 +67,7 @@ describe('Test function: getStoredTransactions', function () {
   });
 
   it('should get the stored transactions of mainnet correctly', async function () {
-    const requestObject: GetStoredTransactionsRequestParams = {
-      chainId: STARKNET_MAINNET_NETWORK.chainId,
-    };
+    const requestObject: GetStoredTransactionsRequestParams = {};
     apiParams.requestParams = requestObject;
     const result = await getStoredTransactions(apiParams);
     expect(walletStub.rpcStubs.snap_manageState).not.to.have.been.called;

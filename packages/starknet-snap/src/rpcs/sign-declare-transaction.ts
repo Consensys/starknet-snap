@@ -1,23 +1,17 @@
-import type { Component } from '@metamask/snaps-sdk';
-import {
-  heading,
-  row,
-  text,
-  UserRejectedRequestError,
-} from '@metamask/snaps-sdk';
 import type { DeclareSignerDetails } from 'starknet';
 import type { Infer } from 'superstruct';
 import { array, object, string, assign } from 'superstruct';
 
+import { renderSignDeclareTransactionUI } from '../ui/utils';
 import {
-  confirmDialog,
   AddressStruct,
-  toJson,
   BaseRequestStruct,
-  AccountRpcController,
   DeclareSignDetailsStruct,
+  mapDeprecatedParams,
 } from '../utils';
+import { UserRejectedOpError } from '../utils/exceptions';
 import { signDeclareTransaction as signDeclareTransactionUtil } from '../utils/starknetUtils';
+import { AccountRpcController } from './abstract/account-rpc-controller';
 
 export const SignDeclareTransactionRequestStruct = assign(
   object({
@@ -48,6 +42,22 @@ export class SignDeclareTransactionRpc extends AccountRpcController<
 
   protected responseStruct = SignDeclareTransactionResponseStruct;
 
+  protected async preExecute(
+    params: SignDeclareTransactionParams,
+  ): Promise<void> {
+    // Define mappings to ensure backward compatibility with previous versions of the API.
+    // These mappings replace deprecated parameter names with the updated equivalents,
+    // allowing older integrations to function without changes
+    const paramMappings: Record<string, string> = {
+      signerAddress: 'address',
+      transaction: 'details',
+    };
+
+    // Apply the mappings to params
+    mapDeprecatedParams(params, paramMappings);
+    await super.preExecute(params);
+  }
+
   /**
    * Execute the sign declare transaction request handler.
    * It will show a confirmation dialog to the user before signing the declare transaction.
@@ -69,51 +79,21 @@ export class SignDeclareTransactionRpc extends AccountRpcController<
     params: SignDeclareTransactionParams,
   ): Promise<SignDeclareTransactionResponse> {
     const { details } = params;
-    if (!(await this.getSignDeclareTransactionConsensus(details))) {
-      throw new UserRejectedRequestError() as unknown as Error;
+    if (
+      !(await renderSignDeclareTransactionUI({
+        senderAddress: details.senderAddress,
+        networkName: this.network.name,
+        chainId: this.network.chainId,
+        declareTransactions: details,
+      }))
+    ) {
+      throw new UserRejectedOpError() as unknown as Error;
     }
 
     return (await signDeclareTransactionUtil(
       this.account.privateKey,
       details as unknown as DeclareSignerDetails,
     )) as unknown as SignDeclareTransactionResponse;
-  }
-
-  protected async getSignDeclareTransactionConsensus(
-    details: Infer<typeof DeclareSignDetailsStruct>,
-  ) {
-    const components: Component[] = [];
-    components.push(heading('Do you want to sign this transaction?'));
-    components.push(
-      row(
-        'Network',
-        text({
-          value: this.network.name,
-          markdown: false,
-        }),
-      ),
-    );
-    components.push(
-      row(
-        'Signer Address',
-        text({
-          value: details.senderAddress,
-          markdown: false,
-        }),
-      ),
-    );
-
-    components.push(
-      row(
-        'Declare Transaction Details',
-        text({
-          value: toJson(details),
-          markdown: false,
-        }),
-      ),
-    );
-
-    return await confirmDialog(components);
   }
 }
 

@@ -1,74 +1,28 @@
-import {
-  TransactionType,
-  type TransactionFinalityStatus,
-  type TransactionExecutionStatus,
-  constants,
-} from 'starknet';
+import { TransactionType, constants } from 'starknet';
+import type { Struct } from 'superstruct';
 
 import type {
   Network,
   Transaction,
   TranscationAccountCall,
 } from '../../types/snapState';
+import { InvalidNetworkError } from '../../utils/exceptions';
+import type { HttpHeaders } from '../api-client';
+import { ApiClient, HttpMethod } from '../api-client';
 import type { IDataClient } from '../data-client';
+import type { StarkScanTransactionsResponse } from './starkscan.type';
+import {
+  type StarkScanAccountCall,
+  type StarkScanTransaction,
+  type StarkScanOptions,
+  StarkScanTransactionsResponseStruct,
+} from './starkscan.type';
 
-/* eslint-disable */
-export type StarkScanTransaction = {
-  transaction_hash: string;
-  block_hash: string;
-  block_number: number;
-  transaction_index: number;
-  transaction_status: string;
-  transaction_finality_status: TransactionExecutionStatus;
-  transaction_execution_status: TransactionFinalityStatus;
-  transaction_type: TransactionType;
-  version: number;
-  signature: string[];
-  max_fee: string;
-  actual_fee: string;
-  nonce: string;
-  contract_address: string | null;
-  entry_point_selector: string | null;
-  entry_point_type: string | null;
-  calldata: string[];
-  class_hash: string | null;
-  sender_address: string | null;
-  constructor_calldata: string[] | null;
-  contract_address_salt: string | null;
-  timestamp: number;
-  entry_point_selector_name: string;
-  number_of_events: number;
-  revert_error: string | null;
-  account_calls: StarkScanAccountCall[];
-};
+export class StarkScanClient extends ApiClient implements IDataClient {
+  apiClientName = 'StarkScanClient';
 
-export type StarkScanAccountCall = {
-  block_hash: string;
-  block_number: number;
-  transaction_hash: string;
-  caller_address: string;
-  contract_address: string;
-  calldata: string[];
-  result: string[];
-  timestamp: number;
-  call_type: string;
-  class_hash: string;
-  selector: string;
-  entry_point_type: string;
-  selector_name: string;
-};
+  protected limit = 100;
 
-export type StarkScanTransactionsResponse = {
-  next_url: string | null;
-  data: StarkScanTransaction[];
-};
-
-export type StarkScanOptions = {
-  apiKey: string;
-};
-/* eslint-enable */
-
-export class StarkScanClient implements IDataClient {
   protected network: Network;
 
   protected options: StarkScanOptions;
@@ -76,6 +30,7 @@ export class StarkScanClient implements IDataClient {
   protected deploySelectorName = 'constructor';
 
   constructor(network: Network, options: StarkScanOptions) {
+    super();
     this.network = network;
     this.options = options;
   }
@@ -87,7 +42,7 @@ export class StarkScanClient implements IDataClient {
       case constants.StarknetChainId.SN_MAIN:
         return 'https://api.starkscan.co/api/v0';
       default:
-        throw new Error(`Invalid Network`);
+        throw new InvalidNetworkError();
     }
   }
 
@@ -95,22 +50,30 @@ export class StarkScanClient implements IDataClient {
     return `${this.baseUrl}${endpoint}`;
   }
 
-  protected getCredential(): Record<string, string> {
+  protected getHttpHeaders(): HttpHeaders {
     return {
       'x-api-key': this.options.apiKey,
     };
   }
 
-  protected async get<Resp>(url: string): Promise<Resp> {
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: this.getCredential(),
+  protected async sendApiRequest<ApiResponse>({
+    apiUrl,
+    responseStruct,
+    requestName,
+  }: {
+    apiUrl: string;
+    responseStruct: Struct;
+    requestName: string;
+  }): Promise<ApiResponse> {
+    return await super.sendHttpRequest<ApiResponse>({
+      request: this.buildHttpRequest({
+        method: HttpMethod.Get,
+        url: apiUrl,
+        headers: this.getHttpHeaders(),
+      }),
+      responseStruct,
+      requestName,
     });
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch data: ${response.statusText}`);
-    }
-    return response.json() as unknown as Resp;
   }
 
   /**
@@ -118,15 +81,12 @@ export class StarkScanClient implements IDataClient {
    * The transactions are fetched in descending order and it will include the deploy transaction.
    *
    * @param address - The address of the contract to fetch the transactions for.
-   * @param tillTo - The timestamp to fetch the transactions until.
+   * @param to - The filter includes transactions with a timestamp that is >= a specified value, but the deploy transaction is always included regardless of its timestamp.
    * @returns A Promise that resolve an array of Transaction object.
    */
-  async getTransactions(
-    address: string,
-    tillTo: number,
-  ): Promise<Transaction[]> {
+  async getTransactions(address: string, to: number): Promise<Transaction[]> {
     let apiUrl = this.getApiUrl(
-      `/transactions?contract_address=${address}&order_by=desc&limit=100`,
+      `/transactions?contract_address=${address}&order_by=desc&limit=${this.limit}`,
     );
 
     const txs: Transaction[] = [];
@@ -134,13 +94,18 @@ export class StarkScanClient implements IDataClient {
     let process = true;
     let timestamp = 0;
 
-    // Fetch the transactions if:
-    // - the timestamp is greater than the `tillTo` AND
+    // Scan the transactions in descending order by timestamp
+    // Include the transaction if:
+    // - it's timestamp is greater than the `tillTo` AND
     // - there is an next data to fetch
-    while (process && (timestamp === 0 || timestamp >= tillTo)) {
+    while (process && (timestamp === 0 || timestamp >= to)) {
       process = false;
 
-      const result = await this.get<StarkScanTransactionsResponse>(apiUrl);
+      const result = await this.sendApiRequest<StarkScanTransactionsResponse>({
+        apiUrl,
+        responseStruct: StarkScanTransactionsResponseStruct,
+        requestName: 'getTransactions',
+      });
 
       for (const data of result.data) {
         const tx = this.toTransaction(data);
@@ -151,10 +116,16 @@ export class StarkScanClient implements IDataClient {
         }
 
         timestamp = tx.timestamp;
-        // If the timestamp is smaller than the `tillTo`
-        // We don't need those records
-        // But if the record is an deploy transaction, we should include it to reduce the number of requests
-        if (timestamp >= tillTo || isDeployTx) {
+        // Only include the records that newer than or equal to the `to` timestamp from the same batch of result
+        // If there is an deploy transaction from the result, it should included too.
+        // e.g
+        // to: 1000
+        // [
+        //   { timestamp: 1100, transaction_type: "invoke"  }, <-- include
+        //   { timestamp: 900, transaction_type: "invoke" }, <-- exclude
+        //   { timestamp: 100, transaction_type: "deploy" }  <-- include
+        // ]
+        if (timestamp >= to || isDeployTx) {
           txs.push(tx);
         }
       }
@@ -165,7 +136,9 @@ export class StarkScanClient implements IDataClient {
       }
     }
 
-    // If the deploy transaction is not found from above traverse, we need to fetch it separately
+    // In case no deploy transaction found from above,
+    // then scan the transactions in asc order by timestamp,
+    // the deploy transaction should usually be the first transaction from the list
     if (!deployTxFound) {
       const deployTx = await this.getDeployTransaction(address);
       deployTx && txs.push(deployTx);
@@ -187,7 +160,11 @@ export class StarkScanClient implements IDataClient {
       `/transactions?contract_address=${address}&order_by=asc&limit=5`,
     );
 
-    const result = await this.get<StarkScanTransactionsResponse>(apiUrl);
+    const result = await this.sendApiRequest<StarkScanTransactionsResponse>({
+      apiUrl,
+      responseStruct: StarkScanTransactionsResponseStruct,
+      requestName: 'getTransactions',
+    });
 
     for (const data of result.data) {
       if (this.isDeployTransaction(data)) {
@@ -202,54 +179,74 @@ export class StarkScanClient implements IDataClient {
     return tx.transaction_type === TransactionType.DEPLOY_ACCOUNT;
   }
 
-  protected isFundTransferTransaction(call: StarkScanAccountCall): boolean {
-    return call.selector_name === 'transfer';
+  protected isFundTransferTransaction(entrypoint: string): boolean {
+    return entrypoint === 'transfer';
   }
 
-  protected toTransaction(tx: StarkScanTransaction): Transaction {
-    let sender = tx.sender_address ?? '';
+  protected getContractAddress(tx: StarkScanTransaction): string {
+    // backfill the contract address if it is null
+    return tx.contract_address ?? '';
+  }
 
-    // account_calls representing the calls to invoke from the account contract, it can be multiple
-    const accountCalls = this.toAccountCall(tx.account_calls);
+  protected getSenderAddress(tx: StarkScanTransaction): string {
+    let sender = tx.sender_address;
 
-    // eslint-disable-next-line no-negated-condition
     if (this.isDeployTransaction(tx)) {
-      // In case of deploy transaction, the contract address is the sender address
+      // if it is a deploy transaction, the contract address is the sender address
       sender = tx.contract_address as unknown as string;
     }
 
-    /* eslint-disable */
-    return {
-      txnHash: tx.transaction_hash,
-      txnType: tx.transaction_type,
-      chainId: this.network.chainId,
-      senderAddress: sender,
+    // backfill the sender address if it is null
+    return sender ?? '';
+  }
 
-      // In case of deploy transaction, the contract address is the sender address, else it will be empty string
-      contractAddress: tx.contract_address ?? '',
-      // TODO: when multiple calls are supported, we move this to accountCalls
-      contractFuncName: '',
-      // TODO: when multiple calls are supported, we move this to accountCalls
-      contractCallData: tx.calldata ?? [],
-      timestamp: tx.timestamp,
-      finalityStatus: tx.transaction_finality_status,
-      executionStatus: tx.transaction_execution_status,
-      failureReason: tx.revert_error ?? '',
-      maxFee: tx.max_fee,
-      actualFee: tx.actual_fee,
-      accountCalls: accountCalls,
+  protected toTransaction(tx: StarkScanTransaction): Transaction {
+    /* eslint-disable @typescript-eslint/naming-convention */
+    const {
+      transaction_hash: txnHash,
+      transaction_type: txnType,
+      timestamp,
+      transaction_finality_status: finalityStatus,
+      transaction_execution_status: executionStatus,
+      max_fee: maxFee,
+      actual_fee: actualFee,
+      revert_error: failureReason,
+      account_calls: calls,
+      version,
+    } = tx;
+
+    // account_calls representing the calls to invoke from the account contract, it can be multiple
+    // If the transaction is a deploy transaction, the account_calls is a empty array
+    const accountCalls = this.toAccountCall(calls);
+
+    return {
+      txnHash,
+      txnType,
+      chainId: this.network.chainId,
+      senderAddress: this.getSenderAddress(tx),
+      timestamp,
+      finalityStatus,
+      executionStatus,
+      maxFee,
+      actualFee,
+      contractAddress: this.getContractAddress(tx),
+      accountCalls,
+      failureReason: failureReason ?? '',
+      version,
+      dataVersion: 'V2',
     };
+
     /* eslint-enable */
   }
 
   protected toAccountCall(
-    calls: StarkScanAccountCall[],
+    accountCalls: StarkScanAccountCall[],
   ): Record<string, TranscationAccountCall[]> | null {
-    if (!calls || calls.length === 0) {
+    if (!accountCalls || accountCalls.length === 0) {
       return null;
     }
 
-    return calls.reduce(
+    return accountCalls.reduce(
       (
         data: Record<string, TranscationAccountCall[]>,
         accountCallArg: StarkScanAccountCall,
@@ -270,7 +267,7 @@ export class StarkScanClient implements IDataClient {
           contractCallData,
         };
 
-        if (this.isFundTransferTransaction(accountCallArg)) {
+        if (this.isFundTransferTransaction(contractFuncName)) {
           accountCall.recipient = accountCallArg.calldata[0];
           accountCall.amount = accountCallArg.calldata[1];
         }

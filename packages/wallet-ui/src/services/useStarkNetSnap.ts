@@ -48,7 +48,7 @@ export const useStarkNetSnap = () => {
   );
   const snapId = process.env.REACT_APP_SNAP_ID
     ? process.env.REACT_APP_SNAP_ID
-    : 'local:http://localhost:8081/';
+    : 'local:http://localhost:8081';
   const snapVersion = process.env.REACT_APP_SNAP_VERSION
     ? process.env.REACT_APP_SNAP_VERSION
     : '*';
@@ -712,15 +712,13 @@ export const useStarkNetSnap = () => {
         },
       });
       return {
-        balanceLatest: BigNumber.from(response.balanceLatest),
-        balancePending: BigNumber.from(response.balancePending),
+        balance: BigNumber.from(response.balancePending),
       };
     } catch (err) {
       //eslint-disable-next-line no-console
       console.error(err);
       return {
-        balanceLatest: BigNumber.from('0x0'),
-        balancePending: BigNumber.from('0x0'),
+        balance: BigNumber.from('0x0'),
       };
     }
   };

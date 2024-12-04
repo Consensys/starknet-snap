@@ -37,7 +37,9 @@ describe('Test function: getStoredErc20Tokens', function () {
   });
 
   it('should get the stored ERC-20 tokens correctly', async function () {
-    const requestObject: GetStoredErc20TokensRequestParams = {};
+    const requestObject: GetStoredErc20TokensRequestParams = {
+      chainId: STARKNET_SEPOLIA_TESTNET_NETWORK.chainId,
+    };
     apiParams.requestParams = requestObject;
     const result = await getStoredErc20Tokens(apiParams);
     expect(walletStub.rpcStubs.snap_manageState).not.to.have.been.called;
@@ -47,7 +49,9 @@ describe('Test function: getStoredErc20Tokens', function () {
 
   it('should throw error if getErc20Tokens failed', async function () {
     sandbox.stub(snapUtils, 'getErc20Tokens').throws(new Error());
-    const requestObject: GetStoredErc20TokensRequestParams = {};
+    const requestObject: GetStoredErc20TokensRequestParams = {
+      chainId: STARKNET_SEPOLIA_TESTNET_NETWORK.chainId,
+    };
     apiParams.requestParams = requestObject;
 
     let result;

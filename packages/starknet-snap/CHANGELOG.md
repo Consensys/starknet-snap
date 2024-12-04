@@ -1,5 +1,50 @@
 # Changelog
 
+## [3.0.0](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v2.11.0...starknet-snap-v3.0.0) (2024-11-26)
+
+
+### ⚠ BREAKING CHANGES
+
+* Enable JSX support, 1) Allow users to select the fee token in the execute transaction dialog (#417, #418, #419, #420). 2) Add JSX support and detection (#415, #416). 3) Replace RPC dialogs with JSX-based components ([#422](https://github.com/Consensys/starknet-snap/issues/422))
+
+### Features
+
+* Enable JSX support, 1) Allow users to select the fee token in the execute transaction dialog ([#417](https://github.com/Consensys/starknet-snap/issues/417), [#418](https://github.com/Consensys/starknet-snap/issues/418), [#419](https://github.com/Consensys/starknet-snap/issues/419), [#420](https://github.com/Consensys/starknet-snap/issues/420)). 2) Add JSX support and detection ([#415](https://github.com/Consensys/starknet-snap/issues/415), [#416](https://github.com/Consensys/starknet-snap/issues/416)). 3) Replace RPC dialogs with JSX-based components ([#422](https://github.com/Consensys/starknet-snap/issues/422)) ([abfc0e5](https://github.com/Consensys/starknet-snap/commit/abfc0e52cc5c9c4fc7ec7e04a9ff667acbf99813))
+
+## [2.11.0](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v2.10.1...starknet-snap-v2.11.0) (2024-10-28)
+
+
+### Features
+
+* Add custom error code to meet get-starknet v4 exception format ([#374](https://github.com/Consensys/starknet-snap/issues/374)) ([e61eb8b](https://github.com/Consensys/starknet-snap/commit/e61eb8bb4b7b1e2af50ed02bbdd4dac517867710))
+* Add new RPC `starkNet_getDeploymentData` to support get-starknet v4 ([#381](https://github.com/Consensys/starknet-snap/issues/381)) ([a034bcf](https://github.com/Consensys/starknet-snap/commit/a034bcfb3b60242559e57f7ffbba9a7359444f1f))
+* Add UI divider and hyperlink the address to the explorer on the UI dialog ([#405](https://github.com/Consensys/starknet-snap/issues/405), [#404](https://github.com/Consensys/starknet-snap/issues/404)) ([a77fede](https://github.com/Consensys/starknet-snap/commit/a77fedebcc3674549b117eb865d500c6d5209c7f))
+* Refactor RPC `starkNet_addErc20Token` to have superstruct validation ([#388](https://github.com/Consensys/starknet-snap/issues/388)) ([157b5ad](https://github.com/Consensys/starknet-snap/commit/157b5ad2930fe4dfa0c154596c942c295d9c4d99))
+* Refactor RPC `starkNet_declareContract` to have superstruct validation ([#398](https://github.com/Consensys/starknet-snap/issues/398)) ([5617ccf](https://github.com/Consensys/starknet-snap/commit/5617ccf85af58943313ef81bf3a03deed0c4eb0f))
+* Refactor RPC `starkNet_switchNetwork` to have superstruct validation ([#369](https://github.com/Consensys/starknet-snap/issues/369), [#373](https://github.com/Consensys/starknet-snap/issues/373), [#368](https://github.com/Consensys/starknet-snap/issues/368)) ([d0384bf](https://github.com/Consensys/starknet-snap/commit/d0384bf9c9476c2168586cf7dc48fe6adb965bcb))
+
+
+### Bug Fixes
+
+* Fix incorrect params passed to RPCs `starkNet_signDeclareTransaction`, `starkNet_verifySignedMessage`, `starkNet_declareContract` and `starkNet_getDeploymentData` ([#401](https://github.com/Consensys/starknet-snap/issues/401)) ([a834beb](https://github.com/Consensys/starknet-snap/commit/a834beb4bc0bb42f2f21b50f1cbb5a961e938b1e))
+* Fix RPC `starkNet_executeTxn` storing in-correct state data if the params `calls`  is not an array ([#376](https://github.com/Consensys/starknet-snap/issues/376)) ([508b958](https://github.com/Consensys/starknet-snap/commit/508b9584b534bd93235296fd36328fbaaa52334b))
+
+## [2.10.1](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v2.10.0...starknet-snap-v2.10.1) (2024-10-02)
+
+
+### Bug Fixes
+
+* fix snap homepage screen error if the logger is not initialised ([#363](https://github.com/Consensys/starknet-snap/issues/363)) ([6117509](https://github.com/Consensys/starknet-snap/commit/61175090256aa3d614b0e850947e0f90b5e05908))
+
+## [2.10.0](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v2.9.0...starknet-snap-v2.10.0) (2024-09-20)
+
+
+### Features
+
+* support STRK token for the gas fee in sending transaction and estimate fee ([#271](https://github.com/Consensys/starknet-snap/issues/271)) ([8f50a33](https://github.com/Consensys/starknet-snap/commit/8f50a33ca7cdce88c6853ce1945cd7f7a7b24fae))
+* change default network to mainnet ([#357](https://github.com/Consensys/starknet-snap/issues/357)) ([b2eccb7](https://github.com/Consensys/starknet-snap/commit/b2eccb74e958d2087917484469cb2139e2f537b7))
+* bump starknet.js to v6.11.0 ([#296](https://github.com/Consensys/starknet-snap/issues/296)) ([e298244](https://github.com/Consensys/starknet-snap/commit/e298244a5e68e2809ab6367330e104c53ca5c861))
+* allow multiple consecutive transactions ([#289](https://github.com/Consensys/starknet-snap/issues/289)) ([5a501f9](https://github.com/Consensys/starknet-snap/commit/5a501f9aae7c3cdf041f479eac38f4a1e82855e9))
 
 ## [2.9.0](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v2.8.0...starknet-snap-v2.9.0) (2024-07-16)
 

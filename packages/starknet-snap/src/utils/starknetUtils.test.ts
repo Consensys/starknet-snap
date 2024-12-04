@@ -1,7 +1,7 @@
 import type { EstimateFee, Invocations } from 'starknet';
 import { constants, TransactionType } from 'starknet';
 
-import { getEstimateFees } from '../__tests__/helper';
+import { generateEstimateFeesResponse } from '../__tests__/helper';
 import { mockAccount, prepareMockAccount } from '../rpcs/__tests__/helper';
 import { FeeTokenUnit } from '../types/snapApi';
 import type { SnapState } from '../types/snapState';
@@ -40,7 +40,7 @@ describe('getEstimatedFees', () => {
     const accountDeployedSpy = jest.spyOn(starknetUtils, 'isAccountDeployed');
     accountDeployedSpy.mockResolvedValue(deployed);
 
-    const estimateResults = getEstimateFees();
+    const estimateResults = generateEstimateFeesResponse();
     const { resourceBounds } = estimateResults[0];
 
     const estimateFeeResp = {

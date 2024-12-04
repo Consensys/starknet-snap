@@ -70,7 +70,7 @@ import {
   BlockIdentifierEnum,
 } from './constants';
 import { DeployRequiredError, UpgradeRequiredError } from './exceptions';
-import { hexToString } from './formatterUtils';
+import { hexToString } from './formatter-utils';
 import { getAddressKey } from './keyPair';
 import { logger } from './logger';
 import { toJson } from './serializer';

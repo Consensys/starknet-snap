@@ -47,10 +47,10 @@ describe('Test function: getStoredNetworks', function () {
     expect(result).to.be.eql(STARKNET_MAINNET_NETWORK);
   });
 
-  it('should get STARKNET_SEPOLIA_TESTNET_NETWORK if current network is undefined', async function () {
+  it('should get STARKNET_MAINNET_NETWORK if current network is undefined', async function () {
     state.currentNetwork = undefined;
     const result = await getCurrentNetwork(apiParams);
     expect(stateStub).not.to.have.been.called;
-    expect(result).to.be.eql(STARKNET_SEPOLIA_TESTNET_NETWORK);
+    expect(result).to.be.eql(STARKNET_MAINNET_NETWORK);
   });
 });

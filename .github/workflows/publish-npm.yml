@@ -1,0 +1,147 @@
+name: Publish NPM
+
+on:
+  workflow_dispatch:
+
+jobs:
+  prepare-deployment:
+    environment: production
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.sha }}
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20.x
+      - name: Prepare Parameters 
+        id: prepare_parameters
+        run: |
+          BASE=$(node -p "require('./packages/starknet-snap/package.json').version")
+
+          {
+            echo "VERSION=${BASE}"
+            echo "TAG=latest"
+            echo "ENV=prod"
+            echo "LOG_LEVEL=0"
+          } >> "$GITHUB_OUTPUT"
+        
+    outputs:
+      VERSION: ${{ steps.prepare_parameters.outputs.VERSION }}
+      TAG: ${{ steps.prepare_parameters.outputs.TAG }}
+      ENV: ${{ steps.prepare_parameters.outputs.ENV }}
+      CACHE_KEY: ${{ github.sha }}-${{ steps.prepare_parameters.outputs.ENV }}-SANP
+      LOG_LEVEL: ${{ steps.prepare_parameters.outputs.LOG_LEVEL }}
+
+  install-build:
+    needs: 
+      - prepare-deployment
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.sha }}
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20.x
+      - name: Install
+        run: |
+          yarn --no-immutable
+          yarn allow-scripts
+      - name: Build Snap
+        run: |
+          echo "Building Snap with version $VERSION"
+
+          npm --prefix ./packages/starknet-snap version --new-version "$VERSION" --no-git-tag-version --allow-same-version
+
+          yarn workspace @consensys/starknet-snap build
+
+          BUILD_VERSION=$(node -p "require('./packages/starknet-snap/package.json').version")
+          
+          if [[ "$VERSION" != "$BUILD_VERSION" ]]; then
+            echo "Version mismatch"
+            exit 1
+          fi
+        env:
+          SNAP_ENV: ${{ needs.prepare-deployment.outputs.ENV }}
+          VERSION: ${{ needs.prepare-deployment.outputs.VERSION }}
+          LOG_LEVEL: ${{ needs.prepare-deployment.outputs.LOG_LEVEL }}
+          VOYAGER_API_KEY: ${{ secrets.VOYAGER_API_KEY }}
+          ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
+      - name: Cache Build
+        uses: actions/cache@v3
+        id: cache
+        with:
+          path: |
+            ./packages/starknet-snap/package.json
+            ./packages/starknet-snap/dist
+            ./packages/starknet-snap/snap.manifest.json
+            ./node_modules/.yarn-state.yml
+          key: ${{ needs.prepare-deployment.outputs.CACHE_KEY }}
+
+  publish-npm-dry-run:
+    runs-on: ubuntu-latest
+    needs: 
+      - prepare-deployment
+      - install-build
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.sha }}
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20.x
+      - name: Restore Cached Build
+        uses: actions/cache@v3
+        id: restore-build
+        with:
+          # add /packages/snap/snap.manifest.json to include an updated shasum from build due to version update in auto PR
+          path: |
+            ./packages/starknet-snap/package.json
+            ./packages/starknet-snap/dist
+            ./packages/starknet-snap/snap.manifest.json
+            ./node_modules/.yarn-state.yml
+          key: ${{ needs.prepare-deployment.outputs.CACHE_KEY }}
+      - name: Dry Run Publish
+        run: |
+          npm pack ./packages/starknet-snap --tag "$TAG" --access public
+        env:
+          TAG: ${{ needs.prepare-deployment.outputs.TAG }}
+
+  publish-npm:
+    runs-on: ubuntu-latest
+    needs: 
+      - publish-npm-dry-run
+      - prepare-deployment
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '20.x'
+          registry-url: 'https://registry.npmjs.org'
+      - name: Restore Cached Build 
+        uses: actions/cache@v3
+        id: restore-build
+        with:
+          # add /packages/snap/snap.manifest.json to include an updated shasum from build due to version update in auto PR
+          path: |
+            ./packages/starknet-snap/package.json
+            ./packages/starknet-snap/dist
+            ./packages/starknet-snap/snap.manifest.json
+            ./node_modules/.yarn-state.yml
+          key: ${{ needs.prepare-deployment.outputs.CACHE_KEY }}
+      - name: Run Publish
+        run: |
+          npm publish ./packages/starknet-snap --tag "$TAG" --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          TAG: ${{ needs.prepare-deployment.outputs.TAG }}

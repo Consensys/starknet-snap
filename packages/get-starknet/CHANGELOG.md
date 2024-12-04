@@ -1,5 +1,26 @@
 # Changelog
 
+## [1.3.0](https://github.com/Consensys/starknet-snap/compare/get-starknet-v1.2.0...get-starknet-v1.3.0) (2024-10-28)
+
+
+### Features
+
+* Add backward compatible with get-starknet v3 ([#400](https://github.com/Consensys/starknet-snap/issues/400)) ([8bf8463](https://github.com/Consensys/starknet-snap/commit/8bf8463e0aefd3eb9e59f3cbcb44493e5de2fb5f))
+* Add get-starknet v4 support ([#400](https://github.com/Consensys/starknet-snap/issues/400)) ([8bf8463](https://github.com/Consensys/starknet-snap/commit/8bf8463e0aefd3eb9e59f3cbcb44493e5de2fb5f))
+
+
+### Bug Fixes
+
+* Fix address not update when network change ([#366](https://github.com/Consensys/starknet-snap/issues/366)) ([c96f75e](https://github.com/Consensys/starknet-snap/commit/c96f75eb6c95b76513e3a0488d7ccdb3d59e5a71))
+* Remove 'Method not supported' exception in 'on' and 'off' event handlers for get-starknet v4 compatibility ([#402](https://github.com/Consensys/starknet-snap/issues/402)) ([bd6b66d](https://github.com/Consensys/starknet-snap/commit/bd6b66d2cba8382711adbe6a6312f295e22c64b6))
+
+## [1.2.0](https://github.com/Consensys/starknet-snap/compare/get-starknet-v1.1.0...get-starknet-v1.2.0) (2024-09-20)
+
+
+### Features
+
+* bump starknet.js to v6.11.0 ([#296](https://github.com/Consensys/starknet-snap/issues/296)) ([e298244](https://github.com/Consensys/starknet-snap/commit/e298244a5e68e2809ab6367330e104c53ca5c861))
+
 ## [1.1.0](https://github.com/Consensys/starknet-snap/compare/get-starknet-v1.0.0...get-starknet-v1.1.0) (2024-07-16)
 
 

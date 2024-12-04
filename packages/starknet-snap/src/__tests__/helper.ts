@@ -2,6 +2,8 @@ import {
   BIP44CoinTypeNode,
   getBIP44AddressKeyDeriver,
 } from '@metamask/key-tree';
+import type { UserInputEvent } from '@metamask/snaps-sdk';
+import { UserInputEventType } from '@metamask/snaps-sdk';
 import { generateMnemonic } from 'bip39';
 import { getRandomValues } from 'crypto';
 import type { constants, EstimateFee } from 'starknet';
@@ -15,12 +17,18 @@ import {
   TransactionExecutionStatus,
   TransactionType,
 } from 'starknet';
+import { v4 as uuidv4 } from 'uuid';
 
 import type {
   StarkScanTransaction,
   StarkScanTransactionsResponse,
-} from '../chain/data-client/starkscan';
-import type { AccContract, Transaction } from '../types/snapState';
+} from '../chain/data-client/starkscan.type';
+import { FeeToken } from '../types/snapApi';
+import type {
+  AccContract,
+  Transaction,
+  TransactionRequest,
+} from '../types/snapState';
 import {
   ACCOUNT_CLASS_HASH,
   ACCOUNT_CLASS_HASH_LEGACY,
@@ -77,8 +85,8 @@ export async function generateBip44Entropy(mnemonic: string, coinType = 9004) {
  * @returns An array of StarknetAccount object.
  */
 export async function generateAccounts(
-  network: constants.StarknetChainId,
-  cnt = 1,
+  network: constants.StarknetChainId | string,
+  cnt: number = 1,
   cairoVersion = '1',
   mnemonic?: string,
 ) {
@@ -306,6 +314,77 @@ export function generateTransactions({
   return transactions.sort((a, b) => b.timestamp - a.timestamp);
 }
 
+export function generateTransactionRequests({
+  chainId,
+  address,
+  selectedFeeTokens = Object.values(FeeToken),
+  contractAddresses = PRELOADED_TOKENS.map((token) => token.address),
+  cnt = 1,
+}: {
+  chainId: constants.StarknetChainId | string;
+  address: string;
+  selectedFeeTokens?: FeeToken[];
+  contractAddresses?: string[];
+  cnt?: number;
+}): TransactionRequest[] {
+  const request = {
+    chainId: chainId,
+    id: '',
+    interfaceId: '',
+    type: '',
+    signer: '',
+    maxFee: '',
+    calls: [],
+    feeToken: '',
+  };
+  const requests: TransactionRequest[] = [];
+
+  for (let i = 0; i < cnt; i++) {
+    requests.push({
+      ...request,
+      id: uuidv4(),
+      interfaceId: uuidv4(),
+      type: TransactionType.INVOKE,
+      networkName: 'Sepolia',
+      signer: address,
+      addressIndex: 0,
+      maxFee: '100',
+      selectedFeeToken:
+        selectedFeeTokens[
+          Math.floor(generateRandomValue() * selectedFeeTokens.length)
+        ],
+      calls: [
+        {
+          contractAddress:
+            contractAddresses[
+              Math.floor(generateRandomValue() * contractAddresses.length)
+            ],
+          calldata: CallData.compile({
+            to: address,
+            amount: '1',
+          }),
+          entrypoint: 'transfer',
+        },
+      ],
+      includeDeploy: false,
+      resourceBounds: [
+        {
+          l1_gas: {
+            max_amount: '0',
+            max_price_per_unit: '0',
+          },
+          l2_gas: {
+            max_amount: '0',
+            max_price_per_unit: '0',
+          },
+        },
+      ],
+    });
+  }
+
+  return requests;
+}
+
 /**
  * Method to generate starkscan transactions.
  *
@@ -317,7 +396,7 @@ export function generateTransactions({
  * @param params.cnt - Number of transaction to generate.
  * @returns An array of transaction object.
  */
-export function generateStarkScanTranscations({
+export function generateStarkScanTransactions({
   address,
   startFrom = Date.now(),
   timestampReduction = 100,
@@ -370,7 +449,7 @@ export function generateStarkScanTranscations({
  *
  * @returns An array containing a mock EstimateFee object.
  */
-export function getEstimateFees() {
+export function generateEstimateFeesResponse() {
   return [
     {
       // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -398,4 +477,37 @@ export function getEstimateFees() {
       },
     } as unknown as EstimateFee,
   ];
+}
+
+/**
+ * Method to generate a mock input event.
+ *
+ * @param params - The parameter for generate the mock input event.
+ * @param params.transactionRequest - The transaction request object.
+ * @param [params.eventValue] - The value of the event.
+ * @param [params.eventType] - The type of the event.
+ * @param [params.eventName] - The name of the event.
+ * @returns An array containing a mock input event object.
+ */
+export function generateInputEvent({
+  transactionRequest,
+  eventValue = FeeToken.ETH,
+  eventType = UserInputEventType.InputChangeEvent,
+  eventName = 'feeTokenSelector',
+}: {
+  transactionRequest: TransactionRequest;
+  eventValue?: string;
+  eventType?: UserInputEventType;
+  eventName?: string;
+}) {
+  return {
+    event: {
+      name: eventName,
+      type: eventType,
+      value: eventValue,
+    } as unknown as UserInputEvent,
+    context: {
+      request: transactionRequest,
+    },
+  };
 }

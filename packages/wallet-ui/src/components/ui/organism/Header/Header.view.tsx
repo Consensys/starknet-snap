@@ -27,7 +27,7 @@ export const HeaderView = ({ address }: Props) => {
   const getUSDValue = () => {
     const amountFloat = parseFloat(
       ethers.utils.formatUnits(
-        wallet.erc20TokenBalanceSelected.spendableAmount,
+        wallet.erc20TokenBalanceSelected.amount,
         wallet.erc20TokenBalanceSelected.decimals,
       ),
     );
