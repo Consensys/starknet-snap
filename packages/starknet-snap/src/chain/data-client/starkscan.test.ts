@@ -4,7 +4,7 @@ import {
   generateAccounts,
   generateStarkScanTransactions,
 } from '../../__tests__/helper';
-import type { Network, Transaction } from '../../types/snapState';
+import { TransactionDataVersion, type Network, type Transaction } from '../../types/snapState';
 import {
   STARKNET_MAINNET_NETWORK,
   STARKNET_SEPOLIA_TESTNET_NETWORK,
@@ -371,7 +371,7 @@ describe('StarkScanClient', () => {
           ],
         },
         version: mockTx.version,
-        dataVersion: 'V2',
+        dataVersion: TransactionDataVersion.V2,
       });
     });
 
@@ -399,7 +399,7 @@ describe('StarkScanClient', () => {
         actualFee: mockTx.actual_fee,
         accountCalls: null,
         version: mockTx.version,
-        dataVersion: 'V2',
+        dataVersion: TransactionDataVersion.V2,
       });
     });
   });

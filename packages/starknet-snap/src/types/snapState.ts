@@ -143,6 +143,10 @@ export type LegacyTransaction = {
   timestamp: number;
 };
 
+export enum TransactionDataVersion {
+  V2='V2'
+}
+
 export type V2Transaction = {
   txnHash: string; // in hex
   txnType: StarkNetTransactionType;
@@ -159,7 +163,7 @@ export type V2Transaction = {
   accountCalls?: Record<string, TranscationAccountCall[]> | null;
   version: number;
   // Snap data Version to support backward compatibility , migration.
-  dataVersion: 'V2';
+  dataVersion: TransactionDataVersion.V2;
 };
 
 // FIXME: temp solution for backward compatibility before StarkScan implemented in get transactions
