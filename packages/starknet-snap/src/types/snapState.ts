@@ -144,7 +144,7 @@ export type LegacyTransaction = {
 };
 
 export enum TransactionDataVersion {
-  V2='V2'
+  V2 = 'V2',
 }
 
 export type V2Transaction = {

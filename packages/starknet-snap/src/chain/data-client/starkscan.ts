@@ -1,10 +1,11 @@
 import { TransactionType, constants } from 'starknet';
 import type { Struct } from 'superstruct';
 
-import type {
-  Network,
-  Transaction,
-  TranscationAccountCall,
+import {
+  TransactionDataVersion,
+  type Network,
+  type Transaction,
+  type TranscationAccountCall,
 } from '../../types/snapState';
 import { InvalidNetworkError } from '../../utils/exceptions';
 import type { HttpHeaders } from '../api-client';
@@ -233,7 +234,7 @@ export class StarkScanClient extends ApiClient implements IDataClient {
       accountCalls,
       failureReason: failureReason ?? '',
       version,
-      dataVersion: 'V2',
+      dataVersion: TransactionDataVersion.V2,
     };
 
     /* eslint-enable */

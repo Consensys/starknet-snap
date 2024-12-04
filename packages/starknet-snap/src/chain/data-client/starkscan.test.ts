@@ -4,7 +4,11 @@ import {
   generateAccounts,
   generateStarkScanTransactions,
 } from '../../__tests__/helper';
-import { TransactionDataVersion, type Network, type Transaction } from '../../types/snapState';
+import {
+  TransactionDataVersion,
+  type Network,
+  type Transaction,
+} from '../../types/snapState';
 import {
   STARKNET_MAINNET_NETWORK,
   STARKNET_SEPOLIA_TESTNET_NETWORK,
