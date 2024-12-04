@@ -24,7 +24,6 @@ interface Props extends InputHTMLAttributes<HTMLInputElement> {
   setIsValidAddress?: Dispatch<SetStateAction<boolean>>;
   disableValidate?: boolean;
   validateError?: string;
-  validInput?: boolean;
 }
 
 export const AddressInputView = ({
@@ -34,7 +33,6 @@ export const AddressInputView = ({
   setIsValidAddress,
   disableValidate,
   validateError,
-  validInput,
   ...otherProps
 }: Props) => {
   const [focused, setFocused] = useState(false);
@@ -44,9 +42,9 @@ export const AddressInputView = ({
 
   useEffect(() => {
     if (!disableValidate || !inputRef.current) return;
-    setValid(validInput ?? false);
-    setError(validateError || '');
-  }, [disableValidate, validateError, validInput]);
+    setValid(inputRef.current.value !== '' && validateError === '');
+    setError(validateError ?? '');
+  }, [disableValidate, validateError]);
 
   const displayIcon = () => {
     return valid || error !== '';

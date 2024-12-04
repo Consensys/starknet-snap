@@ -81,24 +81,14 @@ export const SendModalView = ({ closeModal }: Props) => {
               setLoading(true);
               getAddrFromStarkName(fieldValue, chainId)
                 .then((address) => {
-                  if (isValidAddress(address)) {
-                    setResolvedAddress(address);
-                  } else {
-                    setResolvedAddress('');
-                    setErrors((prevErrors) => ({
-                      ...prevErrors,
-                      address: '.stark name doesn’t exist',
-                    }));
-                  }
+                  setResolvedAddress(address);
                 })
-                .catch((error) => {
-                  if (error.name !== 'AbortError') {
-                    setResolvedAddress('');
-                    setErrors((prevErrors) => ({
-                      ...prevErrors,
-                      address: '.stark name doesn’t exist',
-                    }));
-                  }
+                .catch(() => {
+                  setResolvedAddress('');
+                  setErrors((prevErrors) => ({
+                    ...prevErrors,
+                    address: '.stark name doesn’t exist',
+                  }));
                 })
                 .finally(() => {
                   setLoading(false);
@@ -124,15 +114,6 @@ export const SendModalView = ({ closeModal }: Props) => {
       ...prevFields,
       [fieldName]: fieldValue,
     }));
-  };
-
-  const isValidAddrField = () => {
-    return (
-      (isValidAddress(fields.address) || isValidStarkName(fields.address)) &&
-      !errors.address &&
-      !loading &&
-      isValidAddress(resolvedAddress)
-    );
   };
 
   const confirmEnabled = () => {
@@ -163,7 +144,6 @@ export const SendModalView = ({ closeModal }: Props) => {
               onChange={(value) => handleChange('address', value.target.value)}
               disableValidate
               validateError={errors.address}
-              validInput={isValidAddrField()}
             />
             {isValidStarkName(fields.address) && resolvedAddress && (
               <InfoText>{shortenAddress(resolvedAddress, 12)}</InfoText>
