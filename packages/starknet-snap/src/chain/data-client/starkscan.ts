@@ -81,7 +81,7 @@ export class StarkScanClient extends ApiClient implements IDataClient {
    * The transactions are fetched in descending order and it will include the deploy transaction.
    *
    * @param address - The address of the contract to fetch the transactions for.
-   * @param to - The timestamp to fetch the transactions until.
+   * @param to - The filter includes transactions with a timestamp that is >= a specified value, but the deploy transaction is always included regardless of its timestamp.
    * @returns A Promise that resolve an array of Transaction object.
    */
   async getTransactions(address: string, to: number): Promise<Transaction[]> {
@@ -212,6 +212,7 @@ export class StarkScanClient extends ApiClient implements IDataClient {
       actual_fee: actualFee,
       revert_error: failureReason,
       account_calls: calls,
+      version,
     } = tx;
 
     // account_calls representing the calls to invoke from the account contract, it can be multiple
@@ -231,7 +232,8 @@ export class StarkScanClient extends ApiClient implements IDataClient {
       contractAddress: this.getContractAddress(tx),
       accountCalls,
       failureReason: failureReason ?? '',
-      version: 'V2',
+      version,
+      dataVersion: 'V2',
     };
 
     /* eslint-enable */

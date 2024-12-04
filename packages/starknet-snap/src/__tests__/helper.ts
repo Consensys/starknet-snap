@@ -380,7 +380,7 @@ export function generateTransactionRequests({
  * @param params.cnt - Number of transaction to generate.
  * @returns An array of transaction object.
  */
-export function generateStarkScanTranscations({
+export function generateStarkScanTransactions({
   address,
   startFrom = Date.now(),
   timestampReduction = 100,

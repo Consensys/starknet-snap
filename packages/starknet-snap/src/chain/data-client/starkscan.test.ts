@@ -2,7 +2,7 @@ import { TransactionType, constants } from 'starknet';
 
 import {
   generateAccounts,
-  generateStarkScanTranscations,
+  generateStarkScanTransactions,
 } from '../../__tests__/helper';
 import type { Network, Transaction } from '../../types/snapState';
 import {
@@ -95,7 +95,7 @@ describe('StarkScanClient', () => {
   };
 
   const mockTxByType = (txnType: TransactionType, address: string) => {
-    const mockResponse = generateStarkScanTranscations({
+    const mockResponse = generateStarkScanTransactions({
       address,
       txnTypes: [txnType],
       cnt: 1,
@@ -214,7 +214,7 @@ describe('StarkScanClient', () => {
       const { fetchSpy } = createMockFetch();
       const { from, to } = getFromAndToTimestamp(5);
       // generate 10 invoke transactions
-      const mockResponse = generateStarkScanTranscations({
+      const mockResponse = generateStarkScanTransactions({
         address: account.address,
         startFrom: from,
       });
@@ -258,12 +258,12 @@ describe('StarkScanClient', () => {
       const { fetchSpy } = createMockFetch();
       // generate the to timestamp which is 100 days ago
       const { to } = getFromAndToTimestamp(100);
-      const mockPage1Response = generateStarkScanTranscations({
+      const mockPage1Response = generateStarkScanTransactions({
         address: account.address,
         txnTypes: [TransactionType.INVOKE],
         cnt: 10,
       });
-      const mockPage2Response = generateStarkScanTranscations({
+      const mockPage2Response = generateStarkScanTransactions({
         address: account.address,
         cnt: 10,
       });
@@ -304,14 +304,14 @@ describe('StarkScanClient', () => {
       // generate the to timestamp which is 5 days ago
       const { from, to } = getFromAndToTimestamp(5);
       // generate 10 invoke transactions, and 1 day time gap between each transaction
-      const mockInvokeResponse = generateStarkScanTranscations({
+      const mockInvokeResponse = generateStarkScanTransactions({
         address: account.address,
         startFrom: from,
         timestampReduction: mSecsFor24Hours,
         txnTypes: [TransactionType.INVOKE],
       });
       // generate another 5 invoke transactions + deploy transactions for testing the fallback case
-      const mockDeployResponse = generateStarkScanTranscations({
+      const mockDeployResponse = generateStarkScanTransactions({
         address: account.address,
         // generate transactions that start from 100 days ago, to ensure not overlap with above invoke transactions
         startFrom: mSecsFor24Hours * 100,
@@ -370,7 +370,8 @@ describe('StarkScanClient', () => {
             },
           ],
         },
-        version: 'V2',
+        version: mockTx.version,
+        dataVersion: 'V2',
       });
     });
 
@@ -397,7 +398,8 @@ describe('StarkScanClient', () => {
         maxFee: mockTx.max_fee,
         actualFee: mockTx.actual_fee,
         accountCalls: null,
-        version: 'V2',
+        version: mockTx.version,
+        dataVersion: 'V2',
       });
     });
   });
@@ -407,7 +409,7 @@ describe('StarkScanClient', () => {
       const account = await mockAccount();
       const { fetchSpy } = createMockFetch();
       // generate 5 invoke transactions with deploy transaction
-      const mockResponse = generateStarkScanTranscations({
+      const mockResponse = generateStarkScanTransactions({
         address: account.address,
         cnt: 5,
       });
@@ -424,7 +426,7 @@ describe('StarkScanClient', () => {
       const account = await mockAccount();
       const { fetchSpy } = createMockFetch();
       // generate 5 invoke transactions with deploy transaction
-      const mockResponse = generateStarkScanTranscations({
+      const mockResponse = generateStarkScanTransactions({
         address: account.address,
         cnt: 1,
         txnTypes: [TransactionType.INVOKE],

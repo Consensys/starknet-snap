@@ -157,7 +157,9 @@ export type V2Transaction = {
   actualFee?: string | null;
   // using Record<string, TranscationAccountCall[]> to support O(1) searching
   accountCalls?: Record<string, TranscationAccountCall[]> | null;
-  version: 'V2';
+  version: number;
+  // Snap data Version to support backward compatibility , migration.
+  dataVersion: 'V2';
 };
 
 // FIXME: temp solution for backward compatibility before StarkScan implemented in get transactions
