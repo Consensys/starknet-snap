@@ -3,8 +3,9 @@ import { assign, boolean } from 'superstruct';
 
 import { NetworkStateManager } from '../state/network-state-manager';
 import { renderSwitchNetworkUI } from '../ui/utils';
-import { AuthorizableStruct, BaseRequestStruct, RpcController } from '../utils';
+import { AuthorizableStruct, BaseRequestStruct } from '../utils';
 import { InvalidNetworkError, UserRejectedOpError } from '../utils/exceptions';
+import { RpcController } from './abstract/base-rpc-controller';
 
 export const SwitchNetworkRequestStruct = assign(
   AuthorizableStruct,

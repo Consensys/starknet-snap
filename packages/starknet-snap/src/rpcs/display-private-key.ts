@@ -4,12 +4,9 @@ import {
   renderDisplayPrivateKeyAlertUI,
   renderDisplayPrivateKeyConfirmUI,
 } from '../ui/utils';
-import {
-  AccountRpcController,
-  AddressStruct,
-  BaseRequestStruct,
-} from '../utils';
+import { AddressStruct, BaseRequestStruct } from '../utils';
 import { UserRejectedOpError } from '../utils/exceptions';
+import { AccountRpcController } from './abstract/account-rpc-controller';
 
 export const DisplayPrivateKeyRequestStruct = assign(
   object({

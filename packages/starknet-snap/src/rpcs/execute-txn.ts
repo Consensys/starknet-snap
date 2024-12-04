@@ -13,11 +13,9 @@ import { FeeToken } from '../types/snapApi';
 import type { TransactionRequest } from '../types/snapState';
 import { VoyagerTransactionType, type Transaction } from '../types/snapState';
 import { generateExecuteTxnFlow } from '../ui/utils';
-import type { AccountRpcControllerOptions } from '../utils';
 import {
   AddressStruct,
   BaseRequestStruct,
-  AccountRpcController,
   UniversalDetailsStruct,
   CallsStruct,
   mapDeprecatedParams,
@@ -30,6 +28,8 @@ import {
   executeTxn as executeTxnUtil,
   getEstimatedFees,
 } from '../utils/starknetUtils';
+import type { AccountRpcControllerOptions } from './abstract/account-rpc-controller';
+import { AccountRpcController } from './abstract/account-rpc-controller';
 
 export const ExecuteTxnRequestStruct = assign(
   object({
