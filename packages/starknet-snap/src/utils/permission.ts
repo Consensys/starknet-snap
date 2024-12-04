@@ -26,6 +26,7 @@ export enum RpcMethod {
   GetTransactions = 'starkNet_getTransactions',
   UpgradeAccContract = 'starkNet_upgradeAccContract',
   GetStarkName = 'starkNet_getStarkName',
+  GetAddressByStarkName = 'starkNet_getAddrFromStarkName',
   ReadContract = 'starkNet_getValue',
   GetStoredErc20Tokens = 'starkNet_getStoredErc20Tokens',
 }

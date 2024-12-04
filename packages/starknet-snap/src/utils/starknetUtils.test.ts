@@ -170,3 +170,37 @@ describe('getEstimatedFees', () => {
     });
   });
 });
+
+describe('isValidStarkName', () => {
+  it.each([
+    { starkName: 'valid.stark', expected: true },
+    { starkName: 'valid-name.stark', expected: true },
+    { starkName: 'valid123.stark', expected: true },
+    { starkName: 'valid-name123.stark', expected: true },
+    { starkName: 'valid.subdomain.stark', expected: true },
+    { starkName: '1-valid.stark', expected: true },
+    {
+      starkName: 'valid-name-with-many-subdomains.valid.subdomain.stark',
+      expected: true,
+    },
+    {
+      starkName: 'too-long-stark-domain-name-more-than-48-characters.stark',
+      expected: false,
+    },
+    { starkName: 'invalid..stark', expected: false },
+    { starkName: 'invalid@stark', expected: false },
+    { starkName: 'invalid_name.stark', expected: false },
+    { starkName: 'invalid space.stark', expected: false },
+    { starkName: 'invalid.starknet', expected: false },
+    { starkName: '.invalid.stark', expected: false },
+    { starkName: 'invalid.', expected: false },
+    { starkName: 'invalid.stark.', expected: false },
+    { starkName: '', expected: false },
+  ])(
+    'validates `$starkName` correctly and returns $expected',
+    ({ starkName, expected }) => {
+      const result = starknetUtils.isValidStarkName(starkName);
+      expect(result).toBe(expected);
+    },
+  );
+});

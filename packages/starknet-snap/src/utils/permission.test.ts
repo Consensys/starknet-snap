@@ -13,6 +13,7 @@ describe('validateOrigin', () => {
     RpcMethod.GetTransactions,
     RpcMethod.UpgradeAccContract,
     RpcMethod.GetStarkName,
+    RpcMethod.GetAddressByStarkName,
     RpcMethod.ReadContract,
     RpcMethod.GetStoredErc20Tokens,
   ];

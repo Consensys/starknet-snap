@@ -35,6 +35,7 @@ import type {
   GetDeploymentDataParams,
   DeclareContractParams,
   WatchAssetParams,
+  GetAddrFromStarkNameParams,
   GetTransactionStatusParams,
 } from './rpcs';
 import {
@@ -49,6 +50,7 @@ import {
   switchNetwork,
   getDeploymentData,
   watchAsset,
+  getAddrFromStarkName,
   getTransactionStatus,
 } from './rpcs';
 import { signDeployAccountTransaction } from './signDeployAccountTransaction';
@@ -267,6 +269,11 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
       case RpcMethod.GetDeploymentData:
         return await getDeploymentData.execute(
           apiParams.requestParams as unknown as GetDeploymentDataParams,
+        );
+
+      case RpcMethod.GetAddressByStarkName:
+        return await getAddrFromStarkName.execute(
+          apiParams.requestParams as unknown as GetAddrFromStarkNameParams,
         );
 
       default:
