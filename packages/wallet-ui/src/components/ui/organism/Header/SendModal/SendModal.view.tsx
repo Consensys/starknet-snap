@@ -171,7 +171,7 @@ export const SendModalView = ({ closeModal }: Props) => {
             <SeparatorSmall />
             <MessageAlert
               variant="info"
-              text="Please only enter a valid Starknet address. Sending funds to a different network might result in permanent loss."
+              text="Please only enter a valid Starknet address or .stark name. Sending funds to a different network might result in permanent loss."
             />
             <Separator />
             <AmountInput
