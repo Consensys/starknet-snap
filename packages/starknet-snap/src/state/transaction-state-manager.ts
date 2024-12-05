@@ -6,7 +6,10 @@ import {
 import { assert, enums, number } from 'superstruct';
 
 import type { Transaction, SnapState, V2Transaction } from '../types/snapState';
-import { TransactionStatusType } from '../types/snapState';
+import {
+  TransactionDataVersion,
+  TransactionStatusType,
+} from '../types/snapState';
 import type { IFilter } from './filter';
 import {
   BigIntFilter,
@@ -184,7 +187,8 @@ export class TransactionStateManager extends StateManager<Transaction> {
       executionStatus,
       finalityStatus,
       timestamp,
-      dataVersion,
+      // default return the latest version of the data
+      dataVersion = [TransactionDataVersion.V2],
     }: SearchFilter,
     state?: SnapState,
   ): Promise<Transaction[]> {

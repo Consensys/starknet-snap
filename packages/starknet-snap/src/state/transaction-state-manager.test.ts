@@ -6,6 +6,7 @@ import {
 } from 'starknet';
 
 import { generateTransactions } from '../__tests__/helper';
+import { TransactionDataVersion } from '../types/snapState';
 import { PRELOADED_TOKENS } from '../utils/constants';
 import { mockAcccounts, mockState } from './__tests__/helper';
 import { StateManagerError } from './state-manager';
@@ -130,6 +131,27 @@ describe('TransactionStateManager', () => {
       });
 
       expect(result).toStrictEqual(txns);
+    });
+
+    it('returns the list of transaction by data version', async () => {
+      const chainId = constants.StarknetChainId.SN_SEPOLIA;
+      const {
+        txns: [legacyData, ...newData],
+        getDataSpy,
+      } = await prepareMockData(chainId);
+
+      // legacy data does not have dataVersion
+      delete legacyData.dataVersion;
+      // simulate the data source return the legacy data and new data
+      getDataSpy.mockResolvedValue(newData.concat([legacyData]));
+
+      const stateManager = new TransactionStateManager();
+
+      const result = await stateManager.findTransactions({
+        dataVersion: [TransactionDataVersion.V2],
+      });
+
+      expect(result).toStrictEqual(newData);
     });
 
     it('returns the list of transaction by contract address', async () => {
