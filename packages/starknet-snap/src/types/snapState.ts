@@ -147,6 +147,11 @@ export enum TransactionDataVersion {
   V2 = 'V2',
 }
 
+export enum ContractFuncName {
+  Upgrade = 'upgrade',
+  Transfer = 'transfer',
+}
+
 export type V2Transaction = {
   txnHash: string; // in hex
   txnType: StarkNetTransactionType;

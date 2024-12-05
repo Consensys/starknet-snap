@@ -13,7 +13,7 @@ const NullableStringArrayStruct = nullable(array(string()));
 export const StarkScanAccountCallStruct = object({
   contract_address: string(),
   calldata: array(string()),
-  selector_name: string(),
+  selector: string(),
 });
 
 export const StarkScanTransactionStruct = object({
