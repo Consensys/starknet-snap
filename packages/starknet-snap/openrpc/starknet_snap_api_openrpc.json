@@ -1244,6 +1244,40 @@
         }
       },
       "errors": []
+    },
+    {
+      "name": "starkNet_getAddrFromStarkName",
+      "summary": "Get address from a stark name",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "starkName",
+          "summary": "stark name of the user",
+          "description": "stark name of the user",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "chainId",
+          "summary": "Id of the target Starknet network",
+          "description": "Id of the target Starknet network (default to Starknet Goerli Testnet)",
+          "required": false,
+          "schema": {
+            "$ref": "#/components/schemas/CHAIN_ID"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "summary": "Address of the given stark name",
+        "description": "Address of the given stark name",
+        "schema": {
+          "$ref": "#/components/schemas/ADDRESS"
+        }
+      },
+      "errors": []
     }
   ],
   "components": {
