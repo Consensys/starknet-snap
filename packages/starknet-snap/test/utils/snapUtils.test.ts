@@ -152,23 +152,3 @@ describe('getVoyagerCredentials', () => {
     expect(getVoyagerCredentials()).to.have.key('X-API-Key');
   });
 });
-
-describe('getRPCUrl', () => {
-  it('returns Mainnet RPC URL if chain id is Mainnet', () => {
-    expect(getRPCUrl(constants.StarknetChainId.SN_MAIN)).to.be.equal(
-      'https://starknet-mainnet.g.alchemy.com/starknet/version/rpc/v0_7/',
-    );
-  });
-
-  it('returns Sepolia RPC URL if chain id is not either Mainnet or Sepolia', () => {
-    expect(getRPCUrl('0x534e5f474f45524c49')).to.be.equal(
-      'https://starknet-sepolia.g.alchemy.com/starknet/version/rpc/v0_7/',
-    );
-  });
-
-  it('returns Sepolia RPC URL if chain id is Sepolia', () => {
-    expect(getRPCUrl(STARKNET_SEPOLIA_TESTNET_NETWORK.chainId)).to.be.equal(
-      'https://starknet-sepolia.g.alchemy.com/starknet/version/rpc/v0_7/',
-    );
-  });
-});

@@ -749,28 +749,6 @@ export function getChainIdHex(network: Network) {
  *
  * @param chainId
  */
-export function getRPCUrl(chainId: string) {
-  switch (chainId) {
-    case constants.StarknetChainId.SN_MAIN:
-      return `https://starknet-mainnet.g.alchemy.com/starknet/version/rpc/v0_7/${getRPCCredentials()}`;
-    default:
-    case STARKNET_SEPOLIA_TESTNET_NETWORK.chainId:
-      return `https://starknet-sepolia.g.alchemy.com/starknet/version/rpc/v0_7/${getRPCCredentials()}`;
-  }
-}
-
-/**
- *
- */
-export function getRPCCredentials(): string {
-  // eslint-disable-next-line no-restricted-globals
-  return process.env.ALCHEMY_API_KEY ?? '';
-}
-
-/**
- *
- * @param chainId
- */
 export function getVoyagerUrl(chainId: string) {
   switch (chainId) {
     case STARKNET_SEPOLIA_TESTNET_NETWORK.chainId:

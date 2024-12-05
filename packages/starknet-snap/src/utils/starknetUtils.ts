@@ -69,6 +69,7 @@ import {
   ETHER_SEPOLIA_TESTNET,
   BlockIdentifierEnum,
 } from './constants';
+import { getRPCUrl } from './din';
 import { DeployRequiredError, UpgradeRequiredError } from './exceptions';
 import { hexToString } from './formatter-utils';
 import { getAddressKey } from './keyPair';
@@ -77,7 +78,6 @@ import { toJson } from './serializer';
 import {
   getAccount,
   getAccounts,
-  getRPCUrl,
   getTransactionsFromVoyagerUrl,
   getVoyagerCredentials,
 } from './snapUtils';
