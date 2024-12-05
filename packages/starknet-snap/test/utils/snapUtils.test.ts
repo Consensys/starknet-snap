@@ -8,7 +8,6 @@ import {
   getTransactionFromVoyagerUrl,
   getTransactionsFromVoyagerUrl,
   getVoyagerCredentials,
-  getRPCUrl,
 } from '../../src/utils/snapUtils';
 import { WalletMock } from '../wallet.mock.test';
 import { Network, SnapState } from '../../src/types/snapState';
