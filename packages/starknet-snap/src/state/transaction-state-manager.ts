@@ -1,13 +1,12 @@
-import type { constants } from 'starknet';
+import type { constants, TransactionType } from 'starknet';
 import {
   TransactionFinalityStatus,
   TransactionExecutionStatus,
-  TransactionType
 } from 'starknet';
 import { assert, enums, number } from 'superstruct';
 
 import type { Transaction, SnapState, V2Transaction } from '../types/snapState';
-import { TransactionStatusType, VoyagerTransactionType } from '../types/snapState';
+import { TransactionStatusType } from '../types/snapState';
 import type { IFilter } from './filter';
 import {
   BigIntFilter,
@@ -25,11 +24,7 @@ export class ChainIdFilter
   implements ITxFilter {}
 
 export class ContractAddressFilter
-  extends MultiFilter<
-  string,
-  string,
-  Transaction
->
+  extends MultiFilter<string, string, Transaction>
   implements ITxFilter
 {
   protected _prepareSearch(search: string[]): void {
@@ -37,8 +32,8 @@ export class ContractAddressFilter
   }
 
   protected _apply(data: Transaction): boolean {
-    const txn = (data as V2Transaction)
-    const accountCalls = txn.accountCalls;
+    const txn = data as V2Transaction;
+    const { accountCalls } = txn;
     if (!accountCalls) {
       return false;
     }
@@ -90,7 +85,6 @@ export class DataVersionFilter
 {
   dataKey = 'dataVersion';
 }
-
 
 // Filter for transaction status
 // Search for transactions based on the finality status and execution status

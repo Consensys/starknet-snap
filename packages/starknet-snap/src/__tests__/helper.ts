@@ -6,8 +6,9 @@ import type { UserInputEvent } from '@metamask/snaps-sdk';
 import { UserInputEventType } from '@metamask/snaps-sdk';
 import { generateMnemonic } from 'bip39';
 import { getRandomValues } from 'crypto';
-import { constants, EstimateFee } from 'starknet';
+import type { EstimateFee } from 'starknet';
 import {
+  constants,
   ec,
   CallData,
   hash,
@@ -69,21 +70,23 @@ export function generateRandomValue() {
  * @param dataLength - The length of the data.
  * @returns An random number.
  */
-export function getRandomValue(dataLength:number) {
+export function getRandomValue(dataLength: number) {
   return Math.floor(generateRandomValue() * dataLength);
 }
 
 /**
  * Method to get a random data.
- * 
+ *
  * @param data - The data to get a random value.
  * @returns A random data.
  * */
-export function getRandomData<DataType>(data:DataType[]) {
+export function getRandomData<DataType>(data: DataType[]) {
   return data[getRandomValue(data.length)];
 }
 
-const SixtyThreeHexInBigInt = BigInt("1000000000000000000000000000000000000000000000000000000000000000000000000000");
+const SixtyThreeHexInBigInt = BigInt(
+  '1000000000000000000000000000000000000000000000000000000000000000000000000000',
+);
 
 /**
  * Method to generate Bip44 Entropy.
@@ -206,7 +209,7 @@ export function generateTransactions({
   executionStatuses = Object.values(TransactionExecutionStatus),
   // The timestamp from data source is in seconds
   timestamp = Math.floor(Date.now() / 1000),
-  transactionVersions = [1,3],
+  transactionVersions = [1, 3],
   cnt = 1,
 }: {
   chainId: constants.StarknetChainId | string;
@@ -230,17 +233,18 @@ export function generateTransactions({
     txnTypes.includes(TransactionType.DEPLOY_ACCOUNT) ||
     txnTypes.includes(TransactionType.DEPLOY)
   ) {
-
-    transactions.push(generateDeployTransaction({
-      address,
-      txnHash: getTransactionHash(baseTxnHashInBigInt),
-      timestamp: baseTimeStamp,
-      version: getRandomData(transactionVersions),
-      chainId
-    }));
+    transactions.push(
+      generateDeployTransaction({
+        address,
+        txnHash: getTransactionHash(baseTxnHashInBigInt),
+        timestamp: baseTimeStamp,
+        version: getRandomData(transactionVersions),
+        chainId,
+      }),
+    );
 
     createCnt -= 1;
-    
+
     // after generate a deploy transaction, we dont need to re-generate another deploy transaction,
     // so we can remove it from the txnTypes, to make sure we only random the types that are not deploy.
     _txnTypes = txnTypes.filter(
@@ -256,23 +260,31 @@ export function generateTransactions({
     // Make sure the txn hash is unique
     baseTxnHashInBigInt += BigInt(i * 100);
 
-    const executionStatus = getRandomData(executionStatuses)
-    const finalityStatus = executionStatus === TransactionExecutionStatus.REJECTED ? TransactionFinalityStatus.ACCEPTED_ON_L2 : getRandomData(finalityStatuses)
+    const executionStatus = getRandomData(executionStatuses);
+    const finalityStatus =
+      executionStatus === TransactionExecutionStatus.REJECTED
+        ? TransactionFinalityStatus.ACCEPTED_ON_L2
+        : getRandomData(finalityStatuses);
     const txnType = getRandomData(_txnTypes);
-    const contractFuncName = txnType == TransactionType.INVOKE ? getRandomData(['transfer', 'upgrade']) : ''
-    
-    transactions.push(generateInvokeTransaction({
-      address,
-      contractAddress: getRandomData(contractAddresses),
-      txnHash: getTransactionHash(baseTxnHashInBigInt),
-      timestamp: baseTimeStamp,
-      version: getRandomData(transactionVersions),
-      chainId,
-      txnType,
-      finalityStatus,
-      executionStatus,
-      contractFuncName,
-    }));
+    const contractFuncName =
+      txnType == TransactionType.INVOKE
+        ? getRandomData(['transfer', 'upgrade'])
+        : '';
+
+    transactions.push(
+      generateInvokeTransaction({
+        address,
+        contractAddress: getRandomData(contractAddresses),
+        txnHash: getTransactionHash(baseTxnHashInBigInt),
+        timestamp: baseTimeStamp,
+        version: getRandomData(transactionVersions),
+        chainId,
+        txnType,
+        finalityStatus,
+        executionStatus,
+        contractFuncName,
+      }),
+    );
   }
 
   return transactions.sort((a, b) => b.timestamp - a.timestamp);
@@ -297,7 +309,7 @@ function getTransactionTemplate() {
 
 /**
  * Method to generate a deploy transaction.
- * 
+ *
  * @param params
  * @param params.address - The address of the account.
  * @param params.txnHash - The transaction hash.
@@ -311,34 +323,33 @@ export function generateDeployTransaction({
   txnHash,
   timestamp,
   version,
-  chainId
+  chainId,
 }: {
   address: string;
   txnHash: string;
   timestamp: number;
   version: number;
   chainId: constants.StarknetChainId | string;
-}):Transaction {
+}): Transaction {
+  const transaction = getTransactionTemplate();
 
-    const transaction = getTransactionTemplate() 
-   
-    return {
-      ...transaction,
-      chainId: chainId,
-      txnHash,
-      senderAddress: address,
-      contractAddress: address,
-      txnType: TransactionType.DEPLOY_ACCOUNT,
-      finalityStatus: TransactionFinalityStatus.ACCEPTED_ON_L1,
-      executionStatus: TransactionExecutionStatus.SUCCEEDED,
-      timestamp: timestamp,
-      version: version
-    }
+  return {
+    ...transaction,
+    chainId: chainId,
+    txnHash,
+    senderAddress: address,
+    contractAddress: address,
+    txnType: TransactionType.DEPLOY_ACCOUNT,
+    finalityStatus: TransactionFinalityStatus.ACCEPTED_ON_L1,
+    executionStatus: TransactionExecutionStatus.SUCCEEDED,
+    timestamp: timestamp,
+    version: version,
+  };
 }
 
 /**
  * Method to generate an invoke transaction.
- * 
+ *
  * @param params
  * @param params.address - The address of the account.
  * @param params.contractAddress - The contract address.
@@ -366,49 +377,48 @@ export function generateInvokeTransaction({
 }: {
   address: string;
   txnHash: string;
-  contractAddress:string,
+  contractAddress: string;
   timestamp: number;
   version: number;
   chainId: constants.StarknetChainId | string;
-  finalityStatus: TransactionFinalityStatus,
-  executionStatus: TransactionExecutionStatus,
-  txnType: TransactionType,
-  contractFuncName : string
-}):Transaction {
+  finalityStatus: TransactionFinalityStatus;
+  executionStatus: TransactionExecutionStatus;
+  txnType: TransactionType;
+  contractFuncName: string;
+}): Transaction {
+  const transaction = getTransactionTemplate();
 
-    const transaction = getTransactionTemplate() 
-
-    return {
-      ...transaction,
-      chainId: chainId,
-      contractAddress: '',
-      txnType,
-      finalityStatus,
-      executionStatus,
-      timestamp,
-      txnHash,
-      senderAddress: address,
-      accountCalls: {
-        [contractAddress] : [
-          {
-            contract: contractAddress,
-            contractFuncName,
-            contractCallData: [address, getRandomValue(1000).toString(16)],
-          }
-        ]
-      },
-      version: version
-    }
+  return {
+    ...transaction,
+    chainId: chainId,
+    contractAddress: '',
+    txnType,
+    finalityStatus,
+    executionStatus,
+    timestamp,
+    txnHash,
+    senderAddress: address,
+    accountCalls: {
+      [contractAddress]: [
+        {
+          contract: contractAddress,
+          contractFuncName,
+          contractCallData: [address, getRandomValue(1000).toString(16)],
+        },
+      ],
+    },
+    version: version,
+  };
 }
 
 /**
  * Method to generate a random transaction hash.
- * 
+ *
  * @param base - The base number to generate the transaction hash.
  * @returns A transaction hash.
  * */
 export function getTransactionHash(base = SixtyThreeHexInBigInt) {
-  return `0x` + base.toString(16)
+  return `0x` + base.toString(16);
 }
 
 export function generateTransactionRequests({
