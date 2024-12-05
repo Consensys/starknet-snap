@@ -4,6 +4,7 @@ import { onHomePage, onRpcRequest } from '.';
 import * as createAccountApi from './createAccount';
 import { HomePageController } from './on-home-page';
 import * as keyPairUtils from './utils/keyPair';
+import * as permissionUtil from './utils/permission';
 
 jest.mock('./utils/logger');
 
@@ -41,7 +42,11 @@ describe('onRpcRequest', () => {
     expect(createAccountSpy).toHaveBeenCalledTimes(1);
   });
 
+  // It is a never case, as the permission of each method is checked in the `validateOrigin` function.
+  // But to increase the coverage, we keep this test case.
   it('throws `MethodNotFoundError` if the request method not found', async () => {
+    jest.spyOn(permissionUtil, 'validateOrigin').mockReturnThis();
+
     await expect(
       onRpcRequest({
         ...createMockRequest(),
