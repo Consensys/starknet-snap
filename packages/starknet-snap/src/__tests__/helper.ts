@@ -19,6 +19,10 @@ import {
 } from 'starknet';
 import { v4 as uuidv4 } from 'uuid';
 
+import type {
+  StarkScanTransaction,
+  StarkScanTransactionsResponse,
+} from '../chain/data-client/starkscan.type';
 import { FeeToken } from '../types/snapApi';
 import type {
   AccContract,
@@ -32,6 +36,7 @@ import {
   PROXY_CONTRACT_HASH,
 } from '../utils/constants';
 import { grindKey } from '../utils/keyPair';
+import { invokeTx, cairo0DeployTx } from './fixture/stark-scan-example.json';
 
 /* eslint-disable */
 export type StarknetAccount = AccContract & {
@@ -362,6 +367,65 @@ export function generateTransactionRequests({
   }
 
   return requests;
+}
+
+/**
+ * Method to generate starkscan transactions.
+ *
+ * @param params
+ * @param params.address - Address of the account.
+ * @param params.startFrom - start timestamp of the first transactions.
+ * @param params.timestampReduction - the deduction timestamp per transactions.
+ * @param params.txnTypes - Array of txn types.
+ * @param params.cnt - Number of transaction to generate.
+ * @returns An array of transaction object.
+ */
+export function generateStarkScanTransactions({
+  address,
+  startFrom = Date.now(),
+  timestampReduction = 100,
+  cnt = 10,
+  txnTypes = [TransactionType.DEPLOY_ACCOUNT, TransactionType.INVOKE],
+}: {
+  address: string;
+  startFrom?: number;
+  timestampReduction?: number;
+  cnt?: number;
+  txnTypes?: TransactionType[];
+}): StarkScanTransactionsResponse {
+  let transactionStartFrom = startFrom;
+  const txs: StarkScanTransaction[] = [];
+  let totalRecordCnt = txnTypes.includes(TransactionType.DEPLOY_ACCOUNT)
+    ? cnt - 1
+    : cnt;
+
+  for (let i = 0; i < totalRecordCnt; i++) {
+    let newTx = {
+      ...invokeTx,
+      account_calls: [...invokeTx.account_calls],
+    };
+    newTx.sender_address = address;
+    newTx.account_calls[0].caller_address = address;
+    newTx.timestamp = transactionStartFrom;
+    newTx.transaction_hash = `0x${transactionStartFrom.toString(16)}`;
+    transactionStartFrom -= timestampReduction;
+    txs.push(newTx as unknown as StarkScanTransaction);
+  }
+
+  if (txnTypes.includes(TransactionType.DEPLOY_ACCOUNT)) {
+    let deployTx = {
+      ...cairo0DeployTx,
+      account_calls: [...cairo0DeployTx.account_calls],
+    };
+    deployTx.contract_address = address;
+    deployTx.transaction_hash = `0x${transactionStartFrom.toString(16)}`;
+    txs.push(deployTx as unknown as StarkScanTransaction);
+  }
+
+  return {
+    next_url: null,
+    data: txs,
+  };
 }
 
 /**
