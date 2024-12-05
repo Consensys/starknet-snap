@@ -140,10 +140,22 @@ describe('TransactionStateManager', () => {
         getDataSpy,
       } = await prepareMockData(chainId);
 
-      // legacy data does not have dataVersion
-      delete legacyData.dataVersion;
+      const legacyTxn = {
+        txnHash: legacyData.txnHash,
+        txnType: legacyData.txnType,
+        chainId: legacyData.chainId,
+        senderAddress: legacyData.senderAddress,
+        contractAddress: legacyData.contractAddress,
+        contractFuncName: 'transfer',
+        contractCallData: ['0x123', '0x456'],
+        executionStatus: legacyData.executionStatus,
+        finalityStatus: legacyData.finalityStatus,
+        timestamp: legacyData.timestamp,
+        eventIds: [],
+        failureReason: legacyData.failureReason,
+      };
       // simulate the data source return the legacy data and new data
-      getDataSpy.mockResolvedValue(newData.concat([legacyData]));
+      getDataSpy.mockResolvedValue(newData.concat([legacyTxn]));
 
       const stateManager = new TransactionStateManager();
 
