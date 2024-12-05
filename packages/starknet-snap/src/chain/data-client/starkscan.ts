@@ -2,11 +2,16 @@ import { TransactionType, constants } from 'starknet';
 import type { Struct } from 'superstruct';
 
 import {
+  ContractFuncName,
   TransactionDataVersion,
   type Network,
   type Transaction,
   type TranscationAccountCall,
 } from '../../types/snapState';
+import {
+  TRANSFER_SELECTOR_HEX,
+  UPGRADE_SELECTOR_HEX,
+} from '../../utils/constants';
 import { InvalidNetworkError } from '../../utils/exceptions';
 import type { HttpHeaders } from '../api-client';
 import { ApiClient, HttpMethod } from '../api-client';
@@ -181,7 +186,7 @@ export class StarkScanClient extends ApiClient implements IDataClient {
   }
 
   protected isFundTransferTransaction(entrypoint: string): boolean {
-    return entrypoint === 'transfer';
+    return entrypoint === TRANSFER_SELECTOR_HEX;
   }
 
   protected getContractAddress(tx: StarkScanTransaction): string {
@@ -254,10 +259,11 @@ export class StarkScanClient extends ApiClient implements IDataClient {
       ) => {
         const {
           contract_address: contract,
-          selector_name: contractFuncName,
+          selector,
           calldata: contractCallData,
         } = accountCallArg;
 
+        const contractFuncName = this.selectorHexToName(selector);
         if (!Object.prototype.hasOwnProperty.call(data, contract)) {
           data[contract] = [];
         }
@@ -268,7 +274,7 @@ export class StarkScanClient extends ApiClient implements IDataClient {
           contractCallData,
         };
 
-        if (this.isFundTransferTransaction(contractFuncName)) {
+        if (this.isFundTransferTransaction(selector)) {
           accountCall.recipient = accountCallArg.calldata[0];
           accountCall.amount = accountCallArg.calldata[1];
         }
@@ -279,5 +285,16 @@ export class StarkScanClient extends ApiClient implements IDataClient {
       },
       {},
     );
+  }
+
+  protected selectorHexToName(selector: string): string {
+    switch (selector.toLowerCase()) {
+      case TRANSFER_SELECTOR_HEX.toLowerCase():
+        return ContractFuncName.Transfer;
+      case UPGRADE_SELECTOR_HEX.toLowerCase():
+        return ContractFuncName.Upgrade;
+      default:
+        return selector;
+    }
   }
 }

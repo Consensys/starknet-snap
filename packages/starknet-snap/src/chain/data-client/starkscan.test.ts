@@ -5,6 +5,7 @@ import {
   generateStarkScanTransactions,
 } from '../../__tests__/helper';
 import {
+  ContractFuncName,
   TransactionDataVersion,
   type Network,
   type Transaction,
@@ -345,11 +346,8 @@ describe('StarkScanClient', () => {
       const client = createMockClient();
       const result = client.toTransaction(mockTx);
 
-      const {
-        contract_address: contract,
-        selector_name: contractFuncName,
-        calldata: contractCallData,
-      } = mockTx.account_calls[0];
+      const { contract_address: contract, calldata: contractCallData } =
+        mockTx.account_calls[0];
 
       expect(result).toStrictEqual({
         txnHash: mockTx.transaction_hash,
@@ -367,7 +365,7 @@ describe('StarkScanClient', () => {
           [contract]: [
             {
               contract,
-              contractFuncName,
+              contractFuncName: ContractFuncName.Transfer,
               contractCallData,
               recipient: contractCallData[0],
               amount: contractCallData[1],
