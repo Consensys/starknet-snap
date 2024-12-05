@@ -6,8 +6,9 @@ import type { UserInputEvent } from '@metamask/snaps-sdk';
 import { UserInputEventType } from '@metamask/snaps-sdk';
 import { generateMnemonic } from 'bip39';
 import { getRandomValues } from 'crypto';
-import type { constants, EstimateFee } from 'starknet';
+import type { EstimateFee } from 'starknet';
 import {
+  constants,
   ec,
   CallData,
   hash,
@@ -24,10 +25,11 @@ import type {
   StarkScanTransactionsResponse,
 } from '../chain/data-client/starkscan.type';
 import { FeeToken } from '../types/snapApi';
-import type {
-  AccContract,
-  Transaction,
-  TransactionRequest,
+import {
+  TransactionDataVersion,
+  type AccContract,
+  type Transaction,
+  type TransactionRequest,
 } from '../types/snapState';
 import {
   ACCOUNT_CLASS_HASH,
@@ -61,6 +63,30 @@ export function generateRandomValue() {
   // by dividing the random value by maxU32, we get a decimal number between 0 and 1, which is the same as Math.random()
   return getRandomValues(u32Arr)[0] / maxU32;
 }
+
+/**
+ * Method to get a random value.
+ *
+ * @param dataLength - The length of the data.
+ * @returns An random number.
+ */
+export function getRandomValue(dataLength: number) {
+  return Math.floor(generateRandomValue() * dataLength);
+}
+
+/**
+ * Method to get a random data.
+ *
+ * @param data - The data to get a random value.
+ * @returns A random data.
+ * */
+export function getRandomData<DataType>(data: DataType[]) {
+  return data[getRandomValue(data.length)];
+}
+
+const SixtyThreeHexInBigInt = BigInt(
+  '1000000000000000000000000000000000000000000000000000000000000000000000000000',
+);
 
 /**
  * Method to generate Bip44 Entropy.
@@ -169,20 +195,24 @@ export async function generateAccounts(
  * @param params.finalityStatuses - Array of transaction finality status.
  * @param params.executionStatuses - Array of transaction execution status.
  * @param params.cnt - Number of transaction to generate.
+ * @param params.timestamp - The timestamp of the first transaction.
+ * @param params.transactionVersions - The transaction version, 1 or 3, where 3 represents the fee will be paid in STRK.
  * @returns An array of transaction object.
  */
 export function generateTransactions({
   chainId,
   address,
+  baseTxnHashInBigInt = SixtyThreeHexInBigInt,
   contractAddresses = PRELOADED_TOKENS.map((token) => token.address),
   txnTypes = Object.values(TransactionType),
   finalityStatuses = Object.values(TransactionFinalityStatus),
   executionStatuses = Object.values(TransactionExecutionStatus),
   // The timestamp from data source is in seconds
   timestamp = Math.floor(Date.now() / 1000),
+  transactionVersions = [1, 3],
   cnt = 1,
 }: {
-  chainId: constants.StarknetChainId;
+  chainId: constants.StarknetChainId | string;
   address: string;
   contractAddresses?: string[];
   txnTypes?: TransactionType[];
@@ -190,29 +220,12 @@ export function generateTransactions({
   executionStatuses?: TransactionExecutionStatus[];
   timestamp?: number;
   cnt?: number;
+  transactionVersions?: number[];
+  baseTxnHashInBigInt?: bigint;
 }): Transaction[] {
-  const transaction = {
-    chainId: chainId,
-    contractAddress: '',
-    contractCallData: [],
-    contractFuncName: '',
-    senderAddress: address,
-    timestamp: timestamp,
-    txnHash: '',
-    txnType: '',
-    failureReason: '',
-    status: '',
-    executionStatus: '',
-    finalityStatus: '',
-    eventIds: [],
-  };
-  let accumulatedTimestamp = timestamp;
-  let accumulatedTxnHash = BigInt(
-    '0x2a8c2d5d4908a6561de87ecb18a76305c64800e3f81b393b9988de1abd37284',
-  );
-
+  let baseTimeStamp = timestamp;
   let createCnt = cnt;
-  let filteredTxnTypes = txnTypes;
+  let _txnTypes = txnTypes;
   const transactions: Transaction[] = [];
 
   // only 1 deploy account transaction to generate
@@ -220,82 +233,192 @@ export function generateTransactions({
     txnTypes.includes(TransactionType.DEPLOY_ACCOUNT) ||
     txnTypes.includes(TransactionType.DEPLOY)
   ) {
-    transactions.push({
-      ...transaction,
-      contractAddress: address,
-      txnType: TransactionType.DEPLOY_ACCOUNT,
-      finalityStatus: TransactionFinalityStatus.ACCEPTED_ON_L1,
-      executionStatus: TransactionExecutionStatus.SUCCEEDED,
-      timestamp: accumulatedTimestamp,
-      txnHash: '0x' + accumulatedTxnHash.toString(16),
-    });
+    transactions.push(
+      generateDeployTransaction({
+        address,
+        txnHash: getTransactionHash(baseTxnHashInBigInt),
+        timestamp: baseTimeStamp,
+        version: getRandomData(transactionVersions),
+        chainId,
+      }),
+    );
+
     createCnt -= 1;
-    // exclude deploy txnType
-    filteredTxnTypes = filteredTxnTypes.filter(
+
+    // after generate a deploy transaction, we dont need to re-generate another deploy transaction,
+    // so we can remove it from the txnTypes, to make sure we only random the types that are not deploy.
+    _txnTypes = txnTypes.filter(
       (type) =>
         type !== TransactionType.DEPLOY_ACCOUNT &&
         type !== TransactionType.DEPLOY,
     );
   }
 
-  if (filteredTxnTypes.length === 0) {
-    filteredTxnTypes = [TransactionType.INVOKE];
-  }
-
   for (let i = 1; i <= createCnt; i++) {
-    const randomContractAddress =
-      contractAddresses[
-        Math.floor(generateRandomValue() * contractAddresses.length)
-      ];
-    const randomTxnType =
-      filteredTxnTypes[
-        Math.floor(generateRandomValue() * filteredTxnTypes.length)
-      ];
-    let randomFinalityStatus =
-      finalityStatuses[
-        Math.floor(generateRandomValue() * finalityStatuses.length)
-      ];
-    let randomExecutionStatus =
-      executionStatuses[
-        Math.floor(generateRandomValue() * executionStatuses.length)
-      ];
-    let randomContractFuncName = ['transfer', 'upgrade'][
-      Math.floor(generateRandomValue() * 2)
-    ];
-    accumulatedTimestamp += i * 100;
-    accumulatedTxnHash += BigInt(i * 100);
+    // Make sure the timestamp is increasing
+    baseTimeStamp += i * 100;
+    // Make sure the txn hash is unique
+    baseTxnHashInBigInt += BigInt(i * 100);
 
-    if (randomExecutionStatus === TransactionExecutionStatus.REJECTED) {
-      if (
-        [
-          TransactionFinalityStatus.NOT_RECEIVED,
-          TransactionFinalityStatus.RECEIVED,
-          TransactionFinalityStatus.ACCEPTED_ON_L1,
-        ].includes(randomFinalityStatus)
-      ) {
-        randomFinalityStatus = TransactionFinalityStatus.ACCEPTED_ON_L2;
-      }
-    }
+    const executionStatus = getRandomData(executionStatuses);
+    const finalityStatus =
+      executionStatus === TransactionExecutionStatus.REJECTED
+        ? TransactionFinalityStatus.ACCEPTED_ON_L2
+        : getRandomData(finalityStatuses);
+    const txnType = getRandomData(_txnTypes);
+    const contractFuncName =
+      txnType == TransactionType.INVOKE
+        ? getRandomData(['transfer', 'upgrade'])
+        : '';
 
-    if (randomFinalityStatus === TransactionFinalityStatus.NOT_RECEIVED) {
-      randomFinalityStatus = TransactionFinalityStatus.ACCEPTED_ON_L2;
-      randomExecutionStatus = TransactionExecutionStatus.SUCCEEDED;
-    }
-
-    transactions.push({
-      ...transaction,
-      contractAddress: randomContractAddress,
-      txnType: randomTxnType,
-      finalityStatus: randomFinalityStatus,
-      executionStatus: randomExecutionStatus,
-      timestamp: accumulatedTimestamp,
-      contractFuncName:
-        randomTxnType === TransactionType.INVOKE ? randomContractFuncName : '',
-      txnHash: '0x' + accumulatedTxnHash.toString(16),
-    });
+    transactions.push(
+      generateInvokeTransaction({
+        address,
+        contractAddress: getRandomData(contractAddresses),
+        txnHash: getTransactionHash(baseTxnHashInBigInt),
+        timestamp: baseTimeStamp,
+        version: getRandomData(transactionVersions),
+        chainId,
+        txnType,
+        finalityStatus,
+        executionStatus,
+        contractFuncName,
+      }),
+    );
   }
 
   return transactions.sort((a, b) => b.timestamp - a.timestamp);
+}
+
+function getTransactionTemplate() {
+  return {
+    chainId: constants.StarknetChainId.SN_SEPOLIA,
+    timestamp: 0,
+    senderAddress: '',
+    contractAddress: '',
+    txnHash: '',
+    txnType: '',
+    failureReason: '',
+    executionStatus: '',
+    finalityStatus: '',
+    accountCalls: null,
+    version: 1,
+    dataVersion: TransactionDataVersion.V2,
+  };
+}
+
+/**
+ * Method to generate a deploy transaction.
+ *
+ * @param params
+ * @param params.address - The address of the account.
+ * @param params.txnHash - The transaction hash.
+ * @param params.timestamp - The timestamp of the transaction.
+ * @param params.version - The version of the transaction.
+ * @param params.chainId - The chain id of the transaction.
+ * @returns A transaction object.
+ * */
+export function generateDeployTransaction({
+  address,
+  txnHash,
+  timestamp,
+  version,
+  chainId,
+}: {
+  address: string;
+  txnHash: string;
+  timestamp: number;
+  version: number;
+  chainId: constants.StarknetChainId | string;
+}): Transaction {
+  const transaction = getTransactionTemplate();
+
+  return {
+    ...transaction,
+    chainId: chainId,
+    txnHash,
+    senderAddress: address,
+    contractAddress: address,
+    txnType: TransactionType.DEPLOY_ACCOUNT,
+    finalityStatus: TransactionFinalityStatus.ACCEPTED_ON_L1,
+    executionStatus: TransactionExecutionStatus.SUCCEEDED,
+    timestamp: timestamp,
+    version: version,
+  };
+}
+
+/**
+ * Method to generate an invoke transaction.
+ *
+ * @param params
+ * @param params.address - The address of the account.
+ * @param params.contractAddress - The contract address.
+ * @param params.txnHash - The transaction hash.
+ * @param params.timestamp - The timestamp of the transaction.
+ * @param params.version - The version of the transaction.
+ * @param params.chainId - The chain id of the transaction.
+ * @param params.txnType - The type of the transaction.
+ * @param params.finalityStatus - The finality status of the transaction.
+ * @param params.executionStatus - The execution status of the transaction.
+ * @param params.contractFuncName - The contract function name.
+ * @returns A transaction object.
+ * */
+export function generateInvokeTransaction({
+  address,
+  contractAddress,
+  txnHash,
+  timestamp,
+  version,
+  chainId,
+  txnType,
+  finalityStatus,
+  executionStatus,
+  contractFuncName,
+}: {
+  address: string;
+  txnHash: string;
+  contractAddress: string;
+  timestamp: number;
+  version: number;
+  chainId: constants.StarknetChainId | string;
+  finalityStatus: TransactionFinalityStatus;
+  executionStatus: TransactionExecutionStatus;
+  txnType: TransactionType;
+  contractFuncName: string;
+}): Transaction {
+  const transaction = getTransactionTemplate();
+
+  return {
+    ...transaction,
+    chainId: chainId,
+    contractAddress: '',
+    txnType,
+    finalityStatus,
+    executionStatus,
+    timestamp,
+    txnHash,
+    senderAddress: address,
+    accountCalls: {
+      [contractAddress]: [
+        {
+          contract: contractAddress,
+          contractFuncName,
+          contractCallData: [address, getRandomValue(1000).toString(16)],
+        },
+      ],
+    },
+    version: version,
+  };
+}
+
+/**
+ * Method to generate a random transaction hash.
+ *
+ * @param base - The base number to generate the transaction hash.
+ * @returns A transaction hash.
+ * */
+export function getTransactionHash(base = SixtyThreeHexInBigInt) {
+  return `0x` + base.toString(16);
 }
 
 export function generateTransactionRequests({
@@ -333,16 +456,10 @@ export function generateTransactionRequests({
       signer: address,
       addressIndex: 0,
       maxFee: '100',
-      selectedFeeToken:
-        selectedFeeTokens[
-          Math.floor(generateRandomValue() * selectedFeeTokens.length)
-        ],
+      selectedFeeToken: getRandomData(selectedFeeTokens),
       calls: [
         {
-          contractAddress:
-            contractAddresses[
-              Math.floor(generateRandomValue() * contractAddresses.length)
-            ],
+          contractAddress: getRandomData(contractAddresses),
           calldata: CallData.compile({
             to: address,
             amount: '1',
