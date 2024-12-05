@@ -16,7 +16,6 @@ import {
   ChainIdFilter as BaseChainIdFilter,
   StringFllter,
   Filter,
-  MultiFilter,
 } from './filter';
 import { StateManager, StateManagerError } from './state-manager';
 
@@ -27,21 +26,17 @@ export class ChainIdFilter
   implements ITxFilter {}
 
 export class ContractAddressFilter
-  extends MultiFilter<string, string, Transaction>
+  extends StringFllter<Transaction>
   implements ITxFilter
 {
-  protected _prepareSearch(search: string[]): void {
-    this.search = new Set(search?.map((val) => val));
-  }
-
   protected _apply(data: Transaction): boolean {
     const txn = data as V2Transaction;
     const { accountCalls } = txn;
     if (!accountCalls) {
       return false;
     }
-    for (const contract in this.search) {
-      if (accountCalls[contract]) {
+    for (const contract in accountCalls) {
+      if (this.search.has(contract.toLowerCase())) {
         return true;
       }
     }
