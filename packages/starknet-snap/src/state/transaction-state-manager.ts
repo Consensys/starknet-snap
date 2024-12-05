@@ -1,18 +1,20 @@
-import type { constants, TransactionType } from 'starknet';
+import type { constants } from 'starknet';
 import {
   TransactionFinalityStatus,
   TransactionExecutionStatus,
+  TransactionType
 } from 'starknet';
 import { assert, enums, number } from 'superstruct';
 
-import type { Transaction, SnapState } from '../types/snapState';
-import { TransactionStatusType } from '../types/snapState';
+import type { Transaction, SnapState, V2Transaction } from '../types/snapState';
+import { TransactionStatusType, VoyagerTransactionType } from '../types/snapState';
 import type { IFilter } from './filter';
 import {
   BigIntFilter,
   ChainIdFilter as BaseChainIdFilter,
   StringFllter,
   Filter,
+  MultiFilter,
 } from './filter';
 import { StateManager, StateManagerError } from './state-manager';
 
@@ -23,11 +25,32 @@ export class ChainIdFilter
   implements ITxFilter {}
 
 export class ContractAddressFilter
-  extends BigIntFilter<Transaction>
+  extends MultiFilter<
+  string,
+  string,
+  Transaction
+>
   implements ITxFilter
 {
-  dataKey = 'contractAddress';
+  protected _prepareSearch(search: string[]): void {
+    this.search = new Set(search?.map((val) => val));
+  }
+
+  protected _apply(data: Transaction): boolean {
+    const txn = (data as V2Transaction)
+    const accountCalls = txn.accountCalls;
+    if (!accountCalls) {
+      return false;
+    }
+    for (const contract in this.search) {
+      if (accountCalls[contract]) {
+        return true;
+      }
+    }
+    return false;
+  }
 }
+
 export class SenderAddressFilter
   extends BigIntFilter<Transaction>
   implements ITxFilter
@@ -60,6 +83,14 @@ export class TxnTypeFilter
 {
   dataKey = 'txnType';
 }
+
+export class DataVersionFilter
+  extends StringFllter<Transaction>
+  implements ITxFilter
+{
+  dataKey = 'dataVersion';
+}
+
 
 // Filter for transaction status
 // Search for transactions based on the finality status and execution status
@@ -112,12 +143,13 @@ export class TxStatusFilter implements ITxFilter {
 export type SearchFilter = {
   txnHash?: string[];
   txnType?: TransactionType[];
-  chainId?: constants.StarknetChainId[];
+  chainId?: constants.StarknetChainId[] | string[];
   senderAddress?: string[];
   contractAddress?: string[];
   executionStatus?: TransactionExecutionStatus[];
   finalityStatus?: TransactionFinalityStatus[];
   timestamp?: number;
+  dataVersion?: string[];
 };
 
 export class TransactionStateManager extends StateManager<Transaction> {
@@ -158,10 +190,15 @@ export class TransactionStateManager extends StateManager<Transaction> {
       executionStatus,
       finalityStatus,
       timestamp,
+      dataVersion,
     }: SearchFilter,
     state?: SnapState,
   ): Promise<Transaction[]> {
     const filters: ITxFilter[] = [];
+    if (dataVersion !== undefined && dataVersion.length > 0) {
+      filters.push(new DataVersionFilter(dataVersion));
+    }
+
     if (txnHash !== undefined && txnHash.length > 0) {
       filters.push(new TxHashFilter(txnHash));
     }

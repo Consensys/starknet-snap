@@ -15,6 +15,7 @@ import * as snapHelper from '../../utils/snap';
 import { NetworkStateManager } from '../network-state-manager';
 import { TransactionRequestStateManager } from '../request-state-manager';
 import { TokenStateManager } from '../token-state-manager';
+import { TransactionStateManager } from '../transaction-state-manager';
 
 jest.mock('../../utils/snap');
 jest.mock('../../utils/logger');
@@ -71,6 +72,22 @@ export const mockTokenStateManager = () => {
   return {
     getEthTokenSpy,
     getStrkTokenSpy,
+  };
+};
+
+export const mockTransactionStateManager = () => {
+  const removeTransactionsSpy = jest.spyOn(
+    TransactionStateManager.prototype,
+    'removeTransactions',
+  );
+  const findTransactionsSpy = jest.spyOn(
+    TransactionStateManager.prototype,
+    'findTransactions',
+  );
+
+  return {
+    removeTransactionsSpy,
+    findTransactionsSpy,
   };
 };
 
