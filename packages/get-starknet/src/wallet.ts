@@ -63,6 +63,10 @@ export class MetaMaskSnapWallet implements StarknetWindowObject {
 
   #networkChangeHandlers: NetworkChangeEventHandler[] = [];
 
+  static readonly minimumPollingDelay = 100;
+
+  static readonly maximumPollingDelay = 5000;
+
   // eslint-disable-next-line @typescript-eslint/naming-convention, no-restricted-globals
   static readonly snapId = process.env.SNAP_ID ?? 'npm:@consensys/starknet-snap';
 
@@ -272,6 +276,10 @@ export class MetaMaskSnapWallet implements StarknetWindowObject {
     }
   }
 
+  /**
+   * Polling function for detecting changes with a maximum delay.
+   * Ensures that each iteration respects a maximum delay before proceeding.
+   */
   #pollingFunction = async (): Promise<void> => {
     if (!this.#pollingController) {
       return; // Abort if the polling controller is not initialized
@@ -279,22 +287,41 @@ export class MetaMaskSnapWallet implements StarknetWindowObject {
     const { signal } = this.#pollingController;
 
     while (!signal.aborted) {
+      const startTime = Date.now(); // Track the start time of the iteration
       const previousNetwork = this.#network;
       const previousAddress = this.#latestAddress;
 
-      await this.#init();
+      try {
+        // Perform the polling operation with a timeout
+        await Promise.race([
+          this.#init(), // Perform the main operation
+          new Promise(
+            (_, reject) =>
+              setTimeout(() => reject(new Error('Polling timeout exceeded')), MetaMaskSnapWallet.maximumPollingDelay), // Timeout after 5 seconds
+          ),
+        ]);
 
-      // Check for network change
-      if (previousNetwork.chainId !== this.#network.chainId) {
-        this.#networkChangeHandlers.forEach((callback) => callback(this.#network.chainId, [this.#selectedAddress]));
+        // Check for network change
+        if (previousNetwork.chainId !== this.#network.chainId) {
+          this.#networkChangeHandlers.forEach((callback) => callback(this.#network.chainId, [this.#selectedAddress]));
+        }
+
+        // Check for account change
+        if (previousAddress !== this.#selectedAddress) {
+          this.#accountChangeHandlers.forEach((callback) => callback([this.#selectedAddress]));
+        }
+      } catch (error) {
+        if (!signal.aborted) {
+          console.error('Error in polling:', error.message);
+        }
       }
 
-      // Check for account change
-      if (previousAddress !== this.#selectedAddress) {
-        this.#accountChangeHandlers.forEach((callback) => callback([this.#selectedAddress]));
+      // Calculate remaining time for minimum delay
+      const elapsedTime = Date.now() - startTime;
+      const remainingTime = Math.max(0, MetaMaskSnapWallet.minimumPollingDelay - elapsedTime); // Ensure a minimum delay of 100ms
+      if (remainingTime > 0) {
+        await new Promise((resolve) => setTimeout(resolve, remainingTime));
       }
-
-      await new Promise((resolve) => setTimeout(resolve, 5000));
     }
   };
 
