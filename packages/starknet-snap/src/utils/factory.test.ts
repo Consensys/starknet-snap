@@ -1,11 +1,12 @@
 import { StarkScanClient } from '../chain/data-client/starkscan';
+import { TransactionService } from '../chain/transaction-service';
 import { Config, DataClient } from '../config';
 import { STARKNET_SEPOLIA_TESTNET_NETWORK } from './constants';
-import { createStarkScanClient } from './factory';
+import { createStarkScanClient, createTransactionService } from './factory';
+
+const config = Config.dataClient[DataClient.STARKSCAN];
 
 describe('createStarkScanClient', () => {
-  const config = Config.dataClient[DataClient.STARKSCAN];
-
   it('creates a StarkScan client', () => {
     config.apiKey = 'API_KEY';
     expect(
@@ -18,5 +19,15 @@ describe('createStarkScanClient', () => {
     expect(() =>
       createStarkScanClient(STARKNET_SEPOLIA_TESTNET_NETWORK),
     ).toThrow('Missing StarkScan API key');
+  });
+});
+
+describe('createTransactionService', () => {
+  it('creates a Transaction service', () => {
+    config.apiKey = 'API_KEY';
+    expect(
+      createTransactionService(STARKNET_SEPOLIA_TESTNET_NETWORK),
+    ).toBeInstanceOf(TransactionService);
+    config.apiKey = undefined;
   });
 });
