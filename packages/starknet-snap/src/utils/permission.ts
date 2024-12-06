@@ -29,7 +29,7 @@ export enum RpcMethod {
   GetAddressByStarkName = 'starkNet_getAddrFromStarkName',
   ReadContract = 'starkNet_getValue',
   GetStoredErc20Tokens = 'starkNet_getStoredErc20Tokens',
-  Ping='ping'
+  Ping = 'ping'
 }
 // RpcMethod that are allowed to be called by any origin
 const publicPermissions = [
