@@ -272,44 +272,41 @@ export class MetaMaskSnapWallet implements StarknetWindowObject {
     }
   }
 
-  /**
-   * Starts polling for account or network changes and calls the respective callbacks.
-   */
-  #startPolling(): void {
-    this.#pollingController = new AbortController();
+  #pollingFunction = async (): Promise<void> => {
+    if (!this.#pollingController) {
+      return; // Abort if the polling controller is not initialized
+    }
     const { signal } = this.#pollingController;
 
-    const pollForChanges = async () => {
-      while (!signal.aborted) {
-        const previousNetwork = this.#network;
-        const previousAddress = this.#latestAddress;
+    while (!signal.aborted) {
+      const previousNetwork = this.#network;
+      const previousAddress = this.#latestAddress;
 
-        await this.#init();
+      await this.#init();
 
-        // Check for network change
-        if (previousNetwork.chainId !== this.#network.chainId) {
-          this.#networkChangeHandlers.forEach((callback) => callback(this.#network.chainId, [this.#selectedAddress]));
-        }
-
-        // Check for account change
-        if (previousAddress !== this.#selectedAddress) {
-          this.#accountChangeHandlers.forEach((callback) => callback([this.#selectedAddress]));
-        }
-
-        await new Promise((resolve) => setTimeout(resolve, 5000));
+      // Check for network change
+      if (previousNetwork.chainId !== this.#network.chainId) {
+        this.#networkChangeHandlers.forEach((callback) => callback(this.#network.chainId, [this.#selectedAddress]));
       }
-    };
 
-    pollForChanges().catch((error) => {
-      if (!signal.aborted) {
+      // Check for account change
+      if (previousAddress !== this.#selectedAddress) {
+        this.#accountChangeHandlers.forEach((callback) => callback([this.#selectedAddress]));
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+    }
+  };
+
+  #startPolling(): void {
+    this.#pollingController = new AbortController();
+    this.#pollingFunction().catch((error) => {
+      if (!this.#pollingController?.signal.aborted) {
         console.error('Error in polling:', error);
       }
     });
   }
 
-  /**
-   * Stops polling for account or network changes.
-   */
   #stopPolling(): void {
     if (this.#pollingController) {
       this.#pollingController.abort();
