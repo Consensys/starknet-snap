@@ -14,7 +14,7 @@ import * as starknetUtils from '../../utils/starknetUtils';
  *
  * @param chainId
  */
-export async function mockAccount(chainId: constants.StarknetChainId) {
+export async function mockAccount(chainId: constants.StarknetChainId | string) {
   const accounts = await generateAccounts(chainId, 1);
   return accounts[0];
 }

@@ -303,6 +303,8 @@ function getTransactionTemplate() {
     finalityStatus: '',
     accountCalls: null,
     version: 1,
+    maxFee: null,
+    actualFee: null,
     dataVersion: TransactionDataVersion.V2,
   };
 }
