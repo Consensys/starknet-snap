@@ -1,6 +1,9 @@
 import type {
-  EstimateFee,
   RawCalldata,
+  TransactionType as StarkNetTransactionType,
+  TransactionExecutionStatus,
+  TransactionFinalityStatus,
+  EstimateFee,
   TransactionType as StarknetTransactionType,
 } from 'starknet';
 
@@ -116,12 +119,18 @@ export enum TransactionStatusType { // for retrieving txn from StarkNet feeder g
   DEPRECATION = 'status',
 }
 
-export type Transaction = {
+export type TranscationAccountCall = {
+  contract: string;
+  contractFuncName: string;
+  contractCallData: string[];
+  recipient?: string;
+  amount?: string;
+};
+
+export type LegacyTransaction = {
   txnHash: string; // in hex
-  // TODO: Change the type of txnType to `TransactionType` in the SnapState, when this state manager apply to getTransactions, there is no migration neeeded, as the state is override for every fetch for getTransactions
   txnType: VoyagerTransactionType | string;
   chainId: string; // in hex
-  // TODO: rename it to address to sync with the same naming convention in the AccContract
   senderAddress: string; // in hex
   contractAddress: string; // in hex
   contractFuncName: string;
@@ -133,5 +142,38 @@ export type Transaction = {
   eventIds: string[];
   timestamp: number;
 };
+
+export enum TransactionDataVersion {
+  V2 = 'V2',
+}
+
+export enum ContractFuncName {
+  Upgrade = 'upgrade',
+  Transfer = 'transfer',
+}
+
+export type V2Transaction = {
+  txnHash: string; // in hex
+  txnType: StarkNetTransactionType;
+  chainId: string; // in hex
+  senderAddress: string; // in hex
+  contractAddress: string; // in hex
+  executionStatus?: TransactionExecutionStatus | string;
+  finalityStatus?: TransactionFinalityStatus | string;
+  failureReason: string;
+  timestamp: number;
+  maxFee?: string | null;
+  actualFee?: string | null;
+  // using Record<string, TranscationAccountCall[]> to support O(1) searching
+  accountCalls?: Record<string, TranscationAccountCall[]> | null;
+  version: number;
+  // Snap data Version to support backward compatibility , migration.
+  dataVersion: TransactionDataVersion.V2;
+};
+
+// FIXME: temp solution for backward compatibility before StarkScan implemented in get transactions
+export type Transaction =
+  | LegacyTransaction
+  | (V2Transaction & { status?: TransactionStatus | string });
 
 /* eslint-disable */

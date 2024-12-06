@@ -242,3 +242,9 @@ export function getTokenBalanceWithDetails(
   const { balance } = tokenBalance;
   return addMissingPropertiesToToken(token, balance.toString(), tokenUSDPrice);
 }
+
+export const isValidStarkName = (starkName: string): boolean => {
+  return /^(?:[a-z0-9-]{1,48}(?:[a-z0-9-]{1,48}[a-z0-9-])?\.)*[a-z0-9-]{1,48}\.stark$/.test(
+    starkName,
+  );
+};

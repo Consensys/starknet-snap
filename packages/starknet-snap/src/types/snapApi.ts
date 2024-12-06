@@ -7,6 +7,8 @@ import type {
   EstimateFeeDetails,
   DeployAccountSignerDetails,
   constants,
+  TransactionExecutionStatus,
+  TransactionFinalityStatus,
 } from 'starknet';
 
 import type { SnapState, VoyagerTransactionType } from './snapState';
@@ -152,8 +154,8 @@ export type DeclareContractRequestParams = {
 } & BaseRequestParams;
 
 export type RpcV4GetTransactionReceiptResponse = {
-  execution_status?: string;
-  finality_status?: string;
+  execution_status?: TransactionExecutionStatus;
+  finality_status?: TransactionFinalityStatus;
 };
 
 export type Authorizable = {

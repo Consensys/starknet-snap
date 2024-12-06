@@ -5,8 +5,11 @@ import {
 } from 'starknet';
 import { assert, enums, number } from 'superstruct';
 
-import type { Transaction, SnapState } from '../types/snapState';
-import { TransactionStatusType } from '../types/snapState';
+import type { Transaction, SnapState, V2Transaction } from '../types/snapState';
+import {
+  TransactionDataVersion,
+  TransactionStatusType,
+} from '../types/snapState';
 import type { IFilter } from './filter';
 import {
   BigIntFilter,
@@ -23,11 +26,24 @@ export class ChainIdFilter
   implements ITxFilter {}
 
 export class ContractAddressFilter
-  extends BigIntFilter<Transaction>
+  extends StringFllter<Transaction>
   implements ITxFilter
 {
-  dataKey = 'contractAddress';
+  protected _apply(data: Transaction): boolean {
+    const txn = data as V2Transaction;
+    const { accountCalls } = txn;
+    if (!accountCalls) {
+      return false;
+    }
+    for (const contract in accountCalls) {
+      if (this.search.has(contract.toLowerCase())) {
+        return true;
+      }
+    }
+    return false;
+  }
 }
+
 export class SenderAddressFilter
   extends BigIntFilter<Transaction>
   implements ITxFilter
@@ -59,6 +75,13 @@ export class TxnTypeFilter
   implements ITxFilter
 {
   dataKey = 'txnType';
+}
+
+export class DataVersionFilter
+  extends StringFllter<Transaction>
+  implements ITxFilter
+{
+  dataKey = 'dataVersion';
 }
 
 // Filter for transaction status
@@ -112,12 +135,13 @@ export class TxStatusFilter implements ITxFilter {
 export type SearchFilter = {
   txnHash?: string[];
   txnType?: TransactionType[];
-  chainId?: constants.StarknetChainId[];
+  chainId?: constants.StarknetChainId[] | string[];
   senderAddress?: string[];
   contractAddress?: string[];
   executionStatus?: TransactionExecutionStatus[];
   finalityStatus?: TransactionFinalityStatus[];
   timestamp?: number;
+  dataVersion?: string[];
 };
 
 export class TransactionStateManager extends StateManager<Transaction> {
@@ -158,10 +182,16 @@ export class TransactionStateManager extends StateManager<Transaction> {
       executionStatus,
       finalityStatus,
       timestamp,
+      // default return the latest version of the data
+      dataVersion = [TransactionDataVersion.V2],
     }: SearchFilter,
     state?: SnapState,
   ): Promise<Transaction[]> {
     const filters: ITxFilter[] = [];
+    if (dataVersion !== undefined && dataVersion.length > 0) {
+      filters.push(new DataVersionFilter(dataVersion));
+    }
+
     if (txnHash !== undefined && txnHash.length > 0) {
       filters.push(new TxHashFilter(txnHash));
     }

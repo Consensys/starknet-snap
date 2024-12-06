@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { AmountInput } from 'components/ui/molecule/AmountInput';
 import { SendSummaryModal } from '../SendSummaryModal';
 import {
@@ -15,11 +15,13 @@ import {
 import { useAppSelector } from 'hooks/redux';
 import { ethers } from 'ethers';
 import { AddressInput } from 'components/ui/molecule/AddressInput';
-import { isValidAddress } from 'utils/utils';
+import { isValidAddress, isValidStarkName, shortenAddress } from 'utils/utils';
 import { Bold, Normal } from '../../ConnectInfoModal/ConnectInfoModal.style';
 import { DropDown } from 'components/ui/molecule/DropDown';
 import { DEFAULT_FEE_TOKEN } from 'utils/constants';
 import { FeeToken } from 'types';
+import { useStarkNetSnap } from 'services';
+import { InfoText } from 'components/ui/molecule/AddressInput/AddressInput.style';
 
 interface Props {
   closeModal?: () => void;
@@ -27,7 +29,9 @@ interface Props {
 
 export const SendModalView = ({ closeModal }: Props) => {
   const networks = useAppSelector((state) => state.networks);
+  const chainId = networks?.items[networks.activeNetwork]?.chainId;
   const wallet = useAppSelector((state) => state.wallet);
+  const { getAddrFromStarkName } = useStarkNetSnap();
   const [summaryModalOpen, setSummaryModalOpen] = useState(false);
   const [fields, setFields] = useState({
     amount: '',
@@ -39,6 +43,9 @@ export const SendModalView = ({ closeModal }: Props) => {
     feeToken: DEFAULT_FEE_TOKEN, // Default fee token
   });
   const [errors, setErrors] = useState({ amount: '', address: '' });
+  const [resolvedAddress, setResolvedAddress] = useState('');
+  const debounceRef = useRef<NodeJS.Timeout | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (fieldName: string, fieldValue: string) => {
     //Check if input amount does not exceed user balance
@@ -64,7 +71,31 @@ export const SendModalView = ({ closeModal }: Props) => {
         break;
       case 'address':
         if (fieldValue !== '') {
-          if (!isValidAddress(fieldValue)) {
+          if (debounceRef.current) clearTimeout(debounceRef.current);
+
+          if (isValidAddress(fieldValue)) {
+            setResolvedAddress(fieldValue);
+            break;
+          } else if (isValidStarkName(fieldValue)) {
+            debounceRef.current = setTimeout(() => {
+              setLoading(true);
+              getAddrFromStarkName(fieldValue, chainId)
+                .then((address) => {
+                  setResolvedAddress(address);
+                })
+                .catch(() => {
+                  setResolvedAddress('');
+                  setErrors((prevErrors) => ({
+                    ...prevErrors,
+                    address: '.stark name doesn’t exist',
+                  }));
+                })
+                .finally(() => {
+                  setLoading(false);
+                });
+            }, 300);
+          } else {
+            setResolvedAddress('');
             setErrors((prevErrors) => ({
               ...prevErrors,
               address: 'Invalid address format',
@@ -90,7 +121,8 @@ export const SendModalView = ({ closeModal }: Props) => {
       !errors.address &&
       !errors.amount &&
       fields.amount.length > 0 &&
-      fields.address.length > 0
+      fields.address.length > 0 &&
+      !loading
     );
   };
 
@@ -108,13 +140,18 @@ export const SendModalView = ({ closeModal }: Props) => {
             </Network>
             <AddressInput
               label="To"
-              placeholder="Paste recipient address here"
+              placeholder="Paste recipient address or .stark name here"
               onChange={(value) => handleChange('address', value.target.value)}
+              disableValidate
+              validateError={errors.address}
             />
+            {isValidStarkName(fields.address) && resolvedAddress && (
+              <InfoText>{shortenAddress(resolvedAddress, 12)}</InfoText>
+            )}
             <SeparatorSmall />
             <MessageAlert
               variant="info"
-              text="Please only enter a valid Starknet address. Sending funds to a different network might result in permanent loss."
+              text="Please only enter a valid Starknet address or .stark name. Sending funds to a different network might result in permanent loss."
             />
             <Separator />
             <AmountInput
@@ -161,7 +198,7 @@ export const SendModalView = ({ closeModal }: Props) => {
       {summaryModalOpen && (
         <SendSummaryModal
           closeModal={closeModal}
-          address={fields.address}
+          address={resolvedAddress}
           amount={fields.amount}
           chainId={fields.chainId}
           selectedFeeToken={fields.feeToken} // Pass the selected fee token

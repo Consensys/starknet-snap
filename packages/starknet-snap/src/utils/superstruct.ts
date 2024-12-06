@@ -33,6 +33,7 @@ import {
   MAXIMUM_TOKEN_NAME_LENGTH,
   MAXIMUM_TOKEN_SYMBOL_LENGTH,
 } from './constants';
+import { isValidStarkName } from './starknetUtils';
 import { isValidAsciiStrField } from './string';
 
 export const TokenNameStruct = refine(
@@ -186,6 +187,17 @@ export const DeclareSignDetailsStruct = assign(
     chainId: ChainIdStruct,
     version: TxVersionStruct,
   }),
+);
+
+export const StarkNameStruct = refine(
+  string(),
+  'StarkNameStruct',
+  (value: string) => {
+    if (isValidStarkName(value)) {
+      return true;
+    }
+    return `The given stark name is invalid`;
+  },
 );
 
 /* ------------------------------ Contract Struct ------------------------------ */
