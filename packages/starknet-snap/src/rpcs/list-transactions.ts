@@ -72,4 +72,4 @@ export class ListTransactionsRpc extends ChainRpcController<
   }
 }
 
-export const ListTransactions = new ListTransactionsRpc();
+export const listTransactions = new ListTransactionsRpc();
