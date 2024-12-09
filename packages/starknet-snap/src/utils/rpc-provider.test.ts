@@ -1,6 +1,6 @@
 import { constants } from 'starknet';
 
-import { getRPCUrl } from './din';
+import { getRPCUrl } from './rpc-provider';
 
 describe('getRPCUrl', () => {
   it('returns Mainnet RPC URL if chain id is Mainnet', () => {
