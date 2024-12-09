@@ -29,6 +29,7 @@ export enum RpcMethod {
   GetAddressByStarkName = 'starkNet_getAddrFromStarkName',
   ReadContract = 'starkNet_getValue',
   GetStoredErc20Tokens = 'starkNet_getStoredErc20Tokens',
+  Ping = 'ping',
 }
 // RpcMethod that are allowed to be called by any origin
 const publicPermissions = [
@@ -51,6 +52,7 @@ const publicPermissions = [
   RpcMethod.GetTransactionStatus,
   RpcMethod.EstimateFee,
   RpcMethod.VerifySignedMessage,
+  RpcMethod.Ping,
 ];
 // RpcMethod that are restricted to be called by wallet UI origins
 const walletUIDappPermissions = publicPermissions.concat([
@@ -59,6 +61,7 @@ const walletUIDappPermissions = publicPermissions.concat([
   RpcMethod.GetTransactions,
   RpcMethod.UpgradeAccContract,
   RpcMethod.GetStarkName,
+  RpcMethod.GetAddressByStarkName,
   RpcMethod.ReadContract,
   RpcMethod.GetStoredErc20Tokens,
 ]);
