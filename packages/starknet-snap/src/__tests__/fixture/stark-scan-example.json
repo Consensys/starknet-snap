@@ -1,0 +1,163 @@
+{
+  "getTransactionsResp": {
+    "next_url": null,
+    "data": []
+  },
+  "invokeTx": {
+    "transaction_hash": "0x06d05d58dc35f432f8f5c7ae5972434a00d2e567e154fc1226c444f06e369c7d",
+    "block_hash": "0x02a44fd749221729c63956309d0df4ba03f4291613248d885870b55baf963e0e",
+    "block_number": 136140,
+    "transaction_index": 6,
+    "transaction_status": "ACCEPTED_ON_L1",
+    "transaction_finality_status": "ACCEPTED_ON_L1",
+    "transaction_execution_status": "SUCCEEDED",
+    "transaction_type": "INVOKE_FUNCTION",
+    "version": 1,
+    "signature": [
+      "0x555fe1b8e5183be2f6c81e5203ee3928aab894ab0b31279c89a3c7f016865fc",
+      "0x269d0a83634905be76372d3116733afc8a8f0f29776f57d7400b05ded54c9b1"
+    ],
+    "max_fee": "95250978959328",
+    "actual_fee": "62936888346418",
+    "nonce": "9",
+    "contract_address": null,
+    "entry_point_selector": null,
+    "entry_point_type": null,
+    "calldata": [
+      "0x1",
+      "0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
+      "0x83afd3f4caedc6eebf44246fe54e38c95e3179a5ec9ea81740eca5b482d12e",
+      "0x3",
+      "0x42ae4bf23ef08090010662d275982b6070edfecb131e9fb83dfc1414d226529",
+      "0x9184e72a000",
+      "0x0"
+    ],
+    "class_hash": null,
+    "sender_address": "0x042ae4bf23ef08090010662d275982b6070edfecb131e9fb83dfc1414d226529",
+    "constructor_calldata": null,
+    "contract_address_salt": null,
+    "timestamp": 1724759407,
+    "entry_point_selector_name": "__execute__",
+    "number_of_events": 3,
+    "revert_error": null,
+    "account_calls": [
+      {
+        "block_hash": "0x02a44fd749221729c63956309d0df4ba03f4291613248d885870b55baf963e0e",
+        "block_number": 136140,
+        "transaction_hash": "0x06d05d58dc35f432f8f5c7ae5972434a00d2e567e154fc1226c444f06e369c7d",
+        "caller_address": "0x042ae4bf23ef08090010662d275982b6070edfecb131e9fb83dfc1414d226529",
+        "contract_address": "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
+        "calldata": [
+          "0x42ae4bf23ef08090010662d275982b6070edfecb131e9fb83dfc1414d226529",
+          "0x9184e72a000",
+          "0x0"
+        ],
+        "result": ["0x1"],
+        "timestamp": 1724759407,
+        "call_type": "CALL",
+        "class_hash": "0x07f3777c99f3700505ea966676aac4a0d692c2a9f5e667f4c606b51ca1dd3420",
+        "selector": "0x83afd3f4caedc6eebf44246fe54e38c95e3179a5ec9ea81740eca5b482d12e",
+        "entry_point_type": "EXTERNAL",
+        "selector_name": "transfer"
+      }
+    ]
+  },
+  "upgradeTx": {
+    "transaction_hash": "0x019a7a7bbda2e52f82ffc867488cace31a04d9340ad56bbe9879aab8bc47f0b6",
+    "block_hash": "0x002dae3ed3cf7763621da170103384d533ed09fb987a232f23b7d8febbbca67f",
+    "block_number": 77586,
+    "transaction_index": 33,
+    "transaction_status": "ACCEPTED_ON_L1",
+    "transaction_finality_status": "ACCEPTED_ON_L1",
+    "transaction_execution_status": "SUCCEEDED",
+    "transaction_type": "INVOKE_FUNCTION",
+    "version": 1,
+    "signature": [
+      "0x417671c63219250e0c80d53b1e1b3c0dd76ade552806a51fdfd8c06f7c47a12",
+      "0x91c7ccadec2ba22bfa5c92b62fc6eaccb56c686279f953c5012f7d6f679570"
+    ],
+    "max_fee": "191210494208472",
+    "actual_fee": "148188646762488",
+    "nonce": "4",
+    "contract_address": null,
+    "entry_point_selector": null,
+    "entry_point_type": null,
+    "calldata": [
+      "0x1",
+      "0x42ae4bf23ef08090010662d275982b6070edfecb131e9fb83dfc1414d226529",
+      "0xf2f7c15cbe06c8d94597cd91fd7f3369eae842359235712def5584f8d270cd",
+      "0x0",
+      "0x3",
+      "0x3",
+      "0x29927c8af6bccf3f6fda035981e765a7bdbf18a2dc0d630494f8758aa908e2b",
+      "0x1",
+      "0x0"
+    ],
+    "class_hash": null,
+    "sender_address": "0x042ae4bf23ef08090010662d275982b6070edfecb131e9fb83dfc1414d226529",
+    "constructor_calldata": null,
+    "contract_address_salt": null,
+    "timestamp": 1719830196,
+    "entry_point_selector_name": "__execute__",
+    "number_of_events": 4,
+    "revert_error": null,
+    "account_calls": [
+      {
+        "block_hash": "0x002dae3ed3cf7763621da170103384d533ed09fb987a232f23b7d8febbbca67f",
+        "block_number": 77586,
+        "transaction_hash": "0x019a7a7bbda2e52f82ffc867488cace31a04d9340ad56bbe9879aab8bc47f0b6",
+        "caller_address": "0x042ae4bf23ef08090010662d275982b6070edfecb131e9fb83dfc1414d226529",
+        "contract_address": "0x042ae4bf23ef08090010662d275982b6070edfecb131e9fb83dfc1414d226529",
+        "calldata": [
+          "0x29927c8af6bccf3f6fda035981e765a7bdbf18a2dc0d630494f8758aa908e2b",
+          "0x1",
+          "0x0"
+        ],
+        "result": ["0x1", "0x0"],
+        "timestamp": 1719830196,
+        "call_type": "CALL",
+        "class_hash": "0x025ec026985a3bf9d0cc1fe17326b245dfdc3ff89b8fde106542a3ea56c5a918",
+        "selector": "0xf2f7c15cbe06c8d94597cd91fd7f3369eae842359235712def5584f8d270cd",
+        "entry_point_type": "EXTERNAL",
+        "selector_name": "upgrade"
+      }
+    ]
+  },
+  "cairo0DeployTx": {
+    "transaction_hash": "0x06210d8004e1c90723732070c191a3a003f99d1d95e6c7766322ed75d9d83d78",
+    "block_hash": "0x058a67093c5f642a7910b7aef0c0a846834e1df60f9bf4c0564afb9c8efe3a41",
+    "block_number": 68074,
+    "transaction_index": 6,
+    "transaction_status": "ACCEPTED_ON_L1",
+    "transaction_finality_status": "ACCEPTED_ON_L1",
+    "transaction_execution_status": "SUCCEEDED",
+    "transaction_type": "DEPLOY_ACCOUNT",
+    "version": 1,
+    "signature": [
+      "0x2de38508b633161a3cdbc0a04b0e09f85c884254552f903417239f95486ceda",
+      "0x2694930b199802941c996f8aaf48e63a1b2e51ccfaec7864f83f40fcd285286"
+    ],
+    "max_fee": "6639218055204",
+    "actual_fee": "21040570099",
+    "nonce": null,
+    "contract_address": "0x042ae4bf23ef08090010662d275982b6070edfecb131e9fb83dfc1414d226529",
+    "entry_point_selector": null,
+    "entry_point_type": null,
+    "calldata": null,
+    "class_hash": "0x025ec026985a3bf9d0cc1fe17326b245dfdc3ff89b8fde106542a3ea56c5a918",
+    "sender_address": null,
+    "constructor_calldata": [
+      "0x33434ad846cdd5f23eb73ff09fe6fddd568284a0fb7d1be20ee482f044dabe2",
+      "0x79dc0da7c54b95f10aa182ad0a46400db63156920adb65eca2654c0945a463",
+      "0x2",
+      "0xbd7fccd6d25df79e3fc8dd539efd03fe448d902b8bc5955e60b3830988ce50",
+      "0x0"
+    ],
+    "contract_address_salt": "334816139481647544515869631733577866188380288661138191555306848313001168464",
+    "timestamp": 1716355916,
+    "entry_point_selector_name": "constructor",
+    "number_of_events": 2,
+    "revert_error": null,
+    "account_calls": []
+  }
+}

@@ -10,20 +10,16 @@ import type {
 import { MethodNotFoundError } from '@metamask/snaps-sdk';
 import { Box, Link, Text } from '@metamask/snaps-sdk/jsx';
 
-import { addNetwork } from './addNetwork';
 import { Config } from './config';
 import { createAccount } from './createAccount';
-import { estimateAccDeployFee } from './estimateAccountDeployFee';
 import { extractPublicKey } from './extractPublicKey';
 import { getCurrentNetwork } from './getCurrentNetwork';
 import { getErc20TokenBalance } from './getErc20TokenBalance';
 import { getStarkName } from './getStarkName';
 import { getStoredErc20Tokens } from './getStoredErc20Tokens';
 import { getStoredNetworks } from './getStoredNetworks';
-import { getStoredTransactions } from './getStoredTransactions';
 import { getStoredUserAccounts } from './getStoredUserAccounts';
 import { getTransactions } from './getTransactions';
-import { getTransactionStatus } from './getTransactionStatus';
 import { getValue } from './getValue';
 import { homePageController } from './on-home-page';
 import { recoverAccounts } from './recoverAccounts';
@@ -39,6 +35,8 @@ import type {
   GetDeploymentDataParams,
   DeclareContractParams,
   WatchAssetParams,
+  GetAddrFromStarkNameParams,
+  GetTransactionStatusParams,
 } from './rpcs';
 import {
   displayPrivateKey,
@@ -52,6 +50,8 @@ import {
   switchNetwork,
   getDeploymentData,
   watchAsset,
+  getAddrFromStarkName,
+  getTransactionStatus,
 } from './rpcs';
 import { signDeployAccountTransaction } from './signDeployAccountTransaction';
 import type {
@@ -80,6 +80,7 @@ import { UnknownError } from './utils/exceptions';
 import { getAddressKeyDeriver } from './utils/keyPair';
 import { acquireLock } from './utils/lock';
 import { logger } from './utils/logger';
+import { RpcMethod, validateOrigin } from './utils/permission';
 import { toJson } from './utils/serializer';
 import {
   upsertErc20Token,
@@ -90,12 +91,17 @@ import {
 declare const snap;
 logger.logLevel = parseInt(Config.logLevel, 10);
 
-export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
+export const onRpcRequest: OnRpcRequestHandler = async ({
+  origin,
+  request,
+}) => {
   const requestParams = request?.params as unknown as ApiRequestParams;
 
   logger.log(`${request.method}:\nrequestParams: ${toJson(requestParams)}`);
 
   try {
+    validateOrigin(origin, request.method);
+
     if (request.method === 'ping') {
       logger.log('pong');
       return 'pong';
@@ -141,13 +147,13 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
     };
 
     switch (request.method) {
-      case 'starkNet_createAccount':
+      case RpcMethod.CreateAccount:
         apiParams.keyDeriver = await getAddressKeyDeriver(snap);
         return await createAccount(
           apiParams as unknown as ApiParamsWithKeyDeriver,
         );
 
-      case 'starkNet_createAccountLegacy':
+      case RpcMethod.DeployCario0Account:
         apiParams.keyDeriver = await getAddressKeyDeriver(snap);
         return await createAccount(
           apiParams as unknown as ApiParamsWithKeyDeriver,
@@ -156,123 +162,118 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
           CAIRO_VERSION_LEGACY,
         );
 
-      case 'starkNet_getStoredUserAccounts':
+      case RpcMethod.ListAccounts:
         return await getStoredUserAccounts(apiParams);
 
-      case 'starkNet_displayPrivateKey':
+      case RpcMethod.DisplayPrivateKey:
         return await displayPrivateKey.execute(
           apiParams.requestParams as unknown as DisplayPrivateKeyParams,
         );
 
-      case 'starkNet_extractPublicKey':
+      case RpcMethod.ExtractPublicKey:
         apiParams.keyDeriver = await getAddressKeyDeriver(snap);
         return await extractPublicKey(
           apiParams as unknown as ApiParamsWithKeyDeriver,
         );
 
-      case 'starkNet_signMessage':
+      case RpcMethod.SignMessage:
         return await signMessage.execute(
           apiParams.requestParams as unknown as SignMessageParams,
         );
 
-      case 'starkNet_signTransaction':
+      case RpcMethod.SignTransaction:
         apiParams.keyDeriver = await getAddressKeyDeriver(snap);
         return await signTransaction.execute(
           apiParams.requestParams as unknown as SignTransactionParams,
         );
 
-      case 'starkNet_signDeclareTransaction':
+      case RpcMethod.SignDeclareTransaction:
         return await signDeclareTransaction.execute(
           apiParams.requestParams as unknown as SignDeclareTransactionParams,
         );
 
-      case 'starkNet_signDeployAccountTransaction':
+      case RpcMethod.SignDeployAccountTransaction:
         apiParams.keyDeriver = await getAddressKeyDeriver(snap);
         return await signDeployAccountTransaction(
           apiParams as unknown as ApiParamsWithKeyDeriver,
         );
 
-      case 'starkNet_verifySignedMessage':
+      case RpcMethod.VerifySignedMessage:
         return await verifySignature.execute(
           apiParams.requestParams as unknown as VerifySignatureParams,
         );
 
-      case 'starkNet_getErc20TokenBalance':
+      case RpcMethod.GetErc20TokenBalance:
         return await getErc20TokenBalance(apiParams);
 
-      case 'starkNet_getTransactionStatus':
-        return await getTransactionStatus(apiParams);
+      case RpcMethod.GetTransactionStatus:
+        return await getTransactionStatus.execute(
+          apiParams.requestParams as unknown as GetTransactionStatusParams,
+        );
 
-      case 'starkNet_getValue':
+      case RpcMethod.ReadContract:
         return await getValue(apiParams);
 
-      case 'starkNet_estimateFee':
+      case RpcMethod.EstimateFee:
         return await estimateFee.execute(
           apiParams.requestParams as unknown as EstimateFeeParams,
         );
 
-      case 'starkNet_estimateAccountDeployFee':
-        apiParams.keyDeriver = await getAddressKeyDeriver(snap);
-        return await estimateAccDeployFee(
-          apiParams as unknown as ApiParamsWithKeyDeriver,
-        );
-
-      case 'starkNet_addErc20Token':
+      case RpcMethod.AddErc20Token:
         return await watchAsset.execute(
           apiParams.requestParams as unknown as WatchAssetParams,
         );
 
-      case 'starkNet_getStoredErc20Tokens':
+      case RpcMethod.GetStoredErc20Tokens:
         return await getStoredErc20Tokens(apiParams);
 
-      case 'starkNet_addNetwork':
-        return await addNetwork(apiParams);
-
-      case 'starkNet_switchNetwork':
+      case RpcMethod.SwitchNetwork:
         return await switchNetwork.execute(
           apiParams.requestParams as unknown as SwitchNetworkParams,
         );
 
-      case 'starkNet_getCurrentNetwork':
+      case RpcMethod.GetCurrentNetwork:
         return await getCurrentNetwork(apiParams);
 
-      case 'starkNet_getStoredNetworks':
+      case RpcMethod.GetStoredNetworks:
         return await getStoredNetworks(apiParams);
 
-      case 'starkNet_getStoredTransactions':
-        return await getStoredTransactions(apiParams);
-
-      case 'starkNet_getTransactions':
+      case RpcMethod.GetTransactions:
         return await getTransactions(apiParams);
 
-      case 'starkNet_recoverAccounts':
+      case RpcMethod.RecoverAccounts:
         apiParams.keyDeriver = await getAddressKeyDeriver(snap);
         return await recoverAccounts(
           apiParams as unknown as ApiParamsWithKeyDeriver,
         );
 
-      case 'starkNet_executeTxn':
+      case RpcMethod.ExecuteTxn:
         return await executeTxn.execute(
           apiParams.requestParams as unknown as ExecuteTxnParams,
         );
 
-      case 'starkNet_upgradeAccContract':
+      case RpcMethod.UpgradeAccContract:
         apiParams.keyDeriver = await getAddressKeyDeriver(snap);
         return upgradeAccContract(
           apiParams as unknown as ApiParamsWithKeyDeriver,
         );
 
-      case 'starkNet_declareContract':
+      case RpcMethod.DeclareContract:
         return await declareContract.execute(
           apiParams.requestParams as unknown as DeclareContractParams,
         );
 
-      case 'starkNet_getStarkName':
+      case RpcMethod.GetStarkName:
         return await getStarkName(apiParams);
 
-      case 'starkNet_getDeploymentData':
+      case RpcMethod.GetDeploymentData:
         return await getDeploymentData.execute(
           apiParams.requestParams as unknown as GetDeploymentDataParams,
+        );
+
+      case RpcMethod.GetAddressByStarkName:
+        return await getAddrFromStarkName.execute(
+          apiParams.requestParams as unknown as GetAddrFromStarkNameParams,
         );
 
       default:
