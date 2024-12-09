@@ -69,11 +69,11 @@ import {
   ETHER_SEPOLIA_TESTNET,
   BlockIdentifierEnum,
 } from './constants';
-import { getRPCUrl } from './din';
 import { DeployRequiredError, UpgradeRequiredError } from './exceptions';
 import { hexToString } from './formatter-utils';
 import { getAddressKey } from './keyPair';
 import { logger } from './logger';
+import { getRPCUrl } from './rpc-provider';
 import { toJson } from './serializer';
 import {
   getAccount,

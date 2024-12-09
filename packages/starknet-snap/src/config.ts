@@ -22,10 +22,22 @@ export type SnapConfig = {
   defaultNetwork: Network;
   availableNetworks: Network[];
   preloadTokens: Erc20Token[];
+  rpcEndpoint: {
+    [key: string]: string;
+  };
   explorer: {
     [key: string]: string;
   };
+  dataClient: {
+    [key: string]: {
+      apiKey: string | undefined;
+    };
+  };
 };
+
+export enum DataClient {
+  STARKSCAN = 'starkscan',
+}
 
 export const Config: SnapConfig = {
   // eslint-disable-next-line no-restricted-globals
@@ -40,6 +52,15 @@ export const Config: SnapConfig = {
     STARKNET_SEPOLIA_TESTNET_NETWORK,
   ],
 
+  rpcEndpoint: {
+    [constants.StarknetChainId.SN_MAIN]:
+      // eslint-disable-next-line no-restricted-globals
+      `https://starknet-mainnet.infura.io/v3/${process.env.DIN_API_KEY ?? ''}`,
+    [constants.StarknetChainId.SN_SEPOLIA]:
+      // eslint-disable-next-line no-restricted-globals
+      `https://starknet-sepolia.infura.io/v3/${process.env.DIN_API_KEY ?? ''}`,
+  },
+
   explorer: {
     [constants.StarknetChainId.SN_MAIN]:
       // eslint-disable-next-line no-template-curly-in-string
@@ -47,6 +68,13 @@ export const Config: SnapConfig = {
     [constants.StarknetChainId.SN_SEPOLIA]:
       // eslint-disable-next-line no-template-curly-in-string
       'https://sepolia.voyager.online/contract/${address}',
+  },
+
+  dataClient: {
+    [DataClient.STARKSCAN]: {
+      // eslint-disable-next-line no-restricted-globals
+      apiKey: process.env.STARKSCAN_API_KEY,
+    },
   },
 
   preloadTokens: [
