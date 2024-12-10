@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
 
+## [1.26.0](https://github.com/Consensys/starknet-snap/compare/wallet-ui-v1.25.0...wallet-ui-v1.26.0) (2024-12-10)
+
+
+### Features
+
+* allow users to transfer money to a .stark name ([#437](https://github.com/Consensys/starknet-snap/issues/437)) ([#449](https://github.com/Consensys/starknet-snap/issues/449)) ([c9e2c64](https://github.com/Consensys/starknet-snap/commit/c9e2c64572ce22bb111e6075fa6191dc025bc863))
+
 ## [1.25.0](https://github.com/Consensys/starknet-snap/compare/wallet-ui-v1.24.1...wallet-ui-v1.25.0) (2024-11-26)
 
 
