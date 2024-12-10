@@ -20,3 +20,8 @@ export const SupportedStarknetSpecVersion = ['0.7'];
 
 // The wallet API support is 0.7.2 but the RPC specs requests xx.yy. Hence we skip the last digits.
 export const SupportedWalletApi = ['0.7'];
+
+export enum WalletEvent {
+  AccountsChanged = 'accountsChanged',
+  NetworkChanged = 'networkChanged',
+}
