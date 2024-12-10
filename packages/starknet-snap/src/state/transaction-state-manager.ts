@@ -1,5 +1,6 @@
-import type { constants, TransactionType } from 'starknet';
+import type { Call, constants } from 'starknet';
 import {
+  TransactionType,
   TransactionFinalityStatus,
   TransactionExecutionStatus,
 } from 'starknet';
@@ -10,6 +11,7 @@ import {
   TransactionDataVersion,
   TransactionStatusType,
 } from '../types/snapState';
+import { msToSec } from '../utils';
 import type { IFilter } from './filter';
 import {
   BigIntFilter,
@@ -336,5 +338,106 @@ export class TransactionStateManager extends StateManager<Transaction> {
     } catch (error) {
       throw new StateManagerError(error.message);
     }
+  }
+
+  /**
+   * Creates a new transaction object with the given data.
+   *
+   * @param params - The parameters of the new transaction object.
+   * @param params.txnHash - The txn hash.
+   * @param params.senderAddress - The sender address.
+   * @param params.chainId - The chain id.
+   * @param params.maxFee - The max fee.
+   * @param params.calls - The array of `Call` object.
+   * @param params.txnVersion - The transaction version.
+   * @returns The new transaction object.
+   */
+  newInvokeTransaction({
+    txnHash,
+    senderAddress,
+    chainId,
+    calls,
+    txnVersion,
+    maxFee,
+  }: {
+    txnHash: string;
+    senderAddress: string;
+    chainId: string;
+    maxFee: string;
+    calls: Call[];
+    txnVersion: number;
+  }): V2Transaction {
+    return {
+      txnHash,
+      txnType: TransactionType.INVOKE,
+      chainId,
+      senderAddress,
+      contractAddress: '',
+      finalityStatus: TransactionFinalityStatus.RECEIVED,
+      // FIXME: executionStatus will be using the same result as finality if the transaction is yet confirmed
+      executionStatus: TransactionFinalityStatus.RECEIVED,
+      failureReason: '',
+      timestamp: msToSec(Date.now()),
+      dataVersion: TransactionDataVersion.V2,
+      version: txnVersion,
+      maxFee,
+      // actualFee is always null if the transaction is yet confirmed
+      actualFee: null,
+      accountCalls: calls.reduce((acc, callData) => {
+        const { contractAddress, calldata, entrypoint } = callData;
+
+        if (!Object.prototype.hasOwnProperty.call(acc, contractAddress)) {
+          acc[contractAddress] = [];
+        }
+        acc[contractAddress].push({
+          contract: contractAddress,
+          contractFuncName: entrypoint,
+          contractCallData: calldata,
+        });
+
+        return acc;
+      }, {}),
+    };
+  }
+
+  /**
+   * Creates a new transaction object for the deploy account transaction.
+   *
+   * @param params - The parameters of the new transaction object.
+   * @param params.txnHash - The txn hash.
+   * @param params.senderAddress - The sender address.
+   * @param params.chainId - The chain id.
+   * @param params.txnVersion - The transaction version.
+   * @returns The new transaction object.
+   */
+  newDeployTransaction({
+    txnHash,
+    senderAddress,
+    chainId,
+    txnVersion,
+  }: {
+    txnHash: string;
+    senderAddress: string;
+    chainId: string;
+    txnVersion: number;
+  }): V2Transaction {
+    return {
+      txnHash,
+      txnType: TransactionType.DEPLOY_ACCOUNT,
+      chainId,
+      senderAddress,
+      contractAddress: senderAddress,
+      finalityStatus: TransactionFinalityStatus.RECEIVED,
+      // FIXME: executionStatus will be using the same result as finality if the transaction is yet confirmed
+      executionStatus: TransactionFinalityStatus.RECEIVED,
+      failureReason: '',
+      timestamp: msToSec(Date.now()),
+      dataVersion: TransactionDataVersion.V2,
+      version: txnVersion,
+      maxFee: null,
+      // actualFee is always null if the transaction is yet confirmed
+      actualFee: null,
+      accountCalls: null,
+    };
   }
 }
