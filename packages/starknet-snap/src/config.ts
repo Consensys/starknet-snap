@@ -22,6 +22,9 @@ export type SnapConfig = {
   defaultNetwork: Network;
   availableNetworks: Network[];
   preloadTokens: Erc20Token[];
+  rpcEndpoint: {
+    [key: string]: string;
+  };
   explorer: {
     [key: string]: string;
   };
@@ -48,6 +51,15 @@ export const Config: SnapConfig = {
     STARKNET_MAINNET_NETWORK,
     STARKNET_SEPOLIA_TESTNET_NETWORK,
   ],
+
+  rpcEndpoint: {
+    [constants.StarknetChainId.SN_MAIN]:
+      // eslint-disable-next-line no-restricted-globals
+      `https://starknet-mainnet.infura.io/v3/${process.env.DIN_API_KEY ?? ''}`,
+    [constants.StarknetChainId.SN_SEPOLIA]:
+      // eslint-disable-next-line no-restricted-globals
+      `https://starknet-sepolia.infura.io/v3/${process.env.DIN_API_KEY ?? ''}`,
+  },
 
   explorer: {
     [constants.StarknetChainId.SN_MAIN]:
