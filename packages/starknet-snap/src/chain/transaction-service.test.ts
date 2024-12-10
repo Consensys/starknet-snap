@@ -40,11 +40,8 @@ describe('TransactionService', () => {
       );
     }
 
-    isTransactionHasSameContractOrAnDeploy(
-      tx: Transaction,
-      contractAddress: string,
-    ) {
-      return super.isTransactionHasSameContractOrAnDeploy(tx, contractAddress);
+    hasMatchingContractOrIsDeploy(tx: Transaction, contractAddress: string) {
+      return super.hasMatchingContractOrIsDeploy(tx, contractAddress);
     }
   }
 
@@ -132,8 +129,7 @@ describe('TransactionService', () => {
     const service = mockTransactionService(network, dataClient);
 
     const filteredTransactions = transactionsFromDataClientOrState.filter(
-      (tx) =>
-        service.isTransactionHasSameContractOrAnDeploy(tx, contractAddress),
+      (tx) => service.hasMatchingContractOrIsDeploy(tx, contractAddress),
     );
 
     return {
