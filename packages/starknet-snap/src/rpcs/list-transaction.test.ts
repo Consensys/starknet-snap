@@ -11,7 +11,7 @@ import {
 import { InvalidRequestParamsError } from '../utils/exceptions';
 import * as factory from '../utils/factory';
 import { mockAccount } from './__tests__/helper';
-import { ListTransactions } from './list-transactions';
+import { listTransactions } from './list-transactions';
 import type { ListTransactionsParams } from './list-transactions';
 
 jest.mock('../utils/logger');
@@ -48,7 +48,7 @@ describe('listTransactions', () => {
     const { transactions, getTransactionsSpy, chainId, account } =
       await prepareListTransactions();
 
-    const result = await ListTransactions.execute({
+    const result = await listTransactions.execute({
       chainId,
       senderAddress: account.address,
       contractAddress: ETHER_SEPOLIA_TESTNET.address,
@@ -67,7 +67,7 @@ describe('listTransactions', () => {
     const { getTransactionsSpy, chainId, account } =
       await prepareListTransactions();
 
-    await ListTransactions.execute({
+    await listTransactions.execute({
       chainId,
       senderAddress: account.address,
       contractAddress: ETHER_SEPOLIA_TESTNET.address,
@@ -82,7 +82,7 @@ describe('listTransactions', () => {
 
   it('throws `InvalidRequestParamsError` when request parameter is not correct', async () => {
     await expect(
-      ListTransactions.execute({} as unknown as ListTransactionsParams),
+      listTransactions.execute({} as unknown as ListTransactionsParams),
     ).rejects.toThrow(InvalidRequestParamsError);
   });
 });

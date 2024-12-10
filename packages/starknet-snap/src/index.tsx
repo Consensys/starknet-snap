@@ -52,7 +52,7 @@ import {
   watchAsset,
   getAddrFromStarkName,
   getTransactionStatus,
-  ListTransactions,
+  listTransactions,
 } from './rpcs';
 import { signDeployAccountTransaction } from './signDeployAccountTransaction';
 import type {
@@ -240,7 +240,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
         return await getStoredNetworks(apiParams);
 
       case RpcMethod.GetTransactions:
-        return await ListTransactions.execute(
+        return await listTransactions.execute(
           apiParams.requestParams as unknown as ListTransactionsParams,
         );
 

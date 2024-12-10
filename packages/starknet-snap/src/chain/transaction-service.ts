@@ -71,13 +71,13 @@ export class TransactionService {
   ): AsyncGenerator<Transaction> {
     for (const tx of transactions) {
       // Only return transaction that are related to the contract address or a deployed transactions.
-      if (this.isTransactionHasSameContractOrAnDeploy(tx, contractAddress)) {
+      if (this.hasMatchingContractOrIsDeploy(tx, contractAddress)) {
         yield tx;
       }
     }
   }
 
-  protected isTransactionHasSameContractOrAnDeploy(
+  protected hasMatchingContractOrIsDeploy(
     tx: Transaction,
     contractAddress: string,
   ) {
