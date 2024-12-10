@@ -32,7 +32,15 @@ export type FormattedCallData = {
   tokenTransferData?: TokenTransferData;
 };
 
-type ResourceBounds = Pick<EstimateFee, 'resourceBounds'>['resourceBounds'];
+export type ResourceBounds = Pick<
+  EstimateFee,
+  'resourceBounds'
+>['resourceBounds'];
+
+export type ResourceBoundsInBigInt = {
+  l1_gas: { max_amount: bigint; max_price_per_unit: bigint };
+  l2_gas: { max_amount: bigint; max_price_per_unit: bigint };
+};
 
 export type TransactionRequest = {
   id: string;
@@ -44,7 +52,7 @@ export type TransactionRequest = {
   networkName: string;
   maxFee: string;
   calls: FormattedCallData[];
-  resourceBounds: ResourceBounds[];
+  resourceBounds: ResourceBounds;
   selectedFeeToken: string;
   includeDeploy: boolean;
 };

@@ -138,7 +138,9 @@ export class UserInputEventController {
       maxFee: request.maxFee,
       selectedFeeToken: request.selectedFeeToken,
       includeDeploy: request.includeDeploy,
-      resourceBounds: [...request.resourceBounds],
+      resourceBounds: {
+        ...request.resourceBounds,
+      },
     };
   }
 
@@ -156,7 +158,7 @@ export class UserInputEventController {
 
       const requestTxnVersion = this.feeTokenToTransactionVersion(feeToken);
 
-      const { includeDeploy, suggestedMaxFee, estimateResults } =
+      const { includeDeploy, suggestedMaxFee, resourceBounds } =
         await getEstimatedFees(
           network,
           signer,
@@ -196,9 +198,7 @@ export class UserInputEventController {
       request.maxFee = suggestedMaxFee;
       request.selectedFeeToken = feeToken;
       request.includeDeploy = includeDeploy;
-      request.resourceBounds = estimateResults.map(
-        (result) => result.resourceBounds,
-      );
+      request.resourceBounds = resourceBounds;
 
       await updateExecuteTxnFlow(this.eventId, request);
       await this.reqStateMgr.upsertTransactionRequest(request);

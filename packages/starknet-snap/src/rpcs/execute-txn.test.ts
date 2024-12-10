@@ -61,6 +61,7 @@ const prepareMockExecuteTxn = async (
     includeDeploy: !accountDeployed,
     unit: 'wei' as FeeTokenUnit,
     estimateResults,
+    resourceBounds: estimateResults[0].resourceBounds,
   };
 
   const getEstimatedFeesSpy = jest.spyOn(starknetUtils, 'getEstimatedFees');

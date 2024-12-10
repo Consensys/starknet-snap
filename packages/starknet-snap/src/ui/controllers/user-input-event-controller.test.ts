@@ -20,6 +20,7 @@ import {
   STARKNET_TESTNET_NETWORK,
   STRK_SEPOLIA_TESTNET,
 } from '../../utils/constants';
+import { ConsolidateFees } from '../../utils/fee';
 import * as keyPairUtils from '../../utils/keyPair';
 import * as StarknetUtils from '../../utils/starknetUtils';
 import * as UiUtils from '../utils';
@@ -91,16 +92,16 @@ describe('UserInputEventController', () => {
   const mockEstimateFee = (feeToken: FeeToken) => {
     const getEstimatedFeesSpy = jest.spyOn(StarknetUtils, 'getEstimatedFees');
     const mockEstimateFeeResponse = generateEstimateFeesResponse();
-    const concatedFee = StarknetUtils.addFeesFromAllTransactions(
-      mockEstimateFeeResponse,
-    );
+    const consolidateFeesObj = new ConsolidateFees(mockEstimateFeeResponse);
+    const consolidatedFees = consolidateFeesObj.serializate();
 
     const mockGetEstimatedFeesResponse = {
-      suggestedMaxFee: concatedFee.suggestedMaxFee.toString(10),
-      overallFee: concatedFee.overall_fee.toString(10),
+      suggestedMaxFee: consolidatedFees.suggestedMaxFee,
+      overallFee: consolidatedFees.overallFee,
       unit: FeeTokenUnit[feeToken],
       includeDeploy: true,
       estimateResults: mockEstimateFeeResponse,
+      resourceBounds: consolidatedFees.resourceBounds,
     };
 
     getEstimatedFeesSpy.mockResolvedValue(mockGetEstimatedFeesResponse);
@@ -350,7 +351,7 @@ describe('UserInputEventController', () => {
         maxFee: transactionRequest.maxFee,
         selectedFeeToken: transactionRequest.selectedFeeToken,
         includeDeploy: transactionRequest.includeDeploy,
-        resourceBounds: [...transactionRequest.resourceBounds],
+        resourceBounds: transactionRequest.resourceBounds,
       };
 
       const event = generateInputEvent({

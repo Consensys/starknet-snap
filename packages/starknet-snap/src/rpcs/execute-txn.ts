@@ -116,7 +116,7 @@ export class ExecuteTxnRpc extends AccountRpcController<
       const { privateKey, publicKey } = this.account;
       const callsArray = Array.isArray(calls) ? calls : [calls];
 
-      const { includeDeploy, suggestedMaxFee, estimateResults } =
+      const { includeDeploy, suggestedMaxFee, resourceBounds } =
         await getEstimatedFees(
           this.network,
           address,
@@ -156,7 +156,7 @@ export class ExecuteTxnRpc extends AccountRpcController<
         addressIndex: this.account.addressIndex,
         maxFee: suggestedMaxFee,
         calls: formattedCalls,
-        resourceBounds: estimateResults.map((result) => result.resourceBounds),
+        resourceBounds,
         selectedFeeToken:
           version === constants.TRANSACTION_VERSION.V3
             ? FeeToken.STRK
@@ -210,10 +210,7 @@ export class ExecuteTxnRpc extends AccountRpcController<
         // TODO: we may also need to increment the nonce base on the input, if the account is not deployed
         nonce: accountDeployed ? details?.nonce : 1,
         maxFee: updatedRequest.maxFee,
-        resourceBounds:
-          updatedRequest.resourceBounds[
-            updatedRequest.resourceBounds.length - 1
-          ],
+        resourceBounds: updatedRequest.resourceBounds,
         version:
           updatedRequest.selectedFeeToken === FeeToken.STRK
             ? constants.TRANSACTION_VERSION.V3
