@@ -152,7 +152,7 @@ export async function upgradeAccContract(params: ApiParamsWithKeyDeriver) {
       maxFee: maxFee.toString(10),
       // whenever upgrade is happen, we pay the fee in ETH, so txnVersion is 1
       txnVersion: 1,
-    });
+    })
 
     await upsertTransaction(txn, wallet, saveMutex);
 
