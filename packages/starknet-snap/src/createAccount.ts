@@ -6,8 +6,7 @@ import type {
   ApiParamsWithKeyDeriver,
   CreateAccountRequestParams,
 } from './types/snapApi';
-import type { AccContract, Transaction } from './types/snapState';
-import { VoyagerTransactionType, TransactionStatus } from './types/snapState';
+import type { AccContract } from './types/snapState';
 import { CAIRO_VERSION_LEGACY, CAIRO_VERSION } from './utils/constants';
 import { logger } from './utils/logger';
 import { toJson } from './utils/serializer';

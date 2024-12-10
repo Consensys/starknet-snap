@@ -5,8 +5,6 @@ import type {
   ApiParamsWithKeyDeriver,
   UpgradeTransactionRequestParams,
 } from './types/snapApi';
-import type { Transaction } from './types/snapState';
-import { TransactionStatus, VoyagerTransactionType } from './types/snapState';
 import { ACCOUNT_CLASS_HASH, CAIRO_VERSION_LEGACY } from './utils/constants';
 import { logger } from './utils/logger';
 import { toJson } from './utils/serializer';
