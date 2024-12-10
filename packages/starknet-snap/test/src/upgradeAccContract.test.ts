@@ -280,7 +280,5 @@ describe('Test function: upgradeAccContract', function () {
         expect(result.message).to.be.include('Transaction hash is not found');
       }
     });
-
- 
   });
 });

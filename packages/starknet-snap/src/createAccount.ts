@@ -149,7 +149,7 @@ export async function createAccount(
           // whenever create account is happen, we pay the fee in ETH, so txnVersion is 1
           // FIXME: it should allow to pay the fee in STRK
           txnVersion: 1,
-        })
+        });
 
         await upsertTransaction(txn, wallet, saveMutex);
       }
