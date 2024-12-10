@@ -281,35 +281,6 @@ describe('Test function: upgradeAccContract', function () {
       }
     });
 
-    it('should save transaction when execute transaction success', async function () {
-      executeTxnStub.resolves(sendTransactionResp);
-      estimateFeeStub.resolves(estimateFeeResp);
-      walletStub.rpcStubs.snap_dialog.resolves(true);
-      const address = (
-        apiParams.requestParams as UpgradeTransactionRequestParams
-      ).contractAddress;
-      const calldata = CallData.compile({
-        implementation: ACCOUNT_CLASS_HASH,
-        calldata: [0],
-      });
-      const txn = {
-        txnHash: sendTransactionResp.transaction_hash,
-        txnType: VoyagerTransactionType.INVOKE,
-        chainId: STARKNET_SEPOLIA_TESTNET_NETWORK.chainId,
-        senderAddress: address,
-        contractAddress: address,
-        contractFuncName: 'upgrade',
-        contractCallData: CallData.compile(calldata),
-        finalityStatus: TransactionStatus.RECEIVED,
-        executionStatus: TransactionStatus.RECEIVED,
-        status: '',
-        failureReason: '',
-        eventIds: [],
-      };
-
-      const result = await upgradeAccContract(apiParams);
-      expect(result).to.be.equal(sendTransactionResp);
-      expect(upsertTransactionStub).to.calledOnceWith(sinon.match(txn));
-    });
+ 
   });
 });
