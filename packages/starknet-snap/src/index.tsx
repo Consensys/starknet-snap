@@ -19,7 +19,6 @@ import { getStarkName } from './getStarkName';
 import { getStoredErc20Tokens } from './getStoredErc20Tokens';
 import { getStoredNetworks } from './getStoredNetworks';
 import { getStoredUserAccounts } from './getStoredUserAccounts';
-import { getTransactions } from './getTransactions';
 import { getValue } from './getValue';
 import { homePageController } from './on-home-page';
 import { recoverAccounts } from './recoverAccounts';
@@ -37,6 +36,7 @@ import type {
   WatchAssetParams,
   GetAddrFromStarkNameParams,
   GetTransactionStatusParams,
+  ListTransactionsParams,
 } from './rpcs';
 import {
   displayPrivateKey,
@@ -52,6 +52,7 @@ import {
   watchAsset,
   getAddrFromStarkName,
   getTransactionStatus,
+  listTransactions,
 } from './rpcs';
 import { signDeployAccountTransaction } from './signDeployAccountTransaction';
 import type {
@@ -239,7 +240,9 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
         return await getStoredNetworks(apiParams);
 
       case RpcMethod.GetTransactions:
-        return await getTransactions(apiParams);
+        return await listTransactions.execute(
+          apiParams.requestParams as unknown as ListTransactionsParams,
+        );
 
       case RpcMethod.RecoverAccounts:
         apiParams.keyDeriver = await getAddressKeyDeriver(snap);
