@@ -5,6 +5,8 @@ import type {
   ApiParamsWithKeyDeriver,
   UpgradeTransactionRequestParams,
 } from './types/snapApi';
+import type { Transaction } from './types/snapState';
+import { TransactionStatus, VoyagerTransactionType } from './types/snapState';
 import { ACCOUNT_CLASS_HASH, CAIRO_VERSION_LEGACY } from './utils/constants';
 import { logger } from './utils/logger';
 import { toJson } from './utils/serializer';
@@ -21,7 +23,6 @@ import {
   isAccountDeployed,
   estimateFee,
 } from './utils/starknetUtils';
-import { newInvokeTransaction } from './utils/transaction';
 
 /**
  *
@@ -144,15 +145,21 @@ export async function upgradeAccContract(params: ApiParamsWithKeyDeriver) {
       throw new Error(`Transaction hash is not found`);
     }
 
-    const txn = newInvokeTransaction({
+    const txn: Transaction = {
       txnHash: txnResp.transaction_hash,
+      txnType: VoyagerTransactionType.INVOKE,
       chainId: network.chainId,
       senderAddress: contractAddress,
-      calls: [txnInvocation],
-      maxFee: maxFee.toString(10),
-      // whenever upgrade is happen, we pay the fee in ETH, so txnVersion is 1
-      txnVersion: 1,
-    })
+      contractAddress,
+      contractFuncName: 'upgrade',
+      contractCallData: CallData.compile(calldata),
+      finalityStatus: TransactionStatus.RECEIVED,
+      executionStatus: TransactionStatus.RECEIVED,
+      status: '', // DEPRECATED LATER
+      failureReason: '',
+      eventIds: [],
+      timestamp: Math.floor(Date.now() / 1000),
+    };
 
     await upsertTransaction(txn, wallet, saveMutex);
 
