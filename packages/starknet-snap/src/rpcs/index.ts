@@ -11,3 +11,4 @@ export * from './get-deployment-data';
 export * from './watch-asset';
 export * from './get-addr-from-starkname';
 export * from './get-transaction-status';
+export * from './list-transactions';

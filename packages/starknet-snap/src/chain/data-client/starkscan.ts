@@ -1,24 +1,18 @@
 import { TransactionType, constants } from 'starknet';
 import type { Struct } from 'superstruct';
 
-import {
-  ContractFuncName,
-  TransactionDataVersion,
-  type Network,
-  type Transaction,
-  type TranscationAccountCall,
-} from '../../types/snapState';
-import {
-  TRANSFER_SELECTOR_HEX,
-  UPGRADE_SELECTOR_HEX,
-} from '../../utils/constants';
+import type { V2Transaction } from '../../types/snapState';
+import { type Network, type Transaction } from '../../types/snapState';
 import { InvalidNetworkError } from '../../utils/exceptions';
+import {
+  newDeployTransaction,
+  newInvokeTransaction,
+} from '../../utils/transaction';
 import type { HttpHeaders } from '../api-client';
 import { ApiClient, HttpMethod } from '../api-client';
 import type { IDataClient } from '../data-client';
 import type { StarkScanTransactionsResponse } from './starkscan.type';
 import {
-  type StarkScanAccountCall,
   type StarkScanTransaction,
   type StarkScanOptions,
   StarkScanTransactionsResponseStruct,
@@ -185,10 +179,6 @@ export class StarkScanClient extends ApiClient implements IDataClient {
     return tx.transaction_type === TransactionType.DEPLOY_ACCOUNT;
   }
 
-  protected isFundTransferTransaction(entrypoint: string): boolean {
-    return entrypoint === TRANSFER_SELECTOR_HEX;
-  }
-
   protected getContractAddress(tx: StarkScanTransaction): string {
     // backfill the contract address if it is null
     return tx.contract_address ?? '';
@@ -207,94 +197,64 @@ export class StarkScanClient extends ApiClient implements IDataClient {
   }
 
   protected toTransaction(tx: StarkScanTransaction): Transaction {
-    /* eslint-disable @typescript-eslint/naming-convention */
+    /* eslint-disable @typescript-eslint/naming-convention, camelcase */
     const {
       transaction_hash: txnHash,
       transaction_type: txnType,
       timestamp,
       transaction_finality_status: finalityStatus,
       transaction_execution_status: executionStatus,
-      max_fee: maxFee,
+      max_fee,
       actual_fee: actualFee,
-      revert_error: failureReason,
+      revert_error,
+      // account_calls representing the calls to invoke from the account contract, it can be multiple
+      // If the transaction is a deploy transaction, the account_calls is a empty array
       account_calls: calls,
-      version,
+      version: txnVersion,
     } = tx;
 
-    // account_calls representing the calls to invoke from the account contract, it can be multiple
-    // If the transaction is a deploy transaction, the account_calls is a empty array
-    const accountCalls = this.toAccountCall(calls);
+    const { chainId } = this.network;
+    const senderAddress = this.getSenderAddress(tx);
+    const failureReason = revert_error ?? '';
+    const maxFee = max_fee ?? '0';
+
+    let transaction: V2Transaction;
+
+    // eslint-disable-next-line no-negated-condition
+    if (!this.isDeployTransaction(tx)) {
+      transaction = newInvokeTransaction({
+        txnHash,
+        senderAddress,
+        chainId,
+        maxFee,
+        calls: calls.map((call) => ({
+          contractAddress: call.contract_address,
+          entrypoint: call.selector,
+          calldata: call.calldata,
+        })),
+        txnVersion,
+      });
+    } else {
+      transaction = newDeployTransaction({
+        txnHash,
+        senderAddress,
+        chainId,
+        txnVersion,
+      });
+    }
 
     return {
-      txnHash,
-      txnType,
-      chainId: this.network.chainId,
-      senderAddress: this.getSenderAddress(tx),
+      ...transaction,
+      // Override the fields from the StarkScanTransaction
       timestamp,
       finalityStatus,
       executionStatus,
-      maxFee,
       actualFee,
+      maxFee,
       contractAddress: this.getContractAddress(tx),
-      accountCalls,
-      failureReason: failureReason ?? '',
-      version,
-      dataVersion: TransactionDataVersion.V2,
+      failureReason,
+      txnType,
     };
-
     /* eslint-enable */
-  }
-
-  protected toAccountCall(
-    accountCalls: StarkScanAccountCall[],
-  ): Record<string, TranscationAccountCall[]> | null {
-    if (!accountCalls || accountCalls.length === 0) {
-      return null;
-    }
-
-    return accountCalls.reduce(
-      (
-        data: Record<string, TranscationAccountCall[]>,
-        accountCallArg: StarkScanAccountCall,
-      ) => {
-        const {
-          contract_address: contract,
-          selector,
-          calldata: contractCallData,
-        } = accountCallArg;
-
-        const contractFuncName = this.selectorHexToName(selector);
-        if (!Object.prototype.hasOwnProperty.call(data, contract)) {
-          data[contract] = [];
-        }
-
-        const accountCall: TranscationAccountCall = {
-          contract,
-          contractFuncName,
-          contractCallData,
-        };
-
-        if (this.isFundTransferTransaction(selector)) {
-          accountCall.recipient = accountCallArg.calldata[0];
-          accountCall.amount = accountCallArg.calldata[1];
-        }
-
-        data[contract].push(accountCall);
-
-        return data;
-      },
-      {},
-    );
-  }
-
-  protected selectorHexToName(selector: string): string {
-    switch (selector.toLowerCase()) {
-      case TRANSFER_SELECTOR_HEX.toLowerCase():
-        return ContractFuncName.Transfer;
-      case UPGRADE_SELECTOR_HEX.toLowerCase():
-        return ContractFuncName.Upgrade;
-      default:
-        return selector;
-    }
   }
 }

@@ -8,6 +8,8 @@ import { ETHER_SEPOLIA_TESTNET } from './constants';
 import {
   callToTransactionReqCall,
   mapDeprecatedParams,
+  dayToSec,
+  msToSec,
 } from './formatter-utils';
 import { logger } from './logger';
 
@@ -205,5 +207,23 @@ describe('callToTransactionReqCall', () => {
         decimals: token.decimals,
       },
     });
+  });
+});
+
+describe('dayToSec', () => {
+  it('converts days to seconds', () => {
+    const days = 10;
+    const expected = days * 24 * 60 * 60;
+
+    expect(dayToSec(days)).toBe(expected);
+  });
+});
+
+describe('msToSec', () => {
+  it('converts milliseconds to seconds', () => {
+    const ms = Date.now();
+    const expected = Math.floor(ms / 1000);
+
+    expect(msToSec(ms)).toBe(expected);
   });
 });
