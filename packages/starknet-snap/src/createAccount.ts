@@ -26,6 +26,7 @@ import {
   waitForTransaction,
   estimateAccountDeployFee,
 } from './utils/starknetUtils';
+import { newDeployTransaction } from './utils/transaction';
 
 /**
  * Create an starknet account.
@@ -142,21 +143,14 @@ export async function createAccount(
 
         await upsertAccount(userAccount, wallet, saveMutex);
 
-        const txn: Transaction = {
+        const txn = newDeployTransaction({
           txnHash: deployResp.transaction_hash,
-          txnType: VoyagerTransactionType.DEPLOY_ACCOUNT,
           chainId: network.chainId,
           senderAddress: deployResp.contract_address,
-          contractAddress: deployResp.contract_address,
-          contractFuncName: '',
-          contractCallData: [],
-          finalityStatus: TransactionStatus.RECEIVED,
-          executionStatus: TransactionStatus.RECEIVED,
-          status: '',
-          failureReason: '',
-          eventIds: [],
-          timestamp: Math.floor(Date.now() / 1000),
-        };
+          // whenever create account is happen, we pay the fee in ETH, so txnVersion is 1
+          // FIXME: it should allow to pay the fee in STRK
+          txnVersion: 1,
+        });
 
         await upsertTransaction(txn, wallet, saveMutex);
       }
