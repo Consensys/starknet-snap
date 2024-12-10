@@ -33,6 +33,8 @@ import {
   transactionVersionToNumber,
   feeTokenToTransactionVersion,
   transactionVersionToFeeToken,
+  newDeployTransaction,
+  newInvokeTransaction,
 } from '../utils/transaction';
 import type { AccountRpcControllerOptions } from './abstract/account-rpc-controller';
 import { AccountRpcController } from './abstract/account-rpc-controller';
@@ -368,7 +370,7 @@ export class ExecuteTxnRpc extends AccountRpcController<
 
     if (txnHashForDeploy) {
       await this.txnStateManager.addTransaction(
-        this.txnStateManager.newDeployTransaction({
+        newDeployTransaction({
           senderAddress: address,
           txnHash: txnHashForDeploy,
           chainId,
@@ -383,7 +385,7 @@ export class ExecuteTxnRpc extends AccountRpcController<
     }
 
     await this.txnStateManager.addTransaction(
-      this.txnStateManager.newInvokeTransaction({
+      newInvokeTransaction({
         senderAddress: address,
         txnHash: txnHashForExecute,
         chainId,

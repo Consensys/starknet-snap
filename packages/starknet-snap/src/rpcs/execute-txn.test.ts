@@ -25,6 +25,8 @@ import * as formatUtils from '../utils/formatter-utils';
 import * as starknetUtils from '../utils/starknetUtils';
 import {
   feeTokenToTransactionVersion,
+  newDeployTransaction as newDeployTransactionFn,
+  newInvokeTransaction as newInvokeTransactionFn,
   transactionVersionToFeeToken,
   transactionVersionToNumber,
 } from '../utils/transaction';
@@ -627,8 +629,7 @@ describe('ExecuteTxn', () => {
         calls,
       } as unknown as SaveDataToStateParamas;
 
-      const txnMgr = new TransactionStateManager(true);
-      const newInvokeTransaction = txnMgr.newInvokeTransaction({
+      const newInvokeTransaction = newInvokeTransactionFn({
         senderAddress: account.address,
         txnHash: request.txnHashForExecute,
         chainId: network.chainId,
@@ -636,7 +637,7 @@ describe('ExecuteTxn', () => {
         txnVersion: transactionVersionToNumber(txnVersion),
         calls,
       });
-      const newDeployTransaction = txnMgr.newDeployTransaction({
+      const newDeployTransaction = newDeployTransactionFn({
         senderAddress: account.address,
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         txnHash: request.txnHashForDeploy!,
