@@ -56,7 +56,7 @@ describe('transactionVersionToNumber', () => {
 });
 
 describe('feeTokenToTransactionVersion', () => {
-  it('converts feeToken string to  transaction version v3 if it is STRK', () => {
+  it('converts feeToken string to transaction version v3 if it is STRK', () => {
     expect(feeTokenToTransactionVersion(FeeToken.STRK)).toStrictEqual(
       constants.TRANSACTION_VERSION.V3,
     );
