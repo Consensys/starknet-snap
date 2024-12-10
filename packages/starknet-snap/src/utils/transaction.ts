@@ -91,7 +91,7 @@ export function callsToTranscationAccountCalls(
       entrypoint,
     } = call;
 
-    const contractFuncName = transactionSelectorHexToName(entrypoint);
+    const contractFuncName = transactionSelectorToName(entrypoint);
 
     if (!Object.prototype.hasOwnProperty.call(acc, contract)) {
       acc[contract] = [];

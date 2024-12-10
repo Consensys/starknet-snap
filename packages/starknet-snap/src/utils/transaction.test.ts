@@ -21,7 +21,7 @@ import {
   transactionVersionToNumber,
   feeTokenToTransactionVersion,
   transactionVersionToFeeToken,
-  transactionSelectorHexToName,
+  transactionSelectorToName,
   isFundTransferEntrypoint,
 } from './transaction';
 
@@ -94,11 +94,11 @@ describe('transactionVersionToFeeToken', () => {
   );
 });
 
-describe('transactionSelectorHexToName', () => {
+describe('transactionSelectorToName', () => {
   it.each([TRANSFER_SELECTOR_HEX, 'transfer'])(
     'converts selector name to `transfer` if it matchs the transfer selector - %s',
     (selector: string) => {
-      expect(transactionSelectorHexToName(selector)).toStrictEqual(
+      expect(transactionSelectorToName(selector)).toStrictEqual(
         ContractFuncName.Transfer,
       );
     },
@@ -107,7 +107,7 @@ describe('transactionSelectorHexToName', () => {
   it.each([UPGRADE_SELECTOR_HEX, 'upgrade'])(
     'converts selector name to `upgrade` if it matchs the upgrade selector - %s',
     (selector: string) => {
-      expect(transactionSelectorHexToName(selector)).toStrictEqual(
+      expect(transactionSelectorToName(selector)).toStrictEqual(
         ContractFuncName.Upgrade,
       );
     },
@@ -116,7 +116,7 @@ describe('transactionSelectorHexToName', () => {
   it.each(['transfers', 'upgraded', '0x11234'])(
     'returns the original selector string if it doesnt match the hex string for upgrade or transfer',
     (selector: string) => {
-      expect(transactionSelectorHexToName(selector)).toStrictEqual(selector);
+      expect(transactionSelectorToName(selector)).toStrictEqual(selector);
     },
   );
 });
@@ -137,7 +137,7 @@ describe('callsToTranscationAccountCalls', () => {
         {
           contract,
           contractCallData,
-          contractFuncName: transactionSelectorHexToName(entrypoint),
+          contractFuncName: transactionSelectorToName(entrypoint),
         },
       ],
     });
@@ -183,7 +183,7 @@ describe('callsToTranscationAccountCalls', () => {
         acc[contract].push({
           contract,
           contractCallData,
-          contractFuncName: transactionSelectorHexToName(entrypoint),
+          contractFuncName: transactionSelectorToName(entrypoint),
           recipient: contractCallData[0],
           amount: contractCallData[1],
         });
