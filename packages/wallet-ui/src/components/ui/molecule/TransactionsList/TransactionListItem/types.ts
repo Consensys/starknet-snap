@@ -68,6 +68,9 @@ export const getTxnDate = (transaction: Transaction): string => {
 
 export const getTxnStatus = (transaction: Transaction): string => {
   let statusStr = [];
+  if (transaction.executionStatus) {
+    statusStr.push(formatStatus(transaction.executionStatus));
+  }
   if (transaction.finalityStatus === transaction.executionStatus) {
     return transaction.finalityStatus
       ? formatStatus(transaction.finalityStatus)
@@ -75,9 +78,6 @@ export const getTxnStatus = (transaction: Transaction): string => {
   }
   if (transaction.finalityStatus) {
     statusStr.push(formatStatus(transaction.finalityStatus));
-  }
-  if (transaction.executionStatus) {
-    statusStr.push(formatStatus(transaction.executionStatus));
   }
   return statusStr.join(' / ');
 };

@@ -1,5 +1,5 @@
 import { Meta } from '@storybook/react';
-import { Transaction } from 'types';
+import { Transaction, TransactionStatus } from 'types';
 import { TransactionsListView } from './TransactionsList.view';
 
 export default {
@@ -15,9 +15,11 @@ const transactions: Transaction[] = [
     chainId: '0x534e5f5345504f4c4941',
     senderAddress:
       '0x5ccc9fc2d7ce9e2b0f2cee1a4b898570bb4d03ba23ad6f72f0db971bd04552c',
-    status: 'RECEIVED',
+    contractAddress:
+      '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
+    executionStatus: TransactionStatus.SUCCEEDED,
+    finalityStatus: TransactionStatus.RECEIVED,
     failureReason: '',
-    eventIds: [],
     timestamp: 1655869759,
     accountCalls: {
       '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7': [
@@ -32,6 +34,10 @@ const transactions: Transaction[] = [
         },
       ],
     },
+    maxFee: null,
+    actualFee: null,
+    version: 1,
+    dataVersion: '2',
   },
   {
     txnHash:
@@ -40,9 +46,11 @@ const transactions: Transaction[] = [
     chainId: '0x534e5f5345504f4c4941',
     senderAddress:
       '0x05ccc9fc2d7ce9e2b0f2cee1a4b898570bb4d03ba23ad6f72f0db971bd04552c',
+    contractAddress:
+      '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
     timestamp: 1655705597,
-    status: 'Accepted on L2',
-    eventIds: ['245417_20_0'],
+    executionStatus: TransactionStatus.SUCCEEDED,
+    finalityStatus: TransactionStatus.ACCEPTED_ON_L2,
     failureReason: '',
     accountCalls: {
       '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7': [
@@ -57,6 +65,10 @@ const transactions: Transaction[] = [
         },
       ],
     },
+    maxFee: null,
+    actualFee: null,
+    version: 1,
+    dataVersion: '2',
   },
   {
     txnHash:
@@ -65,10 +77,12 @@ const transactions: Transaction[] = [
     chainId: '0x534e5f5345504f4c4941',
     senderAddress:
       '0x5ccc9fc2d7ce9e2b0f2cee1a4b898570bb4d03ba23ad6f72f0db971bd04552c',
-    status: 'REJECTED',
+    contractAddress:
+      '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
+    executionStatus: TransactionStatus.REJECTED,
+    finalityStatus: TransactionStatus.NOT_RECEIVED,
     failureReason:
       'Actual fee exceeded max fee.\n13056675060932 > 9585012591398',
-    eventIds: [],
     timestamp: 1655695493,
     accountCalls: {
       '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7': [
@@ -83,6 +97,10 @@ const transactions: Transaction[] = [
         },
       ],
     },
+    maxFee: null,
+    actualFee: null,
+    version: 1,
+    dataVersion: '2',
   },
   {
     txnHash:
@@ -91,9 +109,11 @@ const transactions: Transaction[] = [
     chainId: '0x534e5f5345504f4c4941',
     senderAddress:
       '0x05ccc9fc2d7ce9e2b0f2cee1a4b898570bb4d03ba23ad6f72f0db971bd04552c',
+    contractAddress:
+      '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
     timestamp: 1654745214,
-    status: 'Accepted on L1',
-    eventIds: ['233927_16_0'],
+    executionStatus: TransactionStatus.SUCCEEDED,
+    finalityStatus: TransactionStatus.ACCEPTED_ON_L1,
     failureReason: '',
     accountCalls: {
       '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7': [
@@ -108,6 +128,10 @@ const transactions: Transaction[] = [
         },
       ],
     },
+    maxFee: null,
+    actualFee: null,
+    version: 1,
+    dataVersion: '2',
   },
   {
     txnHash:
@@ -116,9 +140,11 @@ const transactions: Transaction[] = [
     chainId: '0x534e5f5345504f4c4941',
     senderAddress:
       '0x05ccc9fc2d7ce9e2b0f2cee1a4b898570bb4d03ba23ad6f72f0db971bd04552c',
+    contractAddress:
+      '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
     timestamp: 1654708040,
-    status: 'Accepted on L1',
-    eventIds: ['233510_7_0'],
+    executionStatus: TransactionStatus.SUCCEEDED,
+    finalityStatus: TransactionStatus.ACCEPTED_ON_L1,
     failureReason: '',
     accountCalls: {
       '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7': [
@@ -133,6 +159,10 @@ const transactions: Transaction[] = [
         },
       ],
     },
+    maxFee: null,
+    actualFee: null,
+    version: 1,
+    dataVersion: '2',
   },
   {
     txnHash:
@@ -141,9 +171,11 @@ const transactions: Transaction[] = [
     chainId: '0x534e5f5345504f4c4941',
     senderAddress:
       '0x05ccc9fc2d7ce9e2b0f2cee1a4b898570bb4d03ba23ad6f72f0db971bd04552c',
+    contractAddress:
+      '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
     timestamp: 1654701586,
-    status: 'Accepted on L1',
-    eventIds: ['233442_14_0'],
+    executionStatus: TransactionStatus.SUCCEEDED,
+    finalityStatus: TransactionStatus.ACCEPTED_ON_L1,
     failureReason: '',
     accountCalls: {
       '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7': [
@@ -158,6 +190,10 @@ const transactions: Transaction[] = [
         },
       ],
     },
+    maxFee: null,
+    actualFee: null,
+    version: 1,
+    dataVersion: '2',
   },
   {
     txnHash: '0x81fab4268648483028b9be3353d6551ca35041fb2a03c2f372b19f3ab109b1',
@@ -165,9 +201,11 @@ const transactions: Transaction[] = [
     chainId: '0x534e5f5345504f4c4941',
     senderAddress:
       '0x05ccc9fc2d7ce9e2b0f2cee1a4b898570bb4d03ba23ad6f72f0db971bd04552c',
+    contractAddress:
+      '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
     timestamp: 1654678571,
-    status: 'Accepted on L1',
-    eventIds: ['233196_29_0'],
+    executionStatus: TransactionStatus.SUCCEEDED,
+    finalityStatus: TransactionStatus.ACCEPTED_ON_L1,
     failureReason: '',
     accountCalls: {
       '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7': [
@@ -182,6 +220,10 @@ const transactions: Transaction[] = [
         },
       ],
     },
+    maxFee: null,
+    actualFee: null,
+    version: 1,
+    dataVersion: '2',
   },
   {
     txnHash:
@@ -190,9 +232,11 @@ const transactions: Transaction[] = [
     chainId: '0x534e5f5345504f4c4941',
     senderAddress:
       '0x05ccc9fc2d7ce9e2b0f2cee1a4b898570bb4d03ba23ad6f72f0db971bd04552c',
+    contractAddress:
+      '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
     timestamp: 1654670913,
-    status: 'Accepted on L1',
-    eventIds: ['233116_23_0'],
+    executionStatus: TransactionStatus.SUCCEEDED,
+    finalityStatus: TransactionStatus.ACCEPTED_ON_L1,
     failureReason: '',
     accountCalls: {
       '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7': [
@@ -207,6 +251,10 @@ const transactions: Transaction[] = [
         },
       ],
     },
+    maxFee: null,
+    actualFee: null,
+    version: 1,
+    dataVersion: '2',
   },
   {
     txnHash:
@@ -215,9 +263,11 @@ const transactions: Transaction[] = [
     chainId: '0x534e5f5345504f4c4941',
     senderAddress:
       '0x05ccc9fc2d7ce9e2b0f2cee1a4b898570bb4d03ba23ad6f72f0db971bd04552c',
+    contractAddress:
+      '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
     timestamp: 1654662459,
-    status: 'Accepted on L1',
-    eventIds: ['233027_3_0'],
+    executionStatus: TransactionStatus.SUCCEEDED,
+    finalityStatus: TransactionStatus.ACCEPTED_ON_L1,
     failureReason: '',
     accountCalls: {
       '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7': [
@@ -229,6 +279,10 @@ const transactions: Transaction[] = [
         },
       ],
     },
+    maxFee: null,
+    actualFee: null,
+    version: 1,
+    dataVersion: '2',
   },
 ];
 

@@ -15,13 +15,16 @@ export type Transaction = {
   txnType: string;
   chainId: string; // in hex
   senderAddress: string; // in hex
-  status?: TransactionStatus | string;
-  executionStatus?: TransactionStatus | string;
-  finalityStatus?: TransactionStatus | string;
+  contractAddress: string; // in hex
+  executionStatus: TransactionStatus | string;
+  finalityStatus: TransactionStatus | string;
   failureReason: string;
-  eventIds: string[];
+  actualFee: string | null;
+  maxFee: string | null;
   timestamp: number;
   accountCalls: AccountCalls;
+  version: number;
+  dataVersion: string;
 };
 
 export type Account = {
@@ -56,19 +59,20 @@ export type TransactionStatusOptions =
   | 'Rejected'
   | 'Not Received';
 
-export enum StarkscanTransactionType { // for retrieving txns from Voyager
+export enum StarkscanTransactionType {
   DEPLOY = 'DEPLOY',
   DEPLOY_ACCOUNT = 'DEPLOY_ACCOUNT',
   INVOKE = 'INVOKE_FUNCTION',
 }
 
 export enum TransactionStatus { // for retrieving txn from Starknet feeder gateway
+  NOT_RECEIVED = 'NOT_RECEIVED',
   RECEIVED = 'RECEIVED',
-  PENDING = 'PENDING',
   ACCEPTED_ON_L2 = 'ACCEPTED_ON_L2',
   ACCEPTED_ON_L1 = 'ACCEPTED_ON_L1',
-  NOT_RECEIVED = 'NOT_RECEIVED',
   REJECTED = 'REJECTED',
+  REVERTED = 'REVERTED',
+  SUCCEEDED = 'SUCCEEDED',
 }
 
 export enum BalanceType {

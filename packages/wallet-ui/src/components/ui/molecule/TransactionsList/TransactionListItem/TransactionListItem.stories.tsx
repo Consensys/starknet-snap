@@ -1,5 +1,5 @@
 import { Meta } from '@storybook/react';
-import { Transaction } from 'types';
+import { Transaction, TransactionStatus } from 'types';
 import { TransactionListItemView } from './TransactionListItem.view';
 
 export default {
@@ -13,9 +13,11 @@ const transaction: Transaction = {
   chainId: '0x534e5f5345504f4c4941',
   senderAddress:
     '0x5ccc9fc2d7ce9e2b0f2cee1a4b898570bb4d03ba23ad6f72f0db971bd04552c',
-  status: 'RECEIVED',
+  contractAddress:
+    '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
+  executionStatus: TransactionStatus.SUCCEEDED,
+  finalityStatus: TransactionStatus.RECEIVED,
   failureReason: '',
-  eventIds: [],
   timestamp: 1655869759,
   accountCalls: {
     '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7': [
@@ -30,6 +32,10 @@ const transaction: Transaction = {
       },
     ],
   },
+  maxFee: null,
+  actualFee: null,
+  version: 1,
+  dataVersion: '2',
 };
 
 export const FullWidth = () => (
