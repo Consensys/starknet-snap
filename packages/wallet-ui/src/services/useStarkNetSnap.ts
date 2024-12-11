@@ -539,7 +539,6 @@ export const useStarkNetSnap = () => {
   const getTransactions = async (
     senderAddress: string,
     contractAddress: string,
-    pageSize: number,
     txnsInLastNumOfDays: number,
     chainId: string,
     showLoading: boolean = true,

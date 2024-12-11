@@ -1,5 +1,9 @@
 import { IconProp } from '@fortawesome/fontawesome-svg-core';
-import { Transaction, TransactionStatus, StarkscanTransactionType } from 'types';
+import {
+  Transaction,
+  TransactionStatus,
+  StarkscanTransactionType,
+} from 'types';
 import { ethers } from 'ethers';
 
 export const getIcon = (transactionName: string): IconProp => {
