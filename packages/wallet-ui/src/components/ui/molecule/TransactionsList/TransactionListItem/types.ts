@@ -1,6 +1,5 @@
 import { IconProp } from '@fortawesome/fontawesome-svg-core';
 import { Transaction, TransactionStatus, VoyagerTransactionType } from 'types';
-import { shortenAddress } from 'utils/utils';
 import { ethers } from 'ethers';
 
 export const getIcon = (transactionName: string): IconProp => {
@@ -17,23 +16,38 @@ export const getIcon = (transactionName: string): IconProp => {
   }
 };
 
-export const getTxnName = (transaction: Transaction): string => {
-  if (transaction.txnType.toLowerCase() === VoyagerTransactionType.INVOKE) {
-    if (transaction.contractFuncName.toLowerCase() === 'transfer') {
-      return 'Send';
-    } else if (transaction.contractFuncName.toLowerCase() === 'upgrade') {
-      return 'Upgrade Account';
-    }
-  } else if (
-    transaction.txnType.toLowerCase() === VoyagerTransactionType.DEPLOY
-  ) {
-    return 'Deploy';
-  } else if (
-    transaction.txnType.toLowerCase() === VoyagerTransactionType.DEPLOY_ACCOUNT
-  ) {
-    return 'Deploy Account';
+export const getTxnName = (
+  transaction: Transaction,
+  contractAddress: string,
+): string => {
+  switch (transaction.txnType) {
+    case VoyagerTransactionType.INVOKE:
+      if (
+        transaction.accountCalls &&
+        transaction.accountCalls[contractAddress]
+      ) {
+        if (
+          transaction.accountCalls[contractAddress].some(
+            (call) => call.contractFuncName === 'transfer',
+          )
+        ) {
+          return 'Send';
+        } else if (
+          transaction.accountCalls[contractAddress].some(
+            (call) => call.contractFuncName === 'upgrade',
+          )
+        ) {
+          return 'Upgrade Account';
+        }
+      }
+      return 'Contract Interaction';
+    case VoyagerTransactionType.DEPLOY:
+      return 'Depoly';
+    case VoyagerTransactionType.DEPLOY_ACCOUNT:
+      return 'Deploy Account';
+    default:
+      return 'Unknown';
   }
-  return 'Unknown';
 };
 
 export const getTxnDate = (transaction: Transaction): string => {
@@ -78,29 +92,6 @@ export const formatStatus = (status: string): string => {
     .join(' ');
 };
 
-export const getTxnToFromLabel = (transaction: Transaction): string => {
-  const txnName = getTxnName(transaction);
-  switch (txnName) {
-    case 'Send':
-      // TODO : This will not be needed after getTransactions revamp.
-      if (transaction.contractCallData.length === 3) {
-        return (
-          'To ' + shortenAddress(transaction.contractCallData[0].toString())
-        );
-      } else {
-        return (
-          'To ' + shortenAddress(transaction.contractCallData[4].toString())
-        );
-      }
-    case 'Receive':
-      return 'From ' + shortenAddress(transaction.senderAddress);
-    case 'Deploy':
-      return 'To ' + shortenAddress(transaction.contractAddress);
-    default:
-      return '';
-  }
-};
-
 export const getTxnFailureReason = (transaction: Transaction): string => {
   return transaction.executionStatus &&
     transaction.executionStatus.toLowerCase() ===
@@ -114,24 +105,25 @@ export const getTxnValues = (
   transaction: Transaction,
   decimals: number = 18,
   toUsdRate: number = 0,
+  tokenAddress: string,
 ) => {
   let txnValue = '0';
   let txnUsdValue = '0';
+  if (transaction.accountCalls && transaction.accountCalls[tokenAddress]) {
+    txnValue = ethers.utils.formatUnits(
+      transaction.accountCalls[tokenAddress]
+        .filter((call) => call.contractFuncName === 'transfer') // Filter for "transfer" calls
+        .reduce((acc, call) => {
+          // Extract the BigInt value from contractCallData
+          const value = BigInt(
+            call.contractCallData[call.contractCallData.length - 2].toString(),
+          );
+          return acc + value; // Sum the BigInt values
+        }, BigInt(0)),
+      decimals,
+    ); // Start with BigInt(0) as the initial value
 
-  const txnName = getTxnName(transaction);
-  switch (txnName) {
-    case 'Send':
-    case 'Receive':
-      txnValue = ethers.utils.formatUnits(
-        transaction.contractCallData[
-          transaction.contractCallData.length - 2
-        ].toString(),
-        decimals,
-      );
-      txnUsdValue = (parseFloat(txnValue) * toUsdRate).toFixed(2);
-      break;
-    default:
-      break;
+    txnUsdValue = (parseFloat(txnValue) * toUsdRate).toFixed(2);
   }
 
   return { txnValue, txnUsdValue };

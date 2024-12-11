@@ -21,7 +21,6 @@ import {
   getTxnFailureReason,
   getTxnName,
   getTxnStatus,
-  getTxnToFromLabel,
   getTxnValues,
 } from './types';
 import { getHumanReadableAmount, openExplorerTab } from 'utils/utils';
@@ -32,15 +31,17 @@ interface Props {
 
 export const TransactionListItemView = ({ transaction }: Props) => {
   const wallet = useAppSelector((state) => state.wallet);
+  const tokenAddress = wallet.erc20TokenBalanceSelected.address;
   const [currencySymbol, setCurrencySymbol] = useState('N/A');
   const [txnValue, setTxnValue] = useState('0');
   const [txnUsdValue, setTxnUsdValue] = useState('0.00');
 
   useEffect(() => {
     const fetchData = async () => {
+      // Find the matching token
       const foundToken = wallet.erc20TokenBalances.find((token) =>
         ethers.BigNumber.from(token.address).eq(
-          ethers.BigNumber.from(transaction.contractAddress),
+          ethers.BigNumber.from(tokenAddress),
         ),
       );
       if (foundToken) {
@@ -48,6 +49,7 @@ export const TransactionListItemView = ({ transaction }: Props) => {
           transaction,
           foundToken.decimals,
           foundToken.usdPrice,
+          tokenAddress,
         );
         setTxnValue(getHumanReadableAmount(foundToken, txnValues.txnValue));
         setTxnUsdValue(txnValues.txnUsdValue);
@@ -58,10 +60,10 @@ export const TransactionListItemView = ({ transaction }: Props) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const txnName = getTxnName(transaction);
+  const txnName = getTxnName(transaction, tokenAddress);
   const txnDate = getTxnDate(transaction);
   const txnStatus = getTxnStatus(transaction);
-  const txnToFromLabel = getTxnToFromLabel(transaction);
+  const txnToFromLabel = '';
   const txnFailureReason = getTxnFailureReason(transaction);
   return (
     <Wrapper

@@ -1,19 +1,27 @@
 import { BigNumber } from 'ethers';
 
+type AccountCall = {
+  contract: string; // HexStruct resolves to a string in this context
+  contractFuncName: string;
+  contractCallData: string[];
+  recipient?: string;
+  amount?: string;
+};
+
+type AccountCalls = Record<string, AccountCall[]> | null;
+
 export type Transaction = {
   txnHash: string; // in hex
   txnType: string;
   chainId: string; // in hex
   senderAddress: string; // in hex
-  contractAddress: string; // in hex
-  contractFuncName: string;
-  contractCallData: string[] | number[];
   status?: TransactionStatus | string;
   executionStatus?: TransactionStatus | string;
   finalityStatus?: TransactionStatus | string;
   failureReason: string;
   eventIds: string[];
   timestamp: number;
+  accountCalls: AccountCalls;
 };
 
 export type Account = {
@@ -49,9 +57,9 @@ export type TransactionStatusOptions =
   | 'Not Received';
 
 export enum VoyagerTransactionType { // for retrieving txns from Voyager
-  DEPLOY = 'deploy',
-  DEPLOY_ACCOUNT = 'deploy_account',
-  INVOKE = 'invoke',
+  DEPLOY = 'DEPLOY',
+  DEPLOY_ACCOUNT = 'DEPLOY_ACCOUNT',
+  INVOKE = 'INVOKE_FUNCTION',
 }
 
 export enum TransactionStatus { // for retrieving txn from Starknet feeder gateway

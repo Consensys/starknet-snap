@@ -15,18 +15,23 @@ const transactions: Transaction[] = [
     chainId: '0x534e5f5345504f4c4941',
     senderAddress:
       '0x5ccc9fc2d7ce9e2b0f2cee1a4b898570bb4d03ba23ad6f72f0db971bd04552c',
-    contractAddress:
-      '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
-    contractFuncName: 'transfer',
-    contractCallData: [
-      '0x6b686ebe2cbd70b37b54df1b9889cc3095b55f386110843912efcaed416ff3f',
-      '0x38d7ea4c68000',
-      '0x0',
-    ],
     status: 'RECEIVED',
     failureReason: '',
     eventIds: [],
     timestamp: 1655869759,
+    accountCalls: {
+      '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7': [
+        {
+          contract:
+            '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
+          contractFuncName: 'transfer',
+          contractCallData: [
+            '0x6b686ebe2cbd70b37b54df1b9889cc3095b55f386110843912efcaed416ff3f',
+            '0x0de0b6b3a7640000',
+          ],
+        },
+      ],
+    },
   },
   {
     txnHash:
@@ -35,17 +40,23 @@ const transactions: Transaction[] = [
     chainId: '0x534e5f5345504f4c4941',
     senderAddress:
       '0x05ccc9fc2d7ce9e2b0f2cee1a4b898570bb4d03ba23ad6f72f0db971bd04552c',
-    contractAddress:
-      '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
-    contractFuncName: 'transfer',
-    contractCallData: [
-      '0x6b686ebe2cbd70b37b54df1b9889cc3095b55f386110843912efcaed416ff3f',
-      '0x0de0b6b3a7640000',
-    ],
     timestamp: 1655705597,
     status: 'Accepted on L2',
     eventIds: ['245417_20_0'],
     failureReason: '',
+    accountCalls: {
+      '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7': [
+        {
+          contract:
+            '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
+          contractFuncName: 'transfer',
+          contractCallData: [
+            '0x6b686ebe2cbd70b37b54df1b9889cc3095b55f386110843912efcaed416ff3f',
+            '0x0de0b6b3a7640000',
+          ],
+        },
+      ],
+    },
   },
   {
     txnHash:
@@ -54,19 +65,24 @@ const transactions: Transaction[] = [
     chainId: '0x534e5f5345504f4c4941',
     senderAddress:
       '0x5ccc9fc2d7ce9e2b0f2cee1a4b898570bb4d03ba23ad6f72f0db971bd04552c',
-    contractAddress:
-      '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
-    contractFuncName: 'transfer',
-    contractCallData: [
-      '0x6b686ebe2cbd70b37b54df1b9889cc3095b55f386110843912efcaed416ff3f',
-      '0xde0b6b3a7640000',
-      '0x0',
-    ],
     status: 'REJECTED',
     failureReason:
       'Actual fee exceeded max fee.\n13056675060932 > 9585012591398',
     eventIds: [],
     timestamp: 1655695493,
+    accountCalls: {
+      '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7': [
+        {
+          contract:
+            '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
+          contractFuncName: 'transfer',
+          contractCallData: [
+            '0x6b686ebe2cbd70b37b54df1b9889cc3095b55f386110843912efcaed416ff3f',
+            '0x0de0b6b3a7640000',
+          ],
+        },
+      ],
+    },
   },
   {
     txnHash:
@@ -75,17 +91,23 @@ const transactions: Transaction[] = [
     chainId: '0x534e5f5345504f4c4941',
     senderAddress:
       '0x05ccc9fc2d7ce9e2b0f2cee1a4b898570bb4d03ba23ad6f72f0db971bd04552c',
-    contractAddress:
-      '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
-    contractFuncName: 'transfer',
-    contractCallData: [
-      '0x14361d05e560796ad3152e083b609f5205f3bd76039327326746ba7f769a666',
-      '0x0de0b6b3a7640000',
-    ],
     timestamp: 1654745214,
     status: 'Accepted on L1',
     eventIds: ['233927_16_0'],
     failureReason: '',
+    accountCalls: {
+      '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7': [
+        {
+          contract:
+            '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
+          contractFuncName: 'transfer',
+          contractCallData: [
+            '0x14361d05e560796ad3152e083b609f5205f3bd76039327326746ba7f769a666',
+            '0x0de0b6b3a7640000',
+          ],
+        },
+      ],
+    },
   },
   {
     txnHash:
@@ -94,17 +116,23 @@ const transactions: Transaction[] = [
     chainId: '0x534e5f5345504f4c4941',
     senderAddress:
       '0x05ccc9fc2d7ce9e2b0f2cee1a4b898570bb4d03ba23ad6f72f0db971bd04552c',
-    contractAddress:
-      '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
-    contractFuncName: 'transfer',
-    contractCallData: [
-      '0x14361d05e560796ad3152e083b609f5205f3bd76039327326746ba7f769a666',
-      '0x0de0b6b3a7640000',
-    ],
     timestamp: 1654708040,
     status: 'Accepted on L1',
     eventIds: ['233510_7_0'],
     failureReason: '',
+    accountCalls: {
+      '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7': [
+        {
+          contract:
+            '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
+          contractFuncName: 'transfer',
+          contractCallData: [
+            '0x14361d05e560796ad3152e083b609f5205f3bd76039327326746ba7f769a666',
+            '0x0de0b6b3a7640000',
+          ],
+        },
+      ],
+    },
   },
   {
     txnHash:
@@ -113,17 +141,23 @@ const transactions: Transaction[] = [
     chainId: '0x534e5f5345504f4c4941',
     senderAddress:
       '0x05ccc9fc2d7ce9e2b0f2cee1a4b898570bb4d03ba23ad6f72f0db971bd04552c',
-    contractAddress:
-      '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
-    contractFuncName: 'transfer',
-    contractCallData: [
-      '0x14361d05e560796ad3152e083b609f5205f3bd76039327326746ba7f769a666',
-      '0x1bc16d674ec80000',
-    ],
     timestamp: 1654701586,
     status: 'Accepted on L1',
     eventIds: ['233442_14_0'],
     failureReason: '',
+    accountCalls: {
+      '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7': [
+        {
+          contract:
+            '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
+          contractFuncName: 'transfer',
+          contractCallData: [
+            '0x14361d05e560796ad3152e083b609f5205f3bd76039327326746ba7f769a666',
+            '0x1bc16d674ec80000',
+          ],
+        },
+      ],
+    },
   },
   {
     txnHash: '0x81fab4268648483028b9be3353d6551ca35041fb2a03c2f372b19f3ab109b1',
@@ -131,17 +165,23 @@ const transactions: Transaction[] = [
     chainId: '0x534e5f5345504f4c4941',
     senderAddress:
       '0x05ccc9fc2d7ce9e2b0f2cee1a4b898570bb4d03ba23ad6f72f0db971bd04552c',
-    contractAddress:
-      '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
-    contractFuncName: 'transfer',
-    contractCallData: [
-      '0x256d8f49882cc9366037415f48fa9fd2b5b7344ded7573ebfcef7c90e3e6b75',
-      '0x0de0b6b3a7640000',
-    ],
     timestamp: 1654678571,
     status: 'Accepted on L1',
     eventIds: ['233196_29_0'],
     failureReason: '',
+    accountCalls: {
+      '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7': [
+        {
+          contract:
+            '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
+          contractFuncName: 'transfer',
+          contractCallData: [
+            '0x256d8f49882cc9366037415f48fa9fd2b5b7344ded7573ebfcef7c90e3e6b75',
+            '0x0de0b6b3a7640000',
+          ],
+        },
+      ],
+    },
   },
   {
     txnHash:
@@ -150,17 +190,23 @@ const transactions: Transaction[] = [
     chainId: '0x534e5f5345504f4c4941',
     senderAddress:
       '0x05ccc9fc2d7ce9e2b0f2cee1a4b898570bb4d03ba23ad6f72f0db971bd04552c',
-    contractAddress:
-      '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
-    contractFuncName: 'transfer',
-    contractCallData: [
-      '0x256d8f49882cc9366037415f48fa9fd2b5b7344ded7573ebfcef7c90e3e6b75',
-      '0x3782dace9d900000',
-    ],
     timestamp: 1654670913,
     status: 'Accepted on L1',
     eventIds: ['233116_23_0'],
     failureReason: '',
+    accountCalls: {
+      '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7': [
+        {
+          contract:
+            '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
+          contractFuncName: 'transfer',
+          contractCallData: [
+            '0x256d8f49882cc9366037415f48fa9fd2b5b7344ded7573ebfcef7c90e3e6b75',
+            '0x3782dace9d900000',
+          ],
+        },
+      ],
+    },
   },
   {
     txnHash:
@@ -169,14 +215,20 @@ const transactions: Transaction[] = [
     chainId: '0x534e5f5345504f4c4941',
     senderAddress:
       '0x05ccc9fc2d7ce9e2b0f2cee1a4b898570bb4d03ba23ad6f72f0db971bd04552c',
-    contractAddress:
-      '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
-    contractFuncName: '',
-    contractCallData: [],
     timestamp: 1654662459,
     status: 'Accepted on L1',
     eventIds: ['233027_3_0'],
     failureReason: '',
+    accountCalls: {
+      '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7': [
+        {
+          contract:
+            '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
+          contractFuncName: '',
+          contractCallData: [],
+        },
+      ],
+    },
   },
 ];
 
