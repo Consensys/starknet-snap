@@ -67,7 +67,7 @@ export class MetaMaskSnapWallet implements StarknetWindowObject {
 
   #networkChangeHandlers: NetworkChangeEventHandler[] = [];
 
-  static readonly minimumPollingDelay = 100;
+  static readonly pollingDelayMs = 100;
 
   static readonly pollingTimeoutMs = 5000;
 
@@ -325,15 +325,14 @@ export class MetaMaskSnapWallet implements StarknetWindowObject {
         // Not to throw an error, to avoid breaking the event subscription
       }
 
-      await new Promise((resolve) => setTimeout(resolve, MetaMaskSnapWallet.minimumPollingDelay));
+      await new Promise((resolve) => setTimeout(resolve, MetaMaskSnapWallet.pollingDelayMs));
     }
   };
 
   #startPolling(): void {
     this.#pollingController = new AbortController();
-    this.#pollingFunction().catch((_error) => {
-      // Do nothing
-    });
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
+    this.#pollingFunction();
   }
 
   #stopPolling(): void {
