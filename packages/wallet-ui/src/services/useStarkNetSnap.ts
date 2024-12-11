@@ -324,8 +324,9 @@ export const useStarkNetSnap = () => {
         },
       });
     } catch (err) {
-      //eslint-disable-next-line no-console
-      console.error(err);
+      if (!isUserDenyError(err)) {
+        throw err;
+      }
     }
   }
 
