@@ -40,7 +40,6 @@ import {
   TransactionType,
   UniversalDetails,
 } from 'starknet';
-import { DENY_ERROR_CODE } from 'utils/constants';
 
 export const useStarkNetSnap = () => {
   const dispatch = useAppDispatch();
