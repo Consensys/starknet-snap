@@ -63,7 +63,7 @@ describe('feeTokenToTransactionVersion', () => {
   });
 
   it.each([FeeToken.ETH, 'invalid_unit'])(
-    'converts feeToken string to transaction version v1 if it not STRK - %s',
+    'converts feeToken string to transaction version v1 if it is not STRK - %s',
     (txnVersion: string) => {
       expect(feeTokenToTransactionVersion(txnVersion)).toStrictEqual(
         constants.TRANSACTION_VERSION.V1,
