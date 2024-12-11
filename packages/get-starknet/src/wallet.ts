@@ -26,9 +26,11 @@ import type { MetaMaskProvider, Network } from './type';
 import type { IStarknetWalletRpc } from './utils';
 import { WalletRpcError, WalletRpcErrorCode } from './utils/error';
 
-const resolver = async (func: (...args: any[]) => any, ...args: any[]): Promise<any> => {
+type CallbackFunction = (...args: any[]) => any;
+
+const resolver = async (func: CallbackFunction, arg1: string | string[], arg2?: string[]): Promise<any> => {
   return new Promise((resolve) => {
-    resolve(func(...args));
+    resolve(func(arg1, arg2));
   });
 };
 
