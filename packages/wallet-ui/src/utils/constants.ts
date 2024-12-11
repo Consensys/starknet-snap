@@ -66,3 +66,5 @@ export const DUMMY_ADDRESS = '0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx';
 export const DEFAULT_FEE_TOKEN = FeeToken.ETH;
 
 export const MIN_METAMASK_VERSION = '12.5.0';
+
+export const DENY_ERROR_CODE = 113;
