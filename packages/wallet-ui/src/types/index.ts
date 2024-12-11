@@ -56,7 +56,7 @@ export type TransactionStatusOptions =
   | 'Rejected'
   | 'Not Received';
 
-export enum VoyagerTransactionType { // for retrieving txns from Voyager
+export enum StarkscanTransactionType { // for retrieving txns from Voyager
   DEPLOY = 'DEPLOY',
   DEPLOY_ACCOUNT = 'DEPLOY_ACCOUNT',
   INVOKE = 'INVOKE_FUNCTION',

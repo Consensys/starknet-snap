@@ -1,5 +1,5 @@
 import { IconProp } from '@fortawesome/fontawesome-svg-core';
-import { Transaction, TransactionStatus, VoyagerTransactionType } from 'types';
+import { Transaction, TransactionStatus, StarkscanTransactionType } from 'types';
 import { ethers } from 'ethers';
 
 export const getIcon = (transactionName: string): IconProp => {
@@ -21,7 +21,7 @@ export const getTxnName = (
   contractAddress: string,
 ): string => {
   switch (transaction.txnType) {
-    case VoyagerTransactionType.INVOKE:
+    case StarkscanTransactionType.INVOKE:
       if (
         transaction.accountCalls &&
         transaction.accountCalls[contractAddress]
@@ -41,9 +41,9 @@ export const getTxnName = (
         }
       }
       return 'Contract Interaction';
-    case VoyagerTransactionType.DEPLOY:
+    case StarkscanTransactionType.DEPLOY:
       return 'Depoly';
-    case VoyagerTransactionType.DEPLOY_ACCOUNT:
+    case StarkscanTransactionType.DEPLOY_ACCOUNT:
       return 'Deploy Account';
     default:
       return 'Unknown';

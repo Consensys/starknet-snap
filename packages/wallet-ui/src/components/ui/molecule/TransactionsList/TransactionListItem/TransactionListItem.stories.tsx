@@ -8,7 +8,7 @@ export default {
 } as Meta;
 
 const transaction: Transaction = {
-  txnHash: '0x3d82342a73d5562d65986c40b88123913a8f0b72be390b3d54377ca3216825d',
+  txnHash: '0x1321951d3102d45abd6dd9ac556b6a86190c78b1026279a8d44cb18c0008eb6',
   txnType: 'invoke',
   chainId: '0x534e5f5345504f4c4941',
   senderAddress:
