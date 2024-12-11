@@ -60,14 +60,14 @@ export function transactionVersionToFeeToken(txnVersion: string): FeeToken {
  * If the selector is not known, return the selector.
  *
  * @param selector - The transaction selector.
- * @returns The meaninful name of the selector if it is known, otherwise return the selector.
+ * @returns The meaningful name of the selector if it is known, otherwise return the selector.
  */
-export function transactionSelectorHexToName(selector: string): string {
+export function transactionSelectorToName(selector: string): string {
   switch (selector.toLowerCase()) {
-    case ContractFuncName.Transfer.toLowerCase():
+    case ContractFuncName.Transfer:
     case TRANSFER_SELECTOR_HEX.toLowerCase():
       return ContractFuncName.Transfer;
-    case ContractFuncName.Upgrade.toLowerCase():
+    case ContractFuncName.Upgrade:
     case UPGRADE_SELECTOR_HEX.toLowerCase():
       return ContractFuncName.Upgrade;
     default:
@@ -91,7 +91,7 @@ export function callsToTranscationAccountCalls(
       entrypoint,
     } = call;
 
-    const contractFuncName = transactionSelectorHexToName(entrypoint);
+    const contractFuncName = transactionSelectorToName(entrypoint);
 
     if (!Object.prototype.hasOwnProperty.call(acc, contract)) {
       acc[contract] = [];
