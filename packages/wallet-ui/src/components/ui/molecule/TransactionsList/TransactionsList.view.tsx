@@ -28,7 +28,6 @@ export const TransactionsListView = ({ transactions }: Props) => {
             address,
             wallet.erc20TokenBalanceSelected.address,
             10,
-            10,
             chain,
             false,
             true,
@@ -49,7 +48,6 @@ export const TransactionsListView = ({ transactions }: Props) => {
         getTransactions(
           address,
           wallet.erc20TokenBalanceSelected.address,
-          10,
           10,
           chain,
         );

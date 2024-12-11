@@ -23,7 +23,7 @@ import {
   getTokenBalanceWithDetails,
 } from '../utils/utils';
 import { setWalletConnection } from '../slices/walletSlice';
-import { Network, VoyagerTransactionType } from '../types';
+import { Network, StarkscanTransactionType } from '../types';
 import { Account } from '../types';
 import { Erc20TokenBalance, Erc20Token } from '../types';
 import { disableLoading, enableLoadingWithMessage } from '../slices/UISlice';
@@ -539,7 +539,6 @@ export const useStarkNetSnap = () => {
   const getTransactions = async (
     senderAddress: string,
     contractAddress: string,
-    pageSize: number,
     txnsInLastNumOfDays: number,
     chainId: string,
     showLoading: boolean = true,
@@ -560,10 +559,7 @@ export const useStarkNetSnap = () => {
               ...defaultParam,
               senderAddress,
               contractAddress,
-              pageSize,
               txnsInLastNumOfDays,
-              onlyFromState,
-              withDeployTxn: true,
               chainId,
             },
           },
@@ -590,8 +586,8 @@ export const useStarkNetSnap = () => {
       //Set the deploy transaction
       const deployTransaction = storedTxns.find(
         (txn: Transaction) =>
-          txn.txnType.toLowerCase() === VoyagerTransactionType.DEPLOY ||
-          txn.txnType.toLowerCase() === VoyagerTransactionType.DEPLOY_ACCOUNT,
+          txn.txnType.toLowerCase() === StarkscanTransactionType.DEPLOY ||
+          txn.txnType.toLowerCase() === StarkscanTransactionType.DEPLOY_ACCOUNT,
       );
       dispatch(setTransactionDeploy(deployTransaction));
 

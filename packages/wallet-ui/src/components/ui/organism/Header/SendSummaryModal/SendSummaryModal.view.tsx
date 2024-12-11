@@ -197,7 +197,6 @@ export const SendSummaryModalView = ({
               wallet.accounts[0] as unknown as string,
               wallet.erc20TokenBalanceSelected.address,
               10,
-              10,
               chainId,
               false,
               true,
