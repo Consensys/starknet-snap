@@ -21,6 +21,7 @@ import {
   retry,
   isGTEMinVersion,
   getTokenBalanceWithDetails,
+  isUserDenyError,
 } from '../utils/utils';
 import { setWalletConnection } from '../slices/walletSlice';
 import { Network, StarkscanTransactionType } from '../types';
@@ -322,8 +323,9 @@ export const useStarkNetSnap = () => {
         },
       });
     } catch (err) {
-      //eslint-disable-next-line no-console
-      console.error(err);
+      if (!isUserDenyError(err)) {
+        throw err;
+      }
     }
   }
 
@@ -409,13 +411,14 @@ export const useStarkNetSnap = () => {
           },
         },
       });
-      dispatch(disableLoading());
+
       return response;
     } catch (err) {
+      if (!isUserDenyError(err)) {
+        throw err;
+      }
+    } finally {
       dispatch(disableLoading());
-      //eslint-disable-next-line no-console
-      console.error(err);
-      throw err;
     }
   }
 
@@ -494,13 +497,14 @@ export const useStarkNetSnap = () => {
           },
         },
       });
-      dispatch(disableLoading());
       return response;
     } catch (err) {
+      if (!isUserDenyError(err)) {
+        throw err;
+      }
+      return false;
+    } finally {
       dispatch(disableLoading());
-      //eslint-disable-next-line no-console
-      console.error(err);
-      throw err;
     }
   };
 
@@ -526,13 +530,15 @@ export const useStarkNetSnap = () => {
           },
         },
       });
-      dispatch(disableLoading());
+
       return response;
     } catch (err) {
+      if (!isUserDenyError(err)) {
+        throw err;
+      }
+      return false;
+    } finally {
       dispatch(disableLoading());
-      //eslint-disable-next-line no-console
-      console.error(err);
-      throw err;
     }
   };
 
@@ -614,7 +620,7 @@ export const useStarkNetSnap = () => {
   ) => {
     dispatch(enableLoadingWithMessage('Adding Token...'));
     try {
-      const token = await provider.request({
+      await provider.request({
         method: 'wallet_invokeSnap',
         params: {
           snapId,
@@ -631,28 +637,36 @@ export const useStarkNetSnap = () => {
           },
         },
       });
-      if (token) {
-        const tokenBalance = await getTokenBalance(
-          tokenAddress,
-          accountAddress,
-          chainId,
-        );
-        const usdPrice = await getAssetPriceUSD(token);
-        const tokenWithBalance: Erc20TokenBalance = getTokenBalanceWithDetails(
-          tokenBalance,
-          token,
-          usdPrice,
-        );
-        dispatch(upsertErc20TokenBalance(tokenWithBalance));
-        dispatch(disableLoading());
-        return tokenWithBalance;
-      } else {
-        dispatch(disableLoading());
-        return null;
-      }
+
+      const token = {
+        address: tokenAddress,
+        name: tokenName,
+        symbol: tokenSymbol,
+        decimals: tokenDecimals,
+        chainId,
+      };
+
+      const tokenBalance = await getTokenBalance(
+        tokenAddress,
+        accountAddress,
+        chainId,
+      );
+
+      const usdPrice = await getAssetPriceUSD(token);
+      const tokenWithBalance: Erc20TokenBalance = getTokenBalanceWithDetails(
+        tokenBalance,
+        token,
+        usdPrice,
+      );
+      dispatch(upsertErc20TokenBalance(tokenWithBalance));
+      return tokenWithBalance;
     } catch (err) {
+      if (!isUserDenyError(err)) {
+        throw err;
+      }
+      return null;
+    } finally {
       dispatch(disableLoading());
-      throw err;
     }
   };
 

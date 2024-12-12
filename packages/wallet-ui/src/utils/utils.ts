@@ -7,6 +7,7 @@ import {
   SEPOLIA_CHAINID,
   TIMEOUT_DURATION,
   MIN_ACC_CONTRACT_VERSION,
+  DENY_ERROR_CODE,
 } from './constants';
 import { Erc20Token, Erc20TokenBalance, TokenBalance } from 'types';
 import { constants } from 'starknet';
@@ -247,4 +248,11 @@ export const isValidStarkName = (starkName: string): boolean => {
   return /^(?:[a-z0-9-]{1,48}(?:[a-z0-9-]{1,48}[a-z0-9-])?\.)*[a-z0-9-]{1,48}\.stark$/.test(
     starkName,
   );
+};
+
+export const isUserDenyError = (error: any): Boolean => {
+  if (error?.data?.walletRpcError?.code) {
+    return error?.data?.walletRpcError?.code === DENY_ERROR_CODE;
+  }
+  return false;
 };
