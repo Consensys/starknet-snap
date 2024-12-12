@@ -274,6 +274,9 @@ export class MetaMaskSnapWallet implements StarknetWindowObject {
     } else {
       throw new Error(`Unsupported event: ${String(event)}`);
     }
+    if (this.#accountChangeHandlers.length + this.#networkChangeHandlers.length === 0) {
+      this.#stopPolling();
+    }
   }
 
   /**
