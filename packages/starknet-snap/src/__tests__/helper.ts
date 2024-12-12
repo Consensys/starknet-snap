@@ -26,6 +26,7 @@ import type {
 } from '../chain/data-client/starkscan.type';
 import { FeeToken } from '../types/snapApi';
 import {
+  ContractFuncName,
   TransactionDataVersion,
   type AccContract,
   type Transaction,
@@ -268,7 +269,7 @@ export function generateTransactions({
     const txnType = getRandomData(_txnTypes);
     const contractFuncName =
       txnType == TransactionType.INVOKE
-        ? getRandomData(['transfer', 'upgrade'])
+        ? getRandomData(Object.values(ContractFuncName))
         : '';
 
     transactions.push(
@@ -466,7 +467,7 @@ export function generateTransactionRequests({
             to: address,
             amount: '1',
           }),
-          entrypoint: 'transfer',
+          entrypoint: ContractFuncName.Transfer,
         },
       ],
       includeDeploy: false,

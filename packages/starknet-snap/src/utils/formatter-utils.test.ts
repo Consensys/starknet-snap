@@ -3,7 +3,7 @@ import { constants } from 'starknet';
 import { singleCall } from '../__tests__/fixture/callsExamples.json';
 import { generateAccounts } from '../__tests__/helper';
 import { TokenStateManager } from '../state/token-state-manager';
-import type { Erc20Token } from '../types/snapState';
+import { ContractFuncName, type Erc20Token } from '../types/snapState';
 import { ETHER_SEPOLIA_TESTNET } from './constants';
 import {
   callToTransactionReqCall,
@@ -129,7 +129,7 @@ describe('callToTransactionReqCall', () => {
     const { senderAddress, recipientAddress } = await getSenderAndRecipient();
     const call = {
       ...singleCall.calls,
-      entrypoint: 'transfer',
+      entrypoint: ContractFuncName.Transfer,
       calldata: [recipientAddress, '1000'],
     };
 
@@ -177,7 +177,7 @@ describe('callToTransactionReqCall', () => {
     const transferAmt = '1000';
     const call = {
       ...singleCall.calls,
-      entrypoint: 'transfer',
+      entrypoint: ContractFuncName.Transfer,
       calldata: [recipientAddress, transferAmt],
     };
     const token = ETHER_SEPOLIA_TESTNET;

@@ -16,7 +16,7 @@ import type {
 
 import { Config } from '../config';
 import { FeeToken, type AddNetworkRequestParams } from '../types/snapApi';
-import { TransactionStatus } from '../types/snapState';
+import { ContractFuncName, TransactionStatus } from '../types/snapState';
 import type {
   Network,
   Erc20Token,
@@ -312,7 +312,7 @@ export function getSendTxnText(
   );
   addDialogTxt(components, 'Network', network.name);
 
-  if (token && contractFuncName === 'transfer') {
+  if (token && contractFuncName === ContractFuncName.Transfer) {
     try {
       let amount = '';
       if ([3, 6, 9, 12, 15, 18].includes(token.decimals)) {

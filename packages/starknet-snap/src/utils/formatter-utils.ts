@@ -2,7 +2,7 @@ import type { Call } from 'starknet';
 import { assert } from 'superstruct';
 
 import type { TokenStateManager } from '../state/token-state-manager';
-import type { FormattedCallData } from '../types/snapState';
+import { ContractFuncName, type FormattedCallData } from '../types/snapState';
 import { logger } from './logger';
 import { AddressStruct, NumberStringStruct } from './superstruct';
 
@@ -61,7 +61,7 @@ export const callToTransactionReqCall = async (
   };
 
   // Check if the entrypoint is 'transfer' and the populate transfer fields
-  if (entrypoint === 'transfer' && calldata) {
+  if (entrypoint === ContractFuncName.Transfer && calldata) {
     try {
       const token = await tokenStateManager.getToken({
         address: contractAddress,
