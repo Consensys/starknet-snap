@@ -51,19 +51,6 @@ export interface Erc20TokenBalance extends Erc20Token {
   amount: BigNumber;
   usdPrice?: number;
 }
-export type TransactionStatusOptions =
-  | 'Received'
-  | 'Pending'
-  | 'Accepted on L2'
-  | 'Accepted on L1'
-  | 'Rejected'
-  | 'Not Received';
-
-export enum StarkscanTransactionType {
-  DEPLOY = 'DEPLOY',
-  DEPLOY_ACCOUNT = 'DEPLOY_ACCOUNT',
-  INVOKE = 'INVOKE_FUNCTION',
-}
 
 export enum TransactionStatus { // for retrieving txn from Starknet feeder gateway
   NOT_RECEIVED = 'NOT_RECEIVED',
@@ -73,6 +60,11 @@ export enum TransactionStatus { // for retrieving txn from Starknet feeder gatew
   REJECTED = 'REJECTED',
   REVERTED = 'REVERTED',
   SUCCEEDED = 'SUCCEEDED',
+}
+
+export enum ContractFuncName {
+  Upgrade = 'upgrade',
+  Transfer = 'transfer',
 }
 
 export enum BalanceType {

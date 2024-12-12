@@ -32,7 +32,7 @@ import { useStarkNetSnap } from 'services';
 import { ethers } from 'ethers';
 import Toastr from 'toastr2';
 import { constants } from 'starknet';
-import { FeeToken, FeeTokenUnit } from 'types';
+import { ContractFuncName, FeeToken, FeeTokenUnit } from 'types';
 
 interface Props {
   address: string;
@@ -90,7 +90,7 @@ export const SendSummaryModalView = ({
         const callData = address + ',' + amountBN.toString() + ',0';
         estimateFees(
           wallet.erc20TokenBalanceSelected.address,
-          'transfer',
+          ContractFuncName.Transfer,
           callData,
           wallet.accounts[0] as unknown as string,
           chainId,
@@ -183,7 +183,7 @@ export const SendSummaryModalView = ({
       const callData = address + ',' + amountBN.toString() + ',0';
       sendTransaction(
         wallet.erc20TokenBalanceSelected.address,
-        'transfer',
+        ContractFuncName.Transfer,
         callData,
         wallet.accounts[0] as unknown as string,
         gasFees.suggestedMaxFee,
