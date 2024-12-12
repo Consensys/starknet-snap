@@ -1,5 +1,5 @@
 import { Meta } from '@storybook/react';
-import { Transaction, TransactionStatus } from 'types';
+import { ContractFuncName, Transaction, TransactionStatus } from 'types';
 import { TransactionListItemView } from './TransactionListItem.view';
 
 export default {
@@ -24,7 +24,7 @@ const transaction: Transaction = {
       {
         contract:
           '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
-        contractFuncName: 'transfer',
+        contractFuncName: ContractFuncName.Transfer,
         contractCallData: [
           '0x6b686ebe2cbd70b37b54df1b9889cc3095b55f386110843912efcaed416ff3f',
           '0x0de0b6b3a7640000',

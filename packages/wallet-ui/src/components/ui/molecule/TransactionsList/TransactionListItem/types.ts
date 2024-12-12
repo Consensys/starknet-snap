@@ -1,9 +1,6 @@
+import { TransactionType } from 'starknet';
 import { IconProp } from '@fortawesome/fontawesome-svg-core';
-import {
-  Transaction,
-  TransactionStatus,
-  StarkscanTransactionType,
-} from 'types';
+import { ContractFuncName, Transaction, TransactionStatus } from 'types';
 import { ethers } from 'ethers';
 
 export const getIcon = (transactionName: string): IconProp => {
@@ -25,29 +22,24 @@ export const getTxnName = (
   contractAddress: string,
 ): string => {
   switch (transaction.txnType) {
-    case StarkscanTransactionType.INVOKE:
+    case TransactionType.INVOKE:
       if (
         transaction.accountCalls &&
-        transaction.accountCalls[contractAddress]
+        transaction.accountCalls[contractAddress] !== undefined
       ) {
-        if (
-          transaction.accountCalls[contractAddress].some(
-            (call) => call.contractFuncName === 'transfer',
-          )
-        ) {
-          return 'Send';
-        } else if (
-          transaction.accountCalls[contractAddress].some(
-            (call) => call.contractFuncName === 'upgrade',
-          )
-        ) {
-          return 'Upgrade Account';
+        for (const call of transaction.accountCalls[contractAddress]) {
+          if (call.contractFuncName === ContractFuncName.Transfer) {
+            return 'Receive';
+          }
+          if (call.contractFuncName === ContractFuncName.Upgrade) {
+            return 'Upgrade Account';
+          }
         }
       }
       return 'Contract Interaction';
-    case StarkscanTransactionType.DEPLOY:
+    case TransactionType.DEPLOY:
       return 'Depoly';
-    case StarkscanTransactionType.DEPLOY_ACCOUNT:
+    case TransactionType.DEPLOY_ACCOUNT:
       return 'Deploy Account';
     default:
       return 'Unknown';
@@ -113,19 +105,24 @@ export const getTxnValues = (
 ) => {
   let txnValue = '0';
   let txnUsdValue = '0';
-  if (transaction.accountCalls && transaction.accountCalls[tokenAddress]) {
+  if (
+    transaction.accountCalls &&
+    transaction.accountCalls[tokenAddress] !== undefined
+  ) {
     txnValue = ethers.utils.formatUnits(
-      transaction.accountCalls[tokenAddress]
-        .filter((call) => call.contractFuncName === 'transfer') // Filter for "transfer" calls
-        .reduce((acc, call) => {
-          // Extract the BigInt value from contractCallData
-          const value = BigInt(
-            call.contractCallData[call.contractCallData.length - 2].toString(),
-          );
-          return acc + value; // Sum the BigInt values
-        }, BigInt(0)),
+      // A transaction can have multiple contract calls with the same tokenAddress.
+      // Hence, it is necessary to sum the amount of all contract calls with the same tokenAddress.
+      transaction.accountCalls[tokenAddress].reduce((acc, call) => {
+        // When the contract function is `transfer`,
+        // there is a amount representing the transfer value of that contract call.
+        if (call.contractFuncName === ContractFuncName.Transfer) {
+          const value = BigInt(call.amount || '0');
+          acc += value;
+        }
+        return acc;
+      }, BigInt(0)),
       decimals,
-    ); // Start with BigInt(0) as the initial value
+    );
 
     txnUsdValue = (parseFloat(txnValue) * toUsdRate).toFixed(2);
   }

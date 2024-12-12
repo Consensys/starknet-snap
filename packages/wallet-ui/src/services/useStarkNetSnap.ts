@@ -23,7 +23,7 @@ import {
   getTokenBalanceWithDetails,
 } from '../utils/utils';
 import { setWalletConnection } from '../slices/walletSlice';
-import { Network, StarkscanTransactionType } from '../types';
+import { Network } from '../types';
 import { Account } from '../types';
 import { Erc20TokenBalance, Erc20Token } from '../types';
 import { disableLoading, enableLoadingWithMessage } from '../slices/UISlice';
@@ -586,8 +586,8 @@ export const useStarkNetSnap = () => {
       //Set the deploy transaction
       const deployTransaction = storedTxns.find(
         (txn: Transaction) =>
-          txn.txnType.toLowerCase() === StarkscanTransactionType.DEPLOY ||
-          txn.txnType.toLowerCase() === StarkscanTransactionType.DEPLOY_ACCOUNT,
+          txn.txnType === TransactionType.DEPLOY ||
+          txn.txnType === TransactionType.DEPLOY_ACCOUNT,
       );
       dispatch(setTransactionDeploy(deployTransaction));
 

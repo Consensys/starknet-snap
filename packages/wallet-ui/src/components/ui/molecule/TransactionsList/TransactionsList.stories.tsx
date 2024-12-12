@@ -1,5 +1,5 @@
 import { Meta } from '@storybook/react';
-import { Transaction, TransactionStatus } from 'types';
+import { ContractFuncName, Transaction, TransactionStatus } from 'types';
 import { TransactionsListView } from './TransactionsList.view';
 
 export default {
@@ -26,7 +26,7 @@ const transactions: Transaction[] = [
         {
           contract:
             '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
-          contractFuncName: 'transfer',
+          contractFuncName: ContractFuncName.Transfer,
           contractCallData: [
             '0x6b686ebe2cbd70b37b54df1b9889cc3095b55f386110843912efcaed416ff3f',
             '0x0de0b6b3a7640000',
@@ -57,7 +57,7 @@ const transactions: Transaction[] = [
         {
           contract:
             '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
-          contractFuncName: 'transfer',
+          contractFuncName: ContractFuncName.Transfer,
           contractCallData: [
             '0x6b686ebe2cbd70b37b54df1b9889cc3095b55f386110843912efcaed416ff3f',
             '0x0de0b6b3a7640000',
@@ -89,7 +89,7 @@ const transactions: Transaction[] = [
         {
           contract:
             '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
-          contractFuncName: 'transfer',
+          contractFuncName: ContractFuncName.Transfer,
           contractCallData: [
             '0x6b686ebe2cbd70b37b54df1b9889cc3095b55f386110843912efcaed416ff3f',
             '0x0de0b6b3a7640000',
@@ -120,7 +120,7 @@ const transactions: Transaction[] = [
         {
           contract:
             '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
-          contractFuncName: 'transfer',
+          contractFuncName: ContractFuncName.Transfer,
           contractCallData: [
             '0x14361d05e560796ad3152e083b609f5205f3bd76039327326746ba7f769a666',
             '0x0de0b6b3a7640000',
@@ -151,7 +151,7 @@ const transactions: Transaction[] = [
         {
           contract:
             '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
-          contractFuncName: 'transfer',
+          contractFuncName: ContractFuncName.Transfer,
           contractCallData: [
             '0x14361d05e560796ad3152e083b609f5205f3bd76039327326746ba7f769a666',
             '0x0de0b6b3a7640000',
@@ -182,7 +182,7 @@ const transactions: Transaction[] = [
         {
           contract:
             '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
-          contractFuncName: 'transfer',
+          contractFuncName: ContractFuncName.Transfer,
           contractCallData: [
             '0x14361d05e560796ad3152e083b609f5205f3bd76039327326746ba7f769a666',
             '0x1bc16d674ec80000',
@@ -212,7 +212,7 @@ const transactions: Transaction[] = [
         {
           contract:
             '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
-          contractFuncName: 'transfer',
+          contractFuncName: ContractFuncName.Transfer,
           contractCallData: [
             '0x256d8f49882cc9366037415f48fa9fd2b5b7344ded7573ebfcef7c90e3e6b75',
             '0x0de0b6b3a7640000',
@@ -243,7 +243,7 @@ const transactions: Transaction[] = [
         {
           contract:
             '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
-          contractFuncName: 'transfer',
+          contractFuncName: ContractFuncName.Transfer,
           contractCallData: [
             '0x256d8f49882cc9366037415f48fa9fd2b5b7344ded7573ebfcef7c90e3e6b75',
             '0x3782dace9d900000',
