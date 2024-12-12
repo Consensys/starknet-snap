@@ -30,6 +30,11 @@ export type SnapConfig = {
       apiKey: string | undefined;
     };
   };
+  transaction: {
+    list: {
+      txnsInLastNumOfDays: number;
+    };
+  };
 };
 
 export enum DataClient {
@@ -48,6 +53,12 @@ export const Config: SnapConfig = {
     STARKNET_MAINNET_NETWORK,
     STARKNET_SEPOLIA_TESTNET_NETWORK,
   ],
+
+  transaction: {
+    list: {
+      txnsInLastNumOfDays: 10,
+    },
+  },
 
   explorer: {
     [constants.StarknetChainId.SN_MAIN]:

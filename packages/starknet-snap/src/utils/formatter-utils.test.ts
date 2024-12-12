@@ -3,11 +3,13 @@ import { constants } from 'starknet';
 import { singleCall } from '../__tests__/fixture/callsExamples.json';
 import { generateAccounts } from '../__tests__/helper';
 import { TokenStateManager } from '../state/token-state-manager';
-import type { Erc20Token } from '../types/snapState';
+import { ContractFuncName, type Erc20Token } from '../types/snapState';
 import { ETHER_SEPOLIA_TESTNET } from './constants';
 import {
   callToTransactionReqCall,
   mapDeprecatedParams,
+  dayToSec,
+  msToSec,
 } from './formatter-utils';
 import { logger } from './logger';
 
@@ -127,7 +129,7 @@ describe('callToTransactionReqCall', () => {
     const { senderAddress, recipientAddress } = await getSenderAndRecipient();
     const call = {
       ...singleCall.calls,
-      entrypoint: 'transfer',
+      entrypoint: ContractFuncName.Transfer,
       calldata: [recipientAddress, '1000'],
     };
 
@@ -175,7 +177,7 @@ describe('callToTransactionReqCall', () => {
     const transferAmt = '1000';
     const call = {
       ...singleCall.calls,
-      entrypoint: 'transfer',
+      entrypoint: ContractFuncName.Transfer,
       calldata: [recipientAddress, transferAmt],
     };
     const token = ETHER_SEPOLIA_TESTNET;
@@ -205,5 +207,23 @@ describe('callToTransactionReqCall', () => {
         decimals: token.decimals,
       },
     });
+  });
+});
+
+describe('dayToSec', () => {
+  it('converts days to seconds', () => {
+    const days = 10;
+    const expected = days * 24 * 60 * 60;
+
+    expect(dayToSec(days)).toBe(expected);
+  });
+});
+
+describe('msToSec', () => {
+  it('converts milliseconds to seconds', () => {
+    const ms = Date.now();
+    const expected = Math.floor(ms / 1000);
+
+    expect(msToSec(ms)).toBe(expected);
   });
 });

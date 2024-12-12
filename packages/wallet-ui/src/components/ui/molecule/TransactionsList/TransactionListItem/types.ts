@@ -1,6 +1,6 @@
+import { TransactionType } from 'starknet';
 import { IconProp } from '@fortawesome/fontawesome-svg-core';
-import { Transaction, TransactionStatus, VoyagerTransactionType } from 'types';
-import { shortenAddress } from 'utils/utils';
+import { ContractFuncName, Transaction, TransactionStatus } from 'types';
 import { ethers } from 'ethers';
 
 export const getIcon = (transactionName: string): IconProp => {
@@ -17,23 +17,33 @@ export const getIcon = (transactionName: string): IconProp => {
   }
 };
 
-export const getTxnName = (transaction: Transaction): string => {
-  if (transaction.txnType.toLowerCase() === VoyagerTransactionType.INVOKE) {
-    if (transaction.contractFuncName.toLowerCase() === 'transfer') {
-      return 'Send';
-    } else if (transaction.contractFuncName.toLowerCase() === 'upgrade') {
-      return 'Upgrade Account';
-    }
-  } else if (
-    transaction.txnType.toLowerCase() === VoyagerTransactionType.DEPLOY
-  ) {
-    return 'Deploy';
-  } else if (
-    transaction.txnType.toLowerCase() === VoyagerTransactionType.DEPLOY_ACCOUNT
-  ) {
-    return 'Deploy Account';
+export const getTxnName = (
+  transaction: Transaction,
+  contractAddress: string,
+): string => {
+  switch (transaction.txnType) {
+    case TransactionType.INVOKE:
+      if (
+        transaction.accountCalls &&
+        transaction.accountCalls[contractAddress] !== undefined
+      ) {
+        for (const call of transaction.accountCalls[contractAddress]) {
+          if (call.contractFuncName === ContractFuncName.Transfer) {
+            return 'Receive';
+          }
+          if (call.contractFuncName === ContractFuncName.Upgrade) {
+            return 'Upgrade Account';
+          }
+        }
+      }
+      return 'Contract Interaction';
+    case TransactionType.DEPLOY:
+      return 'Depoly';
+    case TransactionType.DEPLOY_ACCOUNT:
+      return 'Deploy Account';
+    default:
+      return 'Unknown';
   }
-  return 'Unknown';
 };
 
 export const getTxnDate = (transaction: Transaction): string => {
@@ -50,6 +60,9 @@ export const getTxnDate = (transaction: Transaction): string => {
 
 export const getTxnStatus = (transaction: Transaction): string => {
   let statusStr = [];
+  if (transaction.executionStatus) {
+    statusStr.push(formatStatus(transaction.executionStatus));
+  }
   if (transaction.finalityStatus === transaction.executionStatus) {
     return transaction.finalityStatus
       ? formatStatus(transaction.finalityStatus)
@@ -57,9 +70,6 @@ export const getTxnStatus = (transaction: Transaction): string => {
   }
   if (transaction.finalityStatus) {
     statusStr.push(formatStatus(transaction.finalityStatus));
-  }
-  if (transaction.executionStatus) {
-    statusStr.push(formatStatus(transaction.executionStatus));
   }
   return statusStr.join(' / ');
 };
@@ -78,29 +88,6 @@ export const formatStatus = (status: string): string => {
     .join(' ');
 };
 
-export const getTxnToFromLabel = (transaction: Transaction): string => {
-  const txnName = getTxnName(transaction);
-  switch (txnName) {
-    case 'Send':
-      // TODO : This will not be needed after getTransactions revamp.
-      if (transaction.contractCallData.length === 3) {
-        return (
-          'To ' + shortenAddress(transaction.contractCallData[0].toString())
-        );
-      } else {
-        return (
-          'To ' + shortenAddress(transaction.contractCallData[4].toString())
-        );
-      }
-    case 'Receive':
-      return 'From ' + shortenAddress(transaction.senderAddress);
-    case 'Deploy':
-      return 'To ' + shortenAddress(transaction.contractAddress);
-    default:
-      return '';
-  }
-};
-
 export const getTxnFailureReason = (transaction: Transaction): string => {
   return transaction.executionStatus &&
     transaction.executionStatus.toLowerCase() ===
@@ -114,24 +101,30 @@ export const getTxnValues = (
   transaction: Transaction,
   decimals: number = 18,
   toUsdRate: number = 0,
+  tokenAddress: string,
 ) => {
   let txnValue = '0';
   let txnUsdValue = '0';
+  if (
+    transaction.accountCalls &&
+    transaction.accountCalls[tokenAddress] !== undefined
+  ) {
+    txnValue = ethers.utils.formatUnits(
+      // A transaction can have multiple contract calls with the same tokenAddress.
+      // Hence, it is necessary to sum the amount of all contract calls with the same tokenAddress.
+      transaction.accountCalls[tokenAddress].reduce((acc, call) => {
+        // When the contract function is `transfer`,
+        // there is a amount representing the transfer value of that contract call.
+        if (call.contractFuncName === ContractFuncName.Transfer) {
+          const value = BigInt(call.amount || '0');
+          acc += value;
+        }
+        return acc;
+      }, BigInt(0)),
+      decimals,
+    );
 
-  const txnName = getTxnName(transaction);
-  switch (txnName) {
-    case 'Send':
-    case 'Receive':
-      txnValue = ethers.utils.formatUnits(
-        transaction.contractCallData[
-          transaction.contractCallData.length - 2
-        ].toString(),
-        decimals,
-      );
-      txnUsdValue = (parseFloat(txnValue) * toUsdRate).toFixed(2);
-      break;
-    default:
-      break;
+    txnUsdValue = (parseFloat(txnValue) * toUsdRate).toFixed(2);
   }
 
   return { txnValue, txnUsdValue };

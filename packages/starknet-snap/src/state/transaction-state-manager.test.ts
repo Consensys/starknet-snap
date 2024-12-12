@@ -7,7 +7,7 @@ import {
 
 import { generateTransactions } from '../__tests__/helper';
 import type { V2Transaction } from '../types/snapState';
-import { TransactionDataVersion } from '../types/snapState';
+import { ContractFuncName, TransactionDataVersion } from '../types/snapState';
 import { PRELOADED_TOKENS } from '../utils/constants';
 import { mockAcccounts, mockState } from './__tests__/helper';
 import { StateManagerError } from './state-manager';
@@ -147,7 +147,7 @@ describe('TransactionStateManager', () => {
         chainId: legacyData.chainId,
         senderAddress: legacyData.senderAddress,
         contractAddress: legacyData.contractAddress,
-        contractFuncName: 'transfer',
+        contractFuncName: ContractFuncName.Transfer,
         contractCallData: ['0x123', '0x456'],
         executionStatus: legacyData.executionStatus,
         finalityStatus: legacyData.finalityStatus,

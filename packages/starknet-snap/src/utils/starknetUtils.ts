@@ -51,7 +51,7 @@ import type {
   SnapState,
   Transaction,
 } from '../types/snapState';
-import { TransactionType } from '../types/snapState';
+import { ContractFuncName, TransactionType } from '../types/snapState';
 import type {
   DeployAccountPayload,
   TransactionResponse,
@@ -596,10 +596,10 @@ export const getMassagedTransactions = async (
       let txContractFuncName = '';
       switch (txFuncSelector) {
         case bigIntTransferSelectorHex:
-          txContractFuncName = 'transfer';
+          txContractFuncName = ContractFuncName.Transfer;
           break;
         case bigIntUpgradeSelectorHex:
-          txContractFuncName = 'upgrade';
+          txContractFuncName = ContractFuncName.Upgrade;
           break;
         default:
           txContractFuncName = '';

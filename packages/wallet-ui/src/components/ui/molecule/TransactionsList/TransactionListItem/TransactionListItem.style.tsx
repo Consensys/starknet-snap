@@ -1,31 +1,32 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import styled from 'styled-components';
-import { TransactionStatusOptions } from 'types';
 import { theme } from 'theme/default';
 import { RoundedIcon } from 'components/ui/atom/RoundedIcon';
+import {
+  TransactionExecutionStatus,
+  TransactionFinalityStatus,
+} from 'starknet';
 
 interface ISpan {
-  status?: TransactionStatusOptions | string;
+  status?: string;
 }
 
 interface IIconeStyled {
   transactionname?: string;
 }
 
-const getStatusColor = (status?: TransactionStatusOptions | string) => {
+const getStatusColor = (status?: string) => {
   switch (status) {
-    case 'ACCEPTED ON L1':
-    case 'ACCEPTED ON L2':
-    case 'SUCCEEDED':
+    case TransactionFinalityStatus.ACCEPTED_ON_L1:
+    case TransactionFinalityStatus.ACCEPTED_ON_L2:
+    case TransactionExecutionStatus.SUCCEEDED:
       return theme.palette.success.dark;
-    case 'RECEIVED':
+    case TransactionFinalityStatus.RECEIVED:
       return theme.palette.info.main;
-    case 'REJECTED':
-    case 'NOT RECEIVED':
-    case 'REVERTED':
+    case TransactionFinalityStatus.NOT_RECEIVED:
+    case TransactionExecutionStatus.REJECTED:
+    case TransactionExecutionStatus.REVERTED:
       return theme.palette.error.main;
-    case 'PENDING':
-      return theme.palette.warning.main;
     default:
       return theme.palette.grey.grey1;
   }
