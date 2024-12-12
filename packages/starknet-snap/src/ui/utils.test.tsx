@@ -1,7 +1,11 @@
 import type { constants } from 'starknet';
 
 import { generateAccounts } from '../__tests__/helper';
-import type { Erc20Token, FormattedCallData } from '../types/snapState';
+import {
+  ContractFuncName,
+  type Erc20Token,
+  type FormattedCallData,
+} from '../types/snapState';
 import {
   DEFAULT_DECIMAL_PLACES,
   BlockIdentifierEnum,
@@ -138,7 +142,7 @@ describe('hasSufficientFundsForFee', () => {
     const calls: FormattedCallData[] = [];
     for (let i = 0; i < cnt; i++) {
       calls.push({
-        entrypoint: 'transfer',
+        entrypoint: ContractFuncName.Transfer,
         contractAddress: token.address,
         tokenTransferData: {
           amount,

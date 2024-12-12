@@ -5,6 +5,7 @@ import contractExample from '../__tests__/fixture/contract-example.json';
 import transactionExample from '../__tests__/fixture/transactionExample.json';
 import typedDataExample from '../__tests__/fixture/typedDataExample.json';
 import { generateTransactions } from '../__tests__/helper';
+import { ContractFuncName } from '../types/snapState';
 import {
   ACCOUNT_CLASS_HASH,
   CAIRO_VERSION,
@@ -394,7 +395,7 @@ describe('InvocationsStruct', () => {
       type: TransactionType.INVOKE,
       payload: {
         contractAddress: ETHER_SEPOLIA_TESTNET.address,
-        entrypoint: 'transfer',
+        entrypoint: ContractFuncName.Transfer,
       },
     },
     {
@@ -426,7 +427,7 @@ describe('InvocationsStruct', () => {
     {
       type: TransactionType.INVOKE,
       payload: {
-        entrypoint: 'transfer',
+        entrypoint: ContractFuncName.Transfer,
       },
     },
     {
@@ -502,7 +503,7 @@ describe('InvocationsStruct', () => {
       payload: [
         {
           contractAddress: ETHER_SEPOLIA_TESTNET.address,
-          entrypoint: 'transfer',
+          entrypoint: ContractFuncName.Transfer,
         },
       ],
     },
