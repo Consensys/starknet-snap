@@ -1,12 +1,12 @@
 import type { MutexInterface } from 'async-mutex';
 import { Mutex } from 'async-mutex';
-import type { WalletEventHandlers } from 'get-starknet-core';
+import type { AccountChangeEventHandler, NetworkChangeEventHandler, WalletEventHandlers } from 'get-starknet-core';
 import { type RpcMessage, type StarknetWindowObject } from 'get-starknet-core';
 import type { AccountInterface, ProviderInterface } from 'starknet';
 import { Provider } from 'starknet';
 
 import { MetaMaskAccount } from './accounts';
-import { RpcMethod, WalletIconMetaData } from './constants';
+import { RpcMethod, WalletEvent, WalletIconMetaData } from './constants';
 import {
   WalletSupportedSpecs,
   WalletSupportedWalletApi,
@@ -25,6 +25,14 @@ import { MetaMaskSnap } from './snap';
 import type { MetaMaskProvider, Network } from './type';
 import type { IStarknetWalletRpc } from './utils';
 import { WalletRpcError, WalletRpcErrorCode } from './utils/error';
+
+type CallbackFunction = (...args: any[]) => any;
+
+const resolver = async (func: CallbackFunction, arg1: string | string[], arg2?: string[]): Promise<any> => {
+  return new Promise((resolve) => {
+    resolve(func(arg1, arg2));
+  });
+};
 
 export class MetaMaskSnapWallet implements StarknetWindowObject {
   id: string;
@@ -54,6 +62,16 @@ export class MetaMaskSnapWallet implements StarknetWindowObject {
   #network: Network;
 
   lock: MutexInterface;
+
+  #pollingController: AbortController | undefined;
+
+  #accountChangeHandlers: Set<AccountChangeEventHandler> = new Set();
+
+  #networkChangeHandlers: Set<NetworkChangeEventHandler> = new Set();
+
+  static readonly pollingDelayMs = 100;
+
+  static readonly pollingTimeoutMs = 5000;
 
   // eslint-disable-next-line @typescript-eslint/naming-convention, no-restricted-globals
   static readonly snapId = process.env.SNAP_ID ?? 'npm:@consensys/starknet-snap';
@@ -196,6 +214,9 @@ export class MetaMaskSnapWallet implements StarknetWindowObject {
       this.#provider = undefined;
       // account is depends on address and provider, if network changes, address will update,
       // hence set account to undefine for reinitialization
+      // TODO : This should be removed. The walletAccount is created with the SWO as input.
+      // This means account is not managed from within the SWO but from outside.
+      // Event handling helps ensure that the correct address is set.
       this.#account = undefined;
     }
 
@@ -220,13 +241,117 @@ export class MetaMaskSnapWallet implements StarknetWindowObject {
     return true;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  on<Event extends keyof WalletEventHandlers>(_event: Event, _handleEvent: WalletEventHandlers[Event]): void {
-    // No operation for now
+  /**
+   * Subscribe the `accountsChanged` or `networkChanged` event.
+   *
+   * @param event - The event name ('accountsChanged' or 'networkChanged').
+   * @param handleEvent - The event handler function.
+   */
+  on<Event extends keyof WalletEventHandlers>(event: Event, handleEvent: WalletEventHandlers[Event]): void {
+    if (event === WalletEvent.AccountsChanged) {
+      this.#accountChangeHandlers.add(handleEvent as AccountChangeEventHandler);
+    } else if (event === WalletEvent.NetworkChanged) {
+      this.#networkChangeHandlers.add(handleEvent as NetworkChangeEventHandler);
+    } else {
+      throw new Error(`Unsupported event: ${String(event)}`);
+    }
+    if (!this.#pollingController) {
+      this.#startPolling();
+    }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  off<Event extends keyof WalletEventHandlers>(_event: Event, _handleEvent?: WalletEventHandlers[Event]): void {
-    // No operation for now
+  /**
+   * Un-subscribe the `accountsChanged` or `networkChanged` event for a given handler.
+   *
+   * @param event - The event name ('accountsChanged' or 'networkChanged').
+   * @param handleEvent - The event handler function to un-subscribe.
+   */
+  off<Event extends keyof WalletEventHandlers>(event: Event, handleEvent: WalletEventHandlers[Event]): void {
+    if (event === WalletEvent.AccountsChanged) {
+      this.#accountChangeHandlers.delete(handleEvent as AccountChangeEventHandler);
+    } else if (event === WalletEvent.NetworkChanged) {
+      this.#networkChangeHandlers.delete(handleEvent as NetworkChangeEventHandler);
+    } else {
+      throw new Error(`Unsupported event: ${String(event)}`);
+    }
+    if (this.#accountChangeHandlers.size + this.#networkChangeHandlers.size === 0) {
+      this.#stopPolling();
+    }
+  }
+
+  /**
+   * Polling function for detecting changes with a maximum delay.
+   * The function balances between responsiveness (handling changes as quickly as possible)
+   * and efficiency (ensuring a controlled polling frequency).
+   *
+   * 1. Polling operation: Runs with a timeout to prevent infinite hangs.
+   * 2. Minimum delay: Introduces a small delay (e.g., 100ms) between iterations
+   * to avoid excessive resource usage while still scanning for updates promptly.
+   */
+  #pollingFunction = async (): Promise<void> => {
+    if (!this.#pollingController) {
+      return; // Abort if the polling controller is not initialized
+    }
+    const { signal } = this.#pollingController;
+
+    while (!signal.aborted) {
+      // Early exit if there are no handlers left
+      if (this.#accountChangeHandlers.size + this.#networkChangeHandlers.size === 0) {
+        this.#stopPolling();
+        return;
+      }
+
+      const previousNetwork = this.#chainId;
+      const previousAddress = this.#selectedAddress;
+
+      try {
+        // Perform the polling operation with a timeout.
+        // Ensures the operation completes within a maximum time frame to avoid infinite hangs.
+        // If `this.#init()` takes too long, the timeout will reject and continue to the next iteration.
+        await Promise.race([
+          // Fetch network, assign address and chainId for thread safe.
+          this.#init(),
+          new Promise((_, reject) =>
+            // Timeout after `MetaMaskSnapWallet.pollingTimeoutMs`.
+            setTimeout(() => reject(new Error('Polling timeout exceeded')), MetaMaskSnapWallet.pollingTimeoutMs),
+          ),
+        ]);
+
+        // Check for network change
+        if (previousNetwork !== this.#chainId) {
+          await Promise.allSettled(
+            Array.from(this.#networkChangeHandlers).map(async (callback) =>
+              resolver(callback, this.#chainId, [this.#selectedAddress]),
+            ),
+          );
+        }
+
+        // Check for account change
+        if (previousAddress !== this.#selectedAddress) {
+          await Promise.allSettled(
+            Array.from(this.#accountChangeHandlers).map(async (callback) =>
+              resolver(callback, [this.#selectedAddress]),
+            ),
+          );
+        }
+      } catch (_error) {
+        // Silently handle errors to avoid breaking the loop
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, MetaMaskSnapWallet.pollingDelayMs));
+    }
+  };
+
+  #startPolling(): void {
+    this.#pollingController = new AbortController();
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
+    this.#pollingFunction();
+  }
+
+  #stopPolling(): void {
+    if (this.#pollingController) {
+      this.#pollingController.abort();
+      this.#pollingController = undefined;
+    }
   }
 }
