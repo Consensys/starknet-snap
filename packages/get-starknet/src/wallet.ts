@@ -65,9 +65,9 @@ export class MetaMaskSnapWallet implements StarknetWindowObject {
 
   #pollingController: AbortController | undefined;
 
-  #accountChangeHandlers: AccountChangeEventHandler[] = [];
+  #accountChangeHandlers: Set<AccountChangeEventHandler> = new Set();
 
-  #networkChangeHandlers: NetworkChangeEventHandler[] = [];
+  #networkChangeHandlers: Set<NetworkChangeEventHandler> = new Set();
 
   static readonly pollingDelayMs = 100;
 
@@ -249,9 +249,9 @@ export class MetaMaskSnapWallet implements StarknetWindowObject {
    */
   on<Event extends keyof WalletEventHandlers>(event: Event, handleEvent: WalletEventHandlers[Event]): void {
     if (event === WalletEvent.AccountsChanged) {
-      this.#accountChangeHandlers.push(handleEvent as AccountChangeEventHandler);
+      this.#accountChangeHandlers.add(handleEvent as AccountChangeEventHandler);
     } else if (event === WalletEvent.NetworkChanged) {
-      this.#networkChangeHandlers.push(handleEvent as NetworkChangeEventHandler);
+      this.#networkChangeHandlers.add(handleEvent as NetworkChangeEventHandler);
     } else {
       throw new Error(`Unsupported event: ${String(event)}`);
     }
@@ -268,13 +268,13 @@ export class MetaMaskSnapWallet implements StarknetWindowObject {
    */
   off<Event extends keyof WalletEventHandlers>(event: Event, handleEvent: WalletEventHandlers[Event]): void {
     if (event === WalletEvent.AccountsChanged) {
-      this.#accountChangeHandlers = this.#accountChangeHandlers.filter((handler) => handler !== handleEvent);
+      this.#accountChangeHandlers.delete(handleEvent as AccountChangeEventHandler);
     } else if (event === WalletEvent.NetworkChanged) {
-      this.#networkChangeHandlers = this.#networkChangeHandlers.filter((handler) => handler !== handleEvent);
+      this.#networkChangeHandlers.delete(handleEvent as NetworkChangeEventHandler);
     } else {
       throw new Error(`Unsupported event: ${String(event)}`);
     }
-    if (this.#accountChangeHandlers.length + this.#networkChangeHandlers.length === 0) {
+    if (this.#accountChangeHandlers.size + this.#networkChangeHandlers.size === 0) {
       this.#stopPolling();
     }
   }
@@ -295,6 +295,12 @@ export class MetaMaskSnapWallet implements StarknetWindowObject {
     const { signal } = this.#pollingController;
 
     while (!signal.aborted) {
+      // Early exit if there are no handlers left
+      if (this.#accountChangeHandlers.size + this.#networkChangeHandlers.size === 0) {
+        this.#stopPolling();
+        return;
+      }
+
       const previousNetwork = this.#chainId;
       const previousAddress = this.#selectedAddress;
 
@@ -314,7 +320,7 @@ export class MetaMaskSnapWallet implements StarknetWindowObject {
         // Check for network change
         if (previousNetwork !== this.#chainId) {
           await Promise.allSettled(
-            this.#networkChangeHandlers.map(async (callback) =>
+            Array.from(this.#networkChangeHandlers).map(async (callback) =>
               resolver(callback, this.#chainId, [this.#selectedAddress]),
             ),
           );
@@ -323,11 +329,13 @@ export class MetaMaskSnapWallet implements StarknetWindowObject {
         // Check for account change
         if (previousAddress !== this.#selectedAddress) {
           await Promise.allSettled(
-            this.#accountChangeHandlers.map(async (callback) => resolver(callback, [this.#selectedAddress])),
+            Array.from(this.#accountChangeHandlers).map(async (callback) =>
+              resolver(callback, [this.#selectedAddress]),
+            ),
           );
         }
       } catch (_error) {
-        // Not to throw an error, to avoid breaking the event subscription
+        // Silently handle errors to avoid breaking the loop
       }
 
       await new Promise((resolve) => setTimeout(resolve, MetaMaskSnapWallet.pollingDelayMs));
