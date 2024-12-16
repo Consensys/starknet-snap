@@ -6,7 +6,7 @@ If your funds are currently stuck, follow these steps to resolve the issue by re
 1. Open your wallet application.
 2. Navigate to the installed Snaps section.
 3. Find the StarkNet Snap and select it.
-4. Click on “Uninstall” or “Remove” to uninstall the StarkNet Snap.
+4. Click on "Uninstall" or "Remove" to uninstall the StarkNet Snap.
 
 ## Step 2: Access the Dev StarkNet Snap Website to Install the Old StarkNet Snap
 1. Go to the dev environment here: [https://staging.snaps.consensys.io/starknet](https://staging.snaps.consensys.io/starknet)
