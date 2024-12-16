@@ -115,7 +115,7 @@ jobs:
         env:
           SNAP_ENV: ${{ needs.prepare-deployment.outputs.ENV }}
           VERSION: ${{ needs.prepare-deployment.outputs.VERSION }}
-          VOYAGER_API_KEY: ${{ secrets.VOYAGER_API_KEY }}
+          STARKSCAN_API_KEY: ${{ secrets.STARKSCAN_API_KEY }}
           ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
           GET_STARKNET_PUBLIC_PATH: ${{ needs.prepare-deployment.outputs.GET_STARKNET_PUBLIC_PATH }}
           LOG_LEVEL: ${{ needs.prepare-deployment.outputs.LOG_LEVEL }}
