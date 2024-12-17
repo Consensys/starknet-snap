@@ -72,7 +72,7 @@ jobs:
           SNAP_ENV: ${{ needs.prepare-deployment.outputs.ENV }}
           VERSION: ${{ needs.prepare-deployment.outputs.VERSION }}
           LOG_LEVEL: ${{ needs.prepare-deployment.outputs.LOG_LEVEL }}
-          VOYAGER_API_KEY: ${{ secrets.VOYAGER_API_KEY }}
+          STARKSCAN_API_KEY: ${{ secrets.STARKSCAN_API_KEY }}
           ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
       - name: Cache Build
         uses: actions/cache@v3
