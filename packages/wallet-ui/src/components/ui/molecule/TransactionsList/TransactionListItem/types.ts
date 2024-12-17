@@ -29,7 +29,7 @@ export const getTxnName = (
       ) {
         for (const call of transaction.accountCalls[contractAddress]) {
           if (call.contractFuncName === ContractFuncName.Transfer) {
-            return 'Receive';
+            return 'Send';
           }
           if (call.contractFuncName === ContractFuncName.Upgrade) {
             return 'Upgrade Account';
