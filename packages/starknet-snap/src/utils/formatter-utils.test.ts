@@ -10,10 +10,58 @@ import {
   mapDeprecatedParams,
   dayToSec,
   msToSec,
+  normalizeStarknetHex,
 } from './formatter-utils';
 import { logger } from './logger';
 
 jest.mock('./logger');
+
+describe('normalizeStarkNetHex', () => {
+  it('pads short hex values with leading zeros to 66 characters', () => {
+    const input = '0x1a2b3c';
+    const expected =
+      '0x00000000000000000000000000000000000000000000000000000000001a2b3c';
+
+    const result = normalizeStarknetHex(input);
+
+    expect(result).toStrictEqual(expected);
+  });
+
+  it('returns the input unchanged if already normalized to 66 characters', () => {
+    const input =
+      '0x06e175889c70810ef42f20d27c3f04b8efd75658b05e3f673b2d383f84edc33f';
+    const expected = input;
+
+    const result = normalizeStarknetHex(input);
+
+    expect(result).toStrictEqual(expected);
+  });
+
+  it('throws an error if the input does not start with "0x"', () => {
+    const input = '1a2b3c';
+
+    expect(() => normalizeStarknetHex(input)).toThrow(
+      'Invalid input: Hex value must start with "0x"',
+    );
+  });
+
+  it('throws an error if the input is longer than 64 hex characters (excluding 0x)', () => {
+    const input =
+      '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1';
+
+    expect(() => normalizeStarknetHex(input)).toThrow(
+      'Invalid input: Hex value is longer than 64 characters',
+    );
+  });
+
+  it('handles an empty string properly (throws an error)', () => {
+    const input = '';
+
+    expect(() => normalizeStarknetHex(input)).toThrow(
+      'Invalid input: Hex value must start with "0x"',
+    );
+  });
+});
 
 describe('mapDeprecatedParams', () => {
   it('maps deprecated parameters to their new equivalents', () => {

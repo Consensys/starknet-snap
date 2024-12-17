@@ -85,8 +85,8 @@ export function getRandomData<DataType>(data: DataType[]) {
   return data[getRandomValue(data.length)];
 }
 
-const SixtyThreeHexInBigInt = BigInt(
-  '1000000000000000000000000000000000000000000000000000000000000000000000000000',
+const SixtyFourHexInBigInt = BigInt(
+  '10000000000000000000000000000000000000000000000000000000000000000000000000000',
 );
 
 /**
@@ -203,7 +203,7 @@ export async function generateAccounts(
 export function generateTransactions({
   chainId,
   address,
-  baseTxnHashInBigInt = SixtyThreeHexInBigInt,
+  baseTxnHashInBigInt = SixtyFourHexInBigInt,
   contractAddresses = PRELOADED_TOKENS.map((token) => token.address),
   txnTypes = Object.values(TransactionType),
   finalityStatuses = Object.values(TransactionFinalityStatus),
@@ -420,7 +420,7 @@ export function generateInvokeTransaction({
  * @param base - The base number to generate the transaction hash.
  * @returns A transaction hash.
  * */
-export function getTransactionHash(base = SixtyThreeHexInBigInt) {
+export function getTransactionHash(base = SixtyFourHexInBigInt) {
   return `0x` + base.toString(16);
 }
 

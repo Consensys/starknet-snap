@@ -76,7 +76,7 @@ import {
 } from './constants';
 import { DeployRequiredError, UpgradeRequiredError } from './exceptions';
 import { ConsolidateFees } from './fee';
-import { hexToString } from './formatter-utils';
+import { hexToString, normalizeStarknetHex } from './formatter-utils';
 import { getAddressKey } from './keyPair';
 import { logger } from './logger';
 import { toJson } from './serializer';
@@ -708,9 +708,7 @@ export const getAccContractAddressAndCallData = (publicKey) => {
     0,
   );
 
-  if (address.length < 66) {
-    address = address.replace('0x', `0x${'0'.repeat(66 - address.length)}`);
-  }
+  address = normalizeStarknetHex(address);
   return {
     address,
     callData,
@@ -733,9 +731,7 @@ export const getAccContractAddressAndCallDataLegacy = (publicKey) => {
     callData,
     0,
   );
-  if (address.length < 66) {
-    address = address.replace('0x', `0x${'0'.repeat(66 - address.length)}`);
-  }
+  address = normalizeStarknetHex(address);
   return {
     address,
     callData,
