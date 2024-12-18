@@ -708,7 +708,7 @@ export const getAccContractAddressAndCallData = (publicKey) => {
     0,
   );
 
-  address = validateAndParseAddress(address);
+  address = _validateAndParseAddress(address);
   return {
     address,
     callData,
@@ -731,7 +731,7 @@ export const getAccContractAddressAndCallDataLegacy = (publicKey) => {
     callData,
     0,
   );
-  address = validateAndParseAddress(address);
+  address = _validateAndParseAddress(address);
   return {
     address,
     callData,
