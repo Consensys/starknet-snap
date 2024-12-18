@@ -168,9 +168,7 @@ export async function generateAccounts(
       0,
     );
 
-    if (address.length < 66) {
-      address = address.replace('0x', `0x${'0'.repeat(66 - address.length)}`);
-    }
+    address = validateAndParseAddress(address);
 
     accounts.push({
       addressSalt: pubKey,
