@@ -1,7 +1,4 @@
-import {
-  TransactionFinalityStatus,
-  TransactionType,
-} from 'starknet';
+import { TransactionFinalityStatus, TransactionType } from 'starknet';
 
 import { TransactionStateManager } from '../state/transaction-state-manager';
 import type { Network, Transaction, V2Transaction } from '../types/snapState';

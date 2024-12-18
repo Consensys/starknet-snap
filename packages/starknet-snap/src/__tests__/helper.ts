@@ -526,7 +526,9 @@ export function generateStarkScanTransactions({
     newTx.sender_address = address;
     newTx.account_calls[0].caller_address = address;
     newTx.timestamp = transactionStartFrom;
-    newTx.transaction_hash = validateAndParseAddress(`0x${transactionStartFrom.toString(16)}`);
+    newTx.transaction_hash = validateAndParseAddress(
+      `0x${transactionStartFrom.toString(16)}`,
+    );
     transactionStartFrom -= timestampReduction;
     txs.push(newTx as unknown as StarkScanTransaction);
   }
@@ -537,7 +539,9 @@ export function generateStarkScanTransactions({
       account_calls: [...cairo0DeployTx.account_calls],
     };
     deployTx.contract_address = address;
-    deployTx.transaction_hash = validateAndParseAddress(`0x${transactionStartFrom.toString(16)}`);
+    deployTx.transaction_hash = validateAndParseAddress(
+      `0x${transactionStartFrom.toString(16)}`,
+    );
     txs.push(deployTx as unknown as StarkScanTransaction);
   }
 
