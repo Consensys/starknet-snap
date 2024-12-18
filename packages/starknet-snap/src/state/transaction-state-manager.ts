@@ -310,7 +310,7 @@ export class TransactionStateManager extends StateManager<Transaction> {
         }
         state.transactions.push({
           ...data,
-          // safe-guard to ensure the txnHash is convert to expected format
+          // safe-guard to ensure the txnHash is converted to the expected format
           txnHash: validateAndParseAddress(data.txnHash),
         });
       });
