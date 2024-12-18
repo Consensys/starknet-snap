@@ -1,7 +1,6 @@
 import {
   TransactionFinalityStatus,
   TransactionType,
-  validateAndParseAddress,
 } from 'starknet';
 
 import { TransactionStateManager } from '../state/transaction-state-manager';
@@ -118,14 +117,14 @@ export class TransactionService {
       tillToInDays,
     )) {
       transactionsOnChain.push(tx);
-      transactionsOnChainSet.add(validateAndParseAddress(tx.txnHash));
+      transactionsOnChainSet.add(tx.txnHash);
     }
     for await (const tx of this.getTransactionsOnState(
       address,
       contractAddress,
     )) {
       // eslint-disable-next-line no-negated-condition
-      if (!transactionsOnChainSet.has(validateAndParseAddress(tx.txnHash))) {
+      if (!transactionsOnChainSet.has(tx.txnHash)) {
         transactionsOnState.push(tx);
       } else {
         transactionsToRemove.push(tx.txnHash);
