@@ -3,6 +3,7 @@ import {
   constants,
   TransactionFinalityStatus,
   TransactionType,
+  validateAndParseAddress,
 } from 'starknet';
 
 import { FeeToken } from '../types/snapApi';
@@ -155,7 +156,7 @@ export function newInvokeTransaction({
   txnVersion: number;
 }): V2Transaction {
   return {
-    txnHash,
+    txnHash: validateAndParseAddress(txnHash),
     txnType: TransactionType.INVOKE,
     chainId,
     senderAddress,
@@ -196,7 +197,7 @@ export function newDeployTransaction({
   txnVersion: number;
 }): V2Transaction {
   return {
-    txnHash,
+    txnHash: validateAndParseAddress(txnHash),
     txnType: TransactionType.DEPLOY_ACCOUNT,
     chainId,
     senderAddress,

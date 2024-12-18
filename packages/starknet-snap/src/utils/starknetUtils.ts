@@ -708,9 +708,7 @@ export const getAccContractAddressAndCallData = (publicKey) => {
     0,
   );
 
-  if (address.length < 66) {
-    address = address.replace('0x', `0x${'0'.repeat(66 - address.length)}`);
-  }
+  address = _validateAndParseAddress(address);
   return {
     address,
     callData,
@@ -733,9 +731,7 @@ export const getAccContractAddressAndCallDataLegacy = (publicKey) => {
     callData,
     0,
   );
-  if (address.length < 66) {
-    address = address.replace('0x', `0x${'0'.repeat(66 - address.length)}`);
-  }
+  address = _validateAndParseAddress(address);
   return {
     address,
     callData,
