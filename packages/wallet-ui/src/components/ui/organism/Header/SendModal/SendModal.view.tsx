@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { AmountInput } from 'components/ui/molecule/AmountInput';
 import { SendSummaryModal } from '../SendSummaryModal';
 import {
@@ -46,6 +46,18 @@ export const SendModalView = ({ closeModal }: Props) => {
   const [resolvedAddress, setResolvedAddress] = useState('');
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {}, [fields]);
+
+  const handleBack = (amount: string, address: string) => {
+    setSummaryModalOpen(false);
+
+    setFields((prevFields) => ({
+      ...prevFields,
+      amount: amount,
+      address: address,
+    }));
+  };
 
   const handleChange = (fieldName: string, fieldValue: string) => {
     //Check if input amount does not exceed user balance
@@ -142,6 +154,7 @@ export const SendModalView = ({ closeModal }: Props) => {
               label="To"
               placeholder="Paste recipient address or .stark name here"
               onChange={(value) => handleChange('address', value.target.value)}
+              value={fields.address}
               disableValidate
               validateError={errors.address}
             />
@@ -157,6 +170,7 @@ export const SendModalView = ({ closeModal }: Props) => {
             <AmountInput
               label="Amount"
               onChangeCustom={(value) => handleChange('amount', value)}
+              value={fields.amount}
               error={errors.amount !== '' ? true : false}
               helperText={errors.amount}
               decimalsMax={wallet.erc20TokenBalanceSelected.decimals}
@@ -198,6 +212,7 @@ export const SendModalView = ({ closeModal }: Props) => {
       {summaryModalOpen && (
         <SendSummaryModal
           closeModal={closeModal}
+          handleBack={handleBack}
           address={resolvedAddress}
           amount={fields.amount}
           chainId={fields.chainId}
