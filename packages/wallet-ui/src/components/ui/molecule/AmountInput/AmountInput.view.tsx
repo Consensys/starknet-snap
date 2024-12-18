@@ -1,4 +1,4 @@
-import { KeyboardEvent, useEffect } from 'react';
+import { KeyboardEvent, useCallback, useEffect } from 'react';
 import { InputHTMLAttributes, useRef, useState } from 'react';
 import { HelperText } from '../../atom/HelperText';
 import { Label } from '../../atom/Label';
@@ -20,6 +20,7 @@ interface Props extends InputHTMLAttributes<HTMLInputElement> {
   error?: boolean;
   helperText?: string;
   label?: string;
+  value?: string;
   decimalsMax?: number;
   asset: Erc20TokenBalance;
   onChangeCustom?: (value: string) => void;
@@ -30,6 +31,7 @@ export const AmountInputView = ({
   error,
   helperText,
   label,
+  value,
   decimalsMax = 18,
   asset,
   onChangeCustom,
@@ -37,55 +39,46 @@ export const AmountInputView = ({
 }: Props) => {
   const [focused, setFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const [inputValue, setInputValue] = useState(value || ''); // Manage the input's value
   const [totalPrice, setTotalPrice] = useState('');
   const [usdMode, setUsdMode] = useState(false);
 
-  const fetchTotalPrice = () => {
-    const inputValue = inputRef.current?.value || '';
+  const fetchTotalPrice = useCallback(() => {
     if (asset.usdPrice && inputValue && inputValue !== '.') {
       const inputFloat = parseFloat(inputValue);
       setTotalPrice(getAmountPrice(asset, inputFloat, usdMode));
     } else {
       setTotalPrice('');
     }
-  };
+  }, [asset, inputValue, usdMode]);
 
-  const resizeInput = () => {
-    if (inputRef.current !== null)
-      inputRef.current.style.width =
-        inputRef.current.value.length * 8 + 6 + 'px';
-  };
+  const resizeInput = useCallback(() => {
+    if (inputRef.current !== null) {
+      inputRef.current.style.width = inputValue.length * 8 + 6 + 'px';
+    }
+  }, [inputValue]);
 
-  const triggerOnChange = () => {
-    //If we are in USD mode we sent the eth amount as the value
-    let valueToSend = inputRef.current?.value || '';
+  const triggerOnChange = (newValue: string) => {
+    setInputValue(newValue);
     if (onChangeCustom) {
-      if (
-        usdMode &&
-        asset.usdPrice &&
-        inputRef.current?.value &&
-        inputRef.current?.value !== '.'
-      ) {
-        const inputFloat = parseFloat(inputRef.current.value);
+      let valueToSend = newValue;
+      if (usdMode && asset.usdPrice && newValue && newValue !== '.') {
+        const inputFloat = parseFloat(newValue);
         valueToSend = getAmountPrice(asset, inputFloat, usdMode);
       }
       onChangeCustom(valueToSend);
     }
   };
 
-  const handleOnKeyUp = () => {
-    //Resize the input depending on content
+  useEffect(() => {
+    // Adjust the input size whenever the value changes
     resizeInput();
-    inputRef.current && fetchTotalPrice();
-  };
-
+  }, [resizeInput]);
   const handleOnKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
     //Only accept numeric and decimals
     if (
       (!/[0-9]|\./.test(event.key) ||
-        (event.key === '.' &&
-          inputRef.current &&
-          inputRef.current.value.includes('.'))) &&
+        (event.key === '.' && inputValue.includes('.'))) &&
       !isSpecialInputKey(event)
     ) {
       event.preventDefault();
@@ -93,9 +86,9 @@ export const AmountInputView = ({
     }
 
     //Check decimals
-    if (inputRef.current && inputRef.current.value.includes('.')) {
-      const decimalIndex = inputRef.current.value.indexOf('.');
-      const decimals = inputRef.current.value.substring(decimalIndex);
+    if (inputValue.includes('.')) {
+      const decimalIndex = inputValue.indexOf('.');
+      const decimals = inputValue.substring(decimalIndex);
       if (decimals.length >= decimalsMax && !isSpecialInputKey(event)) {
         event.preventDefault();
         return;
@@ -110,29 +103,29 @@ export const AmountInputView = ({
   };
 
   const handleMaxClick = () => {
-    if (inputRef.current && asset.usdPrice) {
+    if (value && asset.usdPrice) {
       const amountStr = ethers.utils
         .formatUnits(asset.amount, asset.decimals)
         .toString();
       const amountFloat = parseFloat(amountStr);
-      inputRef.current.value = usdMode
+      const value = usdMode
         ? getAmountPrice(asset, amountFloat, false)
         : amountStr;
       fetchTotalPrice();
       resizeInput();
-      triggerOnChange();
+      triggerOnChange(value);
     }
   };
 
   useEffect(() => {
-    if (inputRef.current?.value && inputRef.current?.value !== '.') {
-      inputRef.current.value = totalPrice;
-      fetchTotalPrice();
-      triggerOnChange();
-      resizeInput();
+    if (value !== undefined) {
+      setInputValue(value);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [usdMode]);
+  }, [value]);
+
+  useEffect(() => {
+    fetchTotalPrice();
+  }, [fetchTotalPrice]);
 
   return (
     <Wrapper>
@@ -150,14 +143,14 @@ export const AmountInputView = ({
         <Left>
           <Input
             error={error}
+            value={inputValue}
             disabled={disabled}
             focused={focused}
             onFocus={() => setFocused(true)}
             onBlur={() => setFocused(false)}
             ref={inputRef}
-            onKeyUp={() => handleOnKeyUp()}
             onKeyDown={(event) => handleOnKeyDown(event)}
-            onChange={(event) => triggerOnChange()}
+            onChange={(event) => triggerOnChange(event.target.value)}
             {...otherProps}
           />
           {!usdMode && (
