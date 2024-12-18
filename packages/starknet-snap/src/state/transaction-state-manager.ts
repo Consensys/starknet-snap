@@ -2,6 +2,7 @@ import type { constants, TransactionType } from 'starknet';
 import {
   TransactionFinalityStatus,
   TransactionExecutionStatus,
+  validateAndParseAddress,
 } from 'starknet';
 import { assert, enums, number } from 'superstruct';
 
@@ -307,7 +308,11 @@ export class TransactionStateManager extends StateManager<Transaction> {
         if (dataInState) {
           throw new Error(`Transaction already exist`);
         }
-        state.transactions.push(data);
+        state.transactions.push({
+          ...data,
+          // safe-guard to ensure the txnHash is converted to the expected format
+          txnHash: validateAndParseAddress(data.txnHash),
+        });
       });
     } catch (error) {
       throw new StateManagerError(error.message);

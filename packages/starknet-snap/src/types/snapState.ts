@@ -1,11 +1,11 @@
 import type {
   RawCalldata,
-  TransactionType as StarkNetTransactionType,
-  TransactionExecutionStatus,
-  TransactionFinalityStatus,
   EstimateFee,
   TransactionType as StarknetTransactionType,
 } from 'starknet';
+import type { Infer } from 'superstruct';
+
+import type { TransactionStruct } from '../utils';
 
 /* eslint-disable */
 export type SnapState = {
@@ -32,7 +32,15 @@ export type FormattedCallData = {
   tokenTransferData?: TokenTransferData;
 };
 
-type ResourceBounds = Pick<EstimateFee, 'resourceBounds'>['resourceBounds'];
+export type ResourceBounds = Pick<
+  EstimateFee,
+  'resourceBounds'
+>['resourceBounds'];
+
+export type ResourceBoundsInBigInt = {
+  l1_gas: { max_amount: bigint; max_price_per_unit: bigint };
+  l2_gas: { max_amount: bigint; max_price_per_unit: bigint };
+};
 
 export type TransactionRequest = {
   id: string;
@@ -44,7 +52,7 @@ export type TransactionRequest = {
   networkName: string;
   maxFee: string;
   calls: FormattedCallData[];
-  resourceBounds: ResourceBounds[];
+  resourceBounds: ResourceBounds;
   selectedFeeToken: string;
   includeDeploy: boolean;
 };
@@ -152,24 +160,7 @@ export enum ContractFuncName {
   Transfer = 'transfer',
 }
 
-export type V2Transaction = {
-  txnHash: string; // in hex
-  txnType: StarkNetTransactionType;
-  chainId: string; // in hex
-  senderAddress: string; // in hex
-  contractAddress: string; // in hex
-  executionStatus?: TransactionExecutionStatus | string;
-  finalityStatus?: TransactionFinalityStatus | string;
-  failureReason: string;
-  timestamp: number;
-  maxFee?: string | null;
-  actualFee?: string | null;
-  // using Record<string, TranscationAccountCall[]> to support O(1) searching
-  accountCalls?: Record<string, TranscationAccountCall[]> | null;
-  version: number;
-  // Snap data Version to support backward compatibility , migration.
-  dataVersion: TransactionDataVersion.V2;
-};
+export type V2Transaction = Infer<typeof TransactionStruct>;
 
 // FIXME: temp solution for backward compatibility before StarkScan implemented in get transactions
 export type Transaction =

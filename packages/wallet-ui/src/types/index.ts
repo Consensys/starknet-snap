@@ -1,19 +1,30 @@
 import { BigNumber } from 'ethers';
 
+type AccountCall = {
+  contract: string; // HexStruct resolves to a string in this context
+  contractFuncName: string;
+  contractCallData: string[];
+  recipient?: string;
+  amount?: string;
+};
+
+type AccountCalls = Record<string, AccountCall[]> | null;
+
 export type Transaction = {
   txnHash: string; // in hex
   txnType: string;
   chainId: string; // in hex
   senderAddress: string; // in hex
   contractAddress: string; // in hex
-  contractFuncName: string;
-  contractCallData: string[] | number[];
-  status?: TransactionStatus | string;
-  executionStatus?: TransactionStatus | string;
-  finalityStatus?: TransactionStatus | string;
+  executionStatus: TransactionStatus | string;
+  finalityStatus: TransactionStatus | string;
   failureReason: string;
-  eventIds: string[];
+  actualFee: string | null;
+  maxFee: string | null;
   timestamp: number;
+  accountCalls: AccountCalls;
+  version: number;
+  dataVersion: string;
 };
 
 export type Account = {
@@ -40,27 +51,20 @@ export interface Erc20TokenBalance extends Erc20Token {
   amount: BigNumber;
   usdPrice?: number;
 }
-export type TransactionStatusOptions =
-  | 'Received'
-  | 'Pending'
-  | 'Accepted on L2'
-  | 'Accepted on L1'
-  | 'Rejected'
-  | 'Not Received';
-
-export enum VoyagerTransactionType { // for retrieving txns from Voyager
-  DEPLOY = 'deploy',
-  DEPLOY_ACCOUNT = 'deploy_account',
-  INVOKE = 'invoke',
-}
 
 export enum TransactionStatus { // for retrieving txn from Starknet feeder gateway
+  NOT_RECEIVED = 'NOT_RECEIVED',
   RECEIVED = 'RECEIVED',
-  PENDING = 'PENDING',
   ACCEPTED_ON_L2 = 'ACCEPTED_ON_L2',
   ACCEPTED_ON_L1 = 'ACCEPTED_ON_L1',
-  NOT_RECEIVED = 'NOT_RECEIVED',
   REJECTED = 'REJECTED',
+  REVERTED = 'REVERTED',
+  SUCCEEDED = 'SUCCEEDED',
+}
+
+export enum ContractFuncName {
+  Upgrade = 'upgrade',
+  Transfer = 'transfer',
 }
 
 export enum BalanceType {

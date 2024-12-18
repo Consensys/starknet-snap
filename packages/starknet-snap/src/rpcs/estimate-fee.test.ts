@@ -2,13 +2,15 @@ import type { Invocations } from 'starknet';
 import { constants, TransactionType } from 'starknet';
 import type { Infer } from 'superstruct';
 
-import { generateEstimateFeesResponse } from '../__tests__/helper';
-import { FeeTokenUnit } from '../types/snapApi';
+import callsExamples from '../__tests__/fixture/callsExamples.json';
 import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../utils/constants';
 import { InvalidRequestParamsError } from '../utils/exceptions';
-import * as starknetUtils from '../utils/starknetUtils';
 import type { TxVersionStruct } from '../utils/superstruct';
-import { mockAccount, prepareMockAccount } from './__tests__/helper';
+import {
+  mockAccount,
+  mockGetEstimatedFeesResponse,
+  prepareMockAccount,
+} from './__tests__/helper';
 import { estimateFee } from './estimate-fee';
 import type { EstimateFeeParams } from './estimate-fee';
 
@@ -29,12 +31,7 @@ const prepareMockEstimateFee = ({
   const invocations: Invocations = [
     {
       type: TransactionType.INVOKE,
-      payload: {
-        contractAddress:
-          '0x00b28a089e7fb83debee4607b6334d687918644796b47d9e9e38ea8213833137',
-        entrypoint: 'functionName',
-        calldata: ['1', '1'],
-      },
+      payload: callsExamples.singleCall.calls,
     },
   ];
 
@@ -45,20 +42,13 @@ const prepareMockEstimateFee = ({
     details: { version },
   } as unknown as EstimateFeeParams;
 
-  const estimateResults = generateEstimateFeesResponse();
-
-  const estimateBulkFeeRespMock = {
-    suggestedMaxFee: BigInt(1000000000000000).toString(10),
-    overallFee: BigInt(1500000000000000).toString(10),
-    unit: FeeTokenUnit.ETH,
-    includeDeploy,
-    estimateResults,
+  return {
+    invocations,
+    request,
+    ...mockGetEstimatedFeesResponse({
+      includeDeploy,
+    }),
   };
-
-  const getEstimatedFeesSpy = jest.spyOn(starknetUtils, 'getEstimatedFees');
-  getEstimatedFeesSpy.mockResolvedValue(estimateBulkFeeRespMock);
-
-  return { estimateBulkFeeRespMock, invocations, request, getEstimatedFeesSpy };
 };
 
 describe('estimateFee', () => {
@@ -73,13 +63,21 @@ describe('estimateFee', () => {
     const chainId = constants.StarknetChainId.SN_SEPOLIA;
     const account = await mockAccount(chainId);
     prepareMockAccount(account, state);
-    const { request, getEstimatedFeesSpy, estimateBulkFeeRespMock } =
-      prepareMockEstimateFee({
-        includeDeploy: false,
-        chainId,
-        address: account.address,
-        version: constants.TRANSACTION_VERSION.V1,
-      });
+    const {
+      request,
+      getEstimatedFeesSpy,
+      getEstimatedFeesResponse: {
+        includeDeploy,
+        overallFee,
+        suggestedMaxFee,
+        unit,
+      },
+    } = prepareMockEstimateFee({
+      includeDeploy: false,
+      chainId,
+      address: account.address,
+      version: constants.TRANSACTION_VERSION.V1,
+    });
 
     const result = await estimateFee.execute(request);
 
@@ -94,10 +92,10 @@ describe('estimateFee', () => {
       },
     );
     expect(result).toStrictEqual({
-      includeDeploy: estimateBulkFeeRespMock.includeDeploy,
-      overallFee: estimateBulkFeeRespMock.overallFee,
-      suggestedMaxFee: estimateBulkFeeRespMock.suggestedMaxFee,
-      unit: estimateBulkFeeRespMock.unit,
+      includeDeploy,
+      overallFee,
+      suggestedMaxFee,
+      unit,
     });
   });
 

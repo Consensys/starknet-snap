@@ -39,10 +39,10 @@ export const DECIMALS_DISPLAYED_MAX_LENGTH = 11;
 
 export const COINGECKO_API = 'https://api.coingecko.com/api/v3/';
 
-export const STARKNET_MAINNET_EXPLORER = 'https://voyager.online/';
+export const STARKNET_MAINNET_EXPLORER = 'https://starkscan.co/';
 
 export const STARKNET_SEPOLIA_TESTNET_EXPLORER =
-  'https://sepolia.voyager.online/';
+  'https://sepolia.starkscan.co/';
 
 export const SNAPS_DOC_URL = 'https://docs.metamask.io/guide/snaps.html';
 
@@ -66,3 +66,5 @@ export const DUMMY_ADDRESS = '0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx';
 export const DEFAULT_FEE_TOKEN = FeeToken.ETH;
 
 export const MIN_METAMASK_VERSION = '12.5.0';
+
+export const DENY_ERROR_CODE = 113;

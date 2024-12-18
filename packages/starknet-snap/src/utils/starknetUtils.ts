@@ -45,8 +45,13 @@ import {
   FeeTokenUnit,
   type RpcV4GetTransactionReceiptResponse,
 } from '../types/snapApi';
-import type { Network, SnapState, Transaction } from '../types/snapState';
-import { TransactionType } from '../types/snapState';
+import type {
+  Network,
+  ResourceBounds,
+  SnapState,
+  Transaction,
+} from '../types/snapState';
+import { ContractFuncName, TransactionType } from '../types/snapState';
 import type {
   DeployAccountPayload,
   TransactionResponse,
@@ -70,6 +75,7 @@ import {
   BlockIdentifierEnum,
 } from './constants';
 import { DeployRequiredError, UpgradeRequiredError } from './exceptions';
+import { ConsolidateFees } from './fee';
 import { hexToString } from './formatter-utils';
 import { getAddressKey } from './keyPair';
 import { logger } from './logger';
@@ -284,7 +290,7 @@ export const deployAccount = async (
   network: Network,
   contractAddress: string,
   contractCallData: RawCalldata,
-  addressSalt: numUtils.BigNumberish,
+  addressSalt: string,
   privateKey: string | Uint8Array,
   cairoVersion?: CairoVersion,
   invocationsDetails?: UniversalDetails,
@@ -590,10 +596,10 @@ export const getMassagedTransactions = async (
       let txContractFuncName = '';
       switch (txFuncSelector) {
         case bigIntTransferSelectorHex:
-          txContractFuncName = 'transfer';
+          txContractFuncName = ContractFuncName.Transfer;
           break;
         case bigIntUpgradeSelectorHex:
-          txContractFuncName = 'upgrade';
+          txContractFuncName = ContractFuncName.Upgrade;
           break;
         default:
           txContractFuncName = '';
@@ -702,9 +708,7 @@ export const getAccContractAddressAndCallData = (publicKey) => {
     0,
   );
 
-  if (address.length < 66) {
-    address = address.replace('0x', `0x${'0'.repeat(66 - address.length)}`);
-  }
+  address = _validateAndParseAddress(address);
   return {
     address,
     callData,
@@ -727,9 +731,7 @@ export const getAccContractAddressAndCallDataLegacy = (publicKey) => {
     callData,
     0,
   );
-  if (address.length < 66) {
-    address = address.replace('0x', `0x${'0'.repeat(66 - address.length)}`);
-  }
+  address = _validateAndParseAddress(address);
   return {
     address,
     callData,
@@ -992,24 +994,6 @@ export const isAccountDeployed = async (network: Network, address: string) => {
   }
 };
 
-export const addFeesFromAllTransactions = (
-  fees: EstimateFee[],
-): Pick<EstimateFee, 'suggestedMaxFee' | 'overall_fee'> => {
-  let overallFee = numUtils.toBigInt(0);
-  let suggestedMaxFee = numUtils.toBigInt(0);
-
-  fees.forEach((fee) => {
-    overallFee += fee.overall_fee;
-    suggestedMaxFee += fee.suggestedMaxFee;
-  });
-
-  return {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    overall_fee: overallFee,
-    suggestedMaxFee,
-  };
-};
-
 export const _validateAndParseAddressFn = _validateAndParseAddress;
 export const validateAndParseAddress = (
   address: numUtils.BigNumberish,
@@ -1077,6 +1061,7 @@ export async function getEstimatedFees(
   overallFee: string;
   unit: FeeTokenUnit;
   includeDeploy: boolean;
+  resourceBounds: ResourceBounds;
   estimateResults: EstimateFee[];
 }> {
   const accountDeployed = await isAccountDeployed(network, address);
@@ -1089,7 +1074,7 @@ export async function getEstimatedFees(
     });
   }
 
-  const estimateBulkFeeResp = await estimateFeeBulk(
+  const estimateResults = await estimateFeeBulk(
     network,
     address,
     privateKey,
@@ -1097,17 +1082,19 @@ export async function getEstimatedFees(
     invocationsDetails,
   );
 
-  const estimateFeeResp = addFeesFromAllTransactions(estimateBulkFeeResp);
+  const consolidateFeesObj = new ConsolidateFees(estimateResults);
+  const consolidateResult = consolidateFeesObj.serializate();
 
   return {
-    suggestedMaxFee: estimateFeeResp.suggestedMaxFee.toString(10),
-    overallFee: estimateFeeResp.overall_fee.toString(10),
+    suggestedMaxFee: consolidateResult.suggestedMaxFee,
+    overallFee: consolidateResult.overallFee,
+    resourceBounds: consolidateResult.resourceBounds,
     unit:
       invocationsDetails?.version === constants.TRANSACTION_VERSION.V3
         ? FeeTokenUnit.STRK
         : FeeTokenUnit.ETH,
     includeDeploy: !accountDeployed,
-    estimateResults: estimateBulkFeeResp,
+    estimateResults,
   };
 }
 

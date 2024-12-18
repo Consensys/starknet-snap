@@ -1,6 +1,8 @@
 import type { IDataClient } from '../chain/data-client';
 import { StarkScanClient } from '../chain/data-client/starkscan';
+import { TransactionService } from '../chain/transaction-service';
 import { Config, DataClient } from '../config';
+import type { TransactionStateManager } from '../state/transaction-state-manager';
 import type { Network } from '../types/snapState';
 
 /**
@@ -22,4 +24,23 @@ export function createStarkScanClient(network: Network): IDataClient {
   });
 
   return dataClient;
+}
+
+/**
+ * Create a TransactionService object.
+ *
+ * @param network - The network.
+ * @param [txnStateMgr] - The transaction state manager.
+ * @returns A TransactionService object.
+ */
+export function createTransactionService(
+  network: Network,
+  txnStateMgr?: TransactionStateManager,
+): TransactionService {
+  const dataClient = createStarkScanClient(network);
+  return new TransactionService({
+    dataClient,
+    network,
+    txnStateMgr,
+  });
 }

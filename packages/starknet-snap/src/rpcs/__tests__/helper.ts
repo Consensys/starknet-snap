@@ -3,9 +3,11 @@ import type { constants } from 'starknet';
 
 import type { StarknetAccount } from '../../__tests__/helper';
 import { generateAccounts, generateRandomValue } from '../../__tests__/helper';
+import { FeeTokenUnit } from '../../types/snapApi';
 import type { SnapState } from '../../types/snapState';
 import * as snapUiUtils from '../../ui/utils';
 import { getExplorerUrl, shortenAddress, toJson } from '../../utils';
+import { mockEstimateFeeBulkResponse } from '../../utils/__tests__/helper';
 import * as snapHelper from '../../utils/snap';
 import * as snapUtils from '../../utils/snapUtils';
 import * as starknetUtils from '../../utils/starknetUtils';
@@ -14,7 +16,7 @@ import * as starknetUtils from '../../utils/starknetUtils';
  *
  * @param chainId
  */
-export async function mockAccount(chainId: constants.StarknetChainId) {
+export async function mockAccount(chainId: constants.StarknetChainId | string) {
   const accounts = await generateAccounts(chainId, 1);
   return accounts[0];
 }
@@ -146,13 +148,14 @@ export function prepareRenderDisplayPrivateKeyAlertUI() {
 
 /**
  *
+ * @param result
  */
-export function prepareConfirmDialogInteractiveUI() {
+export function prepareConfirmDialogInteractiveUI(result = true) {
   const confirmDialogSpy = jest.spyOn(
     snapHelper,
     'createInteractiveConfirmDialog',
   );
-  confirmDialogSpy.mockResolvedValue(true);
+  confirmDialogSpy.mockResolvedValue(result);
   return {
     confirmDialogSpy,
   };
@@ -229,4 +232,40 @@ export function generateRandomFee(
   return useBigInt
     ? randomFee.toString(10)
     : BigNumber.from(randomFee).toString();
+}
+
+/**
+ *
+ * @param options0
+ * @param options0.includeDeploy
+ * @param options0.unit
+ */
+export function mockGetEstimatedFeesResponse({
+  includeDeploy = false,
+  unit = FeeTokenUnit.ETH,
+}: {
+  includeDeploy?: boolean;
+  unit?: FeeTokenUnit;
+}) {
+  const {
+    consolidatedFees: { suggestedMaxFee, overallFee, resourceBounds },
+    estimateFeesResponse,
+  } = mockEstimateFeeBulkResponse();
+
+  const getEstimatedFeesResponse = {
+    suggestedMaxFee,
+    overallFee,
+    unit,
+    includeDeploy,
+    estimateResults: estimateFeesResponse,
+    resourceBounds,
+  };
+
+  const getEstimatedFeesSpy = jest.spyOn(starknetUtils, 'getEstimatedFees');
+  getEstimatedFeesSpy.mockResolvedValue(getEstimatedFeesResponse);
+
+  return {
+    getEstimatedFeesSpy,
+    getEstimatedFeesResponse,
+  };
 }

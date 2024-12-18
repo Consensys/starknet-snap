@@ -17,6 +17,7 @@ import {
   TransactionFinalityStatus,
   TransactionExecutionStatus,
   TransactionType,
+  validateAndParseAddress,
 } from 'starknet';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -26,6 +27,7 @@ import type {
 } from '../chain/data-client/starkscan.type';
 import { FeeToken } from '../types/snapApi';
 import {
+  ContractFuncName,
   TransactionDataVersion,
   type AccContract,
   type Transaction,
@@ -166,9 +168,7 @@ export async function generateAccounts(
       0,
     );
 
-    if (address.length < 66) {
-      address = address.replace('0x', `0x${'0'.repeat(66 - address.length)}`);
-    }
+    address = validateAndParseAddress(address);
 
     accounts.push({
       addressSalt: pubKey,
@@ -268,7 +268,7 @@ export function generateTransactions({
     const txnType = getRandomData(_txnTypes);
     const contractFuncName =
       txnType == TransactionType.INVOKE
-        ? getRandomData(['transfer', 'upgrade'])
+        ? getRandomData(Object.values(ContractFuncName))
         : '';
 
     transactions.push(
@@ -303,6 +303,8 @@ function getTransactionTemplate() {
     finalityStatus: '',
     accountCalls: null,
     version: 1,
+    maxFee: null,
+    actualFee: null,
     dataVersion: TransactionDataVersion.V2,
   };
 }
@@ -418,7 +420,7 @@ export function generateInvokeTransaction({
  * @returns A transaction hash.
  * */
 export function getTransactionHash(base = SixtyThreeHexInBigInt) {
-  return `0x` + base.toString(16);
+  return `0x0` + base.toString(16);
 }
 
 export function generateTransactionRequests({
@@ -464,22 +466,20 @@ export function generateTransactionRequests({
             to: address,
             amount: '1',
           }),
-          entrypoint: 'transfer',
+          entrypoint: ContractFuncName.Transfer,
         },
       ],
       includeDeploy: false,
-      resourceBounds: [
-        {
-          l1_gas: {
-            max_amount: '0',
-            max_price_per_unit: '0',
-          },
-          l2_gas: {
-            max_amount: '0',
-            max_price_per_unit: '0',
-          },
+      resourceBounds: {
+        l1_gas: {
+          max_amount: '0',
+          max_price_per_unit: '0',
         },
-      ],
+        l2_gas: {
+          max_amount: '0',
+          max_price_per_unit: '0',
+        },
+      },
     });
   }
 
@@ -524,7 +524,9 @@ export function generateStarkScanTransactions({
     newTx.sender_address = address;
     newTx.account_calls[0].caller_address = address;
     newTx.timestamp = transactionStartFrom;
-    newTx.transaction_hash = `0x${transactionStartFrom.toString(16)}`;
+    newTx.transaction_hash = validateAndParseAddress(
+      `0x${transactionStartFrom.toString(16)}`,
+    );
     transactionStartFrom -= timestampReduction;
     txs.push(newTx as unknown as StarkScanTransaction);
   }
@@ -535,7 +537,9 @@ export function generateStarkScanTransactions({
       account_calls: [...cairo0DeployTx.account_calls],
     };
     deployTx.contract_address = address;
-    deployTx.transaction_hash = `0x${transactionStartFrom.toString(16)}`;
+    deployTx.transaction_hash = validateAndParseAddress(
+      `0x${transactionStartFrom.toString(16)}`,
+    );
     txs.push(deployTx as unknown as StarkScanTransaction);
   }
 

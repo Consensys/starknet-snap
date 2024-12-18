@@ -6,7 +6,13 @@ import type {
   Invocations,
   UniversalDetails,
 } from 'starknet';
-import { constants, TransactionType, validateAndParseAddress } from 'starknet';
+import {
+  constants,
+  TransactionType,
+  validateAndParseAddress,
+  TransactionFinalityStatus,
+  TransactionExecutionStatus,
+} from 'starknet';
 import type { Struct } from 'superstruct';
 import {
   boolean,
@@ -25,8 +31,11 @@ import {
   validate,
   nonempty,
   unknown,
+  empty,
+  nullable,
 } from 'superstruct';
 
+import { TransactionDataVersion } from '../types/snapState';
 import {
   CAIRO_VERSION_LEGACY,
   CAIRO_VERSION,
@@ -77,6 +86,16 @@ export const AddressStruct = refine(
     return true;
   },
 );
+
+export const TransactionFinalityStatusStruct = enums(
+  Object.values(TransactionFinalityStatus),
+);
+
+export const TransactionExecutionStatusStruct = enums(
+  Object.values(TransactionExecutionStatus),
+);
+
+export const TransactionTypeStruct = enums(Object.values(TransactionType));
 
 export const ChainIdStruct = enums(Object.values(constants.StarknetChainId));
 
@@ -287,12 +306,7 @@ export const BaseInvocationStruct = object({
   // lets not accept optaional payload to reduce the complexity of the struct
   // as the snap control the input
   payload: unknown(),
-  type: enums([
-    TransactionType.DECLARE,
-    TransactionType.DEPLOY,
-    TransactionType.DEPLOY_ACCOUNT,
-    TransactionType.INVOKE,
-  ]),
+  type: TransactionTypeStruct,
 });
 
 export const CallsStruct = define<Call[] | Call>(
@@ -381,3 +395,34 @@ export const UniversalDetailsStruct = define<UniversalDetails>(
     );
   },
 );
+
+export const TransactionStruct = object({
+  txnHash: HexStruct,
+  txnType: TransactionTypeStruct,
+  chainId: string(),
+  senderAddress: union([AddressStruct, empty(string())]),
+  contractAddress: union([AddressStruct, empty(string())]),
+  executionStatus: union([TransactionExecutionStatusStruct, string()]),
+  finalityStatus: union([TransactionFinalityStatusStruct, string()]),
+  failureReason: string(),
+  timestamp: number(),
+  maxFee: nullable(string()),
+  actualFee: nullable(string()),
+  accountCalls: nullable(
+    record(
+      HexStruct,
+      array(
+        object({
+          contract: HexStruct,
+          contractFuncName: string(),
+          contractCallData: array(string()),
+          recipient: optional(string()),
+          amount: optional(string()),
+        }),
+      ),
+    ),
+  ),
+  version: number(),
+  // Snap data Version to support backward compatibility , migration.
+  dataVersion: enums(Object.values(TransactionDataVersion)),
+});
