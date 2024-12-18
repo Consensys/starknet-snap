@@ -10,6 +10,7 @@ describe('getRPCUrl', () => {
   afterEach(function () {
     Config.rpcApiKey = '';
   });
+
   it('returns Mainnet RPC URL if chain id is Mainnet', () => {
     expect(getRPCUrl(constants.StarknetChainId.SN_MAIN)).toBe(
       `https://starknet-mainnet.infura.io/v3/${Config.rpcApiKey}`,
