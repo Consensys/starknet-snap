@@ -116,6 +116,7 @@ export class TransactionService {
       transactionsOnChain.push(tx);
       transactionsOnChainSet.add(tx.txnHash);
     }
+
     for await (const tx of this.getTransactionsOnState(
       address,
       contractAddress,
