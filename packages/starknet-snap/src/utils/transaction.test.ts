@@ -240,6 +240,44 @@ describe('newInvokeTransaction', () => {
       accountCalls: callsToTranscationAccountCalls(calls),
     });
   });
+
+  it('convert a 62 transaction hash to 66 transaction hash', async () => {
+    const chainId = constants.StarknetChainId.SN_SEPOLIA;
+    const [{ address: senderAddress }] = await generateAccounts(chainId, 1);
+    const { calls } = callsExamples.multipleCalls;
+    const txnVersion = 1;
+    const maxFee = '10';
+
+    const result = newInvokeTransaction({
+      // 62 transaction hash
+      txnHash:
+        '0xb28a089e7fb83debee4607b6334d687918644796b47d9e9e38ea8213833137',
+      senderAddress,
+      chainId,
+      maxFee,
+      calls,
+      txnVersion,
+    });
+
+    expect(result).toStrictEqual({
+      // 64 transaction hash
+      txnHash:
+        '0x00b28a089e7fb83debee4607b6334d687918644796b47d9e9e38ea8213833137',
+      txnType: TransactionType.INVOKE,
+      chainId,
+      senderAddress,
+      contractAddress: '',
+      finalityStatus: TransactionFinalityStatus.RECEIVED,
+      executionStatus: TransactionFinalityStatus.RECEIVED,
+      failureReason: '',
+      timestamp: expect.any(Number),
+      dataVersion: TransactionDataVersion.V2,
+      version: txnVersion,
+      maxFee,
+      actualFee: null,
+      accountCalls: callsToTranscationAccountCalls(calls),
+    });
+  });
 });
 
 describe('newDeployTransaction', () => {
@@ -258,6 +296,40 @@ describe('newDeployTransaction', () => {
 
     expect(result).toStrictEqual({
       txnHash,
+      txnType: TransactionType.DEPLOY_ACCOUNT,
+      chainId,
+      senderAddress,
+      contractAddress: senderAddress,
+      finalityStatus: TransactionFinalityStatus.RECEIVED,
+      executionStatus: TransactionFinalityStatus.RECEIVED,
+      failureReason: '',
+      timestamp: expect.any(Number),
+      dataVersion: TransactionDataVersion.V2,
+      version: txnVersion,
+      maxFee: null,
+      actualFee: null,
+      accountCalls: null,
+    });
+  });
+
+  it('convert a 62 transaction hash to 66 transaction hash', async () => {
+    const chainId = constants.StarknetChainId.SN_SEPOLIA;
+    const [{ address: senderAddress }] = await generateAccounts(chainId, 1);
+    const txnVersion = 1;
+
+    const result = newDeployTransaction({
+      // 62 transaction hash
+      txnHash:
+        '0xb28a089e7fb83debee4607b6334d687918644796b47d9e9e38ea8213833137',
+      senderAddress,
+      chainId,
+      txnVersion,
+    });
+
+    expect(result).toStrictEqual({
+      // 64 transaction hash
+      txnHash:
+        '0x00b28a089e7fb83debee4607b6334d687918644796b47d9e9e38ea8213833137',
       txnType: TransactionType.DEPLOY_ACCOUNT,
       chainId,
       senderAddress,
