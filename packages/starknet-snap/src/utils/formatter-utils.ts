@@ -17,28 +17,6 @@ export const hexToString = (hexStr) => {
 };
 
 /**
- * Normalizes a StarkNet hex string (address or transaction hash) to 66 characters,
- * including the '0x' prefix. Ensures the hex value is padded with leading zeros
- * to meet StarkNet's 64-character requirement (excluding the prefix).
- *
- * @param hexString - the input hex string to normalize.
- * @returns a normalized 66-character hex string with the '0x' prefix and added leading zeros if necessary.
- */
-export const normalizeStarknetHex = (hexString: string) => {
-  if (!hexString.startsWith('0x')) {
-    throw new Error('Invalid input: Hex value must start with "0x"');
-  }
-
-  const hexWithoutPrefix = hexString.slice(2); // Remove '0x'
-
-  if (hexWithoutPrefix.length > 64) {
-    throw new Error('Invalid input: Hex value is longer than 64 characters');
-  }
-
-  return `0x${hexWithoutPrefix.padStart(64, '0')}`; // Pad to 64 chars + '0x'
-};
-
-/**
  * Maps deprecated parameters to their new equivalents in the requestParams object
  * and removes the deprecated parameters afterward.
  *

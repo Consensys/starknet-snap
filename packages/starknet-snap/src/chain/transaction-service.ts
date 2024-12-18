@@ -1,9 +1,13 @@
-import { TransactionFinalityStatus, TransactionType } from 'starknet';
+import {
+  TransactionFinalityStatus,
+  TransactionType,
+  validateAndParseAddress,
+} from 'starknet';
 
 import { TransactionStateManager } from '../state/transaction-state-manager';
 import type { Network, Transaction, V2Transaction } from '../types/snapState';
 import { TransactionDataVersion } from '../types/snapState';
-import { dayToSec, msToSec, normalizeStarknetHex } from '../utils';
+import { dayToSec, msToSec } from '../utils';
 import type { IDataClient } from './data-client';
 
 export class TransactionService {
@@ -107,21 +111,21 @@ export class TransactionService {
     const transactionsOnState: Transaction[] = [];
     const transactionsToRemove: string[] = [];
     const transactionsOnChainSet = new Set<string>();
+
     for await (const tx of this.getTransactionsOnChain(
       address,
       contractAddress,
       tillToInDays,
     )) {
       transactionsOnChain.push(tx);
-      transactionsOnChainSet.add(tx.txnHash);
+      transactionsOnChainSet.add(validateAndParseAddress(tx.txnHash));
     }
     for await (const tx of this.getTransactionsOnState(
       address,
       contractAddress,
     )) {
-      console.log(tx.txnHash);
       // eslint-disable-next-line no-negated-condition
-      if (!transactionsOnChainSet.has(normalizeStarknetHex(tx.txnHash))) {
+      if (!transactionsOnChainSet.has(validateAndParseAddress(tx.txnHash))) {
         transactionsOnState.push(tx);
       } else {
         transactionsToRemove.push(tx.txnHash);
