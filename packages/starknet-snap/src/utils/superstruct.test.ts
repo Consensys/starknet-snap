@@ -77,7 +77,7 @@ describe('AddressStruct', () => {
   });
 
   it.each([
-    // non hex string - charactor is not within [0-9a-fA-F]
+    // non hex string - character is not within [0-9a-fA-F]
     '0x04882a372da3dfe1c53170ad75893832469bf87b62b13e84662565c4a88f2zzz',
     // invalid length - 66/63 chars expected
     '372da3dfe1c53170ad75893832469bf87b62b13e84662565c4a88f25cd',
@@ -471,7 +471,7 @@ describe('InvocationsStruct', () => {
           },
         ],
       },
-      expectedError: 'Declare payload does not accept mutiple items',
+      expectedError: 'Declare payload does not accept multiple items',
     },
     {
       request: {
@@ -482,7 +482,7 @@ describe('InvocationsStruct', () => {
           },
         ],
       },
-      expectedError: 'Deploy account payload does not accept mutiple items',
+      expectedError: 'Deploy account payload does not accept multiple items',
     },
   ])(
     'throws error if the invocation type is $request.type and payload is multiple',
