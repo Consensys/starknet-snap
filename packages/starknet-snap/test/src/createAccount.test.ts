@@ -97,7 +97,7 @@ describe('Test function: createAccount', function () {
     expect(state.transactions.length).to.be.eq(0);
   });
 
-  it('waits for tansaction after an account has deployed', async function () {
+  it('waits for transaction after an account has deployed', async function () {
     sandbox.stub(utils, 'deployAccount').callsFake(async () => {
       return createAccountProxyMainnetResp;
     });

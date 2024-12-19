@@ -14,7 +14,7 @@ export class WalletSwitchStarknetChain extends StarknetWalletRpc {
     // Example scenario:
     // [Rq1] wallet init and send switch network B request to snap at T0
     // [Rq2] wallet init and send switch network B request to snap at T1 <-- this request will be on hold by the lock
-    // [Rq1] confrim request and network switch to B, assign local chain Id to B at T2
+    // [Rq1] confirm request and network switch to B, assign local chain Id to B at T2
     // [Rq2] lock release, wallet inited and local chainId is B, which is same as request, so we return true directly at T3
     try {
       return await this.wallet.lock.runExclusive(async () => {

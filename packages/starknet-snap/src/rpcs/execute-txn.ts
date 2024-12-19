@@ -202,7 +202,7 @@ export class ExecuteTxnRpc extends AccountRpcController<
       details: {
         ...details,
         version: updatedTxnVersion,
-        // Aways repect the input, unless the account is not deployed
+        // Aways respect the input, unless the account is not deployed
         // TODO: we may also need to increment the nonce base on the input, if the account is not deployed
         nonce: accountDeployed ? details?.nonce : 1,
         maxFee,

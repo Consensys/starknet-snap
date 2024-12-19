@@ -342,7 +342,7 @@ export const InvocationsStruct = define<Invocations>(
         case TransactionType.DECLARE:
           struct = DeclareContractPayloadStruct;
           if (isArray) {
-            throw new Error('Declare payload does not accept mutiple items');
+            throw new Error('Declare payload does not accept multiple items');
           }
           break;
         case TransactionType.DEPLOY:
@@ -352,7 +352,7 @@ export const InvocationsStruct = define<Invocations>(
           struct = DeployAccountContractStruct;
           if (isArray) {
             throw new Error(
-              'Deploy account payload does not accept mutiple items',
+              'Deploy account payload does not accept multiple items',
             );
           }
           break;
