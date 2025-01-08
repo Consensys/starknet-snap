@@ -16,7 +16,6 @@ describe('Cairo1Contract', () => {
         account: { publicKey },
       } = await createAccountContract(network, 0, Cairo1Contract);
 
-      // contract.address is a getter method that making a call to calculateAddress.
       expect(contract.getCallData()).toStrictEqual(
         CallData.compile({
           signer: publicKey,
