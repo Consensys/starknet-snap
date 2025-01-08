@@ -16,8 +16,6 @@ export class AccountContractDiscovery {
 
   protected network: Network;
 
-  protected ethBalanceThreshold = BigInt(0);
-
   constructor(network: Network) {
     this.network = network;
   }
@@ -38,13 +36,7 @@ export class AccountContractDiscovery {
     const DefaultContractCtor = this.defaultContractCtor;
 
     // Use array to store the result to prevent race condition.
-    const contracts: {
-      balance: CairoAccountContract[];
-      deploy: CairoAccountContract[];
-    } = {
-      balance: [],
-      deploy: [],
-    };
+    const contracts: CairoAccountContract[] = [];
 
     let cairoContract: CairoAccountContract | undefined;
 
@@ -58,15 +50,13 @@ export class AccountContractDiscovery {
           // if contract upgraded, bind the latest contract with current contract interface,
           // to inherit the address from current contract.
           if (await contract.isUpgraded()) {
-            contracts.deploy.push(
-              DefaultContractCtor.fromAccountContract(contract),
-            );
+            contracts.push(DefaultContractCtor.fromAccountContract(contract));
           } else {
-            contracts.deploy.push(contract);
+            contracts.push(contract);
           }
         } else if (await contract.isRequireDeploy()) {
           // if contract is not deployed but has balance, then use the contract with balance.
-          contracts.balance.push(contract);
+          contracts.push(contract);
         }
       }),
     );
@@ -74,16 +64,10 @@ export class AccountContractDiscovery {
     // In case of multiple contracts are deployed or have balance,
     // We will not be able to determine which contract to use.
     // Hence, throw an error.
-    if (contracts.balance.length > 1 || contracts.deploy.length > 1) {
+    if (contracts.length > 1) {
       throw new AccountDiscoveryError();
-    }
-
-    if (contracts.deploy.length !== 0) {
-      // if there is a deployed contract, then choose the deployed contract.
-      cairoContract = contracts.deploy[0];
-    } else if (contracts.balance.length !== 0) {
-      // otherwise, then choose the contract with balance.
-      cairoContract = contracts.balance[0];
+    } else if (contracts.length === 1) {
+      cairoContract = contracts[0];
     }
 
     // Fallback with default contract.

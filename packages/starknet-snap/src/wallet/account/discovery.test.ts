@@ -9,7 +9,7 @@ jest.mock('../../utils/logger');
 describe('AccountContractDiscovery', () => {
   const network = STARKNET_SEPOLIA_TESTNET_NETWORK;
 
-  describe('getCairoContract', () => {
+  describe('getContract', () => {
     const mockContractState = (params: {
       cairo1: {
         isDeployed: boolean;
