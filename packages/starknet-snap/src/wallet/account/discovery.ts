@@ -54,8 +54,11 @@ export class AccountContractDiscovery {
           } else {
             contracts.push(contract);
           }
-        } else if (await contract.isRequireDeploy()) {
-          // if contract is not deployed but has balance, then use the contract with balance.
+        } else if (contract instanceof(Cairo0Contract) && await contract.isRequireDeploy()) {
+          // It should only valid for Cairo 0 contract.
+          // A Cairo 0 contract can only paying fee with ETH token.
+          // Therefore if the contract is not deployed, and it has ETH token, we should use this contract.
+          // And the UI will force the user to deploy the Cairo 0 contract.
           contracts.push(contract);
         }
       }),

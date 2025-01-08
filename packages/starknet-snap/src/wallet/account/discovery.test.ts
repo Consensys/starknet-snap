@@ -237,31 +237,5 @@ describe('AccountContractDiscovery', () => {
         AccountDiscoveryError,
       );
     });
-
-    it('throws `AccountDiscoveryError` if more than one contracts has ETH', async () => {
-      const [account] = await generateAccounts(network.chainId, 1);
-
-      mockContractState({
-        cairo0: {
-          isDeployed: false,
-          isUpgraded: false,
-        },
-        cairo1: {
-          isDeployed: false,
-          isUpgraded: false,
-        },
-      });
-
-      mockContractEthBalance({
-        cairo0HasBalance: true,
-        cairo1HasBalance: true,
-      });
-
-      const service = new AccountContractDiscovery(network);
-
-      await expect(service.getContract(account.publicKey)).rejects.toThrow(
-        AccountDiscoveryError,
-      );
-    });
   });
 });
