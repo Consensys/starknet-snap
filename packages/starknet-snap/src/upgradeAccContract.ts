@@ -111,7 +111,7 @@ export async function upgradeAccContract(params: ApiParamsWithKeyDeriver) {
       params: {
         type: DialogType.Confirmation,
         content: panel([
-          heading('Do you want to sign this transaction ?'),
+          heading('Do you want to sign this transaction?'),
           ...dialogComponents,
         ]),
       },

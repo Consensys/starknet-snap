@@ -4,18 +4,13 @@ import type { Mutex } from 'async-mutex';
 import convert from 'ethereum-unit-converter';
 import { num as numUtils, constants } from 'starknet';
 import type {
-  InvocationsDetails,
-  DeclareContractPayload,
-  Abi,
   DeclareSignerDetails,
   Call,
   DeployAccountSignerDetails,
-  Invocations,
-  UniversalDetails,
 } from 'starknet';
-
+import { getTranslator } from '../utils/locale';
 import { Config } from '../config';
-import { FeeToken, type AddNetworkRequestParams } from '../types/snapApi';
+import { type AddNetworkRequestParams } from '../types/snapApi';
 import { ContractFuncName, TransactionStatus } from '../types/snapState';
 import type {
   Network,
@@ -218,64 +213,18 @@ export function addDialogTxt(
  * @param network
  */
 export function getNetworkTxt(network: Network) {
+  const t = getTranslator();
   const components = [];
-  addDialogTxt(components, 'Chain Name', network.name);
-  addDialogTxt(components, 'Chain ID', network.chainId);
+  addDialogTxt(components, t('chainName'), network.name);
+  addDialogTxt(components, t('chainId'), network.chainId);
   if (network.baseUrl) {
-    addDialogTxt(components, 'Base URL', network.baseUrl);
+    addDialogTxt(components, t('baseUrl'), network.baseUrl);
   }
   if (network.nodeUrl) {
-    addDialogTxt(components, 'RPC URL', network.nodeUrl);
+    addDialogTxt(components, t('rpcUrl'), network.nodeUrl);
   }
   if (network.voyagerUrl) {
-    addDialogTxt(components, 'Explorer URL', network.voyagerUrl);
-  }
-  return components;
-}
-
-/**
- *
- * @param senderAddress
- * @param network
- * @param invocations
- * @param abis
- * @param details
- */
-export function getTxnSnapTxt(
-  senderAddress: string,
-  network: Network,
-  invocations: Invocations | Call | Call[],
-  abis?: Abi[],
-  details?: UniversalDetails,
-) {
-  const components = [];
-  addDialogTxt(components, 'Network', network.name);
-  addDialogTxt(components, 'Signer Address', senderAddress);
-  addDialogTxt(
-    components,
-    'Transaction Invocation',
-    JSON.stringify(invocations, null, 2),
-  );
-  if (abis && abis.length > 0) {
-    addDialogTxt(components, 'Abis', JSON.stringify(abis, null, 2));
-  }
-
-  if (details?.maxFee) {
-    const feeToken: FeeToken =
-      details?.version === constants.TRANSACTION_VERSION.V3
-        ? FeeToken.STRK
-        : FeeToken.ETH;
-    addDialogTxt(
-      components,
-      `Max Fee(${feeToken})`,
-      convert(details.maxFee, 'wei', 'ether'),
-    );
-  }
-  if (details?.nonce) {
-    addDialogTxt(components, 'Nonce', details.nonce.toString());
-  }
-  if (details?.version) {
-    addDialogTxt(components, 'Version', details.version.toString());
+    addDialogTxt(components, t('explorerUrl'), network.voyagerUrl);
   }
   return components;
 }
@@ -300,11 +249,12 @@ export function getSendTxnText(
   network: Network,
 ): Component[] {
   // Retrieve the ERC-20 token from snap state for confirmation display purpose
+  const t = getTranslator();
   const token = getErc20Token(state, contractAddress, network.chainId);
   const components = [];
-  addDialogTxt(components, 'Signer Address', senderAddress);
+  addDialogTxt(components, t('signerAddress'), senderAddress);
   addDialogTxt(components, 'Contract', contractAddress);
-  addDialogTxt(components, 'Call Data', `[${contractCallData.join(', ')}]`);
+  addDialogTxt(components, t('callData'), `[${contractCallData.join(', ')}]`);
   addDialogTxt(
     components,
     'Estimated Gas Fee(ETH)',
@@ -322,8 +272,8 @@ export function getSendTxnText(
           Number(contractCallData[1]) * Math.pow(10, -1 * token.decimals)
         ).toFixed(token.decimals);
       }
-      addDialogTxt(components, 'Sender Address', senderAddress);
-      addDialogTxt(components, 'Recipient Address', contractCallData[0]);
+      addDialogTxt(components, t('senderAddress'), senderAddress);
+      addDialogTxt(components, t('recipientAddress'), contractCallData[0]);
       addDialogTxt(components, `Amount(${token.symbol})`, amount);
     } catch (error) {
       logger.error(
@@ -350,96 +300,15 @@ export function getSignTxnTxt(
   network: Network,
   txnInvocation: Call[] | DeclareSignerDetails | DeployAccountSignerDetails,
 ) {
+  const t = getTranslator();
   const components = [];
   addDialogTxt(components, 'Network', network.name);
-  addDialogTxt(components, 'Signer Address', signerAddress);
+  addDialogTxt(components, t('signerAddress'), signerAddress);
   addDialogTxt(
     components,
     'Transaction',
     JSON.stringify(txnInvocation, null, 2),
   );
-  return components;
-}
-
-/**
- *
- * @param senderAddress
- * @param network
- * @param contractPayload
- * @param invocationsDetails
- */
-export function getDeclareSnapTxt(
-  senderAddress: string,
-  network: Network,
-  contractPayload: DeclareContractPayload,
-  invocationsDetails?: InvocationsDetails,
-) {
-  const components = [];
-  addDialogTxt(components, 'Network', network.name);
-  addDialogTxt(components, 'Signer Address', senderAddress);
-
-  if (contractPayload.contract) {
-    const _contractPayload =
-      typeof contractPayload.contract === 'string' ||
-      contractPayload.contract instanceof String
-        ? contractPayload.contract.toString()
-        : JSON.stringify(contractPayload.contract, null, 2);
-    addDialogTxt(components, 'Contract', _contractPayload);
-  }
-  if (contractPayload.compiledClassHash) {
-    addDialogTxt(
-      components,
-      'Complied Class Hash',
-      contractPayload.compiledClassHash,
-    );
-  }
-  if (contractPayload.classHash) {
-    addDialogTxt(components, 'Class Hash', contractPayload.classHash);
-  }
-  if (contractPayload.casm) {
-    addDialogTxt(
-      components,
-      'Casm',
-      JSON.stringify(contractPayload.casm, null, 2),
-    );
-  }
-  if (invocationsDetails?.maxFee !== undefined) {
-    addDialogTxt(
-      components,
-      'Max Fee(ETH)',
-      convert(invocationsDetails.maxFee, 'wei', 'ether'),
-    );
-  }
-  if (invocationsDetails?.nonce !== undefined) {
-    addDialogTxt(components, 'Nonce', invocationsDetails.nonce.toString());
-  }
-  if (invocationsDetails?.version !== undefined) {
-    addDialogTxt(components, 'Version', invocationsDetails.version.toString());
-  }
-  return components;
-}
-
-/**
- *
- * @param tokenAddress
- * @param tokenName
- * @param tokenSymbol
- * @param tokenDecimals
- * @param network
- */
-export function getAddTokenText(
-  tokenAddress: string,
-  tokenName: string,
-  tokenSymbol: string,
-  tokenDecimals: number,
-  network: Network,
-) {
-  const components = [];
-  addDialogTxt(components, 'Network', network.name);
-  addDialogTxt(components, 'Token Address', tokenAddress);
-  addDialogTxt(components, 'Token Name', tokenName);
-  addDialogTxt(components, 'Token Symbol', tokenSymbol);
-  addDialogTxt(components, 'Token Decimals', tokenDecimals.toString());
   return components;
 }
 
@@ -1018,8 +887,9 @@ export function toMap<Key, Val, FnParam>(
  * Displays a modal to the user requesting them to upgrade their account.
  */
 export async function showUpgradeRequestModal() {
+  const t = getTranslator();
   await alertDialog([
-    heading('Account Upgrade Mandatory!'),
+    heading(t('accountUpgradeMandatory')),
     text(
       `Visit the [companion dapp for Starknet](${getDappUrl()}) and click “Upgrade”.\nThank you!`,
     ),
@@ -1030,8 +900,9 @@ export async function showUpgradeRequestModal() {
  * Displays a modal to the user requesting them to deploy their account.
  */
 export async function showDeployRequestModal() {
+  const t = getTranslator();
   await alertDialog([
-    heading('Account Deployment Mandatory!'),
+    heading(t('accountDeploymentMandatory')),
     text(
       `Visit the [companion dapp for Starknet](${getDappUrl()}) to deploy your account.\nThank you!`,
     ),

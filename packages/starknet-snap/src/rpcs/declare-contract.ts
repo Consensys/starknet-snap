@@ -19,6 +19,7 @@ import {
 import { UserRejectedOpError } from '../utils/exceptions';
 import { declareContract as declareContractUtil } from '../utils/starknetUtils';
 import { AccountRpcController } from './abstract/account-rpc-controller';
+import { getTranslator} from '../utils/locale';
 
 // Define the DeclareContractRequestStruct
 export const DeclareContractRequestStruct = assign(
@@ -104,9 +105,10 @@ export class DeclareContractRpc extends AccountRpcController<
   }
 
   protected async getDeclareContractConsensus(params: DeclareContractParams) {
+    const t = getTranslator();
     const { payload, details, address } = params;
     const components: Component[] = [];
-    components.push(headerUI('Do you want to sign this transaction?'));
+    components.push(headerUI(t('signTransactionPrompt')));
 
     components.push(
       signerUI({
@@ -128,7 +130,7 @@ export class DeclareContractRpc extends AccountRpcController<
       components.push(dividerUI());
       components.push(
         rowUI({
-          label: 'Compiled Class Hash',
+          label: t('compiledClassHash'),
           value: compiledClassHash,
         }),
       );
@@ -138,7 +140,7 @@ export class DeclareContractRpc extends AccountRpcController<
       components.push(dividerUI());
       components.push(
         rowUI({
-          label: 'Class Hash',
+          label: t('classHash'),
           value: classHash,
         }),
       );
@@ -149,7 +151,7 @@ export class DeclareContractRpc extends AccountRpcController<
       components.push(dividerUI());
       components.push(
         rowUI({
-          label: 'Max Fee (ETH)',
+          label: t("maxFee"),
           value: maxFeeInEth,
         }),
       );

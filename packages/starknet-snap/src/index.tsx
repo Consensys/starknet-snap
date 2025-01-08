@@ -70,6 +70,8 @@ import {
   isSnapRpcError,
   setStateData,
 } from './utils';
+import { getTranslator, loadLocale } from './utils/locale';
+
 import {
   CAIRO_VERSION_LEGACY,
   PRELOADED_TOKENS,
@@ -96,6 +98,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
   origin,
   request,
 }) => {
+  await loadLocale();
   const requestParams = request?.params as unknown as ApiRequestParams;
 
   logger.log(`${request.method}:\nrequestParams: ${toJson(requestParams)}`);
@@ -297,30 +300,34 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
 };
 
 export const onInstall: OnInstallHandler = async () => {
+  await loadLocale();
+  const t = getTranslator();
   await ensureJsxSupport(
     <Box>
-      <Text>Your MetaMask wallet is now compatible with Starknet!</Text>
+      <Text>{t('walletCompatibility')}</Text>
       <Text>
-        To manage your Starknet account and send and receive funds, visit the{' '}
-        <Link href={getDappUrl()}>companion dapp for Starknet</Link>.
+        {t('accountManagementIntro')}{' '}
+        <Link href={getDappUrl()}>{t('companionDapp')}</Link>.
       </Text>
     </Box>,
   );
 };
 
 export const onUpdate: OnUpdateHandler = async () => {
+  await loadLocale();
+  const t = getTranslator();
   await ensureJsxSupport(
     <Box>
-      <Text>Your Starknet Snap is now up-to-date !</Text>
+      <Text>{t('snapUpdate')}</Text>
       <Text>
-        As usual, to manage your Starknet account and send and receive funds,
-        visit the <Link href={getDappUrl()}>companion dapp for Starknet</Link>.
+        {t('accountManagementReminder')} <Link href={getDappUrl()}>{t('companionDapp')}</Link>.
       </Text>
     </Box>,
   );
 };
 
 export const onHomePage: OnHomePageHandler = async () => {
+  await loadLocale();
   return await homePageController.execute();
 };
 
