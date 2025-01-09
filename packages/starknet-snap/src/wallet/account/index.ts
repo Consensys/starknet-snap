@@ -6,3 +6,4 @@ export * from './type';
 export * from './contract';
 export * from './discovery';
 export * from './service';
+export * from './account';
