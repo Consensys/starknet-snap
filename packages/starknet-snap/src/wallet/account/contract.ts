@@ -49,7 +49,7 @@ export abstract class CairoAccountContract {
     return this.getCallData();
   }
 
-  get deployPaylod(): {
+  get deployPayload(): {
     classHash: string;
     contractAddress: string;
     constructorCalldata: Calldata;
