@@ -26,6 +26,7 @@ import { UserRejectedOpError } from '../utils/exceptions';
 import {
   deployAccount,
   executeTxn as executeTxnUtil,
+  getDeployAccountCallData,
   getEstimatedFees,
 } from '../utils/starknetUtils';
 import {
@@ -59,16 +60,20 @@ export type ExecuteTxnResponse = Infer<typeof ExecuteTxnResponseStruct>;
 
 export type ConfirmTransactionParams = {
   calls: Call[];
+  address: string;
   maxFee: string;
   resourceBounds: ResourceBounds;
   txnVersion: constants.TRANSACTION_VERSION;
+  includeDeploy: boolean;
 };
 
 export type DeployAccountParams = {
+  address: string;
   txnVersion: constants.TRANSACTION_VERSION;
 };
 
 export type SendTransactionParams = {
+  address: string;
   calls: Call[];
   abis?: any[];
   details?: Infer<typeof UniversalDetailsStruct>;
@@ -79,6 +84,7 @@ export type SaveDataToStateParamas = {
   txnHashForExecute: string;
   txnVersion: constants.TRANSACTION_VERSION;
   maxFee: string;
+  address: string;
   calls: Call[];
 };
 
@@ -145,8 +151,11 @@ export class ExecuteTxnRpc extends AccountRpcController<
     const { privateKey, publicKey } = this.account;
     const callsArray = Array.isArray(calls) ? calls : [calls];
 
-    // FIXME: getEstimatedFees shpuld be refactored to accept account object
-    const { suggestedMaxFee: maxFee, resourceBounds } = await getEstimatedFees(
+    const {
+      includeDeploy,
+      suggestedMaxFee: maxFee,
+      resourceBounds,
+    } = await getEstimatedFees(
       this.network,
       address,
       privateKey,
@@ -160,7 +169,7 @@ export class ExecuteTxnRpc extends AccountRpcController<
       details,
     );
 
-    const accountDeployed = await this.account.accountContract.isDeployed();
+    const accountDeployed = !includeDeploy;
 
     const {
       selectedFeeToken,
@@ -168,9 +177,11 @@ export class ExecuteTxnRpc extends AccountRpcController<
       resourceBounds: updatedResouceBounds,
     } = await this.confirmTransaction({
       txnVersion: details?.version as unknown as constants.TRANSACTION_VERSION,
+      address,
       calls: callsArray,
       maxFee,
       resourceBounds,
+      includeDeploy,
     });
 
     const updatedTxnVersion = feeTokenToTransactionVersion(selectedFeeToken);
@@ -179,11 +190,13 @@ export class ExecuteTxnRpc extends AccountRpcController<
 
     if (!accountDeployed) {
       txnHashForDeploy = await this.deployAccount({
+        address,
         txnVersion: updatedTxnVersion,
       });
     }
 
     const txnHashForExecute = await this.sendTransaction({
+      address,
       calls: callsArray,
       abis,
       details: {
@@ -202,6 +215,7 @@ export class ExecuteTxnRpc extends AccountRpcController<
       txnHashForExecute,
       txnVersion: updatedTxnVersion,
       maxFee: updatedMaxFee,
+      address,
       calls: callsArray,
     });
 
@@ -213,13 +227,15 @@ export class ExecuteTxnRpc extends AccountRpcController<
 
   protected async confirmTransaction({
     calls,
+    address,
     maxFee,
     resourceBounds,
     txnVersion,
+    includeDeploy,
   }: ConfirmTransactionParams): Promise<TransactionRequest> {
     const requestId = uuidv4();
     const { chainId, name: networkName } = this.network;
-    const { hdIndex: addressIndex, address } = this.account;
+    const { hdIndex: addressIndex } = this.account;
 
     const formattedCalls = await Promise.all(
       calls.map(async (call) =>
@@ -244,7 +260,7 @@ export class ExecuteTxnRpc extends AccountRpcController<
       calls: formattedCalls,
       resourceBounds,
       selectedFeeToken: transactionVersionToFeeToken(txnVersion),
-      includeDeploy: !(await this.account.accountContract.isDeployed()),
+      includeDeploy,
     };
 
     const interfaceId = await generateExecuteTxnFlow(request);
@@ -284,16 +300,13 @@ export class ExecuteTxnRpc extends AccountRpcController<
   }
 
   protected async deployAccount({
+    address,
     txnVersion,
   }: DeployAccountParams): Promise<string> {
-    const {
-      privateKey,
-      address,
-      publicKey,
-      accountContract: { callData },
-    } = this.account;
+    const { privateKey, publicKey } = this.account;
 
-    // FIXME: deployAccount shpuld be refactored to accept account object
+    const callData = getDeployAccountCallData(publicKey, CAIRO_VERSION);
+
     const {
       contract_address: contractAddress,
       transaction_hash: transactionHash,
@@ -321,11 +334,12 @@ export class ExecuteTxnRpc extends AccountRpcController<
   }
 
   protected async sendTransaction({
+    address,
     calls,
     abis,
     details,
   }: SendTransactionParams): Promise<string> {
-    const { privateKey, address } = this.account;
+    const { privateKey } = this.account;
 
     const executeTxnResp = await executeTxnUtil(
       this.network,
@@ -348,11 +362,11 @@ export class ExecuteTxnRpc extends AccountRpcController<
     txnHashForExecute,
     txnVersion,
     maxFee,
+    address,
     calls,
   }: SaveDataToStateParamas) {
     const txnVersionInNumber = transactionVersionToNumber(txnVersion);
     const { chainId } = this.network;
-    const { address } = this.account;
 
     if (txnHashForDeploy) {
       await this.txnStateManager.addTransaction(
