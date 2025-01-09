@@ -7,11 +7,7 @@ import { mockTransactionRequestStateManager } from '../state/__tests__/helper';
 import { AccountStateManager } from '../state/account-state-manager';
 import { TransactionStateManager } from '../state/transaction-state-manager';
 import { FeeToken } from '../types/snapApi';
-import type {
-  FormattedCallData,
-  Network,
-  TransactionRequest,
-} from '../types/snapState';
+import type { FormattedCallData, TransactionRequest } from '../types/snapState';
 import * as uiUtils from '../ui/utils';
 import {
   CAIRO_VERSION,
@@ -31,10 +27,9 @@ import {
   transactionVersionToNumber,
 } from '../utils/transaction';
 import {
-  mockAccount,
   mockGetEstimatedFeesResponse,
-  prepareConfirmDialogInteractiveUI,
-  prepareMockAccount,
+  mockConfirmDialogInteractiveUI,
+  setupAccountController,
 } from './__tests__/helper';
 import type {
   ConfirmTransactionParams,
@@ -73,101 +68,116 @@ class MockExecuteTxnRpc extends ExecuteTxnRpc {
   }
 }
 
-const generateAccount = async (network) => {
-  const state = {
-    accContracts: [],
-    erc20Tokens: [],
-    networks: [network],
-    transactions: [],
-  };
-
-  const account = await mockAccount(network);
-  prepareMockAccount(account, state);
-
-  return account;
-};
-
-const createMockRpc = () => {
-  const rpc = new MockExecuteTxnRpc({
-    showInvalidAccountAlert: true,
-  });
-  return rpc;
-};
-
-const setupMockRpc = async (network: Network, calls: Call[]) => {
-  const account = await generateAccount(network);
-
-  const rpc = createMockRpc();
-
-  // Setup the rpc, to discover the account and network
-  await rpc.preExecute({
-    chainId: network.chainId,
-    address: account.address,
-    calls,
-  } as unknown as ExecuteTxnParams);
-
-  return {
-    rpc,
-    account,
-  };
-};
-
-const mockCallToTransactionReqCall = (calls: Call[]) => {
-  const callToTransactionReqCallSpy = jest.spyOn(
-    formatUtils,
-    'callToTransactionReqCall',
-  );
-  const formattedCalls: FormattedCallData[] = [];
-  for (const call of calls) {
-    formattedCalls.push({
-      contractAddress: call.contractAddress,
-      calldata: call.calldata as unknown as string[],
-      entrypoint: call.entrypoint,
-    });
-    callToTransactionReqCallSpy.mockResolvedValueOnce(
-      formattedCalls[formattedCalls.length - 1],
-    );
-  }
-  return {
-    callToTransactionReqCallSpy,
-    formattedCalls,
-  };
-};
-
-const mockGenerateExecuteTxnFlow = () => {
-  const generateExecuteTxnFlowSpy = jest.spyOn(
-    uiUtils,
-    'generateExecuteTxnFlow',
-  );
-  const interfaceId = uuidv4();
-  generateExecuteTxnFlowSpy.mockResolvedValue(interfaceId);
-  return {
-    interfaceId,
-    generateExecuteTxnFlowSpy,
-  };
-};
-
 describe('ExecuteTxn', () => {
-  describe('confirmTransaction', () => {
-    const prepareConfirmTransaction = async (confirm = true) => {
-      const network = STARKNET_SEPOLIA_TESTNET_NETWORK;
-      const includeDeploy = true;
-      const txnVersion = constants.TRANSACTION_VERSION.V3;
-      const { calls } = callsExamples.multipleCalls;
+  const network = STARKNET_SEPOLIA_TESTNET_NETWORK;
 
-      const { account, rpc } = await setupMockRpc(network, calls);
+  const createMockRpc = () => {
+    const rpc = new MockExecuteTxnRpc({
+      showInvalidAccountAlert: true,
+    });
+    return rpc;
+  };
+
+  const setupRpcTest = async (calls: Call[]) => {
+    const controller = await setupAccountController({ network });
+
+    const rpc = createMockRpc();
+
+    // Setup the rpc, to discover the account and network
+    await rpc.preExecute({
+      chainId: network.chainId,
+      address: controller.account.address,
+      calls,
+    } as unknown as ExecuteTxnParams);
+
+    return {
+      rpc,
+      ...controller,
+    };
+  };
+
+  const mockCallToTransactionReqCall = (calls: Call[]) => {
+    const callToTransactionReqCallSpy = jest.spyOn(
+      formatUtils,
+      'callToTransactionReqCall',
+    );
+    const formattedCalls: FormattedCallData[] = [];
+    for (const call of calls) {
+      formattedCalls.push({
+        contractAddress: call.contractAddress,
+        calldata: call.calldata as unknown as string[],
+        entrypoint: call.entrypoint,
+      });
+      callToTransactionReqCallSpy.mockResolvedValueOnce(
+        formattedCalls[formattedCalls.length - 1],
+      );
+    }
+    return {
+      callToTransactionReqCallSpy,
+      formattedCalls,
+    };
+  };
+
+  const mockGenerateExecuteTxnFlow = () => {
+    const generateExecuteTxnFlowSpy = jest.spyOn(
+      uiUtils,
+      'generateExecuteTxnFlow',
+    );
+    const interfaceId = uuidv4();
+    generateExecuteTxnFlowSpy.mockResolvedValue(interfaceId);
+    return {
+      interfaceId,
+      generateExecuteTxnFlowSpy,
+    };
+  };
+
+  const getTransactionCalls = () => {
+    const { calls, details, hash } = callsExamples.multipleCalls;
+    const { formattedCalls } = mockCallToTransactionReqCall(calls);
+    return {
+      calls,
+      details,
+      hash,
+      formattedCalls,
+    };
+  };
+
+  describe('confirmTransaction', () => {
+    const setupConfirmTransactionTest = async (confirm = true) => {
+      const txnVersion = constants.TRANSACTION_VERSION.V3;
+      const { calls, formattedCalls } = getTransactionCalls();
+
+      const { account, rpc } = await setupRpcTest(calls);
+      const includeDeploy = !(await account.accountContract.isDeployed());
+
       const {
         getEstimatedFeesResponse: { suggestedMaxFee: maxFee, resourceBounds },
       } = mockGetEstimatedFeesResponse({
-        includeDeploy: false,
+        includeDeploy,
       });
 
       const request = {
         calls,
-        address: account.address,
         maxFee,
         resourceBounds,
         txnVersion,
+        includeDeploy,
+      };
+
+      const { interfaceId } = mockGenerateExecuteTxnFlow();
+
+      const transactionRequest = {
+        chainId: network.chainId,
+        networkName: network.name,
+        id: uuidv4(),
+        interfaceId,
+        type: TransactionType.INVOKE,
+        signer: account.address,
+        addressIndex: 0,
+        maxFee,
+        calls: formattedCalls,
+        resourceBounds,
+        selectedFeeToken: transactionVersionToFeeToken(txnVersion),
         includeDeploy,
       };
 
@@ -180,9 +190,8 @@ describe('ExecuteTxn', () => {
         resourceBounds,
         txnVersion,
         includeDeploy,
-        ...prepareConfirmDialogInteractiveUI(confirm),
-        ...mockCallToTransactionReqCall(calls),
-        ...mockGenerateExecuteTxnFlow(),
+        transactionRequest,
+        ...mockConfirmDialogInteractiveUI(confirm),
         ...mockTransactionRequestStateManager(),
       };
     };
@@ -191,41 +200,25 @@ describe('ExecuteTxn', () => {
       const {
         request,
         rpc,
-        interfaceId,
-        account: { address },
-        formattedCalls,
-        maxFee,
-        resourceBounds,
-        txnVersion,
-        includeDeploy,
-        network: { chainId, name: networkName },
         upsertTransactionRequestSpy,
-        confirmDialogSpy,
         getTransactionRequestSpy,
         removeTransactionRequestSpy,
-      } = await prepareConfirmTransaction();
+        transactionRequest,
+      } = await setupConfirmTransactionTest();
+
+      getTransactionRequestSpy.mockResolvedValue(transactionRequest);
 
       const result = await rpc.confirmTransaction(request);
 
       const expectedTransactionRequest = {
-        chainId,
-        networkName,
+        ...transactionRequest,
         id: expect.any(String),
-        interfaceId,
-        type: TransactionType.INVOKE,
-        signer: address,
-        addressIndex: 0,
-        maxFee,
-        calls: formattedCalls,
-        resourceBounds,
-        selectedFeeToken: transactionVersionToFeeToken(txnVersion),
-        includeDeploy,
       };
+
       expect(result).toStrictEqual(expectedTransactionRequest);
       expect(upsertTransactionRequestSpy).toHaveBeenCalledWith(
         expectedTransactionRequest,
       );
-      expect(confirmDialogSpy).toHaveBeenCalledWith(interfaceId);
       expect(getTransactionRequestSpy).toHaveBeenCalledWith({
         requestId: expect.any(String),
       });
@@ -235,8 +228,15 @@ describe('ExecuteTxn', () => {
     });
 
     it('does not throw an error if remove request failed', async () => {
-      const { request, rpc, removeTransactionRequestSpy } =
-        await prepareConfirmTransaction();
+      const {
+        request,
+        rpc,
+        removeTransactionRequestSpy,
+        transactionRequest,
+        getTransactionRequestSpy,
+      } = await setupConfirmTransactionTest();
+
+      getTransactionRequestSpy.mockResolvedValue(transactionRequest);
 
       removeTransactionRequestSpy.mockRejectedValue(
         new Error('Failed to remove request'),
@@ -254,7 +254,7 @@ describe('ExecuteTxn', () => {
         rpc,
         getTransactionRequestSpy,
         removeTransactionRequestSpy,
-      } = await prepareConfirmTransaction();
+      } = await setupConfirmTransactionTest();
 
       getTransactionRequestSpy.mockResolvedValue(null);
 
@@ -268,7 +268,7 @@ describe('ExecuteTxn', () => {
     });
 
     it('throws UserRejectedOpError if user denied the operation', async () => {
-      const { request, rpc } = await prepareConfirmTransaction(false);
+      const { request, rpc } = await setupConfirmTransactionTest(false);
 
       await expect(rpc.confirmTransaction(request)).rejects.toThrow(
         UserRejectedOpError,
@@ -277,11 +277,10 @@ describe('ExecuteTxn', () => {
   });
 
   describe('deployAccount', () => {
-    const prepareDeployAccount = async () => {
-      const network = STARKNET_SEPOLIA_TESTNET_NETWORK;
+    const setupDeployAccountTest = async () => {
       const txnVersion = constants.TRANSACTION_VERSION.V3;
       const { calls } = callsExamples.multipleCalls;
-      const { account, rpc } = await setupMockRpc(network, calls);
+      const { account, rpc } = await setupRpcTest(calls);
 
       const deployAccountSpy = jest.spyOn(starknetUtils, 'deployAccount');
       const deployAccountResponse = {
@@ -291,7 +290,6 @@ describe('ExecuteTxn', () => {
       deployAccountSpy.mockResolvedValue(deployAccountResponse);
 
       const request = {
-        address: account.address,
         txnVersion,
       };
 
@@ -304,7 +302,6 @@ describe('ExecuteTxn', () => {
         accountDeploymentData,
         request,
         rpc,
-        network,
         account,
         deployAccountSpy,
         deployAccountResponse,
@@ -315,12 +312,11 @@ describe('ExecuteTxn', () => {
       const {
         rpc,
         request,
-        network,
         account: { address, privateKey, publicKey },
         deployAccountResponse,
         deployAccountSpy,
         accountDeploymentData,
-      } = await prepareDeployAccount();
+      } = await setupDeployAccountTest();
 
       const result = await rpc.deployAccount(request);
 
@@ -338,7 +334,7 @@ describe('ExecuteTxn', () => {
 
     it('throws `Failed to deploy account` error if the execution transaction hash is empty', async () => {
       const { rpc, request, deployAccountSpy, deployAccountResponse } =
-        await prepareDeployAccount();
+        await setupDeployAccountTest();
       deployAccountSpy.mockResolvedValue({
         ...deployAccountResponse,
         transaction_hash: '',
@@ -351,12 +347,11 @@ describe('ExecuteTxn', () => {
   });
 
   describe('sendTransaction', () => {
-    const prepareConfirmTransaction = async () => {
-      const network = STARKNET_SEPOLIA_TESTNET_NETWORK;
+    const setupConfirmTransactionTest = async () => {
       const txnVersion = constants.TRANSACTION_VERSION.V3;
       const { calls } = callsExamples.multipleCalls;
 
-      const { account, rpc } = await setupMockRpc(network, calls);
+      const { account, rpc } = await setupRpcTest(calls);
 
       const executeTxnSpy = jest.spyOn(starknetUtils, 'executeTxn');
       const executeTxnResponse = {
@@ -366,7 +361,6 @@ describe('ExecuteTxn', () => {
 
       const request: SendTransactionParams = {
         calls,
-        address: account.address,
         abis: undefined,
         details: {
           version: txnVersion,
@@ -387,18 +381,17 @@ describe('ExecuteTxn', () => {
       const {
         rpc,
         request,
-        network,
-        account: { privateKey },
+        account: { privateKey, address },
         executeTxnResponse,
         executeTxnSpy,
-      } = await prepareConfirmTransaction();
+      } = await setupConfirmTransactionTest();
 
       const result = await rpc.sendTransaction(request);
 
       expect(result).toStrictEqual(executeTxnResponse.transaction_hash);
       expect(executeTxnSpy).toHaveBeenCalledWith(
         network,
-        request.address,
+        address,
         privateKey,
         request.calls,
         request.abis,
@@ -407,7 +400,8 @@ describe('ExecuteTxn', () => {
     });
 
     it('throws `Failed to execute transaction` error if the execution transaction hash is empty', async () => {
-      const { rpc, request, executeTxnSpy } = await prepareConfirmTransaction();
+      const { rpc, request, executeTxnSpy } =
+        await setupConfirmTransactionTest();
       executeTxnSpy.mockResolvedValue({ transaction_hash: '' });
 
       await expect(rpc.sendTransaction(request)).rejects.toThrow(
@@ -417,53 +411,71 @@ describe('ExecuteTxn', () => {
   });
 
   describe('execute', () => {
-    const prepareExecute = async (accountDeployed = true) => {
-      const network = STARKNET_SEPOLIA_TESTNET_NETWORK;
-      const account = await generateAccount(network);
+    const mockExecute = () => {
+      const confirmTransactionSpy = jest.spyOn(
+        MockExecuteTxnRpc.prototype,
+        'confirmTransaction',
+      );
+      const sendTransactionSpy = jest.spyOn(
+        MockExecuteTxnRpc.prototype,
+        'sendTransaction',
+      );
+      const saveDataToStateSpy = jest.spyOn(
+        MockExecuteTxnRpc.prototype,
+        'saveDataToState',
+      );
+      const deployAccountSpy = jest.spyOn(
+        MockExecuteTxnRpc.prototype,
+        'deployAccount',
+      );
+
+      return {
+        deployAccountSpy,
+        confirmTransactionSpy,
+        sendTransactionSpy,
+        saveDataToStateSpy,
+      };
+    };
+
+    const setupExecuteTest = async (accountDeployed = true) => {
+      const {
+        confirmTransactionSpy,
+        deployAccountSpy,
+        sendTransactionSpy,
+        saveDataToStateSpy,
+      } = mockExecute();
+      const {
+        calls,
+        details,
+        hash: sendTansactionResponse,
+      } = getTransactionCalls();
+      const { account, rpc, isDeploySpy } = await setupRpcTest(calls);
 
       const { getEstimatedFeesResponse, getEstimatedFeesSpy } =
         mockGetEstimatedFeesResponse({
           includeDeploy: !accountDeployed,
         });
-      const { suggestedMaxFee, resourceBounds } = getEstimatedFeesResponse;
+      const { suggestedMaxFee: maxFee, resourceBounds } =
+        getEstimatedFeesResponse;
 
-      const confirmTransactionSpy = jest.spyOn(
-        MockExecuteTxnRpc.prototype,
-        'confirmTransaction',
-      );
       const transactionRequest = {
         selectedFeeToken: FeeToken.STRK,
-        maxFee: suggestedMaxFee,
+        maxFee,
         resourceBounds,
       } as unknown as TransactionRequest;
-      confirmTransactionSpy.mockResolvedValue(transactionRequest);
-
-      const sendTansactionResponse = callsExamples.multipleCalls.hash;
-      const sendTransactionSpy = jest.spyOn(
-        MockExecuteTxnRpc.prototype,
-        'sendTransaction',
-      );
-      sendTransactionSpy.mockResolvedValue(sendTansactionResponse);
-
       const deployAccountResponse = callsExamples.singleCall.hash;
-      const deployAccountSpy = jest.spyOn(
-        MockExecuteTxnRpc.prototype,
-        'deployAccount',
-      );
+
+      confirmTransactionSpy.mockResolvedValue(transactionRequest);
+      sendTransactionSpy.mockResolvedValue(sendTansactionResponse);
       deployAccountSpy.mockResolvedValue(deployAccountResponse);
-
-      const saveDataToStateSpy = jest.spyOn(
-        MockExecuteTxnRpc.prototype,
-        'saveDataToState',
-      );
       saveDataToStateSpy.mockReturnThis();
+      isDeploySpy.mockResolvedValue(accountDeployed);
 
-      const rpc = createMockRpc();
       const request: ExecuteTxnParams = {
         chainId: network.chainId,
         address: account.address,
-        calls: callsExamples.multipleCalls.calls,
-        details: callsExamples.multipleCalls.details,
+        calls,
+        details,
       } as unknown as ExecuteTxnParams;
 
       return {
@@ -489,23 +501,19 @@ describe('ExecuteTxn', () => {
         request,
         sendTansactionResponse,
         sendTransactionSpy,
-        account: { address },
         getEstimatedFeesResponse,
         confirmTransactionSpy,
         deployAccountSpy,
         saveDataToStateSpy,
         transactionRequest,
-      } = await prepareExecute();
+      } = await setupExecuteTest();
       const updatedTxnVersion = feeTokenToTransactionVersion(
         transactionRequest.selectedFeeToken,
       );
       const { maxFee: updatedMaxFee, resourceBounds: updatedResourceBounds } =
         transactionRequest;
-      const {
-        suggestedMaxFee: maxFee,
-        resourceBounds,
-        includeDeploy,
-      } = getEstimatedFeesResponse;
+      const { suggestedMaxFee: maxFee, resourceBounds } =
+        getEstimatedFeesResponse;
       const { calls, abis, details } = request;
 
       const result = await rpc.execute(request);
@@ -515,15 +523,12 @@ describe('ExecuteTxn', () => {
       });
       expect(confirmTransactionSpy).toHaveBeenCalledWith({
         txnVersion: details?.version,
-        address,
         calls,
         maxFee,
         resourceBounds,
-        includeDeploy,
       });
       expect(deployAccountSpy).not.toHaveBeenCalled();
       expect(sendTransactionSpy).toHaveBeenCalledWith({
-        address,
         calls,
         abis,
         details: {
@@ -538,7 +543,6 @@ describe('ExecuteTxn', () => {
         txnHashForExecute: sendTansactionResponse,
         txnVersion: updatedTxnVersion,
         maxFee: updatedMaxFee,
-        address,
         calls,
       });
     });
@@ -548,13 +552,12 @@ describe('ExecuteTxn', () => {
         rpc,
         request,
         sendTansactionResponse,
-        account: { address },
         deployAccountResponse,
         deployAccountSpy,
         saveDataToStateSpy,
         transactionRequest,
         sendTransactionSpy,
-      } = await prepareExecute(false);
+      } = await setupExecuteTest(false);
       const updatedTxnVersion = feeTokenToTransactionVersion(
         transactionRequest.selectedFeeToken,
       );
@@ -568,11 +571,9 @@ describe('ExecuteTxn', () => {
         transaction_hash: sendTansactionResponse,
       });
       expect(deployAccountSpy).toHaveBeenCalledWith({
-        address,
         txnVersion: updatedTxnVersion,
       });
       expect(sendTransactionSpy).toHaveBeenCalledWith({
-        address,
         calls,
         abis,
         details: {
@@ -588,44 +589,49 @@ describe('ExecuteTxn', () => {
         txnHashForExecute: sendTansactionResponse,
         txnVersion: updatedTxnVersion,
         maxFee: updatedMaxFee,
-        address,
         calls,
       });
     });
   });
 
   describe('saveDataToState', () => {
-    const prepareSaveDataToState = async () => {
-      const network = STARKNET_SEPOLIA_TESTNET_NETWORK;
+    const mockSaveDataToState = () => {
+      const addTransactionSpy = jest.spyOn(
+        TransactionStateManager.prototype,
+        'addTransaction',
+      );
+      const updateAccountAsDeploySpy = jest.spyOn(
+        AccountStateManager.prototype,
+        'updateAccountAsDeploy',
+      );
+      addTransactionSpy.mockReturnThis();
+      updateAccountAsDeploySpy.mockReturnThis();
+
+      return {
+        addTransactionSpy,
+        updateAccountAsDeploySpy,
+      };
+    };
+
+    const setupSaveDataToStateTest = async () => {
       const txnVersion = constants.TRANSACTION_VERSION.V3;
-      const { hash: txnHashForExecute, calls } = callsExamples.multipleCalls;
+      const { updateAccountAsDeploySpy, addTransactionSpy } =
+        mockSaveDataToState();
+      const { hash: txnHashForExecute, calls } = getTransactionCalls();
       const { hash: txnHashForDeploy } = callsExamples.singleCall;
 
-      const { rpc, account } = await setupMockRpc(network, calls);
+      const { rpc, account } = await setupRpcTest(calls);
       const {
         getEstimatedFeesResponse: { suggestedMaxFee: maxFee },
       } = mockGetEstimatedFeesResponse({
         includeDeploy: false,
       });
 
-      const addTransactionSpy = jest.spyOn(
-        TransactionStateManager.prototype,
-        'addTransaction',
-      );
-      addTransactionSpy.mockReturnThis();
-
-      const updateAccountAsDeploySpy = jest.spyOn(
-        AccountStateManager.prototype,
-        'updateAccountAsDeploy',
-      );
-      updateAccountAsDeploySpy.mockReturnThis();
-
       const request: SaveDataToStateParamas = {
         txnHashForDeploy,
         txnHashForExecute,
         txnVersion,
         maxFee,
-        address: account.address,
         calls,
       } as unknown as SaveDataToStateParamas;
 
@@ -664,7 +670,7 @@ describe('ExecuteTxn', () => {
         addTransactionSpy,
         updateAccountAsDeploySpy,
         newInvokeTransaction,
-      } = await prepareSaveDataToState();
+      } = await setupSaveDataToStateTest();
 
       await rpc.saveDataToState({
         ...request,
@@ -685,7 +691,7 @@ describe('ExecuteTxn', () => {
         updateAccountAsDeploySpy,
         newInvokeTransaction,
         newDeployTransaction,
-      } = await prepareSaveDataToState();
+      } = await setupSaveDataToStateTest();
 
       await rpc.saveDataToState(request);
 

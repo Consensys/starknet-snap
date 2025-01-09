@@ -1,16 +1,18 @@
 import { BigNumber } from 'ethers';
 import type { constants } from 'starknet';
 
-import type { StarknetAccount } from '../../__tests__/helper';
 import { generateAccounts, generateRandomValue } from '../../__tests__/helper';
 import { FeeTokenUnit } from '../../types/snapApi';
-import type { SnapState } from '../../types/snapState';
+import type { Network } from '../../types/snapState';
 import * as snapUiUtils from '../../ui/utils';
 import { getExplorerUrl, shortenAddress, toJson } from '../../utils';
 import { mockEstimateFeeBulkResponse } from '../../utils/__tests__/helper';
+import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../../utils/constants';
 import * as snapHelper from '../../utils/snap';
-import * as snapUtils from '../../utils/snapUtils';
 import * as starknetUtils from '../../utils/starknetUtils';
+import { AccountService, CairoAccountContract } from '../../wallet/account';
+import { createAccountObject } from '../../wallet/account/__test__/helper';
+import type { Account } from '../../wallet/account/account';
 
 /**
  *
@@ -24,36 +26,62 @@ export async function mockAccount(chainId: constants.StarknetChainId | string) {
 /**
  *
  * @param account
- * @param state
+ * @param account.accountObj
+ * @param account.network
+ * @param account.requireUpgrade
+ * @param account.requireDeploy
+ * @param account.isDeployed
  */
-export function prepareMockAccount(account: StarknetAccount, state: SnapState) {
-  const getStateDataSpy = jest.spyOn(snapHelper, 'getStateData');
-  const verifyIfAccountNeedUpgradeOrDeploySpy = jest.spyOn(
-    snapUtils,
-    'verifyIfAccountNeedUpgradeOrDeploy',
+export async function setupAccountController({
+  accountObj,
+  network = STARKNET_SEPOLIA_TESTNET_NETWORK,
+  requireUpgrade = false,
+  requireDeploy = false,
+  isDeployed = false,
+}: {
+  accountObj?: Account;
+  network?: Network;
+  requireUpgrade?: boolean;
+  requireDeploy?: boolean;
+  isDeployed?: boolean;
+}) {
+  const account = accountObj ?? (await createAccountObject(network)).accountObj;
+
+  // Mock the `accountContract` properties in the `Account` object
+  const isRequireUpgradeSpy = jest.spyOn(
+    CairoAccountContract.prototype,
+    'isRequireUpgrade',
   );
-  const getKeysFromAddressSpy = jest.spyOn(starknetUtils, 'getKeysFromAddress');
+  const isRequireDeploySpy = jest.spyOn(
+    CairoAccountContract.prototype,
+    'isRequireDeploy',
+  );
+  const isDeploySpy = jest.spyOn(CairoAccountContract.prototype, 'isDeployed');
 
-  getKeysFromAddressSpy.mockResolvedValue({
-    privateKey: account.privateKey,
-    publicKey: account.publicKey,
-    addressIndex: account.addressIndex,
-    derivationPath: account.derivationPath as unknown as any,
-  });
+  isRequireUpgradeSpy.mockResolvedValue(requireUpgrade);
+  isRequireDeploySpy.mockResolvedValue(requireDeploy);
+  isDeploySpy.mockResolvedValue(isDeployed);
 
-  verifyIfAccountNeedUpgradeOrDeploySpy.mockReturnThis();
-  getStateDataSpy.mockResolvedValue(state);
+  const deriveAccountByAddressSpy = jest.spyOn(
+    AccountService.prototype,
+    'deriveAccountByAddress',
+  );
+
+  deriveAccountByAddressSpy.mockResolvedValue(account);
 
   return {
-    getKeysFromAddressSpy,
-    verifyIfAccountNeedUpgradeOrDeploySpy,
+    deriveAccountByAddressSpy,
+    isRequireDeploySpy,
+    isRequireUpgradeSpy,
+    isDeploySpy,
+    account,
   };
 }
 
 /**
  *
  */
-export function prepareConfirmDialog() {
+export function mockConfirmDialog() {
   const confirmDialogSpy = jest.spyOn(snapHelper, 'confirmDialog');
   confirmDialogSpy.mockResolvedValue(true);
   return {
@@ -64,7 +92,7 @@ export function prepareConfirmDialog() {
 /**
  *
  */
-export function prepareRenderWatchAssetUI() {
+export function mockRenderWatchAssetUI() {
   const confirmDialogSpy = jest.spyOn(snapUiUtils, 'renderWatchAssetUI');
   confirmDialogSpy.mockResolvedValue(true);
   return {
@@ -75,7 +103,7 @@ export function prepareRenderWatchAssetUI() {
 /**
  *
  */
-export function prepareRenderSwitchNetworkUI() {
+export function mockRenderSwitchNetworkUI() {
   const confirmDialogSpy = jest.spyOn(snapUiUtils, 'renderSwitchNetworkUI');
   confirmDialogSpy.mockResolvedValue(true);
   return {
@@ -86,7 +114,7 @@ export function prepareRenderSwitchNetworkUI() {
 /**
  *
  */
-export function prepareRenderSignMessageUI() {
+export function mockRenderSignMessageUI() {
   const confirmDialogSpy = jest.spyOn(snapUiUtils, 'renderSignMessageUI');
   confirmDialogSpy.mockResolvedValue(true);
   return {
@@ -97,7 +125,7 @@ export function prepareRenderSignMessageUI() {
 /**
  *
  */
-export function prepareRenderSignTransactionUI() {
+export function mockRenderSignTransactionUI() {
   const confirmDialogSpy = jest.spyOn(snapUiUtils, 'renderSignTransactionUI');
   confirmDialogSpy.mockResolvedValue(true);
   return {
@@ -108,7 +136,7 @@ export function prepareRenderSignTransactionUI() {
 /**
  *
  */
-export function prepareRenderSignDeclareTransactionUI() {
+export function mockRenderSignDeclareTransactionUI() {
   const confirmDialogSpy = jest.spyOn(
     snapUiUtils,
     'renderSignDeclareTransactionUI',
@@ -122,7 +150,7 @@ export function prepareRenderSignDeclareTransactionUI() {
 /**
  *
  */
-export function prepareRenderDisplayPrivateKeyConfirmUI() {
+export function mockRenderDisplayPrivateKeyConfirmUI() {
   const confirmDialogSpy = jest.spyOn(
     snapUiUtils,
     'renderDisplayPrivateKeyConfirmUI',
@@ -136,7 +164,7 @@ export function prepareRenderDisplayPrivateKeyConfirmUI() {
 /**
  *
  */
-export function prepareRenderDisplayPrivateKeyAlertUI() {
+export function mockRenderDisplayPrivateKeyAlertUI() {
   const alertDialogSpy = jest.spyOn(
     snapUiUtils,
     'renderDisplayPrivateKeyAlertUI',
@@ -150,7 +178,7 @@ export function prepareRenderDisplayPrivateKeyAlertUI() {
  *
  * @param result
  */
-export function prepareConfirmDialogInteractiveUI(result = true) {
+export function mockConfirmDialogInteractiveUI(result = true) {
   const confirmDialogSpy = jest.spyOn(
     snapHelper,
     'createInteractiveConfirmDialog',
@@ -164,7 +192,7 @@ export function prepareConfirmDialogInteractiveUI(result = true) {
 /**
  *
  */
-export function prepareAlertDialog() {
+export function mockAlertDialog() {
   const alertDialogSpy = jest.spyOn(snapHelper, 'alertDialog');
   alertDialogSpy.mockResolvedValue(true);
   return {

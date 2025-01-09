@@ -17,7 +17,7 @@ import type { ListTransactionsParams } from './list-transactions';
 jest.mock('../utils/logger');
 
 describe('listTransactions', () => {
-  const prepareListTransactions = async () => {
+  const setupListTransactionsTest = async () => {
     const network = STARKNET_SEPOLIA_TESTNET_NETWORK;
     const chainId = network.chainId as unknown as constants.StarknetChainId;
     const account = await mockAccount(chainId);
@@ -46,7 +46,7 @@ describe('listTransactions', () => {
 
   it('returns transactions', async () => {
     const { transactions, getTransactionsSpy, chainId, account } =
-      await prepareListTransactions();
+      await setupListTransactionsTest();
 
     const result = await listTransactions.execute({
       chainId,
@@ -65,7 +65,7 @@ describe('listTransactions', () => {
 
   it('fetchs transactions with config value if input `txnsInLastNumOfDays` has not given', async () => {
     const { getTransactionsSpy, chainId, account } =
-      await prepareListTransactions();
+      await setupListTransactionsTest();
 
     await listTransactions.execute({
       chainId,

@@ -1,27 +1,20 @@
-import type { getBIP44ChangePathString } from '@metamask/key-tree/dist/types/utils';
 import type { Json } from '@metamask/snaps-sdk';
 
-import type { Network, SnapState } from '../../types/snapState';
-import { getBip44Deriver, getStateData } from '../../utils';
 import {
-  getNetworkFromChainId,
-  verifyIfAccountNeedUpgradeOrDeploy,
+  DeployRequiredError,
+  UpgradeRequiredError,
+} from '../../utils/exceptions';
+import { createAccountService } from '../../utils/factory';
+import {
+  showDeployRequestModal,
+  showUpgradeRequestModal,
 } from '../../utils/snapUtils';
-import { getKeysFromAddress } from '../../utils/starknetUtils';
-import { RpcController } from './base-rpc-controller';
+import type { Account } from '../../wallet/account/account';
+import { ChainRpcController } from './chain-rpc-controller';
 
 export type AccountRpcParams = {
   chainId: string;
   address: string;
-};
-
-// TODO: the Account object should move into a account manager for generate account
-export type Account = {
-  privateKey: string;
-  publicKey: string;
-  addressIndex: number;
-  // This is the derivation path of the address, it is used in `getNextAddressIndex` to find the account in state where matching the same derivation path
-  derivationPath: ReturnType<typeof getBIP44ChangePathString>;
 };
 
 export type AccountRpcControllerOptions = {
@@ -38,10 +31,8 @@ export type AccountRpcControllerOptions = {
 export abstract class AccountRpcController<
   Request extends AccountRpcParams,
   Response extends Json,
-> extends RpcController<Request, Response> {
+> extends ChainRpcController<Request, Response> {
   protected account: Account;
-
-  protected network: Network;
 
   protected options: AccountRpcControllerOptions;
 
@@ -54,33 +45,55 @@ export abstract class AccountRpcController<
     this.options = Object.assign({}, this.defaultOptions, options);
   }
 
+  /**
+   * A Pre execute hook of the rpc method execution.
+   * Derives the account from the address and verifies if it needs to be upgraded or deployed.
+   *
+   * @param params - The request parameters.
+   * @returns The response.
+   */
   protected async preExecute(params: Request): Promise<void> {
     await super.preExecute(params);
+    const { address } = params;
 
-    const { chainId, address } = params;
-    const { showInvalidAccountAlert } = this.options;
+    const accountService = createAccountService(this.network);
+    this.account = await accountService.deriveAccountByAddress(address);
 
-    const deriver = await getBip44Deriver();
-    // TODO: Instead of getting the state directly, we should implement state management to consolidate the state fetching
-    const state = await getStateData<SnapState>();
+    try {
+      await this.verifyAccount();
+    } catch (error) {
+      await this.displayAlert(error);
+      throw error;
+    }
+  }
 
-    // TODO: getNetworkFromChainId from state is still needed, due to it is supporting in get-starknet at this moment
-    this.network = getNetworkFromChainId(state, chainId);
+  /**
+   * Verify if the account needs to be upgraded or deployed and throw an error if it does.
+   *
+   * @throws {DeployRequiredError} If the account needs to be deployed.
+   * @throws {UpgradeRequiredError} If the account needs to be upgraded.
+   */
+  protected async verifyAccount(): Promise<void> {
+    const { accountContract } = this.account;
 
-    // TODO: This method should be refactored to get the account from an account manager
-    this.account = await getKeysFromAddress(
-      deriver,
-      this.network,
-      state,
-      address,
-    );
+    if (await accountContract.isRequireUpgrade()) {
+      throw new UpgradeRequiredError();
+    } else if (await accountContract.isRequireDeploy()) {
+      throw new DeployRequiredError();
+    }
+  }
 
-    // TODO: rename this method to verifyAccount
-    await verifyIfAccountNeedUpgradeOrDeploy(
-      this.network,
-      address,
-      this.account.publicKey,
-      showInvalidAccountAlert,
-    );
+  /**
+   * Show an alert modal if the account needs to be upgraded or deployed, otherwise do nothing.
+   * @param error
+   */
+  protected async displayAlert(error: Error): Promise<void> {
+    const { showInvalidAccountAlert: enableAlert } = this.options;
+
+    if (error instanceof UpgradeRequiredError) {
+      enableAlert && (await showUpgradeRequestModal());
+    } else if (error instanceof DeployRequiredError) {
+      enableAlert && (await showDeployRequestModal());
+    }
   }
 }

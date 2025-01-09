@@ -10,35 +10,35 @@ import {
 jest.mock('../utils/snap');
 jest.mock('../utils/logger');
 
-const prepareMockGetAddrFromStarkName = ({
-  chainId,
-  starkName,
-}: {
-  chainId: constants.StarknetChainId;
-  starkName: string;
-}) => {
-  const request = {
+describe('getAddrFromStarkName', () => {
+  const setupGetAddrFromStarkNameTest = ({
     chainId,
     starkName,
-  } as unknown as GetAddrFromStarkNameParams;
+  }: {
+    chainId: constants.StarknetChainId;
+    starkName: string;
+  }) => {
+    const request = {
+      chainId,
+      starkName,
+    } as unknown as GetAddrFromStarkNameParams;
 
-  const getAddrFromStarkNameSpy = jest.spyOn(
-    starknetUtils,
-    'getAddrFromStarkNameUtil',
-  );
-  getAddrFromStarkNameSpy.mockResolvedValue(
-    '0x01c744953f1d671673f46a9179a58a7e58d9299499b1e076cdb908e7abffe69f',
-  );
+    const getAddrFromStarkNameSpy = jest.spyOn(
+      starknetUtils,
+      'getAddrFromStarkNameUtil',
+    );
+    getAddrFromStarkNameSpy.mockResolvedValue(
+      '0x01c744953f1d671673f46a9179a58a7e58d9299499b1e076cdb908e7abffe69f',
+    );
 
-  return {
-    request,
+    return {
+      request,
+    };
   };
-};
 
-describe('getAddrFromStarkName', () => {
   it('get address from stark name correctly', async () => {
     const chainId = constants.StarknetChainId.SN_SEPOLIA;
-    const { request } = prepareMockGetAddrFromStarkName({
+    const { request } = setupGetAddrFromStarkNameTest({
       chainId,
       starkName: 'testname.stark',
     });

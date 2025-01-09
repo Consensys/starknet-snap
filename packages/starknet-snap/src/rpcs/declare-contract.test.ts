@@ -1,6 +1,5 @@
 import { utils } from 'ethers';
-import type { Abi, UniversalDetails } from 'starknet';
-import { constants } from 'starknet';
+import type { Abi, UniversalDetails, constants } from 'starknet';
 import type { Infer } from 'superstruct';
 
 import { type DeclareContractPayloadStruct } from '../utils';
@@ -17,9 +16,8 @@ import {
   buildRowComponent,
   buildSignerComponent,
   generateRandomFee,
-  mockAccount,
-  prepareConfirmDialog,
-  prepareMockAccount,
+  mockConfirmDialog,
+  setupAccountController,
 } from './__tests__/helper';
 import { declareContract } from './declare-contract';
 import type {
@@ -55,50 +53,44 @@ const generateExpectedDeclareTransactionPayload =
     },
   });
 
-const prepareMockDeclareContract = async (
-  transactionHash: string,
-  payload: DeclareContractPayload,
-  details: UniversalDetails,
-) => {
-  const state = {
-    accContracts: [],
-    erc20Tokens: [],
-    networks: [STARKNET_SEPOLIA_TESTNET_NETWORK],
-    transactions: [],
-  };
-  const { confirmDialogSpy } = prepareConfirmDialog();
-
-  const account = await mockAccount(constants.StarknetChainId.SN_SEPOLIA);
-  prepareMockAccount(account, state);
-
-  const request = {
-    chainId: state.networks[0].chainId as unknown as constants.StarknetChainId,
-    address: account.address,
-    payload,
-    details,
-  };
-
-  const declareContractRespMock: DeclareContractResponse = {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    transaction_hash: transactionHash,
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    class_hash: '0x123456789abcdef',
-  };
-
-  const declareContractUtilSpy = jest.spyOn(starknetUtils, 'declareContract');
-  declareContractUtilSpy.mockResolvedValue(declareContractRespMock);
-
-  return {
-    network: state.networks[0],
-    account,
-    request,
-    confirmDialogSpy,
-    declareContractRespMock,
-    declareContractUtilSpy,
-  };
-};
-
 describe('DeclareContractRpc', () => {
+  const network = STARKNET_SEPOLIA_TESTNET_NETWORK;
+
+  const setupDeclareContractTest = async (
+    transactionHash: string,
+    payload: DeclareContractPayload,
+    details: UniversalDetails,
+  ) => {
+    const { confirmDialogSpy } = mockConfirmDialog();
+
+    const { account } = await setupAccountController({});
+
+    const request = {
+      chainId: network.chainId as unknown as constants.StarknetChainId,
+      address: account.address,
+      payload,
+      details,
+    };
+
+    const declareContractMockResp: DeclareContractResponse = {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      transaction_hash: transactionHash,
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      class_hash: '0x123456789abcdef',
+    };
+
+    const declareContractUtilSpy = jest.spyOn(starknetUtils, 'declareContract');
+    declareContractUtilSpy.mockResolvedValue(declareContractMockResp);
+
+    return {
+      account,
+      request,
+      confirmDialogSpy,
+      declareContractMockResp,
+      declareContractUtilSpy,
+    };
+  };
+
   it('declares a contract correctly if user confirms the dialog', async () => {
     const payload = generateExpectedDeclareTransactionPayload();
     const details = {
@@ -109,17 +101,16 @@ describe('DeclareContractRpc', () => {
     const {
       account,
       request,
-      network,
-      declareContractRespMock,
+      declareContractMockResp,
       confirmDialogSpy,
       declareContractUtilSpy,
-    } = await prepareMockDeclareContract(transactionHash, payload, details);
+    } = await setupDeclareContractTest(transactionHash, payload, details);
 
     confirmDialogSpy.mockResolvedValue(true);
 
     const result = await declareContract.execute(request);
 
-    expect(result).toStrictEqual(declareContractRespMock);
+    expect(result).toStrictEqual(declareContractMockResp);
     expect(declareContractUtilSpy).toHaveBeenCalledWith(
       network,
       account.address,
@@ -137,7 +128,7 @@ describe('DeclareContractRpc', () => {
     const transactionHash =
       '0x07f901c023bac6c874691244c4c2332c6825b916fb68d240c807c6156db84fd3';
 
-    const { request, confirmDialogSpy } = await prepareMockDeclareContract(
+    const { request, confirmDialogSpy } = await setupDeclareContractTest(
       transactionHash,
       payload,
       details,
@@ -158,25 +149,25 @@ describe('DeclareContractRpc', () => {
   it.each([
     {
       testCase: 'class_hash is missing',
-      declareContractRespMock: {
+      declareContractMockResp: {
         // eslint-disable-next-line @typescript-eslint/naming-convention
         transaction_hash: '0x123',
       },
     },
     {
       testCase: 'transaction_hash is missing',
-      declareContractRespMock: {
+      declareContractMockResp: {
         // eslint-disable-next-line @typescript-eslint/naming-convention
         class_hash: '0x123456789abcdef',
       },
     },
     {
       testCase: 'empty object is returned',
-      declareContractRespMock: {},
+      declareContractMockResp: {},
     },
   ])(
     'throws `Unknown Error` when $testCase',
-    async ({ declareContractRespMock }) => {
+    async ({ declareContractMockResp }) => {
       const payload = generateExpectedDeclareTransactionPayload();
       const details = {
         maxFee: generateRandomFee('1000000000000000', '2000000000000000'),
@@ -184,10 +175,10 @@ describe('DeclareContractRpc', () => {
       const transactionHash = '0x123';
 
       const { request, declareContractUtilSpy } =
-        await prepareMockDeclareContract(transactionHash, payload, details);
+        await setupDeclareContractTest(transactionHash, payload, details);
 
       declareContractUtilSpy.mockResolvedValue(
-        declareContractRespMock as unknown as DeclareContractResponse,
+        declareContractMockResp as unknown as DeclareContractResponse,
       );
 
       await expect(declareContract.execute(request)).rejects.toThrow(
@@ -205,8 +196,8 @@ describe('DeclareContractRpc', () => {
     const maxFeeInEth = utils.formatUnits(details.maxFee, 'ether');
     const transactionHash = '0x123';
 
-    const { request, network, confirmDialogSpy, account } =
-      await prepareMockDeclareContract(transactionHash, payload, details);
+    const { request, confirmDialogSpy, account } =
+      await setupDeclareContractTest(transactionHash, payload, details);
 
     await declareContract.execute(request);
 

@@ -1,26 +1,20 @@
-import { constants } from 'starknet';
 import { object, string } from 'superstruct';
 import type { Infer } from 'superstruct';
 
-import type { StarknetAccount } from '../../__tests__/helper';
-import { generateAccounts } from '../../__tests__/helper';
-import type { SnapState } from '../../types/snapState';
 import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../../utils/constants';
-import * as snapHelper from '../../utils/snap';
+import {
+  DeployRequiredError,
+  UpgradeRequiredError,
+} from '../../utils/exceptions';
 import * as snapUtils from '../../utils/snapUtils';
-import * as starknetUtils from '../../utils/starknetUtils';
+import { setupAccountController } from '../__tests__/helper';
 import { AccountRpcController } from './account-rpc-controller';
 
 jest.mock('../../utils/snap');
 jest.mock('../../utils/logger');
 
 describe('AccountRpcController', () => {
-  const state: SnapState = {
-    accContracts: [],
-    erc20Tokens: [],
-    networks: [STARKNET_SEPOLIA_TESTNET_NETWORK],
-    transactions: [],
-  };
+  const network = STARKNET_SEPOLIA_TESTNET_NETWORK;
 
   const RequestStruct = object({
     address: string(),
@@ -38,89 +32,88 @@ describe('AccountRpcController', () => {
     async handleRequest(param: Request) {
       return `done ${param.address} and ${param.chainId}`;
     }
+
+    async displayAlert(error: Error): Promise<void> {
+      return super.displayAlert(error);
+    }
   }
 
-  const mockAccount = async (network: constants.StarknetChainId) => {
-    const accounts = await generateAccounts(network, 1);
-    return accounts[0];
-  };
+  const setupRpcExecuteTest = async ({
+    requireDeploy = false,
+    requireUpgrade = false,
+  }: {
+    requireDeploy?: boolean;
+    requireUpgrade?: boolean;
+  }) => {
+    const { account, isRequireUpgradeSpy, isRequireDeploySpy } =
+      await setupAccountController({});
 
-  const prepareExecute = async (account: StarknetAccount) => {
-    const verifyIfAccountNeedUpgradeOrDeploySpy = jest.spyOn(
+    const showDeployRequestModalSpy = jest.spyOn(
       snapUtils,
-      'verifyIfAccountNeedUpgradeOrDeploy',
+      'showDeployRequestModal',
+    );
+    const showUpgradeRequestModalSpy = jest.spyOn(
+      snapUtils,
+      'showUpgradeRequestModal',
     );
 
-    const getKeysFromAddressSpy = jest.spyOn(
-      starknetUtils,
-      'getKeysFromAddress',
-    );
-
-    const getStateDataSpy = jest.spyOn(snapHelper, 'getStateData');
-
-    getStateDataSpy.mockResolvedValue(state);
-
-    getKeysFromAddressSpy.mockResolvedValue({
-      privateKey: account.privateKey,
-      publicKey: account.publicKey,
-      addressIndex: account.addressIndex,
-      derivationPath: account.derivationPath as unknown as any,
-    });
-
-    verifyIfAccountNeedUpgradeOrDeploySpy.mockReturnThis();
+    isRequireUpgradeSpy.mockResolvedValue(requireUpgrade);
+    isRequireDeploySpy.mockResolvedValue(requireDeploy);
 
     return {
-      getKeysFromAddressSpy,
-      getStateDataSpy,
-      verifyIfAccountNeedUpgradeOrDeploySpy,
+      account,
+      showDeployRequestModalSpy,
+      showUpgradeRequestModalSpy,
+      isRequireUpgradeSpy,
+      isRequireDeploySpy,
     };
   };
 
   it('executes request', async () => {
-    const chainId = constants.StarknetChainId.SN_SEPOLIA;
-    const account = await mockAccount(chainId);
-    await prepareExecute(account);
+    const { account } = await setupRpcExecuteTest({});
     const rpc = new MockAccountRpc();
 
     const result = await rpc.execute({
       address: account.address,
-      chainId,
+      chainId: network.chainId,
     });
 
-    expect(result).toBe(`done ${account.address} and ${chainId}`);
+    expect(result).toBe(`done ${account.address} and ${network.chainId}`);
   });
 
-  it('fetchs account before execute', async () => {
-    const chainId = constants.StarknetChainId.SN_SEPOLIA;
-    const account = await mockAccount(chainId);
-    const { getKeysFromAddressSpy } = await prepareExecute(account);
-    const rpc = new MockAccountRpc();
+  it(`displays a request deploy dialog if account is required deploy and \`showInvalidAccountAlert\` is true`, async () => {
+    const { account, showDeployRequestModalSpy } = await setupRpcExecuteTest({
+      requireDeploy: true,
+    });
+    const rpc = new MockAccountRpc({
+      showInvalidAccountAlert: true,
+    });
 
-    await rpc.execute({ address: account.address, chainId });
+    await expect(
+      rpc.execute({
+        address: account.address,
+        chainId: network.chainId,
+      }),
+    ).rejects.toThrow(DeployRequiredError);
 
-    expect(getKeysFromAddressSpy).toHaveBeenCalled();
+    expect(showDeployRequestModalSpy).toHaveBeenCalled();
   });
 
-  it.each([true, false])(
-    `assign verifyIfAccountNeedUpgradeOrDeploy's argument "showAlert" to %s if the constructor option 'showInvalidAccountAlert' is set to %s`,
-    async (showInvalidAccountAlert: boolean) => {
-      const chainId = constants.StarknetChainId.SN_SEPOLIA;
-      const account = await mockAccount(chainId);
-      const { verifyIfAccountNeedUpgradeOrDeploySpy } = await prepareExecute(
-        account,
-      );
-      const rpc = new MockAccountRpc({
-        showInvalidAccountAlert,
-      });
+  it(`displays a request upgrade dialog if account is required upgrade and \`showInvalidAccountAlert\` is true`, async () => {
+    const { account, showUpgradeRequestModalSpy } = await setupRpcExecuteTest({
+      requireUpgrade: true,
+    });
+    const rpc = new MockAccountRpc({
+      showInvalidAccountAlert: true,
+    });
 
-      await rpc.execute({ address: account.address, chainId });
+    await expect(
+      rpc.execute({
+        address: account.address,
+        chainId: network.chainId,
+      }),
+    ).rejects.toThrow(UpgradeRequiredError);
 
-      expect(verifyIfAccountNeedUpgradeOrDeploySpy).toHaveBeenCalledWith(
-        expect.any(Object),
-        account.address,
-        account.publicKey,
-        showInvalidAccountAlert,
-      );
-    },
-  );
+    expect(showUpgradeRequestModalSpy).toHaveBeenCalled();
+  });
 });

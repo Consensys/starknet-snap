@@ -2,11 +2,9 @@ import type { Infer } from 'superstruct';
 import { assign, object } from 'superstruct';
 
 import { NetworkStateManager } from '../state/network-state-manager';
-import type { Network } from '../types/snapState';
 import { AddressStruct, BaseRequestStruct, StarkNameStruct } from '../utils';
-import { InvalidNetworkError } from '../utils/exceptions';
 import { getAddrFromStarkNameUtil } from '../utils/starknetUtils';
-import { RpcController } from './abstract/base-rpc-controller';
+import { ChainRpcController } from './abstract/chain-rpc-controller';
 
 export const GetAddrFromStarkNameRequestStruct = assign(
   object({
@@ -28,7 +26,7 @@ export type GetAddrFromStarkNameResponse = Infer<
 /**
  * The RPC handler to get a StarkName by a Starknet address.
  */
-export class GetAddrFromStarkNameRpc extends RpcController<
+export class GetAddrFromStarkNameRpc extends ChainRpcController<
   GetAddrFromStarkNameParams,
   GetAddrFromStarkNameResponse
 > {
@@ -58,27 +56,12 @@ export class GetAddrFromStarkNameRpc extends RpcController<
     return super.execute(params);
   }
 
-  protected async getNetworkFromChainId(chainId: string): Promise<Network> {
-    const network = await this.networkStateMgr.getNetwork({
-      chainId,
-    });
-
-    // It should be never happen, as the chainId should be validated by the superstruct
-    if (!network) {
-      throw new InvalidNetworkError() as unknown as Error;
-    }
-
-    return network;
-  }
-
   protected async handleRequest(
     params: GetAddrFromStarkNameParams,
   ): Promise<GetAddrFromStarkNameResponse> {
-    const { chainId, starkName } = params;
+    const { starkName } = params;
 
-    const network = await this.getNetworkFromChainId(chainId);
-
-    const address = await getAddrFromStarkNameUtil(network, starkName);
+    const address = await getAddrFromStarkNameUtil(this.network, starkName);
 
     return address;
   }
