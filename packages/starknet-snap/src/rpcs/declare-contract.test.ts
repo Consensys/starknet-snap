@@ -10,6 +10,7 @@ import {
   InvalidRequestParamsError,
   UnknownError,
 } from '../utils/exceptions';
+import { loadLocale } from '../utils/locale';
 import * as starknetUtils from '../utils/starknetUtils';
 import {
   buildDividerComponent,
@@ -60,6 +61,7 @@ const prepareMockDeclareContract = async (
   payload: DeclareContractPayload,
   details: UniversalDetails,
 ) => {
+  await loadLocale();
   const state = {
     accContracts: [],
     erc20Tokens: [],

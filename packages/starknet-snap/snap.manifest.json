@@ -18,6 +18,7 @@
     }
   },
   "initialPermissions": {
+    "snap_getPreferences": {},
     "snap_dialog": {},
     "endowment:network-access": {},
     "snap_getBip44Entropy": [

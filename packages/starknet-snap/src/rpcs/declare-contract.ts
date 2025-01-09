@@ -151,7 +151,7 @@ export class DeclareContractRpc extends AccountRpcController<
       components.push(dividerUI());
       components.push(
         rowUI({
-          label: translate('maxFee'),
+          label: translate('maxFeeETH'),
           value: maxFeeInEth,
         }),
       );

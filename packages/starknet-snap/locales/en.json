@@ -76,6 +76,9 @@
     "messageLabel": {
       "message": "Message"
     },
+    "maxFeeETH": {
+      "message": "Max Fee (ETH)"
+    },
     "nameLabel": {
       "message": "Name"
     },

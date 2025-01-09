@@ -9,6 +9,7 @@ import {
   ETHER_MAINNET,
   STARKNET_SEPOLIA_TESTNET_NETWORK,
 } from './utils/constants';
+import { loadLocale } from './utils/locale';
 import * as snapHelper from './utils/snap';
 import * as starknetUtils from './utils/starknetUtils';
 
@@ -65,6 +66,7 @@ describe('homepageController', () => {
     };
 
     it('returns the correct homepage response', async () => {
+      await loadLocale();
       const { currentNetwork } = state;
       await mockState();
       const account = await mockAccount(

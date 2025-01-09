@@ -29,6 +29,7 @@ import {
 } from '../../src/types/snapApi';
 import { GetTransactionReceiptResponse } from 'starknet';
 import { BIP44AddressKeyDeriver } from '@metamask/key-tree';
+import { loadLocale } from '../../src/utils/locale';
 
 chai.use(sinonChai);
 const sandbox = sinon.createSandbox();
@@ -98,6 +99,7 @@ describe('Test function: createAccount', function () {
   });
 
   it('waits for tansaction after an account has deployed', async function () {
+    await loadLocale();
     sandbox.stub(utils, 'deployAccount').callsFake(async () => {
       return createAccountProxyMainnetResp;
     });
@@ -117,6 +119,7 @@ describe('Test function: createAccount', function () {
   });
 
   it('should create and store an user account with proxy in state correctly in mainnet', async function () {
+    await loadLocale();
     sandbox.stub(utils, 'deployAccount').callsFake(async () => {
       return createAccountProxyMainnetResp;
     });
@@ -152,6 +155,7 @@ describe('Test function: createAccount', function () {
   });
 
   it('should create and store an user account of specific address index with proxy in state correctly in mainnet', async function () {
+    await loadLocale();
     state.accContracts.push(account1);
     state.transactions.push(createAccountProxyTxn);
     sandbox.stub(utils, 'deployAccount').callsFake(async () => {
@@ -222,6 +226,7 @@ describe('Test function: createAccount', function () {
   });
 
   it('should not create any user account with proxy in state in SN_SEPOLIA if not in silentMode and user rejected', async function () {
+    await loadLocale();
     sandbox.stub(utils, 'getAccContractAddressAndCallData').callsFake(() => {
       return {
         address: account1.address,
@@ -240,6 +245,7 @@ describe('Test function: createAccount', function () {
   });
 
   it('should skip upsert account and transaction if deployTxn response code has no transaction_hash in SN_SEPOLIA', async function () {
+    await loadLocale();
     sandbox.stub(utils, 'deployAccount').callsFake(async () => {
       return createAccountFailedProxyResp;
     });

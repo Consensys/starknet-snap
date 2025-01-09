@@ -306,7 +306,7 @@ export const onInstall: OnInstallHandler = async () => {
       <Text>{translate('walletCompatibility')}</Text>
       <Text>
         {translate('accountManagementIntro')}{' '}
-        <Link href={getDappUrl()}>{t('companionDapp')}</Link>.
+        <Link href={getDappUrl()}>{translate('companionDapp')}</Link>.
       </Text>
     </Box>,
   );

@@ -11,6 +11,7 @@ import {
 import { addNetwork } from '../../src/addNetwork';
 import { Mutex } from 'async-mutex';
 import { AddNetworkRequestParams, ApiParams } from '../../src/types/snapApi';
+import { loadLocale } from '../../src/utils/locale';
 
 chai.use(sinonChai);
 const sandbox = sinon.createSandbox();
@@ -44,6 +45,7 @@ describe('Test function: addNetwork', function () {
   });
 
   it('should add the network correctly', async function () {
+    await loadLocale();
     const requestObject: AddNetworkRequestParams = {
       networkName: 'Starknet Unit SN_SEPOLIA',
       networkChainId: '0x534e5f474f777',
@@ -58,6 +60,7 @@ describe('Test function: addNetwork', function () {
   });
 
   it('should update the network correctly', async function () {
+    await loadLocale();
     const requestObject: AddNetworkRequestParams = {
       networkName: 'Starknet Unit SN_SEPOLIA 2',
       networkChainId: '0x534e5f474f777',
@@ -72,6 +75,7 @@ describe('Test function: addNetwork', function () {
   });
 
   it('should not update snap state with the duplicated network', async function () {
+    await loadLocale();
     const requestObject: AddNetworkRequestParams = {
       networkName: 'Starknet Unit SN_SEPOLIA 2',
       networkChainId: '0x534e5f474f777',

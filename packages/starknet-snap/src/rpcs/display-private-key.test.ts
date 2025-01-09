@@ -6,6 +6,7 @@ import {
   UserRejectedOpError,
   InvalidRequestParamsError,
 } from '../utils/exceptions';
+import { loadLocale } from '../utils/locale';
 import {
   mockAccount,
   prepareMockAccount,
@@ -37,6 +38,7 @@ describe('displayPrivateKey', () => {
   };
 
   it('displays private key correctly', async () => {
+    await loadLocale();
     const chainId = constants.StarknetChainId.SN_SEPOLIA;
     const account = await mockAccount(chainId);
     prepareMockAccount(account, state);
@@ -51,6 +53,7 @@ describe('displayPrivateKey', () => {
   });
 
   it('renders confirmation dialog', async () => {
+    await loadLocale();
     const chainId = constants.StarknetChainId.SN_SEPOLIA;
     const account = await mockAccount(chainId);
     prepareMockAccount(account, state);
