@@ -5,6 +5,7 @@ import { generateAccounts, generateKeyDeriver } from '../../__tests__/helper';
 import { AccountStateManager } from '../../state/account-state-manager';
 import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../../utils/constants';
 import { AccountNotFoundError } from '../../utils/exceptions';
+import { createAccountService } from '../../utils/factory';
 import * as snapUtils from '../../utils/snap';
 import {
   createAccountObject,
@@ -19,7 +20,7 @@ describe('AccountService', () => {
   const network = STARKNET_SEPOLIA_TESTNET_NETWORK;
 
   describe('deriveAccountByIndex', () => {
-    const prepareDeriveAccountByIndex = async (hdIndex) => {
+    const setupDeriveAccountByIndexTest = async (hdIndex) => {
       const mnemonicString = generateMnemonic();
 
       const [account] = await generateAccounts(
@@ -72,9 +73,9 @@ describe('AccountService', () => {
         upsertAccountSpy,
         cairo1Contract,
         account,
-      } = await prepareDeriveAccountByIndex(hdIndex);
+      } = await setupDeriveAccountByIndexTest(hdIndex);
 
-      const service = new AccountService(network, new AccountStateManager());
+      const service = createAccountService(network);
       const accountObject = await service.deriveAccountByIndex();
 
       expect(getNextIndexSpy).toHaveBeenCalled();
@@ -100,9 +101,9 @@ describe('AccountService', () => {
         cairo1Contract,
         account,
         upsertAccountSpy,
-      } = await prepareDeriveAccountByIndex(hdIndex);
+      } = await setupDeriveAccountByIndexTest(hdIndex);
 
-      const service = new AccountService(network, new AccountStateManager());
+      const service = createAccountService(network);
       const accountObject = await service.deriveAccountByIndex(hdIndex);
 
       expect(getNextIndexSpy).not.toHaveBeenCalled();
@@ -122,7 +123,7 @@ describe('AccountService', () => {
   });
 
   describe('deriveAccountFromAddress', () => {
-    const prepareDeriveAccountByAddress = async () => {
+    const setupDeriveAccountByAddressTest = async () => {
       const getAccountSpy = jest.spyOn(
         AccountStateManager.prototype,
         'getAccount',
@@ -146,9 +147,9 @@ describe('AccountService', () => {
 
     it('derive an account by address', async () => {
       const { getAccountSpy, deriveAccountByIndexSpy, accountObj } =
-        await prepareDeriveAccountByAddress();
+        await setupDeriveAccountByAddressTest();
 
-      const service = new AccountService(network, new AccountStateManager());
+      const service = createAccountService(network);
       const accountObject = await service.deriveAccountByAddress(
         accountObj.address,
       );
@@ -160,11 +161,11 @@ describe('AccountService', () => {
 
     it('throws `AccountNotFoundError` if the given address is not found', async () => {
       const { getAccountSpy, accountObj } =
-        await prepareDeriveAccountByAddress();
+        await setupDeriveAccountByAddressTest();
 
       getAccountSpy.mockResolvedValue(null);
 
-      const service = new AccountService(network, new AccountStateManager());
+      const service = createAccountService(network);
 
       await expect(
         service.deriveAccountByAddress(accountObj.address),
@@ -181,7 +182,7 @@ describe('AccountService', () => {
       );
       removeAccountSpy.mockResolvedValue();
 
-      const service = new AccountService(network, new AccountStateManager());
+      const service = createAccountService(network);
       await service.removeAccount(accountObj);
 
       expect(removeAccountSpy).toHaveBeenCalledWith({

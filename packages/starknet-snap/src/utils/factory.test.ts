@@ -1,8 +1,13 @@
 import { StarkScanClient } from '../chain/data-client/starkscan';
 import { TransactionService } from '../chain/transaction-service';
 import { Config, DataClient } from '../config';
+import { AccountService } from '../wallet/account';
 import { STARKNET_SEPOLIA_TESTNET_NETWORK } from './constants';
-import { createStarkScanClient, createTransactionService } from './factory';
+import {
+  createAccountService,
+  createStarkScanClient,
+  createTransactionService,
+} from './factory';
 
 const config = Config.dataClient[DataClient.STARKSCAN];
 
@@ -29,5 +34,13 @@ describe('createTransactionService', () => {
       createTransactionService(STARKNET_SEPOLIA_TESTNET_NETWORK),
     ).toBeInstanceOf(TransactionService);
     config.apiKey = undefined;
+  });
+});
+
+describe('createAccountService', () => {
+  it('creates a Account service', () => {
+    expect(
+      createAccountService(STARKNET_SEPOLIA_TESTNET_NETWORK),
+    ).toBeInstanceOf(AccountService);
   });
 });

@@ -1,4 +1,4 @@
-import type { AccountStateManager } from '../../state/account-state-manager';
+import { AccountStateManager } from '../../state/account-state-manager';
 import type { Network } from '../../types/snapState';
 import { getBip44Deriver } from '../../utils';
 import { AccountNotFoundError } from '../../utils/exceptions';
@@ -13,7 +13,13 @@ export class AccountService {
 
   protected accountContractDiscoveryService: AccountContractDiscovery;
 
-  constructor(network: Network, accountStateMgr: AccountStateManager) {
+  constructor({
+    network,
+    accountStateMgr = new AccountStateManager(),
+  }: {
+    network: Network;
+    accountStateMgr?: AccountStateManager;
+  }) {
     this.network = network;
     this.accountStateMgr = accountStateMgr;
     this.accountContractDiscoveryService = new AccountContractDiscovery(

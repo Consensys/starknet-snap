@@ -49,6 +49,20 @@ export abstract class CairoAccountContract {
     return this.getCallData();
   }
 
+  get deployPaylod(): {
+    classHash: string;
+    contractAddress: string;
+    constructorCalldata: Calldata;
+    addressSalt: string;
+  } {
+    return {
+      classHash: this.classhash,
+      contractAddress: this.address,
+      constructorCalldata: this.callData,
+      addressSalt: this.publicKey,
+    };
+  }
+
   get address(): string {
     if (this._address === undefined) {
       this._address = this.calculateAddress();
