@@ -30,6 +30,9 @@ export class AccountStateManager extends StateManager<AccContract> {
     if (data.deployRequired !== undefined) {
       dataInState.deployRequired = data.deployRequired;
     }
+    if (data.cairoVersion !== undefined) {
+      dataInState.cairoVersion = data.cairoVersion;
+    }
   }
 
   /**
@@ -116,6 +119,28 @@ export class AccountStateManager extends StateManager<AccContract> {
     }
   }
 
+  async upsertAccount(data: AccContract): Promise<void> {
+    try {
+      await this.update(async (state: SnapState) => {
+        const accountInState = await this.getAccount(
+          {
+            address: data.address,
+            chainId: data.chainId,
+          },
+          state,
+        );
+
+        if (accountInState) {
+          this.updateEntity(accountInState, data);
+        } else {
+          state.accContracts.push(data);
+        }
+      });
+    } catch (error) {
+      throw new StateManagerError(error.message);
+    }
+  }
+
   async updateAccountAsDeploy({
     address,
     chainId,
@@ -142,6 +167,59 @@ export class AccountStateManager extends StateManager<AccContract> {
         accountInState.upgradeRequired = false;
         accountInState.deployRequired = false;
         accountInState.deployTxnHash = transactionHash;
+      });
+    } catch (error) {
+      throw new StateManagerError(error.message);
+    }
+  }
+
+  async getNextIndex(chainId: string): Promise<number> {
+    let idx = 0;
+    await this.update(async (state: SnapState) => {
+      // Choose the deleted account index over the last index (accContracts length).
+      // If the removedAccounts array is empty, then fallback with the last index.
+      idx =
+        state.removedAccounts?.[chainId]?.shift() ?? state.accContracts.length;
+    });
+    return idx;
+  }
+
+  async removeAccount({
+    address,
+    chainId,
+  }: {
+    address: string;
+    chainId: string;
+  }): Promise<void> {
+    try {
+      await this.update(async (state: SnapState) => {
+        const accountInState = await this.getAccount(
+          {
+            address,
+            chainId,
+          },
+          state,
+        );
+
+        if (!accountInState) {
+          throw new StateManagerError(`Account does not exist`);
+        }
+
+        state.accContracts = state.accContracts.filter(
+          (account) =>
+            account.address !== address && account.chainId === chainId,
+        );
+
+        // Safeguard to ensure the removedAccounts object is initialized.
+        if (!state.removedAccounts) {
+          state.removedAccounts = {};
+        }
+
+        if (!Object.hasOwnProperty.call(state.removedAccounts, chainId)) {
+          state.removedAccounts[chainId] = [];
+        }
+
+        state.removedAccounts[chainId].push(accountInState.addressIndex);
       });
     } catch (error) {
       throw new StateManagerError(error.message);

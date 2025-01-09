@@ -109,6 +109,21 @@ export async function generateBip44Entropy(
 }
 
 /**
+ * Method to generate Bip44 Node by index.
+ *
+ * @param [mnemonic] - Optional, the provided mnemonic string.
+ * @returns The deriver function for the derivation path.
+ */
+export async function generateKeyDeriver(mnemonic?: string) {
+  let mnemonicString = mnemonic;
+  if (!mnemonicString) {
+    mnemonicString = generateMnemonic();
+  }
+  const node = await generateBip44Entropy(mnemonicString);
+  return await getBIP44AddressKeyDeriver(node);
+}
+
+/**
  * Method to generate starknet account.
  *
  * @param network - Starknet Chain Id.
@@ -120,18 +135,14 @@ export async function generateAccounts(
   network: constants.StarknetChainId | string,
   cnt: number = 1,
   cairoVersion = '1',
-  mnemonic?: string,
+  startIndex = 0,
+  mnemonicString: string = generateMnemonic(),
 ) {
   const accounts: StarknetAccount[] = [];
-  let mnemonicString = mnemonic;
-  if (!mnemonicString) {
-    mnemonicString = generateMnemonic();
-  }
 
-  for (let i = 0; i < cnt; i++) {
+  for (let i = startIndex; i < startIndex + cnt; i++) {
     // simulate the bip44 entropy generation
-    const node = await generateBip44Entropy(mnemonicString);
-    const keyDeriver = await getBIP44AddressKeyDeriver(node);
+    const keyDeriver = await generateKeyDeriver(mnemonicString);
     const { privateKey } = await keyDeriver(i);
 
     if (!privateKey) {
