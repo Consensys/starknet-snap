@@ -179,7 +179,9 @@ export class AccountStateManager extends StateManager<AccContract> {
       // Choose the deleted account index over the last index (accContracts length).
       // If the removedAccounts array is empty, then fallback with the last index.
       idx =
-        state.removedAccounts?.[chainId]?.shift() ?? state.accContracts.length;
+        state.removedAccounts?.[chainId]?.shift() ??
+        state.accContracts.filter((account) => account.chainId === chainId)
+          .length;
     });
     return idx;
   }
