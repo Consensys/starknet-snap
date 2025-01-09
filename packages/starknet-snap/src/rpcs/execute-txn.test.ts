@@ -158,6 +158,7 @@ describe('ExecuteTxn', () => {
 
       const { formattedCalls } = mockCallToTransactionReqCall(calls);
       const { interfaceId } = mockGenerateExecuteTxnFlow();
+      const txnMgrMocks = mockTransactionRequestStateManager();
 
       const transactionRequest = {
         chainId: network.chainId,
@@ -173,7 +174,9 @@ describe('ExecuteTxn', () => {
         selectedFeeToken: transactionVersionToFeeToken(txnVersion),
         includeDeploy,
       };
-      getTransactionRequestSpy.mockResolvedValue(transactionRequest);
+      txnMgrMocks.getTransactionRequestSpy.mockResolvedValue(
+        transactionRequest,
+      );
 
       return {
         request,
@@ -181,7 +184,7 @@ describe('ExecuteTxn', () => {
         transactionRequest,
         interfaceId,
         ...mockConfirmDialogInteractiveUI(confirm),
-        ...mockTransactionRequestStateManager(),
+        ...txnMgrMocks,
       };
     };
 
