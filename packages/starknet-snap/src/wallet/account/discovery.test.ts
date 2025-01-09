@@ -1,7 +1,6 @@
 import { Cairo0Contract, Cairo1Contract } from '.';
 import { generateAccounts } from '../../__tests__/helper';
 import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../../utils/constants';
-import { AccountDiscoveryError } from '../../utils/exceptions';
 import { AccountContractDiscovery } from './discovery';
 
 jest.mock('../../utils/logger');
@@ -145,7 +144,19 @@ describe('AccountContractDiscovery', () => {
           isUpgraded: false,
         },
         expected: Cairo1Contract,
-        title: 'Cairo 0 is not deployed and Cairo 1 is not deployed',
+        title: 'no contract is deployed',
+      },
+      {
+        cairo0: {
+          isDeployed: true,
+          isUpgraded: false,
+        },
+        cairo1: {
+          isDeployed: true,
+          isUpgraded: false,
+        },
+        expected: Cairo1Contract,
+        title: 'all contracts are deployed',
       },
     ])(
       'returns a $expected.name if $title',
@@ -190,7 +201,7 @@ describe('AccountContractDiscovery', () => {
         expected: Cairo0Contract,
       },
     ])(
-      'returns a $expected.name if no account contract has deployed and the $expected.name has ETH',
+      'returns a $expected.name if no account contract is deployed and the $expected.name has ETH',
       async ({ expected, cairo0HasBalance, cairo1HasBalance }) => {
         const [account] = await generateAccounts(network.chainId, 1);
 
@@ -217,12 +228,12 @@ describe('AccountContractDiscovery', () => {
       },
     );
 
-    it('throws `AccountDiscoveryError` if more than one contracts deployed', async () => {
+    it('returns a Cairo1Contract if the Cairo1Contract is deployed and Cairo0Contract has ETH', async () => {
       const [account] = await generateAccounts(network.chainId, 1);
 
       mockContractState({
         cairo0: {
-          isDeployed: true,
+          isDeployed: false,
           isUpgraded: false,
         },
         cairo1: {
@@ -231,11 +242,15 @@ describe('AccountContractDiscovery', () => {
         },
       });
 
-      const service = new AccountContractDiscovery(network);
+      mockContractEthBalance({
+        cairo0HasBalance: true,
+        cairo1HasBalance: false,
+      });
 
-      await expect(service.getContract(account.publicKey)).rejects.toThrow(
-        AccountDiscoveryError,
-      );
+      const service = new AccountContractDiscovery(network);
+      const contract = await service.getContract(account.publicKey);
+
+      expect(contract).toBeInstanceOf(Cairo1Contract);
     });
   });
 });
