@@ -9,8 +9,8 @@ import {
 } from '@metamask/snaps-sdk/jsx';
 
 import type { Erc20Token } from '../../types/snapState';
-import { AddressUI, NetworkUI } from '../fragments';
 import { getTranslator } from '../../utils/locale';
+import { AddressUI, NetworkUI } from '../fragments';
 
 export type WatchAssetUIProps = {
   networkName: string;
@@ -32,28 +32,32 @@ export const WatchAssetUI: SnapComponent<WatchAssetUIProps> = ({
   chainId,
   token,
 }) => {
-  const t = getTranslator();
+  const translate = getTranslator();
   const { name, symbol, address, decimals } = token;
   return (
     <Box>
-      <Heading>{t("signTransactionPrompt")}</Heading>
+      <Heading>{translate('signTransactionPrompt')}</Heading>
       <Divider />
       <NetworkUI networkName={networkName} />
       <Section>
-        <AddressUI label={t("tokenLabel")} address={address} chainId={chainId} />
+        <AddressUI
+          label={translate('tokenLabel')}
+          address={address}
+          chainId={chainId}
+        />
         <Section>
           {name ? (
-            <Row label={t("nameLabel")}>
+            <Row label={translate('nameLabel')}>
               <Text>{name}</Text>
             </Row>
           ) : null}
           {symbol ? (
-            <Row label={t("symbolLabel")}>
+            <Row label={translate('symbolLabel')}>
               <Text>{symbol}</Text>
             </Row>
           ) : null}
           {decimals !== null && (
-            <Row label={t("decimalsLabel")}>
+            <Row label={translate('decimalsLabel')}>
               <Text>{decimals.toString()}</Text>
             </Row>
           )}

@@ -1,5 +1,6 @@
 import type { SnapComponent } from '@metamask/snaps-sdk/jsx';
 import { Box, Icon, Text, Heading, Copyable } from '@metamask/snaps-sdk/jsx';
+
 import { getTranslator } from '../../utils/locale';
 
 /**
@@ -8,15 +9,13 @@ import { getTranslator } from '../../utils/locale';
  * @returns A JSX component prompting the user to confirm revealing their private key.
  */
 export const DisplayPrivateKeyDialogUI: SnapComponent = () => {
-  const t = getTranslator();
+  const translate = getTranslator();
   return (
     <Box>
       <Heading>Are you sure you want to reveal your private key?</Heading>
       <Box direction="horizontal">
         <Icon name="warning" size="md" />
-        <Text>
-          {t("confirmPrivateKeyAction")}
-        </Text>
+        <Text>{translate('confirmPrivateKeyAction')}</Text>
       </Box>
     </Box>
   );
@@ -36,13 +35,11 @@ export type DisplayPrivateKeyAlertUIProps = {
 export const DisplayPrivateKeyAlertUI: SnapComponent<
   DisplayPrivateKeyAlertUIProps
 > = ({ privateKey }) => {
-  const t = getTranslator();
+  const translate = getTranslator();
   return (
     <Box>
-      <Heading>{t("starknetPrivateKeyTitle")}</Heading>
-      <Text>
-        {t("starknetPrivateKeyDescription")}
-      </Text>
+      <Heading>{translate('starknetPrivateKeyTitle')}</Heading>
+      <Text>{translate('starknetPrivateKeyDescription')}</Text>
       <Copyable value={privateKey} />
     </Box>
   );

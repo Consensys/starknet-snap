@@ -70,8 +70,6 @@ import {
   isSnapRpcError,
   setStateData,
 } from './utils';
-import { getTranslator, loadLocale } from './utils/locale';
-
 import {
   CAIRO_VERSION_LEGACY,
   PRELOADED_TOKENS,
@@ -81,6 +79,7 @@ import {
 } from './utils/constants';
 import { UnknownError } from './utils/exceptions';
 import { getAddressKeyDeriver } from './utils/keyPair';
+import { getTranslator, loadLocale } from './utils/locale';
 import { acquireLock } from './utils/lock';
 import { logger } from './utils/logger';
 import { RpcMethod, validateOrigin } from './utils/permission';
@@ -301,12 +300,12 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
 
 export const onInstall: OnInstallHandler = async () => {
   await loadLocale();
-  const t = getTranslator();
+  const translate = getTranslator();
   await ensureJsxSupport(
     <Box>
-      <Text>{t('walletCompatibility')}</Text>
+      <Text>{translate('walletCompatibility')}</Text>
       <Text>
-        {t('accountManagementIntro')}{' '}
+        {translate('accountManagementIntro')}{' '}
         <Link href={getDappUrl()}>{t('companionDapp')}</Link>.
       </Text>
     </Box>,
@@ -315,12 +314,13 @@ export const onInstall: OnInstallHandler = async () => {
 
 export const onUpdate: OnUpdateHandler = async () => {
   await loadLocale();
-  const t = getTranslator();
+  const translate = getTranslator();
   await ensureJsxSupport(
     <Box>
-      <Text>{t('snapUpdate')}</Text>
+      <Text>{translate('snapUpdate')}</Text>
       <Text>
-        {t('accountManagementReminder')} <Link href={getDappUrl()}>{t('companionDapp')}</Link>.
+        {translate('accountManagementReminder')}{' '}
+        <Link href={getDappUrl()}>{translate('companionDapp')}</Link>.
       </Text>
     </Box>,
   );

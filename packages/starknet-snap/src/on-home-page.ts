@@ -19,12 +19,12 @@ import {
   toJson,
 } from './utils';
 import { BlockIdentifierEnum, ETHER_MAINNET } from './utils/constants';
+import { getTranslator } from './utils/locale';
 import {
   getBalance,
   getCorrectContractAddress,
   getKeysFromAddressIndex,
 } from './utils/starknetUtils';
-import { getTranslator } from './utils/locale';
 
 /**
  * The onHomePage handler to execute the home page event operation.
@@ -103,12 +103,12 @@ export class HomePageController {
     network: Network,
     balance: string,
   ): OnHomePageResponse {
-    const t = getTranslator();
+    const translate = getTranslator();
     const panelItems: Component[] = [];
-    panelItems.push(text(t('address')));
+    panelItems.push(text(translate('address')));
     panelItems.push(copyable(`${address}`));
-    panelItems.push(row(t('network'), text(`${network.name}`)));
-    panelItems.push(row(t('balance'), text(`${balance} ETH`)));
+    panelItems.push(row(translate('network'), text(`${network.name}`)));
+    panelItems.push(row(translate('balance'), text(`${balance} ETH`)));
     panelItems.push(divider());
     panelItems.push(
       text(

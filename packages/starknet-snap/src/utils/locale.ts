@@ -61,6 +61,7 @@ export function getTranslator(): Translator {
 /**
  * Translates keys to user local message
  *
+ * @param key
  * @returns A function that translates keys to user locale messages.
  */
 export function translate(key: string): string {

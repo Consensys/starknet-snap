@@ -8,7 +8,7 @@ import type {
   Call,
   DeployAccountSignerDetails,
 } from 'starknet';
-import { getTranslator } from '../utils/locale';
+
 import { Config } from '../config';
 import { type AddNetworkRequestParams } from '../types/snapApi';
 import { ContractFuncName, TransactionStatus } from '../types/snapState';
@@ -26,6 +26,7 @@ import {
   STARKNET_SEPOLIA_TESTNET_NETWORK,
 } from './constants';
 import { DeployRequiredError, UpgradeRequiredError } from './exceptions';
+import { getTranslator } from './locale';
 import { logger } from './logger';
 import { toJson } from './serializer';
 import { alertDialog } from './snap';
@@ -213,18 +214,18 @@ export function addDialogTxt(
  * @param network
  */
 export function getNetworkTxt(network: Network) {
-  const t = getTranslator();
+  const translate = getTranslator();
   const components = [];
-  addDialogTxt(components, t('chainName'), network.name);
-  addDialogTxt(components, t('chainId'), network.chainId);
+  addDialogTxt(components, translate('chainName'), network.name);
+  addDialogTxt(components, translate('chainId'), network.chainId);
   if (network.baseUrl) {
-    addDialogTxt(components, t('baseUrl'), network.baseUrl);
+    addDialogTxt(components, translate('baseUrl'), network.baseUrl);
   }
   if (network.nodeUrl) {
-    addDialogTxt(components, t('rpcUrl'), network.nodeUrl);
+    addDialogTxt(components, translate('rpcUrl'), network.nodeUrl);
   }
   if (network.voyagerUrl) {
-    addDialogTxt(components, t('explorerUrl'), network.voyagerUrl);
+    addDialogTxt(components, translate('explorerUrl'), network.voyagerUrl);
   }
   return components;
 }
@@ -249,12 +250,16 @@ export function getSendTxnText(
   network: Network,
 ): Component[] {
   // Retrieve the ERC-20 token from snap state for confirmation display purpose
-  const t = getTranslator();
+  const translate = getTranslator();
   const token = getErc20Token(state, contractAddress, network.chainId);
   const components = [];
-  addDialogTxt(components, t('signerAddress'), senderAddress);
+  addDialogTxt(components, translate('signerAddress'), senderAddress);
   addDialogTxt(components, 'Contract', contractAddress);
-  addDialogTxt(components, t('callData'), `[${contractCallData.join(', ')}]`);
+  addDialogTxt(
+    components,
+    translate('callData'),
+    `[${contractCallData.join(', ')}]`,
+  );
   addDialogTxt(
     components,
     'Estimated Gas Fee(ETH)',
@@ -272,8 +277,12 @@ export function getSendTxnText(
           Number(contractCallData[1]) * Math.pow(10, -1 * token.decimals)
         ).toFixed(token.decimals);
       }
-      addDialogTxt(components, t('senderAddress'), senderAddress);
-      addDialogTxt(components, t('recipientAddress'), contractCallData[0]);
+      addDialogTxt(components, translate('senderAddress'), senderAddress);
+      addDialogTxt(
+        components,
+        translate('recipientAddress'),
+        contractCallData[0],
+      );
       addDialogTxt(components, `Amount(${token.symbol})`, amount);
     } catch (error) {
       logger.error(
@@ -300,10 +309,10 @@ export function getSignTxnTxt(
   network: Network,
   txnInvocation: Call[] | DeclareSignerDetails | DeployAccountSignerDetails,
 ) {
-  const t = getTranslator();
+  const translate = getTranslator();
   const components = [];
   addDialogTxt(components, 'Network', network.name);
-  addDialogTxt(components, t('signerAddress'), signerAddress);
+  addDialogTxt(components, translate('signerAddress'), signerAddress);
   addDialogTxt(
     components,
     'Transaction',
@@ -596,7 +605,7 @@ export function getNetworkFromChainId(
   const network = getNetwork(state, chainId);
   if (network === undefined) {
     throw new Error(
-      `can't find the network in snap state with chainId: ${chainId}`,
+      `can'translate find the network in snap state with chainId: ${chainId}`,
     );
   }
   logger.log(
@@ -887,9 +896,9 @@ export function toMap<Key, Val, FnParam>(
  * Displays a modal to the user requesting them to upgrade their account.
  */
 export async function showUpgradeRequestModal() {
-  const t = getTranslator();
+  const translate = getTranslator();
   await alertDialog([
-    heading(t('accountUpgradeMandatory')),
+    heading(translate('accountUpgradeMandatory')),
     text(
       `Visit the [companion dapp for Starknet](${getDappUrl()}) and click “Upgrade”.\nThank you!`,
     ),
@@ -900,9 +909,9 @@ export async function showUpgradeRequestModal() {
  * Displays a modal to the user requesting them to deploy their account.
  */
 export async function showDeployRequestModal() {
-  const t = getTranslator();
+  const translate = getTranslator();
   await alertDialog([
-    heading(t('accountDeploymentMandatory')),
+    heading(translate('accountDeploymentMandatory')),
     text(
       `Visit the [companion dapp for Starknet](${getDappUrl()}) to deploy your account.\nThank you!`,
     ),

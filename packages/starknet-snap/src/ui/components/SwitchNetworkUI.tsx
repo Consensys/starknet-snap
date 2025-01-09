@@ -1,8 +1,8 @@
 import type { SnapComponent } from '@metamask/snaps-sdk/jsx';
 import { Box, Heading, Copyable, Bold } from '@metamask/snaps-sdk/jsx';
 
-import { NetworkUI } from '../fragments';
 import { getTranslator } from '../../utils/locale';
+import { NetworkUI } from '../fragments';
 
 export type SwitchNetworkUIProps = {
   name: string;
@@ -21,13 +21,13 @@ export const SwitchNetworkUI: SnapComponent<SwitchNetworkUIProps> = ({
   name,
   chainId,
 }) => {
-  const t = getTranslator();
+  const translate = getTranslator();
   return (
     <Box>
-      <Heading>{t("switchNetworkPrompt")}</Heading>
+      <Heading>{translate('switchNetworkPrompt')}</Heading>
       <NetworkUI networkName={name} />
       <Box direction="horizontal" alignment="space-between">
-        <Bold>{t("chainIdLabel")}</Bold>
+        <Bold>{translate('chainIdLabel')}</Bold>
         <Copyable value={chainId} />
       </Box>
     </Box>
