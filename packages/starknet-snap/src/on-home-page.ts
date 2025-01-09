@@ -24,6 +24,7 @@ import {
   getCorrectContractAddress,
   getKeysFromAddressIndex,
 } from './utils/starknetUtils';
+import { getTranslator } from './utils/locale';
 
 /**
  * The onHomePage handler to execute the home page event operation.
@@ -102,11 +103,12 @@ export class HomePageController {
     network: Network,
     balance: string,
   ): OnHomePageResponse {
+    const t = getTranslator();
     const panelItems: Component[] = [];
-    panelItems.push(text('Address'));
+    panelItems.push(text(t('address')));
     panelItems.push(copyable(`${address}`));
-    panelItems.push(row('Network', text(`${network.name}`)));
-    panelItems.push(row('Balance', text(`${balance} ETH`)));
+    panelItems.push(row(t('network'), text(`${network.name}`)));
+    panelItems.push(row(t('balance'), text(`${balance} ETH`)));
     panelItems.push(divider());
     panelItems.push(
       text(

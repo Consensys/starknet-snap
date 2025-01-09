@@ -4,6 +4,7 @@ import type { Infer } from 'superstruct';
 
 import type { TypeDataStruct } from '../../utils';
 import { JsonDataUI, SignerUI } from '../fragments';
+import { getTranslator } from '../../utils/locale';
 
 export type SignMessageUIProps = {
   address: string;
@@ -25,12 +26,13 @@ export const SignMessageUI: SnapComponent<SignMessageUIProps> = ({
   chainId,
   typedDataMessage,
 }) => {
+  const t = getTranslator();
   return (
     <Box>
-      <Heading>Do you want to sign this message?</Heading>
+      <Heading>{t("signeMessagePrompt")}</Heading>
       <Section>
         <SignerUI address={address} chainId={chainId} />
-        <JsonDataUI label="Message" data={typedDataMessage} />
+        <JsonDataUI label={t("messageLabel")} data={typedDataMessage} />
       </Section>
     </Box>
   );

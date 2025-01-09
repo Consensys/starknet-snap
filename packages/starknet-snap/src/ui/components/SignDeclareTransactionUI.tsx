@@ -4,6 +4,7 @@ import type { Infer } from 'superstruct';
 
 import type { DeclareSignDetailsStruct } from '../../utils';
 import { AddressUI, JsonDataUI, NetworkUI } from '../fragments';
+import { getTranslator } from '../../utils/locale';
 
 export type SignDeclareTransactionUIProps = {
   senderAddress: string;
@@ -25,14 +26,15 @@ export type SignDeclareTransactionUIProps = {
 export const SignDeclareTransactionUI: SnapComponent<
   SignDeclareTransactionUIProps
 > = ({ senderAddress, networkName, chainId, declareTransactions }) => {
+  const t = getTranslator();
   return (
     <Box>
-      <Heading>Do you want to sign this transaction?</Heading>
+      <Heading>{t("signTransactionPrompt")}</Heading>
       <Section>
-        <AddressUI label="Signer" address={senderAddress} chainId={chainId} />
+        <AddressUI label={t("signerLabel")} address={senderAddress} chainId={chainId} />
         <NetworkUI networkName={networkName} />
         <JsonDataUI
-          label={'Declare Transaction Details'}
+          label={t("declareTransactionDetails")}
           data={declareTransactions}
         />
       </Section>

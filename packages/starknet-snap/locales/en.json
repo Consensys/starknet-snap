@@ -1,203 +1,140 @@
 {
-    "locale": "en",
-    "messages": {
-      "apiResponseError": {
-        "message": "API response error: response body can not be deserialised."
-      },
-      "accountDeploymentMandatory": {
-        "message": "Account Deployment Mandatory!"
-      },
-      "accountUpgradeMandatory": {
-        "message": "Account Upgrade Mandatory!"
-      },
-      "accountAlreadyDeployed": {
-        "message": "Account already deployed"
-      },
-      "atLeastOneSearchCondition": {
-        "message": "At least one search condition must be provided"
-      },
-      "baseUrl": {
-        "message": "Base URL"
-      },
-      "cairo0BalanceNotEmpty": {
-        "message": "Cairo 0 contract address balance is not empty, deploy required"
-      },
-      "callData": {
-        "message": "Call Data"
-      },
-      "chainId": {
-        "message": "Chain ID"
-      },
-      "chainName": {
-        "message": "Chain Name"
-      },
-      "classHash": {
-        "message": "Class Hash"
-      },
-      "compiledClassHash": {
-        "message": "Compiled Class Hash"
-      },
-      "contractNotDeployed": {
-        "message": "Contract has not deployed"
-      },
-      "contractNotFound": {
-        "message": "Contract not found"
-      },
-      "declarePayloadError": {
-        "message": "Declare payload does not accept mutiple items"
-      },
-      "deployAccountPayloadError": {
-        "message": "Deploy account payload does not accept mutiple items"
-      },
-      "addNetworkPrompt": {
-        "message": "Do you want to add this network?"
-      },
-      "signDeployTransactionPrompt": {
-        "message": "Do you want to sign this deploy transaction ?"
-      },
-      "signTransactionPrompt": {
-        "message": "Do you want to sign this transaction?"
-      },
-      "estimatedGasFee": {
-        "message": "Estimated Gas Fee(ETH)"
-      },
-      "explorerUrl": {
-        "message": "Explorer URL"
-      },
-      "failedToBeginTransaction": {
-        "message": "Failed to begin transaction"
-      },
-      "failedToDeployAccount": {
-        "message": "Failed to deploy account"
-      },
-      "failedToCommitTransaction": {
-        "message": "Failed to commit transaction"
-      },
-      "failedToExecuteOnHomePage": {
-        "message": "Failed to execute onHomePage"
-      },
-      "failedToExecuteTransaction": {
-        "message": "Failed to execute transaction"
-      },
-      "failedToInitializeSnapHomePage": {
-        "message": "Failed to initialize Snap HomePage"
-      },
-      "failedToRemoveTransactionRequest": {
-        "message": "Failed to remove transaction request"
-      },
-      "failedToRetrieveTransactionRequest": {
-        "message": "Failed to retrieve the updated transaction request"
-      },
-      "failedToRollbackState": {
-        "message": "Failed to rollback state"
-      },
-      "goerliTestnetDeprecated": {
-        "message": "Goerli Testnet (deprecated)"
-      },
-      "indexesMustBePositive": {
-        "message": "Indexes must be positives"
-      },
-      "indexesOutOfBounds": {
-        "message": "Indexes out of bounds"
-      },
-      "insufficientFunds": {
-        "message": "Insufficient Funds"
-      },
-      "invalidChainId": {
-        "message": "Invalid Chain ID"
-      },
-      "invalidResponse": {
-        "message": "Invalid Response"
-      },
-      "invalidAddressFormat": {
-        "message": "Invalid address format"
-      },
-      "invalidTransactionType": {
-        "message": "Invalid transaction type"
-      },
-      "maxFee": {
-        "message": "Max Fee (ETH)"
-      },
-      "missingStarkScanApiKey": {
-        "message": "Missing StarkScan API key"
-      },
-      "networkNotSupported": {
-        "message": "Network not Supported"
-      },
-      "networkNotFound": {
-        "message": "Network not found"
-      },
-      "originNotFound": {
-        "message": "Origin not found"
-      },
-      "rpcUrl": {
-        "message": "RPC URL"
-      },
-      "recipientAddress": {
-        "message": "Recipient Address"
-      },
-      "senderAddress": {
-        "message": "Sender Address"
-      },
-      "sepoliaTestnet": {
-        "message": "Sepolia Testnet"
-      },
-      "signerAddress": {
-        "message": "Signer Address"
-      },
-      "starknetToken": {
-        "message": "Starknet Token"
-      },
-      "testToken": {
-        "message": "Test Token"
-      },
-      "tetherUsd": {
-        "message": "Tether USD"
-      },
-      "networkNameConflict": {
-        "message": "The given network chainId or name is the same as one of the preloaded networks, and thus cannot be added"
-      },
-      "tokenAddress": {
-        "message": "Token Address"
-      },
-      "tokenDecimals": {
-        "message": "Token Decimals"
-      },
-      "tokenName": {
-        "message": "Token Name"
-      },
-      "tokenSymbol": {
-        "message": "Token Symbol"
-      },
-      "tokenConflict": {
-        "message": "Token address, name, or symbol is the same as one of the preloaded tokens"
-      },
-      "tokenNotFound": {
-        "message": "Token not found"
-      },
-      "transactionInvocation": {
-        "message": "Transaction Invocation"
-      },
-      "transactionRequestNotFound": {
-        "message": "Transaction request not found"
-      },
-      "usdCoin": {
-        "message": "USD Coin"
-      },
-      "unexpectedError": {
-        "message": "Unexpected Error, neither DeployRequiredError or UpgradeRequiredError"
-      },
-      "unknownError": {
-        "message": "Unknown Error"
-      },
-      "upgradeNotRequired": {
-        "message": "Upgrade is not required"
-      },
-      "upgradeRequired": {
-        "message": "Upgrade required"
-      },
-      "updateMetaMaskPrompt": {
-        "message": "You need to update your MetaMask to latest version to use this snap."
-      }
+  "locale": "en",
+  "messages": {
+    "accountDeploymentMandatory": {
+      "message": "Account Deployment Mandatory!"
+    },
+    "accountDeploymentNotice": {
+      "message": "The account will be deployed with this transaction."
+    },
+    "accountManagementIntro": {
+      "message": "To manage your Starknet account and send and receive funds, visit the"
+    },
+    "accountManagementReminder": {
+      "message": "As usual, to manage your Starknet account and send and receive funds, visit the"
+    },
+    "accountUpgradeMandatory": {
+      "message": "Account Upgrade Mandatory!"
+    },
+    "addTokenPrompt": {
+      "message": "Do you want to add this token?"
+    },
+    "address": {
+      "message": "Address"
+    },
+    "amountLabel": {
+      "message": "Amount"
+    },
+    "balance": {
+      "message": "Balance"
+    },
+    "baseUrl": {
+      "message": "Base URL"
+    },
+    "callData": {
+      "message": "Call Data"
+    },
+    "callLabel": {
+      "message": "Call"
+    },
+    "chainId": {
+      "message": "Chain ID"
+    },
+    "chainIdLabel": {
+      "message": "Chain ID"
+    },
+    "chainName": {
+      "message": "Chain Name"
+    },
+    "classHash": {
+      "message": "Class Hash"
+    },
+    "companionDapp": {
+      "message": "companion dapp for Starknet"
+    },
+    "companionDappRepeat": {
+      "message": "companion dapp for Starknet"
+    },
+    "compiledClassHash": {
+      "message": "Compiled Class Hash"
+    },
+    "confirmPrivateKeyAction": {
+      "message": "Confirming this action will display your private key. Ensure you are in a secure environment."
+    },
+    "contractLabel": {
+      "message": "Contract"
+    },
+    "decimalsLabel": {
+      "message": "Decimals"
+    },
+    "declareTransactionDetails": {
+      "message": "Declare Transaction Details"
+    },
+    "explorerUrl": {
+      "message": "Explorer URL"
+    },
+    "messageLabel": {
+      "message": "Message"
+    },
+    "nameLabel": {
+      "message": "Name"
+    },
+    "network": {
+      "message": "Network"
+    },
+    "networkFee": {
+      "message": "network fee"
+    },
+    "recipientAddress": {
+      "message": "Recipient Address"
+    },
+    "recipientLabel": {
+      "message": "Recipient"
+    },
+    "rpcUrl": {
+      "message": "RPC URL"
+    },
+    "senderAddress": {
+      "message": "Sender Address"
+    },
+    "signMessagePrompt": {
+      "message": "Do you want to sign this message?"
+    },
+    "signTransactionPrompt": {
+      "message": "Do you want to sign this transaction?"
+    },
+    "signerAddress": {
+      "message": "Signer Address"
+    },
+    "signerLabel": {
+      "message": "Signer"
+    },
+    "snapUpdate": {
+      "message": "Your Starknet Snap is now up-to-date !"
+    },
+    "starknetPrivateKeyDescription": {
+      "message": "Below is your Starknet Account private key. Keep it confidential."
+    },
+    "starknetPrivateKeyTitle": {
+      "message": "Starknet Account Private Key"
+    },
+    "switchNetworkPrompt": {
+      "message": "Do you want to switch to this network?"
+    },
+    "symbolLabel": {
+      "message": "Symbol"
+    },
+    "tokenLabel": {
+      "message": "Token"
+    },
+    "totalFor": {
+      "message": "Total for"
+    },
+    "transactionsLabel": {
+      "message": "Transactions"
+    },
+    "walletCompatibility": {
+      "message": "Your MetaMask wallet is now compatible with Starknet!"
     }
   }
+}
