@@ -12,6 +12,7 @@ import {
   STRK_SEPOLIA_TESTNET,
 } from '../../utils/constants';
 import * as snapHelper from '../../utils/snap';
+import { AccountStateManager } from '../account-state-manager';
 import { NetworkStateManager } from '../network-state-manager';
 import { TransactionRequestStateManager } from '../request-state-manager';
 import { TokenStateManager } from '../token-state-manager';
@@ -83,6 +84,29 @@ export const mockTokenStateManager = () => {
   return {
     getEthTokenSpy,
     getStrkTokenSpy,
+  };
+};
+
+export const mockAccountStateManager = () => {
+  const getAccountSpy = jest.spyOn(AccountStateManager.prototype, 'getAccount');
+  const getNextIndexSpy = jest.spyOn(
+    AccountStateManager.prototype,
+    'getNextIndex',
+  );
+  const upsertAccountSpy = jest.spyOn(
+    AccountStateManager.prototype,
+    'upsertAccount',
+  );
+  const isMaxAccountLimitExceededSpy = jest.spyOn(
+    AccountStateManager.prototype,
+    'isMaxAccountLimitExceeded',
+  );
+
+  return {
+    getAccountSpy,
+    getNextIndexSpy,
+    upsertAccountSpy,
+    isMaxAccountLimitExceededSpy,
   };
 };
 

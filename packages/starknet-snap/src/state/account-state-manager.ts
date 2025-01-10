@@ -1,3 +1,4 @@
+import { Config } from '../config';
 import type { AccContract, SnapState } from '../types/snapState';
 import type { IFilter } from './filter';
 import {
@@ -189,5 +190,27 @@ export class AccountStateManager extends StateManager<AccContract> {
     } catch (error) {
       throw new StateManagerError(error.message);
     }
+  }
+
+  /**
+   * Determines whether max account limit exceeded.
+   *
+   * @param params - The parameters for checking the max account limit.
+   * @param params.chainId - The chain ID.
+   * @param [state] - The optional SnapState object.
+   * @returns A Promise that resolves to a boolean indicating whether the max account limit is exceeded.
+   */
+  async isMaxAccountLimitExceeded(
+    {
+      chainId,
+    }: {
+      chainId: string;
+    },
+    state?: SnapState,
+  ): Promise<boolean> {
+    return (
+      (await this.list([new ChainIdFilter([chainId])], undefined, state))
+        .length >= Config.account.maxAccountToCreate
+    );
   }
 }

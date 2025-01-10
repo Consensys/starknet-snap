@@ -1,7 +1,10 @@
 import { AccountStateManager } from '../../state/account-state-manager';
 import type { Network } from '../../types/snapState';
 import { getBip44Deriver } from '../../utils';
-import { AccountNotFoundError } from '../../utils/exceptions';
+import {
+  AccountNotFoundError,
+  MaxAccountLimitExceededError,
+} from '../../utils/exceptions';
 import { Account } from './account';
 import { AccountContractDiscovery } from './discovery';
 import { AccountKeyPair } from './keypair';
@@ -47,36 +50,52 @@ export class AccountService {
    * @returns A promise that resolves to the newly created `Account` object.
    */
   async deriveAccountByIndex(index?: number): Promise<Account> {
-    let hdIndex = index;
+    const { chainId } = this.network;
 
-    if (hdIndex === undefined) {
-      hdIndex = await this.accountStateMgr.getNextIndex(this.network.chainId);
-    }
+    // use `withTransaction` to ensure that the state is not modified if an error occurs.
+    return this.accountStateMgr.withTransaction(async (state) => {
+      let hdIndex = index;
+      if (hdIndex === undefined) {
+        hdIndex = await this.accountStateMgr.getNextIndex(chainId);
+      }
 
-    // Derive a BIP44 node from an index. e.g m/44'/60'/0'/0/{hdIndex}
-    const deriver = await getBip44Deriver();
-    const node = await deriver(hdIndex);
+      // Derive a BIP44 node from an index. e.g m/44'/60'/0'/0/{hdIndex}
+      const deriver = await getBip44Deriver();
+      const node = await deriver(hdIndex);
 
-    // Grind a new private key and public key from the derived node.
-    // Private key and public key are independent from the account contract.
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const { privateKey, publicKey } = new AccountKeyPair(node.privateKey!);
+      // Grind a new private key and public key from the derived node.
+      // Private key and public key are independent from the account contract.
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      const { privateKey, publicKey } = new AccountKeyPair(node.privateKey!);
 
-    const accountContract =
-      await this.accountContractDiscoveryService.getContract(publicKey);
+      const accountContract =
+        await this.accountContractDiscoveryService.getContract(publicKey);
 
-    const account = new Account({
-      privateKey,
-      publicKey,
-      chainId: this.network.chainId,
-      hdIndex,
-      addressSalt: publicKey,
-      accountContract,
+      const account = new Account({
+        privateKey,
+        publicKey,
+        chainId: this.network.chainId,
+        hdIndex,
+        addressSalt: publicKey,
+        accountContract,
+      });
+
+      await this.accountStateMgr.upsertAccount(await account.serialize());
+
+      // FIXME: this is a convenience way to check if the account limit has been exceeded at the last line of the code. However, it is possible to improve if we can check it before the account is derived.
+      if (
+        await this.accountStateMgr.isMaxAccountLimitExceeded(
+          {
+            chainId,
+          },
+          state,
+        )
+      ) {
+        throw new MaxAccountLimitExceededError();
+      }
+
+      return account;
     });
-
-    await this.accountStateMgr.upsertAccount(await account.serialize());
-
-    return account;
   }
 
   /**
