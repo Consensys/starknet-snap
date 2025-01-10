@@ -15,6 +15,7 @@ export enum RpcMethod {
   SignDeclareTransaction = 'starkNet_signDeclareTransaction',
   SignDeployAccountTransaction = 'starkNet_signDeployAccountTransaction',
 
+  AddAccount = 'starkNet_addAccount',
   CreateAccount = 'starkNet_createAccount',
   DisplayPrivateKey = 'starkNet_displayPrivateKey',
   GetErc20TokenBalance = 'starkNet_getErc20TokenBalance',
@@ -64,6 +65,7 @@ const walletUIDappPermissions = publicPermissions.concat([
   RpcMethod.GetAddressByStarkName,
   RpcMethod.ReadContract,
   RpcMethod.GetStoredErc20Tokens,
+  RpcMethod.AddAccount,
 ]);
 
 const publicPermissionsSet = new Set(publicPermissions);

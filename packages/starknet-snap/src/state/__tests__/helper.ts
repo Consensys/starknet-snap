@@ -1,4 +1,4 @@
-import type { constants } from 'starknet';
+import { constants } from 'starknet';
 
 import { generateAccounts, type StarknetAccount } from '../../__tests__/helper';
 import type {
@@ -27,6 +27,14 @@ export const mockAcccounts = async (
   return generateAccounts(chainId, cnt);
 };
 
+export const generateTestnetAccounts = async (count?: number) => {
+  return await mockAcccounts(constants.StarknetChainId.SN_SEPOLIA, count);
+};
+
+export const generateMainnetAccounts = async (count?: number) => {
+  return await mockAcccounts(constants.StarknetChainId.SN_MAIN, count);
+};
+
 export const mockState = async ({
   accounts,
   tokens,
@@ -47,7 +55,7 @@ export const mockState = async ({
   const getDataSpy = jest.spyOn(snapHelper, 'getStateData');
   const setDataSpy = jest.spyOn(snapHelper, 'setStateData');
   const state = {
-    accContracts: accounts,
+    accContracts: accounts ?? [],
     erc20Tokens: tokens ?? [],
     networks: networks ?? [],
     transactions: transactions ?? [],

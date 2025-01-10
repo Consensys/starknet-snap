@@ -37,6 +37,7 @@ import type {
   GetAddrFromStarkNameParams,
   GetTransactionStatusParams,
   ListTransactionsParams,
+  AddAccountParams,
 } from './rpcs';
 import {
   displayPrivateKey,
@@ -53,6 +54,7 @@ import {
   getAddrFromStarkName,
   getTransactionStatus,
   listTransactions,
+  addAccount,
 } from './rpcs';
 import { signDeployAccountTransaction } from './signDeployAccountTransaction';
 import type {
@@ -277,6 +279,11 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
       case RpcMethod.GetAddressByStarkName:
         return await getAddrFromStarkName.execute(
           apiParams.requestParams as unknown as GetAddrFromStarkNameParams,
+        );
+
+      case RpcMethod.AddAccount:
+        return await addAccount.execute(
+          requestParams as unknown as AddAccountParams,
         );
 
       default:

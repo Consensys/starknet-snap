@@ -58,6 +58,12 @@ export class Account {
    * @returns A promise that resolves to the serialized `Account` object.
    */
   async serialize(): Promise<AccContract> {
+    // When a Account object discovery by the account service,
+    // it should already cached the status of requireDeploy and requireUpgrade.
+    const [upgradeRequired, deployRequired] = await Promise.all([
+      this.accountContract.isRequireDeploy(),
+      this.accountContract.isRequireUpgrade(),
+    ]);
     return {
       addressSalt: this.publicKey,
       publicKey: this.publicKey,
@@ -65,6 +71,8 @@ export class Account {
       addressIndex: this.hdIndex,
       chainId: this.chainId,
       cairoVersion: this.cairoVersion,
+      upgradeRequired,
+      deployRequired,
     };
   }
 }
