@@ -210,7 +210,7 @@ export class AccountStateManager extends StateManager<AccContract> {
   ): Promise<boolean> {
     return (
       (await this.list([new ChainIdFilter([chainId])], undefined, state))
-        .length >= Config.account.maxAccountToCreate
+        .length > Config.account.maxAccountToCreate
     );
   }
 }

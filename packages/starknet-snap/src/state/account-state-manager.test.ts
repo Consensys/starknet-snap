@@ -1,6 +1,7 @@
 import { constants } from 'starknet';
 
 import type { StarknetAccount } from '../__tests__/helper';
+import { Config } from '../config';
 import {
   generateMainnetAccounts,
   generateTestnetAccounts,
@@ -16,13 +17,21 @@ describe('AccountStateManager', () => {
   const testnetChainId = constants.StarknetChainId.SN_SEPOLIA;
   const mainnetChainId = constants.StarknetChainId.SN_MAIN;
 
+  const mockStateWithMainnetAccounts = async (
+    accounts: StarknetAccount[] = [],
+  ) => {
+    const mainnetAccounts = await generateMainnetAccounts();
+
+    const { state } = await mockState({
+      accounts: mainnetAccounts.concat(accounts),
+    });
+    return state;
+  };
+
   describe('getAccount', () => {
     it('returns the account', async () => {
       const accountsInTestnet = await generateTestnetAccounts();
-      const accountsInMainnet = await generateMainnetAccounts();
-      await mockState({
-        accounts: [...accountsInTestnet, ...accountsInMainnet],
-      });
+      await mockStateWithMainnetAccounts(accountsInTestnet);
 
       const stateManager = new AccountStateManager();
       const result = await stateManager.getAccount({
@@ -35,9 +44,7 @@ describe('AccountStateManager', () => {
 
     it('returns null if the account address can not be found', async () => {
       const [accountNotExist, ...accounts] = await generateTestnetAccounts();
-      await mockState({
-        accounts,
-      });
+      await mockStateWithMainnetAccounts(accounts);
 
       const stateManager = new AccountStateManager();
       const result = await stateManager.getAccount({
@@ -50,9 +57,7 @@ describe('AccountStateManager', () => {
 
     it('returns null if the account chainId is not match', async () => {
       const accounts = await generateTestnetAccounts();
-      await mockState({
-        accounts,
-      });
+      await mockStateWithMainnetAccounts(accounts);
 
       const stateManager = new AccountStateManager();
       const result = await stateManager.getAccount({
@@ -103,18 +108,9 @@ describe('AccountStateManager', () => {
   });
 
   describe('upsertAccount', () => {
-    const setupUpserAccountTest = async (accounts: StarknetAccount[] = []) => {
-      const mainnetAccounts = await generateMainnetAccounts();
-
-      const { state } = await mockState({
-        accounts: mainnetAccounts.concat(accounts),
-      });
-      return state;
-    };
-
     it('adds an account if the account not exist', async () => {
       const [account] = await generateTestnetAccounts(1);
-      const state = await setupUpserAccountTest();
+      const state = await mockStateWithMainnetAccounts();
       const originalAccountsFromState = [...state.accContracts];
 
       const stateManager = new AccountStateManager();
@@ -131,7 +127,7 @@ describe('AccountStateManager', () => {
         ...accounts[0],
         upgradeRequired: true,
       };
-      const state = await setupUpserAccountTest(accounts);
+      const state = await mockStateWithMainnetAccounts(accounts);
       const originalAccountsLength = state.accContracts.length;
 
       const stateManager = new AccountStateManager();
@@ -150,14 +146,10 @@ describe('AccountStateManager', () => {
 
   describe('getNextIndex', () => {
     const setupGetNextIndexTest = async () => {
-      const mainnetAccounts = await generateMainnetAccounts();
-
-      const { state } = await mockState({
-        removedAccounts: {
-          [mainnetChainId]: [0, 1, 2],
-        },
-        accounts: mainnetAccounts,
-      });
+      const state = await mockStateWithMainnetAccounts();
+      state.removedAccounts = {
+        [mainnetChainId]: [0, 1, 2],
+      };
       return state;
     };
 
@@ -196,19 +188,10 @@ describe('AccountStateManager', () => {
   });
 
   describe('removeAccount', () => {
-    const setupRemoveAccountTest = async (accounts: StarknetAccount[] = []) => {
-      const mainnetAccounts = await generateMainnetAccounts();
-
-      const { state } = await mockState({
-        accounts: mainnetAccounts.concat(accounts),
-      });
-      return state;
-    };
-
     it('removes an account', async () => {
       const accounts = await generateTestnetAccounts();
       const removeAccount = accounts[1];
-      const state = await setupRemoveAccountTest(accounts);
+      const state = await mockStateWithMainnetAccounts(accounts);
       const originalAccountsFromState = [...state.accContracts];
       const expectedAccountsAfterRemoved = originalAccountsFromState.filter(
         (account) =>
@@ -228,12 +211,42 @@ describe('AccountStateManager', () => {
 
     it('throws an `Account does not exist` error if the removed account is not exist', async () => {
       const [removeAccount, ...accounts] = await generateTestnetAccounts();
-      await setupRemoveAccountTest(accounts);
+      await mockStateWithMainnetAccounts(accounts);
 
       const stateManager = new AccountStateManager();
       await expect(stateManager.removeAccount(removeAccount)).rejects.toThrow(
         'Account does not exist',
       );
+    });
+  });
+
+  describe('isMaxAccountLimitExceeded', () => {
+    it('returns true if the account limit is reached', async () => {
+      const accounts = await generateTestnetAccounts(
+        Config.account.maxAccountToCreate + 1,
+      );
+      await mockStateWithMainnetAccounts(accounts);
+
+      const stateManager = new AccountStateManager();
+      const result = await stateManager.isMaxAccountLimitExceeded({
+        chainId: testnetChainId,
+      });
+
+      expect(result).toBe(true);
+    });
+
+    it('returns false if the account limit is not reached', async () => {
+      const accounts = await generateTestnetAccounts(
+        Config.account.maxAccountToCreate,
+      );
+      await mockStateWithMainnetAccounts(accounts);
+
+      const stateManager = new AccountStateManager();
+      const result = await stateManager.isMaxAccountLimitExceeded({
+        chainId: testnetChainId,
+      });
+
+      expect(result).toBe(false);
     });
   });
 });
