@@ -51,14 +51,11 @@ export const walletSlice = createSlice({
         payload: Account | Account[];
       },
     ) => {
-      let chainId;
       if (Array.isArray(payload)) {
         // When switching networks, we clean up the accounts from the previous network
         // Hence, we can assume that setAccounts is called with an array of accounts from the same network
-        chainId = payload[0].chainId;
         state.accounts = payload.map((account) => account.address);
       } else {
-        chainId = payload.chainId;
         state.accounts.push(payload.address);
       }
       // FIXME: this is a hack to set the current account to the last one added
