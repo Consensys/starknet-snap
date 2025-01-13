@@ -114,7 +114,9 @@ export const SideBarView = ({ address }: Props) => {
       <RowDiv>
         <InfoIcon onClick={() => setInfoModalOpen(true)}>i</InfoIcon>
         <AccountAddress address={address} starkName={starkName} />
-        <InfoIcon onClick={async () => await addNewAccount(chainId)}>+</InfoIcon>
+        <InfoIcon onClick={async () => await addNewAccount(chainId)}>
+          +
+        </InfoIcon>
       </RowDiv>
       <DivList ref={ref as any}>
         <AssetsList />

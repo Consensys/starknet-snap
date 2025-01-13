@@ -316,10 +316,7 @@ export const useStarkNetSnap = () => {
       dispatch(enableLoadingWithMessage('Getting network data ...'));
     }
 
-    const {
-      address,
-      chainId
-    } = account;
+    const { address, chainId } = account;
 
     await setAccount(account);
 
@@ -332,7 +329,7 @@ export const useStarkNetSnap = () => {
     const { upgradeRequired, deployRequired } = account;
     dispatch(setAccounts(account));
 
-    // FIXME: hardcode to set the info modal visible, 
+    // FIXME: hardcode to set the info modal visible,
     // but it should only visible when the account is not deployed
     dispatch(setInfoModalVisible(true));
 
@@ -350,11 +347,7 @@ export const useStarkNetSnap = () => {
     // Get all tokens balance, USD value, and format them into Erc20TokenBalance type
     const tokensWithBalances: Erc20TokenBalance[] = await Promise.all(
       tokens.map(async (token) => {
-        const balance = await getTokenBalance(
-          token.address,
-          address,
-          chainId,
-        );
+        const balance = await getTokenBalance(token.address, address, chainId);
         const usdPrice = await getAssetPriceUSD(token);
         return await getTokenBalanceWithDetails(balance, token, usdPrice);
       }),
@@ -1041,7 +1034,7 @@ export const useStarkNetSnap = () => {
   const addNewAccount = async (chainId: string) => {
     dispatch(enableLoadingWithMessage('Adding new account...'));
     try {
-      const account = await provider.request({
+      const account = (await provider.request({
         method: 'wallet_invokeSnap',
         params: {
           snapId,
@@ -1052,12 +1045,12 @@ export const useStarkNetSnap = () => {
             },
           },
         },
-      }) as Account;
-  
+      })) as Account;
+
       await initWalletData({
-        account
+        account,
       });
-  
+
       return account;
     } catch (err: any) {
       const toastr = new Toastr();

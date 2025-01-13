@@ -15,10 +15,14 @@ export const TransactionsListView = ({ transactions }: Props) => {
   const { getTransactions } = useStarkNetSnap();
   const networks = useAppSelector((state) => state.networks);
   const wallet = useAppSelector((state) => state.wallet);
-  const timeoutHandle = useRef(setTimeout(() => {})); 
+  const timeoutHandle = useRef(setTimeout(() => {}));
   const chainId = networks.items[networks.activeNetwork]?.chainId;
-  const { currentAccount, erc20TokenBalanceSelected, transactions: walletTransactions } = wallet;
-  
+  const {
+    currentAccount,
+    erc20TokenBalanceSelected,
+    transactions: walletTransactions,
+  } = wallet;
+
   useEffect(() => {
     if (chainId && currentAccount) {
       clearTimeout(timeoutHandle.current); // cancel the timeout that was in-flight

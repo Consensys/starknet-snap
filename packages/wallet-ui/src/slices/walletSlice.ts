@@ -43,9 +43,14 @@ export const walletSlice = createSlice({
     setForceReconnect: (state, { payload }) => {
       state.forceReconnect = payload;
     },
-    setAccounts: (state, { payload } : {
-      payload: Account | Account[];
-    }) => {
+    setAccounts: (
+      state,
+      {
+        payload,
+      }: {
+        payload: Account | Account[];
+      },
+    ) => {
       let chainId;
       if (Array.isArray(payload)) {
         // When switching networks, we clean up the accounts from the previous network
@@ -60,7 +65,7 @@ export const walletSlice = createSlice({
       // We should have a way to get the active account
       const currentAccountIdx = state.accounts.length - 1;
       const currentAccount = state.accounts[currentAccountIdx];
-      state.currentAccount = currentAccount
+      state.currentAccount = currentAccount;
     },
     setErc20TokenBalances: (state, { payload }) => {
       state.erc20TokenBalances = payload;

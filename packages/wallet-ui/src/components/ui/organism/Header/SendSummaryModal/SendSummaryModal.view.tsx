@@ -114,9 +114,7 @@ export const SendSummaryModalView = ({
       }
     };
     fetchGasFee();
-  }, [
-    currentAccount
-  ]);
+  }, [currentAccount]);
 
   useEffect(() => {
     if (gasFees?.suggestedMaxFee) {
