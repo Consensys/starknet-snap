@@ -1,4 +1,12 @@
-import { type, array, assign, boolean, object, optional, type Infer } from 'superstruct';
+import {
+  type,
+  array,
+  assign,
+  boolean,
+  object,
+  optional,
+  type Infer,
+} from 'superstruct';
 
 import { AccountStateManager } from '../state/account-state-manager';
 import { BaseRequestStruct, AccountStruct, CairoVersionStruct } from '../utils';
@@ -10,14 +18,14 @@ export const ListAccountsRequestStruct = BaseRequestStruct;
 export const ListAccountsResponseStruct = array(
   type(
     assign(
-      AccountStruct, 
+      AccountStruct,
       object({
         upgradeRequired: optional(boolean()),
         deployRequired: optional(boolean()),
         cairoVersion: optional(CairoVersionStruct),
-      })
-    ).schema
-  )
+      }),
+    ).schema,
+  ),
 );
 
 export type ListAccountsParams = Infer<typeof ListAccountsRequestStruct>;

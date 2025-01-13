@@ -7,9 +7,7 @@ import {
   generateTestnetAccounts,
   mockState,
 } from './__tests__/helper';
-import {
-  AccountStateManager,
-} from './account-state-manager';
+import { AccountStateManager } from './account-state-manager';
 
 describe('AccountStateManager', () => {
   const testnetChainId = constants.StarknetChainId.SN_SEPOLIA;

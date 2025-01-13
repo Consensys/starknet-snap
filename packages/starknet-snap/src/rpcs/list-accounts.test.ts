@@ -1,11 +1,11 @@
 import type { constants } from 'starknet';
 
+import { generateAccounts } from '../__tests__/helper';
 import { AccountStateManager } from '../state/account-state-manager';
 import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../utils/constants';
 import { InvalidRequestParamsError } from '../utils/exceptions';
 import { listAccounts } from './list-accounts';
 import type { ListAccountsParams } from './list-accounts';
-import { generateAccounts } from '../__tests__/helper';
 
 jest.mock('../utils/snap');
 jest.mock('../utils/logger');
@@ -14,7 +14,7 @@ describe('ListAccountsRpc', () => {
   const network = STARKNET_SEPOLIA_TESTNET_NETWORK;
 
   const setupListAccountsTest = async () => {
-    const accounts = await generateAccounts(network.chainId, 10)
+    const accounts = await generateAccounts(network.chainId, 10);
 
     const listAccountsSpy = jest.spyOn(
       AccountStateManager.prototype,
@@ -34,12 +34,12 @@ describe('ListAccountsRpc', () => {
   };
 
   it('returns an array of `Account`', async () => {
-    const { accounts, request , listAccountsSpy } =
+    const { accounts, request, listAccountsSpy } =
       await setupListAccountsTest();
 
     const result = await listAccounts.execute(request);
 
-    expect(result).toStrictEqual(accounts );
+    expect(result).toStrictEqual(accounts);
     expect(listAccountsSpy).toHaveBeenCalledWith({
       chainId: network.chainId,
     });
