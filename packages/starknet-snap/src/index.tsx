@@ -18,7 +18,6 @@ import { getErc20TokenBalance } from './getErc20TokenBalance';
 import { getStarkName } from './getStarkName';
 import { getStoredErc20Tokens } from './getStoredErc20Tokens';
 import { getStoredNetworks } from './getStoredNetworks';
-import { getStoredUserAccounts } from './getStoredUserAccounts';
 import { getValue } from './getValue';
 import { homePageController } from './on-home-page';
 import { recoverAccounts } from './recoverAccounts';
@@ -39,6 +38,7 @@ import type {
   ListTransactionsParams,
   AddAccountParams,
   GetCurrentAccountParams,
+  ListAccountsParams,
 } from './rpcs';
 import {
   displayPrivateKey,
@@ -57,6 +57,7 @@ import {
   listTransactions,
   addAccount,
   getCurrentAccount,
+  listAccounts,
 } from './rpcs';
 import { signDeployAccountTransaction } from './signDeployAccountTransaction';
 import type {
@@ -168,7 +169,9 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
         );
 
       case RpcMethod.ListAccounts:
-        return await getStoredUserAccounts(apiParams);
+        return await listAccounts.execute(
+          requestParams as unknown as ListAccountsParams,
+        );
 
       case RpcMethod.DisplayPrivateKey:
         return await displayPrivateKey.execute(

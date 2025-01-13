@@ -9,7 +9,6 @@ describe('validateOrigin', () => {
   const publicPermissions = Array.from(originPermissions.get('*')!);
   const restrictedPermissions = [
     RpcMethod.DeployCario0Account,
-    RpcMethod.ListAccounts,
     RpcMethod.GetTransactions,
     RpcMethod.UpgradeAccContract,
     RpcMethod.GetStarkName,
