@@ -259,4 +259,59 @@ export class AccountStateManager extends StateManager<AccContract> {
 
     return data.currentAccount?.[chainId] ?? null;
   }
+
+  /**
+   * Switches the current account for the specified chain ID.
+   * And updates the `AccContract` data for the current account from state.
+   *
+   * @param params - The parameters for switching the current account.
+   * @param params.chainId - The chain ID.
+   * @param params.accountToSwitch - The `AccContract` object to switch to.
+   * @throws {StateManagerError} If the account to switch does not exist.
+   */
+  async switchAccount({
+    chainId,
+    accountToSwitch,
+  }: {
+    chainId: string;
+    accountToSwitch: AccContract;
+  }): Promise<void> {
+    try {
+      await this.update(async (state: SnapState) => {
+        const { chainId: accountChainId, address } = accountToSwitch;
+
+        // We should not relied on the `chainId` from the `accountToSwitch` object
+        // therefore it is required to verify if the `accountToSwitch` object
+        // whether it has the same chain ID or not
+        if (chainId !== accountChainId) {
+          throw new Error(`Account to switch is not in the same chain`);
+        }
+
+        // a safeguard to ensure the `accountToSwitch` is exist in the state
+        const accountInState = await this.getAccount(
+          {
+            address,
+            chainId: accountChainId,
+          },
+          state,
+        );
+
+        if (!accountInState) {
+          throw new Error(`Account does not exist`);
+        }
+
+        if (!state.currentAccount) {
+          state.currentAccount = {};
+        }
+
+        state.currentAccount[chainId] = accountToSwitch;
+
+        // due to the account may contains legacy data,
+        // this is a hack to ensure the account is updated
+        this.updateEntity(accountInState, accountToSwitch);
+      });
+    } catch (error) {
+      throw new StateManagerError(error.message);
+    }
+  }
 }

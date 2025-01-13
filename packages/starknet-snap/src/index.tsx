@@ -39,6 +39,7 @@ import type {
   AddAccountParams,
   GetCurrentAccountParams,
   ListAccountsParams,
+  SwitchAccountParams,
 } from './rpcs';
 import {
   displayPrivateKey,
@@ -58,6 +59,7 @@ import {
   addAccount,
   getCurrentAccount,
   listAccounts,
+  switchAccount,
 } from './rpcs';
 import { signDeployAccountTransaction } from './signDeployAccountTransaction';
 import type {
@@ -294,6 +296,11 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
       case RpcMethod.GetCurrentAccount:
         return await getCurrentAccount.execute(
           requestParams as unknown as GetCurrentAccountParams,
+        );
+
+      case RpcMethod.SwitchAccount:
+        return await switchAccount.execute(
+          requestParams as unknown as SwitchAccountParams,
         );
 
       default:

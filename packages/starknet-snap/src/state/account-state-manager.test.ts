@@ -8,6 +8,7 @@ import {
   mockState,
 } from './__tests__/helper';
 import { AccountStateManager } from './account-state-manager';
+import { StateManagerError } from './state-manager';
 
 describe('AccountStateManager', () => {
   const testnetChainId = constants.StarknetChainId.SN_SEPOLIA;
@@ -291,6 +292,75 @@ describe('AccountStateManager', () => {
       });
 
       expect(result).toBeNull();
+    });
+  });
+
+  describe('switchAccount', () => {
+    const setupSwitchAccountTest = async () => {
+      const [testnetCurrentAccount] = await generateTestnetAccounts();
+      const state = await mockStateWithMainnetAccounts([testnetCurrentAccount]);
+
+      return {
+        testnetCurrentAccount,
+        state,
+      };
+    };
+
+    it('switchs the current account', async () => {
+      const { testnetCurrentAccount, state } = await setupSwitchAccountTest();
+      // simulate the account to switch for that contains updated data.
+      const updatedAccountToSwitch = {
+        ...testnetCurrentAccount,
+        upgradeRequired: true,
+      };
+
+      const stateManager = new AccountStateManager();
+      await stateManager.switchAccount({
+        chainId: testnetChainId,
+        accountToSwitch: updatedAccountToSwitch,
+      });
+
+      const updatedAccountFromState = state.accContracts.find(
+        (acc) =>
+          acc.chainId === updatedAccountToSwitch.chainId &&
+          acc.address === updatedAccountToSwitch.address,
+      );
+
+      expect(state.currentAccount).toHaveProperty(testnetChainId);
+      expect(state.currentAccount[testnetChainId]).toStrictEqual(
+        updatedAccountToSwitch,
+      );
+      expect(updatedAccountFromState).toStrictEqual(updatedAccountToSwitch);
+    });
+
+    it('throws `Account does not exist` error if the account to switch for is not exist', async () => {
+      const { testnetCurrentAccount } = await setupSwitchAccountTest();
+      const accountNotExist = {
+        ...testnetCurrentAccount,
+        address: '0x123456789',
+      };
+
+      const stateManager = new AccountStateManager();
+      await expect(
+        stateManager.switchAccount({
+          chainId: testnetChainId,
+          accountToSwitch: accountNotExist,
+        }),
+      ).rejects.toThrow(new StateManagerError('Account does not exist'));
+    });
+
+    it('throws `Account to switch is not in the same chain` error if the account to switch for does not has the same chain Id as the given chain Id', async () => {
+      const { testnetCurrentAccount } = await setupSwitchAccountTest();
+
+      const stateManager = new AccountStateManager();
+      await expect(
+        stateManager.switchAccount({
+          chainId: mainnetChainId,
+          accountToSwitch: testnetCurrentAccount,
+        }),
+      ).rejects.toThrow(
+        new StateManagerError('Account to switch is not in the same chain'),
+      );
     });
   });
 });

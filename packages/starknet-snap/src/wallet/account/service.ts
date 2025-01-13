@@ -133,4 +133,21 @@ export class AccountService {
       activeAccount ? activeAccount.addressIndex : 0,
     );
   }
+
+  /**
+   * Switches the account for the network.
+   * The account to switch must be in the same chain.
+   *
+   * @param chainId - The chain ID.
+   * @param accountToSwitch - The account to switch to.
+   */
+  async switchAccount(
+    chainId: string,
+    accountToSwitch: Account,
+  ): Promise<void> {
+    await this.accountStateMgr.switchAccount({
+      chainId,
+      accountToSwitch: await accountToSwitch.serialize(),
+    });
+  }
 }
