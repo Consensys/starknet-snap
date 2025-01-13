@@ -213,4 +213,25 @@ export class AccountStateManager extends StateManager<AccContract> {
         .length > Config.account.maxAccountToCreate
     );
   }
+
+  /**
+   * Gets the current account for the specified chain ID.
+   *
+   * @param params - The parameters for getting the current account.
+   * @param params.chainId - The chain ID.
+   * @param [state] - The optional SnapState object.
+   * @returns A Promise that resolves to the current account.
+   */
+  async getCurrentAccount(
+    {
+      chainId,
+    }: {
+      chainId: string;
+    },
+    state?: SnapState,
+  ): Promise<AccContract | null> {
+    const data = state ?? (await this.get());
+
+    return data.currentAccount?.[chainId] ?? null;
+  }
 }

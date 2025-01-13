@@ -117,4 +117,20 @@ export class AccountService {
 
     throw new AccountNotFoundError();
   }
+
+  /**
+   * Gets the selected account for the network.
+   * if there is no account selected, return an account with index 0.
+   *
+   * @returns A promise that resolves to a `Account` object.
+   */
+  async getCurrentAccount(): Promise<Account> {
+    const activeAccount = await this.accountStateMgr.getCurrentAccount({
+      chainId: this.network.chainId,
+    });
+
+    return await this.deriveAccountByIndex(
+      activeAccount ? activeAccount.addressIndex : 0,
+    );
+  }
 }

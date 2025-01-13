@@ -249,4 +249,59 @@ describe('AccountStateManager', () => {
       expect(result).toBe(false);
     });
   });
+
+  describe('getCurrentAccount', () => {
+    const setupGetCurrentAccountTest = async () => {
+      const accounts = await generateTestnetAccounts();
+      const state = await mockStateWithMainnetAccounts();
+
+      const testnetCurrentAccount = accounts[0];
+      const mainnetCurrentAccount = state.accContracts[0];
+
+      state.currentAccount = {
+        [testnetChainId]: testnetCurrentAccount,
+        [mainnetChainId]: mainnetCurrentAccount,
+      };
+      state.accContracts = state.accContracts.concat(accounts);
+      return {
+        testnetCurrentAccount,
+        mainnetCurrentAccount,
+        state,
+      };
+    };
+
+    it('returns the current account for the testnet', async () => {
+      const { testnetCurrentAccount } = await setupGetCurrentAccountTest();
+
+      const stateManager = new AccountStateManager();
+      const result = await stateManager.getCurrentAccount({
+        chainId: testnetChainId,
+      });
+
+      expect(result).toStrictEqual(testnetCurrentAccount);
+    });
+
+    it('returns the current account for the mainnet', async () => {
+      const { mainnetCurrentAccount } = await setupGetCurrentAccountTest();
+
+      const stateManager = new AccountStateManager();
+      const result = await stateManager.getCurrentAccount({
+        chainId: mainnetChainId,
+      });
+
+      expect(result).toStrictEqual(mainnetCurrentAccount);
+    });
+
+    it('returns null if no current account found', async () => {
+      const { state } = await setupGetCurrentAccountTest();
+      state.currentAccount = {};
+
+      const stateManager = new AccountStateManager();
+      const result = await stateManager.getCurrentAccount({
+        chainId: testnetChainId,
+      });
+
+      expect(result).toBeNull();
+    });
+  });
 });

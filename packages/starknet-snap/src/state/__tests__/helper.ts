@@ -44,6 +44,7 @@ export const mockState = async ({
   currentNetwork,
   transactionRequests,
   removedAccounts,
+  currentAccount,
 }: {
   accounts?: StarknetAccount[];
   tokens?: Erc20Token[];
@@ -52,6 +53,7 @@ export const mockState = async ({
   currentNetwork?: Network;
   transactionRequests?: TransactionRequest[];
   removedAccounts?: Record<string, number[]>;
+  currentAccount?: Record<string, StarknetAccount>;
 }) => {
   const getDataSpy = jest.spyOn(snapHelper, 'getStateData');
   const setDataSpy = jest.spyOn(snapHelper, 'setStateData');
@@ -63,6 +65,7 @@ export const mockState = async ({
     currentNetwork,
     transactionRequests: transactionRequests ?? [],
     removedAccounts: removedAccounts ?? {},
+    currentAccount: currentAccount ?? {},
   };
   getDataSpy.mockResolvedValue(state);
   return {
