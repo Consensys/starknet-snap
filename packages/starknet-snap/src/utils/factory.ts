@@ -2,8 +2,10 @@ import type { IDataClient } from '../chain/data-client';
 import { StarkScanClient } from '../chain/data-client/starkscan';
 import { TransactionService } from '../chain/transaction-service';
 import { Config, DataClient } from '../config';
+import type { AccountStateManager } from '../state/account-state-manager';
 import type { TransactionStateManager } from '../state/transaction-state-manager';
 import type { Network } from '../types/snapState';
+import { AccountService } from '../wallet/account';
 
 /**
  * Create a StarkScan client.
@@ -42,5 +44,22 @@ export function createTransactionService(
     dataClient,
     network,
     txnStateMgr,
+  });
+}
+
+/**
+ * Create a AccountService object.
+ *
+ * @param network - The network.
+ * @param [accountStateMgr] - The `AccountStateManager`.
+ * @returns A AccountService object.
+ */
+export function createAccountService(
+  network: Network,
+  accountStateMgr?: AccountStateManager,
+): AccountService {
+  return new AccountService({
+    network,
+    accountStateMgr,
   });
 }
