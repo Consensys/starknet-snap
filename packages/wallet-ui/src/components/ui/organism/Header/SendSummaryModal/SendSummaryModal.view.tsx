@@ -50,6 +50,7 @@ export const SendSummaryModalView = ({
   selectedFeeToken,
 }: Props) => {
   const wallet = useAppSelector((state) => state.wallet);
+  const currentAccount = wallet.currentAccount;
   const [estimatingGas, setEstimatingGas] = useState(true);
   const [gasFees, setGasFees] = useState({
     suggestedMaxFee: '0',
@@ -80,7 +81,7 @@ export const SendSummaryModalView = ({
 
   useEffect(() => {
     const fetchGasFee = () => {
-      if (wallet.accounts) {
+      if (currentAccount) {
         setGasFeesError(false);
         setEstimatingGas(true);
         const amountBN = ethers.utils.parseUnits(
@@ -92,7 +93,7 @@ export const SendSummaryModalView = ({
           wallet.erc20TokenBalanceSelected.address,
           ContractFuncName.Transfer,
           callData,
-          wallet.accounts[0] as unknown as string,
+          currentAccount,
           chainId,
           selectedFeeToken === FeeToken.STRK
             ? constants.TRANSACTION_VERSION.V3
@@ -113,7 +114,9 @@ export const SendSummaryModalView = ({
       }
     };
     fetchGasFee();
-  }, []);
+  }, [
+    currentAccount
+  ]);
 
   useEffect(() => {
     if (gasFees?.suggestedMaxFee) {
@@ -175,7 +178,7 @@ export const SendSummaryModalView = ({
   }, [amount, wallet.erc20TokenBalanceSelected]);
 
   const handleConfirmClick = () => {
-    if (wallet.accounts) {
+    if (currentAccount) {
       const amountBN = ethers.utils.parseUnits(
         amount,
         wallet.erc20TokenBalanceSelected.decimals,
@@ -185,7 +188,7 @@ export const SendSummaryModalView = ({
         wallet.erc20TokenBalanceSelected.address,
         ContractFuncName.Transfer,
         callData,
-        wallet.accounts[0] as unknown as string,
+        currentAccount,
         gasFees.suggestedMaxFee,
         chainId,
         selectedFeeToken,
@@ -194,7 +197,7 @@ export const SendSummaryModalView = ({
           if (result) {
             toastr.success('Transaction sent successfully');
             getTransactions(
-              wallet.accounts[0] as unknown as string,
+              currentAccount,
               wallet.erc20TokenBalanceSelected.address,
               10,
               chainId,

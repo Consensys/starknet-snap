@@ -15,20 +15,20 @@ export const TransactionsListView = ({ transactions }: Props) => {
   const { getTransactions } = useStarkNetSnap();
   const networks = useAppSelector((state) => state.networks);
   const wallet = useAppSelector((state) => state.wallet);
-  const timeoutHandle = useRef(setTimeout(() => {}));
-
+  const timeoutHandle = useRef(setTimeout(() => {})); 
+  const chainId = networks.items[networks.activeNetwork]?.chainId;
+  const { currentAccount, erc20TokenBalanceSelected, transactions: walletTransactions } = wallet;
+  
   useEffect(() => {
-    const chain = networks.items[networks.activeNetwork]?.chainId;
-    const address = wallet.accounts?.[0] as unknown as string;
-    if (chain && address) {
+    if (chainId && currentAccount) {
       clearTimeout(timeoutHandle.current); // cancel the timeout that was in-flight
       timeoutHandle.current = setTimeout(
         () =>
           getTransactions(
-            address,
-            wallet.erc20TokenBalanceSelected.address,
+            currentAccount,
+            erc20TokenBalanceSelected.address,
             10,
-            chain,
+            chainId,
             false,
             true,
           ),
@@ -37,30 +37,29 @@ export const TransactionsListView = ({ transactions }: Props) => {
       return () => clearTimeout(timeoutHandle.current);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [wallet.transactions]);
+  }, [walletTransactions]);
 
   useEffect(
     () => {
-      const chain = networks.items[networks.activeNetwork]?.chainId;
-      const address = wallet.accounts?.[0] as unknown as string;
-      if (chain && address) {
+      if (chainId && currentAccount) {
         clearTimeout(timeoutHandle.current); // cancel the timeout that was in-flight
         getTransactions(
-          address,
-          wallet.erc20TokenBalanceSelected.address,
+          currentAccount,
+          erc20TokenBalanceSelected.address,
           10,
-          chain,
+          chainId,
         );
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       // eslint-disable-next-line react-hooks/exhaustive-deps
-      wallet.erc20TokenBalanceSelected.address,
+      erc20TokenBalanceSelected.address,
       // eslint-disable-next-line react-hooks/exhaustive-deps
-      wallet.erc20TokenBalanceSelected.chainId,
+      erc20TokenBalanceSelected.chainId,
       // eslint-disable-next-line react-hooks/exhaustive-deps
-      wallet.accounts?.[0],
+      currentAccount,
+      chainId,
     ],
   );
 

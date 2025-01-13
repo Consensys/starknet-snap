@@ -8,7 +8,8 @@ export interface WalletState {
   connected: boolean;
   isLoading: boolean;
   forceReconnect: boolean;
-  accounts: Account[];
+  accounts: string[];
+  currentAccount: string;
   erc20TokenBalances: Erc20TokenBalance[];
   erc20TokenBalanceSelected: Erc20TokenBalance;
   transactions: Transaction[];
@@ -21,6 +22,7 @@ const initialState: WalletState = {
   isLoading: false,
   forceReconnect: false,
   accounts: [],
+  currentAccount: '',
   erc20TokenBalances: [],
   erc20TokenBalanceSelected: {} as Erc20TokenBalance,
   transactions: [],
@@ -41,12 +43,24 @@ export const walletSlice = createSlice({
     setForceReconnect: (state, { payload }) => {
       state.forceReconnect = payload;
     },
-    setAccounts: (state, { payload }) => {
+    setAccounts: (state, { payload } : {
+      payload: Account | Account[];
+    }) => {
+      let chainId;
       if (Array.isArray(payload)) {
+        // When switching networks, we clean up the accounts from the previous network
+        // Hence, we can assume that setAccounts is called with an array of accounts from the same network
+        chainId = payload[0].chainId;
         state.accounts = payload.map((account) => account.address);
       } else {
+        chainId = payload.chainId;
         state.accounts.push(payload.address);
       }
+      // FIXME: this is a hack to set the current account to the last one added
+      // We should have a way to get the active account
+      const currentAccountIdx = state.accounts.length - 1;
+      const currentAccount = state.accounts[currentAccountIdx];
+      state.currentAccount = currentAccount
     },
     setErc20TokenBalances: (state, { payload }) => {
       state.erc20TokenBalances = payload;
@@ -94,6 +108,7 @@ export const walletSlice = createSlice({
     },
     clearAccounts: (state) => {
       state.accounts = [];
+      state.currentAccount = '';
     },
     resetWallet: (state) => {
       return {
