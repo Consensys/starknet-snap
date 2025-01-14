@@ -242,35 +242,53 @@ describe('CairoAccountContract', () => {
   });
 
   describe('isRequireDeploy', () => {
-    it('returns true if the contract requires deploy', async () => {
-      const { getVersionSpy } = mockAccountContractReader({});
-      getVersionSpy.mockRejectedValue(new ContractNotDeployedError());
+    it.each([
+      {
+        expected: true,
+        balance: 1000000,
+      },
+      {
+        expected: false,
+        balance: 0,
+      },
+    ])(
+      'returns $expected if a Cairo 0 contract is not deployed - Balance: $balance',
+      async ({ balance, expected }: { balance: number; expected: boolean }) => {
+        const { getVersionSpy } = mockAccountContractReader({
+          balance: BigInt(balance),
+        });
+        getVersionSpy.mockRejectedValue(new ContractNotDeployedError());
 
-      const { contract } = await createAccountContract(
-        network,
-        0,
-        Cairo0Contract,
-      );
+        const { contract } = await createAccountContract(
+          network,
+          0,
+          Cairo0Contract,
+        );
 
-      const result = await contract.isRequireDeploy();
+        const result = await contract.isRequireDeploy();
 
-      expect(result).toBe(true);
-    });
+        expect(result).toBe(expected);
+      },
+    );
 
-    it('returns false if the contract is not deployed and does not has ETH', async () => {
-      const { getVersionSpy } = mockAccountContractReader({
-        balance: BigInt(0),
-      });
-      getVersionSpy.mockRejectedValue(new ContractNotDeployedError());
-      const { contract } = await createAccountContract(
-        network,
-        0,
-        Cairo1Contract,
-      );
+    it.each([0, 1000000])(
+      'returns false if the Cairo 1 contract is not deployed regardless if it has ETH or not - Balance: %s',
+      async (balance: number) => {
+        const { getVersionSpy } = mockAccountContractReader({
+          balance: BigInt(balance),
+        });
+        getVersionSpy.mockRejectedValue(new ContractNotDeployedError());
 
-      const result = await contract.isRequireUpgrade();
+        const { contract } = await createAccountContract(
+          network,
+          0,
+          Cairo1Contract,
+        );
 
-      expect(result).toBe(false);
-    });
+        const result = await contract.isRequireDeploy();
+
+        expect(result).toBe(false);
+      },
+    );
   });
 });

@@ -49,7 +49,7 @@ export class AccountService {
   async deriveAccountByIndex(index?: number): Promise<Account> {
     let hdIndex = index;
 
-    if (!hdIndex) {
+    if (hdIndex === undefined) {
       hdIndex = await this.accountStateMgr.getNextIndex(this.network.chainId);
     }
 

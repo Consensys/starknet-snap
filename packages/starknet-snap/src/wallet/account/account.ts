@@ -1,3 +1,5 @@
+import type { CairoVersion } from 'starknet';
+
 import type { AccContract } from '../../types/snapState';
 import type { CairoAccountContract } from './contract';
 
@@ -25,7 +27,7 @@ export class Account {
    * `1` referred to Cairo 1.
    * `0` referred to Cairo 0.
    */
-  cairoVersion: string;
+  cairoVersion: CairoVersion;
 
   accountContract: CairoAccountContract;
 
@@ -44,7 +46,9 @@ export class Account {
     this.addressSalt = props.addressSalt;
     this.address = props.accountContract.address;
 
-    this.cairoVersion = props.accountContract.cairoVerion.toString(10);
+    this.cairoVersion = props.accountContract.cairoVerion.toString(
+      10,
+    ) as CairoVersion;
     this.accountContract = props.accountContract;
   }
 

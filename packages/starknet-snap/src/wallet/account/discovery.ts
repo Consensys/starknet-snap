@@ -1,5 +1,4 @@
 import type { Network } from '../../types/snapState';
-import { AccountDiscoveryError } from '../../utils/exceptions';
 import { Cairo0Contract } from './cairo0';
 import { Cairo1Contract } from './cairo1';
 import type { CairoAccountContract } from './contract';
@@ -9,6 +8,7 @@ import type { CairoAccountContractStatic, ICairoAccountContract } from './type';
 export class AccountContractDiscovery {
   protected defaultContractCtor: CairoAccountContractStatic = Cairo1Contract;
 
+  // The order of the `contractCtors` array determines the priority of the contract to be selected.
   protected contractCtors: ICairoAccountContract[] = [
     Cairo1Contract,
     Cairo0Contract,
@@ -23,9 +23,14 @@ export class AccountContractDiscovery {
   /**
    * Get the contract for the given public key.
    * The contract is determined based on the following rules:
-   * 1. If a contract is deployed, then use the deployed contract.
-   * 2. If no contract is deployed, but has balance, then use the contract with balance.
-   * 3. If neither contract is deployed or has balance, then use the default contract.
+   *
+   * 1. If a Cairo 1 contract has been deployed, it will always be used regardless of whether the other contract has a balance in ETH or has been deployed.
+   * 2. If a Cairo 0 contract has been deployed and the other contract has not, the Cairo 0 contract will always be used regardless of whether the other contract has a balance or not, and the contract will be forced to upgrade.
+   * 3. If neither contract has been deployed, but a Cairo 0 contract has a balance in ETH, it will always be used regardless of whether the other contract has a balance or not, and the contract will be forced to deploy.
+   * 3. If neither contract has been deployed and neither has a balance in ETH, the default contract (Cairo 1) will be used."
+   *
+   * Note: The rules accommodate for most use cases, except 1 edge case:
+   * - Due to rule #1, if a user wont able to operated a Cairo 0 contract if a Cairo 1 contract has been deployed.
    *
    * @param publicKey - The public key to get the contract for.
    * @returns The contract for the given public key.
@@ -35,14 +40,9 @@ export class AccountContractDiscovery {
     const reader = new AccountContractReader(this.network);
     const DefaultContractCtor = this.defaultContractCtor;
 
-    // Use array to store the result to prevent race condition.
-    const contracts: CairoAccountContract[] = [];
-
-    let cairoContract: CairoAccountContract | undefined;
-
     // Identify where all available contracts have been deployed, upgraded,
     // and whether they have an ETH balance or not.
-    await Promise.all(
+    const contracts = await Promise.all(
       this.contractCtors.map(async (ContractCtor: ICairoAccountContract) => {
         const contract = new ContractCtor(publicKey, reader);
 
@@ -50,33 +50,29 @@ export class AccountContractDiscovery {
           // if contract upgraded, bind the latest contract with current contract interface,
           // to inherit the address from current contract.
           if (await contract.isUpgraded()) {
-            contracts.push(DefaultContractCtor.fromAccountContract(contract));
-          } else {
-            contracts.push(contract);
+            return DefaultContractCtor.fromAccountContract(contract);
           }
-        } else if (
-          contract instanceof Cairo0Contract &&
-          (await contract.isRequireDeploy())
-        ) {
+          return contract;
+        } else if (await contract.isRequireDeploy()) {
           // It should only valid for Cairo 0 contract.
           // A Cairo 0 contract can only paying fee with ETH token.
           // Therefore if the contract is not deployed, and it has ETH token, we should use this contract.
           // And the UI will force the user to deploy the Cairo 0 contract.
-          contracts.push(contract);
+          return contract;
         }
+
+        return null;
       }),
     );
 
-    // In case of multiple contracts are deployed or have balance,
-    // We will not be able to determine which contract to use.
-    // Hence, throw an error.
-    if (contracts.length > 1) {
-      throw new AccountDiscoveryError();
-    } else if (contracts.length === 1) {
-      cairoContract = contracts[0];
+    // If multiple contracts are deployed, the first contract in the `contractCtors` array will be selected.
+    for (const contract of contracts) {
+      if (contract !== null) {
+        return contract;
+      }
     }
 
     // Fallback with default contract.
-    return cairoContract ?? new DefaultContractCtor(publicKey, reader);
+    return new DefaultContractCtor(publicKey, reader);
   }
 }

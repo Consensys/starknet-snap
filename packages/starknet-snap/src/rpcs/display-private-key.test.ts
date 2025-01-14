@@ -1,16 +1,15 @@
 import { constants } from 'starknet';
 
-import type { SnapState } from '../types/snapState';
 import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../utils/constants';
 import {
   UserRejectedOpError,
   InvalidRequestParamsError,
 } from '../utils/exceptions';
+import { createAccountObject } from '../wallet/account/__test__/helper';
 import {
-  mockAccount,
-  prepareMockAccount,
-  prepareRenderDisplayPrivateKeyAlertUI,
-  prepareRenderDisplayPrivateKeyConfirmUI,
+  setupAccountController,
+  mockRenderDisplayPrivateKeyAlertUI,
+  mockRenderDisplayPrivateKeyConfirmUI,
 } from './__tests__/helper';
 import { displayPrivateKey } from './display-private-key';
 import type { DisplayPrivateKeyParams } from './display-private-key';
@@ -18,32 +17,36 @@ import type { DisplayPrivateKeyParams } from './display-private-key';
 jest.mock('../utils/logger');
 
 describe('displayPrivateKey', () => {
-  const state: SnapState = {
-    accContracts: [],
-    erc20Tokens: [],
-    networks: [STARKNET_SEPOLIA_TESTNET_NETWORK],
-    transactions: [],
-  };
+  const network = STARKNET_SEPOLIA_TESTNET_NETWORK;
+  const setupDisplayPrivateKeyTest = async () => {
+    const { chainId } = network;
+    const { accountObj: account } = await createAccountObject(network);
+    await setupAccountController({
+      accountObj: account,
+    });
 
-  const createRequestParam = (
-    chainId: constants.StarknetChainId,
-    address: string,
-  ): DisplayPrivateKeyParams => {
+    const { confirmDialogSpy } = mockRenderDisplayPrivateKeyConfirmUI();
+    const { alertDialogSpy } = mockRenderDisplayPrivateKeyAlertUI();
+
+    mockRenderDisplayPrivateKeyAlertUI();
+
     const request: DisplayPrivateKeyParams = {
-      chainId,
-      address,
+      chainId: chainId as constants.StarknetChainId,
+      address: account.address,
     };
-    return request;
+
+    return {
+      request,
+      account,
+      chainId,
+      confirmDialogSpy,
+      alertDialogSpy,
+    };
   };
 
   it('displays private key correctly', async () => {
-    const chainId = constants.StarknetChainId.SN_SEPOLIA;
-    const account = await mockAccount(chainId);
-    prepareMockAccount(account, state);
-    prepareRenderDisplayPrivateKeyConfirmUI();
-    const { alertDialogSpy } = prepareRenderDisplayPrivateKeyAlertUI();
-
-    const request = createRequestParam(chainId, account.address);
+    const { account, alertDialogSpy, request } =
+      await setupDisplayPrivateKeyTest();
 
     await displayPrivateKey.execute(request);
 
@@ -51,13 +54,7 @@ describe('displayPrivateKey', () => {
   });
 
   it('renders confirmation dialog', async () => {
-    const chainId = constants.StarknetChainId.SN_SEPOLIA;
-    const account = await mockAccount(chainId);
-    prepareMockAccount(account, state);
-    const { confirmDialogSpy } = prepareRenderDisplayPrivateKeyConfirmUI();
-    prepareRenderDisplayPrivateKeyAlertUI();
-
-    const request = createRequestParam(chainId, account.address);
+    const { confirmDialogSpy, request } = await setupDisplayPrivateKeyTest();
 
     await displayPrivateKey.execute(request);
 
@@ -65,15 +62,9 @@ describe('displayPrivateKey', () => {
   });
 
   it('throws `UserRejectedOpError` if user denies the operation', async () => {
-    const chainId = constants.StarknetChainId.SN_SEPOLIA;
-    const account = await mockAccount(chainId);
-    prepareMockAccount(account, state);
-    const { confirmDialogSpy } = prepareRenderDisplayPrivateKeyConfirmUI();
-    prepareRenderDisplayPrivateKeyAlertUI();
+    const { confirmDialogSpy, request } = await setupDisplayPrivateKeyTest();
 
     confirmDialogSpy.mockResolvedValue(false);
-
-    const request = createRequestParam(chainId, account.address);
 
     await expect(displayPrivateKey.execute(request)).rejects.toThrow(
       UserRejectedOpError,

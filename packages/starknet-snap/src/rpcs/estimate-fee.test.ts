@@ -6,10 +6,10 @@ import callsExamples from '../__tests__/fixture/callsExamples.json';
 import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../utils/constants';
 import { InvalidRequestParamsError } from '../utils/exceptions';
 import type { TxVersionStruct } from '../utils/superstruct';
+import { createAccountObject } from '../wallet/account/__test__/helper';
 import {
-  mockAccount,
   mockGetEstimatedFeesResponse,
-  prepareMockAccount,
+  setupAccountController,
 } from './__tests__/helper';
 import { estimateFee } from './estimate-fee';
 import type { EstimateFeeParams } from './estimate-fee';
@@ -17,52 +17,50 @@ import type { EstimateFeeParams } from './estimate-fee';
 jest.mock('../utils/snap');
 jest.mock('../utils/logger');
 
-const prepareMockEstimateFee = ({
-  chainId,
-  address,
-  version,
-  includeDeploy = false,
-}: {
-  chainId: constants.StarknetChainId;
-  address: string;
-  version: Infer<typeof TxVersionStruct>;
-  includeDeploy?: boolean;
-}) => {
-  const invocations: Invocations = [
-    {
-      type: TransactionType.INVOKE,
-      payload: callsExamples.singleCall.calls,
-    },
-  ];
+describe('estimateFee', () => {
+  const network = STARKNET_SEPOLIA_TESTNET_NETWORK;
 
-  const request = {
+  const setupMockEstimateFeeTest = ({
     chainId,
     address,
-    invocations,
-    details: { version },
-  } as unknown as EstimateFeeParams;
+    version,
+    includeDeploy = false,
+  }: {
+    chainId: constants.StarknetChainId;
+    address: string;
+    version: Infer<typeof TxVersionStruct>;
+    includeDeploy?: boolean;
+  }) => {
+    const invocations: Invocations = [
+      {
+        type: TransactionType.INVOKE,
+        payload: callsExamples.singleCall.calls,
+      },
+    ];
 
-  return {
-    invocations,
-    request,
-    ...mockGetEstimatedFeesResponse({
-      includeDeploy,
-    }),
-  };
-};
+    const request = {
+      chainId,
+      address,
+      invocations,
+      details: { version },
+    } as unknown as EstimateFeeParams;
 
-describe('estimateFee', () => {
-  const state = {
-    accContracts: [],
-    erc20Tokens: [],
-    networks: [STARKNET_SEPOLIA_TESTNET_NETWORK],
-    transactions: [],
+    return {
+      invocations,
+      request,
+      ...mockGetEstimatedFeesResponse({
+        includeDeploy,
+      }),
+    };
   };
 
   it('estimates fee correctly', async () => {
-    const chainId = constants.StarknetChainId.SN_SEPOLIA;
-    const account = await mockAccount(chainId);
-    prepareMockAccount(account, state);
+    const { chainId } = network;
+    const { accountObj: account } = await createAccountObject(network);
+    await setupAccountController({
+      accountObj: account,
+    });
+
     const {
       request,
       getEstimatedFeesSpy,
@@ -72,9 +70,8 @@ describe('estimateFee', () => {
         suggestedMaxFee,
         unit,
       },
-    } = prepareMockEstimateFee({
-      includeDeploy: false,
-      chainId,
+    } = setupMockEstimateFeeTest({
+      chainId: chainId as constants.StarknetChainId,
       address: account.address,
       version: constants.TRANSACTION_VERSION.V1,
     });
@@ -82,7 +79,7 @@ describe('estimateFee', () => {
     const result = await estimateFee.execute(request);
 
     expect(getEstimatedFeesSpy).toHaveBeenCalledWith(
-      STARKNET_SEPOLIA_TESTNET_NETWORK,
+      network,
       account.address,
       account.privateKey,
       account.publicKey,
