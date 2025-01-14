@@ -5,9 +5,7 @@ import sinonChai from 'sinon-chai';
 import { WalletMock } from '../wallet.mock.test';
 import * as utils from '../../src/utils/starknetUtils';
 import * as snapUtils from '../../src/utils/snapUtils';
-import {
-  SnapState,
-} from '../../src/types/snapState';
+import { SnapState } from '../../src/types/snapState';
 import { upgradeAccContract } from '../../src/upgradeAccContract';
 import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../../src/utils/constants';
 import {
