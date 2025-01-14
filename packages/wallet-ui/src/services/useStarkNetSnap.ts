@@ -251,6 +251,8 @@ export const useStarkNetSnap = () => {
     }
   };
 
+  // FIXME: this method has to rewrite when switch account enabled
+  // we should get the active account, instead of recovering all accounts
   const getWalletData = async (chainId: string, networks?: Network[]) => {
     if (!loader.isLoading && !networks) {
       dispatch(enableLoadingWithMessage('Getting network data ...'));
@@ -302,8 +304,60 @@ export const useStarkNetSnap = () => {
     dispatch(disableLoading());
   };
 
+  // FIXME: this method has to replace getWalletData()
+  const initWalletData = async ({
+    account,
+  }: {
+    // TODO: we should allow the account to be optional
+    // and get the active account from the snap
+    account: Account;
+  }) => {
+    if (!loader.isLoading) {
+      dispatch(enableLoadingWithMessage('Getting network data ...'));
+    }
+
+    const { address, chainId } = account;
+
+    await setAccount(account);
+
+    await initTokensAndBalances(chainId, address);
+
+    dispatch(disableLoading());
+  };
+
+  const setAccount = async (account: Account) => {
+    const { upgradeRequired, deployRequired } = account;
+    dispatch(setAccounts(account));
+
+    // FIXME: hardcode to set the info modal visible,
+    // but it should only visible when the account is not deployed
+    dispatch(setInfoModalVisible(true));
+
+    dispatch(setUpgradeModalVisible(upgradeRequired));
+    dispatch(setDeployModalVisible(deployRequired));
+  };
+
   const setErc20TokenBalance = (erc20TokenBalance: Erc20TokenBalance) => {
     dispatch(setErc20TokenBalanceSelected(erc20TokenBalance));
+  };
+
+  const initTokensAndBalances = async (chainId: string, address: string) => {
+    const tokens = await getTokens(chainId);
+
+    // Get all tokens balance, USD value, and format them into Erc20TokenBalance type
+    const tokensWithBalances: Erc20TokenBalance[] = await Promise.all(
+      tokens.map(async (token) => {
+        const balance = await getTokenBalance(token.address, address, chainId);
+        const usdPrice = await getAssetPriceUSD(token);
+        return await getTokenBalanceWithDetails(balance, token, usdPrice);
+      }),
+    );
+
+    dispatch(setErc20TokenBalances(tokensWithBalances));
+
+    if (tokensWithBalances.length > 0) {
+      setErc20TokenBalance(tokensWithBalances[0]);
+    }
   };
 
   async function getPrivateKeyFromAddress(address: string, chainId: string) {
@@ -337,6 +391,9 @@ export const useStarkNetSnap = () => {
     chainId: string,
     transactionVersion?: typeof constants.TRANSACTION_VERSION.V3,
   ) {
+    console.log('contractCallData', contractCallData);
+    console.log('contractAddress', contractAddress);
+    console.log('address', address);
     try {
       const invocations: Invocations = [
         {
@@ -974,6 +1031,35 @@ export const useStarkNetSnap = () => {
     }
   };
 
+  const addNewAccount = async (chainId: string) => {
+    dispatch(enableLoadingWithMessage('Adding new account...'));
+    try {
+      const account = (await provider.request({
+        method: 'wallet_invokeSnap',
+        params: {
+          snapId,
+          request: {
+            method: 'starkNet_addAccount',
+            params: {
+              chainId,
+            },
+          },
+        },
+      })) as Account;
+
+      await initWalletData({
+        account,
+      });
+
+      return account;
+    } catch (err: any) {
+      const toastr = new Toastr();
+      toastr.error(err.message as unknown as string);
+    } finally {
+      dispatch(disableLoading());
+    }
+  };
+
   return {
     connectToSnap,
     getNetworks,
@@ -1004,6 +1090,7 @@ export const useStarkNetSnap = () => {
     getCurrentNetwork,
     getStarkName,
     getAddrFromStarkName,
+    addNewAccount,
     satisfiesVersion: oldVersionDetected,
   };
 };
