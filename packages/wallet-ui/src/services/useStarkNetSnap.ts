@@ -77,7 +77,7 @@ export const useStarkNetSnap = () => {
       .then(() => {
         dispatch(setWalletConnection(true));
       })
-      .catch((err: any) => {
+      .catch((error: any) => {
         dispatch(setWalletConnection(false));
         dispatch(disableLoading());
         //eslint-disable-next-line no-console
