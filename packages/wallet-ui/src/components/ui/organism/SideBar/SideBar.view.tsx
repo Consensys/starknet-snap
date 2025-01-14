@@ -12,6 +12,7 @@ import {
   AccountDetailsContent,
   AccountImageStyled,
   AccountLabel,
+  AddIcon,
   AddTokenButton,
   DivList,
   InfoIcon,
@@ -114,9 +115,7 @@ export const SideBarView = ({ address }: Props) => {
       <RowDiv>
         <InfoIcon onClick={() => setInfoModalOpen(true)}>i</InfoIcon>
         <AccountAddress address={address} starkName={starkName} />
-        <InfoIcon onClick={async () => await addNewAccount(chainId)}>
-          +
-        </InfoIcon>
+        <AddIcon onClick={async () => await addNewAccount(chainId)}>+</AddIcon>
       </RowDiv>
       <DivList ref={ref as any}>
         <AssetsList />
