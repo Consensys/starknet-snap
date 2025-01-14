@@ -7,8 +7,6 @@ import * as utils from '../../src/utils/starknetUtils';
 import * as snapUtils from '../../src/utils/snapUtils';
 import {
   SnapState,
-  VoyagerTransactionType,
-  TransactionStatus,
 } from '../../src/types/snapState';
 import { upgradeAccContract } from '../../src/upgradeAccContract';
 import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../../src/utils/constants';
@@ -29,6 +27,7 @@ import {
   ACCOUNT_CLASS_HASH,
 } from '../../src/utils/constants';
 import { CallData, num } from 'starknet';
+import { loadLocale } from '../../src/utils/locale';
 
 chai.use(sinonChai);
 chai.use(chaiAsPromised);
@@ -157,6 +156,7 @@ describe('Test function: upgradeAccContract', function () {
     });
 
     it('should use provided max fee to execute txn when max fee provided', async function () {
+      await loadLocale();
       (apiParams.requestParams as UpgradeTransactionRequestParams).maxFee =
         '10000';
       walletStub.rpcStubs.snap_dialog.resolves(true);
@@ -194,6 +194,7 @@ describe('Test function: upgradeAccContract', function () {
     });
 
     it('should use calculated max fee to execute txn when max fee not provided', async function () {
+      await loadLocale();
       walletStub.rpcStubs.snap_dialog.resolves(true);
       executeTxnStub.resolves(sendTransactionResp);
       estimateFeeStub.resolves(estimateFeeResp);
@@ -230,6 +231,7 @@ describe('Test function: upgradeAccContract', function () {
     });
 
     it('should return executed txn result when user accept to sign the transaction', async function () {
+      await loadLocale();
       executeTxnStub.resolves(sendTransactionResp);
       estimateFeeStub.resolves(estimateFeeResp);
       walletStub.rpcStubs.snap_dialog.resolves(true);
@@ -242,6 +244,7 @@ describe('Test function: upgradeAccContract', function () {
     });
 
     it('should return false when user rejected to sign the transaction', async function () {
+      await loadLocale();
       executeTxnStub.resolves(sendTransactionResp);
       estimateFeeStub.resolves(estimateFeeResp);
       walletStub.rpcStubs.snap_dialog.resolves(false);
@@ -254,6 +257,7 @@ describe('Test function: upgradeAccContract', function () {
     });
 
     it('should return executed txn result when execute transaction success', async function () {
+      await loadLocale();
       executeTxnStub.resolves(sendTransactionResp);
       estimateFeeStub.resolves(estimateFeeResp);
       walletStub.rpcStubs.snap_dialog.resolves(true);
@@ -266,6 +270,7 @@ describe('Test function: upgradeAccContract', function () {
     });
 
     it('should throw exception when execute transaction result null', async function () {
+      await loadLocale();
       executeTxnStub.resolves(null);
       estimateFeeStub.resolves(estimateFeeResp);
       walletStub.rpcStubs.snap_dialog.resolves(true);
