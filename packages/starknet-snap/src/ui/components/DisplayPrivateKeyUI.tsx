@@ -38,8 +38,8 @@ export const DisplayPrivateKeyAlertUI: SnapComponent<
   const translate = getTranslator();
   return (
     <Box>
-      <Heading>{translate('starknetPrivateKeyTitle')}</Heading>
-      <Text>{translate('starknetPrivateKeyDescription')}</Text>
+      <Heading>{translate('starknetPrivateKey')}</Heading>
+      <Text>{translate('starknetPrivateKeyConfidential')}</Text>
       <Copyable value={privateKey} />
     </Box>
   );
