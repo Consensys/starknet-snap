@@ -22,8 +22,11 @@
     "address": {
       "message": "Address"
     },
-    "amountLabel": {
+    "amount": {
       "message": "Amount"
+    },
+    "amountWythSymbol": {
+      "message": "Amount ({1})"
     },
     "balance": {
       "message": "Balance"
@@ -34,13 +37,10 @@
     "callData": {
       "message": "Call Data"
     },
-    "callLabel": {
+    "call": {
       "message": "Call"
     },
     "chainId": {
-      "message": "Chain ID"
-    },
-    "chainIdLabel": {
       "message": "Chain ID"
     },
     "chainName": {
@@ -52,34 +52,34 @@
     "companionDapp": {
       "message": "companion dapp for Starknet"
     },
-    "companionDappRepeat": {
-      "message": "companion dapp for Starknet"
-    },
     "compiledClassHash": {
       "message": "Compiled Class Hash"
     },
     "confirmPrivateKeyAction": {
       "message": "Confirming this action will display your private key. Ensure you are in a secure environment."
     },
-    "contractLabel": {
+    "contract": {
       "message": "Contract"
     },
-    "decimalsLabel": {
+    "decimals": {
       "message": "Decimals"
     },
     "declareTransactionDetails": {
       "message": "Declare Transaction Details"
     },
+    "estimatedGasFee": {
+      "message": "Estimated Gas Fee"
+    },
     "explorerUrl": {
       "message": "Explorer URL"
     },
-    "messageLabel": {
+    "message": {
       "message": "Message"
     },
     "maxFeeETH": {
       "message": "Max Fee (ETH)"
     },
-    "nameLabel": {
+    "name": {
       "message": "Name"
     },
     "network": {
@@ -91,7 +91,7 @@
     "recipientAddress": {
       "message": "Recipient Address"
     },
-    "recipientLabel": {
+    "recipient": {
       "message": "Recipient"
     },
     "rpcUrl": {
@@ -109,11 +109,11 @@
     "signerAddress": {
       "message": "Signer Address"
     },
-    "signerLabel": {
+    "signer": {
       "message": "Signer"
     },
     "snapUpdate": {
-      "message": "Your Starknet Snap is now up-to-date !"
+      "message": "Your Starknet Snap is now up-to-date!"
     },
     "starknetPrivateKeyDescription": {
       "message": "Below is your Starknet Account private key. Keep it confidential."
@@ -124,17 +124,29 @@
     "switchNetworkPrompt": {
       "message": "Do you want to switch to this network?"
     },
-    "symbolLabel": {
+    "symbol": {
       "message": "Symbol"
     },
-    "tokenLabel": {
+    "token": {
       "message": "Token"
     },
     "totalFor": {
       "message": "Total for"
     },
-    "transactionsLabel": {
+    "transaction": {
+      "message": "Transaction"
+    },
+    "transactions": {
       "message": "Transactions"
+    },
+    "visitCompanionDappHomePage": {
+      "message": "Visit the [companion dapp for Starknet]({1}) to manage your account."
+    },
+    "visiteCompanionDappAndDeloy": {
+      "message": "Visit the [companion dapp for Starknet]({1}) to deploy your account.\nThank you!"
+    },
+    "visiteCompanionDappAndUpgrade": {
+      "message": "Visit the [companion dapp for Starknet]({1}) and click “Upgrade”.\nThank you!"
     },
     "walletCompatibility": {
       "message": "Your MetaMask wallet is now compatible with Starknet!"

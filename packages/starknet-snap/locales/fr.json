@@ -22,8 +22,11 @@
     "address": {
       "message": "Adresse"
     },
-    "amountLabel": {
+    "amount": {
       "message": "Montant"
+    },
+    "amountWythSymbol": {
+      "message": "Montant ({1})"
     },
     "balance": {
       "message": "Solde"
@@ -34,13 +37,10 @@
     "callData": {
       "message": "Données d'appel"
     },
-    "callLabel": {
+    "call": {
       "message": "Appel"
     },
     "chainId": {
-      "message": "ID de la chaîne"
-    },
-    "chainIdLabel": {
       "message": "ID de la chaîne"
     },
     "chainName": {
@@ -52,34 +52,34 @@
     "companionDapp": {
       "message": "dapp compagnon pour Starknet"
     },
-    "companionDappRepeat": {
-      "message": "dapp compagnon pour Starknet"
-    },
     "compiledClassHash": {
       "message": "Hash de la classe compilée"
     },
     "confirmPrivateKeyAction": {
       "message": "Confirmer cette action affichera votre clé privée. Assurez-vous d'être dans un environnement sécurisé."
     },
-    "contractLabel": {
+    "contract": {
       "message": "Contrat"
     },
-    "decimalsLabel": {
+    "decimals": {
       "message": "Décimales"
     },
     "declareTransactionDetails": {
       "message": "Détails de la transaction à déclarer"
     },
+    "estimatedGasFee": {
+      "message": "Frais de gaz estimés"
+    },
     "explorerUrl": {
       "message": "URL de l'explorateur"
     },
-    "messageLabel": {
+    "message": {
       "message": "Message"
     },
     "maxFeeETH": {
       "message": "Frais max (ETH)"
     },
-    "nameLabel": {
+    "name": {
       "message": "Nom"
     },
     "network": {
@@ -91,7 +91,7 @@
     "recipientAddress": {
       "message": "Adresse du destinataire"
     },
-    "recipientLabel": {
+    "recipient": {
       "message": "Destinataire"
     },
     "rpcUrl": {
@@ -109,7 +109,7 @@
     "signerAddress": {
       "message": "Adresse du signataire"
     },
-    "signerLabel": {
+    "signer": {
       "message": "Signataire"
     },
     "snapUpdate": {
@@ -124,17 +124,29 @@
     "switchNetworkPrompt": {
       "message": "Voulez-vous changer pour ce réseau ?"
     },
-    "symbolLabel": {
+    "symbol": {
       "message": "Symbole"
     },
-    "tokenLabel": {
+    "token": {
       "message": "Token"
     },
     "totalFor": {
       "message": "Total pour"
     },
-    "transactionsLabel": {
+    "transaction": {
+      "message": "Transaction"
+    },
+    "transactions": {
       "message": "Transactions"
+    },
+    "visitCompanionDappHomePage": {
+      "message": "Visitez la [dapp compagnon pour Starknet]({1}) pour gérer votre compte."
+    },
+    "visiteCompanionDappAndDeloy": {
+      "message": "Visitez la [dapp compagnon pour Starknet]({1}) pour déployer votre compte.\nMerci !"
+    },
+    "visiteCompanionDappAndUpgrade": {
+      "message": "Visitez la [dapp compagnon pour Starknet]({1}) et cliquez sur “Upgrade”.\nMerci !"
     },
     "walletCompatibility": {
       "message": "Votre portefeuille MetaMask est désormais compatible avec Starknet !"

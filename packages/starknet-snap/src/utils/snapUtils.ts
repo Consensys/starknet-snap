@@ -254,7 +254,7 @@ export function getSendTxnText(
   const token = getErc20Token(state, contractAddress, network.chainId);
   const components = [];
   addDialogTxt(components, translate('signerAddress'), senderAddress);
-  addDialogTxt(components, 'Contract', contractAddress);
+  addDialogTxt(components, translate('contract'), contractAddress);
   addDialogTxt(
     components,
     translate('callData'),
@@ -262,10 +262,10 @@ export function getSendTxnText(
   );
   addDialogTxt(
     components,
-    'Estimated Gas Fee(ETH)',
+    `${translate('estimatedGasFee')}(ETH)`,
     convert(maxFee, 'wei', 'ether'),
   );
-  addDialogTxt(components, 'Network', network.name);
+  addDialogTxt(components, translate('network'), network.name);
 
   if (token && contractFuncName === ContractFuncName.Transfer) {
     try {
@@ -283,7 +283,11 @@ export function getSendTxnText(
         translate('recipientAddress'),
         contractCallData[0],
       );
-      addDialogTxt(components, `Amount(${token.symbol})`, amount);
+      addDialogTxt(
+        components,
+        translate('amountWithSymbol', token.symbol),
+        amount,
+      );
     } catch (error) {
       logger.error(
         // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
@@ -311,11 +315,11 @@ export function getSignTxnTxt(
 ) {
   const translate = getTranslator();
   const components = [];
-  addDialogTxt(components, 'Network', network.name);
+  addDialogTxt(components, translate('network'), network.name);
   addDialogTxt(components, translate('signerAddress'), signerAddress);
   addDialogTxt(
     components,
-    'Transaction',
+    translate('transaction'),
     JSON.stringify(txnInvocation, null, 2),
   );
   return components;
@@ -899,9 +903,7 @@ export async function showUpgradeRequestModal() {
   const translate = getTranslator();
   await alertDialog([
     heading(translate('accountUpgradeMandatory')),
-    text(
-      `Visit the [companion dapp for Starknet](${getDappUrl()}) and click “Upgrade”.\nThank you!`,
-    ),
+    text(translate('visiteCompanionDapp', getDappUrl())),
   ]);
 }
 
@@ -912,9 +914,7 @@ export async function showDeployRequestModal() {
   const translate = getTranslator();
   await alertDialog([
     heading(translate('accountDeploymentMandatory')),
-    text(
-      `Visit the [companion dapp for Starknet](${getDappUrl()}) to deploy your account.\nThank you!`,
-    ),
+    text(translate('visiteCompanionDappAndDeloy', getDappUrl())),
   ]);
 }
 
