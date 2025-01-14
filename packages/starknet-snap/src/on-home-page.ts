@@ -111,9 +111,7 @@ export class HomePageController {
     panelItems.push(row(translate('balance'), text(`${balance} ETH`)));
     panelItems.push(divider());
     panelItems.push(
-      text(
-        `Visit the [companion dapp for Starknet](${getDappUrl()}) to manage your account.`,
-      ),
+      text(translate('visitCompanionDappHomePage', getDappUrl())),
     );
     return {
       content: panel(panelItems),

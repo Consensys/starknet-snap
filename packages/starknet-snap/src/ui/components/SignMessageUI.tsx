@@ -32,7 +32,7 @@ export const SignMessageUI: SnapComponent<SignMessageUIProps> = ({
       <Heading>{translate('signeMessagePrompt')}</Heading>
       <Section>
         <SignerUI address={address} chainId={chainId} />
-        <JsonDataUI label={translate('messageLabel')} data={typedDataMessage} />
+        <JsonDataUI label={translate('message')} data={typedDataMessage} />
       </Section>
     </Box>
   );

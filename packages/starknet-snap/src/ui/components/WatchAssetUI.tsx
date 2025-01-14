@@ -41,23 +41,23 @@ export const WatchAssetUI: SnapComponent<WatchAssetUIProps> = ({
       <NetworkUI networkName={networkName} />
       <Section>
         <AddressUI
-          label={translate('tokenLabel')}
+          label={translate('token')}
           address={address}
           chainId={chainId}
         />
         <Section>
           {name ? (
-            <Row label={translate('nameLabel')}>
+            <Row label={translate('name')}>
               <Text>{name}</Text>
             </Row>
           ) : null}
           {symbol ? (
-            <Row label={translate('symbolLabel')}>
+            <Row label={translate('symbol')}>
               <Text>{symbol}</Text>
             </Row>
           ) : null}
           {decimals !== null && (
-            <Row label={translate('decimalsLabel')}>
+            <Row label={translate('decimals')}>
               <Text>{decimals.toString()}</Text>
             </Row>
           )}

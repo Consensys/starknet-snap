@@ -35,15 +35,12 @@ export const SignTransactionUI: SnapComponent<SignTransactionUIProps> = ({
       <Heading>{translate('signTransactionPrompt')}</Heading>
       <Section>
         <AddressUI
-          label={translate('signerLabel')}
+          label={translate('signer')}
           address={senderAddress}
           chainId={chainId}
         />
         <NetworkUI networkName={networkName} />
-        <JsonDataUI
-          label={translate('transactionsLabel')}
-          data={transactions}
-        />
+        <JsonDataUI label={translate('transactions')} data={transactions} />
       </Section>
     </Box>
   );

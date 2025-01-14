@@ -79,26 +79,26 @@ export const ExecuteTxnUI: SnapComponent<ExecuteTxnUIProps> = ({
         {calls.map((call) => (
           <Section>
             <AddressUI
-              label={translate('contractLabel')}
+              label={translate('contract')}
               address={call.contractAddress}
               chainId={chainId}
             />
             {call.tokenTransferData ? (
               <Section>
                 <AddressUI
-                  label={translate('recipientLabel')}
+                  label={translate('recipient')}
                   address={call.tokenTransferData.recipientAddress}
                   chainId={chainId}
                 />
                 <Amount
-                  label={translate('amountLabel')}
+                  label={translate('amount')}
                   amount={call.tokenTransferData.amount}
                   decimals={call.tokenTransferData.decimals}
                   symbol={call.tokenTransferData.symbol}
                 />
               </Section>
             ) : (
-              <JsonDataUI label={translate('callLabel')} data={call.calldata} />
+              <JsonDataUI label={translate('call')} data={call.calldata} />
             )}
           </Section>
         ))}

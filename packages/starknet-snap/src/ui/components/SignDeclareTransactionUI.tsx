@@ -32,7 +32,7 @@ export const SignDeclareTransactionUI: SnapComponent<
       <Heading>{translate('signTransactionPrompt')}</Heading>
       <Section>
         <AddressUI
-          label={translate('signerLabel')}
+          label={translate('signer')}
           address={senderAddress}
           chainId={chainId}
         />

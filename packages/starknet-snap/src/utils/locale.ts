@@ -44,7 +44,7 @@ export async function getUserLocalePreference(): Promise<Locale> {
   }
 }
 
-export type Translator = (string) => string;
+export type Translator = (string, ...args: (string | undefined)[]) => string;
 
 /**
  * Returns a translator function that translates keys to user locale messages.
@@ -53,8 +53,15 @@ export type Translator = (string) => string;
  */
 export function getTranslator(): Translator {
   const userLocale = getUserLocale();
-  return (key: string) => {
-    return userLocale[key]?.message ?? `{${key}}`;
+
+  return (key: string, ...args: string[]): string => {
+    const template = userLocale[key]?.message ?? `{${key}}`;
+
+    // Replace placeholders like $1, $2, etc., with corresponding arguments
+    return template.replace(/\{(\d+)\}/gu, (_, index: string) => {
+      const argIndex = parseInt(index, 10) - 1; // {1} corresponds to args[0], {2} to args[1], etc.
+      return args[argIndex] ?? `{${index}}`; // Fallback to placeholder if argument is missing
+    });
   };
 }
 

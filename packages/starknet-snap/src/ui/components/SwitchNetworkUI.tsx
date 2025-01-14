@@ -27,7 +27,7 @@ export const SwitchNetworkUI: SnapComponent<SwitchNetworkUIProps> = ({
       <Heading>{translate('switchNetworkPrompt')}</Heading>
       <NetworkUI networkName={name} />
       <Box direction="horizontal" alignment="space-between">
-        <Bold>{translate('chainIdLabel')}</Bold>
+        <Bold>{translate('chainId')}</Bold>
         <Copyable value={chainId} />
       </Box>
     </Box>
