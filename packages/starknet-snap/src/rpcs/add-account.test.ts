@@ -30,7 +30,7 @@ describe('AddAccountRpc', () => {
     };
   };
 
-  it('add a `Account`', async () => {
+  it('add an `Account`', async () => {
     const { account, request, deriveAccountByIndexSpy } =
       await setupAddAccountTest();
 
