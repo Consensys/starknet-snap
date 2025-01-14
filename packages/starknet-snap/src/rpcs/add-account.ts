@@ -45,6 +45,7 @@ export class AddAccountRpc extends ChainRpcController<
       // it is better not to throw an error to maintain the user experience.
       await accountService.switchAccount(this.network.chainId, account);
     } catch (error) {
+      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
       logger.warn(`Failed to switch account: ${error.message}`);
     }
 

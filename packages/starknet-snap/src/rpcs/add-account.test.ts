@@ -1,5 +1,5 @@
 import { Logger } from 'ethers/lib/utils';
-import { Account, type constants } from 'starknet';
+import { type constants } from 'starknet';
 
 import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../utils/constants';
 import { InvalidRequestParamsError } from '../utils/exceptions';
