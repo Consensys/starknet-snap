@@ -21,7 +21,6 @@ import { MinVersionModal } from './components/ui/organism/MinVersionModal';
 import { useHasMetamask } from 'hooks/useHasMetamask';
 import { DUMMY_ADDRESS } from 'utils/constants';
 import { DeployModal } from 'components/ui/organism/DeployModal';
-import { AccountDrawerModal } from 'components/ui/organism/AccountsDrawer';
 
 library.add(fas, far);
 
