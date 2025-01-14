@@ -115,10 +115,10 @@
     "snapUpdate": {
       "message": "Votre Starknet Snap est maintenant à jour !"
     },
-    "starknetPrivateKeyDescription": {
+    "starknetPrivateKeyConfidential": {
       "message": "Voici la clé privée de votre compte Starknet. Gardez-la confidentielle."
     },
-    "starknetPrivateKeyTitle": {
+    "starknetPrivateKey": {
       "message": "Clé privée du compte Starknet"
     },
     "switchNetworkPrompt": {
@@ -142,10 +142,10 @@
     "visitCompanionDappHomePage": {
       "message": "Visitez la [dapp compagnon pour Starknet]({1}) pour gérer votre compte."
     },
-    "visiteCompanionDappAndDeloy": {
+    "visitCompanionDappAndDeploy": {
       "message": "Visitez la [dapp compagnon pour Starknet]({1}) pour déployer votre compte.\nMerci !"
     },
-    "visiteCompanionDappAndUpgrade": {
+    "visitCompanionDappAndUpgrade": {
       "message": "Visitez la [dapp compagnon pour Starknet]({1}) et cliquez sur “Upgrade”.\nMerci !"
     },
     "walletCompatibility": {

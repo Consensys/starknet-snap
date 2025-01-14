@@ -903,7 +903,7 @@ export async function showUpgradeRequestModal() {
   const translate = getTranslator();
   await alertDialog([
     heading(translate('accountUpgradeMandatory')),
-    text(translate('visiteCompanionDapp', getDappUrl())),
+    text(translate('visitCompanionDappAndUpgrade', getDappUrl())),
   ]);
 }
 
@@ -914,7 +914,7 @@ export async function showDeployRequestModal() {
   const translate = getTranslator();
   await alertDialog([
     heading(translate('accountDeploymentMandatory')),
-    text(translate('visiteCompanionDappAndDeloy', getDappUrl())),
+    text(translate('visitCompanionDappAndDeploy', getDappUrl())),
   ]);
 }
 
