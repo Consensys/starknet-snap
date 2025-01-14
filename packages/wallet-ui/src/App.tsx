@@ -37,11 +37,10 @@ function App() {
   } = useAppSelector((state) => state.modals);
   const { loader } = useAppSelector((state) => state.UI);
   const networks = useAppSelector((state) => state.networks);
-  const { accounts } = useAppSelector((state) => state.wallet);
+  const { currentAccount } = useAppSelector((state) => state.wallet);
   const { hasMetamask } = useHasMetamask();
-
-  const address =
-    accounts?.length > 0 ? (accounts[0] as unknown as string) : DUMMY_ADDRESS;
+  const chainId = networks.items?.[networks.activeNetwork]?.chainId;
+  const address = currentAccount ?? DUMMY_ADDRESS;
 
   useEffect(() => {
     if (!provider) {
@@ -57,12 +56,11 @@ function App() {
   }, [connected, forceReconnect, hasMetamask, provider]);
 
   useEffect(() => {
-    if (provider && networks.items.length > 0) {
-      const chainId = networks.items[networks.activeNetwork].chainId;
+    if (provider && networks.items.length > 0 && chainId) {
       getWalletData(chainId);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [networks.activeNetwork, provider]);
+  }, [networks.activeNetwork, provider, chainId]);
 
   const loading = loader.isLoading;
   return (
