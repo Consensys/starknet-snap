@@ -1,3 +1,4 @@
+import { logger } from 'ethers';
 import { type Infer } from 'superstruct';
 
 import { BaseRequestStruct, AccountStruct } from '../utils';
@@ -38,7 +39,15 @@ export class AddAccountRpc extends ChainRpcController<
 
     const account = await accountService.deriveAccountByIndex();
 
-    // TODO: after derive an account, we should store it as a active account.
+    try {
+      // after derive an account, the current account will switch to the new account.
+      // however if the account is failed to switch,
+      // it is better not to throw an error to maintain the user experience.
+      await accountService.switchAccount(this.network.chainId, account);
+    } catch (error) {
+      logger.warn(`Failed to switch account: ${error.message}`);
+    }
+
     return account.serialize() as unknown as AddAccountResponse;
   }
 }
