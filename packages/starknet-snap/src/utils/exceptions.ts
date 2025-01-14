@@ -4,6 +4,7 @@ import {
   UserRejectedRequestError,
 } from '@metamask/snaps-sdk';
 
+import { Config } from '../config';
 import { createWalletRpcErrorWrapper, WalletRpcErrorCode } from './error';
 
 // Extend SnapError to allow error message visible to client
@@ -44,6 +45,16 @@ export class AccountDiscoveryError extends SnapError {
   constructor(message?: string) {
     super(
       message ?? 'Account discovery found',
+      createWalletRpcErrorWrapper(WalletRpcErrorCode.Unknown),
+    );
+  }
+}
+
+export class MaxAccountLimitExceededError extends SnapError {
+  constructor(message?: string) {
+    super(
+      message ??
+        `Maximum number of accounts reached: ${Config.account.maxAccountToCreate}`,
       createWalletRpcErrorWrapper(WalletRpcErrorCode.Unknown),
     );
   }

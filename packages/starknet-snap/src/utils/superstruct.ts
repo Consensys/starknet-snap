@@ -426,3 +426,14 @@ export const TransactionStruct = object({
   // Snap data Version to support backward compatibility , migration.
   dataVersion: enums(Object.values(TransactionDataVersion)),
 });
+
+export const AccountStruct = object({
+  address: AddressStruct,
+  chainId: ChainIdStruct,
+  publicKey: HexStruct,
+  addressSalt: HexStruct,
+  addressIndex: number(),
+  cairoVersion: CairoVersionStruct,
+  upgradeRequired: boolean(),
+  deployRequired: boolean(),
+});

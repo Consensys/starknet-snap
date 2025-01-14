@@ -1,4 +1,4 @@
-import type { constants } from 'starknet';
+import { constants } from 'starknet';
 
 import { generateAccounts, type StarknetAccount } from '../../__tests__/helper';
 import type {
@@ -12,6 +12,7 @@ import {
   STRK_SEPOLIA_TESTNET,
 } from '../../utils/constants';
 import * as snapHelper from '../../utils/snap';
+import { AccountStateManager } from '../account-state-manager';
 import { NetworkStateManager } from '../network-state-manager';
 import { TransactionRequestStateManager } from '../request-state-manager';
 import { TokenStateManager } from '../token-state-manager';
@@ -25,6 +26,14 @@ export const mockAcccounts = async (
   cnt = 10,
 ) => {
   return generateAccounts(chainId, cnt);
+};
+
+export const generateTestnetAccounts = async (count?: number) => {
+  return await mockAcccounts(constants.StarknetChainId.SN_SEPOLIA, count);
+};
+
+export const generateMainnetAccounts = async (count?: number) => {
+  return await mockAcccounts(constants.StarknetChainId.SN_MAIN, count);
 };
 
 export const mockState = async ({
@@ -47,7 +56,7 @@ export const mockState = async ({
   const getDataSpy = jest.spyOn(snapHelper, 'getStateData');
   const setDataSpy = jest.spyOn(snapHelper, 'setStateData');
   const state = {
-    accContracts: accounts,
+    accContracts: accounts ?? [],
     erc20Tokens: tokens ?? [],
     networks: networks ?? [],
     transactions: transactions ?? [],
@@ -75,6 +84,29 @@ export const mockTokenStateManager = () => {
   return {
     getEthTokenSpy,
     getStrkTokenSpy,
+  };
+};
+
+export const mockAccountStateManager = () => {
+  const getAccountSpy = jest.spyOn(AccountStateManager.prototype, 'getAccount');
+  const getNextIndexSpy = jest.spyOn(
+    AccountStateManager.prototype,
+    'getNextIndex',
+  );
+  const upsertAccountSpy = jest.spyOn(
+    AccountStateManager.prototype,
+    'upsertAccount',
+  );
+  const isMaxAccountLimitExceededSpy = jest.spyOn(
+    AccountStateManager.prototype,
+    'isMaxAccountLimitExceeded',
+  );
+
+  return {
+    getAccountSpy,
+    getNextIndexSpy,
+    upsertAccountSpy,
+    isMaxAccountLimitExceededSpy,
   };
 };
 

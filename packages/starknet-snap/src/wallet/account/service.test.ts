@@ -1,10 +1,17 @@
 import { generateMnemonic } from 'bip39';
 
-import { AccountContractReader, AccountService, Cairo1Contract } from '.';
-import { generateAccounts, generateKeyDeriver } from '../../__tests__/helper';
+import { AccountService } from '.';
+import { generateKeyDeriver } from '../../__tests__/helper';
+import {
+  mockAccountStateManager,
+  mockState,
+} from '../../state/__tests__/helper';
 import { AccountStateManager } from '../../state/account-state-manager';
 import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../../utils/constants';
-import { AccountNotFoundError } from '../../utils/exceptions';
+import {
+  AccountNotFoundError,
+  MaxAccountLimitExceededError,
+} from '../../utils/exceptions';
 import { createAccountService } from '../../utils/factory';
 import * as snapUtils from '../../utils/snap';
 import {
@@ -15,53 +22,64 @@ import { Account } from './account';
 import { AccountContractDiscovery } from './discovery';
 
 jest.mock('../../utils/logger');
+jest.mock('../../utils/snap');
 
 describe('AccountService', () => {
   const network = STARKNET_SEPOLIA_TESTNET_NETWORK;
 
   describe('deriveAccountByIndex', () => {
-    const setupDeriveAccountByIndexTest = async (hdIndex) => {
-      const mnemonicString = generateMnemonic();
-
-      const [account] = await generateAccounts(
-        network.chainId,
-        1,
-        '1',
+    const mockDeriveAccount = async (
+      hdIndex,
+      mnemonicString = generateMnemonic(),
+    ) => {
+      const { accountObj } = await createAccountObject(
+        network,
         hdIndex,
         mnemonicString,
-      );
-      const deriver = await generateKeyDeriver(mnemonicString);
-
-      const getNextIndexSpy = jest.spyOn(
-        AccountStateManager.prototype,
-        'getNextIndex',
-      );
-      const upsertAccountSpy = jest.spyOn(
-        AccountStateManager.prototype,
-        'upsertAccount',
       );
       const getCairoContractSpy = jest.spyOn(
         AccountContractDiscovery.prototype,
         'getContract',
       );
+      getCairoContractSpy.mockResolvedValue(accountObj.accountContract);
+
+      return {
+        accountObj,
+        getCairoContractSpy,
+      };
+    };
+
+    const mockSnapDeriver = async (mnemonicString) => {
+      const deriver = await generateKeyDeriver(mnemonicString);
       jest.spyOn(snapUtils, 'getBip44Deriver').mockResolvedValue(deriver);
+    };
+
+    const setupDeriveAccountByIndexTest = async (hdIndex) => {
+      const mnemonicString = generateMnemonic();
+
+      const { accountObj, getCairoContractSpy } = await mockDeriveAccount(
+        hdIndex,
+        mnemonicString,
+      );
+      await mockSnapDeriver(mnemonicString);
+
+      const {
+        getNextIndexSpy,
+        isMaxAccountLimitExceededSpy,
+        upsertAccountSpy,
+      } = mockAccountStateManager();
 
       mockAccountContractReader({});
 
-      const cairo1Contract = new Cairo1Contract(
-        account.publicKey,
-        new AccountContractReader(network),
-      );
-
-      getCairoContractSpy.mockResolvedValue(cairo1Contract);
       getNextIndexSpy.mockResolvedValue(hdIndex);
+      isMaxAccountLimitExceededSpy.mockResolvedValue(false);
 
       return {
         upsertAccountSpy,
         getNextIndexSpy,
         getCairoContractSpy,
-        cairo1Contract,
-        account,
+        account: accountObj,
+        isMaxAccountLimitExceededSpy,
       };
     };
 
@@ -71,26 +89,23 @@ describe('AccountService', () => {
         getNextIndexSpy,
         getCairoContractSpy,
         upsertAccountSpy,
-        cairo1Contract,
         account,
       } = await setupDeriveAccountByIndexTest(hdIndex);
 
       const service = createAccountService(network);
-      const accountObject = await service.deriveAccountByIndex();
+      const result = await service.deriveAccountByIndex();
 
       expect(getNextIndexSpy).toHaveBeenCalled();
-      expect(upsertAccountSpy).toHaveBeenCalledWith(
-        await accountObject.serialize(),
-      );
+      expect(upsertAccountSpy).toHaveBeenCalledWith(await result.serialize());
       expect(getCairoContractSpy).toHaveBeenCalledWith(account.publicKey);
-      expect(accountObject).toBeInstanceOf(Account);
-      expect(accountObject).toHaveProperty('accountContract', cairo1Contract);
-      expect(accountObject).toHaveProperty('address', account.address);
-      expect(accountObject).toHaveProperty('chainId', account.chainId);
-      expect(accountObject).toHaveProperty('privateKey', account.privateKey);
-      expect(accountObject).toHaveProperty('publicKey', account.publicKey);
-      expect(accountObject).toHaveProperty('hdIndex', hdIndex);
-      expect(accountObject).toHaveProperty('addressSalt', account.publicKey);
+      expect(result).toBeInstanceOf(Account);
+      expect(result).toHaveProperty('accountContract', account.accountContract);
+      expect(result).toHaveProperty('address', account.address);
+      expect(result).toHaveProperty('chainId', account.chainId);
+      expect(result).toHaveProperty('privateKey', account.privateKey);
+      expect(result).toHaveProperty('publicKey', account.publicKey);
+      expect(result).toHaveProperty('hdIndex', hdIndex);
+      expect(result).toHaveProperty('addressSalt', account.publicKey);
     });
 
     it('derive an account with the given index', async () => {
@@ -98,27 +113,60 @@ describe('AccountService', () => {
       const {
         getNextIndexSpy,
         getCairoContractSpy,
-        cairo1Contract,
         account,
         upsertAccountSpy,
       } = await setupDeriveAccountByIndexTest(hdIndex);
 
       const service = createAccountService(network);
-      const accountObject = await service.deriveAccountByIndex(hdIndex);
+      const result = await service.deriveAccountByIndex(hdIndex);
 
       expect(getNextIndexSpy).not.toHaveBeenCalled();
-      expect(upsertAccountSpy).toHaveBeenCalledWith(
-        await accountObject.serialize(),
-      );
+      expect(upsertAccountSpy).toHaveBeenCalledWith(await result.serialize());
       expect(getCairoContractSpy).toHaveBeenCalledWith(account.publicKey);
-      expect(accountObject).toBeInstanceOf(Account);
-      expect(accountObject).toHaveProperty('accountContract', cairo1Contract);
-      expect(accountObject).toHaveProperty('address', account.address);
-      expect(accountObject).toHaveProperty('chainId', account.chainId);
-      expect(accountObject).toHaveProperty('privateKey', account.privateKey);
-      expect(accountObject).toHaveProperty('publicKey', account.publicKey);
-      expect(accountObject).toHaveProperty('hdIndex', hdIndex);
-      expect(accountObject).toHaveProperty('addressSalt', account.publicKey);
+      expect(result).toBeInstanceOf(Account);
+      expect(result).toHaveProperty('accountContract', account.accountContract);
+      expect(result).toHaveProperty('address', account.address);
+      expect(result).toHaveProperty('chainId', account.chainId);
+      expect(result).toHaveProperty('privateKey', account.privateKey);
+      expect(result).toHaveProperty('publicKey', account.publicKey);
+      expect(result).toHaveProperty('hdIndex', hdIndex);
+      expect(result).toHaveProperty('addressSalt', account.publicKey);
+    });
+
+    it('throws `MaxAccountLimitExceededError` error if the account to derive reach the maximum', async () => {
+      const { isMaxAccountLimitExceededSpy } =
+        await setupDeriveAccountByIndexTest(0);
+      isMaxAccountLimitExceededSpy.mockResolvedValue(true);
+
+      const service = createAccountService(network);
+
+      await expect(service.deriveAccountByIndex()).rejects.toThrow(
+        MaxAccountLimitExceededError,
+      );
+    });
+
+    it('does not modify the state if an error has thrown', async () => {
+      const { setDataSpy } = await mockState({});
+      // mockAccountStateManager is only returning the spies,
+      // it will not mock the function to return a value.
+      const { isMaxAccountLimitExceededSpy } = mockAccountStateManager();
+
+      const mnemonicString = generateMnemonic();
+      await mockDeriveAccount(0, mnemonicString);
+      await mockSnapDeriver(mnemonicString);
+      mockAccountContractReader({});
+
+      // A `MaxAccountLimitExceededError` will be thrown when `isMaxAccountLimitExceeded` is true.
+      // Since this checking is placed at the end of the function,
+      // it is the best way to test if the state is not modified if an error occurs.
+      isMaxAccountLimitExceededSpy.mockResolvedValue(true);
+
+      const service = createAccountService(network);
+
+      await expect(service.deriveAccountByIndex()).rejects.toThrow(
+        MaxAccountLimitExceededError,
+      );
+      expect(setDataSpy).not.toHaveBeenCalled();
     });
   });
 

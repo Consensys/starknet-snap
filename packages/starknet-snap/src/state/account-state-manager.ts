@@ -1,3 +1,4 @@
+import { Config } from '../config';
 import type { AccContract, SnapState } from '../types/snapState';
 import type { IFilter } from './filter';
 import {
@@ -61,64 +62,11 @@ export class AccountStateManager extends StateManager<AccContract> {
   }
 
   /**
-   * Updates an account in the state with the given data.
+   * Upserts an account in the state.
    *
-   * @param data - The AccContract object to update.
-   * @returns A Promise that resolves when the update is complete.
-   * @throws {StateManagerError} If there is an error updating the account, such as:
-   * If the account to be updated does not exist in the state.
+   * @param data - The AccContract object to upsert.
+   * @throws {StateManagerError} If an error occurs while updating the state.
    */
-  async updateAccount(data: AccContract): Promise<void> {
-    try {
-      await this.update(async (state: SnapState) => {
-        const accountInState = await this.getAccount(
-          {
-            address: data.address,
-            chainId: data.chainId,
-          },
-          state,
-        );
-
-        if (!accountInState) {
-          throw new StateManagerError(`Account does not exist`);
-        }
-
-        this.updateEntity(accountInState, data);
-      });
-    } catch (error) {
-      throw new StateManagerError(error.message);
-    }
-  }
-
-  /**
-   * Adds a new account to the state with the given data.
-   *
-   * @param data - The AccContract object to add.
-   * @returns A Promise that resolves when the add is complete.
-   * @throws {StateManagerError} If there is an error adding the account, such as:
-   * If the account to be added already exists in the state.
-   */
-  async addAccount(data: AccContract): Promise<void> {
-    try {
-      await this.update(async (state: SnapState) => {
-        const accountInState = await this.getAccount(
-          {
-            address: data.address,
-            chainId: data.chainId,
-          },
-          state,
-        );
-
-        if (accountInState) {
-          throw new Error(`Account already exist`);
-        }
-        state.accContracts.push(data);
-      });
-    } catch (error) {
-      throw new StateManagerError(error.message);
-    }
-  }
-
   async upsertAccount(data: AccContract): Promise<void> {
     try {
       await this.update(async (state: SnapState) => {
@@ -173,19 +121,34 @@ export class AccountStateManager extends StateManager<AccContract> {
     }
   }
 
+  /**
+   * Gets the next index based on the chain ID.
+   * If `removedAccounts` is not empty for the chain ID, the first index is picked.
+   * Otherwise, the length of `accContracts` for the chain ID is used.
+   *
+   * @param chainId - The chain ID.
+   * @returns A Promise that resolves to the next index.
+   */
   async getNextIndex(chainId: string): Promise<number> {
     let idx = 0;
     await this.update(async (state: SnapState) => {
-      // Choose the deleted account index over the last index (accContracts length).
-      // If the removedAccounts array is empty, then fallback with the last index.
       idx =
         state.removedAccounts?.[chainId]?.shift() ??
-        state.accContracts.filter((account) => account.chainId === chainId)
-          .length;
+        state.accContracts.filter((account) =>
+          new ChainIdFilter([chainId]).apply(account),
+        ).length;
     });
     return idx;
   }
 
+  /**
+   * Removes account by address and chain ID.
+   *
+   * @param params - The parameters for removing the account.
+   * @param params.address - The address of the account to remove.
+   * @param params.chainId - The chain ID of the account to remove.
+   * @throws {StateManagerError} If the account to be removed does not exist.
+   */
   async removeAccount({
     address,
     chainId,
@@ -209,7 +172,8 @@ export class AccountStateManager extends StateManager<AccContract> {
 
         state.accContracts = state.accContracts.filter(
           (account) =>
-            account.address !== address && account.chainId === chainId,
+            new ChainIdFilter([chainId]).apply(account) &&
+            account.address !== address,
         );
 
         // Safeguard to ensure the removedAccounts object is initialized.
@@ -226,5 +190,27 @@ export class AccountStateManager extends StateManager<AccContract> {
     } catch (error) {
       throw new StateManagerError(error.message);
     }
+  }
+
+  /**
+   * Determines whether max account limit exceeded.
+   *
+   * @param params - The parameters for checking the max account limit.
+   * @param params.chainId - The chain ID.
+   * @param [state] - The optional SnapState object.
+   * @returns A Promise that resolves to a boolean indicating whether the max account limit is exceeded.
+   */
+  async isMaxAccountLimitExceeded(
+    {
+      chainId,
+    }: {
+      chainId: string;
+    },
+    state?: SnapState,
+  ): Promise<boolean> {
+    return (
+      (await this.list([new ChainIdFilter([chainId])], undefined, state))
+        .length > Config.account.maxAccountToCreate
+    );
   }
 }

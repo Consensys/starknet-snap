@@ -54,9 +54,18 @@ export const createAccountContract = async (
   };
 };
 
-export const createAccountObject = async (network, hdIndex = 0) => {
+export const createAccountObject = async (
+  network,
+  hdIndex = 0,
+  mnemonicString?: string,
+) => {
   const { account, accountContractReader, contract } =
-    await createAccountContract(network, hdIndex);
+    await createAccountContract(
+      network,
+      hdIndex,
+      Cairo1Contract,
+      mnemonicString,
+    );
 
   const { privateKey, publicKey, chainId, addressIndex } = account;
 

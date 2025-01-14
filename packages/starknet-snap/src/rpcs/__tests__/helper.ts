@@ -67,10 +67,17 @@ export async function setupAccountController({
     'deriveAccountByAddress',
   );
 
+  const deriveAccountByIndexSpy = jest.spyOn(
+    AccountService.prototype,
+    'deriveAccountByIndex',
+  );
+
   deriveAccountByAddressSpy.mockResolvedValue(account);
+  deriveAccountByIndexSpy.mockResolvedValue(account);
 
   return {
     deriveAccountByAddressSpy,
+    deriveAccountByIndexSpy,
     isRequireDeploySpy,
     isRequireUpgradeSpy,
     isDeploySpy,
