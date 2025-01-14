@@ -21,11 +21,12 @@ import { MinVersionModal } from './components/ui/organism/MinVersionModal';
 import { useHasMetamask } from 'hooks/useHasMetamask';
 import { DUMMY_ADDRESS } from 'utils/constants';
 import { DeployModal } from 'components/ui/organism/DeployModal';
+import { AccountDrawerModal } from 'components/ui/organism/AccountsDrawer';
 
 library.add(fas, far);
 
 function App() {
-  const { initSnap, getWalletData, checkConnection } = useStarkNetSnap();
+  const { initSnap, initWalletData, checkConnection } = useStarkNetSnap();
   const { connected, forceReconnect, provider } = useAppSelector(
     (state) => state.wallet,
   );
@@ -57,7 +58,7 @@ function App() {
 
   useEffect(() => {
     if (provider && networks.items.length > 0 && chainId) {
-      getWalletData(chainId);
+      initWalletData({ chainId });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [networks.activeNetwork, provider, chainId]);

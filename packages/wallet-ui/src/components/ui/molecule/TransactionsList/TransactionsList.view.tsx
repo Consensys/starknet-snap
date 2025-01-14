@@ -24,7 +24,7 @@ export const TransactionsListView = ({ transactions }: Props) => {
   } = wallet;
 
   useEffect(() => {
-    if (chainId && currentAccount) {
+    if (chainId && currentAccount && erc20TokenBalanceSelected.address) {
       clearTimeout(timeoutHandle.current); // cancel the timeout that was in-flight
       timeoutHandle.current = setTimeout(
         () =>
@@ -45,7 +45,7 @@ export const TransactionsListView = ({ transactions }: Props) => {
 
   useEffect(
     () => {
-      if (chainId && currentAccount) {
+      if (chainId && currentAccount && erc20TokenBalanceSelected.address) {
         clearTimeout(timeoutHandle.current); // cancel the timeout that was in-flight
         getTransactions(
           currentAccount,
