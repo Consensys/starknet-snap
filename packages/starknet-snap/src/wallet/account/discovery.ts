@@ -23,10 +23,14 @@ export class AccountContractDiscovery {
   /**
    * Get the contract for the given public key.
    * The contract is determined based on the following rules:
-   * 1. If a contract is deployed, then use the deployed contract.
-   * 2. If no contract is deployed, but has balance, then use the contract with balance.
-   * 3. If neither contract is deployed or has balance, then use the default contract.
-   * 4. If multiple contracts are deployed, then use the default contract.
+   *
+   * 1. If a Cairo 1 contract has been deployed, it will always be used regardless of whether the other contract has a balance in ETH or has been deployed.
+   * 2. If a Cairo 0 contract has been deployed and the other contract has not, the Cairo 0 contract will always be used regardless of whether the other contract has a balance or not, and the contract will be forced to upgrade.
+   * 3. If neither contract has been deployed, but a Cairo 0 contract has a balance in ETH, it will always be used regardless of whether the other contract has a balance or not, and the contract will be forced to deploy.
+   * 3. If neither contract has been deployed and neither has a balance in ETH, the default contract (Cairo 1) will be used."
+   *
+   * Note: The rules accommodate for most use cases, except 1 edge case:
+   * - Due to rule #1, if a user wont able to operated a Cairo 0 contract if a Cairo 1 contract has been deployed.
    *
    * @param publicKey - The public key to get the contract for.
    * @returns The contract for the given public key.
@@ -49,10 +53,7 @@ export class AccountContractDiscovery {
             return DefaultContractCtor.fromAccountContract(contract);
           }
           return contract;
-        } else if (
-          contract instanceof Cairo0Contract &&
-          (await contract.isRequireDeploy())
-        ) {
+        } else if (await contract.isRequireDeploy()) {
           // It should only valid for Cairo 0 contract.
           // A Cairo 0 contract can only paying fee with ETH token.
           // Therefore if the contract is not deployed, and it has ETH token, we should use this contract.

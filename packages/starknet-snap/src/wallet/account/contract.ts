@@ -1,6 +1,7 @@
 import type { Calldata } from 'starknet';
 import { hash, addAddressPadding } from 'starknet';
 
+import { CAIRO_VERSION_LEGACY } from '../../utils/constants';
 import { ContractNotDeployedError } from '../../utils/exceptions';
 import { isGTEMinVersion } from '../../utils/starknetUtils';
 import type { AccountContractReader } from './reader';
@@ -175,7 +176,9 @@ export abstract class CairoAccountContract {
    */
   async isRequireDeploy(): Promise<boolean> {
     return (
-      !(await this.isDeployed()) && (await this.getEthBalance()) > BigInt(0)
+      this.cairoVerion.toString() === CAIRO_VERSION_LEGACY &&
+      !(await this.isDeployed()) &&
+      (await this.getEthBalance()) > BigInt(0)
     );
   }
 
