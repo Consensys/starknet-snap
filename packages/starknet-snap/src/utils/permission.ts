@@ -15,6 +15,7 @@ export enum RpcMethod {
   SignDeclareTransaction = 'starkNet_signDeclareTransaction',
   SignDeployAccountTransaction = 'starkNet_signDeployAccountTransaction',
   GetCurrentAccount = 'starkNet_getCurrentAccount',
+  ListAccounts = 'starkNet_listAccounts',
 
   AddAccount = 'starkNet_addAccount',
   CreateAccount = 'starkNet_createAccount',
@@ -24,7 +25,6 @@ export enum RpcMethod {
   EstimateFee = 'starkNet_estimateFee',
   VerifySignedMessage = 'starkNet_verifySignedMessage',
   DeployCario0Account = 'starkNet_createAccountLegacy',
-  ListAccounts = 'starkNet_getStoredUserAccounts',
   GetTransactions = 'starkNet_getTransactions',
   UpgradeAccContract = 'starkNet_upgradeAccContract',
   GetStarkName = 'starkNet_getStarkName',
@@ -36,6 +36,7 @@ export enum RpcMethod {
 // RpcMethod that are allowed to be called by any origin
 const publicPermissions = [
   RpcMethod.ExtractPublicKey,
+  RpcMethod.ListAccounts,
   RpcMethod.GetCurrentNetwork,
   RpcMethod.GetStoredNetworks,
   RpcMethod.SwitchNetwork,
@@ -60,7 +61,6 @@ const publicPermissions = [
 // RpcMethod that are restricted to be called by wallet UI origins
 const walletUIDappPermissions = publicPermissions.concat([
   RpcMethod.DeployCario0Account,
-  RpcMethod.ListAccounts,
   RpcMethod.GetTransactions,
   RpcMethod.UpgradeAccContract,
   RpcMethod.GetStarkName,

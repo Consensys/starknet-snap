@@ -7,11 +7,7 @@ import {
   generateTestnetAccounts,
   mockState,
 } from './__tests__/helper';
-import {
-  AddressFilter,
-  ChainIdFilter,
-  AccountStateManager,
-} from './account-state-manager';
+import { AccountStateManager } from './account-state-manager';
 
 describe('AccountStateManager', () => {
   const testnetChainId = constants.StarknetChainId.SN_SEPOLIA;
@@ -69,7 +65,7 @@ describe('AccountStateManager', () => {
     });
   });
 
-  describe('list', () => {
+  describe('findAccounts', () => {
     it('returns the list of accounts', async () => {
       const accountsInTestnet = await generateTestnetAccounts();
       const accountsInMainnet = await generateMainnetAccounts();
@@ -78,30 +74,23 @@ describe('AccountStateManager', () => {
         accounts: [...accountsInTestnet, ...accountsInMainnet],
       });
       const stateManager = new AccountStateManager();
-      const result = await stateManager.list([
-        new AddressFilter([
-          accountsInTestnet[0].address,
-          accountsInMainnet[0].address,
-        ]),
-      ]);
+      const result = await stateManager.findAccounts({
+        chainId: testnetChainId,
+      });
 
-      expect(result).toStrictEqual([
-        accountsInTestnet[0],
-        accountsInMainnet[0],
-      ]);
+      expect(result).toStrictEqual(accountsInTestnet);
     });
 
     it('returns empty array if the account address can not be found', async () => {
-      const [accountNotExist, ...accounts] = await generateTestnetAccounts();
+      const accounts = await generateTestnetAccounts();
       await mockState({
         accounts,
       });
 
       const stateManager = new AccountStateManager();
-      const result = await stateManager.list([
-        new AddressFilter([accountNotExist.address]),
-        new ChainIdFilter([testnetChainId]),
-      ]);
+      const result = await stateManager.findAccounts({
+        chainId: mainnetChainId,
+      });
 
       expect(result).toStrictEqual([]);
     });

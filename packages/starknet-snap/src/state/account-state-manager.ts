@@ -62,6 +62,31 @@ export class AccountStateManager extends StateManager<AccContract> {
   }
 
   /**
+   * List the account in the state that matches the chain ID.
+   *
+   * @param param - An object containing the chain ID to search for.
+   * @param param.chainId - The chain ID of the account to search for.
+   * @param [state] - The optional SnapState object.
+   * @returns A Promise that resolves with a array of the matching AccContract object.
+   */
+  async findAccounts(
+    {
+      chainId,
+    }: {
+      chainId: string;
+    },
+    state?: SnapState,
+  ): Promise<AccContract[]> {
+    return this.list(
+      [new ChainIdFilter([chainId])],
+      // sort by index in asc order
+      (entityA: AccContract, entityB: AccContract) =>
+        entityA.addressIndex - entityB.addressIndex,
+      state,
+    );
+  }
+
+  /**
    * Upserts an account in the state.
    *
    * @param data - The AccContract object to upsert.
