@@ -39,8 +39,9 @@ export const InfoIcon = styled(RoundedIcon)`
   margin-right: ${(props) => props.theme.spacing.tiny2};
 `;
 
-export const AddIcon = styled(RoundedIcon)`
+export const CopyIcon = styled(RoundedIcon)`
   cursor: pointer;
+  border: none;
   margin-left: ${(props) => props.theme.spacing.tiny2};
 `;
 

@@ -56,7 +56,9 @@ export const walletSlice = createSlice({
         // Hence, we can assume that setAccounts is called with an array of accounts from the same network
         state.accounts = payload.map((account) => account.address);
       } else {
-        state.accounts.push(payload.address);
+        if (!state.accounts.includes(payload.address)) {
+          state.accounts.push(payload.address);
+        }
       }
       // FIXME: this is a hack to set the current account to the last one added
       // We should have a way to get the active account

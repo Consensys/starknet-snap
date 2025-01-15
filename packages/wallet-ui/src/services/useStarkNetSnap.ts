@@ -44,9 +44,8 @@ import {
 export const useStarkNetSnap = () => {
   const dispatch = useAppDispatch();
   const { loader } = useAppSelector((state) => state.UI);
-  const { transactions, erc20TokenBalances, provider } = useAppSelector(
-    (state) => state.wallet,
-  );
+  const { transactions, erc20TokenBalances, provider, currentAccount } =
+    useAppSelector((state) => state.wallet);
   const snapId = process.env.REACT_APP_SNAP_ID
     ? process.env.REACT_APP_SNAP_ID
     : 'local:http://localhost:8081';
@@ -275,7 +274,9 @@ export const useStarkNetSnap = () => {
     }
 
     const accountAddr = Array.isArray(acc) ? acc[0].address : acc.address;
-
+    if (currentAccount === accountAddr) {
+      return;
+    }
     // Get all tokens balance, USD value, and format them into Erc20TokenBalance type
     const tokensWithBalances: Erc20TokenBalance[] = await Promise.all(
       tokens.map(async (token) => {
@@ -317,11 +318,11 @@ export const useStarkNetSnap = () => {
     }
 
     const { address, chainId } = account;
+    if (currentAccount !== address) {
+      await setAccount(account);
 
-    await setAccount(account);
-
-    await initTokensAndBalances(chainId, address);
-
+      await initTokensAndBalances(chainId, address);
+    }
     dispatch(disableLoading());
   };
 
