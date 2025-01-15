@@ -15,3 +15,4 @@ export * from './list-transactions';
 export * from './add-account';
 export * from './get-current-account';
 export * from './list-accounts';
+export * from './switch-account';

@@ -292,4 +292,24 @@ describe('AccountService', () => {
       expect(result.hdIndex).toStrictEqual(defaultIndex);
     });
   });
+
+  describe('switchAccount', () => {
+    it('switches the account for the network', async () => {
+      const switchAccountSpy = jest.spyOn(
+        AccountStateManager.prototype,
+        'switchAccount',
+      );
+      switchAccountSpy.mockResolvedValue();
+      mockAccountContractReader({});
+      const { accountObj } = await createAccountObject(network, 0);
+
+      const service = createAccountService(network);
+      await service.switchAccount(accountObj.chainId, accountObj);
+
+      expect(switchAccountSpy).toHaveBeenCalledWith({
+        chainId: accountObj.chainId,
+        accountToSwitch: await accountObj.serialize(),
+      });
+    });
+  });
 });
