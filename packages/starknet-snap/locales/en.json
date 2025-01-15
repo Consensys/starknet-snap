@@ -25,7 +25,7 @@
     "amount": {
       "message": "Amount"
     },
-    "amountWythSymbol": {
+    "amountWithSymbol": {
       "message": "Amount ({1})"
     },
     "balance": {
@@ -55,7 +55,7 @@
     "compiledClassHash": {
       "message": "Compiled Class Hash"
     },
-    "confirmPrivateKeyAction": {
+    "confirmPrivateKeyToDisplay": {
       "message": "Confirming this action will display your private key. Ensure you are in a secure environment."
     },
     "contract": {
@@ -112,7 +112,7 @@
     "signer": {
       "message": "Signer"
     },
-    "snapUpdate": {
+    "snapIsUpToDate": {
       "message": "Your Starknet Snap is now up-to-date!"
     },
     "starknetPrivateKeyConfidential": {
@@ -148,7 +148,7 @@
     "visitCompanionDappAndUpgrade": {
       "message": "Visit the [companion dapp for Starknet]({1}) and click “Upgrade”.\nThank you!"
     },
-    "walletCompatibility": {
+    "walletIsCompatible": {
       "message": "Your MetaMask wallet is now compatible with Starknet!"
     }
   }

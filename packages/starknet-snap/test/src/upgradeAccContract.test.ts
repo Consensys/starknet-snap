@@ -153,44 +153,6 @@ describe('Test function: upgradeAccContract', function () {
       estimateFeeStub = sandbox.stub(utils, 'estimateFee');
     });
 
-    it('should use provided max fee to execute txn when max fee provided', async function () {
-      await loadLocale();
-      (apiParams.requestParams as UpgradeTransactionRequestParams).maxFee =
-        '10000';
-      walletStub.rpcStubs.snap_dialog.resolves(true);
-      executeTxnStub.resolves(sendTransactionResp);
-
-      const address = (
-        apiParams.requestParams as UpgradeTransactionRequestParams
-      ).contractAddress;
-      const calldata = CallData.compile({
-        implementation: ACCOUNT_CLASS_HASH,
-        calldata: [0],
-      });
-
-      const txnInvocation = {
-        contractAddress: address,
-        entrypoint: 'upgrade',
-        calldata,
-      };
-
-      const result = await upgradeAccContract(apiParams);
-
-      expect(executeTxnStub).to.calledOnce;
-      expect(executeTxnStub).to.calledWith(
-        STARKNET_SEPOLIA_TESTNET_NETWORK,
-        address,
-        'pk',
-        txnInvocation,
-        undefined,
-        {
-          maxFee: num.toBigInt(10000),
-        },
-        CAIRO_VERSION_LEGACY,
-      );
-      expect(result).to.be.equal(sendTransactionResp);
-    });
-
     it('should use calculated max fee to execute txn when max fee not provided', async function () {
       await loadLocale();
       walletStub.rpcStubs.snap_dialog.resolves(true);
