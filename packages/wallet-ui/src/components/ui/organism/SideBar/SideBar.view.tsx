@@ -12,6 +12,7 @@ import {
   AccountDetailsContent,
   AccountImageStyled,
   AccountLabel,
+  AddIcon,
   AddTokenButton,
   DivList,
   InfoIcon,
@@ -37,7 +38,7 @@ export const SideBarView = ({ address }: Props) => {
   const [accountDetailsOpen, setAccountDetailsOpen] = useState(false);
   const wallet = useAppSelector((state) => state.wallet);
   const [addTokenOpen, setAddTokenOpen] = useState(false);
-  const { getStarkName } = useStarkNetSnap();
+  const { getStarkName, addNewAccount } = useStarkNetSnap();
   const [starkName, setStarkName] = useState<string | undefined>(undefined);
 
   const ref = useRef<HTMLDivElement>();
@@ -114,6 +115,7 @@ export const SideBarView = ({ address }: Props) => {
       <RowDiv>
         <InfoIcon onClick={() => setInfoModalOpen(true)}>i</InfoIcon>
         <AccountAddress address={address} starkName={starkName} />
+        <AddIcon onClick={async () => await addNewAccount(chainId)}>+</AddIcon>
       </RowDiv>
       <DivList ref={ref as any}>
         <AssetsList />
