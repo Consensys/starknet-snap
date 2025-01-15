@@ -16,6 +16,7 @@ export type SnapState = {
   currentNetwork?: Network;
   transactionRequests?: TransactionRequest[];
   removedAccounts?: Record<string, number[]>;
+  currentAccount?: Record<string, AccContract>;
 };
 
 export type TokenTransferData = {

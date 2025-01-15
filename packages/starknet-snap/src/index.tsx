@@ -38,6 +38,7 @@ import type {
   GetTransactionStatusParams,
   ListTransactionsParams,
   AddAccountParams,
+  GetCurrentAccountParams,
 } from './rpcs';
 import {
   displayPrivateKey,
@@ -55,6 +56,7 @@ import {
   getTransactionStatus,
   listTransactions,
   addAccount,
+  getCurrentAccount,
 } from './rpcs';
 import { signDeployAccountTransaction } from './signDeployAccountTransaction';
 import type {
@@ -284,6 +286,11 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
       case RpcMethod.AddAccount:
         return await addAccount.execute(
           requestParams as unknown as AddAccountParams,
+        );
+
+      case RpcMethod.GetCurrentAccount:
+        return await getCurrentAccount.execute(
+          requestParams as unknown as GetCurrentAccountParams,
         );
 
       default:

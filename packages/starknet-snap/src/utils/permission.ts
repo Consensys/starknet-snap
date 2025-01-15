@@ -14,6 +14,7 @@ export enum RpcMethod {
   SignTransaction = 'starkNet_signTransaction',
   SignDeclareTransaction = 'starkNet_signDeclareTransaction',
   SignDeployAccountTransaction = 'starkNet_signDeployAccountTransaction',
+  GetCurrentAccount = 'starkNet_getCurrentAccount',
 
   AddAccount = 'starkNet_addAccount',
   CreateAccount = 'starkNet_createAccount',
@@ -48,6 +49,7 @@ const publicPermissions = [
   RpcMethod.SignDeclareTransaction,
   RpcMethod.SignDeployAccountTransaction,
   RpcMethod.CreateAccount,
+  RpcMethod.GetCurrentAccount,
   RpcMethod.DisplayPrivateKey,
   RpcMethod.GetErc20TokenBalance,
   RpcMethod.GetTransactionStatus,

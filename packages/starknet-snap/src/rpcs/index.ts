@@ -13,3 +13,4 @@ export * from './get-addr-from-starkname';
 export * from './get-transaction-status';
 export * from './list-transactions';
 export * from './add-account';
+export * from './get-current-account';
