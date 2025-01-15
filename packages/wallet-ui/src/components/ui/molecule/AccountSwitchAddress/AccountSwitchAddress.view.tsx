@@ -27,9 +27,18 @@ export const AccountSwitchAddressView = ({
   starkName,
 }: Props) => {
   const networks = useAppSelector((state) => state.networks);
+  const { switchAccount, initWalletData } = useStarkNetSnap();
   const chainId = networks?.items[networks.activeNetwork]?.chainId;
 
   const { addNewAccount } = useStarkNetSnap();
+
+  const changeAccount = async (address: string) => {
+    const account = await switchAccount(chainId, address);
+    await initWalletData({
+      account,
+      chainId,
+    });
+  };
 
   return (
     <Menu as="div" style={{ display: 'inline-block', position: 'relative' }}>
@@ -53,7 +62,7 @@ export const AccountSwitchAddressView = ({
         <MenuSection>
           {accounts.map((account) => (
             <Menu.Item key={account}>
-              <NetworkMenuItem onClick={() => {}}>
+              <NetworkMenuItem onClick={() => changeAccount(account)}>
                 <Radio
                   checked={account === address}
                   name="radio-buttons"

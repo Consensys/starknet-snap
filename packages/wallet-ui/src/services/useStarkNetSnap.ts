@@ -799,11 +799,12 @@ export const useStarkNetSnap = () => {
     });
   };
 
-  const switchAccount = async (chainId: string) => {
+  const switchAccount = async (chainId: string, address: string) => {
     return await invokeSnap<Account>({
-      method: 'starkNet_switchtAccount',
+      method: 'starkNet_switchAccount',
       params: {
         chainId,
+        address,
       },
     });
   };
