@@ -51,14 +51,15 @@ export const walletSlice = createSlice({
         payload: Account | Account[];
       },
     ) => {
-      const accounts = Array.isArray(payload)
+      const accountsToInsert = Array.isArray(payload)
         ? payload.map((account) => account.address)
         : [payload.address];
 
-      if (state.accounts.length === 0) {
-        state.accounts = accounts;
-      } else {
-        state.accounts.concat(accounts);
+      const accountSet = new Set(state.accounts);
+      for (const account of accountsToInsert) {
+        if (!accountSet.has(account)) {
+          state.accounts.push(account);
+        }
       }
     },
     setCurrentAccount: (state, { payload }: { payload: Account }) => {
