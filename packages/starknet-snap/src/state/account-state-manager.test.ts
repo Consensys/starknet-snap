@@ -52,7 +52,7 @@ describe('AccountStateManager', () => {
       expect(result).toBeNull();
     });
 
-    it('returns null if the account chainId is not match', async () => {
+    it('returns null if the account chainId does not match', async () => {
       const accounts = await generateTestnetAccounts();
       await mockStateWithMainnetAccounts(accounts);
 
@@ -67,7 +67,7 @@ describe('AccountStateManager', () => {
   });
 
   describe('findAccounts', () => {
-    it('returns the list of account', async () => {
+    it('returns the list of accounts', async () => {
       const accountsInTestnet = await generateTestnetAccounts();
       const accountsInMainnet = await generateMainnetAccounts();
 
@@ -98,7 +98,7 @@ describe('AccountStateManager', () => {
   });
 
   describe('upsertAccount', () => {
-    it('adds an account if the account not exist', async () => {
+    it('adds an account if the account does not exist', async () => {
       const [account] = await generateTestnetAccounts(1);
       const state = await mockStateWithMainnetAccounts();
       const originalAccountsFromState = [...state.accContracts];
@@ -199,7 +199,7 @@ describe('AccountStateManager', () => {
       ]);
     });
 
-    it('throws an `Account does not exist` error if the removed account is not exist', async () => {
+    it('throws an `Account does not exist` error if the removed account does not exist', async () => {
       const [removeAccount, ...accounts] = await generateTestnetAccounts();
       await mockStateWithMainnetAccounts(accounts);
 

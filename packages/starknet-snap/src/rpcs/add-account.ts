@@ -1,7 +1,6 @@
-import { logger } from 'ethers';
 import { type Infer } from 'superstruct';
 
-import { BaseRequestStruct, AccountStruct } from '../utils';
+import { BaseRequestStruct, AccountStruct, logger } from '../utils';
 import { createAccountService } from '../utils/factory';
 import { ChainRpcController } from './abstract/chain-rpc-controller';
 
