@@ -39,6 +39,11 @@ export const InfoIcon = styled(RoundedIcon)`
   margin-right: ${(props) => props.theme.spacing.tiny2};
 `;
 
+export const AddIcon = styled(RoundedIcon)`
+  cursor: pointer;
+  margin-left: ${(props) => props.theme.spacing.tiny2};
+`;
+
 export const AddTokenButton = styled(Button).attrs((props) => ({
   textStyle: {
     fontWeight: props.theme.typography.bold.fontWeight,
