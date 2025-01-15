@@ -15,7 +15,7 @@ export const DisplayPrivateKeyDialogUI: SnapComponent = () => {
       <Heading>Are you sure you want to reveal your private key?</Heading>
       <Box direction="horizontal">
         <Icon name="warning" size="md" />
-        <Text>{translate('confirmPrivateKeyAction')}</Text>
+        <Text>{translate('confirmPrivateKeyToDisplay')}</Text>
       </Box>
     </Box>
   );

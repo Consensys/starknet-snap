@@ -303,7 +303,7 @@ export const onInstall: OnInstallHandler = async () => {
   const translate = getTranslator();
   await ensureJsxSupport(
     <Box>
-      <Text>{translate('walletCompatibility')}</Text>
+      <Text>{translate('walletIsCompatible')}</Text>
       <Text>
         {translate('accountManagementIntro')}{' '}
         <Link href={getDappUrl()}>{translate('companionDapp')}</Link>.
@@ -317,7 +317,7 @@ export const onUpdate: OnUpdateHandler = async () => {
   const translate = getTranslator();
   await ensureJsxSupport(
     <Box>
-      <Text>{translate('snapUpdate')}</Text>
+      <Text>{translate('snapIsUpToDate')}</Text>
       <Text>
         {translate('accountManagementReminder')}{' '}
         <Link href={getDappUrl()}>{translate('companionDapp')}</Link>.
