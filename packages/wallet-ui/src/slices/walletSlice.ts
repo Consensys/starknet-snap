@@ -61,6 +61,11 @@ export const walletSlice = createSlice({
       } else {
         state.accounts = payload.map((account) => account.address);
       }
+      // FIXME: this is a hack to set the current account to the last one added
+      // We should have a way to get the active account
+      const currentAccountIdx = state.accounts.length - 1;
+      const currentAccount = state.accounts[currentAccountIdx];
+      state.currentAccount = currentAccount;
     },
     setCurrentAccount: (state, { payload }: { payload: Account }) => {
       state.currentAccount = payload.address;

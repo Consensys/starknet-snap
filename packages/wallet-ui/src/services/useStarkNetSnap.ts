@@ -840,6 +840,7 @@ export const useStarkNetSnap = () => {
     getCurrentNetwork,
     getStarkName,
     getAddrFromStarkName,
+    addNewAccount,
     satisfiesVersion: oldVersionDetected,
   };
 };
