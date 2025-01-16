@@ -820,6 +820,9 @@ export const useStarkNetSnap = () => {
         chainId,
       });
 
+      // push the current account into state
+      dispatch(setAccounts(account));
+
       return account;
     } catch (err: any) {
       const toastr = new Toastr();
@@ -827,6 +830,24 @@ export const useStarkNetSnap = () => {
     } finally {
       dispatch(disableLoading());
     }
+  };
+
+  const getCurrentAccount = async (chainId: string) => {
+    return await invokeSnap<Account>({
+      method: 'starkNet_getCurrentAccount',
+      params: {
+        chainId,
+      },
+    });
+  };
+
+  const switchAccount = async (chainId: string) => {
+    return await invokeSnap<Account>({
+      method: 'starkNet_switchtAccount',
+      params: {
+        chainId,
+      },
+    });
   };
 
   return {
