@@ -1,0 +1,155 @@
+{
+  "locale": "en",
+  "messages": {
+    "accountDeploymentMandatory": {
+      "message": "Account Deployment Mandatory!"
+    },
+    "accountDeploymentNotice": {
+      "message": "The account will be deployed with this transaction."
+    },
+    "accountManagementIntro": {
+      "message": "To manage your Starknet account and send and receive funds, visit the"
+    },
+    "accountManagementReminder": {
+      "message": "As usual, to manage your Starknet account and send and receive funds, visit the"
+    },
+    "accountUpgradeMandatory": {
+      "message": "Account Upgrade Mandatory!"
+    },
+    "addTokenPrompt": {
+      "message": "Do you want to add this token?"
+    },
+    "address": {
+      "message": "Address"
+    },
+    "amount": {
+      "message": "Amount"
+    },
+    "amountWithSymbol": {
+      "message": "Amount ({1})"
+    },
+    "balance": {
+      "message": "Balance"
+    },
+    "baseUrl": {
+      "message": "Base URL"
+    },
+    "callData": {
+      "message": "Call Data"
+    },
+    "call": {
+      "message": "Call"
+    },
+    "chainId": {
+      "message": "Chain ID"
+    },
+    "chainName": {
+      "message": "Chain Name"
+    },
+    "classHash": {
+      "message": "Class Hash"
+    },
+    "companionDapp": {
+      "message": "companion dapp for Starknet"
+    },
+    "compiledClassHash": {
+      "message": "Compiled Class Hash"
+    },
+    "confirmPrivateKeyToDisplay": {
+      "message": "Confirming this action will display your private key. Ensure you are in a secure environment."
+    },
+    "contract": {
+      "message": "Contract"
+    },
+    "decimals": {
+      "message": "Decimals"
+    },
+    "declareTransactionDetails": {
+      "message": "Declare Transaction Details"
+    },
+    "estimatedGasFee": {
+      "message": "Estimated Gas Fee"
+    },
+    "explorerUrl": {
+      "message": "Explorer URL"
+    },
+    "message": {
+      "message": "Message"
+    },
+    "maxFeeETH": {
+      "message": "Max Fee (ETH)"
+    },
+    "name": {
+      "message": "Name"
+    },
+    "network": {
+      "message": "Network"
+    },
+    "networkFee": {
+      "message": "network fee"
+    },
+    "recipientAddress": {
+      "message": "Recipient Address"
+    },
+    "recipient": {
+      "message": "Recipient"
+    },
+    "rpcUrl": {
+      "message": "RPC URL"
+    },
+    "senderAddress": {
+      "message": "Sender Address"
+    },
+    "signMessagePrompt": {
+      "message": "Do you want to sign this message?"
+    },
+    "signTransactionPrompt": {
+      "message": "Do you want to sign this transaction?"
+    },
+    "signerAddress": {
+      "message": "Signer Address"
+    },
+    "signer": {
+      "message": "Signer"
+    },
+    "snapIsUpToDate": {
+      "message": "Your Starknet Snap is now up-to-date!"
+    },
+    "starknetPrivateKeyConfidential": {
+      "message": "Below is your Starknet Account private key. Keep it confidential."
+    },
+    "starknetPrivateKey": {
+      "message": "Starknet Account Private Key"
+    },
+    "switchNetworkPrompt": {
+      "message": "Do you want to switch to this network?"
+    },
+    "symbol": {
+      "message": "Symbol"
+    },
+    "token": {
+      "message": "Token"
+    },
+    "totalFor": {
+      "message": "Total for"
+    },
+    "transaction": {
+      "message": "Transaction"
+    },
+    "transactions": {
+      "message": "Transactions"
+    },
+    "visitCompanionDappHomePage": {
+      "message": "Visit the [companion dapp for Starknet]({1}) to manage your account."
+    },
+    "visitCompanionDappAndDeploy": {
+      "message": "Visit the [companion dapp for Starknet]({1}) to deploy your account.\nThank you!"
+    },
+    "visitCompanionDappAndUpgrade": {
+      "message": "Visit the [companion dapp for Starknet]({1}) and click “Upgrade”.\nThank you!"
+    },
+    "walletIsCompatible": {
+      "message": "Your MetaMask wallet is now compatible with Starknet!"
+    }
+  }
+}

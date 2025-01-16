@@ -7,6 +7,7 @@ import type {
 } from './types/snapApi';
 import { ContractFuncName } from './types/snapState';
 import { ACCOUNT_CLASS_HASH, CAIRO_VERSION_LEGACY } from './utils/constants';
+import { getTranslator } from './utils/locale';
 import { logger } from './utils/logger';
 import { toJson } from './utils/serializer';
 import {
@@ -105,13 +106,13 @@ export async function upgradeAccContract(params: ApiParamsWithKeyDeriver) {
       maxFee,
       network,
     );
-
+    const translate = getTranslator();
     const response = await wallet.request({
       method: 'snap_dialog',
       params: {
         type: DialogType.Confirmation,
         content: panel([
-          heading('Do you want to sign this transaction ?'),
+          heading(translate('signTransactionPrompt')),
           ...dialogComponents,
         ]),
       },

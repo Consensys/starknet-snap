@@ -11,6 +11,7 @@ import {
 import type { FeeToken } from '../../types/snapApi';
 import type { FormattedCallData } from '../../types/snapState';
 import { DEFAULT_DECIMAL_PLACES } from '../../utils/constants';
+import { getTranslator } from '../../utils/locale';
 import { AddressUI, JsonDataUI, NetworkUI, SignerUI } from '../fragments';
 import { Amount } from '../fragments/Amount';
 import { FeeTokenSelector } from '../fragments/FeeTokenSelector';
@@ -63,6 +64,7 @@ export const ExecuteTxnUI: SnapComponent<ExecuteTxnUIProps> = ({
   errors,
 }) => {
   // Calculate the totals using the helper
+  const translate = getTranslator();
   const tokenTotals = accumulateTotals(calls, maxFee, selectedFeeToken);
 
   return (
@@ -77,26 +79,26 @@ export const ExecuteTxnUI: SnapComponent<ExecuteTxnUIProps> = ({
         {calls.map((call) => (
           <Section>
             <AddressUI
-              label="Contract"
+              label={translate('contract')}
               address={call.contractAddress}
               chainId={chainId}
             />
             {call.tokenTransferData ? (
               <Section>
                 <AddressUI
-                  label="Recipient"
+                  label={translate('recipient')}
                   address={call.tokenTransferData.recipientAddress}
                   chainId={chainId}
                 />
                 <Amount
-                  label={`Amount`}
+                  label={translate('amount')}
                   amount={call.tokenTransferData.amount}
                   decimals={call.tokenTransferData.decimals}
                   symbol={call.tokenTransferData.symbol}
                 />
               </Section>
             ) : (
-              <JsonDataUI label="Call Data" data={call.calldata} />
+              <JsonDataUI label={translate('call')} data={call.calldata} />
             )}
           </Section>
         ))}
@@ -107,7 +109,7 @@ export const ExecuteTxnUI: SnapComponent<ExecuteTxnUIProps> = ({
         <Section>
           <Icon name="gas" size="md" />
           <Amount
-            label="Network fee"
+            label={translate('networkFee')}
             amount={maxFee}
             decimals={DEFAULT_DECIMAL_PLACES}
             symbol={selectedFeeToken}
@@ -118,7 +120,7 @@ export const ExecuteTxnUI: SnapComponent<ExecuteTxnUIProps> = ({
             {Object.entries(tokenTotals).map(
               ([tokenSymbol, { amount, decimals }]) => (
                 <Amount
-                  label={`Total for ${tokenSymbol}`}
+                  label={`${translate('totalFor')} ${tokenSymbol}`}
                   amount={amount.toString()}
                   decimals={decimals}
                   symbol={tokenSymbol}
@@ -130,7 +132,7 @@ export const ExecuteTxnUI: SnapComponent<ExecuteTxnUIProps> = ({
           {includeDeploy ? (
             <Box direction="horizontal">
               <Icon name="warning" size="md" />
-              <Text>The account will be deployed with this transaction</Text>
+              <Text>{translate('accountDeploymentNotice')}</Text>
             </Box>
           ) : null}
         </Section>

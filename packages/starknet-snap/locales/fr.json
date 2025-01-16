@@ -1,0 +1,155 @@
+{
+  "locale": "fr",
+  "messages": {
+    "accountDeploymentMandatory": {
+      "message": "Déploiement du compte obligatoire !"
+    },
+    "accountDeploymentNotice": {
+      "message": "Le compte sera déployé avec cette transaction."
+    },
+    "accountManagementIntro": {
+      "message": "Pour gérer votre compte Starknet et envoyer ou recevoir des fonds, accédez à cette page"
+    },
+    "accountManagementReminder": {
+      "message": "Comme d'habitude, pour gérer votre compte Starknet et envoyer ou recevoir des fonds, accédez à cette page"
+    },
+    "accountUpgradeMandatory": {
+      "message": "Mise à niveau du compte obligatoire !"
+    },
+    "addTokenPrompt": {
+      "message": "Voulez-vous ajouter ce token ?"
+    },
+    "address": {
+      "message": "Adresse"
+    },
+    "amount": {
+      "message": "Montant"
+    },
+    "amountWithSymbol": {
+      "message": "Montant ({1})"
+    },
+    "balance": {
+      "message": "Solde"
+    },
+    "baseUrl": {
+      "message": "URL de base"
+    },
+    "callData": {
+      "message": "Données d'appel"
+    },
+    "call": {
+      "message": "Appel"
+    },
+    "chainId": {
+      "message": "ID de la chaîne"
+    },
+    "chainName": {
+      "message": "Nom de la chaîne"
+    },
+    "classHash": {
+      "message": "Hash de la classe"
+    },
+    "companionDapp": {
+      "message": "dapp compagnon pour Starknet"
+    },
+    "compiledClassHash": {
+      "message": "Hash de la classe compilée"
+    },
+    "confirmPrivateKeyToDisplay": {
+      "message": "Confirmer cette action affichera votre clé privée. Assurez-vous d'être dans un environnement sécurisé."
+    },
+    "contract": {
+      "message": "Contrat"
+    },
+    "decimals": {
+      "message": "Décimales"
+    },
+    "declareTransactionDetails": {
+      "message": "Détails de la transaction à déclarer"
+    },
+    "estimatedGasFee": {
+      "message": "Frais de gaz estimés"
+    },
+    "explorerUrl": {
+      "message": "URL de l'explorateur"
+    },
+    "message": {
+      "message": "Message"
+    },
+    "maxFeeETH": {
+      "message": "Frais max (ETH)"
+    },
+    "name": {
+      "message": "Nom"
+    },
+    "network": {
+      "message": "Réseau"
+    },
+    "networkFee": {
+      "message": "frais de réseau"
+    },
+    "recipientAddress": {
+      "message": "Adresse du destinataire"
+    },
+    "recipient": {
+      "message": "Destinataire"
+    },
+    "rpcUrl": {
+      "message": "URL RPC"
+    },
+    "senderAddress": {
+      "message": "Adresse de l'expéditeur"
+    },
+    "signMessagePrompt": {
+      "message": "Voulez-vous signer ce message ?"
+    },
+    "signTransactionPrompt": {
+      "message": "Voulez-vous signer cette transaction ?"
+    },
+    "signerAddress": {
+      "message": "Adresse du signataire"
+    },
+    "signer": {
+      "message": "Signataire"
+    },
+    "snapIsUpToDate": {
+      "message": "Votre Starknet Snap est maintenant à jour !"
+    },
+    "starknetPrivateKeyConfidential": {
+      "message": "Voici la clé privée de votre compte Starknet. Gardez-la confidentielle."
+    },
+    "starknetPrivateKey": {
+      "message": "Clé privée du compte Starknet"
+    },
+    "switchNetworkPrompt": {
+      "message": "Voulez-vous changer pour ce réseau ?"
+    },
+    "symbol": {
+      "message": "Symbole"
+    },
+    "token": {
+      "message": "Token"
+    },
+    "totalFor": {
+      "message": "Total pour"
+    },
+    "transaction": {
+      "message": "Transaction"
+    },
+    "transactions": {
+      "message": "Transactions"
+    },
+    "visitCompanionDappHomePage": {
+      "message": "Visitez la [dapp compagnon pour Starknet]({1}) pour gérer votre compte."
+    },
+    "visitCompanionDappAndDeploy": {
+      "message": "Visitez la [dapp compagnon pour Starknet]({1}) pour déployer votre compte.\nMerci !"
+    },
+    "visitCompanionDappAndUpgrade": {
+      "message": "Visitez la [dapp compagnon pour Starknet]({1}) et cliquez sur “Upgrade”.\nMerci !"
+    },
+    "walletIsCompatible": {
+      "message": "Votre portefeuille MetaMask est désormais compatible avec Starknet !"
+    }
+  }
+}
