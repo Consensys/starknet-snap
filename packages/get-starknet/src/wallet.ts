@@ -137,7 +137,7 @@ export class MetaMaskSnapWallet implements StarknetWindowObject {
   }
 
   async #getWalletAddress(chainId: string) {
-    const accountResponse = await this.snap.recoverDefaultAccount(chainId);
+    const accountResponse = await this.snap.getCurrentAccount({ chainId });
 
     if (!accountResponse?.address) {
       throw new Error('Unable to recover accounts');
@@ -207,9 +207,9 @@ export class MetaMaskSnapWallet implements StarknetWindowObject {
       throw new Error('Unable to find the selected network');
     }
 
+    // address is depends on network, if network changes, address will update
+    this.#selectedAddress = await this.#getWalletAddress(network.chainId);
     if (!this.#network || network.chainId !== this.#network.chainId) {
-      // address is depends on network, if network changes, address will update
-      this.#selectedAddress = await this.#getWalletAddress(network.chainId);
       // provider is depends on network.nodeUrl, if network changes, set provider to undefine for reinitialization
       this.#provider = undefined;
       // account is depends on address and provider, if network changes, address will update,

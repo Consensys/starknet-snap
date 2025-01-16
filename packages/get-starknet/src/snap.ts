@@ -239,6 +239,21 @@ export class MetaMaskSnap {
     return result[0];
   }
 
+  async getCurrentAccount({ chainId }: { chainId?: string }): Promise<AccContract> {
+    return (await this.#provider.request({
+      method: 'wallet_invokeSnap',
+      params: {
+        snapId: this.#snapId,
+        request: {
+          method: 'starkNet_getCurrentAccount',
+          params: await this.#getSnapParams({
+            chainId,
+          }),
+        },
+      },
+    })) as AccContract;
+  }
+
   async recoverAccounts({
     chainId,
     startScanIndex = 0,
@@ -424,6 +439,10 @@ export class MetaMaskSnap {
   }
 
   async installIfNot(): Promise<boolean> {
+    // if the snap is already installed, return true, to bypass the prompt
+    if (await this.isInstalled()) {
+      return true;
+    }
     const response = (await this.#provider.request({
       method: 'wallet_requestSnaps',
       params: {
