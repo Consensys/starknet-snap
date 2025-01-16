@@ -100,12 +100,7 @@ export const SendSummaryModalView = ({
             : undefined,
         )
           .then((response) => {
-            if (response.message && response.message.includes('Error')) {
-              toastr.error('Error when trying to calculate the gas fees');
-              setGasFeesError(true);
-            } else {
-              setGasFees(response);
-            }
+            setGasFees(response);
             setEstimatingGas(false);
           })
           .catch(() => {

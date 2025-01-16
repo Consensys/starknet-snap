@@ -25,7 +25,7 @@ import { DeployModal } from 'components/ui/organism/DeployModal';
 library.add(fas, far);
 
 function App() {
-  const { initSnap, getWalletData, checkConnection } = useStarkNetSnap();
+  const { initSnap, initWalletData, checkConnection } = useStarkNetSnap();
   const { connected, forceReconnect, provider } = useAppSelector(
     (state) => state.wallet,
   );
@@ -57,7 +57,7 @@ function App() {
 
   useEffect(() => {
     if (provider && networks.items.length > 0 && chainId) {
-      getWalletData(chainId);
+      initWalletData({ chainId });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [networks.activeNetwork, provider, chainId]);

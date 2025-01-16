@@ -51,18 +51,17 @@ export const walletSlice = createSlice({
         payload: Account | Account[];
       },
     ) => {
-      if (Array.isArray(payload)) {
-        // When switching networks, we clean up the accounts from the previous network
-        // Hence, we can assume that setAccounts is called with an array of accounts from the same network
-        state.accounts = payload.map((account) => account.address);
-      } else {
-        state.accounts.push(payload.address);
+      const accountsToInsert = Array.isArray(payload) ? payload : [payload];
+
+      const accountSet = new Set(state.accounts);
+      for (const account of accountsToInsert) {
+        if (!accountSet.has(account.address)) {
+          state.accounts.push(account.address);
+        }
       }
-      // FIXME: this is a hack to set the current account to the last one added
-      // We should have a way to get the active account
-      const currentAccountIdx = state.accounts.length - 1;
-      const currentAccount = state.accounts[currentAccountIdx];
-      state.currentAccount = currentAccount;
+    },
+    setCurrentAccount: (state, { payload }: { payload: Account }) => {
+      state.currentAccount = payload.address;
     },
     setErc20TokenBalances: (state, { payload }) => {
       state.erc20TokenBalances = payload;
@@ -125,6 +124,7 @@ export const walletSlice = createSlice({
 export const {
   setWalletConnection,
   setForceReconnect,
+  setCurrentAccount,
   setAccounts,
   clearAccounts,
   setErc20TokenBalances,

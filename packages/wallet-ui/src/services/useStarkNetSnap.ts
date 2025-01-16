@@ -11,6 +11,7 @@ import {
   upsertErc20TokenBalance,
   setErc20TokenBalances,
   setAccounts,
+  setCurrentAccount,
   setTransactions,
   setTransactionDeploy,
   setForceReconnect,
@@ -24,7 +25,7 @@ import {
   isUserDenyError,
 } from '../utils/utils';
 import { setWalletConnection } from '../slices/walletSlice';
-import { Network } from '../types';
+import { FeeToken, FeeTokenUnit, Network } from '../types';
 import { Account } from '../types';
 import { Erc20TokenBalance, Erc20Token } from '../types';
 import { disableLoading, enableLoadingWithMessage } from '../slices/UISlice';
@@ -40,37 +41,26 @@ import {
   TransactionType,
   UniversalDetails,
 } from 'starknet';
+import { useSnap } from './useSnap';
 
 export const useStarkNetSnap = () => {
   const dispatch = useAppDispatch();
+  const {
+    invokeSnap,
+    getInstalledSnaps,
+    requestSnap,
+    minSnapVersion,
+    ping,
+    snapId,
+  } = useSnap();
   const { loader } = useAppSelector((state) => state.UI);
-  const { transactions, erc20TokenBalances, provider } = useAppSelector(
+  const { erc20TokenBalances, accounts } = useAppSelector(
     (state) => state.wallet,
   );
-  const snapId = process.env.REACT_APP_SNAP_ID
-    ? process.env.REACT_APP_SNAP_ID
-    : 'local:http://localhost:8081';
-  const snapVersion = process.env.REACT_APP_SNAP_VERSION
-    ? process.env.REACT_APP_SNAP_VERSION
-    : '*';
-  const minSnapVersion = process.env.REACT_APP_MIN_SNAP_VERSION
-    ? process.env.REACT_APP_MIN_SNAP_VERSION
-    : '2.0.1';
-  const START_SCAN_INDEX = 0;
-  const MAX_SCANNED = 1;
-  const MAX_MISSED = 1;
-
-  const defaultParam = {};
 
   const connectToSnap = () => {
     dispatch(enableLoadingWithMessage('Connecting...'));
-    provider
-      .request({
-        method: 'wallet_requestSnaps',
-        params: {
-          [snapId]: { version: snapVersion },
-        },
-      })
+    requestSnap()
       .then(() => {
         dispatch(setWalletConnection(true));
         dispatch(setForceReconnect(false));
@@ -83,126 +73,44 @@ export const useStarkNetSnap = () => {
 
   const checkConnection = () => {
     dispatch(enableLoadingWithMessage('Connecting...'));
-    provider
-      .request({
-        method: 'wallet_invokeSnap',
-        params: {
-          snapId,
-          request: {
-            method: 'ping',
-            params: {
-              ...defaultParam,
-            },
-          },
-        },
-      })
+    ping()
       .then(() => {
         dispatch(setWalletConnection(true));
       })
-      .catch((err: any) => {
+      .catch((error: any) => {
         dispatch(setWalletConnection(false));
         dispatch(disableLoading());
         //eslint-disable-next-line no-console
-        console.log(err);
+        console.log(error);
       });
   };
 
   const getNetworks = async () => {
-    const data = (await provider.request({
-      method: 'wallet_invokeSnap',
-      params: {
-        snapId,
-        request: {
-          method: 'starkNet_getStoredNetworks',
-          params: {
-            ...defaultParam,
-          },
-        },
-      },
-    })) as Network[];
-    return data;
+    return await invokeSnap<Network[]>({
+      method: 'starkNet_getStoredNetworks',
+    });
   };
 
   const getTokens = async (chainId: string) => {
-    const tokens = (await provider.request({
-      method: 'wallet_invokeSnap',
+    return await invokeSnap<Erc20Token[]>({
+      method: 'starkNet_getStoredErc20Tokens',
       params: {
-        snapId,
-        request: {
-          method: 'starkNet_getStoredErc20Tokens',
-          params: {
-            ...defaultParam,
-            chainId,
-          },
-        },
+        chainId,
       },
-    })) as Erc20Token[];
-    return tokens;
-  };
-
-  const recoverAccounts = async (
-    chainId: string,
-    start: number = START_SCAN_INDEX,
-    maxScan: number = MAX_SCANNED,
-    maxMiss: number = MAX_MISSED,
-  ) => {
-    const scannedAccounts = (await provider.request({
-      method: 'wallet_invokeSnap',
-      params: {
-        snapId,
-        request: {
-          method: 'starkNet_recoverAccounts',
-          params: {
-            ...defaultParam,
-            startScanIndex: start,
-            maxScanned: maxScan,
-            maxMissed: maxMiss,
-            chainId,
-          },
-        },
-      },
-    })) as Account[];
-    return scannedAccounts;
+    });
   };
 
   const getAccounts = async (chainId: string) => {
-    const data = (await provider.request({
-      method: 'wallet_invokeSnap',
+    return await invokeSnap<Account[]>({
+      method: 'starkNet_listAccounts',
       params: {
-        snapId,
-        request: {
-          method: 'starkNet_getStoredUserAccounts',
-          params: {
-            ...defaultParam,
-            chainId,
-          },
-        },
+        chainId,
       },
-    })) as Account[];
-    return data;
-  };
-
-  const addAccount = async (chainId: string) => {
-    const data = (await provider.request({
-      method: 'wallet_invokeSnap',
-      params: {
-        snapId,
-        request: {
-          method: 'starkNet_createAccount',
-          params: {
-            ...defaultParam,
-            addressIndex: START_SCAN_INDEX,
-            chainId,
-            deploy: false,
-          },
-        },
-      },
-    })) as Account;
-    return data;
+    });
   };
 
   const oldVersionDetected = async () => {
-    const snaps = await provider.request({ method: 'wallet_getSnaps' });
+    const snaps = await getInstalledSnaps();
     if (typeof snaps[snapId]?.version !== 'undefined') {
       // console.log(`snaps[snapId][version]: ${snaps[snapId]?.version}`);
       // console.log(`snaps[snapId][version].split('_')[0]: ${snaps[snapId]?.version?.split('-')?.[0]}`);
@@ -223,15 +131,22 @@ export const useStarkNetSnap = () => {
       dispatch(enableLoadingWithMessage('Initializing wallet ...'));
     }
     try {
-      const nets = await getNetworks();
-      if (nets.length === 0) {
+      const networks = await getNetworks();
+      if (networks.length === 0) {
+        console.error('No networks found');
         return;
       }
-      const net = await getCurrentNetwork();
-      const idx = nets.findIndex((e) => e.chainId === net.chainId);
+      dispatch(setNetworks(networks));
+
+      const currentNetwork = await getCurrentNetwork();
+      const idx = networks.findIndex(
+        (network) => network.chainId === currentNetwork.chainId,
+      );
       dispatch(setActiveNetwork(idx));
-      const chainId = net.chainId;
-      await getWalletData(chainId, nets);
+
+      await initWalletData({
+        chainId: currentNetwork.chainId,
+      });
     } catch (err: any) {
       if (err.code && err.code === 4100) {
         const toastr = new Toastr();
@@ -251,83 +166,41 @@ export const useStarkNetSnap = () => {
     }
   };
 
-  // FIXME: this method has to rewrite when switch account enabled
-  // we should get the active account, instead of recovering all accounts
-  const getWalletData = async (chainId: string, networks?: Network[]) => {
-    if (!loader.isLoading && !networks) {
-      dispatch(enableLoadingWithMessage('Getting network data ...'));
-    }
-    const tokens = await getTokens(chainId);
-    let acc: Account[] | Account = await recoverAccounts(chainId);
-    let upgradeRequired = false;
-    let deployRequired = false;
-    deployRequired =
-      (Array.isArray(acc)
-        ? acc[0].deployRequired
-        : (acc as Account).deployRequired) ?? false;
-    if (!acc || acc.length === 0 || (!acc[0].publicKey && !deployRequired)) {
-      acc = await addAccount(chainId);
-    } else {
-      upgradeRequired =
-        (Array.isArray(acc)
-          ? acc[0].upgradeRequired
-          : (acc as Account).upgradeRequired) ?? false;
-    }
-
-    const accountAddr = Array.isArray(acc) ? acc[0].address : acc.address;
-
-    // Get all tokens balance, USD value, and format them into Erc20TokenBalance type
-    const tokensWithBalances: Erc20TokenBalance[] = await Promise.all(
-      tokens.map(async (token) => {
-        const balance = await getTokenBalance(
-          token.address,
-          accountAddr,
-          chainId,
-        );
-        const usdPrice = await getAssetPriceUSD(token);
-        return await getTokenBalanceWithDetails(balance, token, usdPrice);
-      }),
-    );
-    if (networks) {
-      dispatch(setNetworks(networks));
-    }
-    dispatch(setErc20TokenBalances(tokensWithBalances));
-    dispatch(setAccounts(acc));
-    if (tokensWithBalances.length > 0) {
-      setErc20TokenBalance(tokensWithBalances[0]);
-    }
-    if (!Array.isArray(acc)) {
-      dispatch(setInfoModalVisible(true));
-    }
-    dispatch(setUpgradeModalVisible(upgradeRequired && !deployRequired));
-    dispatch(setDeployModalVisible(deployRequired));
-    dispatch(disableLoading());
-  };
-
-  // FIXME: this method has to replace getWalletData()
   const initWalletData = async ({
     account,
+    chainId,
   }: {
-    // TODO: we should allow the account to be optional
-    // and get the active account from the snap
-    account: Account;
+    account?: Account;
+    chainId: string;
   }) => {
     if (!loader.isLoading) {
       dispatch(enableLoadingWithMessage('Getting network data ...'));
     }
 
-    const { address, chainId } = account;
+    let currentAccount = account;
+    if (!currentAccount) {
+      currentAccount = await getCurrentAccount(chainId);
+    }
 
-    await setAccount(account);
+    await setAccount(chainId, currentAccount);
+
+    const { address } = currentAccount;
 
     await initTokensAndBalances(chainId, address);
 
     dispatch(disableLoading());
   };
 
-  const setAccount = async (account: Account) => {
-    const { upgradeRequired, deployRequired } = account;
-    dispatch(setAccounts(account));
+  const setAccount = async (chainId: string, currentAccount: Account) => {
+    const { upgradeRequired, deployRequired } = currentAccount;
+
+    dispatch(setCurrentAccount(currentAccount));
+
+    // if no accounts from state, we fetch the accounts from snap
+    if (!accounts || accounts.length === 0) {
+      const accounts = await getAccounts(chainId);
+      dispatch(setAccounts(accounts));
+    }
 
     // FIXME: hardcode to set the info modal visible,
     // but it should only visible when the account is not deployed
@@ -362,23 +235,16 @@ export const useStarkNetSnap = () => {
 
   async function getPrivateKeyFromAddress(address: string, chainId: string) {
     try {
-      await provider.request({
-        method: 'wallet_invokeSnap',
+      await invokeSnap<null>({
+        method: 'starkNet_displayPrivateKey',
         params: {
-          snapId,
-          request: {
-            method: 'starkNet_displayPrivateKey',
-            params: {
-              ...defaultParam,
-              address: address,
-              chainId,
-            },
-          },
+          address: address,
+          chainId,
         },
       });
-    } catch (err) {
-      if (!isUserDenyError(err)) {
-        throw err;
+    } catch (error) {
+      if (!isUserDenyError(error)) {
+        throw error;
       }
     }
   }
@@ -391,41 +257,30 @@ export const useStarkNetSnap = () => {
     chainId: string,
     transactionVersion?: typeof constants.TRANSACTION_VERSION.V3,
   ) {
-    console.log('contractCallData', contractCallData);
-    console.log('contractAddress', contractAddress);
-    console.log('address', address);
-    try {
-      const invocations: Invocations = [
-        {
-          type: TransactionType.INVOKE,
-          payload: {
-            contractAddress,
-            entrypoint: contractFuncName,
-            calldata: contractCallData.split(',').map((ele) => ele.trim()),
-          },
+    const invocations: Invocations = [
+      {
+        type: TransactionType.INVOKE,
+        payload: {
+          contractAddress,
+          entrypoint: contractFuncName,
+          calldata: contractCallData.split(',').map((ele) => ele.trim()),
         },
-      ];
-      const response = await provider.request({
-        method: 'wallet_invokeSnap',
-        params: {
-          snapId,
-          request: {
-            method: 'starkNet_estimateFee',
-            params: {
-              ...defaultParam,
-              address,
-              invocations,
-              details: { version: transactionVersion },
-              chainId,
-            },
-          },
-        },
-      });
-      return response;
-    } catch (err) {
-      //eslint-disable-next-line no-console
-      console.error(err);
-    }
+      },
+    ];
+
+    return await invokeSnap<{
+      suggestedMaxFee: string;
+      unit: FeeTokenUnit;
+      includeDeploy: boolean;
+    }>({
+      method: 'starkNet_estimateFee',
+      params: {
+        address,
+        invocations,
+        details: { version: transactionVersion },
+        chainId,
+      },
+    });
   }
 
   async function sendTransaction(
@@ -446,33 +301,29 @@ export const useStarkNetSnap = () => {
           calldata: contractCallData.split(',').map((ele) => ele.trim()),
         },
       ];
-      const response = await provider.request({
-        method: 'wallet_invokeSnap',
+
+      const response = await invokeSnap<{
+        transaction_hash: string;
+      }>({
+        method: 'starkNet_executeTxn',
         params: {
-          snapId,
-          request: {
-            method: 'starkNet_executeTxn',
-            params: {
-              ...defaultParam,
-              address,
-              calls,
-              details: {
-                version:
-                  feeToken === 'STRK'
-                    ? constants.TRANSACTION_VERSION.V3
-                    : undefined,
-                maxFee,
-              } as UniversalDetails,
-              chainId,
-            },
-          },
+          address,
+          calls,
+          details: {
+            version:
+              feeToken === FeeToken.STRK
+                ? constants.TRANSACTION_VERSION.V3
+                : undefined,
+            maxFee,
+          } as UniversalDetails,
+          chainId,
         },
       });
 
       return response;
-    } catch (err) {
-      if (!isUserDenyError(err)) {
-        throw err;
+    } catch (error) {
+      if (!isUserDenyError(error)) {
+        throw error;
       }
     } finally {
       dispatch(disableLoading());
@@ -483,52 +334,29 @@ export const useStarkNetSnap = () => {
     transactionHash: string,
     chainId: string,
   ) => {
-    try {
-      const response = await provider.request({
-        method: 'wallet_invokeSnap',
-        params: {
-          snapId,
-          request: {
-            method: 'starkNet_getTransactionStatus',
-            params: {
-              ...defaultParam,
-              transactionHash,
-              chainId,
-            },
-          },
-        },
-      });
-      return response;
-    } catch (err) {
-      //eslint-disable-next-line no-console
-      console.error(err);
-    }
+    return await invokeSnap<{
+      executionStatus?: string;
+      finalityStatus?: string;
+    }>({
+      method: 'starkNet_getTransactionStatus',
+      params: {
+        transactionHash,
+        chainId,
+      },
+    });
   };
 
-  const readContract = async (
+  const readContract = async <Resp>(
     contractAddress: string,
     contractFuncName: string,
   ) => {
-    try {
-      const response = await provider.request({
-        method: 'wallet_invokeSnap',
-        params: {
-          snapId,
-          request: {
-            method: 'starkNet_getValue',
-            params: {
-              ...defaultParam,
-              contractAddress,
-              contractFuncName,
-            },
-          },
-        },
-      });
-      return response;
-    } catch (err) {
-      //eslint-disable-next-line no-console
-      console.error(err);
-    }
+    return await invokeSnap<Resp>({
+      method: 'starkNet_getValue',
+      params: {
+        contractAddress,
+        contractFuncName,
+      },
+    });
   };
 
   const deployAccount = async (
@@ -538,26 +366,21 @@ export const useStarkNetSnap = () => {
   ) => {
     dispatch(enableLoadingWithMessage('Deploying account...'));
     try {
-      const response = await provider.request({
-        method: 'wallet_invokeSnap',
+      const response = await invokeSnap<{
+        transaction_hash: string;
+      }>({
+        method: 'starkNet_createAccountLegacy',
         params: {
-          snapId,
-          request: {
-            method: 'starkNet_createAccountLegacy',
-            params: {
-              ...defaultParam,
-              contractAddress,
-              maxFee,
-              chainId,
-              deploy: true,
-            },
-          },
+          contractAddress,
+          maxFee,
+          chainId,
+          deploy: true,
         },
       });
       return response;
-    } catch (err) {
-      if (!isUserDenyError(err)) {
-        throw err;
+    } catch (error) {
+      if (!isUserDenyError(error)) {
+        throw error;
       }
       return false;
     } finally {
@@ -572,26 +395,20 @@ export const useStarkNetSnap = () => {
   ) => {
     dispatch(enableLoadingWithMessage('Upgrading account...'));
     try {
-      const response = await provider.request({
-        method: 'wallet_invokeSnap',
+      const response = await invokeSnap<{
+        transaction_hash: string;
+      }>({
+        method: 'starkNet_upgradeAccContract',
         params: {
-          snapId,
-          request: {
-            method: 'starkNet_upgradeAccContract',
-            params: {
-              ...defaultParam,
-              contractAddress,
-              maxFee,
-              chainId,
-            },
-          },
+          contractAddress,
+          maxFee,
+          chainId,
         },
       });
-
       return response;
-    } catch (err) {
-      if (!isUserDenyError(err)) {
-        throw err;
+    } catch (error) {
+      if (!isUserDenyError(error)) {
+        throw error;
       }
       return false;
     } finally {
@@ -612,39 +429,17 @@ export const useStarkNetSnap = () => {
     }
 
     try {
-      const data = await provider.request({
-        method: 'wallet_invokeSnap',
+      const data = await invokeSnap<Array<Transaction>>({
+        method: 'starkNet_getTransactions',
         params: {
-          snapId,
-          request: {
-            method: 'starkNet_getTransactions',
-            params: {
-              ...defaultParam,
-              senderAddress,
-              contractAddress,
-              txnsInLastNumOfDays,
-              chainId,
-            },
-          },
+          senderAddress,
+          contractAddress,
+          txnsInLastNumOfDays,
+          chainId,
         },
       });
 
       let storedTxns = data;
-      if (onlyFromState) {
-        // Filter out stored txns that are not found in the retrieved txns
-        const filteredTxns = transactions.filter((txn: Transaction) => {
-          return !storedTxns.find((storedTxn: Transaction) =>
-            ethers.BigNumber.from(storedTxn.txnHash).eq(
-              ethers.BigNumber.from(txn.txnHash),
-            ),
-          );
-        });
-
-        // sort in timestamp descending order
-        storedTxns = [...storedTxns, ...filteredTxns].sort(
-          (a: Transaction, b: Transaction) => b.timestamp - a.timestamp,
-        );
-      }
 
       //Set the deploy transaction
       const deployTransaction = storedTxns.find(
@@ -656,14 +451,13 @@ export const useStarkNetSnap = () => {
 
       dispatch(setTransactions(storedTxns));
 
+      return data;
+    } catch (error) {
+      dispatch(setTransactions([]));
+    } finally {
       if (showLoading) {
         dispatch(disableLoading());
       }
-      return data;
-    } catch (err) {
-      dispatch(disableLoading());
-      dispatch(setTransactions([]));
-      console.error(err);
     }
   };
 
@@ -677,21 +471,14 @@ export const useStarkNetSnap = () => {
   ) => {
     dispatch(enableLoadingWithMessage('Adding Token...'));
     try {
-      await provider.request({
-        method: 'wallet_invokeSnap',
+      await invokeSnap<null>({
+        method: 'starkNet_addErc20Token',
         params: {
-          snapId,
-          request: {
-            method: 'starkNet_addErc20Token',
-            params: {
-              ...defaultParam,
-              tokenAddress,
-              tokenName,
-              tokenSymbol,
-              tokenDecimals,
-              chainId,
-            },
-          },
+          tokenAddress,
+          tokenName,
+          tokenSymbol,
+          tokenDecimals,
+          chainId,
         },
       });
 
@@ -717,9 +504,9 @@ export const useStarkNetSnap = () => {
       );
       dispatch(upsertErc20TokenBalance(tokenWithBalance));
       return tokenWithBalance;
-    } catch (err) {
-      if (!isUserDenyError(err)) {
-        throw err;
+    } catch (error) {
+      if (!isUserDenyError(error)) {
+        throw error;
       }
       return null;
     } finally {
@@ -763,27 +550,20 @@ export const useStarkNetSnap = () => {
     chainId: string,
   ) => {
     try {
-      const response = await provider.request({
-        method: 'wallet_invokeSnap',
+      const response = await invokeSnap<{
+        balancePending: string;
+      }>({
+        method: 'starkNet_getErc20TokenBalance',
         params: {
-          snapId,
-          request: {
-            method: 'starkNet_getErc20TokenBalance',
-            params: {
-              ...defaultParam,
-              tokenAddress,
-              userAddress,
-              chainId,
-            },
-          },
+          tokenAddress,
+          userAddress,
+          chainId,
         },
       });
       return {
         balance: BigNumber.from(response.balancePending),
       };
-    } catch (err) {
-      //eslint-disable-next-line no-console
-      console.error(err);
+    } catch (error) {
       return {
         balance: BigNumber.from('0x0'),
       };
@@ -872,13 +652,11 @@ export const useStarkNetSnap = () => {
     try {
       const executeFn = async (): Promise<boolean> => {
         // read contract to check if upgrade is required
-        const resp = await readContract(accountAddress, 'getVersion');
+        const resp = await readContract<string[]>(accountAddress, 'getVersion');
         if (!resp || !resp[0]) {
           return false;
         }
 
-        // recover accounts to update snap state
-        await recoverAccounts(chainId);
         return true;
       };
 
@@ -918,7 +696,7 @@ export const useStarkNetSnap = () => {
     try {
       const executeFn = async (): Promise<boolean> => {
         // read contract to check if upgrade is required
-        const resp = await readContract(accountAddress, 'getVersion');
+        const resp = await readContract<string[]>(accountAddress, 'getVersion');
         if (!resp || !resp[0]) {
           return false;
         }
@@ -927,8 +705,6 @@ export const useStarkNetSnap = () => {
           return false;
         }
 
-        // recover accounts to update snap state
-        await recoverAccounts(chainId);
         return true;
       };
 
@@ -949,107 +725,61 @@ export const useStarkNetSnap = () => {
   const switchNetwork = async (chainId: string) => {
     dispatch(enableLoadingWithMessage('Switching Network...'));
     try {
-      const result = await provider.request({
-        method: 'wallet_invokeSnap',
+      return await invokeSnap<boolean>({
+        method: 'starkNet_switchNetwork',
         params: {
-          snapId,
-          request: {
-            method: 'starkNet_switchNetwork',
-            params: {
-              ...defaultParam,
-              chainId,
-            },
-          },
+          chainId,
         },
       });
-      dispatch(disableLoading());
-      return result;
-    } catch (err) {
+    } catch (error) {
       dispatch(disableLoading());
       return false;
     }
   };
 
   const getCurrentNetwork = async () => {
-    try {
-      return await provider.request({
-        method: 'wallet_invokeSnap',
-        params: {
-          snapId,
-          request: {
-            method: 'starkNet_getCurrentNetwork',
-            params: {
-              ...defaultParam,
-            },
-          },
-        },
-      });
-    } catch (err) {
-      throw err;
-    }
+    return await invokeSnap<Network>({
+      method: 'starkNet_getCurrentNetwork',
+    });
   };
 
   const getStarkName = async (userAddress: string, chainId: string) => {
-    try {
-      return await provider.request({
-        method: 'wallet_invokeSnap',
-        params: {
-          snapId,
-          request: {
-            method: 'starkNet_getStarkName',
-            params: {
-              ...defaultParam,
-              userAddress,
-              chainId,
-            },
-          },
-        },
-      });
-    } catch (err) {
-      throw err;
-    }
+    return await invokeSnap<string>({
+      method: 'starkNet_getStarkName',
+      params: {
+        userAddress,
+        chainId,
+      },
+    });
   };
 
   const getAddrFromStarkName = async (starkName: string, chainId: string) => {
-    try {
-      return await provider.request({
-        method: 'wallet_invokeSnap',
-        params: {
-          snapId,
-          request: {
-            method: 'starkNet_getAddrFromStarkName',
-            params: {
-              ...defaultParam,
-              starkName,
-              chainId,
-            },
-          },
-        },
-      });
-    } catch (err) {
-      throw err;
-    }
+    return await invokeSnap<string>({
+      method: 'starkNet_getAddrFromStarkName',
+      params: {
+        starkName,
+        chainId,
+      },
+    });
   };
 
   const addNewAccount = async (chainId: string) => {
     dispatch(enableLoadingWithMessage('Adding new account...'));
     try {
-      const account = (await provider.request({
-        method: 'wallet_invokeSnap',
+      const account = await invokeSnap<Account>({
+        method: 'starkNet_addAccount',
         params: {
-          snapId,
-          request: {
-            method: 'starkNet_addAccount',
-            params: {
-              chainId,
-            },
-          },
+          chainId,
         },
-      })) as Account;
+      });
 
       await initWalletData({
         account,
+        chainId,
       });
+
+      // push the current account into state
+      dispatch(setAccounts(account));
 
       return account;
     } catch (err: any) {
@@ -1060,11 +790,32 @@ export const useStarkNetSnap = () => {
     }
   };
 
+  const getCurrentAccount = async (chainId: string) => {
+    return await invokeSnap<Account>({
+      method: 'starkNet_getCurrentAccount',
+      params: {
+        chainId,
+      },
+    });
+  };
+
+  const switchAccount = async (chainId: string) => {
+    return await invokeSnap<Account>({
+      method: 'starkNet_switchtAccount',
+      params: {
+        chainId,
+      },
+    });
+  };
+
   return {
     connectToSnap,
     getNetworks,
     getAccounts,
-    addAccount,
+    switchAccount,
+    getCurrentAccount,
+    addNewAccount,
+    setAccount,
     setErc20TokenBalance,
     getPrivateKeyFromAddress,
     estimateFees,
@@ -1073,7 +824,6 @@ export const useStarkNetSnap = () => {
     deployAccount,
     getTransactions,
     getTransactionStatus,
-    recoverAccounts,
     waitForTransaction,
     waitForAccountUpdate,
     waitForAccountCreation,
@@ -1083,14 +833,13 @@ export const useStarkNetSnap = () => {
     getTokens,
     checkConnection,
     initSnap,
-    getWalletData,
+    initWalletData,
     refreshTokensUSDPrice,
     readContract,
     switchNetwork,
     getCurrentNetwork,
     getStarkName,
     getAddrFromStarkName,
-    addNewAccount,
     satisfiesVersion: oldVersionDetected,
   };
 };
