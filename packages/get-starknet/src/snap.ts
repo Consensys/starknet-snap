@@ -239,7 +239,7 @@ export class MetaMaskSnap {
     return result[0];
   }
 
-  async getCurrentAccount({ chainId }: { chainId?: string }): Promise<AccContract> {
+  async getCurrentAccount({ chainId, fromState }: { chainId?: string; fromState?: boolean }): Promise<AccContract> {
     return (await this.#provider.request({
       method: 'wallet_invokeSnap',
       params: {
@@ -248,6 +248,7 @@ export class MetaMaskSnap {
           method: 'starkNet_getCurrentAccount',
           params: await this.#getSnapParams({
             chainId,
+            fromState,
           }),
         },
       },
