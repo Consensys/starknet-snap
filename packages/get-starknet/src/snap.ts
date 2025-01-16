@@ -239,11 +239,7 @@ export class MetaMaskSnap {
     return result[0];
   }
 
-  async getCurrentAccount({
-    chainId,
-  }: {
-    chainId?: string;
-  }): Promise<AccContract> {
+  async getCurrentAccount({ chainId }: { chainId?: string }): Promise<AccContract> {
     return (await this.#provider.request({
       method: 'wallet_invokeSnap',
       params: {
