@@ -21,8 +21,8 @@ describe('MetaMaskSnapWallet', () => {
     });
 
     it('throws `Unable to recover accounts` error if the account address not return from the Snap', async () => {
-      const { recoverDefaultAccountSpy } = mockWalletInit({});
-      recoverDefaultAccountSpy.mockResolvedValue({} as unknown as AccContract);
+      const { getCurrentAccount } = mockWalletInit({});
+      getCurrentAccount.mockResolvedValue({} as unknown as AccContract);
 
       const wallet = createWallet();
 
