@@ -31,6 +31,7 @@ describe('GetCurrentAccountRpc', () => {
     };
 
     return {
+      getCurrentAccountSpy,
       deriveAccountByIndexSpy,
       account,
       request,
@@ -42,6 +43,33 @@ describe('GetCurrentAccountRpc', () => {
       await setupGetCurrentAccountTest();
 
     const result = await getCurrentAccount.execute(request);
+
+    expect(result).toStrictEqual(await account.serialize());
+    expect(deriveAccountByIndexSpy).toHaveBeenCalled();
+  });
+
+  it('returns the selected `Account` from state if the param `fromState` was given', async () => {
+    const { account, request, deriveAccountByIndexSpy } =
+      await setupGetCurrentAccountTest();
+
+    const result = await getCurrentAccount.execute({
+      ...request,
+      fromState: true,
+    });
+
+    expect(result).toStrictEqual(await account.serialize());
+    expect(deriveAccountByIndexSpy).not.toHaveBeenCalled();
+  });
+
+  it('derives the selected `Account` if the param `fromState` was given but the account does not found from state', async () => {
+    const { account, request, deriveAccountByIndexSpy, getCurrentAccountSpy } =
+      await setupGetCurrentAccountTest();
+    getCurrentAccountSpy.mockResolvedValue(null);
+
+    const result = await getCurrentAccount.execute({
+      ...request,
+      fromState: true,
+    });
 
     expect(result).toStrictEqual(await account.serialize());
     expect(deriveAccountByIndexSpy).toHaveBeenCalled();
