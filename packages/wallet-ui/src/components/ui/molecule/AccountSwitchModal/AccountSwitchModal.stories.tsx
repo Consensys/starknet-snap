@@ -1,9 +1,9 @@
 import { Meta } from '@storybook/react';
-import { AccountSwitchAddressView } from './AccountSwitchAddress.view';
+import { AccountSwitchModalView } from './AccountSwitchModal.view';
 
 export default {
   title: 'Molecule/AccountAddress',
-  component: AccountSwitchAddressView,
+  component: AccountSwitchModalView,
 } as Meta;
 
 const address =
@@ -20,38 +20,38 @@ const accounts = ['0x123...abcd', '0x456...efgh', '0x789...ijkl'];
 
 export const Default = () => (
   <div style={wrapperStyle}>
-    <AccountSwitchAddressView
-      address={address}
+    <AccountSwitchModalView
+      currentAddress={address}
       accounts={accounts}
-    ></AccountSwitchAddressView>
+    ></AccountSwitchModalView>
   </div>
 );
 
 export const TooltipTop = () => (
   <div style={wrapperStyle}>
-    <AccountSwitchAddressView
-      address={address}
+    <AccountSwitchModalView
+      currentAddress={address}
       accounts={accounts}
-    ></AccountSwitchAddressView>
+    ></AccountSwitchModalView>
   </div>
 );
 
 export const Full = () => (
   <div style={wrapperStyle}>
-    <AccountSwitchAddressView
-      address={address}
+    <AccountSwitchModalView
+      currentAddress={address}
       accounts={accounts}
       full
-    ></AccountSwitchAddressView>
+    ></AccountSwitchModalView>
   </div>
 );
 
 export const DarkerBackground = () => (
   <div style={{ ...wrapperStyle, backgroundColor: 'grey' }}>
-    <AccountSwitchAddressView
-      address={address}
+    <AccountSwitchModalView
+      currentAddress={address}
       accounts={accounts}
       full
-    ></AccountSwitchAddressView>
+    ></AccountSwitchModalView>
   </div>
 );
