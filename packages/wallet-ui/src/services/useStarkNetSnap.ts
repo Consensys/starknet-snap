@@ -832,24 +832,6 @@ export const useStarkNetSnap = () => {
     }
   };
 
-  const getCurrentAccount = async (chainId: string) => {
-    return await invokeSnap<Account>({
-      method: 'starkNet_getCurrentAccount',
-      params: {
-        chainId,
-      },
-    });
-  };
-
-  const switchAccount = async (chainId: string) => {
-    return await invokeSnap<Account>({
-      method: 'starkNet_switchtAccount',
-      params: {
-        chainId,
-      },
-    });
-  };
-
   return {
     connectToSnap,
     getNetworks,

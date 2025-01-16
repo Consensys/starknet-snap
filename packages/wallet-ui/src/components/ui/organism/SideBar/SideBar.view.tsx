@@ -117,7 +117,7 @@ export const SideBarView = ({ address }: Props) => {
       <RowDiv>
         <InfoIcon onClick={() => setInfoModalOpen(true)}>i</InfoIcon>
         <AccountSwitchModal
-          address={address}
+          currentAddress={address}
           starkName={starkName}
           accounts={accounts}
         />
