@@ -23,6 +23,7 @@ import {
   isGTEMinVersion,
   getTokenBalanceWithDetails,
   isUserDenyError,
+  shortenAddress,
 } from '../utils/utils';
 import { setWalletConnection } from '../slices/walletSlice';
 import { FeeToken, FeeTokenUnit, Network } from '../types';
@@ -800,13 +801,35 @@ export const useStarkNetSnap = () => {
   };
 
   const switchAccount = async (chainId: string, address: string) => {
-    return await invokeSnap<Account>({
-      method: 'starkNet_switchAccount',
-      params: {
+    dispatch(
+      enableLoadingWithMessage(
+        `Switching Account to ${shortenAddress(address)}`,
+      ),
+    );
+    try {
+      const account = await invokeSnap<Account>({
+        method: 'starkNet_switchAccount',
+        params: {
+          chainId,
+          address,
+        },
+      });
+
+      await initWalletData({
+        account,
         chainId,
-        address,
-      },
-    });
+      });
+
+      // push the current account into state
+      dispatch(setAccounts(account));
+
+      return account;
+    } catch (err: any) {
+      const toastr = new Toastr();
+      toastr.error(err.message as unknown as string);
+    } finally {
+      dispatch(disableLoading());
+    }
   };
 
   return {

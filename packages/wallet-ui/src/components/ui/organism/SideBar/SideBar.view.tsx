@@ -1,7 +1,7 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useEffect, useRef, useState } from 'react';
 import { RoundedIcon } from 'components/ui/atom/RoundedIcon';
-import { AccountSwitchAddress } from 'components/ui/molecule/AccountSwitchAddress';
+import { AccountSwitchModal } from 'components/ui/molecule/AccountSwitchModal';
 import { AssetsList } from 'components/ui/molecule/AssetsList';
 import { PopIn } from 'components/ui/molecule/PopIn';
 import { AccountDetailsModal } from '../AccountDetailsModal';
@@ -116,8 +116,8 @@ export const SideBarView = ({ address }: Props) => {
       <AccountLabel>My account</AccountLabel>
       <RowDiv>
         <InfoIcon onClick={() => setInfoModalOpen(true)}>i</InfoIcon>
-        <AccountSwitchAddress
-          address={address}
+        <AccountSwitchModal
+          currentAddress={address}
           starkName={starkName}
           accounts={accounts}
         />

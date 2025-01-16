@@ -1,5 +1,5 @@
 import { shortenAddress, shortenDomain } from 'utils/utils';
-import { Wrapper } from './AccountSwitchAddress.style';
+import { Wrapper } from './AccountSwitchModal.style';
 import { Menu } from '@headlessui/react';
 import {
   MenuItems,
@@ -14,26 +14,24 @@ import { useAppSelector } from 'hooks/redux';
 import { useStarkNetSnap } from 'services';
 
 interface Props {
-  address: string;
+  currentAddress: string;
   accounts: string[];
   full?: boolean;
   starkName?: string;
 }
 
-export const AccountSwitchAddressView = ({
-  address,
+export const AccountSwitchModalView = ({
+  currentAddress,
   accounts,
   full,
   starkName,
 }: Props) => {
   const networks = useAppSelector((state) => state.networks);
-  const { switchAccount, initWalletData } = useStarkNetSnap();
+  const { switchAccount, initWalletData, addNewAccount } = useStarkNetSnap();
   const chainId = networks?.items[networks.activeNetwork]?.chainId;
 
-  const { addNewAccount } = useStarkNetSnap();
-
-  const changeAccount = async (address: string) => {
-    const account = await switchAccount(chainId, address);
+  const changeAccount = async (currentAddress: string) => {
+    const account = await switchAccount(chainId, currentAddress);
     await initWalletData({
       account,
       chainId,
@@ -45,10 +43,10 @@ export const AccountSwitchAddressView = ({
       <Menu.Button style={{ background: 'none', border: 'none' }}>
         <Wrapper backgroundTransparent iconRight="angle-down">
           {full
-            ? starkName ?? address
+            ? starkName ?? currentAddress
             : starkName
             ? shortenDomain(starkName)
-            : shortenAddress(address)}
+            : shortenAddress(currentAddress)}
         </Wrapper>
       </Menu.Button>
 
@@ -64,7 +62,7 @@ export const AccountSwitchAddressView = ({
             <Menu.Item key={account}>
               <NetworkMenuItem onClick={() => changeAccount(account)}>
                 <Radio
-                  checked={account === address}
+                  checked={account === currentAddress}
                   name="radio-buttons"
                   inputProps={{ 'aria-label': account }}
                   sx={{
