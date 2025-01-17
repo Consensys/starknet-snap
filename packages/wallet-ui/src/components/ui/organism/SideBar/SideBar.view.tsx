@@ -75,7 +75,7 @@ export const SideBarView = ({ address }: Props) => {
         isOpen={accountDetailsOpen}
         setIsOpen={setAccountDetailsOpen}
       >
-        <AccountDetailsModal address={address} />
+        <AccountDetailsModal address={address}/>
       </PopInStyled>
       <PopIn
         isOpen={infoModalOpen}

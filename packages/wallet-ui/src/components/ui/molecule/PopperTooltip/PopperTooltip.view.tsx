@@ -71,7 +71,7 @@ export const PopperTooltipView = ({
   });
 
   return (
-    <>
+    <div style={{zIndex:1}}>
       <Wrapper
         ref={setTriggerRef}
         onClick={handleOnClick}
@@ -91,6 +91,6 @@ export const PopperTooltipView = ({
           <ToolTipContent style={contentStyle}>{content}</ToolTipContent>
         </PopperContainer>
       )}
-    </>
+    </div>
   );
 };

@@ -820,9 +820,6 @@ export const useStarkNetSnap = () => {
         chainId,
       });
 
-      // push the current account into state
-      dispatch(setAccounts(account));
-
       return account;
     } catch (err: any) {
       const toastr = new Toastr();
