@@ -1,7 +1,7 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useEffect, useRef, useState } from 'react';
 import { RoundedIcon } from 'components/ui/atom/RoundedIcon';
-import { AccountAddress } from 'components/ui/molecule/AccountAddress';
+import { AccountSwitchModal } from 'components/ui/molecule/AccountSwitchModal';
 import { AssetsList } from 'components/ui/molecule/AssetsList';
 import { PopIn } from 'components/ui/molecule/PopIn';
 import { AccountDetailsModal } from '../AccountDetailsModal';
@@ -12,7 +12,7 @@ import {
   AccountDetailsContent,
   AccountImageStyled,
   AccountLabel,
-  AddIcon,
+  CopyIcon,
   AddTokenButton,
   DivList,
   InfoIcon,
@@ -25,6 +25,7 @@ import { useAppSelector } from 'hooks/redux';
 import { AddTokenModal } from '../AddTokenModal';
 import { useStarkNetSnap } from 'services';
 import { DUMMY_ADDRESS } from 'utils/constants';
+import { PopperTooltip } from 'components/ui/molecule/PopperTooltip';
 
 interface Props {
   address: string;
@@ -32,13 +33,14 @@ interface Props {
 
 export const SideBarView = ({ address }: Props) => {
   const networks = useAppSelector((state) => state.networks);
+  const accounts = useAppSelector((state) => state.wallet.accounts);
   const chainId = networks?.items[networks.activeNetwork]?.chainId;
   const [listOverflow, setListOverflow] = useState(false);
   const [infoModalOpen, setInfoModalOpen] = useState(false);
   const [accountDetailsOpen, setAccountDetailsOpen] = useState(false);
   const wallet = useAppSelector((state) => state.wallet);
   const [addTokenOpen, setAddTokenOpen] = useState(false);
-  const { getStarkName, addNewAccount } = useStarkNetSnap();
+  const { getStarkName } = useStarkNetSnap();
   const [starkName, setStarkName] = useState<string | undefined>(undefined);
 
   const ref = useRef<HTMLDivElement>();
@@ -114,8 +116,18 @@ export const SideBarView = ({ address }: Props) => {
       <AccountLabel>My account</AccountLabel>
       <RowDiv>
         <InfoIcon onClick={() => setInfoModalOpen(true)}>i</InfoIcon>
-        <AccountAddress address={address} starkName={starkName} />
-        <AddIcon onClick={async () => await addNewAccount(chainId)}>+</AddIcon>
+        <AccountSwitchModal
+          currentAddress={address}
+          starkName={starkName}
+          accounts={accounts}
+        />
+        <PopperTooltip content="Copied!" closeTrigger="click">
+          <CopyIcon
+            onClick={async () => navigator.clipboard.writeText(address)}
+          >
+            <FontAwesomeIcon icon="copy" />
+          </CopyIcon>
+        </PopperTooltip>
       </RowDiv>
       <DivList ref={ref as any}>
         <AssetsList />
