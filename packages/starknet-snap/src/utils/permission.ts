@@ -4,7 +4,7 @@ export enum RpcMethod {
   ExtractPublicKey = 'starkNet_extractPublicKey',
   GetCurrentNetwork = 'starkNet_getCurrentNetwork',
   GetStoredNetworks = 'starkNet_getStoredNetworks',
-  SwitchNetwork = 'starkNet_swtichAccount',
+  SwitchNetwork = 'starkNet_switchNetwork',
   AddErc20Token = 'starkNet_addErc20Token',
   RecoverAccounts = 'starkNet_recoverAccounts',
   ExecuteTxn = 'starkNet_executeTxn',
@@ -17,7 +17,7 @@ export enum RpcMethod {
   GetCurrentAccount = 'starkNet_getCurrentAccount',
   ListAccounts = 'starkNet_listAccounts',
 
-  SwitchAccount = 'starkNet_switchAccount',
+  SwitchAccount = 'starkNet_swtichAccount',
   AddAccount = 'starkNet_addAccount',
   CreateAccount = 'starkNet_createAccount',
   DisplayPrivateKey = 'starkNet_displayPrivateKey',
