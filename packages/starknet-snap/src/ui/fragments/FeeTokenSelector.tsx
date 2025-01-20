@@ -36,10 +36,10 @@ export const FeeTokenSelector: SnapComponent<FeeTokenSelectorProps> = ({
   const translate = getTranslator();
   return (
     <Form name="form-fee-token-selection">
-      <Field label={translate("feeToken")} error={error}>
+      <Field label={translate('feeToken')} error={error}>
         <Selector
           name="feeTokenSelector"
-          title={translate("selectFeeToken")}
+          title={translate('selectFeeToken')}
           value={selectedToken}
         >
           <SelectorOption value={FeeToken.ETH}>
@@ -50,9 +50,7 @@ export const FeeTokenSelector: SnapComponent<FeeTokenSelectorProps> = ({
           </SelectorOption>
         </Selector>
       </Field>
-      <Text color="muted">
-        {translate('autoSwitchToFundedToken')}
-      </Text>
+      <Text color="muted">{translate('autoSwitchToFundedToken')}</Text>
     </Form>
   );
 };

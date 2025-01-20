@@ -1,7 +1,7 @@
 import type { SnapComponent } from '@metamask/snaps-sdk/jsx';
 
-import { AddressUI } from './AddressUI';
 import { getTranslator } from '../../utils/locale';
+import { AddressUI } from './AddressUI';
 
 export type SignerUIProps = {
   address: string;
@@ -23,10 +23,10 @@ export const SignerUI: SnapComponent<SignerUIProps> = ({
   const translate = getTranslator();
   return (
     <AddressUI
-      label={translate("signerAddress")}
+      label={translate('signerAddress')}
       address={address}
       chainId={chainId}
       shortern={true}
     />
-  )
+  );
 };
