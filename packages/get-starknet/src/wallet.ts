@@ -140,7 +140,7 @@ export class MetaMaskSnapWallet implements StarknetWindowObject {
     const accountResponse = await this.snap.getCurrentAccount({ chainId, fromState: true });
 
     if (!accountResponse?.address) {
-      throw new Error('Unable to recover accounts');
+      throw new Error('Unable to retrieve the wallet account');
     }
 
     return accountResponse.address;

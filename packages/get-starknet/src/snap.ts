@@ -229,16 +229,6 @@ export class MetaMaskSnap {
     return network;
   }
 
-  async recoverDefaultAccount(chainId: string): Promise<AccContract> {
-    const result = await this.recoverAccounts({
-      chainId,
-      startScanIndex: 0,
-      maxScanned: 1,
-      maxMissed: 1,
-    });
-    return result[0];
-  }
-
   async getCurrentAccount({ chainId, fromState }: { chainId?: string; fromState?: boolean }): Promise<AccContract> {
     return (await this.#provider.request({
       method: 'wallet_invokeSnap',
@@ -253,34 +243,6 @@ export class MetaMaskSnap {
         },
       },
     })) as AccContract;
-  }
-
-  async recoverAccounts({
-    chainId,
-    startScanIndex = 0,
-    maxScanned = 1,
-    maxMissed = 1,
-  }: {
-    chainId?: string;
-    startScanIndex?: number;
-    maxScanned?: number;
-    maxMissed?: number;
-  }): Promise<AccContract[]> {
-    return (await this.#provider.request({
-      method: 'wallet_invokeSnap',
-      params: {
-        snapId: this.#snapId,
-        request: {
-          method: 'starkNet_recoverAccounts',
-          params: await this.#getSnapParams({
-            startScanIndex,
-            maxScanned,
-            maxMissed,
-            chainId,
-          }),
-        },
-      },
-    })) as AccContract[];
   }
 
   async switchNetwork(chainId: string): Promise<boolean> {

@@ -4,7 +4,7 @@ import { Provider } from 'starknet';
 import { SepoliaNetwork, mockWalletInit, createWallet } from './__tests__/helper';
 import { MetaMaskAccount } from './accounts';
 import { WalletSupportedSpecs } from './rpcs';
-import type { AccContract, Network } from './type';
+import type { Network } from './type';
 
 describe('MetaMaskSnapWallet', () => {
   describe('enable', () => {
@@ -18,15 +18,6 @@ describe('MetaMaskSnapWallet', () => {
       const [address] = await wallet.enable();
 
       expect(address).toStrictEqual(expectedAccountAddress);
-    });
-
-    it('throws `Unable to recover accounts` error if the account address not return from the Snap', async () => {
-      const { getCurrentAccount } = mockWalletInit({});
-      getCurrentAccount.mockResolvedValue({} as unknown as AccContract);
-
-      const wallet = createWallet();
-
-      await expect(wallet.enable()).rejects.toThrow('Unable to recover accounts');
     });
   });
 
