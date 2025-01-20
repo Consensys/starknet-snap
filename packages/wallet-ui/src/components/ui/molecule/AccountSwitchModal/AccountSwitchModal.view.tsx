@@ -27,11 +27,15 @@ export const AccountSwitchModalView = ({
   starkName,
 }: Props) => {
   const networks = useAppSelector((state) => state.networks);
-  const { switchAccount, addNewAccount } = useStarkNetSnap();
+  const { switchAccount, initWalletData, addNewAccount } = useStarkNetSnap();
   const chainId = networks?.items[networks.activeNetwork]?.chainId;
 
   const changeAccount = async (currentAddress: string) => {
-    await switchAccount(chainId, currentAddress);
+    const account = await switchAccount(chainId, currentAddress);
+    await initWalletData({
+      account,
+      chainId,
+    });
   };
 
   return (

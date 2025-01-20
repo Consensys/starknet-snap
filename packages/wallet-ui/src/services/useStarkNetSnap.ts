@@ -808,7 +808,7 @@ export const useStarkNetSnap = () => {
     );
     try {
       const account = await invokeSnap<Account>({
-        method: 'starkNet_switchAccount',
+        method: 'starkNet_swtichAccount',
         params: {
           chainId,
           address,
