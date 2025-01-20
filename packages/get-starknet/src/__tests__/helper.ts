@@ -101,17 +101,17 @@ export function mockWalletInit({
 }) {
   const installSpy = jest.spyOn(MetaMaskSnap.prototype, 'installIfNot');
   const getCurrentNetworkSpy = jest.spyOn(MetaMaskSnap.prototype, 'getCurrentNetwork');
-  const getCurrentAccount = jest.spyOn(MetaMaskSnap.prototype, 'getCurrentAccount');
+  const getCurrentAccountSpy = jest.spyOn(MetaMaskSnap.prototype, 'getCurrentAccount');
   const initSpy = jest.spyOn(MetaMaskSnapWallet.prototype, 'init');
 
   installSpy.mockResolvedValue(install);
   getCurrentNetworkSpy.mockResolvedValue(currentNetwork);
-  getCurrentAccount.mockResolvedValue(generateAccount({ address }));
+  getCurrentAccountSpy.mockResolvedValue(generateAccount({ address }));
 
   return {
     initSpy,
     installSpy,
     getCurrentNetworkSpy,
-    getCurrentAccount,
+    getCurrentAccountSpy,
   };
 }
