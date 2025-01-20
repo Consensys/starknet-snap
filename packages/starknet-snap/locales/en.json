@@ -28,6 +28,9 @@
     "amountWithSymbol": {
       "message": "Amount ({1})"
     },
+    "autoSwitchToFundedToken": {
+      "message": "If the chosen token has no funds, the system will automatically switch to a funded token."
+    },
     "balance": {
       "message": "Balance"
     },
@@ -73,6 +76,9 @@
     "explorerUrl": {
       "message": "Explorer URL"
     },
+    "feeToken": {
+      "message": "Fee Token"
+    },
     "message": {
       "message": "Message"
     },
@@ -96,6 +102,9 @@
     },
     "rpcUrl": {
       "message": "RPC URL"
+    },
+    "selectFeeToken": {
+      "message": "Select Fee Token"
     },
     "senderAddress": {
       "message": "Sender Address"

@@ -28,6 +28,9 @@
     "amountWithSymbol": {
       "message": "Montant ({1})"
     },
+    "autoSwitchToFundedToken": {
+      "message": "Si le jeton choisi n'a pas de solde, le système passera automatiquement à un jeton avec solde."
+    },
     "balance": {
       "message": "Solde"
     },
@@ -73,6 +76,9 @@
     "explorerUrl": {
       "message": "URL de l'explorateur"
     },
+    "feeToken": {
+      "message": "Jeton de frais"
+    },
     "message": {
       "message": "Message"
     },
@@ -96,6 +102,9 @@
     },
     "rpcUrl": {
       "message": "URL RPC"
+    },
+    "selectFeeToken": {
+      "message": "Sélectionner le jeton de frais"
     },
     "senderAddress": {
       "message": "Adresse de l'expéditeur"

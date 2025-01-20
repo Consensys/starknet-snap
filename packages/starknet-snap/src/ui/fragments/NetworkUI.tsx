@@ -1,6 +1,8 @@
 import type { SnapComponent } from '@metamask/snaps-sdk/jsx';
 import { Row, Text } from '@metamask/snaps-sdk/jsx';
 
+import { getTranslator } from '../../utils/locale';
+
 export type NetworkUIProps = {
   networkName: string;
 };
@@ -14,8 +16,11 @@ export type NetworkUIProps = {
  */
 export const NetworkUI: SnapComponent<NetworkUIProps> = ({
   networkName,
-}: NetworkUIProps) => (
-  <Row label="Network">
-    <Text>{networkName}</Text>
-  </Row>
-);
+}: NetworkUIProps) => {
+  const translate = getTranslator();
+  return (
+    <Row label={translate('network')}>
+      <Text>{networkName}</Text>
+    </Row>
+  );
+};
