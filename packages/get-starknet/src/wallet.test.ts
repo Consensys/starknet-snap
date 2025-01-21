@@ -1,10 +1,11 @@
 import { Mutex } from 'async-mutex';
 import { Provider } from 'starknet';
 
-import { SepoliaNetwork, mockWalletInit, createWallet } from './__tests__/helper';
+import { SepoliaNetwork, mockWalletInit, createWallet, generateAccount, MainnetNetwork } from './__tests__/helper';
 import { MetaMaskAccount } from './accounts';
 import { WalletSupportedSpecs } from './rpcs';
 import type { Network } from './type';
+import { MetaMaskSnapWallet } from './wallet';
 
 describe('MetaMaskSnapWallet', () => {
   describe('enable', () => {
@@ -128,18 +129,78 @@ describe('MetaMaskSnapWallet', () => {
   });
 
   describe('on', () => {
-    it('does nothing and not throw any error', async () => {
-      const wallet = createWallet();
+    it('adds an event handler and starts polling if not already started', () => {
+      mockWalletInit({});
 
-      expect(() => wallet.on('accountsChanged', jest.fn())).not.toThrow();
+      const wallet = createWallet();
+      const handler = jest.fn();
+
+      wallet.on('accountsChanged', handler);
+      expect((wallet as any).accountChangeHandlers.has(handler)).toBe(true);
+      wallet.off('accountsChanged', handler);
+    });
+
+    it('throws an error for unsupported events', () => {
+      const wallet = createWallet();
+      expect(() => wallet.on('unsupportedEvent' as any, jest.fn())).toThrow('Unsupported event: unsupportedEvent');
     });
   });
 
   describe('off', () => {
-    it('does nothing and not throw any error', async () => {
-      const wallet = createWallet();
+    it('removes an event handler and stops polling if no handlers remain', () => {
+      mockWalletInit({});
 
-      expect(() => wallet.off('accountsChanged', jest.fn())).not.toThrow();
+      const wallet = createWallet();
+      const handler = jest.fn();
+
+      wallet.on('accountsChanged', handler);
+      wallet.off('accountsChanged', handler);
+
+      expect((wallet as any).accountChangeHandlers.has(handler)).toBe(false);
+    });
+
+    it('throws an error for unsupported events', () => {
+      const wallet = createWallet();
+      expect(() => wallet.off('unsupportedEvent' as any, jest.fn())).toThrow('Unsupported event: unsupportedEvent');
+    });
+  });
+
+  describe('event handling', () => {
+    it('triggers the accountsChanged handler when the event occurs', async () => {
+      const { getCurrentAccountSpy } = mockWalletInit({});
+      getCurrentAccountSpy.mockReset();
+
+      const wallet = createWallet();
+      getCurrentAccountSpy.mockResolvedValueOnce(generateAccount({ address: '0xInitialAddress' }));
+      (MetaMaskSnapWallet as any).pollingDelayMs = 0;
+      const handler = jest.fn();
+      wallet.on('accountsChanged', handler);
+      getCurrentAccountSpy.mockResolvedValueOnce(generateAccount({ address: '0xNewAddress' }));
+
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      expect(handler).toHaveBeenCalledWith(['0xNewAddress'], undefined);
+      wallet.off('accountsChanged', handler);
+    });
+
+    it('triggers the networkChanged handler when the event occurs', async () => {
+      const { getCurrentNetworkSpy } = mockWalletInit({});
+      getCurrentNetworkSpy.mockReset();
+
+      const wallet = createWallet();
+      getCurrentNetworkSpy.mockResolvedValueOnce(SepoliaNetwork);
+      (MetaMaskSnapWallet as any).pollingDelayMs = 0;
+      const handler = jest.fn();
+      wallet.on('networkChanged', handler);
+
+      getCurrentNetworkSpy.mockResolvedValueOnce(MainnetNetwork);
+
+      await new Promise((resolve) => setTimeout(resolve, 300));
+
+      expect(handler).toHaveBeenCalledWith(MainnetNetwork.chainId, [
+        '0x04882a372da3dfe1c53170ad75893832469bf87b62b13e84662565c4a88f25cd',
+      ]);
+      wallet.off('networkChanged', handler);
     });
   });
 });

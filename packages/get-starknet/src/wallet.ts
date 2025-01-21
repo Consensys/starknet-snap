@@ -65,9 +65,11 @@ export class MetaMaskSnapWallet implements StarknetWindowObject {
 
   #pollingController: AbortController | undefined;
 
-  #accountChangeHandlers: Set<AccountChangeEventHandler> = new Set();
+  // eslint-disable-next-line no-restricted-syntax
+  private readonly accountChangeHandlers: Set<AccountChangeEventHandler> = new Set();
 
-  #networkChangeHandlers: Set<NetworkChangeEventHandler> = new Set();
+  // eslint-disable-next-line no-restricted-syntax
+  private readonly networkChangeHandlers: Set<NetworkChangeEventHandler> = new Set();
 
   static readonly pollingDelayMs = 100;
 
@@ -253,9 +255,9 @@ export class MetaMaskSnapWallet implements StarknetWindowObject {
    */
   on<Event extends keyof WalletEventHandlers>(event: Event, handleEvent: WalletEventHandlers[Event]): void {
     if (event === WalletEvent.AccountsChanged) {
-      this.#accountChangeHandlers.add(handleEvent as AccountChangeEventHandler);
+      this.accountChangeHandlers.add(handleEvent as AccountChangeEventHandler);
     } else if (event === WalletEvent.NetworkChanged) {
-      this.#networkChangeHandlers.add(handleEvent as NetworkChangeEventHandler);
+      this.networkChangeHandlers.add(handleEvent as NetworkChangeEventHandler);
     } else {
       throw new Error(`Unsupported event: ${String(event)}`);
     }
@@ -272,13 +274,13 @@ export class MetaMaskSnapWallet implements StarknetWindowObject {
    */
   off<Event extends keyof WalletEventHandlers>(event: Event, handleEvent: WalletEventHandlers[Event]): void {
     if (event === WalletEvent.AccountsChanged) {
-      this.#accountChangeHandlers.delete(handleEvent as AccountChangeEventHandler);
+      this.accountChangeHandlers.delete(handleEvent as AccountChangeEventHandler);
     } else if (event === WalletEvent.NetworkChanged) {
-      this.#networkChangeHandlers.delete(handleEvent as NetworkChangeEventHandler);
+      this.networkChangeHandlers.delete(handleEvent as NetworkChangeEventHandler);
     } else {
       throw new Error(`Unsupported event: ${String(event)}`);
     }
-    if (this.#accountChangeHandlers.size + this.#networkChangeHandlers.size === 0) {
+    if (this.accountChangeHandlers.size + this.networkChangeHandlers.size === 0) {
       this.#stopPolling();
     }
   }
@@ -300,7 +302,7 @@ export class MetaMaskSnapWallet implements StarknetWindowObject {
 
     while (!signal.aborted) {
       // Early exit if there are no handlers left
-      if (this.#accountChangeHandlers.size + this.#networkChangeHandlers.size === 0) {
+      if (this.accountChangeHandlers.size + this.networkChangeHandlers.size === 0) {
         this.#stopPolling();
         return;
       }
@@ -322,9 +324,9 @@ export class MetaMaskSnapWallet implements StarknetWindowObject {
         ]);
 
         // Check for network change
-        if (previousNetwork !== this.#chainId) {
+        if (previousNetwork !== this.#chainId && previousNetwork !== undefined) {
           await Promise.allSettled(
-            Array.from(this.#networkChangeHandlers).map(async (callback) =>
+            Array.from(this.networkChangeHandlers).map(async (callback) =>
               resolver(callback, this.#chainId, [this.#selectedAddress]),
             ),
           );
@@ -333,9 +335,7 @@ export class MetaMaskSnapWallet implements StarknetWindowObject {
         // Check for account change
         if (previousAddress !== this.#selectedAddress) {
           await Promise.allSettled(
-            Array.from(this.#accountChangeHandlers).map(async (callback) =>
-              resolver(callback, [this.#selectedAddress]),
-            ),
+            Array.from(this.accountChangeHandlers).map(async (callback) => resolver(callback, [this.#selectedAddress])),
           );
         }
       } catch (_error) {
