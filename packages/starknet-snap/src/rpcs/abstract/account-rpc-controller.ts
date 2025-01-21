@@ -4,7 +4,7 @@ import {
   DeployRequiredError,
   UpgradeRequiredError,
 } from '../../utils/exceptions';
-import { createAccountService } from '../../utils/factory';
+import { AccountDiscoveryType, createAccountService } from '../../utils/factory';
 import {
   showDeployRequestModal,
   showUpgradeRequestModal,
@@ -15,6 +15,7 @@ import { ChainRpcController } from './chain-rpc-controller';
 export type AccountRpcParams = {
   chainId: string;
   address: string;
+  accountDiscoveryType?: AccountDiscoveryType;
 };
 
 export type AccountRpcControllerOptions = {
@@ -55,8 +56,11 @@ export abstract class AccountRpcController<
   protected async preExecute(params: Request): Promise<void> {
     await super.preExecute(params);
     const { address } = params;
-
-    const accountService = createAccountService(this.network);
+    const accountService = createAccountService(
+      this.network,
+      undefined,
+      params.accountDiscoveryType,
+    );
     this.account = await accountService.deriveAccountByAddress(address);
 
     try {

@@ -1,14 +1,15 @@
-import { boolean, object, optional, assign, type Infer } from 'superstruct';
+import { boolean, object, optional, assign, type Infer, enums } from 'superstruct';
 
 import { AccountStateManager } from '../state/account-state-manager';
 import { BaseRequestStruct, AccountStruct } from '../utils';
-import { createAccountService } from '../utils/factory';
+import { AccountDiscoveryType, createAccountService } from '../utils/factory';
 import { ChainRpcController } from './abstract/chain-rpc-controller';
 
 export const GetCurrentAccountRequestStruct = assign(
   BaseRequestStruct,
   object({
     fromState: optional(boolean()),
+    accountDiscoveryType: optional(enums(Object.values(AccountDiscoveryType))),
   }),
 );
 
@@ -44,7 +45,11 @@ export class GetCurrentAccountRpc extends ChainRpcController<
   protected async handleRequest(
     params: GetCurrentAccountParams,
   ): Promise<GetCurrentAccountResponse> {
-    const accountService = createAccountService(this.network);
+    const accountService = createAccountService(
+      this.network,
+      undefined,
+      params.accountDiscoveryType,
+    );
 
     if (params.fromState) {
       // Get the current account from the state if the flag is set.

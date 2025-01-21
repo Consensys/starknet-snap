@@ -1,13 +1,18 @@
-import { assign, object, type Infer } from 'superstruct';
+import { assign, enums, object, optional, type Infer } from 'superstruct';
 
-import { BaseRequestStruct, AccountStruct, AddressStruct } from '../utils';
-import { createAccountService } from '../utils/factory';
+import {
+  BaseRequestStruct,
+  AccountStruct,
+  AddressStruct,
+} from '../utils';
+import { AccountDiscoveryType, createAccountService } from '../utils/factory';
 import { AccountRpcController } from './abstract/account-rpc-controller';
 
 export const SwitchAccountRequestStruct = assign(
   BaseRequestStruct,
   object({
     address: AddressStruct,
+    accountDiscoveryType: optional(enums(Object.values(AccountDiscoveryType))),
   }),
 );
 
@@ -39,7 +44,11 @@ export class SwitchAccountRpc extends AccountRpcController<
   protected async handleRequest(
     params: SwitchAccountParams,
   ): Promise<SwitchAccountResponse> {
-    const accountService = createAccountService(this.network);
+    const accountService = createAccountService(
+      this.network,
+      undefined,
+      params.accountDiscoveryType,
+    );
 
     await accountService.switchAccount(params.chainId, this.account);
 

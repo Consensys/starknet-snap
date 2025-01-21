@@ -47,19 +47,28 @@ export function createTransactionService(
   });
 }
 
+export enum AccountDiscoveryType {
+  DEFAULT = 'DEFAULT',
+  ForceCairo0 = 'FORCE_CAIRO_0',
+  ForceCairo1 = 'FORCE_CAIRO_1',
+}
+
 /**
  * Create a AccountService object.
  *
  * @param network - The network.
  * @param [accountStateMgr] - The `AccountStateManager`.
+ * @param accountDiscoveryType
  * @returns A AccountService object.
  */
 export function createAccountService(
   network: Network,
   accountStateMgr?: AccountStateManager,
+  accountDiscoveryType?: AccountDiscoveryType,
 ): AccountService {
   return new AccountService({
     network,
     accountStateMgr,
+    accountDiscoveryType,
   });
 }

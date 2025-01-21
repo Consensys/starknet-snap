@@ -65,9 +65,22 @@ export const useSnap = () => {
   };
 
   const ping = async (): Promise<void> => {
-    await invokeSnap<null>({
-      method: 'ping',
-    });
+    // Extract the `accountDiscovery` parameter from the GET field (e.g., URL search params)
+    const urlParams = new URLSearchParams(window.location.search);
+    const accountDiscovery = urlParams.get('accountDiscovery');
+
+    if (accountDiscovery !== null) {
+      await invokeSnap<null>({
+        method: 'ping',
+        params: {
+          accountDiscoveryType: accountDiscovery,
+        },
+      });
+    } else {
+      await invokeSnap<null>({
+        method: 'ping',
+      });
+    }
   };
 
   return {

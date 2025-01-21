@@ -5,6 +5,7 @@ import {
   AccountNotFoundError,
   MaxAccountLimitExceededError,
 } from '../../utils/exceptions';
+import { AccountDiscoveryType } from '../../utils/factory';
 import { Account } from './account';
 import { AccountContractDiscovery } from './discovery';
 import { AccountKeyPair } from './keypair';
@@ -19,14 +20,17 @@ export class AccountService {
   constructor({
     network,
     accountStateMgr = new AccountStateManager(),
+    accountDiscoveryType = AccountDiscoveryType.DEFAULT,
   }: {
     network: Network;
     accountStateMgr?: AccountStateManager;
+    accountDiscoveryType?: AccountDiscoveryType;
   }) {
     this.network = network;
     this.accountStateMgr = accountStateMgr;
     this.accountContractDiscoveryService = new AccountContractDiscovery(
       network,
+      accountDiscoveryType,
     );
   }
 

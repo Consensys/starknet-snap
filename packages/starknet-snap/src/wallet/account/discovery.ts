@@ -1,4 +1,5 @@
 import type { Network } from '../../types/snapState';
+import { AccountDiscoveryType } from '../../utils/factory';
 import { Cairo0Contract } from './cairo0';
 import { Cairo1Contract } from './cairo1';
 import type { CairoAccountContract } from './contract';
@@ -16,8 +17,23 @@ export class AccountContractDiscovery {
 
   protected network: Network;
 
-  constructor(network: Network) {
+  constructor(network: Network, discoveryType?: AccountDiscoveryType) {
     this.network = network;
+    if (discoveryType !== undefined) {
+      switch (discoveryType) {
+        case AccountDiscoveryType.ForceCairo0:
+          this.contractCtors = [Cairo0Contract];
+          this.defaultContractCtor = Cairo0Contract;
+          break;
+        case AccountDiscoveryType.ForceCairo1:
+          this.contractCtors = [Cairo1Contract];
+          this.defaultContractCtor = Cairo1Contract;
+          break;
+        default:
+          this.contractCtors = [Cairo1Contract, Cairo0Contract];
+          this.defaultContractCtor = Cairo1Contract;
+      }
+    }
   }
 
   /**

@@ -767,10 +767,12 @@ export const useStarkNetSnap = () => {
   const addNewAccount = async (chainId: string) => {
     dispatch(enableLoadingWithMessage('Adding new account...'));
     try {
+      const urlParams = new URLSearchParams(window.location.search);
       const account = await invokeSnap<Account>({
         method: 'starkNet_addAccount',
         params: {
           chainId,
+          accountDiscoveryType: urlParams.get('accountDiscovery'),
         },
       });
 
@@ -792,10 +794,12 @@ export const useStarkNetSnap = () => {
   };
 
   const getCurrentAccount = async (chainId: string) => {
+    const urlParams = new URLSearchParams(window.location.search);
     return await invokeSnap<Account>({
       method: 'starkNet_getCurrentAccount',
       params: {
         chainId,
+        accountDiscoveryType: urlParams.get('accountDiscovery') ?? "DEFAULT",
       },
     });
   };
@@ -807,11 +811,13 @@ export const useStarkNetSnap = () => {
       ),
     );
     try {
+      const urlParams = new URLSearchParams(window.location.search);
       const account = await invokeSnap<Account>({
         method: 'starkNet_swtichAccount',
         params: {
           chainId,
           address,
+          accountDiscoveryType: urlParams.get('accountDiscovery'),
         },
       });
 

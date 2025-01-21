@@ -1,10 +1,19 @@
-import { type Infer } from 'superstruct';
+import { assign, enums, object, optional, type Infer } from 'superstruct';
 
-import { BaseRequestStruct, AccountStruct, logger } from '../utils';
-import { createAccountService } from '../utils/factory';
+import {
+  BaseRequestStruct,
+  AccountStruct,
+  logger,
+} from '../utils';
+import { AccountDiscoveryType, createAccountService } from '../utils/factory';
 import { ChainRpcController } from './abstract/chain-rpc-controller';
 
-export const AddAccountRequestStruct = BaseRequestStruct;
+export const AddAccountRequestStruct = assign(
+  object({
+    accountDiscoveryType: optional(enums(Object.values(AccountDiscoveryType))),
+  }),
+  BaseRequestStruct,
+);
 
 export const AddAccountResponseStruct = AccountStruct;
 
@@ -34,7 +43,11 @@ export class AddAccountRpc extends ChainRpcController<
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     params: AddAccountParams,
   ): Promise<AddAccountResponse> {
-    const accountService = createAccountService(this.network);
+    const accountService = createAccountService(
+      this.network,
+      undefined,
+      params.accountDiscoveryType,
+    );
 
     const account = await accountService.deriveAccountByIndex();
 
