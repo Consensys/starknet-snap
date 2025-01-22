@@ -4,7 +4,8 @@ import {
   DeployRequiredError,
   UpgradeRequiredError,
 } from '../../utils/exceptions';
-import { AccountDiscoveryType, createAccountService } from '../../utils/factory';
+import type { AccountDiscoveryType } from '../../utils/factory';
+import { createAccountService } from '../../utils/factory';
 import {
   showDeployRequestModal,
   showUpgradeRequestModal,

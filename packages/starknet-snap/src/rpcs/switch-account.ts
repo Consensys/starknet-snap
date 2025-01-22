@@ -1,10 +1,6 @@
 import { assign, enums, object, optional, type Infer } from 'superstruct';
 
-import {
-  BaseRequestStruct,
-  AccountStruct,
-  AddressStruct,
-} from '../utils';
+import { BaseRequestStruct, AccountStruct, AddressStruct } from '../utils';
 import { AccountDiscoveryType, createAccountService } from '../utils/factory';
 import { AccountRpcController } from './abstract/account-rpc-controller';
 

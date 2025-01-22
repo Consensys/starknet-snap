@@ -1,4 +1,11 @@
-import { boolean, object, optional, assign, type Infer, enums } from 'superstruct';
+import {
+  boolean,
+  object,
+  optional,
+  assign,
+  type Infer,
+  enums,
+} from 'superstruct';
 
 import { AccountStateManager } from '../state/account-state-manager';
 import { BaseRequestStruct, AccountStruct } from '../utils';
