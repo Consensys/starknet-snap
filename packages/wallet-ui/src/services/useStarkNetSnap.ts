@@ -799,7 +799,7 @@ export const useStarkNetSnap = () => {
       method: 'starkNet_getCurrentAccount',
       params: {
         chainId,
-        accountDiscoveryType: urlParams.get('accountDiscovery') ?? "DEFAULT",
+        accountDiscoveryType: urlParams.get('accountDiscovery') ?? 'DEFAULT',
       },
     });
   };
