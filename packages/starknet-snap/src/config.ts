@@ -65,7 +65,7 @@ export const Config: SnapConfig = {
   },
 
   account: {
-    maxAccountToCreate: 2,
+    maxAccountToCreate: 1,
   },
 
   // eslint-disable-next-line no-restricted-globals

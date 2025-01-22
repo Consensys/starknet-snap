@@ -1,8 +1,8 @@
-import { ReactNode, useState } from 'react';
+import { ReactNode } from 'react';
 import { Footer } from 'components/ui/organism/Footer';
+import { Button, Stack, Typography } from '@mui/material'; // Importing MUI components
 import {
   Banner,
-  CloseIcon,
   ColMiddle,
   Content,
   MenuStyled,
@@ -15,7 +15,29 @@ interface Props {
 }
 
 export const FrameworkView = ({ connected, children }: Props) => {
-  const [bannerOpen, setBannerOpen] = useState(true);
+  // Get the current `accountDiscovery` value from the URL
+  const urlParams = new URLSearchParams(window.location.search);
+  const accountDiscovery = urlParams.get('accountDiscovery');
+
+  const bannerMessage =
+    accountDiscovery === 'FORCE_CAIRO_1'
+      ? 'This is a special version for recovering funds on a Cairo 1 account.'
+      : accountDiscovery === 'FORCE_CAIRO_0'
+      ? 'This is a special version for recovering funds on a Cairo 0 account.'
+      : 'This is a special version of the dapp for account recovery purposes.';
+
+  const handleAccountChange = (version: string) => {
+    // Update the URL without reloading the page
+    const newParams = new URLSearchParams(window.location.search);
+    newParams.set('accountDiscovery', version);
+    window.history.replaceState(
+      {},
+      '',
+      `${window.location.pathname}?${newParams.toString()}`,
+    );
+    window.location.reload(); // Reload to apply the updated query parameter
+  };
+
   return (
     <Wrapper>
       <ColMiddle>
@@ -23,12 +45,36 @@ export const FrameworkView = ({ connected, children }: Props) => {
         <Content>{children}</Content>
         <Footer />
       </ColMiddle>
-      {bannerOpen && (
-        <Banner>
-          This is the Open Beta version of the dapp, updates are made regularly{' '}
-          <CloseIcon icon={'close'} onClick={() => setBannerOpen(false)} />
-        </Banner>
-      )}
+      <Banner>
+        <Typography variant="body1" sx={{ mb: 2 }}>
+          {bannerMessage}
+        </Typography>
+        <Stack
+          direction="row"
+          spacing={2}
+          justifyContent="center"
+          alignItems="center"
+        >
+          <Button
+            variant={
+              accountDiscovery === 'FORCE_CAIRO_1' ? 'contained' : 'outlined'
+            }
+            color="warning"
+            onClick={() => handleAccountChange('FORCE_CAIRO_1')}
+          >
+            Force Cairo 1
+          </Button>
+          <Button
+            variant={
+              accountDiscovery === 'FORCE_CAIRO_0' ? 'contained' : 'outlined'
+            }
+            color="warning"
+            onClick={() => handleAccountChange('FORCE_CAIRO_0')}
+          >
+            Force Cairo 0
+          </Button>
+        </Stack>
+      </Banner>
     </Wrapper>
   );
 };

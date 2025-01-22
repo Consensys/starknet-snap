@@ -14,7 +14,7 @@ export const Wrapper = styled.div`
 export const ColMiddle = styled.div`
   width: 1040px;
   margin: auto;
-
+  margin-top: 40px;
   @media (max-width: 1024px) {
     width: 896px;
   }
@@ -34,14 +34,16 @@ export const Content = styled.div`
 export const Banner = styled.div`
   position: fixed;
   left: 0px;
-  bottom: 0px;
+  top: 0px;
   width: 100%;
-  background-color: ${(props) => props.theme.palette.primary.main};
+  background-color: red;
+  margin-bottom: 24px;
   color: ${(props) => props.theme.palette.grey.grey3};
   display: flex;
   align-items: center;
-  padding: 13px 24px;
-  justify-content: space-between;
+  padding: 10px 24px;
+  justify-content: space-around;
+  z-index: 2;
 `;
 
 export const CloseIcon = styled(FontAwesomeIcon)`

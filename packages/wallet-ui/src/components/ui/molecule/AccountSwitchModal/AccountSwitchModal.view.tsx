@@ -40,8 +40,8 @@ export const AccountSwitchModalView = ({
 
   return (
     <Menu as="div" style={{ display: 'inline-block', position: 'relative' }}>
-      <Menu.Button style={{ background: 'none', border: 'none' }}>
-        <Wrapper backgroundTransparent iconRight="angle-down">
+      <Menu.Button style={{ background: 'none', border: 'none' }} disabled>
+        <Wrapper backgroundTransparent>
           {full
             ? starkName ?? currentAddress
             : starkName
