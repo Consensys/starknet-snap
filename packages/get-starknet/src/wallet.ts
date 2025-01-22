@@ -137,10 +137,10 @@ export class MetaMaskSnapWallet implements StarknetWindowObject {
   }
 
   async #getWalletAddress(chainId: string) {
-    const accountResponse = await this.snap.recoverDefaultAccount(chainId);
+    const accountResponse = await this.snap.getCurrentAccount({ chainId, fromState: true });
 
     if (!accountResponse?.address) {
-      throw new Error('Unable to recover accounts');
+      throw new Error('Unable to retrieve the wallet account');
     }
 
     return accountResponse.address;
@@ -207,18 +207,22 @@ export class MetaMaskSnapWallet implements StarknetWindowObject {
       throw new Error('Unable to find the selected network');
     }
 
+    const address = await this.#getWalletAddress(network.chainId);
     if (!this.#network || network.chainId !== this.#network.chainId) {
-      // address is depends on network, if network changes, address will update
-      this.#selectedAddress = await this.#getWalletAddress(network.chainId);
       // provider is depends on network.nodeUrl, if network changes, set provider to undefine for reinitialization
       this.#provider = undefined;
       // account is depends on address and provider, if network changes, address will update,
       // hence set account to undefine for reinitialization
-      // TODO : This should be removed. The walletAccount is created with the SWO as input.
-      // This means account is not managed from within the SWO but from outside.
-      // Event handling helps ensure that the correct address is set.
       this.#account = undefined;
     }
+
+    if (address !== this.#selectedAddress) {
+      // account is depend on address,
+      // hence set account to undefine for reinitialization
+      this.#account = undefined;
+    }
+
+    this.#selectedAddress = address;
 
     this.#network = network;
     this.#chainId = network.chainId;
