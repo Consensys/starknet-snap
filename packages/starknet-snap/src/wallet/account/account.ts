@@ -61,8 +61,8 @@ export class Account {
     // When a Account object discovery by the account service,
     // it should already cached the status of requireDeploy and requireUpgrade.
     const [upgradeRequired, deployRequired] = await Promise.all([
-      this.accountContract.isRequireUpgrade(),
       this.accountContract.isRequireDeploy(),
+      this.accountContract.isRequireUpgrade(),
     ]);
     return {
       addressSalt: this.publicKey,
