@@ -14,8 +14,7 @@ export const NoFlaskModalView = () => {
       <StarknetLogo />
       <Title>You don't have the MetaMask Flask extension</Title>
       <DescriptionCentered>
-        You need to install MetaMask Flask extension in order to use the
-        Starknet Snap.
+        You need to install MetaMask Flask extension in order to use the Starknet Snap.
         <br />
         <br />
         <AlertView

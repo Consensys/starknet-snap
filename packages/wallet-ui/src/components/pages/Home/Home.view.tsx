@@ -26,7 +26,7 @@ export const HomeView = ({ address }: Props) => {
         {!upgradeModalVisible &&
           Object.keys(transactions).length === 0 &&
           !loader.isLoading && (
-            <NoTransactions> You have no transactions</NoTransactions>
+            <NoTransactions>You have no transactions</NoTransactions>
           )}
       </RightPart>
     </Wrapper>

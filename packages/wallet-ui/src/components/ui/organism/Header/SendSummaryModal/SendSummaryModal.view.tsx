@@ -258,8 +258,7 @@ export const SendSummaryModalView = ({
               closeTrigger="hover"
               content={
                 <EstimatedFeesTooltip>
-                  Gas fees are defined by the network and fluctuate depending on
-                  network traffic and transaction complexity.
+                  Gas fees are defined by the network and fluctuate depending on network traffic and transaction complexity.
                   <br></br>
                   <br></br>
                 </EstimatedFeesTooltip>

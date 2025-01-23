@@ -89,14 +89,7 @@ export const DeployModalView = ({ address }: Props) => {
               <center>
                 <AccountAddressView address={address}></AccountAddressView>
               </center>
-              <br />
-              A deployment of your address is necessary to proceed with the
-              Snap.
-              <br />
-              <br />
-              Click on the "Deploy" button to proceed.
-              <br />
-              Thank you!
+              <br />A deployment of your address is necessary to proceed with theSnap.<br /><br />Click on the "Deploy" button to proceed.<br />Thank you!
             </DescriptionCentered>
             <DeployButton onClick={onDeploy}>Deploy</DeployButton>
           </>
@@ -110,7 +103,7 @@ export const DeployModalView = ({ address }: Props) => {
       case Stage.SUCCESS:
         return (
           <DescriptionCentered>
-            Account deployd successfully.
+            Account deployed successfully.
           </DescriptionCentered>
         );
       default:
@@ -120,16 +113,7 @@ export const DeployModalView = ({ address }: Props) => {
             <Txnlink onClick={() => openExplorerTab(txnHash, 'tx', chainId)}>
               {shortenAddress(txnHash)}{' '}
             </Txnlink>
-            <br />
-            Your deploy transaction is still pending and has reached the maximum
-            retry limit for status checks. Please wait for the transaction to
-            complete.
-            <br />
-            <br />
-            Please try again in a couple of hours.
-            <br />
-            <br />
-            Thank you for your comprehension.
+            <br />Your deploy transaction is still pending and has reached the maximumretry limit for status checks. Please wait for the transaction tocomplete.<br /><br />Please try again in a couple of hours.<br /><br />Thank you for your comprehension.
           </DescriptionCentered>
         );
     }

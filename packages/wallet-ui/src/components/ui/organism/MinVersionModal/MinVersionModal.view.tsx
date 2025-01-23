@@ -32,22 +32,17 @@ export const MinVersionModalView = () => {
         <>
           <Title>A new version of the Starknet Snap is available</Title>
           <Description>
-            To use this dapp, please install the latest version by following
-            those steps:
+            To use this dapp, please install the latest version by following those steps:
             <ul>
               <li>
-                Delete the current version in MetaMask by going in Settings{' '}
-                {'>'} Snaps {'>'} @consensys/starknet-snap {'>'} See details{' '}
-                {'>'} Remove Snap
+                Delete the current version in MetaMask by going in Settings{' '} {'>'} Snaps {'>'} @consensys/starknet-snap {'>'} See details{' '} {'>'} Remove Snap
               </li>
               <li>Refresh the page</li>
               <li>
-                Click on connect, the new version will be proposed for
-                installation.
+                Click on connect, the new version will be proposed for installation.
               </li>
             </ul>
-            Note: Your account will be automatically recovered. Future upgrades
-            will be managed automatically
+            Note: Your account will be automatically recovered. Future upgrades will be managed automatically
           </Description>
         </>
       )}

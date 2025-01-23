@@ -82,17 +82,7 @@ export const UpgradeModelView = ({ address }: Props) => {
         return (
           <>
             <DescriptionCentered>
-              A new version of the smart contract <br />
-              is necessary to proceed with the Snap.
-              <br />
-              <br />
-              New enhancements will come with <br />
-              this version.
-              <br />
-              <br />
-              Click on the "Upgrade" button to install it.
-              <br />
-              Thank you!
+              A new version of the smart contract <br />is necessary to proceed with the Snap.<br /><br />New enhancements will come with <br />this version.<br /><br />Click on the "Upgrade" button to install it.<br />Thank you!
             </DescriptionCentered>
             <UpgradeButton onClick={onUpgrade}>Upgrade</UpgradeButton>
           </>
@@ -116,16 +106,7 @@ export const UpgradeModelView = ({ address }: Props) => {
             <Txnlink onClick={() => openExplorerTab(txnHash, 'tx', chainId)}>
               {shortenAddress(txnHash)}{' '}
             </Txnlink>
-            <br />
-            Your upgrade transaction is still pending and has reached the
-            maximum retry limit for status checks. Please wait for the
-            transaction to complete.
-            <br />
-            <br />
-            Please try again in a couple of hours.
-            <br />
-            <br />
-            Thank you for your comprehension.
+            <br />Your upgrade transaction is still pending and has reached themaximum retry limit for status checks. Please wait for thetransaction to complete.<br /><br />Please try again in a couple of hours.<br /><br />Thank you for your comprehension.
           </DescriptionCentered>
         );
     }
