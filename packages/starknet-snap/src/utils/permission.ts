@@ -71,6 +71,7 @@ const walletUIDappPermissions = publicPermissions.concat([
   RpcMethod.GetStoredErc20Tokens,
   RpcMethod.AddAccount,
   RpcMethod.SwitchAccount,
+  RpcMethod.ToggleAccountVisibility,
 ]);
 
 const publicPermissionsSet = new Set(publicPermissions);
