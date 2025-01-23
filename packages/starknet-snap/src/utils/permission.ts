@@ -17,6 +17,7 @@ export enum RpcMethod {
   GetCurrentAccount = 'starkNet_getCurrentAccount',
   ListAccounts = 'starkNet_listAccounts',
 
+  ToggleAccountVisibility = 'starkNet_toggleAccountVisibility',
   SwitchAccount = 'starkNet_switchAccount',
   AddAccount = 'starkNet_addAccount',
   CreateAccount = 'starkNet_createAccount',

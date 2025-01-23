@@ -15,7 +15,6 @@ export abstract class StateManager<Entity> extends SnapStateManager<SnapState> {
           networks: [],
           transactions: [],
           transactionRequests: [],
-          removedAccounts: {},
           currentAccount: {},
         };
       }
@@ -38,10 +37,6 @@ export abstract class StateManager<Entity> extends SnapStateManager<SnapState> {
 
       if (!state.transactions) {
         state.transactions = [];
-      }
-
-      if (!state.removedAccounts) {
-        state.removedAccounts = {};
       }
 
       if (!state.currentAccount) {
