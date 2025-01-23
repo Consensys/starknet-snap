@@ -40,6 +40,19 @@ import {
   TransactionType,
   UniversalDetails,
 } from 'starknet';
+import { useEffect, useState } from 'react';
+
+export type Locale = Record<
+  string,
+  {
+    message: string;
+  }
+>;
+
+export type Translator = (
+  key: string,
+  ...args: (string | undefined)[]
+) => string;
 
 export const useStarkNetSnap = () => {
   const dispatch = useAppDispatch();
@@ -47,6 +60,9 @@ export const useStarkNetSnap = () => {
   const { transactions, erc20TokenBalances, provider } = useAppSelector(
     (state) => state.wallet,
   );
+
+  const [locale, setLocale] = useState<Locale | null>(null);
+
   const snapId = process.env.REACT_APP_SNAP_ID
     ? process.env.REACT_APP_SNAP_ID
     : 'local:http://localhost:8081';
@@ -105,6 +121,45 @@ export const useStarkNetSnap = () => {
         //eslint-disable-next-line no-console
         console.log(err);
       });
+  };
+
+  const loadLocale = async () => {
+    try {
+      const userLocale = await getUserLocalePreference();
+      setLocale(userLocale);
+    } catch (error) {
+      console.error('Error loading locale:', error);
+    }
+  };
+
+  const getUserLocalePreference = async (): Promise<Locale> => {
+    try {
+      const { locale: userLocale } = await provider.request({
+        method: 'wallet_invokeSnap',
+        params: {
+          snapId,
+          request: {
+            method: 'starkNet_getPreferences',
+          },
+        },
+      });
+      return (await import(`../assets/locales/${userLocale}.json`)).messages;
+    } catch (error) {
+      return (await import(`../assets/locales/en.json`)).messages;
+    }
+  };
+  const getTranslator = (): Translator | null => {
+    if (!locale) return null;
+
+    return (key: string, ...args: (string | undefined)[]): string => {
+      const template = locale[key]?.message ?? `{${key}}`;
+
+      // Replace placeholders like {1}, {2}, etc., with corresponding arguments
+      return template.replace(/\{(\d+)\}/g, (_, index: string) => {
+        const argIndex = parseInt(index, 10) - 1; // {1} corresponds to args[0], {2} to args[1], etc.
+        return args[argIndex] ?? `{${index}}`; // Fallback to placeholder if argument is missing
+      });
+    };
   };
 
   const getNetworks = async () => {
@@ -974,8 +1029,15 @@ export const useStarkNetSnap = () => {
     }
   };
 
+  useEffect(() => {
+    if (provider) {
+      loadLocale();
+    }
+  });
+
   return {
     connectToSnap,
+    getTranslator,
     getNetworks,
     getAccounts,
     addAccount,
