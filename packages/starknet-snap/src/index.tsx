@@ -150,6 +150,11 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
     };
 
     switch (request.method) {
+      case RpcMethod.GetPreferences:
+        return await snap.request({
+          method: 'snap_getPreferences',
+        });
+
       case RpcMethod.CreateAccount:
         apiParams.keyDeriver = await getAddressKeyDeriver(snap);
         return await createAccount(
