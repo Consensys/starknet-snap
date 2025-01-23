@@ -216,7 +216,7 @@ export class AccountStateManager extends StateManager<AccContract> {
             );
             if (!accountToSwitch) {
               throw new StateManagerError(
-                `No visible account found, at least one account should be visible`,
+                `No visible accounts found, at least one account should be visible`,
               );
             }
             this.#setCurrentAccount(accountToSwitch, state);

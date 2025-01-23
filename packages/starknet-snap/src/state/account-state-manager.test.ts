@@ -162,7 +162,7 @@ describe('AccountStateManager', () => {
 
   describe('toggleAccountVisibility', () => {
     it.each([true, false])(
-      'toggle the account visibility an account',
+      'toggles the account visibility - %s',
       async (visibility) => {
         const accounts = await generateTestnetAccounts();
         await mockStateWithMainnetAccounts(accounts);
@@ -179,7 +179,7 @@ describe('AccountStateManager', () => {
       },
     );
 
-    describe('switchs to a visible accounts if the account change to hidden and it is the current account', () => {
+    describe('switches to a visible account if the account toggles to hidden and it is the current account', () => {
       const setupNextVisibleAccountTest = async (
         accountToToggleIndex = 0,
         accountCount = 5,
@@ -198,7 +198,7 @@ describe('AccountStateManager', () => {
         };
       };
 
-      it('switchs to the next visible accounts if there is one', async () => {
+      it('switches to the next visible account if there is one', async () => {
         const { accounts, accountToToggle, state } =
           await setupNextVisibleAccountTest(2, 5);
         // Simulate the visibility of the next account is a hidden account too.
@@ -214,7 +214,7 @@ describe('AccountStateManager', () => {
         expect(state.currentAccount[testnetChainId]).toStrictEqual(accounts[4]);
       });
 
-      it('switchs to the first visible accounts if there is no avaiable account to pick', async () => {
+      it('switches to the first visible account if there are no next available accounts to pick', async () => {
         const { accounts, accountToToggle, state } =
           await setupNextVisibleAccountTest(4, 5);
         // Simulate the visibility of the first account is a hidden account too.
@@ -230,7 +230,7 @@ describe('AccountStateManager', () => {
         expect(state.currentAccount[testnetChainId]).toStrictEqual(accounts[1]);
       });
 
-      it('throws an `No visible account found, at least one account should be visible` error if there is no visible accounts', async () => {
+      it('throws a `No visible accounts found, at least one account should be visible` error if there are no available accounts to pick', async () => {
         const { accountToToggle } = await setupNextVisibleAccountTest(0, 1);
 
         const stateManager = new AccountStateManager();
@@ -241,12 +241,12 @@ describe('AccountStateManager', () => {
             visibility: false,
           }),
         ).rejects.toThrow(
-          'No visible account found, at least one account should be visible',
+          'No visible accounts found, at least one account should be visible',
         );
       });
     });
 
-    it('throws an `Account does not exist` error if the removed account does not exist', async () => {
+    it('throws a `Account does not exist` error if the removed account does not exist', async () => {
       const [removeAccount, ...accounts] = await generateTestnetAccounts();
       await mockStateWithMainnetAccounts(accounts);
 
@@ -327,7 +327,7 @@ describe('AccountStateManager', () => {
       };
     };
 
-    it('switchs the current account', async () => {
+    it('switches the current account', async () => {
       const { testnetCurrentAccount, state } = await setupSwitchAccountTest();
       // simulate the account to switch for that contains updated data.
       const updatedAccountToSwitch = {
