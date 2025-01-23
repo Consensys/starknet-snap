@@ -15,31 +15,36 @@ import {
 } from './ConnectModal.style';
 
 export const ConnectModalView = () => {
-  const { connectToSnap } = useStarkNetSnap();
+  const { connectToSnap, getTranslator } = useStarkNetSnap();
 
   const handleReadMoreClick = () => {
     window.open(SNAPS_DOC_URL, '_blank')?.focus();
   };
 
+  const translate = getTranslator();
+
   return (
-    <Wrapper>
-      <StarknetLogo />
-      <Title>
-        Connect to MetaMask<br></br> Starknet Snap
-      </Title>
-      <DescriptionCentered>
-        If you do not have the Starknet snap installed you will be prompted to install it.
-      </DescriptionCentered>
-      <WhatIsSnapDiv>
-        <WhatIsSnap>What is a snap?</WhatIsSnap>
-        <Description>
-          Snaps extend the capabilities of MetaMask by adding new functionalities. This Snap allows MetaMask to be compatible with Starknet and manage your keys.
-        </Description>
-        <ReadMore onClick={handleReadMoreClick}>Read more</ReadMore>
-      </WhatIsSnapDiv>
-      <ConnectButton customIconLeft={<MetamaskIcon />} onClick={connectToSnap}>
-        Connect with MetaMask
-      </ConnectButton>
-    </Wrapper>
+    translate && (
+      <Wrapper>
+        <StarknetLogo />
+        <Title>{translate('connectMetaMaskStarknetSnap')}</Title>
+        <DescriptionCentered>
+          {translate('starknetSnapInstallationPrompt')}
+        </DescriptionCentered>
+        <WhatIsSnapDiv>
+          <WhatIsSnap>{translate('whatIsASnap')}</WhatIsSnap>
+          <Description>{translate('snapsExtendMetaMask')}</Description>
+          <ReadMore onClick={handleReadMoreClick}>
+            {translate('readMore')}
+          </ReadMore>
+        </WhatIsSnapDiv>
+        <ConnectButton
+          customIconLeft={<MetamaskIcon />}
+          onClick={connectToSnap}
+        >
+          {translate('connectWithMetaMask')}
+        </ConnectButton>
+      </Wrapper>
+    )
   );
 };

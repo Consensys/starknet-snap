@@ -28,7 +28,9 @@ enum Stage {
 
 export const DeployModalView = ({ address }: Props) => {
   const dispatch = useAppDispatch();
-  const { deployAccount, waitForAccountCreation } = useStarkNetSnap();
+  const { deployAccount, waitForAccountCreation, getTranslator } =
+    useStarkNetSnap();
+  const translate = getTranslator();
   const [txnHash, setTxnHash] = useState('');
   const [stage, setStage] = useState(Stage.INIT);
   const networks = useAppSelector((state) => state.networks);
@@ -36,6 +38,7 @@ export const DeployModalView = ({ address }: Props) => {
   const toastr = new Toastr();
 
   const onDeploy = async () => {
+    if (!translate) return;
     try {
       const resp = await deployAccount(address, '0', chainId);
 
@@ -51,7 +54,7 @@ export const DeployModalView = ({ address }: Props) => {
     } catch (err) {
       //eslint-disable-next-line no-console
       console.error(err);
-      toastr.error(`Deploy account failed`);
+      toastr.error(translate('deployAccountFailed'));
     }
   };
 
@@ -70,8 +73,8 @@ export const DeployModalView = ({ address }: Props) => {
   }, [txnHash, address, chainId]);
 
   useEffect(() => {
-    if (stage === Stage.SUCCESS) {
-      toastr.success(`Account deployed successfully`);
+    if (stage === Stage.SUCCESS && translate) {
+      toastr.success(translate('accountDeployedSuccessfully'));
       dispatch(setDeployModalVisible(false));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -81,49 +84,61 @@ export const DeployModalView = ({ address }: Props) => {
     switch (stage) {
       case Stage.INIT:
         return (
-          <>
-            <DescriptionCentered>
-              You have a non-zero balance on a Cairo 0 non-deployed address
-              <br />
-              <br />
-              <center>
-                <AccountAddressView address={address}></AccountAddressView>
-              </center>
-              <br />A deployment of your address is necessary to proceed with theSnap.<br /><br />Click on the "Deploy" button to proceed.<br />Thank you!
-            </DescriptionCentered>
-            <DeployButton onClick={onDeploy}>Deploy</DeployButton>
-          </>
+          translate && (
+            <>
+              <DescriptionCentered>
+                {translate('nonZeroBalanceOnCairo0')}
+                <br />
+                <br />
+                <center>
+                  <AccountAddressView address={address}></AccountAddressView>
+                </center>
+                <br />
+                {translate('deploymentNecessaryToProceed')}
+              </DescriptionCentered>
+              <DeployButton onClick={onDeploy}>Deploy</DeployButton>
+            </>
+          )
         );
       case Stage.WAITING_FOR_TXN:
         return (
-          <DescriptionCentered>
-            Waiting for transaction to be complete.
-          </DescriptionCentered>
+          translate && (
+            <DescriptionCentered>
+              {translate('waitingForTransaction')}
+            </DescriptionCentered>
+          )
         );
       case Stage.SUCCESS:
         return (
-          <DescriptionCentered>
-            Account deployed successfully.
-          </DescriptionCentered>
+          translate && (
+            <DescriptionCentered>
+              {translate('accountDeployedSuccessfully')}
+            </DescriptionCentered>
+          )
         );
       default:
         return (
-          <DescriptionCentered>
-            Transaction Hash: <br />{' '}
-            <Txnlink onClick={() => openExplorerTab(txnHash, 'tx', chainId)}>
-              {shortenAddress(txnHash)}{' '}
-            </Txnlink>
-            <br />Your deploy transaction is still pending and has reached the maximumretry limit for status checks. Please wait for the transaction tocomplete.<br /><br />Please try again in a couple of hours.<br /><br />Thank you for your comprehension.
-          </DescriptionCentered>
+          translate && (
+            <DescriptionCentered>
+              {translate('transactionHash')} <br />{' '}
+              <Txnlink onClick={() => openExplorerTab(txnHash, 'tx', chainId)}>
+                {shortenAddress(txnHash)}{' '}
+              </Txnlink>
+              <br />
+              {translate('deployTransactionPending')}
+            </DescriptionCentered>
+          )
         );
     }
   };
 
   return (
-    <Wrapper>
-      <StarknetLogo />
-      <Title>Deploy Account</Title>
-      {renderComponent()}
-    </Wrapper>
+    translate && (
+      <Wrapper>
+        <StarknetLogo />
+        <Title>{translate('deployAccount')}</Title>
+        {renderComponent()}
+      </Wrapper>
+    )
   );
 };

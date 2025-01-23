@@ -1,3 +1,4 @@
+import { useStarkNetSnap } from 'services';
 import {
   AddressCopy,
   AddressQrCode,
@@ -10,11 +11,16 @@ interface Props {
 }
 
 export const ReceiveModalView = ({ address }: Props) => {
+  const { getTranslator } = useStarkNetSnap();
+  const translate = getTranslator();
+
   return (
-    <Wrapper>
-      <Title>Receive</Title>
-      <AddressQrCode value={address} />
-      <AddressCopy address={address} placement="top" />
-    </Wrapper>
+    translate && (
+      <Wrapper>
+        <Title>{translate('receive')}</Title>
+        <AddressQrCode value={address} />
+        <AddressCopy address={address} placement="top" />
+      </Wrapper>
+    )
   );
 };

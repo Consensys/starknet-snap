@@ -1,3 +1,4 @@
+import { useStarkNetSnap } from 'services';
 import {
   MetamaskSnaps,
   PoweredBy,
@@ -9,22 +10,30 @@ import {
 
 export const FooterView = () => {
   const currentYr = new Date().getFullYear();
-  return (
-    <>
-      <Wrapper>
-        <PoweredBy>Powered by</PoweredBy>
-        <MetamaskSnaps>MetaMask Snaps</MetamaskSnaps>
+  const { getTranslator } = useStarkNetSnap();
+  const translate = getTranslator();
 
-        <TandCWrapper>
-          <CopyText>&copy;{currentYr} Consensys</CopyText>
-          <TandCLink href="https://consensys.io/terms-of-use" target="_blank">
-            Terms of Use
-          </TandCLink>
-          <TandCLink href="https://consensys.io/privacy-policy" target="_blank">
-            Privacy Policy
-          </TandCLink>
-        </TandCWrapper>
-      </Wrapper>
-    </>
+  return (
+    translate && (
+      <>
+        <Wrapper>
+          <PoweredBy>{translate('poweredBy')}</PoweredBy>
+          <MetamaskSnaps>MetaMask Snaps</MetamaskSnaps>
+
+          <TandCWrapper>
+            <CopyText>&copy;{currentYr} Consensys</CopyText>
+            <TandCLink href="https://consensys.io/terms-of-use" target="_blank">
+              {translate('termsOfUse')}
+            </TandCLink>
+            <TandCLink
+              href="https://consensys.io/privacy-policy"
+              target="_blank"
+            >
+              {translate('privacyPolicy')}
+            </TandCLink>
+          </TandCWrapper>
+        </Wrapper>
+      </>
+    )
   );
 };

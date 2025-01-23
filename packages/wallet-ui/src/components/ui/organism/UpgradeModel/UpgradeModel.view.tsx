@@ -27,14 +27,17 @@ enum Stage {
 
 export const UpgradeModelView = ({ address }: Props) => {
   const dispatch = useAppDispatch();
-  const { upgradeAccount, waitForAccountUpdate } = useStarkNetSnap();
+  const { upgradeAccount, waitForAccountUpdate, getTranslator } =
+    useStarkNetSnap();
   const [txnHash, setTxnHash] = useState('');
   const [stage, setStage] = useState(Stage.INIT);
   const networks = useAppSelector((state) => state.networks);
   const chainId = networks?.items[networks.activeNetwork]?.chainId;
   const toastr = new Toastr();
+  const translate = getTranslator();
 
   const onUpgrade = async () => {
+    if (!translate) return;
     try {
       const resp = await upgradeAccount(address, '0', chainId);
 
@@ -50,7 +53,7 @@ export const UpgradeModelView = ({ address }: Props) => {
     } catch (err) {
       //eslint-disable-next-line no-console
       console.error(err);
-      toastr.error(`Upgrade account failed`);
+      toastr.error(translate('upgradeAccountFailed'));
     }
   };
 
@@ -69,8 +72,8 @@ export const UpgradeModelView = ({ address }: Props) => {
   }, [txnHash, address, chainId]);
 
   useEffect(() => {
-    if (stage === Stage.SUCCESS) {
-      toastr.success(`Account upgraded successfully`);
+    if (stage === Stage.SUCCESS && translate) {
+      toastr.success(translate('accountUpgradedSuccessfully'));
       dispatch(setUpgradeModalVisible(false));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -80,43 +83,56 @@ export const UpgradeModelView = ({ address }: Props) => {
     switch (stage) {
       case Stage.INIT:
         return (
-          <>
-            <DescriptionCentered>
-              A new version of the smart contract <br />is necessary to proceed with the Snap.<br /><br />New enhancements will come with <br />this version.<br /><br />Click on the "Upgrade" button to install it.<br />Thank you!
-            </DescriptionCentered>
-            <UpgradeButton onClick={onUpgrade}>Upgrade</UpgradeButton>
-          </>
+          translate && (
+            <>
+              <DescriptionCentered>
+                {translate('newVersionOfSmartContractNecessary')}
+              </DescriptionCentered>
+              <UpgradeButton onClick={onUpgrade}>
+                {translate('upgrade')}
+              </UpgradeButton>
+            </>
+          )
         );
       case Stage.WAITING_FOR_TXN:
         return (
-          <DescriptionCentered>
-            Waiting for transaction to be complete.
-          </DescriptionCentered>
+          translate && (
+            <DescriptionCentered>
+              {translate('waitingForTransaction')}
+            </DescriptionCentered>
+          )
         );
       case Stage.SUCCESS:
         return (
-          <DescriptionCentered>
-            Account upgraded successfully.
-          </DescriptionCentered>
+          translate && (
+            <DescriptionCentered>
+              {translate('accountUpgradedSuccessfully')}
+            </DescriptionCentered>
+          )
         );
       default:
         return (
-          <DescriptionCentered>
-            Transaction Hash: <br />{' '}
-            <Txnlink onClick={() => openExplorerTab(txnHash, 'tx', chainId)}>
-              {shortenAddress(txnHash)}{' '}
-            </Txnlink>
-            <br />Your upgrade transaction is still pending and has reached themaximum retry limit for status checks. Please wait for thetransaction to complete.<br /><br />Please try again in a couple of hours.<br /><br />Thank you for your comprehension.
-          </DescriptionCentered>
+          translate && (
+            <DescriptionCentered>
+              {translate('transactionHash')} <br />{' '}
+              <Txnlink onClick={() => openExplorerTab(txnHash, 'tx', chainId)}>
+                {shortenAddress(txnHash)}{' '}
+              </Txnlink>
+              <br />
+              {translate('upgradeTransactionPending')}
+            </DescriptionCentered>
+          )
         );
     }
   };
 
   return (
-    <Wrapper>
-      <StarknetLogo />
-      <Title>Upgrade Account</Title>
-      {renderComponent()}
-    </Wrapper>
+    translate && (
+      <Wrapper>
+        <StarknetLogo />
+        <Title>{translate('upgradeAccount')}</Title>
+        {renderComponent()}
+      </Wrapper>
+    )
   );
 };

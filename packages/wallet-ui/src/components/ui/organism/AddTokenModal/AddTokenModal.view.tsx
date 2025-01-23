@@ -23,7 +23,8 @@ interface Props {
 }
 
 export const AddTokenModalView = ({ closeModal }: Props) => {
-  const { setErc20TokenBalance, addErc20Token } = useStarkNetSnap();
+  const { setErc20TokenBalance, addErc20Token, getTranslator } =
+    useStarkNetSnap();
   const [enabled, setEnabled] = useState(false);
   const networks = useAppSelector((state) => state.networks);
   const { accounts } = useAppSelector((state) => state.wallet);
@@ -41,6 +42,7 @@ export const AddTokenModalView = ({ closeModal }: Props) => {
       [fieldName]: fieldValue,
     }));
   };
+  const translate = getTranslator();
 
   useEffect(() => {
     const allFieldFilled = Object.values(fields).every((field) => {
@@ -50,77 +52,80 @@ export const AddTokenModalView = ({ closeModal }: Props) => {
   }, [fields, isValidAddress]);
 
   return (
-    <>
-      <Wrapper>
-        <Title>Add Token</Title>
-        <Alert
-          text="Anyone can create a token, including creating fake versions of existing tokens. Learn more about scams and security risks."
-          variant="warning"
-        />
-        <Space />
-        <FormGroup>
-          <AddressInput
-            label="ContractAddress"
-            placeholder=""
-            onChange={(event) => handleChange('address', event.target.value)}
-            setIsValidAddress={setIsValidAddress}
-          />
-        </FormGroup>
-        <FormGroup>
-          <InputWithLabel
-            label="Name"
-            onChange={(event) => handleChange('name', event.target.value)}
-          />
-        </FormGroup>
-        <FormGroup>
-          <InputWithLabel
-            label="Symbol"
-            onChange={(event) => handleChange('symbol', event.target.value)}
-          />
-        </FormGroup>
-        <FormGroup>
-          <InputWithLabel
-            label="Decimal"
-            placeholder="0"
-            type="number"
-            onChange={(event) =>
-              handleChange(
-                'decimal',
-                isNaN(Number(event.target.value)) ? '' : event.target.value,
-              )
-            }
-          />
-        </FormGroup>
-      </Wrapper>
-      <ButtonsWrapper>
-        <ButtonStyled onClick={closeModal} backgroundTransparent borderVisible>
-          CANCEL
-        </ButtonStyled>
-        <ButtonStyled
-          enabled={enabled}
-          onClick={async () => {
-            try {
-              const newToken = await addErc20Token(
-                fields.address,
-                fields.name,
-                fields.symbol,
-                parseFloat(fields.decimal),
-                chain,
-                accounts[0] as unknown as string,
-              );
-              if (newToken) {
-                setErc20TokenBalance(newToken);
-                toastr.success('Token added successfully');
+    translate && (
+      <>
+        <Wrapper>
+          <Title>{translate('addToken')}</Title>
+          <Alert text={translate('tokenCreationWarning')} variant="warning" />
+          <Space />
+          <FormGroup>
+            <AddressInput
+              label={translate('contractAddress')}
+              placeholder=""
+              onChange={(event) => handleChange('address', event.target.value)}
+              setIsValidAddress={setIsValidAddress}
+            />
+          </FormGroup>
+          <FormGroup>
+            <InputWithLabel
+              label={translate('name')}
+              onChange={(event) => handleChange('name', event.target.value)}
+            />
+          </FormGroup>
+          <FormGroup>
+            <InputWithLabel
+              label={translate('symbol')}
+              onChange={(event) => handleChange('symbol', event.target.value)}
+            />
+          </FormGroup>
+          <FormGroup>
+            <InputWithLabel
+              label={translate('decimal')}
+              placeholder="0"
+              type="number"
+              onChange={(event) =>
+                handleChange(
+                  'decimal',
+                  isNaN(Number(event.target.value)) ? '' : event.target.value,
+                )
               }
-              closeModal();
-            } catch (err) {
-              toastr.error('Error while adding token');
-            }
-          }}
-        >
-          ADD
-        </ButtonStyled>
-      </ButtonsWrapper>
-    </>
+            />
+          </FormGroup>
+        </Wrapper>
+        <ButtonsWrapper>
+          <ButtonStyled
+            onClick={closeModal}
+            backgroundTransparent
+            borderVisible
+          >
+            {translate('cancel')}
+          </ButtonStyled>
+          <ButtonStyled
+            enabled={enabled}
+            onClick={async () => {
+              try {
+                const newToken = await addErc20Token(
+                  fields.address,
+                  fields.name,
+                  fields.symbol,
+                  parseFloat(fields.decimal),
+                  chain,
+                  accounts[0] as unknown as string,
+                );
+                if (newToken) {
+                  setErc20TokenBalance(newToken);
+                  toastr.success(translate('tokenAddedSuccessfully'));
+                }
+                closeModal();
+              } catch (err) {
+                toastr.error(translate('errorAddingToken'));
+              }
+            }}
+          >
+            {translate('add')}
+          </ButtonStyled>
+        </ButtonsWrapper>
+      </>
+    )
   );
 };

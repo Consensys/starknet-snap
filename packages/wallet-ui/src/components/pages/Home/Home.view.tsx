@@ -3,6 +3,7 @@ import { Header } from 'components/ui/organism/Header';
 import { SideBar } from 'components/ui/organism/SideBar';
 import { RightPart, Wrapper, NoTransactions } from './Home.style';
 import { useAppSelector } from 'hooks/redux';
+import { useStarkNetSnap } from 'services';
 interface Props {
   address: string;
 }
@@ -13,22 +14,25 @@ export const HomeView = ({ address }: Props) => {
   );
   const loader = useAppSelector((state) => state.UI.loader);
   const { upgradeModalVisible } = useAppSelector((state) => state.modals);
-
+  const { getTranslator } = useStarkNetSnap();
+  const translate = getTranslator();
   return (
-    <Wrapper>
-      <SideBar address={address} />
-      <RightPart>
-        {!upgradeModalVisible &&
-          Object.keys(erc20TokenBalanceSelected).length > 0 && (
-            <Header address={address} />
-          )}
-        {!upgradeModalVisible && <TransactionsList transactions={[]} />}
-        {!upgradeModalVisible &&
-          Object.keys(transactions).length === 0 &&
-          !loader.isLoading && (
-            <NoTransactions>You have no transactions</NoTransactions>
-          )}
-      </RightPart>
-    </Wrapper>
+    translate && (
+      <Wrapper>
+        <SideBar address={address} />
+        <RightPart>
+          {!upgradeModalVisible &&
+            Object.keys(erc20TokenBalanceSelected).length > 0 && (
+              <Header address={address} />
+            )}
+          {!upgradeModalVisible && <TransactionsList transactions={[]} />}
+          {!upgradeModalVisible &&
+            Object.keys(transactions).length === 0 &&
+            !loader.isLoading && (
+              <NoTransactions>{translate('noTransactions')}</NoTransactions>
+            )}
+        </RightPart>
+      </Wrapper>
+    )
   );
 };

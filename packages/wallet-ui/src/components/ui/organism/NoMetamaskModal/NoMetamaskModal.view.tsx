@@ -1,3 +1,4 @@
+import { useStarkNetSnap } from 'services';
 import {
   ConnectButton,
   DescriptionCentered,
@@ -8,20 +9,29 @@ import {
 } from './NoMetamaskModal.style';
 
 export const NoMetamaskModalView = () => {
+  const { getTranslator } = useStarkNetSnap();
+  const translate = getTranslator();
+
   return (
-    <Wrapper>
-      <StarknetLogo />
-      <Title>You don't have the MetaMask extension</Title>
-      <DescriptionCentered>
-        You need to install MetaMask extension in order to use the Starknet Snap.
-        <br />
-        <br />
-      </DescriptionCentered>
-      <a href="https://metamask.io/" target="_blank" rel="noreferrer noopener">
-        <ConnectButton customIconLeft={<MetamaskIcon />} onClick={() => {}}>
-          Download MetaMask
-        </ConnectButton>
-      </a>
-    </Wrapper>
+    translate && (
+      <Wrapper>
+        <StarknetLogo />
+        <Title>{translate('metaMaskExtensionRequired')}</Title>
+        <DescriptionCentered>
+          {translate('installMetaMaskToUseSnap')}
+          <br />
+          <br />
+        </DescriptionCentered>
+        <a
+          href="https://metamask.io/"
+          target="_blank"
+          rel="noreferrer noopener"
+        >
+          <ConnectButton customIconLeft={<MetamaskIcon />} onClick={() => {}}>
+            {translate('downloadMetaMask')}
+          </ConnectButton>
+        </a>
+      </Wrapper>
+    )
   );
 };

@@ -8,6 +8,7 @@ import {
   MenuStyled,
   Wrapper,
 } from './Framework.style';
+import { useStarkNetSnap } from 'services';
 
 interface Props {
   connected: boolean;
@@ -16,19 +17,24 @@ interface Props {
 
 export const FrameworkView = ({ connected, children }: Props) => {
   const [bannerOpen, setBannerOpen] = useState(true);
+  const { getTranslator } = useStarkNetSnap();
+  const translate = getTranslator();
+
   return (
-    <Wrapper>
-      <ColMiddle>
-        <MenuStyled connected={connected} />
-        <Content>{children}</Content>
-        <Footer />
-      </ColMiddle>
-      {bannerOpen && (
-        <Banner>
-          This is the Open Beta version of the dapp, updates are made regularly{' '}
-          <CloseIcon icon={'close'} onClick={() => setBannerOpen(false)} />
-        </Banner>
-      )}
-    </Wrapper>
+    translate && (
+      <Wrapper>
+        <ColMiddle>
+          <MenuStyled connected={connected} />
+          <Content>{children}</Content>
+          <Footer />
+        </ColMiddle>
+        {bannerOpen && (
+          <Banner>
+            {translate('openBetaVersion')}{' '}
+            <CloseIcon icon={'close'} onClick={() => setBannerOpen(false)} />
+          </Banner>
+        )}
+      </Wrapper>
+    )
   );
 };

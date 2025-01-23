@@ -33,9 +33,10 @@ interface IProps extends HTMLAttributes<HTMLElement> {
 }
 
 export const MenuView = ({ connected, ...otherProps }: IProps) => {
-  const { switchNetwork } = useStarkNetSnap();
+  const { switchNetwork, getTranslator } = useStarkNetSnap();
   const networks = useAppSelector((state) => state.networks);
   const dispatch = useAppDispatch();
+  const translate = getTranslator();
 
   const changeNetwork = async (network: number, chainId: string) => {
     const result = await switchNetwork(chainId);
@@ -57,177 +58,183 @@ export const MenuView = ({ connected, ...otherProps }: IProps) => {
   }
 
   return (
-    <Wrapper {...otherProps}>
-      <Left>
-        <img src={logo} alt="logo" />
-      </Left>
-      <Right>
-        <Menu
-          as="div"
-          style={{
-            display: 'inline-block',
-            position: 'relative',
-            textAlign: 'left',
-          }}
-        >
-          <Menu.Button
+    translate && (
+      <Wrapper {...otherProps}>
+        <Left>
+          <img src={logo} alt="logo" />
+        </Left>
+        <Right>
+          <Menu
             as="div"
             style={{
-              cursor: 'pointer',
-              border: 'none',
-              background: 'transparent',
+              display: 'inline-block',
+              position: 'relative',
+              textAlign: 'left',
             }}
           >
-            <NetworkPill iconRight="angle-down" backgroundTransparent>
-              {networks.items[networks.activeNetwork] ? (
-                networks.items[networks.activeNetwork].name
-              ) : (
-                <Skeleton variant="text" width={100} height={16} />
-              )}
-            </NetworkPill>
-          </Menu.Button>
-          <MenuItems>
-            <MenuSection>
-              <Menu.Item disabled>
-                <div style={{ padding: '8px 0px 0px 8px' }}>
-                  <Bold>Network</Bold>
-                </div>
-              </Menu.Item>
-            </MenuSection>
-            <MenuSection>
-              {networks.items.map((network, index) => (
-                <Menu.Item key={network.chainId + '_' + index}>
-                  <NetworkMenuItem
-                    onClick={() => changeNetwork(index, network.chainId)}
-                  >
-                    <Radio
-                      checked={Number(networks.activeNetwork) === index}
-                      name="radio-buttons"
-                      inputProps={{ 'aria-label': network.name }}
-                      sx={{
-                        color: theme.palette.grey.grey1,
-                        '&.Mui-checked': {
-                          color: theme.palette.secondary.main,
-                        },
-                      }}
-                    />
-                    <MenuItemText>{network.name}</MenuItemText>
-                  </NetworkMenuItem>
+            <Menu.Button
+              as="div"
+              style={{
+                cursor: 'pointer',
+                border: 'none',
+                background: 'transparent',
+              }}
+            >
+              <NetworkPill iconRight="angle-down" backgroundTransparent>
+                {networks.items[networks.activeNetwork] ? (
+                  networks.items[networks.activeNetwork].name
+                ) : (
+                  <Skeleton variant="text" width={100} height={16} />
+                )}
+              </NetworkPill>
+            </Menu.Button>
+            <MenuItems>
+              <MenuSection>
+                <Menu.Item disabled>
+                  <div style={{ padding: '8px 0px 0px 8px' }}>
+                    <Bold>{translate('network')}</Bold>
+                  </div>
                 </Menu.Item>
-              ))}
-            </MenuSection>
-          </MenuItems>
-        </Menu>
-        <Menu
-          as="div"
-          style={{
-            display: 'inline-block',
-            position: 'relative',
-            textAlign: 'left',
-          }}
-        >
-          <Menu.Button
-            disabled={!connected}
+              </MenuSection>
+              <MenuSection>
+                {networks.items.map((network, index) => (
+                  <Menu.Item key={network.chainId + '_' + index}>
+                    <NetworkMenuItem
+                      onClick={() => changeNetwork(index, network.chainId)}
+                    >
+                      <Radio
+                        checked={Number(networks.activeNetwork) === index}
+                        name="radio-buttons"
+                        inputProps={{ 'aria-label': network.name }}
+                        sx={{
+                          color: theme.palette.grey.grey1,
+                          '&.Mui-checked': {
+                            color: theme.palette.secondary.main,
+                          },
+                        }}
+                      />
+                      <MenuItemText>{network.name}</MenuItemText>
+                    </NetworkMenuItem>
+                  </Menu.Item>
+                ))}
+              </MenuSection>
+            </MenuItems>
+          </Menu>
+          <Menu
+            as="div"
             style={{
-              cursor: 'pointer',
-              border: 'none',
-              background: 'transparent',
+              display: 'inline-block',
+              position: 'relative',
+              textAlign: 'left',
             }}
           >
-            <MenuIcon>
-              <FontAwesomeIcon icon={['fas', 'bars']} />
-              {connected ? (
-                <Badge
-                  style={{ background: theme.palette.success.main }}
-                ></Badge>
-              ) : (
-                <Badge
-                  style={{
-                    background: theme.palette.grey.grey4,
-                    border: '1px solid #ffffff',
-                  }}
-                ></Badge>
-              )}
-            </MenuIcon>
-          </Menu.Button>
-          <MenuItems>
-            <MenuSection>
-              <Menu.Item disabled>
-                <div style={{ padding: '8px 0px' }}>
-                  <FontAwesomeIcon
-                    icon="circle"
-                    color={theme.palette.success.main}
+            <Menu.Button
+              disabled={!connected}
+              style={{
+                cursor: 'pointer',
+                border: 'none',
+                background: 'transparent',
+              }}
+            >
+              <MenuIcon>
+                <FontAwesomeIcon icon={['fas', 'bars']} />
+                {connected ? (
+                  <Badge
+                    style={{ background: theme.palette.success.main }}
+                  ></Badge>
+                ) : (
+                  <Badge
                     style={{
-                      fontSize: '12px',
-                      lineHeight: '12px',
-                      padding: '0px 10px',
+                      background: theme.palette.grey.grey4,
+                      border: '1px solid #ffffff',
                     }}
-                  />
-                  <MenuItemText>Connected to Starknet Snap</MenuItemText>
-                </div>
-              </Menu.Item>
-            </MenuSection>
-            <MenuDivider />
-            <MenuSection>
-              <Menu.Item>
-                {({ active }) => (
-                  <div
-                    style={{
-                      padding: '8px 0px',
-                      background: active
-                        ? theme.palette.grey.grey4
-                        : theme.palette.grey.white,
-                      cursor: 'pointer',
-                    }}
-                  >
+                  ></Badge>
+                )}
+              </MenuIcon>
+            </Menu.Button>
+            <MenuItems>
+              <MenuSection>
+                <Menu.Item disabled>
+                  <div style={{ padding: '8px 0px' }}>
                     <FontAwesomeIcon
-                      icon="info-circle"
-                      color={theme.palette.grey.grey1}
+                      icon="circle"
+                      color={theme.palette.success.main}
                       style={{
                         fontSize: '12px',
                         lineHeight: '12px',
                         padding: '0px 10px',
                       }}
                     />
-                    <a
-                      href="https://consensys.net/blog/metamask/metamask-integrates-starkware-into-first-of-its-kind-zk-rollup-snap/"
-                      target="_blank"
-                      rel="noreferrer"
+                    <MenuItemText>
+                      {translate('connectedToStarknetSnap')}
+                    </MenuItemText>
+                  </div>
+                </Menu.Item>
+              </MenuSection>
+              <MenuDivider />
+              <MenuSection>
+                <Menu.Item>
+                  {({ active }) => (
+                    <div
+                      style={{
+                        padding: '8px 0px',
+                        background: active
+                          ? theme.palette.grey.grey4
+                          : theme.palette.grey.white,
+                        cursor: 'pointer',
+                      }}
                     >
-                      <MenuItemText>About this snap</MenuItemText>
-                    </a>
-                  </div>
-                )}
-              </Menu.Item>
-              <Menu.Item>
-                {({ active }) => (
-                  <div
-                    onClick={disconnect}
-                    style={{
-                      padding: '8px 0px',
-                      background: active
-                        ? theme.palette.grey.grey4
-                        : theme.palette.grey.white,
-                      cursor: 'pointer',
-                    }}
-                  >
-                    <FontAwesomeIcon
-                      icon="sign-out"
-                      color={theme.palette.grey.grey1}
+                      <FontAwesomeIcon
+                        icon="info-circle"
+                        color={theme.palette.grey.grey1}
+                        style={{
+                          fontSize: '12px',
+                          lineHeight: '12px',
+                          padding: '0px 10px',
+                        }}
+                      />
+                      <a
+                        href="https://consensys.net/blog/metamask/metamask-integrates-starkware-into-first-of-its-kind-zk-rollup-snap/"
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        <MenuItemText>
+                          {translate('aboutThisSnap')}
+                        </MenuItemText>
+                      </a>
+                    </div>
+                  )}
+                </Menu.Item>
+                <Menu.Item>
+                  {({ active }) => (
+                    <div
+                      onClick={disconnect}
                       style={{
-                        fontSize: '12px',
-                        lineHeight: '12px',
-                        padding: '0px 10px',
+                        padding: '8px 0px',
+                        background: active
+                          ? theme.palette.grey.grey4
+                          : theme.palette.grey.white,
+                        cursor: 'pointer',
                       }}
-                    />
-                    <MenuItemText>Disconnect</MenuItemText>
-                  </div>
-                )}
-              </Menu.Item>
-            </MenuSection>
-          </MenuItems>
-        </Menu>
-      </Right>
-    </Wrapper>
+                    >
+                      <FontAwesomeIcon
+                        icon="sign-out"
+                        color={theme.palette.grey.grey1}
+                        style={{
+                          fontSize: '12px',
+                          lineHeight: '12px',
+                          padding: '0px 10px',
+                        }}
+                      />
+                      <MenuItemText>{translate('disconnect')}</MenuItemText>
+                    </div>
+                  )}
+                </Menu.Item>
+              </MenuSection>
+            </MenuItems>
+          </Menu>
+        </Right>
+      </Wrapper>
+    )
   );
 };

@@ -64,7 +64,7 @@ export const SendSummaryModalView = ({
   const [totalAmount, setTotalAmount] = useState('');
   const [totalAmountUSD, setTotalAmountUSD] = useState('');
   const [totalExceedsBalance, setTotalExceedsBalance] = useState(false);
-  const { estimateFees, sendTransaction, getTransactions } = useStarkNetSnap();
+  const { estimateFees, sendTransaction, getTransactions, getTranslator } = useStarkNetSnap();
 
   const ethToken = wallet.erc20TokenBalances[0];
   const feeToken =
@@ -78,9 +78,11 @@ export const SendSummaryModalView = ({
     positionClass: 'toast-top-center',
   });
 
+  const translate = getTranslator();
+
   useEffect(() => {
     const fetchGasFee = () => {
-      if (wallet.accounts) {
+      if (wallet.accounts && translate) {
         setGasFeesError(false);
         setEstimatingGas(true);
         const amountBN = ethers.utils.parseUnits(
@@ -100,7 +102,7 @@ export const SendSummaryModalView = ({
         )
           .then((response) => {
             if (response.message && response.message.includes('Error')) {
-              toastr.error('Error when trying to calculate the gas fees');
+              toastr.error(translate('errorCalculatingGasFees'));
               setGasFeesError(true);
             } else {
               setGasFees(response);
@@ -108,7 +110,7 @@ export const SendSummaryModalView = ({
             setEstimatingGas(false);
           })
           .catch(() => {
-            toastr.error('Error when trying to calculate the gas fees');
+            toastr.error(translate('errorCalculatingGasFees'));
           });
       }
     };
@@ -175,7 +177,7 @@ export const SendSummaryModalView = ({
   }, [amount, wallet.erc20TokenBalanceSelected]);
 
   const handleConfirmClick = () => {
-    if (wallet.accounts) {
+    if (wallet.accounts && translate) {
       const amountBN = ethers.utils.parseUnits(
         amount,
         wallet.erc20TokenBalanceSelected.decimals,
@@ -192,7 +194,7 @@ export const SendSummaryModalView = ({
       )
         .then((result) => {
           if (result) {
-            toastr.success('Transaction sent successfully');
+            toastr.success(translate('transactionSentSuccessfully'));
             getTransactions(
               wallet.accounts[0] as unknown as string,
               wallet.erc20TokenBalanceSelected.address,
@@ -206,11 +208,11 @@ export const SendSummaryModalView = ({
               );
             });
           } else {
-            toastr.info('Transaction rejected by user');
+            toastr.info(translate('transactionRejectedByUser'));
           }
         })
         .catch(() => {
-          toastr.error('Error while sending the transaction');
+          toastr.error(translate('errorSendingTransaction'));
         });
       closeModal && closeModal();
     }
@@ -234,97 +236,105 @@ export const SendSummaryModalView = ({
   };
 
   return (
-    <div>
-      <Wrapper>
-        <Header>
-          <Title>Send</Title>
-        </Header>
-        <ToDiv>To</ToDiv>
-        <AddressDiv>{shortenAddress(address)}</AddressDiv>
-        <AssetQuantity
-          currency={wallet.erc20TokenBalanceSelected.symbol}
-          currencyValue={getMaxDecimalsReadable(
-            wallet.erc20TokenBalanceSelected,
-            amount,
-          )}
-          USDValue={amountUsdPrice}
-          size="medium"
-          centered
-        />
-        <Summary>
-          <LeftSummary>
-            <PopperTooltip
-              placement="top"
-              closeTrigger="hover"
-              content={
-                <EstimatedFeesTooltip>
-                  Gas fees are defined by the network and fluctuate depending on network traffic and transaction complexity.
-                  <br></br>
-                  <br></br>
-                </EstimatedFeesTooltip>
-              }
-            >
-              Estimated Fee
-            </PopperTooltip>
-          </LeftSummary>
-          <RightSummary>
-            {estimatingGas && <LoadingWrapper />}
-            {!estimatingGas && (
-              <>
-                <CurrencyAmount>
-                  {gasFeesAmount} {selectedFeeToken}
-                </CurrencyAmount>
-                <USDAmount>{gasFeesAmountUSD} USD</USDAmount>
-              </>
+    translate && (
+      <div>
+        <Wrapper>
+          <Header>
+            <Title>{translate('send')}</Title>
+          </Header>
+          <ToDiv>To</ToDiv>
+          <AddressDiv>{shortenAddress(address)}</AddressDiv>
+          <AssetQuantity
+            currency={wallet.erc20TokenBalanceSelected.symbol}
+            currencyValue={getMaxDecimalsReadable(
+              wallet.erc20TokenBalanceSelected,
+              amount,
             )}
-          </RightSummary>
-        </Summary>
-        {!estimatingGas && (
-          <TotalAmount>
-            Maximum fees: {gasFeesAmount} {selectedFeeToken}
-          </TotalAmount>
-        )}
-        {gasFees.includeDeploy && (
-          <IncludeDeploy>*Fees include a one-time deployment fee</IncludeDeploy>
-        )}
-        <Summary>
-          <LeftSummary>
-            <PopperTooltip
-              placement="right"
-              closeTrigger="hover"
-              content="Amount + Fee"
-            >
-              Total
-            </PopperTooltip>
-          </LeftSummary>
-          <RightSummary>
-            <CurrencyAmount>{totalAmountDisplay()}</CurrencyAmount>
-            <USDAmount>{totalAmountUSD} USD</USDAmount>
-          </RightSummary>
-        </Summary>
-        {totalAmount && (
-          <TotalAmount>
-            Maximum amount: {totalAmount} {selectedFeeToken}
-          </TotalAmount>
-        )}
-        {totalExceedsBalance && (
-          <AlertTotalExceedsAmount
-            text="Insufficient funds for fees"
-            variant="warning"
+            USDValue={amountUsdPrice}
+            size="medium"
+            centered
           />
-        )}
-      </Wrapper>
-      <Buttons>
-        <ButtonStyled onClick={closeModal} backgroundTransparent borderVisible>
-          REJECT
-        </ButtonStyled>
-        <ButtonStyled
-          enabled={!estimatingGas && !gasFeesError && !totalExceedsBalance}
-          onClick={handleConfirmClick}
-        >
-          CONFIRM
-        </ButtonStyled>
-      </Buttons>
-    </div>
+          <Summary>
+            <LeftSummary>
+              <PopperTooltip
+                placement="top"
+                closeTrigger="hover"
+                content={
+                  <EstimatedFeesTooltip>
+                    {translate('gasFeesDefinition')}
+                    <br></br>
+                    <br></br>
+                  </EstimatedFeesTooltip>
+                }
+              >
+                {translate('estimatedFee')}
+              </PopperTooltip>
+            </LeftSummary>
+            <RightSummary>
+              {estimatingGas && <LoadingWrapper />}
+              {!estimatingGas && (
+                <>
+                  <CurrencyAmount>
+                    {gasFeesAmount} {selectedFeeToken}
+                  </CurrencyAmount>
+                  <USDAmount>{gasFeesAmountUSD} USD</USDAmount>
+                </>
+              )}
+            </RightSummary>
+          </Summary>
+          {!estimatingGas && (
+            <TotalAmount>
+              {translate('maximumFees')} {gasFeesAmount} {selectedFeeToken}
+            </TotalAmount>
+          )}
+          {gasFees.includeDeploy && (
+            <IncludeDeploy>
+              *{translate('feesIncludeOneTimeDeploymentFee')}
+            </IncludeDeploy>
+          )}
+          <Summary>
+            <LeftSummary>
+              <PopperTooltip
+                placement="right"
+                closeTrigger="hover"
+                content="Amount + Fee"
+              >
+                {translate('total')}
+              </PopperTooltip>
+            </LeftSummary>
+            <RightSummary>
+              <CurrencyAmount>{totalAmountDisplay()}</CurrencyAmount>
+              <USDAmount>{totalAmountUSD} USD</USDAmount>
+            </RightSummary>
+          </Summary>
+          {totalAmount && (
+            <TotalAmount>
+              {translate('maximumAmount')} {totalAmount} {selectedFeeToken}
+            </TotalAmount>
+          )}
+          {totalExceedsBalance && (
+            <AlertTotalExceedsAmount
+              text={translate('insufficientFundsForFees')}
+              variant="warning"
+            />
+          )}
+        </Wrapper>
+        <Buttons>
+          <ButtonStyled
+            onClick={closeModal}
+            backgroundTransparent
+            borderVisible
+          >
+            {translate('reject')}
+          </ButtonStyled>
+          <ButtonStyled
+            enabled={!estimatingGas && !gasFeesError && !totalExceedsBalance}
+            onClick={handleConfirmClick}
+          >
+            {translate('confirm')}
+          </ButtonStyled>
+        </Buttons>
+      </div>
+    )
   );
 };

@@ -3,6 +3,7 @@ import 'react-dropdown/style.css';
 import { Group, Option, ReactDropdownProps } from 'react-dropdown';
 import { Label } from 'components/ui/atom/Label';
 import { HelperText } from 'components/ui/atom/HelperText';
+import { useStarkNetSnap } from 'services';
 
 interface Props extends ReactDropdownProps {
   error?: boolean;
@@ -21,19 +22,24 @@ export const DropDownView = ({
   value,
   ...otherProps
 }: Props) => {
-  return (
-    <Wrapper>
-      <Label error={error}>{label}</Label>
-      <DropdownStyled
-        error={error}
-        disabled={disabled}
-        options={options}
-        value={value}
-        placeholder="Select an option"
-        {...otherProps}
-      />
+  const { getTranslator } = useStarkNetSnap();
+  const translate = getTranslator();
 
-      {helperText && <HelperText>{helperText}</HelperText>}
-    </Wrapper>
+  return (
+    translate && (
+      <Wrapper>
+        <Label error={error}>{label}</Label>
+        <DropdownStyled
+          error={error}
+          disabled={disabled}
+          options={options}
+          value={value}
+          placeholder={translate('selectAnOption')}
+          {...otherProps}
+        />
+
+        {helperText && <HelperText>{helperText}</HelperText>}
+      </Wrapper>
+    )
   );
 };

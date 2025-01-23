@@ -21,8 +21,9 @@ export const HeaderView = ({ address }: Props) => {
   const [sendOpen, setSendOpen] = useState(false);
   const networks = useAppSelector((state) => state.networks);
   const wallet = useAppSelector((state) => state.wallet);
-  const { updateTokenBalance } = useStarkNetSnap();
+  const { updateTokenBalance, getTranslator } = useStarkNetSnap();
   const timeoutHandle = useRef(setTimeout(() => {}));
+  const translate = getTranslator();
 
   const getUSDValue = () => {
     const amountFloat = parseFloat(
@@ -61,34 +62,36 @@ export const HeaderView = ({ address }: Props) => {
   };
 
   return (
-    <Wrapper>
-      <AssetQuantity
-        USDValue={getUSDValue()}
-        currencyValue={getSpendableTotalBalance(
-          wallet.erc20TokenBalanceSelected,
-        )}
-        currency={wallet.erc20TokenBalanceSelected.symbol}
-        size="big"
-        centered
-      />
-      <Buttons>
-        <HeaderButton onClick={() => setReceiveOpen(true)}>
-          Receive
-        </HeaderButton>
-        <Button
-          onClick={() => handleSendClick()}
-          backgroundTransparent
-          borderVisible
-        >
-          Send
-        </Button>
-      </Buttons>
-      <PopIn isOpen={receiveOpen} setIsOpen={setReceiveOpen}>
-        <ReceiveModal address={address} />
-      </PopIn>
-      <PopIn isOpen={sendOpen} setIsOpen={setSendOpen}>
-        <SendModal closeModal={() => setSendOpen(false)} />
-      </PopIn>
-    </Wrapper>
+    translate && (
+      <Wrapper>
+        <AssetQuantity
+          USDValue={getUSDValue()}
+          currencyValue={getSpendableTotalBalance(
+            wallet.erc20TokenBalanceSelected,
+          )}
+          currency={wallet.erc20TokenBalanceSelected.symbol}
+          size="big"
+          centered
+        />
+        <Buttons>
+          <HeaderButton onClick={() => setReceiveOpen(true)}>
+            {translate('receive')}
+          </HeaderButton>
+          <Button
+            onClick={() => handleSendClick()}
+            backgroundTransparent
+            borderVisible
+          >
+            {translate('send')}
+          </Button>
+        </Buttons>
+        <PopIn isOpen={receiveOpen} setIsOpen={setReceiveOpen}>
+          <ReceiveModal address={address} />
+        </PopIn>
+        <PopIn isOpen={sendOpen} setIsOpen={setSendOpen}>
+          <SendModal closeModal={() => setSendOpen(false)} />
+        </PopIn>
+      </Wrapper>
+    )
   );
 };
