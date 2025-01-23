@@ -1,7 +1,6 @@
 import { constants } from 'starknet';
 
 import type { StarknetAccount } from '../__tests__/helper';
-import { Config } from '../config';
 import {
   generateMainnetAccounts,
   generateTestnetAccounts,
@@ -207,36 +206,6 @@ describe('AccountStateManager', () => {
       await expect(stateManager.removeAccount(removeAccount)).rejects.toThrow(
         'Account does not exist',
       );
-    });
-  });
-
-  describe('isMaxAccountLimitExceeded', () => {
-    it('returns true if the account limit is reached', async () => {
-      const accounts = await generateTestnetAccounts(
-        Config.account.maxAccountToCreate + 1,
-      );
-      await mockStateWithMainnetAccounts(accounts);
-
-      const stateManager = new AccountStateManager();
-      const result = await stateManager.isMaxAccountLimitExceeded({
-        chainId: testnetChainId,
-      });
-
-      expect(result).toBe(true);
-    });
-
-    it('returns false if the account limit is not reached', async () => {
-      const accounts = await generateTestnetAccounts(
-        Config.account.maxAccountToCreate,
-      );
-      await mockStateWithMainnetAccounts(accounts);
-
-      const stateManager = new AccountStateManager();
-      const result = await stateManager.isMaxAccountLimitExceeded({
-        chainId: testnetChainId,
-      });
-
-      expect(result).toBe(false);
     });
   });
 

@@ -100,16 +100,11 @@ export const mockAccountStateManager = () => {
     AccountStateManager.prototype,
     'upsertAccount',
   );
-  const isMaxAccountLimitExceededSpy = jest.spyOn(
-    AccountStateManager.prototype,
-    'isMaxAccountLimitExceeded',
-  );
 
   return {
     getAccountSpy,
     getNextIndexSpy,
     upsertAccountSpy,
-    isMaxAccountLimitExceededSpy,
   };
 };
 

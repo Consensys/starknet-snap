@@ -1,10 +1,7 @@
 import { AccountStateManager } from '../../state/account-state-manager';
 import type { Network } from '../../types/snapState';
 import { getBip44Deriver } from '../../utils';
-import {
-  AccountNotFoundError,
-  MaxAccountLimitExceededError,
-} from '../../utils/exceptions';
+import { AccountNotFoundError } from '../../utils/exceptions';
 import { Account } from './account';
 import { AccountContractDiscovery } from './discovery';
 import { AccountKeyPair } from './keypair';
@@ -53,7 +50,7 @@ export class AccountService {
     const { chainId } = this.network;
 
     // use `withTransaction` to ensure that the state is not modified if an error occurs.
-    return this.accountStateMgr.withTransaction(async (state) => {
+    return this.accountStateMgr.withTransaction(async () => {
       let hdIndex = index;
       if (hdIndex === undefined) {
         hdIndex = await this.accountStateMgr.getNextIndex(chainId);
@@ -81,18 +78,6 @@ export class AccountService {
       });
 
       await this.accountStateMgr.upsertAccount(await account.serialize());
-
-      // FIXME: this is a convenience way to check if the account limit has been exceeded at the last line of the code. However, it is possible to improve if we can check it before the account is derived.
-      if (
-        await this.accountStateMgr.isMaxAccountLimitExceeded(
-          {
-            chainId,
-          },
-          state,
-        )
-      ) {
-        throw new MaxAccountLimitExceededError();
-      }
 
       return account;
     });

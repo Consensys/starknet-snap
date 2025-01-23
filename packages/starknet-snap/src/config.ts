@@ -36,9 +36,6 @@ export type SnapConfig = {
       txnsInLastNumOfDays: number;
     };
   };
-  account: {
-    maxAccountToCreate: number;
-  };
 };
 
 export enum DataClient {
@@ -63,11 +60,6 @@ export const Config: SnapConfig = {
       txnsInLastNumOfDays: 10,
     },
   },
-
-  account: {
-    maxAccountToCreate: 2,
-  },
-
   // eslint-disable-next-line no-restricted-globals
   rpcApiKey: process.env.DIN_API_KEY ?? '',
 
