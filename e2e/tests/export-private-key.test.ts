@@ -3,6 +3,7 @@ import MetaMaskPage from "../utils/MetaMaskPage";
 import DappPage from "../utils/DappPage";
 import { URL } from '../conf/configuration';
 import { test } from '@playwright/test';
+import { createBrowserContext, getTestUrl } from '../conf/test-helpers';
 
 test.describe('Starknet dapp should be able to show account private key', () => {
   let browserContext: BrowserContext;
@@ -11,14 +12,7 @@ test.describe('Starknet dapp should be able to show account private key', () => 
 
   //TODO: Put the beforeEach in config file that all tests can use
   test.beforeEach(async () => {
-    const extensionPath = require('path').join(__dirname, '../extension-source')
-    browserContext = await chromium.launchPersistentContext('', {
-      headless: false,
-      args: [
-        `--disable-extensions-except=${extensionPath}`,
-        `--load-extension=${extensionPath}`
-      ]
-    });
+    browserContext = await createBrowserContext();
   });
 
   test.afterEach(async () => {
@@ -40,7 +34,7 @@ test.describe('Starknet dapp should be able to show account private key', () => 
     await applicationPage.page.waitForTimeout(1000);
 
     // TODO: Put the DEV parameter in environmental variable
-    await applicationPage.page.goto(URL.DEV);
+    await applicationPage.page.goto(getTestUrl());
     await applicationPage.clickConnectButton();
     await metaMaskPage.confirmConnectUI();
     await applicationPage.page.bringToFront();

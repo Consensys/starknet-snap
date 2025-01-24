@@ -1,24 +1,16 @@
-import { chromium, BrowserContext } from "playwright";
+import { BrowserContext } from "playwright";
 import { test, expect } from '@playwright/test';
 import MetaMaskPage from "../utils/MetaMaskPage";
 import DappPage from "../utils/DappPage";
-import { URL } from '../conf/configuration';
+import { createBrowserContext, getTestUrl } from '../conf/test-helpers';
 
 test.describe('Starknet dapp should be able to show account on voyager explorer', () => {
   let browserContext: BrowserContext;
   let metaMaskPage: MetaMaskPage;
   let applicationPage: DappPage;
 
-  //TODO: Put the beforeEach in config file that all tests can use
   test.beforeEach(async () => {
-    const extensionPath = require('path').join(__dirname, '../extension-source')
-    browserContext = await chromium.launchPersistentContext('', {
-      headless: false,
-      args: [
-        `--disable-extensions-except=${extensionPath}`,
-        `--load-extension=${extensionPath}`
-      ]
-    });
+    browserContext = await createBrowserContext();
   });
 
   test.afterEach(async () => {
@@ -39,8 +31,7 @@ test.describe('Starknet dapp should be able to show account on voyager explorer'
     await applicationPage.page.bringToFront();
     await applicationPage.page.waitForTimeout(1000);
 
-    // TODO: Put the DEV parameter in environmental variable
-    await applicationPage.page.goto(URL.DEV);
+    await applicationPage.page.goto(getTestUrl());
     await applicationPage.clickConnectButton();
     await metaMaskPage.confirmConnectUI();
     await applicationPage.page.waitForSelector('//*[contains(text(),"Send")]', {timeout: 90000});
@@ -49,12 +40,8 @@ test.describe('Starknet dapp should be able to show account on voyager explorer'
     await applicationPage.page.bringToFront();
     await applicationPage.page.waitForTimeout(1000);
     await applicationPage.checkCopyAddress();
-    await applicationPage.checkAccountInfo();
 
-    // Check view on explorer link for account
-    await applicationPage.clickViewOnExplorerLink();
-    const [accountPage] = await Promise.all([browserContext.waitForEvent('page')]);
-    expect(accountPage.url()).toContain('/voyager.online/contract/0x');
-    await accountPage.close()
+    // Check user can view account on voyager explorer
+    await applicationPage.checkViewOnExplorer();
   });
 });
