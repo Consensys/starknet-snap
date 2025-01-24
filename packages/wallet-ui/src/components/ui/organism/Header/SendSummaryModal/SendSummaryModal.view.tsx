@@ -64,7 +64,8 @@ export const SendSummaryModalView = ({
   const [totalAmount, setTotalAmount] = useState('');
   const [totalAmountUSD, setTotalAmountUSD] = useState('');
   const [totalExceedsBalance, setTotalExceedsBalance] = useState(false);
-  const { estimateFees, sendTransaction, getTransactions, getTranslator } = useStarkNetSnap();
+  const { estimateFees, sendTransaction, getTransactions, getTranslator } =
+    useStarkNetSnap();
 
   const ethToken = wallet.erc20TokenBalances[0];
   const feeToken =
