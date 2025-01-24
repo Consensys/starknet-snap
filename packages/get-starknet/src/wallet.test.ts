@@ -198,7 +198,7 @@ describe('MetaMaskSnapWallet', () => {
   });
 
   describe('event handling', () => {
-    it('triggers the accountsChanged handler when the event occurs', async () => {
+    it('dispatchs a `accountsChanged` event', async () => {
       const { address: initialAddress } = generateAccount({ address: '0xInitialAddress' });
       const { address: newAddress } = generateAccount({ address: '0xNewAddress' });
 
@@ -216,7 +216,7 @@ describe('MetaMaskSnapWallet', () => {
       }
     });
 
-    it('triggers the networkChanged handler when the event occurs', async () => {
+    it('dispatchs a `networkChanged` event', async () => {
       // The code simulates a scenario where the MainnetNetwork is the default network.
       // Later, the network is changed to SepoliaNetwork and remains unchanged.
       // - `mockResolvedValueOnce` sets the MainnetNetwork as the default network.
@@ -231,5 +231,18 @@ describe('MetaMaskSnapWallet', () => {
         expect(handler).toHaveBeenCalledWith(SepoliaNetwork.chainId, [address]);
       }
     });
+
+    it.each(['accountsChanged', 'networkChanged'])(
+      'does not dispatchs a %s event if the wallet object is not initialized yet',
+      async (event: keyof WalletEventHandlers) => {
+        mockWalletInit({});
+
+        const { handlers } = await setupEventTest(event);
+
+        for (const handler of handlers) {
+          expect(handler).toHaveBeenCalledTimes(0);
+        }
+      },
+    );
   });
 });

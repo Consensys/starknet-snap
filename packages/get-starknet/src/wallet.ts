@@ -323,8 +323,10 @@ export class MetaMaskSnapWallet implements StarknetWindowObject {
           ),
         ]);
 
-        // Check for network change
+        // By checking the previous network is undefined
+        // it will not sending event to client when the wallet object initialized first time
         if (previousNetwork !== this.#chainId && previousNetwork !== undefined) {
+          // With `Promise.allSettled`, we can handle all promises and continue even if some fail.
           await Promise.allSettled(
             Array.from(this.#networkChangeHandlers).map(async (callback) =>
               resolver(callback, this.#chainId, [this.#selectedAddress]),
@@ -332,8 +334,10 @@ export class MetaMaskSnapWallet implements StarknetWindowObject {
           );
         }
 
-        // Check for account change
-        if (previousAddress !== this.#selectedAddress) {
+        // By checking the previous address is undefined
+        // it will not sending event to client when the wallet object initialized first tim
+        if (previousAddress !== this.#selectedAddress && previousAddress !== undefined) {
+          // With `Promise.allSettled`, we can handle all promises and continue even if some fail.
           await Promise.allSettled(
             Array.from(this.#accountChangeHandlers).map(async (callback) =>
               resolver(callback, [this.#selectedAddress]),
