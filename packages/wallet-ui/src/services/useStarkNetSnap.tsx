@@ -62,7 +62,7 @@ export const useStarkNetSnap = () => {
   );
 
   const [locale, setLocale] = useState<Locale | null>(null);
-  const [language, setLanguage] = useState<string>("en");
+  const [language, setLanguage] = useState<string>('en');
 
   const snapId = process.env.REACT_APP_SNAP_ID
     ? process.env.REACT_APP_SNAP_ID
@@ -148,7 +148,7 @@ export const useStarkNetSnap = () => {
           },
         },
       });
-      setLanguage(userLocale as string)
+      setLanguage(userLocale as string);
       return (await import(`../assets/locales/${userLocale}.json`)).messages;
     } catch (error) {
       return (await import(`../assets/locales/en.json`)).messages;
@@ -156,16 +156,22 @@ export const useStarkNetSnap = () => {
   };
   const getTranslator = (): Translator | null => {
     if (!locale) return null;
-  
-    return (key: string, ...args: (string | undefined)[]): JSX.Element | string => {
+
+    return (
+      key: string,
+      ...args: (string | undefined)[]
+    ): JSX.Element | string => {
       const template = locale[key]?.message ?? `{${key}}`;
-  
+
       // Replace placeholders like {1}, {2}, etc., with corresponding arguments
-      const translatedString = template.replace(/\{(\d+)\}/g, (_, index: string) => {
-        const argIndex = parseInt(index, 10) - 1; // {1} corresponds to args[0], {2} to args[1], etc.
-        return args[argIndex] ?? `{${index}}`; // Fallback to placeholder if argument is missing
-      });
-  
+      const translatedString = template.replace(
+        /\{(\d+)\}/g,
+        (_, index: string) => {
+          const argIndex = parseInt(index, 10) - 1; // {1} corresponds to args[0], {2} to args[1], etc.
+          return args[argIndex] ?? `{${index}}`; // Fallback to placeholder if argument is missing
+        },
+      );
+
       // If the string contains HTML (like <br />), process it as JSX
       if (translatedString.includes('<br />')) {
         const parts = translatedString.split('<br />');
@@ -180,7 +186,7 @@ export const useStarkNetSnap = () => {
           </>
         );
       }
-  
+
       // If no HTML tags, return the plain string
       return translatedString;
     };

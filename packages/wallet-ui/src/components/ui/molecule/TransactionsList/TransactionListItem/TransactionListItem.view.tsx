@@ -32,12 +32,12 @@ interface Props {
 
 function toCamelCase(str: string) {
   return str
-    .replace(/(?:^\w|[A-Z]|\b\w|\s+|\_|\-)/g, (match, index) => 
-      index === 0 ? match.toLowerCase() : match.toUpperCase())
+    .replace(/(?:^\w|[A-Z]|\b\w|\s+|_|-)/g, (match, index) =>
+      index === 0 ? match.toLowerCase() : match.toUpperCase(),
+    )
     .replace(/\s+/g, '')
-    .replace(/[\-_]+/g, '');
+    .replace(/[-_]+/g, '');
 }
-
 
 export const TransactionListItemView = ({ transaction }: Props) => {
   const wallet = useAppSelector((state) => state.wallet);
@@ -77,38 +77,40 @@ export const TransactionListItemView = ({ transaction }: Props) => {
   const txnStatus = getTxnStatus(transaction);
   const txnToFromLabel = '';
   const txnFailureReason = getTxnFailureReason(transaction);
-  return translate && (
-    <Wrapper
-      onClick={() =>
-        openExplorerTab(transaction.txnHash, 'tx', transaction.chainId)
-      }
-    >
-      <Left>
-        <LeftIcon>
-          <IconStyled transactionname={txnName} icon={getIcon(txnName)} />
-        </LeftIcon>
-        <Column>
-          <Label>{translate(toCamelCase(txnName))}</Label>
-          <Description>
-            {txnDate}
-            <br />
-            <Status status={transaction.executionStatus}>
-              {txnStatus}
-              {txnFailureReason}
-            </Status>
-          </Description>
-        </Column>
-      </Left>
-      <Middle>{txnToFromLabel} </Middle>
-      <Right>
-        {txnName === 'Send' && (
-          <AssetQuantity
-            currency={currencySymbol}
-            currencyValue={txnValue}
-            USDValue={txnUsdValue}
-          />
-        )}
-      </Right>
-    </Wrapper>
+  return (
+    translate && (
+      <Wrapper
+        onClick={() =>
+          openExplorerTab(transaction.txnHash, 'tx', transaction.chainId)
+        }
+      >
+        <Left>
+          <LeftIcon>
+            <IconStyled transactionname={txnName} icon={getIcon(txnName)} />
+          </LeftIcon>
+          <Column>
+            <Label>{translate(toCamelCase(txnName))}</Label>
+            <Description>
+              {txnDate}
+              <br />
+              <Status status={transaction.executionStatus}>
+                {txnStatus}
+                {txnFailureReason}
+              </Status>
+            </Description>
+          </Column>
+        </Left>
+        <Middle>{txnToFromLabel} </Middle>
+        <Right>
+          {txnName === 'Send' && (
+            <AssetQuantity
+              currency={currencySymbol}
+              currencyValue={txnValue}
+              USDValue={txnUsdValue}
+            />
+          )}
+        </Right>
+      </Wrapper>
+    )
   );
 };
