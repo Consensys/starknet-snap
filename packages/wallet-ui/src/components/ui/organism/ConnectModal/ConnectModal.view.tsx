@@ -27,7 +27,11 @@ export const ConnectModalView = () => {
     translate && (
       <Wrapper>
         <StarknetLogo />
-        <Title>{translate('connectMetaMaskStarknetSnap')}</Title>
+        <Title>
+          {translate('connectTo')} MetaMask
+          <br />
+          Starknet Snap
+        </Title>
         <DescriptionCentered>
           {translate('starknetSnapInstallationPrompt')}
         </DescriptionCentered>

@@ -18,7 +18,6 @@ import {
   Wrapper,
 } from './AddressInput.style';
 import { STARKNET_ADDRESS_LENGTH } from 'utils/constants';
-import { useStarkNetSnap } from 'services';
 
 interface Props extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;
@@ -40,8 +39,6 @@ export const AddressInputView = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState('');
   const [valid, setValid] = useState(false);
-  const { getTranslator } = useStarkNetSnap();
-  const translate = getTranslator();
   useEffect(() => {
     if (!disableValidate || !inputRef.current) return;
     setValid(inputRef.current.value !== '' && validateError === '');
@@ -64,7 +61,6 @@ export const AddressInputView = ({
 
   const handleOnChange = (event: ChangeEvent<HTMLInputElement>) => {
     //Check if valid address
-    if (!translate) return;
     onChange && onChange(event);
 
     if (!inputRef.current) return;
@@ -78,7 +74,7 @@ export const AddressInputView = ({
       setError('');
     } else {
       setValid(false);
-      setError(translate('invalidAddressFormat'));
+      setError('Invalid address format');
     }
 
     if (setIsValidAddress) {

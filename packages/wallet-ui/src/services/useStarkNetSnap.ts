@@ -52,7 +52,7 @@ export type Locale = Record<
 export type Translator = (
   key: string,
   ...args: (string | undefined)[]
-) => string | JSX.Element;
+) => string;
 
 export const useStarkNetSnap = () => {
   const dispatch = useAppDispatch();
@@ -157,10 +157,7 @@ export const useStarkNetSnap = () => {
   const getTranslator = (): Translator | null => {
     if (!locale) return null;
 
-    return (
-      key: string,
-      ...args: (string | undefined)[]
-    ): JSX.Element | string => {
+    return (key: string, ...args: (string | undefined)[]): string => {
       const template = locale[key]?.message ?? `{${key}}`;
 
       // Replace placeholders like {1}, {2}, etc., with corresponding arguments
@@ -172,22 +169,6 @@ export const useStarkNetSnap = () => {
         },
       );
 
-      // If the string contains HTML (like <br />), process it as JSX
-      if (translatedString.includes('<br />')) {
-        const parts = translatedString.split('<br />');
-        return (
-          <>
-            {parts.map((part, index) => (
-              <>
-                {part}
-                {index < parts.length - 1 && <br />}
-              </>
-            ))}
-          </>
-        );
-      }
-
-      // If no HTML tags, return the plain string
       return translatedString;
     };
   };

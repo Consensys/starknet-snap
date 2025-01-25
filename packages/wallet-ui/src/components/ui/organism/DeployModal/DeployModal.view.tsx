@@ -94,7 +94,11 @@ export const DeployModalView = ({ address }: Props) => {
                   <AccountAddressView address={address}></AccountAddressView>
                 </center>
                 <br />
-                {translate('deploymentNecessaryToProceed')}
+                {translate('deploymentNecessaryToProceedPart1')} <br />
+                <br />
+                {translate('deploymentNecessaryToProceedPart2')} <br />
+                <br />
+                {translate('deploymentNecessaryToProceedPart3')}
               </DescriptionCentered>
               <DeployButton onClick={onDeploy}>Deploy</DeployButton>
             </>
@@ -125,7 +129,11 @@ export const DeployModalView = ({ address }: Props) => {
                 {shortenAddress(txnHash)}{' '}
               </Txnlink>
               <br />
-              {translate('deployTransactionPending')}
+              {translate('deployTransactionPendingPart1')} <br />
+              <br />
+              {translate('deployTransactionPendingPart2')} <br />
+              <br />
+              {translate('deployTransactionPendingPart3')}
             </DescriptionCentered>
           )
         );

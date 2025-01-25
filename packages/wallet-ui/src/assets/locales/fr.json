@@ -37,8 +37,8 @@
     "confirm": {
       "message": "CONFIRMER"
     },
-    "connectMetaMaskStarknetSnap": {
-      "message": "Se connecter à MetaMask<br />Snap Starknet"
+    "connectTo": {
+      "message": "Se connecter à"
     },
     "connectToMetaMask": {
       "message": "Cliquez sur connecter, la nouvelle version sera proposée pour installation."
@@ -76,8 +76,14 @@
     "deployTransactionPending": {
       "message": "Votre transaction de déploiement est toujours en attente et a atteint la limite maximale de tentatives pour vérifier son statut. Veuillez attendre la fin de la transaction.<br /><br />Merci de réessayer dans quelques heures.<br /><br />Merci de votre compréhension."
     },
-    "deploymentNecessaryToProceed": {
-      "message": "Un déploiement de votre adresse est nécessaire pour poursuivre avec le Snap.<br /><br />Cliquez sur le bouton \"Déployer\" pour continuer.<br />Merci !"
+    "deploymentNecessaryToProceedPart1": {
+      "message": "Un déploiement de votre adresse est nécessaire pour poursuivre avec le Snap."
+    },
+    "deploymentNecessaryToProceedPart2": {
+      "message": "Cliquez sur le bouton \"Déployer\" pour continuer."
+    },
+    "deploymentNecessaryToProceedPart3": {
+      "message": "Merci !"
     },
     "disableMetaMaskExtension": {
       "message": "Veuillez vous assurer que l'extension MetaMask régulière est désactivée ou utilisez un autre profil de navigateur."
@@ -166,8 +172,17 @@
     "newVersionAvailable": {
       "message": "Une nouvelle version du Snap Starknet est disponible"
     },
-    "newVersionOfSmartContractNecessary": {
-      "message": "Une nouvelle version du contrat intelligent <br />est nécessaire pour continuer avec le Snap.<br /><br />De nouvelles améliorations seront apportées avec <br />cette version.<br /><br />Cliquez sur le bouton \"Mettre à jour\" pour l'installer.<br />Merci !"
+    "newVersionOfSmartContractNecessaryPart1": {
+      "message": "Une nouvelle version du contrat intelligent est nécessaire pour poursuivre avec le Snap."
+    },
+    "newVersionOfSmartContractNecessaryPart2": {
+      "message": "De nouvelles améliorations viendront avec cette version."
+    },
+    "newVersionOfSmartContractNecessaryPart3": {
+      "message": "Cliquez sur le bouton \"Mettre à jour\" pour l'installer."
+    },
+    "newVersionOfSmartContractNecessaryPart4": {
+      "message": "Merci !"
     },
     "noTransactions": {
       "message": "Vous n'avez aucune transaction"
@@ -259,8 +274,14 @@
     "upgradeAccountFailed": {
       "message": "Échec de la mise à jour du compte"
     },
-    "upgradeTransactionPending": {
-      "message": "Votre transaction de mise à jour est toujours en attente et a atteint la limite maximale de tentatives pour vérifier son statut. Veuillez attendre que la transaction se termine.<br /><br />Merci de réessayer dans quelques heures.<br /><br />Merci de votre compréhension."
+    "upgradeTransactionPendingPart1": {
+      "message": "Votre transaction de mise à jour est toujours en attente et a atteint la limite maximale de tentatives pour vérifier son statut. Veuillez attendre la fin de la transaction."
+    },
+    "upgradeTransactionPendingPart2": {
+      "message": "Veuillez réessayer dans quelques heures."
+    },
+    "upgradeTransactionPendingPart3": {
+      "message": "Merci de votre compréhension."
     },
     "validStarknetAddressOnly": {
       "message": "Veuillez entrer uniquement une adresse Starknet valide ou un nom .stark. Envoyer des fonds à un autre réseau pourrait entraîner une perte permanente."

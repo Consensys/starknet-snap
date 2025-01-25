@@ -37,8 +37,8 @@
     "confirm": {
       "message": "CONFIRM"
     },
-    "connectMetaMaskStarknetSnap": {
-      "message": "Connect to MetaMask<br />Starknet Snap"
+    "connectTo": {
+      "message": "Connect to"
     },
     "connectToMetaMask": {
       "message": "Click on connect, the new version will be proposed for installation."
@@ -73,11 +73,23 @@
     "deployAccountFailed": {
       "message": "Deploy account failed"
     },
-    "deployTransactionPending": {
-      "message": "Your deploy transaction is still pending and has reached the maximum retry limit for status checks. Please wait for the transaction to complete.<br /><br />Please try again in a couple of hours.<br /><br />Thank you for your comprehension."
+    "deployTransactionPendingPart1": {
+      "message": "Your deploy transaction is still pending and has reached the maximum retry limit for status checks. Please wait for the transaction to complete."
     },
-    "deploymentNecessaryToProceed": {
-      "message": "A deployment of your address is necessary to proceed with the Snap.<br /><br />Click on the \"Deploy\" button to proceed.<br />Thank you!"
+    "deployTransactionPendingPart2": {
+      "message": "Please try again in a couple of hours."
+    },
+    "deployTransactionPendingPart3": {
+      "message": "Thank you for your comprehension."
+    },
+    "deploymentNecessaryToProceedPart1": {
+      "message": "A deployment of your address is necessary to proceed with the Snap."
+    },
+    "deploymentNecessaryToProceedPart2": {
+      "message": "Click on the \"Deploy\" button to proceed."
+    },
+    "deploymentNecessaryToProceedPart3": {
+      "message": "Thank you!"
     },
     "disableMetaMaskExtension": {
       "message": "Please make sure that the regular MetaMask extension is disabled or use a different browser profile"
@@ -166,8 +178,17 @@
     "newVersionAvailable": {
       "message": "A new version of the Starknet Snap is available"
     },
-    "newVersionOfSmartContractNecessary": {
-      "message": "A new version of the smart contract <br />is necessary to proceed with the Snap.<br /><br />New enhancements will come with <br />this version.<br /><br />Click on the \"Upgrade\" button to install it.<br />Thank you!"
+    "newVersionOfSmartContractNecessaryPart1": {
+      "message": "A new version of the smart contract is necessary to proceed with the Snap."
+    },
+    "newVersionOfSmartContractNecessaryPart2": {
+      "message": "New enhancements will come with this version."
+    },
+    "newVersionOfSmartContractNecessaryPart3": {
+      "message": "Click on the \"Upgrade\" button to install it."
+    },
+    "newVersionOfSmartContractNecessaryPart4": {
+      "message": "Thank you!"
     },
     "noTransactions": {
       "message": "You don't have any transactions"
@@ -259,8 +280,14 @@
     "upgradeAccountFailed": {
       "message": "Upgrade account failed"
     },
-    "upgradeTransactionPending": {
-      "message": "Your upgrade transaction is still pending and has reached the maximum retry limit for status checks. Please wait for the transaction to complete.<br /><br />Please try again in a couple of hours.<br /><br />Thank you for your comprehension."
+    "upgradeTransactionPendingPart1": {
+      "message": "Your upgrade transaction is still pending and has reached the maximum retry limit for status checks. Please wait for the transaction to complete."
+    },
+    "upgradeTransactionPendingPart2": {
+      "message": "Please try again in a couple of hours."
+    },
+    "upgradeTransactionPendingPart3": {
+      "message": "Thank you for your comprehension."
     },
     "validStarknetAddressOnly": {
       "message": "Please only enter a valid Starknet address or .stark name. Sending funds to a different network might result in permanent loss."

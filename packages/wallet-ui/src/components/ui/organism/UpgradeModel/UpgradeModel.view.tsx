@@ -86,7 +86,12 @@ export const UpgradeModelView = ({ address }: Props) => {
           translate && (
             <>
               <DescriptionCentered>
-                {translate('newVersionOfSmartContractNecessary')}
+                {translate('newVersionOfSmartContractNecessaryPart1')} <br />
+                <br />
+                {translate('newVersionOfSmartContractNecessaryPart2')} <br />
+                <br />
+                {translate('newVersionOfSmartContractNecessaryPart3')} <br />
+                {translate('newVersionOfSmartContractNecessaryPart4')}
               </DescriptionCentered>
               <UpgradeButton onClick={onUpgrade}>
                 {translate('upgrade')}
@@ -119,7 +124,11 @@ export const UpgradeModelView = ({ address }: Props) => {
                 {shortenAddress(txnHash)}{' '}
               </Txnlink>
               <br />
-              {translate('upgradeTransactionPending')}
+              {translate('upgradeTransactionPendingPart1')} <br />
+              <br />
+              {translate('upgradeTransactionPendingPart2')} <br />
+              <br />
+              {translate('upgradeTransactionPendingPart3')}
             </DescriptionCentered>
           )
         );
