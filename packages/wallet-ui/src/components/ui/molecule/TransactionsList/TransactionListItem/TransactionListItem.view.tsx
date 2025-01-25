@@ -24,10 +24,20 @@ import {
   getTxnValues,
 } from './types';
 import { getHumanReadableAmount, openExplorerTab } from 'utils/utils';
+import { useStarkNetSnap } from 'services';
 
 interface Props {
   transaction: Transaction;
 }
+
+function toCamelCase(str: string) {
+  return str
+    .replace(/(?:^\w|[A-Z]|\b\w|\s+|\_|\-)/g, (match, index) => 
+      index === 0 ? match.toLowerCase() : match.toUpperCase())
+    .replace(/\s+/g, '')
+    .replace(/[\-_]+/g, '');
+}
+
 
 export const TransactionListItemView = ({ transaction }: Props) => {
   const wallet = useAppSelector((state) => state.wallet);
@@ -35,6 +45,8 @@ export const TransactionListItemView = ({ transaction }: Props) => {
   const [currencySymbol, setCurrencySymbol] = useState('N/A');
   const [txnValue, setTxnValue] = useState('0');
   const [txnUsdValue, setTxnUsdValue] = useState('0.00');
+  const { getTranslator, getLanguage } = useStarkNetSnap();
+  const translate = getTranslator();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -61,11 +73,11 @@ export const TransactionListItemView = ({ transaction }: Props) => {
   }, []);
 
   const txnName = getTxnName(transaction, tokenAddress);
-  const txnDate = getTxnDate(transaction);
+  const txnDate = getTxnDate(transaction, getLanguage());
   const txnStatus = getTxnStatus(transaction);
   const txnToFromLabel = '';
   const txnFailureReason = getTxnFailureReason(transaction);
-  return (
+  return translate && (
     <Wrapper
       onClick={() =>
         openExplorerTab(transaction.txnHash, 'tx', transaction.chainId)
@@ -76,7 +88,7 @@ export const TransactionListItemView = ({ transaction }: Props) => {
           <IconStyled transactionname={txnName} icon={getIcon(txnName)} />
         </LeftIcon>
         <Column>
-          <Label>{txnName}</Label>
+          <Label>{translate(toCamelCase(txnName))}</Label>
           <Description>
             {txnDate}
             <br />
