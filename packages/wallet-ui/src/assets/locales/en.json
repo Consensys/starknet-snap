@@ -38,7 +38,7 @@
       "message": "CONFIRM"
     },
     "connectMetaMaskStarknetSnap": {
-      "message": "Connect to MetaMask<br></br> Starknet Snap"
+      "message": "Connect to MetaMask<br />Starknet Snap"
     },
     "connectToMetaMask": {
       "message": "Click on connect, the new version will be proposed for installation."
