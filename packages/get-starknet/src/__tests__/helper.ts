@@ -74,11 +74,25 @@ export class MockProvider implements MetaMaskProvider {
   request = jest.fn();
 }
 
+export class MockMetaMaskSnapWallet extends MetaMaskSnapWallet {
+  public pollingDelayMs = 0;
+
+  public pollingTimeoutMs = 0;
+
+  public startPolling(): void {
+    super.startPolling();
+  }
+
+  public stopPolling(): void {
+    super.stopPolling();
+  }
+}
+
 /**
  * Create a wallet instance.
  */
 export function createWallet() {
-  return new MetaMaskSnapWallet(new MockProvider());
+  return new MockMetaMaskSnapWallet(new MockProvider());
 }
 
 /**
