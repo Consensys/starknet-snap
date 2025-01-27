@@ -1,5 +1,4 @@
 import {
-  setInfoModalVisible,
   setMinVersionModalVisible,
   setUpgradeModalVisible,
   setDeployModalVisible,
@@ -205,7 +204,7 @@ export const useStarkNetSnap = () => {
 
     // FIXME: hardcode to set the info modal visible,
     // but it should only visible when the account is not deployed
-    dispatch(setInfoModalVisible(true));
+    // dispatch(setInfoModalVisible(true));
 
     dispatch(setUpgradeModalVisible(upgradeRequired));
     dispatch(setDeployModalVisible(deployRequired));
@@ -808,7 +807,7 @@ export const useStarkNetSnap = () => {
     );
     try {
       const account = await invokeSnap<Account>({
-        method: 'starkNet_swtichAccount',
+        method: 'starkNet_switchAccount',
         params: {
           chainId,
           address,
