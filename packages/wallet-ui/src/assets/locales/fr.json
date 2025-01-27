@@ -25,9 +25,6 @@
     "addToken": {
       "message": "Ajouter un jeton"
     },
-    "addTokenCapital": {
-      "message": "AJOUTER UN JETON"
-    },
     "amount": {
       "message": "Montant"
     },
@@ -288,9 +285,6 @@
     },
     "viewOnExplorer": {
       "message": "Voir sur l'explorateur"
-    },
-    "viewOnExplorerCapital": {
-      "message": "VOIR SUR L'EXPLORATEUR"
     },
     "waitingForTransaction": {
       "message": "En attente de la transaction pour se terminer."

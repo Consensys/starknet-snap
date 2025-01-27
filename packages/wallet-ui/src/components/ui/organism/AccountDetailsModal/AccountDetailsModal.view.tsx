@@ -43,7 +43,7 @@ export const AccountDetailsModalView = ({ address }: Props) => {
             borderVisible
             onClick={() => openExplorerTab(address, 'contract', chainId)}
           >
-            {translate('viewOnExplorerCapital')}
+            {translate('viewOnExplorer').toUpperCase()}
           </ButtonStyled>
           <ButtonStyled
             backgroundTransparent

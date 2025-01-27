@@ -130,7 +130,7 @@ export const SideBarView = ({ address }: Props) => {
           shadowVisible={listOverflow}
           onClick={() => setAddTokenOpen(true)}
         >
-          {translate('addTokenCapital')}
+          {translate('addToken').toUpperCase()}
         </AddTokenButton>
         <PopIn isOpen={addTokenOpen} setIsOpen={setAddTokenOpen}>
           <AddTokenModal closeModal={() => setAddTokenOpen(false)} />

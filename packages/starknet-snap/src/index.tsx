@@ -150,11 +150,12 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
     };
 
     switch (request.method) {
-      case RpcMethod.GetPreferences:
+      case RpcMethod.GetPreferences: {
         const { locale } = await snap.request({
           method: 'snap_getPreferences',
         });
         return { locale };
+      }
 
       case RpcMethod.CreateAccount:
         apiParams.keyDeriver = await getAddressKeyDeriver(snap);

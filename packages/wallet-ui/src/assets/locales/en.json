@@ -25,9 +25,6 @@
     "addToken": {
       "message": "Add Token"
     },
-    "addTokenCapital": {
-      "message": "ADD TOKEN"
-    },
     "amount": {
       "message": "Amount"
     },
@@ -294,9 +291,6 @@
     },
     "viewOnExplorer": {
       "message": "View on explorer"
-    },
-    "viewOnExplorerCapital": {
-      "message": "VIEW ON EXPLORER"
     },
     "waitingForTransaction": {
       "message": "Waiting for transaction to be complete."
