@@ -1,5 +1,5 @@
 import { AccountStateManager } from '../../state/account-state-manager';
-import type { Network } from '../../types/snapState';
+import type { AccContract, Network } from '../../types/snapState';
 import { getBip44Deriver } from '../../utils';
 import { AccountNotFoundError } from '../../utils/exceptions';
 import { Account } from './account';
@@ -28,25 +28,17 @@ export class AccountService {
   }
 
   /**
-   * Removes an account from the state.
-   *
-   * @param account - The  `Account` object to remove.
-   */
-  async removeAccount(account: Account): Promise<void> {
-    await this.accountStateMgr.removeAccount({
-      address: account.address,
-      chainId: account.chainId,
-    });
-  }
-
-  /**
    * Derives a BIP44 node from an index and constructs a new `Account` object using the derived private key and public key.
    * The `Account` object is assigned a `CairoAccountContract` contract and is then serialized and persisted to the state.
    *
    * @param [index] - Optional. The hd index to derive the account from. If not provided, the next index will be used.
+   * @param [jsonData] - Optional. The jsonData to assign to the account.
    * @returns A promise that resolves to the newly created `Account` object.
    */
-  async deriveAccountByIndex(index?: number): Promise<Account> {
+  async deriveAccountByIndex(
+    index?: number,
+    jsonData?: AccContract,
+  ): Promise<Account> {
     const { chainId } = this.network;
 
     // use `withTransaction` to ensure that the state is not modified if an error occurs.
@@ -75,6 +67,7 @@ export class AccountService {
         hdIndex,
         addressSalt: publicKey,
         accountContract,
+        jsonData,
       });
 
       await this.accountStateMgr.upsertAccount(await account.serialize());
@@ -97,7 +90,10 @@ export class AccountService {
     });
 
     if (accountFromState) {
-      return await this.deriveAccountByIndex(accountFromState.addressIndex);
+      return await this.deriveAccountByIndex(
+        accountFromState.addressIndex,
+        accountFromState,
+      );
     }
 
     throw new AccountNotFoundError();
@@ -113,9 +109,11 @@ export class AccountService {
     const activeAccount = await this.accountStateMgr.getCurrentAccount({
       chainId: this.network.chainId,
     });
-
+    // Active account only be undefined if the account state is new.
+    // In that case, we will derive a index 0 account with default metadata.
     return await this.deriveAccountByIndex(
       activeAccount ? activeAccount.addressIndex : 0,
+      activeAccount ?? undefined,
     );
   }
 

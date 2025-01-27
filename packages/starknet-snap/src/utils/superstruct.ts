@@ -436,4 +436,5 @@ export const AccountStruct = object({
   cairoVersion: CairoVersionStruct,
   upgradeRequired: boolean(),
   deployRequired: boolean(),
+  visibility: optional(boolean()),
 });

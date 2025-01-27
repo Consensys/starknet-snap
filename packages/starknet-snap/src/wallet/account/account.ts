@@ -3,6 +3,12 @@ import type { CairoVersion } from 'starknet';
 import type { AccContract } from '../../types/snapState';
 import type { CairoAccountContract } from './contract';
 
+export type AccountMetaData = { visibility?: boolean };
+
+export const DefaultAccountMetaData: AccountMetaData = {
+  visibility: true,
+};
+
 /**
  * Account object that holds the private key, public key, address, chain id,
  * hd index, address salt and the `CairoAccountContract`.
@@ -31,6 +37,8 @@ export class Account {
 
   accountContract: CairoAccountContract;
 
+  metadata: AccountMetaData = Object.assign({}, DefaultAccountMetaData);
+
   constructor(props: {
     privateKey: string;
     publicKey: string;
@@ -38,6 +46,7 @@ export class Account {
     hdIndex: number;
     addressSalt: string;
     accountContract: CairoAccountContract;
+    jsonData?: AccContract;
   }) {
     this.privateKey = props.privateKey;
     this.publicKey = props.publicKey;
@@ -50,6 +59,17 @@ export class Account {
       10,
     ) as CairoVersion;
     this.accountContract = props.accountContract;
+
+    this.#jsonDataToMetaData(props.jsonData);
+  }
+
+  #jsonDataToMetaData(jsonData?: AccContract): void {
+    if (!jsonData) {
+      return;
+    }
+    if (jsonData.visibility !== undefined) {
+      this.metadata.visibility = jsonData.visibility;
+    }
   }
 
   /**
@@ -71,8 +91,9 @@ export class Account {
       addressIndex: this.hdIndex,
       chainId: this.chainId,
       cairoVersion: this.cairoVersion,
-      upgradeRequired,
       deployRequired,
+      upgradeRequired,
+      visibility: this.metadata.visibility,
     };
   }
 }

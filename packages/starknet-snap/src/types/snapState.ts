@@ -15,7 +15,6 @@ export type SnapState = {
   transactions: Transaction[];
   currentNetwork?: Network;
   transactionRequests?: TransactionRequest[];
-  removedAccounts?: Record<string, number[]>;
   currentAccount?: Record<string, AccContract>;
 };
 
@@ -70,6 +69,7 @@ export type AccContract = {
   upgradeRequired?: boolean;
   deployRequired?: boolean;
   cairoVersion?: string;
+  visibility?: boolean;
 };
 
 export type Erc20Token = {
