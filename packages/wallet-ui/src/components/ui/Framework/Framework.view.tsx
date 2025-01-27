@@ -17,7 +17,7 @@ interface Props {
 export const FrameworkView = ({ connected, children }: Props) => {
   // Get the current `accountDiscovery` value from the URL
   const urlParams = new URLSearchParams(window.location.search);
-  const accountDiscovery = urlParams.get('accountDiscovery') ?? "FORCE_CAIRO_0";
+  const accountDiscovery = urlParams.get('accountDiscovery') ?? 'FORCE_CAIRO_0';
 
   const bannerMessage =
     accountDiscovery === 'FORCE_CAIRO_1'
@@ -45,7 +45,15 @@ export const FrameworkView = ({ connected, children }: Props) => {
       </ColMiddle>
       <Banner>
         <Typography variant="body1" sx={{ mb: 2 }}>
-          {bannerMessage}, click <a target="_blank" href="https://github.com/Consensys/starknet-snap/blob/main/docs/tutorial-resolving-stuck-funds.md">here</a> to access the tutorial
+          {bannerMessage}, click{' '}
+          <a
+            target="_blank"
+            href="https://github.com/Consensys/starknet-snap/blob/main/docs/tutorial-resolving-stuck-funds.md"
+            rel="noreferrer"
+          >
+            here
+          </a>{' '}
+          to access the tutorial
         </Typography>
         <Stack
           direction="row"
