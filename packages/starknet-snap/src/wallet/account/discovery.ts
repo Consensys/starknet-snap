@@ -21,17 +21,15 @@ export class AccountContractDiscovery {
     this.network = network;
     if (discoveryType !== undefined) {
       switch (discoveryType) {
-        case AccountDiscoveryType.ForceCairo0:
-          this.contractCtors = [Cairo0Contract];
-          this.defaultContractCtor = Cairo0Contract;
-          break;
         case AccountDiscoveryType.ForceCairo1:
           this.contractCtors = [Cairo1Contract];
           this.defaultContractCtor = Cairo1Contract;
           break;
+        // We default te Cairo0 discovery
         default:
-          this.contractCtors = [Cairo1Contract, Cairo0Contract];
-          this.defaultContractCtor = Cairo1Contract;
+          this.contractCtors = [Cairo0Contract];
+          this.defaultContractCtor = Cairo0Contract;
+          break;
       }
     }
   }

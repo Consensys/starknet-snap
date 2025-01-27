@@ -17,14 +17,12 @@ interface Props {
 export const FrameworkView = ({ connected, children }: Props) => {
   // Get the current `accountDiscovery` value from the URL
   const urlParams = new URLSearchParams(window.location.search);
-  const accountDiscovery = urlParams.get('accountDiscovery');
+  const accountDiscovery = urlParams.get('accountDiscovery') ?? "FORCE_CAIRO_0";
 
   const bannerMessage =
     accountDiscovery === 'FORCE_CAIRO_1'
       ? 'This is a special version for recovering funds on a Cairo 1 account.'
-      : accountDiscovery === 'FORCE_CAIRO_0'
-      ? 'This is a special version for recovering funds on a Cairo 0 account.'
-      : 'This is a special version of the dapp for account recovery purposes.';
+      : 'This is a special version for recovering funds on a Cairo 0 account.';
 
   const handleAccountChange = (version: string) => {
     // Update the URL without reloading the page
@@ -47,7 +45,7 @@ export const FrameworkView = ({ connected, children }: Props) => {
       </ColMiddle>
       <Banner>
         <Typography variant="body1" sx={{ mb: 2 }}>
-          {bannerMessage}
+          {bannerMessage}, click <a target="_blank" href="https://github.com/Consensys/starknet-snap/blob/main/docs/tutorial-resolving-stuck-funds.md">here</a> to access the tutorial
         </Typography>
         <Stack
           direction="row"
