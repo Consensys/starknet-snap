@@ -2,16 +2,10 @@ import { generateMnemonic } from 'bip39';
 
 import { AccountService } from '.';
 import { generateKeyDeriver } from '../../__tests__/helper';
-import {
-  mockAccountStateManager,
-  mockState,
-} from '../../state/__tests__/helper';
+import { mockAccountStateManager } from '../../state/__tests__/helper';
 import { AccountStateManager } from '../../state/account-state-manager';
 import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../../utils/constants';
-import {
-  AccountNotFoundError,
-  MaxAccountLimitExceededError,
-} from '../../utils/exceptions';
+import { AccountNotFoundError } from '../../utils/exceptions';
 import { createAccountService } from '../../utils/factory';
 import * as snapUtils from '../../utils/snap';
 import {
@@ -63,23 +57,17 @@ describe('AccountService', () => {
       );
       await mockSnapDeriver(mnemonicString);
 
-      const {
-        getNextIndexSpy,
-        isMaxAccountLimitExceededSpy,
-        upsertAccountSpy,
-      } = mockAccountStateManager();
+      const { getNextIndexSpy, upsertAccountSpy } = mockAccountStateManager();
 
       mockAccountContractReader({});
 
       getNextIndexSpy.mockResolvedValue(hdIndex);
-      isMaxAccountLimitExceededSpy.mockResolvedValue(false);
 
       return {
         upsertAccountSpy,
         getNextIndexSpy,
         getCairoContractSpy,
         account: accountObj,
-        isMaxAccountLimitExceededSpy,
       };
     };
 
@@ -131,42 +119,6 @@ describe('AccountService', () => {
       expect(result).toHaveProperty('publicKey', account.publicKey);
       expect(result).toHaveProperty('hdIndex', hdIndex);
       expect(result).toHaveProperty('addressSalt', account.publicKey);
-    });
-
-    it('throws `MaxAccountLimitExceededError` error if the account to derive reach the maximum', async () => {
-      const { isMaxAccountLimitExceededSpy } =
-        await setupDeriveAccountByIndexTest(0);
-      isMaxAccountLimitExceededSpy.mockResolvedValue(true);
-
-      const service = createAccountService(network);
-
-      await expect(service.deriveAccountByIndex()).rejects.toThrow(
-        MaxAccountLimitExceededError,
-      );
-    });
-
-    it('does not modify the state if an error has thrown', async () => {
-      const { setDataSpy } = await mockState({});
-      // mockAccountStateManager is only returning the spies,
-      // it will not mock the function to return a value.
-      const { isMaxAccountLimitExceededSpy } = mockAccountStateManager();
-
-      const mnemonicString = generateMnemonic();
-      await mockDeriveAccount(0, mnemonicString);
-      await mockSnapDeriver(mnemonicString);
-      mockAccountContractReader({});
-
-      // A `MaxAccountLimitExceededError` will be thrown when `isMaxAccountLimitExceeded` is true.
-      // Since this checking is placed at the end of the function,
-      // it is the best way to test if the state is not modified if an error occurs.
-      isMaxAccountLimitExceededSpy.mockResolvedValue(true);
-
-      const service = createAccountService(network);
-
-      await expect(service.deriveAccountByIndex()).rejects.toThrow(
-        MaxAccountLimitExceededError,
-      );
-      expect(setDataSpy).not.toHaveBeenCalled();
     });
   });
 
