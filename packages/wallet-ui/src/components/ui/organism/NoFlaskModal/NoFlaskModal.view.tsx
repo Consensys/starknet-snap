@@ -7,11 +7,10 @@ import {
   Wrapper,
 } from './NoFlaskModal.style';
 import { AlertView } from '../../atom/Alert/Alert.view';
-import { useStarkNetSnap } from 'services';
+import { useMultiLanguage } from 'services';
 
 export const NoFlaskModalView = () => {
-  const { getTranslator } = useStarkNetSnap();
-  const translate = getTranslator();
+  const { translate } = useMultiLanguage();
 
   return (
     translate && (

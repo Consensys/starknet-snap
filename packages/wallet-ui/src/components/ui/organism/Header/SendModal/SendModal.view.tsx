@@ -20,7 +20,7 @@ import { Bold, Normal } from '../../ConnectInfoModal/ConnectInfoModal.style';
 import { DropDown } from 'components/ui/molecule/DropDown';
 import { DEFAULT_FEE_TOKEN } from 'utils/constants';
 import { FeeToken } from 'types';
-import { useStarkNetSnap } from 'services';
+import { useMultiLanguage, useStarkNetSnap } from 'services';
 import { InfoText } from 'components/ui/molecule/AddressInput/AddressInput.style';
 
 interface Props {
@@ -31,7 +31,8 @@ export const SendModalView = ({ closeModal }: Props) => {
   const networks = useAppSelector((state) => state.networks);
   const chainId = networks?.items[networks.activeNetwork]?.chainId;
   const wallet = useAppSelector((state) => state.wallet);
-  const { getAddrFromStarkName, getTranslator } = useStarkNetSnap();
+  const { getAddrFromStarkName } = useStarkNetSnap();
+  const { translate } = useMultiLanguage();
   const [summaryModalOpen, setSummaryModalOpen] = useState(false);
   const [fields, setFields] = useState({
     amount: '',
@@ -46,7 +47,6 @@ export const SendModalView = ({ closeModal }: Props) => {
   const [resolvedAddress, setResolvedAddress] = useState('');
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
   const [loading, setLoading] = useState(false);
-  const translate = getTranslator();
 
   const handleChange = (fieldName: string, fieldValue: string) => {
     //Check if input amount does not exceed user balance

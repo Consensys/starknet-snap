@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAppSelector } from 'hooks/redux';
-import { useStarkNetSnap } from 'services';
+import { useMultiLanguage, useStarkNetSnap } from 'services';
 import { Alert } from 'components/ui/atom/Alert';
 import { AddressInput } from 'components/ui/molecule/AddressInput';
 import { InputWithLabel } from 'components/ui/molecule/InputWithLabel';
@@ -23,8 +23,8 @@ interface Props {
 }
 
 export const AddTokenModalView = ({ closeModal }: Props) => {
-  const { setErc20TokenBalance, addErc20Token, getTranslator } =
-    useStarkNetSnap();
+  const { setErc20TokenBalance, addErc20Token } = useStarkNetSnap();
+  const { translate } = useMultiLanguage();
   const [enabled, setEnabled] = useState(false);
   const networks = useAppSelector((state) => state.networks);
   const { accounts } = useAppSelector((state) => state.wallet);
@@ -42,7 +42,6 @@ export const AddTokenModalView = ({ closeModal }: Props) => {
       [fieldName]: fieldValue,
     }));
   };
-  const translate = getTranslator();
 
   useEffect(() => {
     const allFieldFilled = Object.values(fields).every((field) => {

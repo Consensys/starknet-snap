@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useStarkNetSnap } from 'services';
+import { useMultiLanguage, useStarkNetSnap } from 'services';
 import { useAppSelector, useAppDispatch } from 'hooks/redux';
 import Toastr from 'toastr2';
 
@@ -28,9 +28,9 @@ enum Stage {
 
 export const DeployModalView = ({ address }: Props) => {
   const dispatch = useAppDispatch();
-  const { deployAccount, waitForAccountCreation, getTranslator } =
-    useStarkNetSnap();
-  const translate = getTranslator();
+  const { deployAccount, waitForAccountCreation } = useStarkNetSnap();
+  const { translate } = useMultiLanguage();
+
   const [txnHash, setTxnHash] = useState('');
   const [stage, setStage] = useState(Stage.INIT);
   const networks = useAppSelector((state) => state.networks);

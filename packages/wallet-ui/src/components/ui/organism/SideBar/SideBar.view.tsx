@@ -22,7 +22,7 @@ import {
 import { openExplorerTab } from 'utils/utils';
 import { useAppSelector } from 'hooks/redux';
 import { AddTokenModal } from '../AddTokenModal';
-import { useStarkNetSnap } from 'services';
+import { useMultiLanguage, useStarkNetSnap } from 'services';
 import { DUMMY_ADDRESS } from 'utils/constants';
 
 interface Props {
@@ -37,11 +37,11 @@ export const SideBarView = ({ address }: Props) => {
   const [accountDetailsOpen, setAccountDetailsOpen] = useState(false);
   const wallet = useAppSelector((state) => state.wallet);
   const [addTokenOpen, setAddTokenOpen] = useState(false);
-  const { getStarkName, getTranslator } = useStarkNetSnap();
+  const { getStarkName } = useStarkNetSnap();
+  const { translate } = useMultiLanguage();
   const [starkName, setStarkName] = useState<string | undefined>(undefined);
 
   const ref = useRef<HTMLDivElement>();
-  const translate = getTranslator();
 
   useEffect(() => {
     if (ref.current) {

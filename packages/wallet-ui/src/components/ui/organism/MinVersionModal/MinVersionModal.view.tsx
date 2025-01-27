@@ -8,12 +8,11 @@ import {
 } from './MinVersionModal.style';
 import { useHasMetamask } from 'hooks/useHasMetamask';
 import { ConnectButton } from '../ConnectModal/ConnectModal.style';
-import { useStarkNetSnap } from 'services';
+import { useMultiLanguage } from 'services';
 
 export const MinVersionModalView = () => {
   const { metaMaskUpgradeRequired } = useHasMetamask();
-  const { getTranslator } = useStarkNetSnap();
-  const translate = getTranslator();
+  const { translate } = useMultiLanguage();
 
   return (
     translate && (

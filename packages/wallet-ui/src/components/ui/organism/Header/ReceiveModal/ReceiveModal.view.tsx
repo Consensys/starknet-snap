@@ -1,4 +1,4 @@
-import { useStarkNetSnap } from 'services';
+import { useMultiLanguage } from 'services';
 import {
   AddressCopy,
   AddressQrCode,
@@ -11,8 +11,7 @@ interface Props {
 }
 
 export const ReceiveModalView = ({ address }: Props) => {
-  const { getTranslator } = useStarkNetSnap();
-  const translate = getTranslator();
+  const { translate } = useMultiLanguage();
 
   return (
     translate && (

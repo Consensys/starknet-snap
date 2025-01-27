@@ -24,7 +24,7 @@ import {
   getTxnValues,
 } from './types';
 import { getHumanReadableAmount, openExplorerTab } from 'utils/utils';
-import { useStarkNetSnap } from 'services';
+import { useMultiLanguage } from 'services';
 
 interface Props {
   transaction: Transaction;
@@ -45,8 +45,9 @@ export const TransactionListItemView = ({ transaction }: Props) => {
   const [currencySymbol, setCurrencySymbol] = useState('N/A');
   const [txnValue, setTxnValue] = useState('0');
   const [txnUsdValue, setTxnUsdValue] = useState('0.00');
-  const { getTranslator, getLanguage } = useStarkNetSnap();
-  const translate = getTranslator();
+  const { translate } = useMultiLanguage();
+
+  const { language } = useAppSelector((state) => state.wallet);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -73,7 +74,7 @@ export const TransactionListItemView = ({ transaction }: Props) => {
   }, []);
 
   const txnName = getTxnName(transaction, tokenAddress);
-  const txnDate = getTxnDate(transaction, getLanguage());
+  const txnDate = getTxnDate(transaction, language);
   const txnStatus = getTxnStatus(transaction);
   const txnToFromLabel = '';
   const txnFailureReason = getTxnFailureReason(transaction);

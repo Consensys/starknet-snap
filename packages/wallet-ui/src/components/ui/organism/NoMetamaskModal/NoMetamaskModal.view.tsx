@@ -1,4 +1,4 @@
-import { useStarkNetSnap } from 'services';
+import { useMultiLanguage } from 'services';
 import {
   ConnectButton,
   DescriptionCentered,
@@ -9,8 +9,7 @@ import {
 } from './NoMetamaskModal.style';
 
 export const NoMetamaskModalView = () => {
-  const { getTranslator } = useStarkNetSnap();
-  const translate = getTranslator();
+  const { translate } = useMultiLanguage();
 
   return (
     translate && (

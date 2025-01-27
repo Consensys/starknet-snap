@@ -8,7 +8,7 @@ import {
   MenuStyled,
   Wrapper,
 } from './Framework.style';
-import { useStarkNetSnap } from 'services';
+import { useMultiLanguage } from 'services';
 
 interface Props {
   connected: boolean;
@@ -17,8 +17,7 @@ interface Props {
 
 export const FrameworkView = ({ connected, children }: Props) => {
   const [bannerOpen, setBannerOpen] = useState(true);
-  const { getTranslator } = useStarkNetSnap();
-  const translate = getTranslator();
+  const { translate } = useMultiLanguage();
 
   return (
     translate && (

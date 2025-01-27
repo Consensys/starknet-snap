@@ -28,7 +28,7 @@ import {
 } from './SendSummaryModal.style';
 import { useAppSelector } from 'hooks/redux';
 import { useEffect, useState } from 'react';
-import { useStarkNetSnap } from 'services';
+import { useMultiLanguage, useStarkNetSnap } from 'services';
 import { ethers } from 'ethers';
 import Toastr from 'toastr2';
 import { constants } from 'starknet';
@@ -64,8 +64,8 @@ export const SendSummaryModalView = ({
   const [totalAmount, setTotalAmount] = useState('');
   const [totalAmountUSD, setTotalAmountUSD] = useState('');
   const [totalExceedsBalance, setTotalExceedsBalance] = useState(false);
-  const { estimateFees, sendTransaction, getTransactions, getTranslator } =
-    useStarkNetSnap();
+  const { estimateFees, sendTransaction, getTransactions } = useStarkNetSnap();
+  const { translate } = useMultiLanguage();
 
   const ethToken = wallet.erc20TokenBalances[0];
   const feeToken =
@@ -78,8 +78,6 @@ export const SendSummaryModalView = ({
     showDuration: 1000000000,
     positionClass: 'toast-top-center',
   });
-
-  const translate = getTranslator();
 
   useEffect(() => {
     const fetchGasFee = () => {

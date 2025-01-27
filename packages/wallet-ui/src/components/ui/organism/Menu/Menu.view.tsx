@@ -19,7 +19,7 @@ import { Menu } from '@headlessui/react';
 import { theme } from 'theme/default';
 import { Radio, Skeleton } from '@mui/material';
 import { useAppDispatch, useAppSelector } from 'hooks/redux';
-import { useStarkNetSnap } from 'services';
+import { useMultiLanguage, useStarkNetSnap } from 'services';
 import {
   setWalletConnection,
   setForceReconnect,
@@ -33,10 +33,10 @@ interface IProps extends HTMLAttributes<HTMLElement> {
 }
 
 export const MenuView = ({ connected, ...otherProps }: IProps) => {
-  const { switchNetwork, getTranslator } = useStarkNetSnap();
+  const { switchNetwork } = useStarkNetSnap();
+  const { translate } = useMultiLanguage();
   const networks = useAppSelector((state) => state.networks);
   const dispatch = useAppDispatch();
-  const translate = getTranslator();
 
   const changeNetwork = async (network: number, chainId: string) => {
     const result = await switchNetwork(chainId);

@@ -9,7 +9,7 @@ import { getSpendableTotalBalance } from 'utils/utils';
 import { Buttons, HeaderButton, Wrapper } from './Header.style';
 import { ReceiveModal } from './ReceiveModal';
 import { SendModal } from './SendModal';
-import { useStarkNetSnap } from 'services';
+import { useMultiLanguage, useStarkNetSnap } from 'services';
 import { TOKEN_BALANCE_REFRESH_FREQUENCY } from 'utils/constants';
 
 interface Props {
@@ -21,9 +21,9 @@ export const HeaderView = ({ address }: Props) => {
   const [sendOpen, setSendOpen] = useState(false);
   const networks = useAppSelector((state) => state.networks);
   const wallet = useAppSelector((state) => state.wallet);
-  const { updateTokenBalance, getTranslator } = useStarkNetSnap();
+  const { updateTokenBalance } = useStarkNetSnap();
+  const { translate } = useMultiLanguage();
   const timeoutHandle = useRef(setTimeout(() => {}));
-  const translate = getTranslator();
 
   const getUSDValue = () => {
     const amountFloat = parseFloat(

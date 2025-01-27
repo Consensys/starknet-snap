@@ -1,4 +1,4 @@
-import { useStarkNetSnap } from 'services';
+import { useMultiLanguage, useStarkNetSnap } from 'services';
 import { SNAPS_DOC_URL } from 'utils/constants';
 
 import {
@@ -15,13 +15,12 @@ import {
 } from './ConnectModal.style';
 
 export const ConnectModalView = () => {
-  const { connectToSnap, getTranslator } = useStarkNetSnap();
+  const { connectToSnap } = useStarkNetSnap();
+  const { translate } = useMultiLanguage();
 
   const handleReadMoreClick = () => {
     window.open(SNAPS_DOC_URL, '_blank')?.focus();
   };
-
-  const translate = getTranslator();
 
   return (
     translate && (

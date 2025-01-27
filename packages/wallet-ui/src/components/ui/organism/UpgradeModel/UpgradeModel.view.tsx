@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useStarkNetSnap } from 'services';
+import { useMultiLanguage, useStarkNetSnap } from 'services';
 import { useAppSelector, useAppDispatch } from 'hooks/redux';
 import Toastr from 'toastr2';
 
@@ -27,14 +27,13 @@ enum Stage {
 
 export const UpgradeModelView = ({ address }: Props) => {
   const dispatch = useAppDispatch();
-  const { upgradeAccount, waitForAccountUpdate, getTranslator } =
-    useStarkNetSnap();
+  const { upgradeAccount, waitForAccountUpdate } = useStarkNetSnap();
+  const { translate } = useMultiLanguage();
   const [txnHash, setTxnHash] = useState('');
   const [stage, setStage] = useState(Stage.INIT);
   const networks = useAppSelector((state) => state.networks);
   const chainId = networks?.items[networks.activeNetwork]?.chainId;
   const toastr = new Toastr();
-  const translate = getTranslator();
 
   const onUpgrade = async () => {
     if (!translate) return;

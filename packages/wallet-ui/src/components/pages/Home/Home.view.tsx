@@ -3,7 +3,7 @@ import { Header } from 'components/ui/organism/Header';
 import { SideBar } from 'components/ui/organism/SideBar';
 import { RightPart, Wrapper, NoTransactions } from './Home.style';
 import { useAppSelector } from 'hooks/redux';
-import { useStarkNetSnap } from 'services';
+import { useMultiLanguage } from 'services';
 interface Props {
   address: string;
 }
@@ -14,8 +14,8 @@ export const HomeView = ({ address }: Props) => {
   );
   const loader = useAppSelector((state) => state.UI.loader);
   const { upgradeModalVisible } = useAppSelector((state) => state.modals);
-  const { getTranslator } = useStarkNetSnap();
-  const translate = getTranslator();
+  const { translate } = useMultiLanguage();
+
   return (
     translate && (
       <Wrapper>

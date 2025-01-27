@@ -14,6 +14,8 @@ import {
   setTransactions,
   setTransactionDeploy,
   setForceReconnect,
+  setLanguage,
+  setLocale,
 } from '../slices/walletSlice';
 import Toastr from 'toastr2';
 import {
@@ -40,19 +42,6 @@ import {
   TransactionType,
   UniversalDetails,
 } from 'starknet';
-import { useCallback, useEffect, useState } from 'react';
-
-export type Locale = Record<
-  string,
-  {
-    message: string;
-  }
->;
-
-export type Translator = (
-  key: string,
-  ...args: (string | undefined)[]
-) => string;
 
 export const useStarkNetSnap = () => {
   const dispatch = useAppDispatch();
@@ -60,9 +49,6 @@ export const useStarkNetSnap = () => {
   const { transactions, erc20TokenBalances, provider } = useAppSelector(
     (state) => state.wallet,
   );
-
-  const [locale, setLocale] = useState<Locale | null>(null);
-  const [language, setLanguage] = useState<string>('en');
 
   const snapId = process.env.REACT_APP_SNAP_ID
     ? process.env.REACT_APP_SNAP_ID
@@ -124,20 +110,7 @@ export const useStarkNetSnap = () => {
       });
   };
 
-  const loadLocale = async () => {
-    try {
-      const userLocale = await getUserLocalePreference();
-      setLocale(userLocale);
-    } catch (error) {
-      console.error('Error loading locale:', error);
-    }
-  };
-
-  const getLanguage = useCallback(() => {
-    return language;
-  }, [language]);
-
-  const getUserLocalePreference = async (): Promise<Locale> => {
+  const loadPreferences = async () => {
     try {
       const { locale: userLocale } = await provider.request({
         method: 'wallet_invokeSnap',
@@ -148,29 +121,15 @@ export const useStarkNetSnap = () => {
           },
         },
       });
-      setLanguage(userLocale as string);
-      return (await import(`../assets/locales/${userLocale}.json`)).messages;
+      const messages = await import(`../assets/locales/${userLocale}.json`);
+      dispatch(setLanguage(userLocale as string));
+      dispatch(setLocale(messages.messages));
     } catch (error) {
-      return (await import(`../assets/locales/en.json`)).messages;
-    }
-  };
-  const getTranslator = (): Translator | null => {
-    if (!locale) return null;
-
-    return (key: string, ...args: (string | undefined)[]): string => {
-      const template = locale[key]?.message ?? `{${key}}`;
-
-      // Replace placeholders like {1}, {2}, etc., with corresponding arguments
-      const translatedString = template.replace(
-        /\{(\d+)\}/g,
-        (_, index: string) => {
-          const argIndex = parseInt(index, 10) - 1; // {1} corresponds to args[0], {2} to args[1], etc.
-          return args[argIndex] ?? `{${index}}`; // Fallback to placeholder if argument is missing
-        },
+      console.error(
+        'Failed to load user preferences. Falling back to default locale.',
+        error,
       );
-
-      return translatedString;
-    };
+    }
   };
 
   const getNetworks = async () => {
@@ -298,6 +257,7 @@ export const useStarkNetSnap = () => {
       dispatch(setActiveNetwork(idx));
       const chainId = net.chainId;
       await getWalletData(chainId, nets);
+      await loadPreferences();
     } catch (err: any) {
       if (err.code && err.code === 4100) {
         const toastr = new Toastr();
@@ -1040,16 +1000,8 @@ export const useStarkNetSnap = () => {
     }
   };
 
-  useEffect(() => {
-    if (provider) {
-      loadLocale();
-    }
-  });
-
   return {
     connectToSnap,
-    getLanguage,
-    getTranslator,
     getNetworks,
     getAccounts,
     addAccount,

@@ -3,7 +3,7 @@ import { Button } from 'components/ui/atom/Button';
 import { Bold, ButtonDiv, Normal, Wrapper } from './ConnectInfoModal.style';
 import { useAppDispatch, useAppSelector } from 'hooks/redux';
 import { setInfoModalVisible } from 'slices/modalSlice';
-import { useStarkNetSnap } from 'services';
+import { useMultiLanguage } from 'services';
 
 interface Props {
   address: string;
@@ -13,8 +13,7 @@ interface Props {
 export const ConnectInfoModalView = ({ address, onButtonClick }: Props) => {
   const networks = useAppSelector((state) => state.networks);
   const dispatch = useAppDispatch();
-  const { getTranslator } = useStarkNetSnap();
-  const translate = getTranslator();
+  const { translate } = useMultiLanguage();
 
   return (
     translate && (

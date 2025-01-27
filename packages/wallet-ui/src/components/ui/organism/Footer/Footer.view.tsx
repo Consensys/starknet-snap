@@ -1,4 +1,4 @@
-import { useStarkNetSnap } from 'services';
+import { useMultiLanguage } from 'services';
 import {
   MetamaskSnaps,
   PoweredBy,
@@ -10,8 +10,7 @@ import {
 
 export const FooterView = () => {
   const currentYr = new Date().getFullYear();
-  const { getTranslator } = useStarkNetSnap();
-  const translate = getTranslator();
+  const { translate } = useMultiLanguage();
 
   return (
     translate && (

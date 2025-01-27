@@ -2,7 +2,7 @@ import { PopperPlacementType } from '@mui/material';
 import { shortenAddress, shortenDomain } from 'utils/utils';
 import { PopperTooltip } from '../PopperTooltip';
 import { Wrapper } from './AccountAddress.style';
-import { useStarkNetSnap } from 'services';
+import { useMultiLanguage } from 'services';
 
 interface Props {
   address: string;
@@ -20,8 +20,7 @@ export const AccountAddressView = ({
   const handleAddressClick = () => {
     navigator.clipboard.writeText(address);
   };
-  const { getTranslator } = useStarkNetSnap();
-  const translate = getTranslator();
+  const { translate } = useMultiLanguage();
 
   return (
     translate && (

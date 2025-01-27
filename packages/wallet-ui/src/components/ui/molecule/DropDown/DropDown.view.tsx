@@ -3,7 +3,7 @@ import 'react-dropdown/style.css';
 import { Group, Option, ReactDropdownProps } from 'react-dropdown';
 import { Label } from 'components/ui/atom/Label';
 import { HelperText } from 'components/ui/atom/HelperText';
-import { useStarkNetSnap } from 'services';
+import { useMultiLanguage } from 'services';
 
 interface Props extends ReactDropdownProps {
   error?: boolean;
@@ -22,8 +22,7 @@ export const DropDownView = ({
   value,
   ...otherProps
 }: Props) => {
-  const { getTranslator } = useStarkNetSnap();
-  const translate = getTranslator();
+  const { translate } = useMultiLanguage();
 
   return (
     translate && (
