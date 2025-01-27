@@ -12,25 +12,19 @@ export const NoMetamaskModalView = () => {
   const { translate } = useMultiLanguage();
 
   return (
-    translate && (
-      <Wrapper>
-        <StarknetLogo />
-        <Title>{translate('metaMaskExtensionRequired')}</Title>
-        <DescriptionCentered>
-          {translate('installMetaMaskToUseSnap')}
-          <br />
-          <br />
-        </DescriptionCentered>
-        <a
-          href="https://metamask.io/"
-          target="_blank"
-          rel="noreferrer noopener"
-        >
-          <ConnectButton customIconLeft={<MetamaskIcon />} onClick={() => {}}>
-            {translate('downloadMetaMask')}
-          </ConnectButton>
-        </a>
-      </Wrapper>
-    )
+    <Wrapper>
+      <StarknetLogo />
+      <Title>{translate('metaMaskExtensionRequired')}</Title>
+      <DescriptionCentered>
+        {translate('installMetaMaskToUseSnap')}
+        <br />
+        <br />
+      </DescriptionCentered>
+      <a href="https://metamask.io/" target="_blank" rel="noreferrer noopener">
+        <ConnectButton customIconLeft={<MetamaskIcon />} onClick={() => {}}>
+          {translate('downloadMetaMask')}
+        </ConnectButton>
+      </a>
+    </Wrapper>
   );
 };

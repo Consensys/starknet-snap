@@ -14,12 +14,10 @@ export const ReceiveModalView = ({ address }: Props) => {
   const { translate } = useMultiLanguage();
 
   return (
-    translate && (
-      <Wrapper>
-        <Title>{translate('receive')}</Title>
-        <AddressQrCode value={address} />
-        <AddressCopy address={address} placement="top" />
-      </Wrapper>
-    )
+    <Wrapper>
+      <Title>{translate('receive')}</Title>
+      <AddressQrCode value={address} />
+      <AddressCopy address={address} placement="top" />
+    </Wrapper>
   );
 };

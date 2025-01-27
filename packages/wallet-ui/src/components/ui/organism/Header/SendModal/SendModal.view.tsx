@@ -129,87 +129,83 @@ export const SendModalView = ({ closeModal }: Props) => {
   };
 
   return (
-    translate && (
-      <>
-        {!summaryModalOpen && (
-          <div>
-            <Wrapper>
-              <Header>
-                <Title>{translate('send')}</Title>
-              </Header>
-              <Network>
-                <Normal>{translate('network')}</Normal>
-                <Bold>{networks.items[networks.activeNetwork].name}</Bold>
-              </Network>
-              <AddressInput
-                label={translate('to')}
-                placeholder={translate('pasteRecipientAddress')}
-                onChange={(value) =>
-                  handleChange('address', value.target.value)
-                }
-                disableValidate
-                validateError={errors.address}
+    <>
+      {!summaryModalOpen && (
+        <div>
+          <Wrapper>
+            <Header>
+              <Title>{translate('send')}</Title>
+            </Header>
+            <Network>
+              <Normal>{translate('network')}</Normal>
+              <Bold>{networks.items[networks.activeNetwork].name}</Bold>
+            </Network>
+            <AddressInput
+              label={translate('to')}
+              placeholder={translate('pasteRecipientAddress')}
+              onChange={(value) => handleChange('address', value.target.value)}
+              disableValidate
+              validateError={errors.address}
+            />
+            {isValidStarkName(fields.address) && resolvedAddress && (
+              <InfoText>{shortenAddress(resolvedAddress, 12)}</InfoText>
+            )}
+            <SeparatorSmall />
+            <MessageAlert
+              variant="info"
+              text={translate('validStarknetAddressOnly')}
+            />
+            <Separator />
+            <AmountInput
+              label={translate('amount')}
+              onChangeCustom={(value) => handleChange('amount', value)}
+              error={errors.amount !== '' ? true : false}
+              helperText={errors.amount}
+              decimalsMax={wallet.erc20TokenBalanceSelected.decimals}
+              asset={wallet.erc20TokenBalanceSelected}
+            />
+            <SeparatorSmall />
+            <div>
+              <label htmlFor="feeToken">
+                {translate('selectTokenForTransactionFees')}
+              </label>
+              <DropDown
+                value={fields.feeToken}
+                options={Object.values(FeeToken).map((token) => ({
+                  label: token,
+                  value: token,
+                }))}
+                onChange={(e) => handleChange('feeToken', e.value)}
               />
-              {isValidStarkName(fields.address) && resolvedAddress && (
-                <InfoText>{shortenAddress(resolvedAddress, 12)}</InfoText>
-              )}
-              <SeparatorSmall />
-              <MessageAlert
-                variant="info"
-                text={translate('validStarknetAddressOnly')}
-              />
-              <Separator />
-              <AmountInput
-                label={translate('amount')}
-                onChangeCustom={(value) => handleChange('amount', value)}
-                error={errors.amount !== '' ? true : false}
-                helperText={errors.amount}
-                decimalsMax={wallet.erc20TokenBalanceSelected.decimals}
-                asset={wallet.erc20TokenBalanceSelected}
-              />
-              <SeparatorSmall />
-              <div>
-                <label htmlFor="feeToken">
-                  {translate('selectTokenForTransactionFees')}
-                </label>
-                <DropDown
-                  value={fields.feeToken}
-                  options={Object.values(FeeToken).map((token) => ({
-                    label: token,
-                    value: token,
-                  }))}
-                  onChange={(e) => handleChange('feeToken', e.value)}
-                />
-              </div>
-            </Wrapper>
-            <Buttons>
-              <ButtonStyled
-                onClick={closeModal}
-                backgroundTransparent
-                borderVisible
-              >
-                {translate('cancel')}
-              </ButtonStyled>
-              <ButtonStyled
-                onClick={() => setSummaryModalOpen(true)}
-                enabled={confirmEnabled()}
-              >
-                {translate('confirm')}
-              </ButtonStyled>
-            </Buttons>
-          </div>
-        )}
+            </div>
+          </Wrapper>
+          <Buttons>
+            <ButtonStyled
+              onClick={closeModal}
+              backgroundTransparent
+              borderVisible
+            >
+              {translate('cancel')}
+            </ButtonStyled>
+            <ButtonStyled
+              onClick={() => setSummaryModalOpen(true)}
+              enabled={confirmEnabled()}
+            >
+              {translate('confirm')}
+            </ButtonStyled>
+          </Buttons>
+        </div>
+      )}
 
-        {summaryModalOpen && (
-          <SendSummaryModal
-            closeModal={closeModal}
-            address={resolvedAddress}
-            amount={fields.amount}
-            chainId={fields.chainId}
-            selectedFeeToken={fields.feeToken} // Pass the selected fee token
-          />
-        )}
-      </>
-    )
+      {summaryModalOpen && (
+        <SendSummaryModal
+          closeModal={closeModal}
+          address={resolvedAddress}
+          amount={fields.amount}
+          chainId={fields.chainId}
+          selectedFeeToken={fields.feeToken} // Pass the selected fee token
+        />
+      )}
+    </>
   );
 };

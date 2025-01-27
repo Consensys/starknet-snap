@@ -25,20 +25,18 @@ export const DropDownView = ({
   const { translate } = useMultiLanguage();
 
   return (
-    translate && (
-      <Wrapper>
-        <Label error={error}>{label}</Label>
-        <DropdownStyled
-          error={error}
-          disabled={disabled}
-          options={options}
-          value={value}
-          placeholder={translate('selectAnOption')}
-          {...otherProps}
-        />
+    <Wrapper>
+      <Label error={error}>{label}</Label>
+      <DropdownStyled
+        error={error}
+        disabled={disabled}
+        options={options}
+        value={value}
+        placeholder={translate('selectAnOption')}
+        {...otherProps}
+      />
 
-        {helperText && <HelperText>{helperText}</HelperText>}
-      </Wrapper>
-    )
+      {helperText && <HelperText>{helperText}</HelperText>}
+    </Wrapper>
   );
 };

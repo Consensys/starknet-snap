@@ -23,32 +23,30 @@ export const AccountAddressView = ({
   const { translate } = useMultiLanguage();
 
   return (
-    translate && (
-      <>
+    <>
+      <PopperTooltip
+        content={translate('copied')}
+        closeTrigger="click"
+        placement={placement}
+      >
         <PopperTooltip
-          content={translate('copied')}
-          closeTrigger="click"
+          content={translate('copyToClipboard')}
+          closeTrigger="hover"
           placement={placement}
         >
-          <PopperTooltip
-            content={translate('copyToClipboard')}
-            closeTrigger="hover"
-            placement={placement}
+          <Wrapper
+            iconRight="clone"
+            onClick={handleAddressClick}
+            backgroundTransparent
           >
-            <Wrapper
-              iconRight="clone"
-              onClick={handleAddressClick}
-              backgroundTransparent
-            >
-              {full
-                ? starkName ?? address
-                : starkName
-                ? shortenDomain(starkName)
-                : shortenAddress(address)}
-            </Wrapper>
-          </PopperTooltip>
+            {full
+              ? starkName ?? address
+              : starkName
+              ? shortenDomain(starkName)
+              : shortenAddress(address)}
+          </Wrapper>
         </PopperTooltip>
-      </>
-    )
+      </PopperTooltip>
+    </>
   );
 };

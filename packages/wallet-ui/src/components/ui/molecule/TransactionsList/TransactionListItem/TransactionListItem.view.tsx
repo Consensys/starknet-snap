@@ -79,39 +79,37 @@ export const TransactionListItemView = ({ transaction }: Props) => {
   const txnToFromLabel = '';
   const txnFailureReason = getTxnFailureReason(transaction);
   return (
-    translate && (
-      <Wrapper
-        onClick={() =>
-          openExplorerTab(transaction.txnHash, 'tx', transaction.chainId)
-        }
-      >
-        <Left>
-          <LeftIcon>
-            <IconStyled transactionname={txnName} icon={getIcon(txnName)} />
-          </LeftIcon>
-          <Column>
-            <Label>{translate(toCamelCase(txnName))}</Label>
-            <Description>
-              {txnDate}
-              <br />
-              <Status status={transaction.executionStatus}>
-                {txnStatus}
-                {txnFailureReason}
-              </Status>
-            </Description>
-          </Column>
-        </Left>
-        <Middle>{txnToFromLabel} </Middle>
-        <Right>
-          {txnName === 'Send' && (
-            <AssetQuantity
-              currency={currencySymbol}
-              currencyValue={txnValue}
-              USDValue={txnUsdValue}
-            />
-          )}
-        </Right>
-      </Wrapper>
-    )
+    <Wrapper
+      onClick={() =>
+        openExplorerTab(transaction.txnHash, 'tx', transaction.chainId)
+      }
+    >
+      <Left>
+        <LeftIcon>
+          <IconStyled transactionname={txnName} icon={getIcon(txnName)} />
+        </LeftIcon>
+        <Column>
+          <Label>{translate(toCamelCase(txnName))}</Label>
+          <Description>
+            {txnDate}
+            <br />
+            <Status status={transaction.executionStatus}>
+              {txnStatus}
+              {txnFailureReason}
+            </Status>
+          </Description>
+        </Column>
+      </Left>
+      <Middle>{txnToFromLabel} </Middle>
+      <Right>
+        {txnName === 'Send' && (
+          <AssetQuantity
+            currency={currencySymbol}
+            currencyValue={txnValue}
+            USDValue={txnUsdValue}
+          />
+        )}
+      </Right>
+    </Wrapper>
   );
 };

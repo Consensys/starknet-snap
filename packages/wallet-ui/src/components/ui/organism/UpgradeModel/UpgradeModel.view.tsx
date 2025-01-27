@@ -82,65 +82,55 @@ export const UpgradeModelView = ({ address }: Props) => {
     switch (stage) {
       case Stage.INIT:
         return (
-          translate && (
-            <>
-              <DescriptionCentered>
-                {translate('newVersionOfSmartContractNecessaryPart1')} <br />
-                <br />
-                {translate('newVersionOfSmartContractNecessaryPart2')} <br />
-                <br />
-                {translate('newVersionOfSmartContractNecessaryPart3')} <br />
-                {translate('newVersionOfSmartContractNecessaryPart4')}
-              </DescriptionCentered>
-              <UpgradeButton onClick={onUpgrade}>
-                {translate('upgrade')}
-              </UpgradeButton>
-            </>
-          )
+          <>
+            <DescriptionCentered>
+              {translate('newVersionOfSmartContractNecessaryPart1')} <br />
+              <br />
+              {translate('newVersionOfSmartContractNecessaryPart2')} <br />
+              <br />
+              {translate('newVersionOfSmartContractNecessaryPart3')} <br />
+              {translate('newVersionOfSmartContractNecessaryPart4')}
+            </DescriptionCentered>
+            <UpgradeButton onClick={onUpgrade}>
+              {translate('upgrade')}
+            </UpgradeButton>
+          </>
         );
       case Stage.WAITING_FOR_TXN:
         return (
-          translate && (
-            <DescriptionCentered>
-              {translate('waitingForTransaction')}
-            </DescriptionCentered>
-          )
+          <DescriptionCentered>
+            {translate('waitingForTransaction')}
+          </DescriptionCentered>
         );
       case Stage.SUCCESS:
         return (
-          translate && (
-            <DescriptionCentered>
-              {translate('accountUpgradedSuccessfully')}
-            </DescriptionCentered>
-          )
+          <DescriptionCentered>
+            {translate('accountUpgradedSuccessfully')}
+          </DescriptionCentered>
         );
       default:
         return (
-          translate && (
-            <DescriptionCentered>
-              {translate('transactionHash')} <br />{' '}
-              <Txnlink onClick={() => openExplorerTab(txnHash, 'tx', chainId)}>
-                {shortenAddress(txnHash)}{' '}
-              </Txnlink>
-              <br />
-              {translate('upgradeTransactionPendingPart1')} <br />
-              <br />
-              {translate('upgradeTransactionPendingPart2')} <br />
-              <br />
-              {translate('upgradeTransactionPendingPart3')}
-            </DescriptionCentered>
-          )
+          <DescriptionCentered>
+            {translate('transactionHash')} <br />{' '}
+            <Txnlink onClick={() => openExplorerTab(txnHash, 'tx', chainId)}>
+              {shortenAddress(txnHash)}{' '}
+            </Txnlink>
+            <br />
+            {translate('upgradeTransactionPendingPart1')} <br />
+            <br />
+            {translate('upgradeTransactionPendingPart2')} <br />
+            <br />
+            {translate('upgradeTransactionPendingPart3')}
+          </DescriptionCentered>
         );
     }
   };
 
   return (
-    translate && (
-      <Wrapper>
-        <StarknetLogo />
-        <Title>{translate('upgradeAccount')}</Title>
-        {renderComponent()}
-      </Wrapper>
-    )
+    <Wrapper>
+      <StarknetLogo />
+      <Title>{translate('upgradeAccount')}</Title>
+      {renderComponent()}
+    </Wrapper>
   );
 };

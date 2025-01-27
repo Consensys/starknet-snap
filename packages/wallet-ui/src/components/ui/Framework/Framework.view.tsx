@@ -20,20 +20,18 @@ export const FrameworkView = ({ connected, children }: Props) => {
   const { translate } = useMultiLanguage();
 
   return (
-    translate && (
-      <Wrapper>
-        <ColMiddle>
-          <MenuStyled connected={connected} />
-          <Content>{children}</Content>
-          <Footer />
-        </ColMiddle>
-        {bannerOpen && (
-          <Banner>
-            {translate('openBetaVersion')}{' '}
-            <CloseIcon icon={'close'} onClick={() => setBannerOpen(false)} />
-          </Banner>
-        )}
-      </Wrapper>
-    )
+    <Wrapper>
+      <ColMiddle>
+        <MenuStyled connected={connected} />
+        <Content>{children}</Content>
+        <Footer />
+      </ColMiddle>
+      {bannerOpen && (
+        <Banner>
+          {translate('openBetaVersion')}{' '}
+          <CloseIcon icon={'close'} onClick={() => setBannerOpen(false)} />
+        </Banner>
+      )}
+    </Wrapper>
   );
 };

@@ -23,31 +23,26 @@ export const ConnectModalView = () => {
   };
 
   return (
-    translate && (
-      <Wrapper>
-        <StarknetLogo />
-        <Title>
-          {translate('connectTo')} MetaMask
-          <br />
-          Starknet Snap
-        </Title>
-        <DescriptionCentered>
-          {translate('starknetSnapInstallationPrompt')}
-        </DescriptionCentered>
-        <WhatIsSnapDiv>
-          <WhatIsSnap>{translate('whatIsASnap')}</WhatIsSnap>
-          <Description>{translate('snapsExtendMetaMask')}</Description>
-          <ReadMore onClick={handleReadMoreClick}>
-            {translate('readMore')}
-          </ReadMore>
-        </WhatIsSnapDiv>
-        <ConnectButton
-          customIconLeft={<MetamaskIcon />}
-          onClick={connectToSnap}
-        >
-          {translate('connectWithMetaMask')}
-        </ConnectButton>
-      </Wrapper>
-    )
+    <Wrapper>
+      <StarknetLogo />
+      <Title>
+        {translate('connectTo')} MetaMask
+        <br />
+        Starknet Snap
+      </Title>
+      <DescriptionCentered>
+        {translate('starknetSnapInstallationPrompt')}
+      </DescriptionCentered>
+      <WhatIsSnapDiv>
+        <WhatIsSnap>{translate('whatIsASnap')}</WhatIsSnap>
+        <Description>{translate('snapsExtendMetaMask')}</Description>
+        <ReadMore onClick={handleReadMoreClick}>
+          {translate('readMore')}
+        </ReadMore>
+      </WhatIsSnapDiv>
+      <ConnectButton customIconLeft={<MetamaskIcon />} onClick={connectToSnap}>
+        {translate('connectWithMetaMask')}
+      </ConnectButton>
+    </Wrapper>
   );
 };

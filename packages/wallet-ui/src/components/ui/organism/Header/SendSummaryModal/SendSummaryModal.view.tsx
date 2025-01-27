@@ -235,105 +235,99 @@ export const SendSummaryModalView = ({
   };
 
   return (
-    translate && (
-      <div>
-        <Wrapper>
-          <Header>
-            <Title>{translate('send')}</Title>
-          </Header>
-          <ToDiv>To</ToDiv>
-          <AddressDiv>{shortenAddress(address)}</AddressDiv>
-          <AssetQuantity
-            currency={wallet.erc20TokenBalanceSelected.symbol}
-            currencyValue={getMaxDecimalsReadable(
-              wallet.erc20TokenBalanceSelected,
-              amount,
+    <div>
+      <Wrapper>
+        <Header>
+          <Title>{translate('send')}</Title>
+        </Header>
+        <ToDiv>To</ToDiv>
+        <AddressDiv>{shortenAddress(address)}</AddressDiv>
+        <AssetQuantity
+          currency={wallet.erc20TokenBalanceSelected.symbol}
+          currencyValue={getMaxDecimalsReadable(
+            wallet.erc20TokenBalanceSelected,
+            amount,
+          )}
+          USDValue={amountUsdPrice}
+          size="medium"
+          centered
+        />
+        <Summary>
+          <LeftSummary>
+            <PopperTooltip
+              placement="top"
+              closeTrigger="hover"
+              content={
+                <EstimatedFeesTooltip>
+                  {translate('gasFeesDefinition')}
+                  <br></br>
+                  <br></br>
+                </EstimatedFeesTooltip>
+              }
+            >
+              {translate('estimatedFee')}
+            </PopperTooltip>
+          </LeftSummary>
+          <RightSummary>
+            {estimatingGas && <LoadingWrapper />}
+            {!estimatingGas && (
+              <>
+                <CurrencyAmount>
+                  {gasFeesAmount} {selectedFeeToken}
+                </CurrencyAmount>
+                <USDAmount>{gasFeesAmountUSD} USD</USDAmount>
+              </>
             )}
-            USDValue={amountUsdPrice}
-            size="medium"
-            centered
+          </RightSummary>
+        </Summary>
+        {!estimatingGas && (
+          <TotalAmount>
+            {translate('maximumFees')} {gasFeesAmount} {selectedFeeToken}
+          </TotalAmount>
+        )}
+        {gasFees.includeDeploy && (
+          <IncludeDeploy>
+            *{translate('feesIncludeOneTimeDeploymentFee')}
+          </IncludeDeploy>
+        )}
+        <Summary>
+          <LeftSummary>
+            <PopperTooltip
+              placement="right"
+              closeTrigger="hover"
+              content="Amount + Fee"
+            >
+              {translate('total')}
+            </PopperTooltip>
+          </LeftSummary>
+          <RightSummary>
+            <CurrencyAmount>{totalAmountDisplay()}</CurrencyAmount>
+            <USDAmount>{totalAmountUSD} USD</USDAmount>
+          </RightSummary>
+        </Summary>
+        {totalAmount && (
+          <TotalAmount>
+            {translate('maximumAmount')} {totalAmount} {selectedFeeToken}
+          </TotalAmount>
+        )}
+        {totalExceedsBalance && (
+          <AlertTotalExceedsAmount
+            text={translate('insufficientFundsForFees')}
+            variant="warning"
           />
-          <Summary>
-            <LeftSummary>
-              <PopperTooltip
-                placement="top"
-                closeTrigger="hover"
-                content={
-                  <EstimatedFeesTooltip>
-                    {translate('gasFeesDefinition')}
-                    <br></br>
-                    <br></br>
-                  </EstimatedFeesTooltip>
-                }
-              >
-                {translate('estimatedFee')}
-              </PopperTooltip>
-            </LeftSummary>
-            <RightSummary>
-              {estimatingGas && <LoadingWrapper />}
-              {!estimatingGas && (
-                <>
-                  <CurrencyAmount>
-                    {gasFeesAmount} {selectedFeeToken}
-                  </CurrencyAmount>
-                  <USDAmount>{gasFeesAmountUSD} USD</USDAmount>
-                </>
-              )}
-            </RightSummary>
-          </Summary>
-          {!estimatingGas && (
-            <TotalAmount>
-              {translate('maximumFees')} {gasFeesAmount} {selectedFeeToken}
-            </TotalAmount>
-          )}
-          {gasFees.includeDeploy && (
-            <IncludeDeploy>
-              *{translate('feesIncludeOneTimeDeploymentFee')}
-            </IncludeDeploy>
-          )}
-          <Summary>
-            <LeftSummary>
-              <PopperTooltip
-                placement="right"
-                closeTrigger="hover"
-                content="Amount + Fee"
-              >
-                {translate('total')}
-              </PopperTooltip>
-            </LeftSummary>
-            <RightSummary>
-              <CurrencyAmount>{totalAmountDisplay()}</CurrencyAmount>
-              <USDAmount>{totalAmountUSD} USD</USDAmount>
-            </RightSummary>
-          </Summary>
-          {totalAmount && (
-            <TotalAmount>
-              {translate('maximumAmount')} {totalAmount} {selectedFeeToken}
-            </TotalAmount>
-          )}
-          {totalExceedsBalance && (
-            <AlertTotalExceedsAmount
-              text={translate('insufficientFundsForFees')}
-              variant="warning"
-            />
-          )}
-        </Wrapper>
-        <Buttons>
-          <ButtonStyled
-            onClick={closeModal}
-            backgroundTransparent
-            borderVisible
-          >
-            {translate('reject')}
-          </ButtonStyled>
-          <ButtonStyled
-            enabled={!estimatingGas && !gasFeesError && !totalExceedsBalance}
-            onClick={handleConfirmClick}
-          >
-            {translate('confirm')}
-          </ButtonStyled>
-        </Buttons>
-      </div>
-    )
+        )}
+      </Wrapper>
+      <Buttons>
+        <ButtonStyled onClick={closeModal} backgroundTransparent borderVisible>
+          {translate('reject')}
+        </ButtonStyled>
+        <ButtonStyled
+          enabled={!estimatingGas && !gasFeesError && !totalExceedsBalance}
+          onClick={handleConfirmClick}
+        >
+          {translate('confirm')}
+        </ButtonStyled>
+      </Buttons>
+    </div>
   );
 };

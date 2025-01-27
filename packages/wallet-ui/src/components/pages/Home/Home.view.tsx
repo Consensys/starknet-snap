@@ -17,22 +17,20 @@ export const HomeView = ({ address }: Props) => {
   const { translate } = useMultiLanguage();
 
   return (
-    translate && (
-      <Wrapper>
-        <SideBar address={address} />
-        <RightPart>
-          {!upgradeModalVisible &&
-            Object.keys(erc20TokenBalanceSelected).length > 0 && (
-              <Header address={address} />
-            )}
-          {!upgradeModalVisible && <TransactionsList transactions={[]} />}
-          {!upgradeModalVisible &&
-            Object.keys(transactions).length === 0 &&
-            !loader.isLoading && (
-              <NoTransactions>{translate('noTransactions')}</NoTransactions>
-            )}
-        </RightPart>
-      </Wrapper>
-    )
+    <Wrapper>
+      <SideBar address={address} />
+      <RightPart>
+        {!upgradeModalVisible &&
+          Object.keys(erc20TokenBalanceSelected).length > 0 && (
+            <Header address={address} />
+          )}
+        {!upgradeModalVisible && <TransactionsList transactions={[]} />}
+        {!upgradeModalVisible &&
+          Object.keys(transactions).length === 0 &&
+          !loader.isLoading && (
+            <NoTransactions>{translate('noTransactions')}</NoTransactions>
+          )}
+      </RightPart>
+    </Wrapper>
   );
 };

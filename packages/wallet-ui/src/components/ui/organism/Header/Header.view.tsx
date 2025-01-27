@@ -62,36 +62,34 @@ export const HeaderView = ({ address }: Props) => {
   };
 
   return (
-    translate && (
-      <Wrapper>
-        <AssetQuantity
-          USDValue={getUSDValue()}
-          currencyValue={getSpendableTotalBalance(
-            wallet.erc20TokenBalanceSelected,
-          )}
-          currency={wallet.erc20TokenBalanceSelected.symbol}
-          size="big"
-          centered
-        />
-        <Buttons>
-          <HeaderButton onClick={() => setReceiveOpen(true)}>
-            {translate('receive')}
-          </HeaderButton>
-          <Button
-            onClick={() => handleSendClick()}
-            backgroundTransparent
-            borderVisible
-          >
-            {translate('send')}
-          </Button>
-        </Buttons>
-        <PopIn isOpen={receiveOpen} setIsOpen={setReceiveOpen}>
-          <ReceiveModal address={address} />
-        </PopIn>
-        <PopIn isOpen={sendOpen} setIsOpen={setSendOpen}>
-          <SendModal closeModal={() => setSendOpen(false)} />
-        </PopIn>
-      </Wrapper>
-    )
+    <Wrapper>
+      <AssetQuantity
+        USDValue={getUSDValue()}
+        currencyValue={getSpendableTotalBalance(
+          wallet.erc20TokenBalanceSelected,
+        )}
+        currency={wallet.erc20TokenBalanceSelected.symbol}
+        size="big"
+        centered
+      />
+      <Buttons>
+        <HeaderButton onClick={() => setReceiveOpen(true)}>
+          {translate('receive')}
+        </HeaderButton>
+        <Button
+          onClick={() => handleSendClick()}
+          backgroundTransparent
+          borderVisible
+        >
+          {translate('send')}
+        </Button>
+      </Buttons>
+      <PopIn isOpen={receiveOpen} setIsOpen={setReceiveOpen}>
+        <ReceiveModal address={address} />
+      </PopIn>
+      <PopIn isOpen={sendOpen} setIsOpen={setSendOpen}>
+        <SendModal closeModal={() => setSendOpen(false)} />
+      </PopIn>
+    </Wrapper>
   );
 };

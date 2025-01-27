@@ -51,80 +51,74 @@ export const AddTokenModalView = ({ closeModal }: Props) => {
   }, [fields, isValidAddress]);
 
   return (
-    translate && (
-      <>
-        <Wrapper>
-          <Title>{translate('addToken')}</Title>
-          <Alert text={translate('tokenCreationWarning')} variant="warning" />
-          <Space />
-          <FormGroup>
-            <AddressInput
-              label={translate('contractAddress')}
-              placeholder=""
-              onChange={(event) => handleChange('address', event.target.value)}
-              setIsValidAddress={setIsValidAddress}
-            />
-          </FormGroup>
-          <FormGroup>
-            <InputWithLabel
-              label={translate('name')}
-              onChange={(event) => handleChange('name', event.target.value)}
-            />
-          </FormGroup>
-          <FormGroup>
-            <InputWithLabel
-              label={translate('symbol')}
-              onChange={(event) => handleChange('symbol', event.target.value)}
-            />
-          </FormGroup>
-          <FormGroup>
-            <InputWithLabel
-              label={translate('decimal')}
-              placeholder="0"
-              type="number"
-              onChange={(event) =>
-                handleChange(
-                  'decimal',
-                  isNaN(Number(event.target.value)) ? '' : event.target.value,
-                )
+    <>
+      <Wrapper>
+        <Title>{translate('addToken')}</Title>
+        <Alert text={translate('tokenCreationWarning')} variant="warning" />
+        <Space />
+        <FormGroup>
+          <AddressInput
+            label={translate('contractAddress')}
+            placeholder=""
+            onChange={(event) => handleChange('address', event.target.value)}
+            setIsValidAddress={setIsValidAddress}
+          />
+        </FormGroup>
+        <FormGroup>
+          <InputWithLabel
+            label={translate('name')}
+            onChange={(event) => handleChange('name', event.target.value)}
+          />
+        </FormGroup>
+        <FormGroup>
+          <InputWithLabel
+            label={translate('symbol')}
+            onChange={(event) => handleChange('symbol', event.target.value)}
+          />
+        </FormGroup>
+        <FormGroup>
+          <InputWithLabel
+            label={translate('decimal')}
+            placeholder="0"
+            type="number"
+            onChange={(event) =>
+              handleChange(
+                'decimal',
+                isNaN(Number(event.target.value)) ? '' : event.target.value,
+              )
+            }
+          />
+        </FormGroup>
+      </Wrapper>
+      <ButtonsWrapper>
+        <ButtonStyled onClick={closeModal} backgroundTransparent borderVisible>
+          {translate('cancel')}
+        </ButtonStyled>
+        <ButtonStyled
+          enabled={enabled}
+          onClick={async () => {
+            try {
+              const newToken = await addErc20Token(
+                fields.address,
+                fields.name,
+                fields.symbol,
+                parseFloat(fields.decimal),
+                chain,
+                accounts[0] as unknown as string,
+              );
+              if (newToken) {
+                setErc20TokenBalance(newToken);
+                toastr.success(translate('tokenAddedSuccessfully'));
               }
-            />
-          </FormGroup>
-        </Wrapper>
-        <ButtonsWrapper>
-          <ButtonStyled
-            onClick={closeModal}
-            backgroundTransparent
-            borderVisible
-          >
-            {translate('cancel')}
-          </ButtonStyled>
-          <ButtonStyled
-            enabled={enabled}
-            onClick={async () => {
-              try {
-                const newToken = await addErc20Token(
-                  fields.address,
-                  fields.name,
-                  fields.symbol,
-                  parseFloat(fields.decimal),
-                  chain,
-                  accounts[0] as unknown as string,
-                );
-                if (newToken) {
-                  setErc20TokenBalance(newToken);
-                  toastr.success(translate('tokenAddedSuccessfully'));
-                }
-                closeModal();
-              } catch (err) {
-                toastr.error(translate('errorAddingToken'));
-              }
-            }}
-          >
-            {translate('add')}
-          </ButtonStyled>
-        </ButtonsWrapper>
-      </>
-    )
+              closeModal();
+            } catch (err) {
+              toastr.error(translate('errorAddingToken'));
+            }
+          }}
+        >
+          {translate('add')}
+        </ButtonStyled>
+      </ButtonsWrapper>
+    </>
   );
 };

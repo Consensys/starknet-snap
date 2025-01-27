@@ -15,41 +15,36 @@ export const MinVersionModalView = () => {
   const { translate } = useMultiLanguage();
 
   return (
-    translate && (
-      <Wrapper>
-        <StarknetLogo />
-        {metaMaskUpgradeRequired ? (
-          <>
-            <Title>{translate('metaMaskUpgradeNeeded')}</Title>
-            <br />
-            <Description>
-              {translate('updateMetaMaskVersion', MIN_METAMASK_VERSION)}
-            </Description>
-            <br />
-            <a href="https://metamask.io" target="_blank" rel="noreferrer">
-              <ConnectButton
-                customIconLeft={<MetaMaskLogo />}
-                onClick={() => {}}
-              >
-                {translate('goToMetaMaskWebsite')}
-              </ConnectButton>
-            </a>
-          </>
-        ) : (
-          <>
-            <Title>{translate('newVersionAvailable')}</Title>
-            <Description>
-              {translate('installLatestVersion')}
-              <ul>
-                <li>{translate('deleteCurrentVersionMetaMask')}</li>
-                <li>{translate('refreshPage')}</li>
-                <li>{translate('connectToMetaMask')}</li>
-              </ul>
-              {translate('accountRecoveryInfo')}
-            </Description>
-          </>
-        )}
-      </Wrapper>
-    )
+    <Wrapper>
+      <StarknetLogo />
+      {metaMaskUpgradeRequired ? (
+        <>
+          <Title>{translate('metaMaskUpgradeNeeded')}</Title>
+          <br />
+          <Description>
+            {translate('updateMetaMaskVersion', MIN_METAMASK_VERSION)}
+          </Description>
+          <br />
+          <a href="https://metamask.io" target="_blank" rel="noreferrer">
+            <ConnectButton customIconLeft={<MetaMaskLogo />} onClick={() => {}}>
+              {translate('goToMetaMaskWebsite')}
+            </ConnectButton>
+          </a>
+        </>
+      ) : (
+        <>
+          <Title>{translate('newVersionAvailable')}</Title>
+          <Description>
+            {translate('installLatestVersion')}
+            <ul>
+              <li>{translate('deleteCurrentVersionMetaMask')}</li>
+              <li>{translate('refreshPage')}</li>
+              <li>{translate('connectToMetaMask')}</li>
+            </ul>
+            {translate('accountRecoveryInfo')}
+          </Description>
+        </>
+      )}
+    </Wrapper>
   );
 };

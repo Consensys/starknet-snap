@@ -84,69 +84,59 @@ export const DeployModalView = ({ address }: Props) => {
     switch (stage) {
       case Stage.INIT:
         return (
-          translate && (
-            <>
-              <DescriptionCentered>
-                {translate('nonZeroBalanceOnCairo0')}
-                <br />
-                <br />
-                <center>
-                  <AccountAddressView address={address}></AccountAddressView>
-                </center>
-                <br />
-                {translate('deploymentNecessaryToProceedPart1')} <br />
-                <br />
-                {translate('deploymentNecessaryToProceedPart2')} <br />
-                <br />
-                {translate('deploymentNecessaryToProceedPart3')}
-              </DescriptionCentered>
-              <DeployButton onClick={onDeploy}>Deploy</DeployButton>
-            </>
-          )
+          <>
+            <DescriptionCentered>
+              {translate('nonZeroBalanceOnCairo0')}
+              <br />
+              <br />
+              <center>
+                <AccountAddressView address={address}></AccountAddressView>
+              </center>
+              <br />
+              {translate('deploymentNecessaryToProceedPart1')} <br />
+              <br />
+              {translate('deploymentNecessaryToProceedPart2')} <br />
+              <br />
+              {translate('deploymentNecessaryToProceedPart3')}
+            </DescriptionCentered>
+            <DeployButton onClick={onDeploy}>Deploy</DeployButton>
+          </>
         );
       case Stage.WAITING_FOR_TXN:
         return (
-          translate && (
-            <DescriptionCentered>
-              {translate('waitingForTransaction')}
-            </DescriptionCentered>
-          )
+          <DescriptionCentered>
+            {translate('waitingForTransaction')}
+          </DescriptionCentered>
         );
       case Stage.SUCCESS:
         return (
-          translate && (
-            <DescriptionCentered>
-              {translate('accountDeployedSuccessfully')}
-            </DescriptionCentered>
-          )
+          <DescriptionCentered>
+            {translate('accountDeployedSuccessfully')}
+          </DescriptionCentered>
         );
       default:
         return (
-          translate && (
-            <DescriptionCentered>
-              {translate('transactionHash')} <br />{' '}
-              <Txnlink onClick={() => openExplorerTab(txnHash, 'tx', chainId)}>
-                {shortenAddress(txnHash)}{' '}
-              </Txnlink>
-              <br />
-              {translate('deployTransactionPendingPart1')} <br />
-              <br />
-              {translate('deployTransactionPendingPart2')} <br />
-              <br />
-              {translate('deployTransactionPendingPart3')}
-            </DescriptionCentered>
-          )
+          <DescriptionCentered>
+            {translate('transactionHash')} <br />{' '}
+            <Txnlink onClick={() => openExplorerTab(txnHash, 'tx', chainId)}>
+              {shortenAddress(txnHash)}{' '}
+            </Txnlink>
+            <br />
+            {translate('deployTransactionPendingPart1')} <br />
+            <br />
+            {translate('deployTransactionPendingPart2')} <br />
+            <br />
+            {translate('deployTransactionPendingPart3')}
+          </DescriptionCentered>
         );
     }
   };
 
   return (
-    translate && (
-      <Wrapper>
-        <StarknetLogo />
-        <Title>{translate('deployAccount')}</Title>
-        {renderComponent()}
-      </Wrapper>
-    )
+    <Wrapper>
+      <StarknetLogo />
+      <Title>{translate('deployAccount')}</Title>
+      {renderComponent()}
+    </Wrapper>
   );
 };

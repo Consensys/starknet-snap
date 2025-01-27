@@ -16,33 +16,31 @@ export const ConnectInfoModalView = ({ address, onButtonClick }: Props) => {
   const { translate } = useMultiLanguage();
 
   return (
-    translate && (
-      <div>
-        <Wrapper>
-          <div>
-            <Normal>{translate('network')}</Normal>
-            <Bold>{networks.items[networks.activeNetwork].name}</Bold>
-          </div>
-          <div>
-            <Normal>{translate('starknetAccount')}</Normal>
-            <Bold>{address}</Bold>
-          </div>
-          <Alert
-            variant="info"
-            text={translate('accountGeneratedWithRecoveryPhrase')}
-          />
-        </Wrapper>
-        <ButtonDiv>
-          <Button
-            onClick={() => {
-              dispatch(setInfoModalVisible(false));
-              onButtonClick && onButtonClick();
-            }}
-          >
-            {translate('gotIt')}
-          </Button>
-        </ButtonDiv>
-      </div>
-    )
+    <div>
+      <Wrapper>
+        <div>
+          <Normal>{translate('network')}</Normal>
+          <Bold>{networks.items[networks.activeNetwork].name}</Bold>
+        </div>
+        <div>
+          <Normal>{translate('starknetAccount')}</Normal>
+          <Bold>{address}</Bold>
+        </div>
+        <Alert
+          variant="info"
+          text={translate('accountGeneratedWithRecoveryPhrase')}
+        />
+      </Wrapper>
+      <ButtonDiv>
+        <Button
+          onClick={() => {
+            dispatch(setInfoModalVisible(false));
+            onButtonClick && onButtonClick();
+          }}
+        >
+          {translate('gotIt')}
+        </Button>
+      </ButtonDiv>
+    </div>
   );
 };

@@ -68,74 +68,72 @@ export const SideBarView = ({ address }: Props) => {
   }, [address, chainId]);
 
   return (
-    translate && (
-      <Wrapper>
-        <PopInStyled
-          isOpen={accountDetailsOpen}
-          setIsOpen={setAccountDetailsOpen}
-        >
-          <AccountDetailsModal address={address} />
-        </PopInStyled>
-        <PopIn
-          isOpen={infoModalOpen}
-          setIsOpen={setInfoModalOpen}
-          showClose={false}
-        >
-          <ConnectInfoModal
-            onButtonClick={() => setInfoModalOpen(false)}
-            address={address}
-          />
-        </PopIn>
-        <AccountDetails
-          arrowVisible={false}
-          closeTrigger="click"
-          offSet={[60, 0]}
-          content={
-            <AccountDetailsContent>
-              <AccountDetailButton
-                backgroundTransparent
-                iconLeft="qrcode"
-                onClick={() => setAccountDetailsOpen(true)}
-              >
-                {translate('accountDetails')}
-              </AccountDetailButton>
-              <AccountDetailButton
-                backgroundTransparent
-                iconLeft="external-link"
-                onClick={() => openExplorerTab(address, 'contract', chainId)}
-              >
-                {translate('viewOnExplorer')}
-              </AccountDetailButton>
-            </AccountDetailsContent>
-          }
-        >
-          <AccountImageStyled address={address} connected={wallet.connected} />
-        </AccountDetails>
+    <Wrapper>
+      <PopInStyled
+        isOpen={accountDetailsOpen}
+        setIsOpen={setAccountDetailsOpen}
+      >
+        <AccountDetailsModal address={address} />
+      </PopInStyled>
+      <PopIn
+        isOpen={infoModalOpen}
+        setIsOpen={setInfoModalOpen}
+        showClose={false}
+      >
+        <ConnectInfoModal
+          onButtonClick={() => setInfoModalOpen(false)}
+          address={address}
+        />
+      </PopIn>
+      <AccountDetails
+        arrowVisible={false}
+        closeTrigger="click"
+        offSet={[60, 0]}
+        content={
+          <AccountDetailsContent>
+            <AccountDetailButton
+              backgroundTransparent
+              iconLeft="qrcode"
+              onClick={() => setAccountDetailsOpen(true)}
+            >
+              {translate('accountDetails')}
+            </AccountDetailButton>
+            <AccountDetailButton
+              backgroundTransparent
+              iconLeft="external-link"
+              onClick={() => openExplorerTab(address, 'contract', chainId)}
+            >
+              {translate('viewOnExplorer')}
+            </AccountDetailButton>
+          </AccountDetailsContent>
+        }
+      >
+        <AccountImageStyled address={address} connected={wallet.connected} />
+      </AccountDetails>
 
-        <AccountLabel>{translate('myAccount')}</AccountLabel>
-        <RowDiv>
-          <InfoIcon onClick={() => setInfoModalOpen(true)}>i</InfoIcon>
-          <AccountAddress address={address} starkName={starkName} />
-        </RowDiv>
-        <DivList ref={ref as any}>
-          <AssetsList />
-        </DivList>
-        <AddTokenButton
-          customIconLeft={
-            <RoundedIcon>
-              <FontAwesomeIcon icon={['fas', 'plus']} />
-            </RoundedIcon>
-          }
-          backgroundTransparent
-          shadowVisible={listOverflow}
-          onClick={() => setAddTokenOpen(true)}
-        >
-          {translate('addToken').toUpperCase()}
-        </AddTokenButton>
-        <PopIn isOpen={addTokenOpen} setIsOpen={setAddTokenOpen}>
-          <AddTokenModal closeModal={() => setAddTokenOpen(false)} />
-        </PopIn>
-      </Wrapper>
-    )
+      <AccountLabel>{translate('myAccount')}</AccountLabel>
+      <RowDiv>
+        <InfoIcon onClick={() => setInfoModalOpen(true)}>i</InfoIcon>
+        <AccountAddress address={address} starkName={starkName} />
+      </RowDiv>
+      <DivList ref={ref as any}>
+        <AssetsList />
+      </DivList>
+      <AddTokenButton
+        customIconLeft={
+          <RoundedIcon>
+            <FontAwesomeIcon icon={['fas', 'plus']} />
+          </RoundedIcon>
+        }
+        backgroundTransparent
+        shadowVisible={listOverflow}
+        onClick={() => setAddTokenOpen(true)}
+      >
+        {translate('addToken').toUpperCase()}
+      </AddTokenButton>
+      <PopIn isOpen={addTokenOpen} setIsOpen={setAddTokenOpen}>
+        <AddTokenModal closeModal={() => setAddTokenOpen(false)} />
+      </PopIn>
+    </Wrapper>
   );
 };

@@ -24,36 +24,34 @@ export const AccountDetailsModalView = ({ address }: Props) => {
 
   const chainId = networks?.items[networks.activeNetwork]?.chainId;
   return (
-    translate && (
-      <div>
-        <AccountImageDiv>
-          <AccountImageStyled size={64} address={address} />
-        </AccountImageDiv>
-        <Wrapper>
-          <TitleDiv>
-            <Title>{translate('myAccount')}</Title>
-            {/* <ModifyIcon /> */}
-          </TitleDiv>
-          <AddressQrCode value={address} />
-          <AddressCopy address={address} />
-        </Wrapper>
-        <ButtonDiv>
-          <ButtonStyled
-            backgroundTransparent
-            borderVisible
-            onClick={() => openExplorerTab(address, 'contract', chainId)}
-          >
-            {translate('viewOnExplorer').toUpperCase()}
-          </ButtonStyled>
-          <ButtonStyled
-            backgroundTransparent
-            borderVisible
-            onClick={() => getPrivateKeyFromAddress(address, chainId)}
-          >
-            {translate('exportPrivateKey')}
-          </ButtonStyled>
-        </ButtonDiv>
-      </div>
-    )
+    <div>
+      <AccountImageDiv>
+        <AccountImageStyled size={64} address={address} />
+      </AccountImageDiv>
+      <Wrapper>
+        <TitleDiv>
+          <Title>{translate('myAccount')}</Title>
+          {/* <ModifyIcon /> */}
+        </TitleDiv>
+        <AddressQrCode value={address} />
+        <AddressCopy address={address} />
+      </Wrapper>
+      <ButtonDiv>
+        <ButtonStyled
+          backgroundTransparent
+          borderVisible
+          onClick={() => openExplorerTab(address, 'contract', chainId)}
+        >
+          {translate('viewOnExplorer').toUpperCase()}
+        </ButtonStyled>
+        <ButtonStyled
+          backgroundTransparent
+          borderVisible
+          onClick={() => getPrivateKeyFromAddress(address, chainId)}
+        >
+          {translate('exportPrivateKey')}
+        </ButtonStyled>
+      </ButtonDiv>
+    </div>
   );
 };

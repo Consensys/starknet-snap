@@ -8,11 +8,9 @@ export const LoadingSmallView = ({ ...otherProps }: Props) => {
   const { translate } = useMultiLanguage();
 
   return (
-    translate && (
-      <Wrapper {...otherProps}>
-        <LoadingSpinner icon="spinner" pulse />
-        <LoadingText>{translate('loading')}</LoadingText>
-      </Wrapper>
-    )
+    <Wrapper {...otherProps}>
+      <LoadingSpinner icon="spinner" pulse />
+      <LoadingText>{translate('loading')}</LoadingText>
+    </Wrapper>
   );
 };

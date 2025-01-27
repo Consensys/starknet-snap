@@ -13,26 +13,21 @@ export const FooterView = () => {
   const { translate } = useMultiLanguage();
 
   return (
-    translate && (
-      <>
-        <Wrapper>
-          <PoweredBy>{translate('poweredBy')}</PoweredBy>
-          <MetamaskSnaps>MetaMask Snaps</MetamaskSnaps>
+    <>
+      <Wrapper>
+        <PoweredBy>{translate('poweredBy')}</PoweredBy>
+        <MetamaskSnaps>MetaMask Snaps</MetamaskSnaps>
 
-          <TandCWrapper>
-            <CopyText>&copy;{currentYr} Consensys</CopyText>
-            <TandCLink href="https://consensys.io/terms-of-use" target="_blank">
-              {translate('termsOfUse')}
-            </TandCLink>
-            <TandCLink
-              href="https://consensys.io/privacy-policy"
-              target="_blank"
-            >
-              {translate('privacyPolicy')}
-            </TandCLink>
-          </TandCWrapper>
-        </Wrapper>
-      </>
-    )
+        <TandCWrapper>
+          <CopyText>&copy;{currentYr} Consensys</CopyText>
+          <TandCLink href="https://consensys.io/terms-of-use" target="_blank">
+            {translate('termsOfUse')}
+          </TandCLink>
+          <TandCLink href="https://consensys.io/privacy-policy" target="_blank">
+            {translate('privacyPolicy')}
+          </TandCLink>
+        </TandCWrapper>
+      </Wrapper>
+    </>
   );
 };
