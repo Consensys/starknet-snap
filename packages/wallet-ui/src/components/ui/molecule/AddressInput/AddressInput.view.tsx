@@ -39,7 +39,6 @@ export const AddressInputView = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState('');
   const [valid, setValid] = useState(false);
-
   useEffect(() => {
     if (!disableValidate || !inputRef.current) return;
     setValid(inputRef.current.value !== '' && validateError === '');

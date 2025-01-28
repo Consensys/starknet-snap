@@ -3,6 +3,7 @@ import 'react-dropdown/style.css';
 import { Group, Option, ReactDropdownProps } from 'react-dropdown';
 import { Label } from 'components/ui/atom/Label';
 import { HelperText } from 'components/ui/atom/HelperText';
+import { useMultiLanguage } from 'services';
 
 interface Props extends ReactDropdownProps {
   error?: boolean;
@@ -21,6 +22,8 @@ export const DropDownView = ({
   value,
   ...otherProps
 }: Props) => {
+  const { translate } = useMultiLanguage();
+
   return (
     <Wrapper>
       <Label error={error}>{label}</Label>
@@ -29,7 +32,7 @@ export const DropDownView = ({
         disabled={disabled}
         options={options}
         value={value}
-        placeholder="Select an option"
+        placeholder={translate('selectAnOption')}
         {...otherProps}
       />
 

@@ -8,46 +8,40 @@ import {
 } from './MinVersionModal.style';
 import { useHasMetamask } from 'hooks/useHasMetamask';
 import { ConnectButton } from '../ConnectModal/ConnectModal.style';
+import { useMultiLanguage } from 'services';
 
 export const MinVersionModalView = () => {
   const { metaMaskUpgradeRequired } = useHasMetamask();
+  const { translate } = useMultiLanguage();
+
   return (
     <Wrapper>
       <StarknetLogo />
       {metaMaskUpgradeRequired ? (
         <>
-          <Title>An upgrade of MetaMask is needed to use this dApp</Title>
+          <Title>{translate('metaMaskUpgradeNeeded')}</Title>
           <br />
           <Description>
-            Please update to MetaMask Version {MIN_METAMASK_VERSION} or higher.
+            {translate('updateMetaMaskVersion', MIN_METAMASK_VERSION)}
           </Description>
           <br />
           <a href="https://metamask.io" target="_blank" rel="noreferrer">
             <ConnectButton customIconLeft={<MetaMaskLogo />} onClick={() => {}}>
-              Go to MetaMask Website
+              {translate('goToMetaMaskWebsite')}
             </ConnectButton>
           </a>
         </>
       ) : (
         <>
-          <Title>A new version of the Starknet Snap is available</Title>
+          <Title>{translate('newVersionAvailable')}</Title>
           <Description>
-            To use this dapp, please install the latest version by following
-            those steps:
+            {translate('installLatestVersion')}
             <ul>
-              <li>
-                Delete the current version in MetaMask by going in Settings{' '}
-                {'>'} Snaps {'>'} @consensys/starknet-snap {'>'} See details{' '}
-                {'>'} Remove Snap
-              </li>
-              <li>Refresh the page</li>
-              <li>
-                Click on connect, the new version will be proposed for
-                installation.
-              </li>
+              <li>{translate('deleteCurrentVersionMetaMask')}</li>
+              <li>{translate('refreshPage')}</li>
+              <li>{translate('connectToMetaMask')}</li>
             </ul>
-            Note: Your account will be automatically recovered. Future upgrades
-            will be managed automatically
+            {translate('accountRecoveryInfo')}
           </Description>
         </>
       )}

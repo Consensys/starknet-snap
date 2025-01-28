@@ -20,7 +20,7 @@ import { Bold, Normal } from '../../ConnectInfoModal/ConnectInfoModal.style';
 import { DropDown } from 'components/ui/molecule/DropDown';
 import { DEFAULT_FEE_TOKEN } from 'utils/constants';
 import { FeeToken } from 'types';
-import { useStarkNetSnap } from 'services';
+import { useMultiLanguage, useStarkNetSnap } from 'services';
 import { InfoText } from 'components/ui/molecule/AddressInput/AddressInput.style';
 
 interface Props {
@@ -32,6 +32,7 @@ export const SendModalView = ({ closeModal }: Props) => {
   const chainId = networks?.items[networks.activeNetwork]?.chainId;
   const wallet = useAppSelector((state) => state.wallet);
   const { getAddrFromStarkName } = useStarkNetSnap();
+  const { translate } = useMultiLanguage();
   const [summaryModalOpen, setSummaryModalOpen] = useState(false);
   const [fields, setFields] = useState({
     amount: '',
@@ -49,6 +50,7 @@ export const SendModalView = ({ closeModal }: Props) => {
 
   const handleChange = (fieldName: string, fieldValue: string) => {
     //Check if input amount does not exceed user balance
+    if (!translate) return;
     setErrors((prevErrors) => ({
       ...prevErrors,
       [fieldName]: '',
@@ -64,7 +66,7 @@ export const SendModalView = ({ closeModal }: Props) => {
           if (inputAmount.gt(userBalance)) {
             setErrors((prevErrors) => ({
               ...prevErrors,
-              amount: 'Input amount exceeds user balance',
+              amount: translate('inputAmountExceedsBalance'),
             }));
           }
         }
@@ -87,7 +89,7 @@ export const SendModalView = ({ closeModal }: Props) => {
                   setResolvedAddress('');
                   setErrors((prevErrors) => ({
                     ...prevErrors,
-                    address: '.stark name doesn’t exist',
+                    address: translate('starkNameDoesNotExist'),
                   }));
                 })
                 .finally(() => {
@@ -98,7 +100,7 @@ export const SendModalView = ({ closeModal }: Props) => {
             setResolvedAddress('');
             setErrors((prevErrors) => ({
               ...prevErrors,
-              address: 'Invalid address format',
+              address: translate('invalidAddressFormat'),
             }));
           }
         }
@@ -132,15 +134,15 @@ export const SendModalView = ({ closeModal }: Props) => {
         <div>
           <Wrapper>
             <Header>
-              <Title>Send</Title>
+              <Title>{translate('send')}</Title>
             </Header>
             <Network>
-              <Normal>Network</Normal>
+              <Normal>{translate('network')}</Normal>
               <Bold>{networks.items[networks.activeNetwork].name}</Bold>
             </Network>
             <AddressInput
-              label="To"
-              placeholder="Paste recipient address or .stark name here"
+              label={translate('to')}
+              placeholder={translate('pasteRecipientAddress')}
               onChange={(value) => handleChange('address', value.target.value)}
               disableValidate
               validateError={errors.address}
@@ -151,11 +153,11 @@ export const SendModalView = ({ closeModal }: Props) => {
             <SeparatorSmall />
             <MessageAlert
               variant="info"
-              text="Please only enter a valid Starknet address or .stark name. Sending funds to a different network might result in permanent loss."
+              text={translate('validStarknetAddressOnly')}
             />
             <Separator />
             <AmountInput
-              label="Amount"
+              label={translate('amount')}
               onChangeCustom={(value) => handleChange('amount', value)}
               error={errors.amount !== '' ? true : false}
               helperText={errors.amount}
@@ -165,7 +167,7 @@ export const SendModalView = ({ closeModal }: Props) => {
             <SeparatorSmall />
             <div>
               <label htmlFor="feeToken">
-                Select Token for Transaction Fees
+                {translate('selectTokenForTransactionFees')}
               </label>
               <DropDown
                 value={fields.feeToken}
@@ -183,13 +185,13 @@ export const SendModalView = ({ closeModal }: Props) => {
               backgroundTransparent
               borderVisible
             >
-              CANCEL
+              {translate('cancel')}
             </ButtonStyled>
             <ButtonStyled
               onClick={() => setSummaryModalOpen(true)}
               enabled={confirmEnabled()}
             >
-              CONFIRM
+              {translate('confirm')}
             </ButtonStyled>
           </Buttons>
         </div>

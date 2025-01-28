@@ -22,7 +22,7 @@ import {
 import { openExplorerTab } from 'utils/utils';
 import { useAppSelector } from 'hooks/redux';
 import { AddTokenModal } from '../AddTokenModal';
-import { useStarkNetSnap } from 'services';
+import { useMultiLanguage, useStarkNetSnap } from 'services';
 import { DUMMY_ADDRESS } from 'utils/constants';
 
 interface Props {
@@ -38,6 +38,7 @@ export const SideBarView = ({ address }: Props) => {
   const wallet = useAppSelector((state) => state.wallet);
   const [addTokenOpen, setAddTokenOpen] = useState(false);
   const { getStarkName } = useStarkNetSnap();
+  const { translate } = useMultiLanguage();
   const [starkName, setStarkName] = useState<string | undefined>(undefined);
 
   const ref = useRef<HTMLDivElement>();
@@ -95,14 +96,14 @@ export const SideBarView = ({ address }: Props) => {
               iconLeft="qrcode"
               onClick={() => setAccountDetailsOpen(true)}
             >
-              Account details
+              {translate('accountDetails')}
             </AccountDetailButton>
             <AccountDetailButton
               backgroundTransparent
               iconLeft="external-link"
               onClick={() => openExplorerTab(address, 'contract', chainId)}
             >
-              View on explorer
+              {translate('viewOnExplorer')}
             </AccountDetailButton>
           </AccountDetailsContent>
         }
@@ -110,7 +111,7 @@ export const SideBarView = ({ address }: Props) => {
         <AccountImageStyled address={address} connected={wallet.connected} />
       </AccountDetails>
 
-      <AccountLabel>My account</AccountLabel>
+      <AccountLabel>{translate('myAccount')}</AccountLabel>
       <RowDiv>
         <InfoIcon onClick={() => setInfoModalOpen(true)}>i</InfoIcon>
         <AccountAddress address={address} starkName={starkName} />
@@ -128,7 +129,7 @@ export const SideBarView = ({ address }: Props) => {
         shadowVisible={listOverflow}
         onClick={() => setAddTokenOpen(true)}
       >
-        ADD TOKEN
+        {translate('addToken').toUpperCase()}
       </AddTokenButton>
       <PopIn isOpen={addTokenOpen} setIsOpen={setAddTokenOpen}>
         <AddTokenModal closeModal={() => setAddTokenOpen(false)} />
