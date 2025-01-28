@@ -33,6 +33,7 @@ export type Account = {
   upgradeRequired: boolean;
   deployRequired: boolean;
   chainId: string;
+  addressIndex: number;
 };
 
 export type Network = {

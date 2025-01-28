@@ -1,3 +1,4 @@
+import { AccountImage } from 'components/ui/atom/AccountImage';
 import { Button } from 'components/ui/atom/Button';
 import styled from 'styled-components';
 
@@ -23,4 +24,20 @@ export const Wrapper = styled(Button).attrs((props) => ({
     background-color: ${(props) => props.theme.palette.grey.grey4};
     border: none;
   }
+`;
+
+export const Normal = styled.div`
+  font-size: ${(props) => props.theme.typography.p1.fontSize};
+`;
+
+export const AccountSwitchMenuItem = styled.div`
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 14px;
+`;
+
+export const AccountImageStyled = styled(AccountImage)`
+  margin-left: ${(props) => props.theme.spacing.small};
+  cursor: pointer;
 `;

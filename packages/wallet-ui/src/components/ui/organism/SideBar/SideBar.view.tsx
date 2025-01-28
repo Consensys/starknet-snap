@@ -29,9 +29,10 @@ import { PopperTooltip } from 'components/ui/molecule/PopperTooltip';
 
 interface Props {
   address: string;
+  addressIndex: number;
 }
 
-export const SideBarView = ({ address }: Props) => {
+export const SideBarView = ({ address, addressIndex }: Props) => {
   const networks = useAppSelector((state) => state.networks);
   const accounts = useAppSelector((state) => state.wallet.accounts);
   const chainId = networks?.items[networks.activeNetwork]?.chainId;
@@ -75,7 +76,7 @@ export const SideBarView = ({ address }: Props) => {
         isOpen={accountDetailsOpen}
         setIsOpen={setAccountDetailsOpen}
       >
-        <AccountDetailsModal address={address} />
+        <AccountDetailsModal address={address} addressIndex={addressIndex} />
       </PopInStyled>
       <PopIn
         isOpen={infoModalOpen}
@@ -113,13 +114,14 @@ export const SideBarView = ({ address }: Props) => {
         <AccountImageStyled address={address} connected={wallet.connected} />
       </AccountDetails>
 
-      <AccountLabel>My account</AccountLabel>
+      <AccountLabel>Account {addressIndex + 1} </AccountLabel>
       <RowDiv>
         <InfoIcon onClick={() => setInfoModalOpen(true)}>i</InfoIcon>
         <AccountSwitchModal
           currentAddress={address}
           starkName={starkName}
-          accounts={accounts}
+          accounts={accounts.map((account) => account.address)}
+          accountsIndex={accounts.map((account) => account.addressIndex)}
         />
         <PopperTooltip content="Copied!" closeTrigger="click">
           <CopyIcon

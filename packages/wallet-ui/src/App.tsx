@@ -37,7 +37,9 @@ function App() {
   } = useAppSelector((state) => state.modals);
   const { loader } = useAppSelector((state) => state.UI);
   const networks = useAppSelector((state) => state.networks);
-  const { currentAccount } = useAppSelector((state) => state.wallet);
+  const { currentAccount, currentAccountIndex } = useAppSelector(
+    (state) => state.wallet,
+  );
   const { hasMetamask } = useHasMetamask();
   const chainId = networks.items?.[networks.activeNetwork]?.chainId;
   const address = currentAccount ?? DUMMY_ADDRESS;
@@ -97,7 +99,7 @@ function App() {
         >
           <DeployModal address={address} />
         </PopIn>
-        <Home address={address} />
+        <Home address={address} addressIndex={currentAccountIndex} />
         <PopIn isOpen={loading}>
           {loading && (
             <LoadingBackdrop>{loader.loadingMessage}</LoadingBackdrop>

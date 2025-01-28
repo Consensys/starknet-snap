@@ -5,9 +5,10 @@ import { RightPart, Wrapper, NoTransactions } from './Home.style';
 import { useAppSelector } from 'hooks/redux';
 interface Props {
   address: string;
+  addressIndex: number;
 }
 
-export const HomeView = ({ address }: Props) => {
+export const HomeView = ({ address, addressIndex }: Props) => {
   const { erc20TokenBalanceSelected, transactions } = useAppSelector(
     (state) => state.wallet,
   );
@@ -16,7 +17,7 @@ export const HomeView = ({ address }: Props) => {
 
   return (
     <Wrapper>
-      <SideBar address={address} />
+      <SideBar address={address} addressIndex={addressIndex} />
       <RightPart>
         {!upgradeModalVisible &&
           Object.keys(erc20TokenBalanceSelected).length > 0 && (

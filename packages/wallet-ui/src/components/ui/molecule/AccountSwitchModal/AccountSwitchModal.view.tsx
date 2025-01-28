@@ -1,13 +1,18 @@
 import { shortenAddress, shortenDomain } from 'utils/utils';
-import { Wrapper } from './AccountSwitchModal.style';
+import {
+  AccountImageStyled,
+  Normal,
+  Wrapper,
+  AccountSwitchMenuItem,
+} from './AccountSwitchModal.style';
 import { Menu } from '@headlessui/react';
 import {
   MenuItems,
   MenuSection,
   NetworkMenuItem,
   MenuItemText,
+  MenuDivider,
 } from 'components/ui/organism/Menu/Menu.style';
-import { Radio } from '@mui/material';
 import { theme } from 'theme/default';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useAppSelector } from 'hooks/redux';
@@ -16,6 +21,7 @@ import { useStarkNetSnap } from 'services';
 interface Props {
   currentAddress: string;
   accounts: string[];
+  accountsIndex: number[];
   full?: boolean;
   starkName?: string;
 }
@@ -23,6 +29,7 @@ interface Props {
 export const AccountSwitchModalView = ({
   currentAddress,
   accounts,
+  accountsIndex,
   full,
   starkName,
 }: Props) => {
@@ -42,36 +49,48 @@ export const AccountSwitchModalView = ({
         </Wrapper>
       </Menu.Button>
 
-      <MenuItems style={{ right: 'auto', zIndex: '1' }}>
+      <MenuItems style={{ right: 'auto', zIndex: '1', width: 'auto' }}>
         {/* Account List */}
         <MenuSection>
           <Menu.Item disabled>
-            <div style={{ padding: '8px 0px 0px 8px' }}>Accounts</div>
+            <Normal>Accounts</Normal>
           </Menu.Item>
         </MenuSection>
-        <MenuSection>
-          {accounts.map((account) => (
-            <Menu.Item key={account}>
-              <NetworkMenuItem onClick={() => switchAccount(chainId, account)}>
-                <Radio
-                  checked={account === currentAddress}
-                  name="radio-buttons"
-                  inputProps={{ 'aria-label': account }}
-                  sx={{
-                    color: theme.palette.grey.grey1,
-                    '&.Mui-checked': {
-                      color: theme.palette.secondary.main,
-                    },
+        <MenuDivider />
+        <MenuSection style={{ height: 201, overflowY: 'auto' }}>
+          {accounts.map((account, index) => {
+            const isSelected = account === currentAddress; // Check if the account is selected
+            return (
+              <Menu.Item key={account}>
+                <AccountSwitchMenuItem
+                  onClick={() => switchAccount(chainId, account)}
+                  style={{
+                    backgroundColor: isSelected
+                      ? theme.palette.grey.grey4
+                      : 'transparent', // Change background color if selected
+                    borderLeft: isSelected
+                      ? `4px solid ${theme.palette.secondary.main}`
+                      : 'none', // Add left border if selected
+                    paddingLeft: isSelected ? 15 : 20, // Add some padding if selected to make space for the border
                   }}
-                />
-                <MenuItemText>
-                  {full ? account : shortenAddress(account)}
-                </MenuItemText>
-              </NetworkMenuItem>
-            </Menu.Item>
-          ))}
+                >
+                  <AccountImageStyled
+                    size={30}
+                    address={account}
+                    connected={account === currentAddress}
+                  />
+                  <MenuItemText style={{ marginLeft: isSelected ? 19 : 20 }}>
+                    <div>
+                      <div>Account {accountsIndex[index] + 1}</div>
+                      <div>{full ? account : shortenAddress(account)}</div>
+                    </div>
+                  </MenuItemText>
+                </AccountSwitchMenuItem>
+              </Menu.Item>
+            );
+          })}
         </MenuSection>
-
+        <MenuDivider />
         <MenuSection>
           <Menu.Item>
             <NetworkMenuItem

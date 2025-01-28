@@ -15,9 +15,10 @@ import { useStarkNetSnap } from 'services';
 
 interface Props {
   address: string;
+  addressIndex: number;
 }
 
-export const AccountDetailsModalView = ({ address }: Props) => {
+export const AccountDetailsModalView = ({ address, addressIndex }: Props) => {
   const networks = useAppSelector((state) => state.networks);
   const { getPrivateKeyFromAddress } = useStarkNetSnap();
   const chainId = networks?.items[networks.activeNetwork]?.chainId;
@@ -28,7 +29,7 @@ export const AccountDetailsModalView = ({ address }: Props) => {
       </AccountImageDiv>
       <Wrapper>
         <TitleDiv>
-          <Title>My account</Title>
+          <Title>Account {addressIndex + 1}</Title>
           {/* <ModifyIcon /> */}
         </TitleDiv>
         <AddressQrCode value={address} />
