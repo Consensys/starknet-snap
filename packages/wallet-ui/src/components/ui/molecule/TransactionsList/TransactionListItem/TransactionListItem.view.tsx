@@ -47,7 +47,7 @@ export const TransactionListItemView = ({ transaction }: Props) => {
   const [txnUsdValue, setTxnUsdValue] = useState('0.00');
   const { translate } = useMultiLanguage();
 
-  const { language } = useAppSelector((state) => state.wallet);
+  const { locale } = useAppSelector((state) => state.wallet);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -74,7 +74,7 @@ export const TransactionListItemView = ({ transaction }: Props) => {
   }, []);
 
   const txnName = getTxnName(transaction, tokenAddress);
-  const txnDate = getTxnDate(transaction, language);
+  const txnDate = getTxnDate(transaction, locale);
   const txnStatus = getTxnStatus(transaction);
   const txnToFromLabel = '';
   const txnFailureReason = getTxnFailureReason(transaction);
