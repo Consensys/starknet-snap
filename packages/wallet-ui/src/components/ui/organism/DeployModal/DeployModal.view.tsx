@@ -73,7 +73,7 @@ export const DeployModalView = ({ address }: Props) => {
   }, [txnHash, address, chainId]);
 
   useEffect(() => {
-    if (stage === Stage.SUCCESS && translate) {
+    if (stage === Stage.SUCCESS) {
       toastr.success(translate('accountDeployedSuccessfully'));
       dispatch(setDeployModalVisible(false));
     }

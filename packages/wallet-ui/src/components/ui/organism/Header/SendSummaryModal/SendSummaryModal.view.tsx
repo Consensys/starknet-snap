@@ -81,7 +81,7 @@ export const SendSummaryModalView = ({
 
   useEffect(() => {
     const fetchGasFee = () => {
-      if (wallet.accounts && translate) {
+      if (wallet.accounts) {
         setGasFeesError(false);
         setEstimatingGas(true);
         const amountBN = ethers.utils.parseUnits(
@@ -176,7 +176,7 @@ export const SendSummaryModalView = ({
   }, [amount, wallet.erc20TokenBalanceSelected]);
 
   const handleConfirmClick = () => {
-    if (wallet.accounts && translate) {
+    if (wallet.accounts) {
       const amountBN = ethers.utils.parseUnits(
         amount,
         wallet.erc20TokenBalanceSelected.decimals,
