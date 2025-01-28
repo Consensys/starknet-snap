@@ -257,7 +257,6 @@ export const useStarkNetSnap = () => {
       dispatch(setActiveNetwork(idx));
       const chainId = net.chainId;
       await getWalletData(chainId, nets);
-      await loadLocale();
     } catch (err: any) {
       if (err.code && err.code === 4100) {
         const toastr = new Toastr();
@@ -1002,6 +1001,7 @@ export const useStarkNetSnap = () => {
 
   return {
     connectToSnap,
+    loadLocale,
     getNetworks,
     getAccounts,
     addAccount,
