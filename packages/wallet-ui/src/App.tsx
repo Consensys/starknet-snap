@@ -25,7 +25,8 @@ import { DeployModal } from 'components/ui/organism/DeployModal';
 library.add(fas, far);
 
 function App() {
-  const { initSnap, getWalletData, checkConnection } = useStarkNetSnap();
+  const { initSnap, getWalletData, checkConnection, loadLocale } =
+    useStarkNetSnap();
   const { connected, forceReconnect, provider } = useAppSelector(
     (state) => state.wallet,
   );
@@ -63,6 +64,12 @@ function App() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [networks.activeNetwork, provider]);
+
+  useEffect(() => {
+    if (connected) {
+      loadLocale();
+    }
+  }, [connected, loadLocale]);
 
   const loading = loader.isLoading;
   return (

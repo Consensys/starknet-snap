@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAppSelector } from 'hooks/redux';
-import { useStarkNetSnap } from 'services';
+import { useMultiLanguage, useStarkNetSnap } from 'services';
 import { Alert } from 'components/ui/atom/Alert';
 import { AddressInput } from 'components/ui/molecule/AddressInput';
 import { InputWithLabel } from 'components/ui/molecule/InputWithLabel';
@@ -24,6 +24,7 @@ interface Props {
 
 export const AddTokenModalView = ({ closeModal }: Props) => {
   const { setErc20TokenBalance, addErc20Token } = useStarkNetSnap();
+  const { translate } = useMultiLanguage();
   const [enabled, setEnabled] = useState(false);
   const networks = useAppSelector((state) => state.networks);
   const { accounts } = useAppSelector((state) => state.wallet);
@@ -52,15 +53,12 @@ export const AddTokenModalView = ({ closeModal }: Props) => {
   return (
     <>
       <Wrapper>
-        <Title>Add Token</Title>
-        <Alert
-          text="Anyone can create a token, including creating fake versions of existing tokens. Learn more about scams and security risks."
-          variant="warning"
-        />
+        <Title>{translate('addToken')}</Title>
+        <Alert text={translate('tokenCreationWarning')} variant="warning" />
         <Space />
         <FormGroup>
           <AddressInput
-            label="ContractAddress"
+            label={translate('contractAddress')}
             placeholder=""
             onChange={(event) => handleChange('address', event.target.value)}
             setIsValidAddress={setIsValidAddress}
@@ -68,19 +66,19 @@ export const AddTokenModalView = ({ closeModal }: Props) => {
         </FormGroup>
         <FormGroup>
           <InputWithLabel
-            label="Name"
+            label={translate('name')}
             onChange={(event) => handleChange('name', event.target.value)}
           />
         </FormGroup>
         <FormGroup>
           <InputWithLabel
-            label="Symbol"
+            label={translate('symbol')}
             onChange={(event) => handleChange('symbol', event.target.value)}
           />
         </FormGroup>
         <FormGroup>
           <InputWithLabel
-            label="Decimal"
+            label={translate('decimal')}
             placeholder="0"
             type="number"
             onChange={(event) =>
@@ -94,7 +92,7 @@ export const AddTokenModalView = ({ closeModal }: Props) => {
       </Wrapper>
       <ButtonsWrapper>
         <ButtonStyled onClick={closeModal} backgroundTransparent borderVisible>
-          CANCEL
+          {translate('cancel')}
         </ButtonStyled>
         <ButtonStyled
           enabled={enabled}
@@ -110,15 +108,15 @@ export const AddTokenModalView = ({ closeModal }: Props) => {
               );
               if (newToken) {
                 setErc20TokenBalance(newToken);
-                toastr.success('Token added successfully');
+                toastr.success(translate('tokenAddedSuccessfully'));
               }
               closeModal();
             } catch (err) {
-              toastr.error('Error while adding token');
+              toastr.error(translate('errorAddingToken'));
             }
           }}
         >
-          ADD
+          {translate('add')}
         </ButtonStyled>
       </ButtonsWrapper>
     </>

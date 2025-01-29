@@ -1,0 +1,296 @@
+{
+  "locale": "fr",
+  "messages": {
+    "aboutThisSnap": {
+      "message": "À propos de ce snap"
+    },
+    "accountDeployedSuccessfully": {
+      "message": "Compte déployé avec succès."
+    },
+    "accountDetails": {
+      "message": "Détails du compte"
+    },
+    "accountGeneratedWithRecoveryPhrase": {
+      "message": "Ce compte a été généré avec votre phrase de récupération secrète MetaMask."
+    },
+    "accountRecoveryInfo": {
+      "message": "Note : Votre compte sera automatiquement récupéré. Les futures mises à jour seront gérées automatiquement."
+    },
+    "accountUpgradedSuccessfully": {
+      "message": "Compte mis à jour avec succès."
+    },
+    "add": {
+      "message": "AJOUTER"
+    },
+    "addToken": {
+      "message": "Ajouter un jeton"
+    },
+    "amount": {
+      "message": "Montant"
+    },
+    "cancel": {
+      "message": "ANNULER"
+    },
+    "confirm": {
+      "message": "CONFIRMER"
+    },
+    "connectTo": {
+      "message": "Se connecter à"
+    },
+    "connectToMetaMask": {
+      "message": "Cliquez sur connecter, la nouvelle version sera proposée pour installation."
+    },
+    "connectWithMetaMask": {
+      "message": "Se connecter avec MetaMask"
+    },
+    "connectedToStarknetSnap": {
+      "message": "Connecté au Snap Starknet"
+    },
+    "contractAddress": {
+      "message": "Adresse du contrat"
+    },
+    "copied": {
+      "message": "Copié !"
+    },
+    "copyToClipboard": {
+      "message": "Copier dans le presse-papiers"
+    },
+    "decimal": {
+      "message": "Décimale"
+    },
+    "deleteCurrentVersionMetaMask": {
+      "message": "Supprimer la version actuelle dans MetaMask en allant dans Paramètres > Snaps > @consensys/starknet-snap > Voir les détails > Supprimer le Snap"
+    },
+    "deploy": {
+      "message": "Déployer"
+    },
+    "deployAccount": {
+      "message": "Déployer le compte"
+    },
+    "deployAccountFailed": {
+      "message": "Échec du déploiement du compte"
+    },
+    "deployTransactionPending": {
+      "message": "Votre transaction de déploiement est toujours en attente et a atteint la limite maximale de tentatives pour vérifier son statut. Veuillez attendre la fin de la transaction.<br /><br />Merci de réessayer dans quelques heures.<br /><br />Merci de votre compréhension."
+    },
+    "deploymentNecessaryToProceedPart1": {
+      "message": "Un déploiement de votre adresse est nécessaire pour poursuivre avec le Snap."
+    },
+    "deploymentNecessaryToProceedPart2": {
+      "message": "Cliquez sur le bouton \"Déployer\" pour continuer."
+    },
+    "deploymentNecessaryToProceedPart3": {
+      "message": "Merci !"
+    },
+    "disableMetaMaskExtension": {
+      "message": "Veuillez vous assurer que l'extension MetaMask régulière est désactivée ou utilisez un autre profil de navigateur."
+    },
+    "disconnect": {
+      "message": "Se déconnecter"
+    },
+    "downloadMetaMask": {
+      "message": "Télécharger MetaMask"
+    },
+    "downloadMetaMaskFlask": {
+      "message": "Télécharger MetaMask Flask"
+    },
+    "errorAddingToken": {
+      "message": "Erreur lors de l'ajout du jeton"
+    },
+    "errorCalculatingGasFees": {
+      "message": "Erreur lors du calcul des frais de gaz"
+    },
+    "errorSendingTransaction": {
+      "message": "Erreur lors de l'envoi de la transaction"
+    },
+    "estimatedFee": {
+      "message": "Frais estimés"
+    },
+    "exportPrivateKey": {
+      "message": "EXPORTER LA CLÉ PRIVÉE"
+    },
+    "feesIncludeOneTimeDeploymentFee": {
+      "message": "Les frais incluent des frais de déploiement uniques"
+    },
+    "gasFeesDefinition": {
+      "message": "Les frais de gaz sont définis par le réseau et fluctuent en fonction du trafic réseau et de la complexité des transactions."
+    },
+    "goToMetaMaskWebsite": {
+      "message": "Aller sur le site MetaMask"
+    },
+    "gotIt": {
+      "message": "COMPRIS !"
+    },
+    "inputAmountExceedsBalance": {
+      "message": "Le montant entré dépasse le solde de l'utilisateur"
+    },
+    "installLatestVersion": {
+      "message": "Pour utiliser cette dApp, veuillez installer la dernière version en suivant ces étapes :"
+    },
+    "installMetaMaskFlaskToUseSnap": {
+      "message": "Vous devez installer l'extension MetaMask Flask pour utiliser le Snap Starknet."
+    },
+    "installMetaMaskToUseSnap": {
+      "message": "Vous devez installer l'extension MetaMask pour utiliser le Snap Starknet."
+    },
+    "insufficientFundsForFees": {
+      "message": "Fonds insuffisants pour les frais"
+    },
+    "invalidAddressFormat": {
+      "message": "Format d'adresse invalide"
+    },
+    "loading": {
+      "message": "Chargement"
+    },
+    "maximumAmount": {
+      "message": "Montant maximum :"
+    },
+    "maximumFees": {
+      "message": "Frais maximum :"
+    },
+    "metaMaskExtensionRequired": {
+      "message": "Vous n'avez pas l'extension MetaMask"
+    },
+    "metaMaskFlaskExtensionRequired": {
+      "message": "Vous n'avez pas l'extension MetaMask Flask"
+    },
+    "metaMaskUpgradeNeeded": {
+      "message": "Une mise à jour de MetaMask est nécessaire pour utiliser cette dApp"
+    },
+    "myAccount": {
+      "message": "Mon compte"
+    },
+    "name": {
+      "message": "Nom"
+    },
+    "network": {
+      "message": "Réseau"
+    },
+    "newVersionAvailable": {
+      "message": "Une nouvelle version du Snap Starknet est disponible"
+    },
+    "newVersionOfSmartContractNecessaryPart1": {
+      "message": "Une nouvelle version du contrat intelligent est nécessaire pour poursuivre avec le Snap."
+    },
+    "newVersionOfSmartContractNecessaryPart2": {
+      "message": "De nouvelles améliorations viendront avec cette version."
+    },
+    "newVersionOfSmartContractNecessaryPart3": {
+      "message": "Cliquez sur le bouton \"Mettre à jour\" pour l'installer."
+    },
+    "newVersionOfSmartContractNecessaryPart4": {
+      "message": "Merci !"
+    },
+    "noTransactions": {
+      "message": "Vous n'avez aucune transaction"
+    },
+    "nonZeroBalanceOnCairo0": {
+      "message": "Vous avez un solde non nul sur une adresse Cairo 0 non déployée"
+    },
+    "openBetaVersion": {
+      "message": "Il s'agit de la version Open Beta de la dApp, des mises à jour sont effectuées régulièrement"
+    },
+    "pasteRecipientAddress": {
+      "message": "Collez l'adresse du destinataire ou le nom .stark ici"
+    },
+    "poweredBy": {
+      "message": "Propulsé par"
+    },
+    "privacyPolicy": {
+      "message": "Politique de confidentialité"
+    },
+    "readMore": {
+      "message": "Lire la suite"
+    },
+    "receive": {
+      "message": "Recevoir"
+    },
+    "refreshPage": {
+      "message": "Actualiser la page"
+    },
+    "reject": {
+      "message": "REJETER"
+    },
+    "selectAnOption": {
+      "message": "Sélectionner une option"
+    },
+    "selectTokenForTransactionFees": {
+      "message": "Sélectionner un jeton pour les frais de transaction"
+    },
+    "send": {
+      "message": "Envoyer"
+    },
+    "snapsExtendMetaMask": {
+      "message": "Les Snaps étendent les capacités de MetaMask en ajoutant de nouvelles fonctionnalités. Ce Snap permet à MetaMask de être compatible avec Starknet et de gérer vos clés."
+    },
+    "starkNameDoesNotExist": {
+      "message": "Le nom .stark n'existe pas"
+    },
+    "starknetAccount": {
+      "message": "Compte Starknet"
+    },
+    "starknetSnapInstallationPrompt": {
+      "message": "Si vous n'avez pas installé le Snap Starknet, vous serez invité à l'installer."
+    },
+    "symbol": {
+      "message": "Symbole"
+    },
+    "termsOfUse": {
+      "message": "Conditions d'utilisation"
+    },
+    "to": {
+      "message": "À"
+    },
+    "tokenAddedSuccessfully": {
+      "message": "Jeton ajouté avec succès"
+    },
+    "tokenCreationWarning": {
+      "message": "Tout le monde peut créer un jeton, y compris créer des versions fausses de jetons existants. Apprenez-en plus sur les arnaques et les risques de sécurité."
+    },
+    "total": {
+      "message": "Total"
+    },
+    "transactionHash": {
+      "message": "Hash de la transaction :"
+    },
+    "transactionRejectedByUser": {
+      "message": "Transaction rejetée par l'utilisateur"
+    },
+    "transactionSentSuccessfully": {
+      "message": "Transaction envoyée avec succès"
+    },
+    "updateMetaMaskVersion": {
+      "message": "Veuillez mettre à jour vers la version MetaMask {1} ou supérieure."
+    },
+    "upgrade": {
+      "message": "Mettre à jour"
+    },
+    "upgradeAccount": {
+      "message": "Mettre à jour le compte"
+    },
+    "upgradeAccountFailed": {
+      "message": "Échec de la mise à jour du compte"
+    },
+    "upgradeTransactionPendingPart1": {
+      "message": "Votre transaction de mise à jour est toujours en attente et a atteint la limite maximale de tentatives pour vérifier son statut. Veuillez attendre la fin de la transaction."
+    },
+    "upgradeTransactionPendingPart2": {
+      "message": "Veuillez réessayer dans quelques heures."
+    },
+    "upgradeTransactionPendingPart3": {
+      "message": "Merci de votre compréhension."
+    },
+    "validStarknetAddressOnly": {
+      "message": "Veuillez entrer uniquement une adresse Starknet valide ou un nom .stark. Envoyer des fonds à un autre réseau pourrait entraîner une perte permanente."
+    },
+    "viewOnExplorer": {
+      "message": "Voir sur l'explorateur"
+    },
+    "waitingForTransaction": {
+      "message": "En attente de la transaction pour se terminer."
+    },
+    "whatIsASnap": {
+      "message": "Qu'est-ce qu'un snap ?"
+    }
+  }
+}

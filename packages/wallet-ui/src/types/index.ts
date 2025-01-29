@@ -86,3 +86,15 @@ export enum FeeTokenUnit {
   ETH = 'wei',
   STRK = 'fri',
 }
+
+export type Locale = Record<
+  string,
+  {
+    message: string;
+  }
+>;
+
+export type Translator = (
+  key: string,
+  ...args: (string | undefined)[]
+) => string;
