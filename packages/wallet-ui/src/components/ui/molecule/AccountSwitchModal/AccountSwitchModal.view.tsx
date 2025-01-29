@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { shortenAddress, shortenDomain } from 'utils/utils';
 import {
   AccountImageStyled,
@@ -19,6 +20,7 @@ import { useAppSelector } from 'hooks/redux';
 import { useStarkNetSnap } from 'services';
 import IconButton from '@mui/material/IconButton';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 import { useEffect } from 'react';
 
 interface Props {
@@ -34,16 +36,22 @@ export const AccountSwitchModalView = ({
 }: Props) => {
   const networks = useAppSelector((state) => state.networks);
   const accounts = useAppSelector((state) => state.wallet.accounts);
-  const accountsVisibility = accounts.map(
-    (account) => account.visibility ?? true,
-  );
-  const accountsIndex = accounts.map((account) => account.addressIndex);
-  const { switchAccount, addNewAccount, hideAccount } = useStarkNetSnap();
+  const { switchAccount, addNewAccount, hideAccount, unHideAccount } =
+    useStarkNetSnap();
   const chainId = networks?.items[networks.activeNetwork]?.chainId;
+
+  const [showHiddenAccounts, setShowHiddenAccounts] = useState(false);
 
   useEffect(() => {
     console.log('Updated accounts:', accounts);
   }, [accounts]);
+
+  const visibleAccounts = accounts.filter(
+    (account) => account.visibility !== false,
+  );
+  const hiddenAccounts = accounts.filter(
+    (account) => account.visibility === false,
+  );
 
   return (
     <Menu as="div" style={{ display: 'inline-block', position: 'relative' }}>
@@ -58,21 +66,83 @@ export const AccountSwitchModalView = ({
       </Menu.Button>
 
       <MenuItems style={{ right: 'auto', zIndex: '1', width: 'auto' }}>
-        {/* Account List */}
+        {/* Accounts Header with Show/Hide Button */}
         <MenuSection>
           <Menu.Item disabled>
-            <Normal>Accounts</Normal>
+            <AccountSwitchMenuItem
+              style={{
+                paddingLeft: 20,
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <Normal>Accounts</Normal>
+              </div>
+              {hiddenAccounts.length > 0 && (
+                <IconButton
+                  onClick={() => setShowHiddenAccounts(!showHiddenAccounts)}
+                  size="small"
+                >
+                  {showHiddenAccounts ? (
+                    <VisibilityOffIcon fontSize="small" />
+                  ) : (
+                    <VisibilityIcon fontSize="small" />
+                  )}
+                </IconButton>
+              )}
+            </AccountSwitchMenuItem>
           </Menu.Item>
         </MenuSection>
         <MenuDivider />
-        <MenuSection style={{ height: 201, overflowY: 'auto' }}>
-          {accounts.map((account, index) => {
-            const isSelected = account.address === currentAddress; // Check if the account is selected
-            return (
-              accountsVisibility[index] !== false && (
-                <Menu.Item key={account.addressIndex}>
+
+        {/* Toggle Between Visible and Hidden Accounts */}
+        {showHiddenAccounts ? (
+          /* Hidden Accounts */
+          <MenuSection style={{ height: 201, overflowY: 'auto' }}>
+            {hiddenAccounts.map((account) => (
+              <Menu.Item key={account.address}>
+                <AccountSwitchMenuItem
+                  style={{
+                    paddingLeft: 20,
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    opacity: 0.5, // Make it semi-transparent
+                  }}
+                  onClick={() => {
+                    setShowHiddenAccounts(false);
+                    unHideAccount(chainId, account.address);
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <AccountImageStyled size={30} address={account.address} />
+                    <MenuItemText style={{ marginLeft: 20 }}>
+                      <div>Account {account.addressIndex + 1}</div>
+                      <div>
+                        {full
+                          ? account.address
+                          : shortenAddress(account.address)}
+                      </div>
+                    </MenuItemText>
+                  </div>
+                  {/* Unhide button */}
+                  <IconButton disabled size="small">
+                    <VisibilityIcon fontSize="small" />
+                  </IconButton>
+                </AccountSwitchMenuItem>
+              </Menu.Item>
+            ))}
+          </MenuSection>
+        ) : (
+          /* Normal Accounts */
+          <MenuSection style={{ height: 201, overflowY: 'auto' }}>
+            {visibleAccounts.map((account) => {
+              const isSelected = account.address === currentAddress;
+              return (
+                <Menu.Item key={account.address}>
                   <AccountSwitchMenuItem
-                    onClick={() => switchAccount(chainId, account.address)}
                     style={{
                       backgroundColor: isSelected
                         ? theme.palette.grey.grey4
@@ -80,13 +150,16 @@ export const AccountSwitchModalView = ({
                       borderLeft: isSelected
                         ? `4px solid ${theme.palette.secondary.main}`
                         : 'none',
-                      paddingLeft: isSelected ? 15 : 20,
+                      paddingLeft: isSelected ? 15 : 22,
                       display: 'flex',
                       justifyContent: 'space-between',
                       alignItems: 'center',
                     }}
                   >
-                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <div
+                      style={{ display: 'flex', alignItems: 'center' }}
+                      onClick={() => switchAccount(chainId, account.address)}
+                    >
                       <AccountImageStyled
                         size={30}
                         address={account.address}
@@ -96,7 +169,7 @@ export const AccountSwitchModalView = ({
                         style={{ marginLeft: isSelected ? 19 : 20 }}
                       >
                         <div>
-                          <div>Account {accountsIndex[index] + 1}</div>
+                          <div>Account {account.addressIndex + 1}</div>
                           <div>
                             {full
                               ? account.address
@@ -105,11 +178,15 @@ export const AccountSwitchModalView = ({
                         </div>
                       </MenuItemText>
                     </div>
-                    {/* Hide button */}
                     <IconButton
                       onClick={(e) => {
-                        e.stopPropagation(); // Prevent triggering account switch
-                        hideAccount(chainId, account.address);
+                        if (
+                          account.address !== currentAddress &&
+                          visibleAccounts.length > 2
+                        ) {
+                          e.preventDefault();
+                        }
+                        hideAccount(chainId, account.address, currentAddress);
                       }}
                       size="small"
                     >
@@ -117,10 +194,11 @@ export const AccountSwitchModalView = ({
                     </IconButton>
                   </AccountSwitchMenuItem>
                 </Menu.Item>
-              )
-            );
-          })}
-        </MenuSection>
+              );
+            })}
+          </MenuSection>
+        )}
+
         <MenuDivider />
         <MenuSection>
           <Menu.Item>
