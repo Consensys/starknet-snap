@@ -16,26 +16,15 @@ const wrapperStyle = {
   justifyContent: 'center',
 };
 
-const accounts = ['0x123...abcd', '0x456...efgh', '0x789...ijkl'];
-const accountsIndex = [0, 1, 2];
-
 export const Default = () => (
   <div style={wrapperStyle}>
-    <AccountSwitchModalView
-      currentAddress={address}
-      accounts={accounts}
-      accountsIndex={accountsIndex}
-    ></AccountSwitchModalView>
+    <AccountSwitchModalView currentAddress={address}></AccountSwitchModalView>
   </div>
 );
 
 export const TooltipTop = () => (
   <div style={wrapperStyle}>
-    <AccountSwitchModalView
-      currentAddress={address}
-      accounts={accounts}
-      accountsIndex={accountsIndex}
-    ></AccountSwitchModalView>
+    <AccountSwitchModalView currentAddress={address}></AccountSwitchModalView>
   </div>
 );
 
@@ -43,8 +32,6 @@ export const Full = () => (
   <div style={wrapperStyle}>
     <AccountSwitchModalView
       currentAddress={address}
-      accounts={accounts}
-      accountsIndex={accountsIndex}
       full
     ></AccountSwitchModalView>
   </div>
@@ -54,8 +41,6 @@ export const DarkerBackground = () => (
   <div style={{ ...wrapperStyle, backgroundColor: 'grey' }}>
     <AccountSwitchModalView
       currentAddress={address}
-      accounts={accounts}
-      accountsIndex={accountsIndex}
       full
     ></AccountSwitchModalView>
   </div>

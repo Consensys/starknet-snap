@@ -17,25 +17,33 @@ import { theme } from 'theme/default';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useAppSelector } from 'hooks/redux';
 import { useStarkNetSnap } from 'services';
+import IconButton from '@mui/material/IconButton';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import { useEffect } from 'react';
 
 interface Props {
   currentAddress: string;
-  accounts: string[];
-  accountsIndex: number[];
   full?: boolean;
   starkName?: string;
 }
 
 export const AccountSwitchModalView = ({
   currentAddress,
-  accounts,
-  accountsIndex,
   full,
   starkName,
 }: Props) => {
   const networks = useAppSelector((state) => state.networks);
-  const { switchAccount, addNewAccount } = useStarkNetSnap();
+  const accounts = useAppSelector((state) => state.wallet.accounts);
+  const accountsVisibility = accounts.map(
+    (account) => account.visibility ?? true,
+  );
+  const accountsIndex = accounts.map((account) => account.addressIndex);
+  const { switchAccount, addNewAccount, hideAccount } = useStarkNetSnap();
   const chainId = networks?.items[networks.activeNetwork]?.chainId;
+
+  useEffect(() => {
+    console.log('Updated accounts:', accounts);
+  }, [accounts]);
 
   return (
     <Menu as="div" style={{ display: 'inline-block', position: 'relative' }}>
@@ -59,34 +67,57 @@ export const AccountSwitchModalView = ({
         <MenuDivider />
         <MenuSection style={{ height: 201, overflowY: 'auto' }}>
           {accounts.map((account, index) => {
-            const isSelected = account === currentAddress; // Check if the account is selected
+            const isSelected = account.address === currentAddress; // Check if the account is selected
             return (
-              <Menu.Item key={account}>
-                <AccountSwitchMenuItem
-                  onClick={() => switchAccount(chainId, account)}
-                  style={{
-                    backgroundColor: isSelected
-                      ? theme.palette.grey.grey4
-                      : 'transparent', // Change background color if selected
-                    borderLeft: isSelected
-                      ? `4px solid ${theme.palette.secondary.main}`
-                      : 'none', // Add left border if selected
-                    paddingLeft: isSelected ? 15 : 20, // Add some padding if selected to make space for the border
-                  }}
-                >
-                  <AccountImageStyled
-                    size={30}
-                    address={account}
-                    connected={account === currentAddress}
-                  />
-                  <MenuItemText style={{ marginLeft: isSelected ? 19 : 20 }}>
-                    <div>
-                      <div>Account {accountsIndex[index] + 1}</div>
-                      <div>{full ? account : shortenAddress(account)}</div>
+              accountsVisibility[index] !== false && (
+                <Menu.Item key={account.addressIndex}>
+                  <AccountSwitchMenuItem
+                    onClick={() => switchAccount(chainId, account.address)}
+                    style={{
+                      backgroundColor: isSelected
+                        ? theme.palette.grey.grey4
+                        : 'transparent',
+                      borderLeft: isSelected
+                        ? `4px solid ${theme.palette.secondary.main}`
+                        : 'none',
+                      paddingLeft: isSelected ? 15 : 20,
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                      <AccountImageStyled
+                        size={30}
+                        address={account.address}
+                        connected={account.address === currentAddress}
+                      />
+                      <MenuItemText
+                        style={{ marginLeft: isSelected ? 19 : 20 }}
+                      >
+                        <div>
+                          <div>Account {accountsIndex[index] + 1}</div>
+                          <div>
+                            {full
+                              ? account.address
+                              : shortenAddress(account.address)}
+                          </div>
+                        </div>
+                      </MenuItemText>
                     </div>
-                  </MenuItemText>
-                </AccountSwitchMenuItem>
-              </Menu.Item>
+                    {/* Hide button */}
+                    <IconButton
+                      onClick={(e) => {
+                        e.stopPropagation(); // Prevent triggering account switch
+                        hideAccount(chainId, account.address);
+                      }}
+                      size="small"
+                    >
+                      <VisibilityOffIcon fontSize="small" />
+                    </IconButton>
+                  </AccountSwitchMenuItem>
+                </Menu.Item>
+              )
             );
           })}
         </MenuSection>

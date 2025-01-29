@@ -14,6 +14,7 @@ import {
   setTransactions,
   setTransactionDeploy,
   setForceReconnect,
+  updateAccount,
 } from '../slices/walletSlice';
 import Toastr from 'toastr2';
 import {
@@ -189,6 +190,26 @@ export const useStarkNetSnap = () => {
     await initTokensAndBalances(chainId, address);
 
     dispatch(disableLoading());
+  };
+
+  const hideAccount = async (chainId: string, address: string) => {
+    try {
+      if (!loader.isLoading) {
+        dispatch(
+          enableLoadingWithMessage(`Hiding account ${shortenAddress(address)}`),
+        );
+      }
+      const account = await toggleAccountVisibility(chainId, address, false);
+      dispatch(updateAccount({ address, updates: { visibility: false } }));
+      await switchAccount(chainId, account.address);
+    } catch (error) {
+      //eslint-disable-next-line no-console
+      const toastr = new Toastr();
+      console.log(`error while processing waitForAccountDeploy: ${error}`);
+      toastr.error('You cannot hide the last remaining account.');
+    } finally {
+      dispatch(disableLoading());
+    }
   };
 
   const setAccount = async (chainId: string, currentAccount: Account) => {
@@ -799,6 +820,21 @@ export const useStarkNetSnap = () => {
     });
   };
 
+  const toggleAccountVisibility = async (
+    chainId: string,
+    address: string,
+    visibility: boolean,
+  ) => {
+    return await invokeSnap<Account>({
+      method: 'starkNet_toggleAccountVisibility',
+      params: {
+        chainId,
+        address,
+        visibility,
+      },
+    });
+  };
+
   const switchAccount = async (chainId: string, address: string) => {
     dispatch(
       enableLoadingWithMessage(
@@ -832,9 +868,11 @@ export const useStarkNetSnap = () => {
     connectToSnap,
     getNetworks,
     getAccounts,
+    hideAccount,
     switchAccount,
     getCurrentAccount,
     addNewAccount,
+    toggleAccountVisibility,
     setAccount,
     setErc20TokenBalance,
     getPrivateKeyFromAddress,
