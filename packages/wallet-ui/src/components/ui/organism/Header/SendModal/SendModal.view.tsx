@@ -48,6 +48,10 @@ export const SendModalView = ({ closeModal }: Props) => {
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
   const [loading, setLoading] = useState(false);
 
+  const handleBack = () => {
+    setSummaryModalOpen(false);
+  };
+
   const handleChange = (fieldName: string, fieldValue: string) => {
     //Check if input amount does not exceed user balance
     if (!translate) return;
@@ -144,6 +148,7 @@ export const SendModalView = ({ closeModal }: Props) => {
               label={translate('to')}
               placeholder={translate('pasteRecipientAddress')}
               onChange={(value) => handleChange('address', value.target.value)}
+              value={fields.address}
               disableValidate
               validateError={errors.address}
             />
@@ -159,6 +164,7 @@ export const SendModalView = ({ closeModal }: Props) => {
             <AmountInput
               label={translate('amount')}
               onChangeCustom={(value) => handleChange('amount', value)}
+              value={fields.amount}
               error={errors.amount !== '' ? true : false}
               helperText={errors.amount}
               decimalsMax={wallet.erc20TokenBalanceSelected.decimals}
@@ -200,6 +206,7 @@ export const SendModalView = ({ closeModal }: Props) => {
       {summaryModalOpen && (
         <SendSummaryModal
           closeModal={closeModal}
+          handleBack={handleBack}
           address={resolvedAddress}
           amount={fields.amount}
           chainId={fields.chainId}
