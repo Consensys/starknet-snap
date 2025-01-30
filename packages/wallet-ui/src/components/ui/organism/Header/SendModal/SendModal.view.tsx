@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { AmountInput } from 'components/ui/molecule/AmountInput';
 import { SendSummaryModal } from '../SendSummaryModal';
 import {

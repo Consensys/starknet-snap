@@ -1,4 +1,4 @@
-import { KeyboardEvent, useCallback, useEffect } from 'react';
+import { KeyboardEvent, useEffect } from 'react';
 import { InputHTMLAttributes, useRef, useState } from 'react';
 import { HelperText } from '../../atom/HelperText';
 import { Label } from '../../atom/Label';
