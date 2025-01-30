@@ -14,6 +14,8 @@ import {
   setTransactions,
   setTransactionDeploy,
   setForceReconnect,
+  setLocale,
+  setTranslations,
 } from '../slices/walletSlice';
 import Toastr from 'toastr2';
 import {
@@ -47,6 +49,7 @@ export const useStarkNetSnap = () => {
   const { transactions, erc20TokenBalances, provider } = useAppSelector(
     (state) => state.wallet,
   );
+
   const snapId = process.env.REACT_APP_SNAP_ID
     ? process.env.REACT_APP_SNAP_ID
     : 'local:http://localhost:8081';
@@ -105,6 +108,28 @@ export const useStarkNetSnap = () => {
         //eslint-disable-next-line no-console
         console.log(err);
       });
+  };
+
+  const loadLocale = async () => {
+    try {
+      const { locale } = await provider.request({
+        method: 'wallet_invokeSnap',
+        params: {
+          snapId,
+          request: {
+            method: 'starkNet_getPreferences',
+          },
+        },
+      });
+      const messages = await import(`../assets/locales/${locale}.json`);
+      dispatch(setLocale(locale));
+      dispatch(setTranslations(messages.messages));
+    } catch (error) {
+      console.error(
+        'Failed to load user preferences. Falling back to default locale.',
+        error,
+      );
+    }
   };
 
   const getNetworks = async () => {
@@ -976,6 +1001,7 @@ export const useStarkNetSnap = () => {
 
   return {
     connectToSnap,
+    loadLocale,
     getNetworks,
     getAccounts,
     addAccount,

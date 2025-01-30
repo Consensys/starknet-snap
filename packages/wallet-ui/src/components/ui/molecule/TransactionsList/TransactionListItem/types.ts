@@ -46,10 +46,22 @@ export const getTxnName = (
   }
 };
 
-export const getTxnDate = (transaction: Transaction): string => {
+export const getTxnDate = (
+  transaction: Transaction,
+  language: string,
+): string => {
   const date = new Date(transaction.timestamp * 1000);
 
-  return date.toLocaleString('en-US', {
+  let localeDate;
+  switch (language) {
+    case 'fr':
+      localeDate = 'fr-FR';
+      break;
+    default:
+      localeDate = 'en-US';
+  }
+
+  return date.toLocaleString(localeDate, {
     year: 'numeric',
     month: 'short',
     day: 'numeric',

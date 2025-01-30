@@ -22,6 +22,7 @@ export type SnapConfig = {
   defaultNetwork: Network;
   availableNetworks: Network[];
   preloadTokens: Erc20Token[];
+  rpcApiKey: string;
   explorer: {
     [key: string]: string;
   };
@@ -59,6 +60,9 @@ export const Config: SnapConfig = {
       txnsInLastNumOfDays: 10,
     },
   },
+
+  // eslint-disable-next-line no-restricted-globals
+  rpcApiKey: process.env.DIN_API_KEY ?? '',
 
   explorer: {
     [constants.StarknetChainId.SN_MAIN]:

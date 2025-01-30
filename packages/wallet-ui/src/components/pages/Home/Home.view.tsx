@@ -3,6 +3,7 @@ import { Header } from 'components/ui/organism/Header';
 import { SideBar } from 'components/ui/organism/SideBar';
 import { RightPart, Wrapper, NoTransactions } from './Home.style';
 import { useAppSelector } from 'hooks/redux';
+import { useMultiLanguage } from 'services';
 interface Props {
   address: string;
 }
@@ -13,6 +14,7 @@ export const HomeView = ({ address }: Props) => {
   );
   const loader = useAppSelector((state) => state.UI.loader);
   const { upgradeModalVisible } = useAppSelector((state) => state.modals);
+  const { translate } = useMultiLanguage();
 
   return (
     <Wrapper>
@@ -26,7 +28,7 @@ export const HomeView = ({ address }: Props) => {
         {!upgradeModalVisible &&
           Object.keys(transactions).length === 0 &&
           !loader.isLoading && (
-            <NoTransactions> You have no transactions</NoTransactions>
+            <NoTransactions>{translate('noTransactions')}</NoTransactions>
           )}
       </RightPart>
     </Wrapper>

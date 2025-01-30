@@ -1,12 +1,15 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { Account } from 'types';
+import { Account, Locale } from 'types';
 import { Erc20TokenBalance } from 'types';
 import { Transaction } from 'types';
 import { ethers } from 'ethers';
+import defaultLocale from '../assets/locales/en.json';
 
 export interface WalletState {
   connected: boolean;
   isLoading: boolean;
+  locale: string;
+  translations: Locale;
   forceReconnect: boolean;
   accounts: Account[];
   erc20TokenBalances: Erc20TokenBalance[];
@@ -19,6 +22,8 @@ export interface WalletState {
 const initialState: WalletState = {
   connected: false,
   isLoading: false,
+  locale: 'en',
+  translations: defaultLocale.messages,
   forceReconnect: false,
   accounts: [],
   erc20TokenBalances: [],
@@ -32,6 +37,12 @@ export const walletSlice = createSlice({
   name: 'wallet',
   initialState,
   reducers: {
+    setLocale: (state, { payload }) => {
+      state.locale = payload;
+    },
+    setTranslations: (state, { payload }) => {
+      state.translations = payload;
+    },
     setProvider: (state, { payload }) => {
       state.provider = payload;
     },
@@ -117,6 +128,8 @@ export const {
   setTransactionDeploy,
   resetWallet,
   setProvider,
+  setTranslations,
+  setLocale,
 } = walletSlice.actions;
 
 export default walletSlice.reducer;

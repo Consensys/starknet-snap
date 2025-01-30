@@ -1,4 +1,4 @@
-import { useStarkNetSnap } from 'services';
+import { useMultiLanguage, useStarkNetSnap } from 'services';
 import { SNAPS_DOC_URL } from 'utils/constants';
 
 import {
@@ -16,6 +16,7 @@ import {
 
 export const ConnectModalView = () => {
   const { connectToSnap } = useStarkNetSnap();
+  const { translate } = useMultiLanguage();
 
   const handleReadMoreClick = () => {
     window.open(SNAPS_DOC_URL, '_blank')?.focus();
@@ -25,23 +26,22 @@ export const ConnectModalView = () => {
     <Wrapper>
       <StarknetLogo />
       <Title>
-        Connect to MetaMask<br></br> Starknet Snap
+        {translate('connectTo')} MetaMask
+        <br />
+        Starknet Snap
       </Title>
       <DescriptionCentered>
-        If you do not have the Starknet snap installed you will be prompted to
-        install it.
+        {translate('starknetSnapInstallationPrompt')}
       </DescriptionCentered>
       <WhatIsSnapDiv>
-        <WhatIsSnap>What is a snap?</WhatIsSnap>
-        <Description>
-          Snaps extend the capabilities of MetaMask by adding new
-          functionalities. This Snap allows MetaMask to be compatible with
-          Starknet and manage your keys.
-        </Description>
-        <ReadMore onClick={handleReadMoreClick}>Read more</ReadMore>
+        <WhatIsSnap>{translate('whatIsASnap')}</WhatIsSnap>
+        <Description>{translate('snapsExtendMetaMask')}</Description>
+        <ReadMore onClick={handleReadMoreClick}>
+          {translate('readMore')}
+        </ReadMore>
       </WhatIsSnapDiv>
       <ConnectButton customIconLeft={<MetamaskIcon />} onClick={connectToSnap}>
-        Connect with MetaMask
+        {translate('connectWithMetaMask')}
       </ConnectButton>
     </Wrapper>
   );

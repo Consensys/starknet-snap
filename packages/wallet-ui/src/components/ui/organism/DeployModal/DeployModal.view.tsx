@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useStarkNetSnap } from 'services';
+import { useMultiLanguage, useStarkNetSnap } from 'services';
 import { useAppSelector, useAppDispatch } from 'hooks/redux';
 import Toastr from 'toastr2';
 
@@ -29,6 +29,8 @@ enum Stage {
 export const DeployModalView = ({ address }: Props) => {
   const dispatch = useAppDispatch();
   const { deployAccount, waitForAccountCreation } = useStarkNetSnap();
+  const { translate } = useMultiLanguage();
+
   const [txnHash, setTxnHash] = useState('');
   const [stage, setStage] = useState(Stage.INIT);
   const networks = useAppSelector((state) => state.networks);
@@ -36,6 +38,7 @@ export const DeployModalView = ({ address }: Props) => {
   const toastr = new Toastr();
 
   const onDeploy = async () => {
+    if (!translate) return;
     try {
       const resp = await deployAccount(address, '0', chainId);
 
@@ -51,7 +54,7 @@ export const DeployModalView = ({ address }: Props) => {
     } catch (err) {
       //eslint-disable-next-line no-console
       console.error(err);
-      toastr.error(`Deploy account failed`);
+      toastr.error(translate('deployAccountFailed'));
     }
   };
 
@@ -71,7 +74,7 @@ export const DeployModalView = ({ address }: Props) => {
 
   useEffect(() => {
     if (stage === Stage.SUCCESS) {
-      toastr.success(`Account deployed successfully`);
+      toastr.success(translate('accountDeployedSuccessfully'));
       dispatch(setDeployModalVisible(false));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -83,20 +86,18 @@ export const DeployModalView = ({ address }: Props) => {
         return (
           <>
             <DescriptionCentered>
-              You have a non-zero balance on a Cairo 0 non-deployed address
+              {translate('nonZeroBalanceOnCairo0')}
               <br />
               <br />
               <center>
                 <AccountAddressView address={address}></AccountAddressView>
               </center>
               <br />
-              A deployment of your address is necessary to proceed with the
-              Snap.
+              {translate('deploymentNecessaryToProceedPart1')} <br />
               <br />
+              {translate('deploymentNecessaryToProceedPart2')} <br />
               <br />
-              Click on the "Deploy" button to proceed.
-              <br />
-              Thank you!
+              {translate('deploymentNecessaryToProceedPart3')}
             </DescriptionCentered>
             <DeployButton onClick={onDeploy}>Deploy</DeployButton>
           </>
@@ -104,32 +105,28 @@ export const DeployModalView = ({ address }: Props) => {
       case Stage.WAITING_FOR_TXN:
         return (
           <DescriptionCentered>
-            Waiting for transaction to be complete.
+            {translate('waitingForTransaction')}
           </DescriptionCentered>
         );
       case Stage.SUCCESS:
         return (
           <DescriptionCentered>
-            Account deployd successfully.
+            {translate('accountDeployedSuccessfully')}
           </DescriptionCentered>
         );
       default:
         return (
           <DescriptionCentered>
-            Transaction Hash: <br />{' '}
+            {translate('transactionHash')} <br />{' '}
             <Txnlink onClick={() => openExplorerTab(txnHash, 'tx', chainId)}>
               {shortenAddress(txnHash)}{' '}
             </Txnlink>
             <br />
-            Your deploy transaction is still pending and has reached the maximum
-            retry limit for status checks. Please wait for the transaction to
-            complete.
+            {translate('deployTransactionPendingPart1')} <br />
             <br />
+            {translate('deployTransactionPendingPart2')} <br />
             <br />
-            Please try again in a couple of hours.
-            <br />
-            <br />
-            Thank you for your comprehension.
+            {translate('deployTransactionPendingPart3')}
           </DescriptionCentered>
         );
     }
@@ -138,7 +135,7 @@ export const DeployModalView = ({ address }: Props) => {
   return (
     <Wrapper>
       <StarknetLogo />
-      <Title>Deploy Account</Title>
+      <Title>{translate('deployAccount')}</Title>
       {renderComponent()}
     </Wrapper>
   );

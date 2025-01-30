@@ -7,19 +7,21 @@ import {
   Wrapper,
 } from './NoFlaskModal.style';
 import { AlertView } from '../../atom/Alert/Alert.view';
+import { useMultiLanguage } from 'services';
 
 export const NoFlaskModalView = () => {
+  const { translate } = useMultiLanguage();
+
   return (
     <Wrapper>
       <StarknetLogo />
-      <Title>You don't have the MetaMask Flask extension</Title>
+      <Title>{translate('metaMaskFlaskExtensionRequired')}</Title>
       <DescriptionCentered>
-        You need to install MetaMask Flask extension in order to use the
-        Starknet Snap.
+        {translate('installMetaMaskFlaskToUseSnap')}
         <br />
         <br />
         <AlertView
-          text="Please make sure that the regular MetaMask extension is disabled or use a different browser profile"
+          text={translate('disableMetaMaskExtension')}
           variant="warning"
         />
       </DescriptionCentered>
@@ -29,7 +31,7 @@ export const NoFlaskModalView = () => {
         rel="noreferrer noopener"
       >
         <ConnectButton customIconLeft={<FlaskIcon />} onClick={() => {}}>
-          Download MetaMask Flask
+          {translate('downloadMetaMaskFlask')}
         </ConnectButton>
       </a>
     </Wrapper>

@@ -1,5 +1,22 @@
 # Changelog
 
+## [3.1.0](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v3.0.0...starknet-snap-v3.1.0) (2024-12-19)
+
+
+### Features
+
+* Add permission boundary.  Block RPCs - `starkNet_addNetwork`, `starkNet_estimateAccountDeployFee` and `starkNet_getStoredTransactions` access for any origin ([#448](https://github.com/Consensys/starknet-snap/issues/448)) ([1e80070](https://github.com/Consensys/starknet-snap/commit/1e800700e1713a94da6ab0e3d074e0c5f16a0d6c))
+* Add new RPC `starkNet_getAddrFromStarkName` to support  transfer money with .stark name ([#437](https://github.com/Consensys/starknet-snap/issues/437)) ([#449](https://github.com/Consensys/starknet-snap/issues/449)) ([c9e2c64](https://github.com/Consensys/starknet-snap/commit/c9e2c64572ce22bb111e6075fa6191dc025bc863))
+* Refactor RPC `starkNet_getTransactions` and change the provider from Voyager to StarkScan ([#453](https://github.com/Consensys/starknet-snap/issues/453)) ([#457](https://github.com/Consensys/starknet-snap/issues/457)) ([#458](https://github.com/Consensys/starknet-snap/issues/458)) ([#459](https://github.com/Consensys/starknet-snap/issues/459)) ([#341](https://github.com/Consensys/starknet-snap/issues/341)) ([cfdc79d](https://github.com/Consensys/starknet-snap/commit/cfdc79da6a0dda518b2dd6dd3c699de254d8e7f1)) ([5b72ef9](https://github.com/Consensys/starknet-snap/commit/5b72ef9f8ab55ad57dcaca25e306d3feecffcf0d))
+* Replace RPC provider from Alchemy to Infura DIN ([451](https://github.com/Consensys/starknet-snap/pull/451)) ([eb6c688](https://github.com/Consensys/starknet-snap/commit/eb6c68876659df171a9c3d9421be1ecf4273d2ee))
+* Refactor RPC starkNet_getTransactionStatus to have superstruct validation ([447](https://github.com/Consensys/starknet-snap/pull/447)) ([5d569a88](https://github.com/Consensys/starknet-snap/commit/5d569a88ed0605e4f022de5b567acfd5c8fc6f15))
+* Remove RPCs `starkNet_sendTransaction` and `starkNet_estimateFees` ([442](https://github.com/Consensys/starknet-snap/pull/442)) ([fbfcb54a](https://github.com/Consensys/starknet-snap/commit/fbfcb54abd8f97b01e2e514c84c86ddf0086fbca))
+
+
+### Bug Fixes
+
+* Consolidate `ResourceBounds` sum ([#456](https://github.com/Consensys/starknet-snap/issues/456)) ([85ea8ba](https://github.com/Consensys/starknet-snap/commit/85ea8bacc8c0251b47dbd63cd23f8e96f073db56))
+
 ## [3.0.0](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v2.11.0...starknet-snap-v3.0.0) (2024-11-26)
 
 

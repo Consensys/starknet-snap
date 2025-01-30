@@ -9,7 +9,7 @@ import { getSpendableTotalBalance } from 'utils/utils';
 import { Buttons, HeaderButton, Wrapper } from './Header.style';
 import { ReceiveModal } from './ReceiveModal';
 import { SendModal } from './SendModal';
-import { useStarkNetSnap } from 'services';
+import { useMultiLanguage, useStarkNetSnap } from 'services';
 import { TOKEN_BALANCE_REFRESH_FREQUENCY } from 'utils/constants';
 
 interface Props {
@@ -22,6 +22,7 @@ export const HeaderView = ({ address }: Props) => {
   const networks = useAppSelector((state) => state.networks);
   const wallet = useAppSelector((state) => state.wallet);
   const { updateTokenBalance } = useStarkNetSnap();
+  const { translate } = useMultiLanguage();
   const timeoutHandle = useRef(setTimeout(() => {}));
 
   const getUSDValue = () => {
@@ -73,14 +74,14 @@ export const HeaderView = ({ address }: Props) => {
       />
       <Buttons>
         <HeaderButton onClick={() => setReceiveOpen(true)}>
-          Receive
+          {translate('receive')}
         </HeaderButton>
         <Button
           onClick={() => handleSendClick()}
           backgroundTransparent
           borderVisible
         >
-          Send
+          {translate('send')}
         </Button>
       </Buttons>
       <PopIn isOpen={receiveOpen} setIsOpen={setReceiveOpen}>

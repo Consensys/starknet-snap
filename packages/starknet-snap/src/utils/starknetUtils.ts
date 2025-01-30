@@ -79,11 +79,11 @@ import { ConsolidateFees } from './fee';
 import { hexToString } from './formatter-utils';
 import { getAddressKey } from './keyPair';
 import { logger } from './logger';
+import { getRPCUrl } from './rpc-provider';
 import { toJson } from './serializer';
 import {
   getAccount,
   getAccounts,
-  getRPCUrl,
   getTransactionsFromVoyagerUrl,
   getVoyagerCredentials,
 } from './snapUtils';

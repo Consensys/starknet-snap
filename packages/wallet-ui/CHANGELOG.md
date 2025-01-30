@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
 
+## [1.26.0](https://github.com/Consensys/starknet-snap/compare/wallet-ui-v1.25.0...wallet-ui-v1.26.0) (2024-12-19)
+
+
+### Features
+
+* allow users to transfer money to a .stark name ([#437](https://github.com/Consensys/starknet-snap/issues/437)) ([#449](https://github.com/Consensys/starknet-snap/issues/449)) ([c9e2c64](https://github.com/Consensys/starknet-snap/commit/c9e2c64572ce22bb111e6075fa6191dc025bc863))
+* Refactor RPC `starkNet_getTransactions` and change the provider from Voyager to StarkScan ([#453](https://github.com/Consensys/starknet-snap/issues/453)) ([#457](https://github.com/Consensys/starknet-snap/issues/457)) ([#458](https://github.com/Consensys/starknet-snap/issues/458)) ([#459](https://github.com/Consensys/starknet-snap/issues/459)) ([5b72ef9](https://github.com/Consensys/starknet-snap/commit/5b72ef9f8ab55ad57dcaca25e306d3feecffcf0d))
+
+
+### Bug Fixes
+
+* Mute Wallet UI error message when user deny a request ([#460](https://github.com/Consensys/starknet-snap/issues/460)) ([8027bc2](https://github.com/Consensys/starknet-snap/commit/8027bc2ce968291b8d4724362f7d3b087610a5ec))
+
 ## [1.25.0](https://github.com/Consensys/starknet-snap/compare/wallet-ui-v1.24.1...wallet-ui-v1.25.0) (2024-11-26)
 
 

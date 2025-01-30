@@ -3,6 +3,7 @@ import { Button } from 'components/ui/atom/Button';
 import { Bold, ButtonDiv, Normal, Wrapper } from './ConnectInfoModal.style';
 import { useAppDispatch, useAppSelector } from 'hooks/redux';
 import { setInfoModalVisible } from 'slices/modalSlice';
+import { useMultiLanguage } from 'services';
 
 interface Props {
   address: string;
@@ -12,20 +13,22 @@ interface Props {
 export const ConnectInfoModalView = ({ address, onButtonClick }: Props) => {
   const networks = useAppSelector((state) => state.networks);
   const dispatch = useAppDispatch();
+  const { translate } = useMultiLanguage();
+
   return (
     <div>
       <Wrapper>
         <div>
-          <Normal>Network</Normal>
+          <Normal>{translate('network')}</Normal>
           <Bold>{networks.items[networks.activeNetwork].name}</Bold>
         </div>
         <div>
-          <Normal>Starknet account</Normal>
+          <Normal>{translate('starknetAccount')}</Normal>
           <Bold>{address}</Bold>
         </div>
         <Alert
           variant="info"
-          text="This account was generated with your MetaMask Secret Recovery Phrase."
+          text={translate('accountGeneratedWithRecoveryPhrase')}
         />
       </Wrapper>
       <ButtonDiv>
@@ -35,7 +38,7 @@ export const ConnectInfoModalView = ({ address, onButtonClick }: Props) => {
             onButtonClick && onButtonClick();
           }}
         >
-          GOT IT!
+          {translate('gotIt')}
         </Button>
       </ButtonDiv>
     </div>

@@ -1,3 +1,4 @@
+import { useMultiLanguage } from 'services';
 import {
   AddressCopy,
   AddressQrCode,
@@ -10,9 +11,11 @@ interface Props {
 }
 
 export const ReceiveModalView = ({ address }: Props) => {
+  const { translate } = useMultiLanguage();
+
   return (
     <Wrapper>
-      <Title>Receive</Title>
+      <Title>{translate('receive')}</Title>
       <AddressQrCode value={address} />
       <AddressCopy address={address} placement="top" />
     </Wrapper>

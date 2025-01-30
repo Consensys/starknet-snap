@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.0](https://github.com/Consensys/starknet-snap/compare/get-starknet-v1.3.0...get-starknet-v1.4.0) (2024-12-19)
+
+
+### Features
+
+* event handling in get-starknet ([#413](https://github.com/Consensys/starknet-snap/issues/413)) ([009e8d4](https://github.com/Consensys/starknet-snap/commit/009e8d4f4bd549007e36545cecb9efd21becb314))
+
 ## [1.3.0](https://github.com/Consensys/starknet-snap/compare/get-starknet-v1.2.0...get-starknet-v1.3.0) (2024-10-28)
 
 
