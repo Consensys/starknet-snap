@@ -65,6 +65,16 @@ export const walletSlice = createSlice({
         }
       }
     },
+    updateAccount: (
+      state,
+      { payload }: { payload: { address: string; updates: Partial<Account> } },
+    ) => {
+      state.accounts = state.accounts.map((account) =>
+        account.address === payload.address
+          ? { ...account, ...payload.updates }
+          : account,
+      );
+    },
     setCurrentAccount: (state, { payload }: { payload: Account }) => {
       state.currentAccount = payload.address;
       state.currentAccountIndex = payload.addressIndex;
@@ -132,6 +142,7 @@ export const {
   setForceReconnect,
   setCurrentAccount,
   setAccounts,
+  updateAccount,
   clearAccounts,
   setErc20TokenBalances,
   setErc20TokenBalanceSelected,

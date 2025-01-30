@@ -34,7 +34,6 @@ interface Props {
 
 export const SideBarView = ({ address, addressIndex }: Props) => {
   const networks = useAppSelector((state) => state.networks);
-  const accounts = useAppSelector((state) => state.wallet.accounts);
   const chainId = networks?.items[networks.activeNetwork]?.chainId;
   const [listOverflow, setListOverflow] = useState(false);
   const [infoModalOpen, setInfoModalOpen] = useState(false);
@@ -117,12 +116,7 @@ export const SideBarView = ({ address, addressIndex }: Props) => {
       <AccountLabel>Account {addressIndex + 1} </AccountLabel>
       <RowDiv>
         <InfoIcon onClick={() => setInfoModalOpen(true)}>i</InfoIcon>
-        <AccountSwitchModal
-          currentAddress={address}
-          starkName={starkName}
-          accounts={accounts.map((account) => account.address)}
-          accountsIndex={accounts.map((account) => account.addressIndex)}
-        />
+        <AccountSwitchModal currentAddress={address} starkName={starkName} />
         <PopperTooltip content="Copied!" closeTrigger="click">
           <CopyIcon
             onClick={async () => navigator.clipboard.writeText(address)}

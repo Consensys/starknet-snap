@@ -34,6 +34,7 @@ export type Account = {
   deployRequired: boolean;
   chainId: string;
   addressIndex: number;
+  visibility?: boolean;
 };
 
 export type Network = {
