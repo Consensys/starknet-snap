@@ -48,16 +48,8 @@ export const SendModalView = ({ closeModal }: Props) => {
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {}, [fields]);
-
-  const handleBack = (amount: string, address: string) => {
+  const handleBack = () => {
     setSummaryModalOpen(false);
-
-    setFields((prevFields) => ({
-      ...prevFields,
-      amount: amount,
-      address: address,
-    }));
   };
 
   const handleChange = (fieldName: string, fieldValue: string) => {

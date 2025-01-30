@@ -39,7 +39,7 @@ interface Props {
   amount: string;
   chainId: string;
   closeModal?: () => void;
-  handleBack: (amount: string, address: string) => void;
+  handleBack: () => void;
   selectedFeeToken: FeeToken;
 }
 
@@ -321,11 +321,11 @@ export const SendSummaryModalView = ({
       </Wrapper>
       <Buttons>
         <ButtonStyled
-          onClick={() => handleBack(amount, address)}
+          onClick={() => handleBack()}
           backgroundTransparent
           borderVisible
         >
-          {translate('reject').toUpperCase()}
+          {translate('back').toUpperCase()}
         </ButtonStyled>
         <ButtonStyled
           enabled={!estimatingGas && !gasFeesError && !totalExceedsBalance}

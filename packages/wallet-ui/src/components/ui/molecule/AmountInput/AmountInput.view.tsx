@@ -43,21 +43,6 @@ export const AmountInputView = ({
   const [totalPrice, setTotalPrice] = useState('');
   const [usdMode, setUsdMode] = useState(false);
 
-  const fetchTotalPrice = useCallback(() => {
-    if (asset.usdPrice && inputValue && inputValue !== '.') {
-      const inputFloat = parseFloat(inputValue);
-      setTotalPrice(getAmountPrice(asset, inputFloat, usdMode));
-    } else {
-      setTotalPrice('');
-    }
-  }, [asset, inputValue, usdMode]);
-
-  const resizeInput = useCallback(() => {
-    if (inputRef.current !== null) {
-      inputRef.current.style.width = inputValue.length * 8 + 6 + 'px';
-    }
-  }, [inputValue]);
-
   const triggerOnChange = (newValue: string) => {
     setInputValue(newValue);
     if (onChangeCustom) {
@@ -72,8 +57,11 @@ export const AmountInputView = ({
 
   useEffect(() => {
     // Adjust the input size whenever the value changes
-    resizeInput();
-  }, [resizeInput]);
+    if (inputRef.current !== null) {
+      inputRef.current.style.width = inputValue.length * 8 + 6 + 'px';
+    }
+  }, [inputValue]);
+
   const handleOnKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
     //Only accept numeric and decimals
     if (
@@ -103,29 +91,24 @@ export const AmountInputView = ({
   };
 
   const handleMaxClick = () => {
-    if (value && asset.usdPrice) {
-      const amountStr = ethers.utils
-        .formatUnits(asset.amount, asset.decimals)
-        .toString();
-      const amountFloat = parseFloat(amountStr);
-      const value = usdMode
-        ? getAmountPrice(asset, amountFloat, false)
-        : amountStr;
-      fetchTotalPrice();
-      resizeInput();
-      triggerOnChange(value);
-    }
+    const amountStr = ethers.utils
+      .formatUnits(asset.amount, asset.decimals)
+      .toString();
+    const amountFloat = parseFloat(amountStr);
+    const value = usdMode
+      ? getAmountPrice(asset, amountFloat, false)
+      : amountStr;
+    triggerOnChange(value);
   };
 
   useEffect(() => {
-    if (value !== undefined) {
-      setInputValue(value);
+    if (asset.usdPrice && inputValue && inputValue !== '.') {
+      const inputFloat = parseFloat(inputValue);
+      setTotalPrice(getAmountPrice(asset, inputFloat, usdMode));
+    } else {
+      setTotalPrice('');
     }
-  }, [value]);
-
-  useEffect(() => {
-    fetchTotalPrice();
-  }, [fetchTotalPrice]);
+  }, [asset, inputValue, usdMode]);
 
   return (
     <Wrapper>

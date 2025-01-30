@@ -28,6 +28,9 @@
     "amount": {
       "message": "Amount"
     },
+    "back": {
+      "message": "Back"
+    },
     "cancel": {
       "message": "CANCEL"
     },

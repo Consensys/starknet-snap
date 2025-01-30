@@ -65,7 +65,6 @@ export const MaxButton = styled(Button).attrs((props) => ({
 export const Input = styled.input<IInput>`
   border: none;
   height: 50px;
-  width: 8px;
   font-size: ${(props) => props.theme.typography.p2.fontSize};
   font-family: ${(props) => props.theme.typography.p2.fontFamily};
   color: ${(props) =>
