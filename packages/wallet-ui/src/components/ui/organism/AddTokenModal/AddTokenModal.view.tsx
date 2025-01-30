@@ -27,7 +27,7 @@ export const AddTokenModalView = ({ closeModal }: Props) => {
   const [enabled, setEnabled] = useState(false);
   const networks = useAppSelector((state) => state.networks);
   const { currentAccount } = useAppSelector((state) => state.wallet);
-  const chainId = networks && networks.items[networks.activeNetwork].chainId;
+  const chainId = networks?.items[networks.activeNetwork].chainId;
   const [isValidAddress, setIsValidAddress] = useState(false);
   const [fields, setFields] = useState({
     address: '',

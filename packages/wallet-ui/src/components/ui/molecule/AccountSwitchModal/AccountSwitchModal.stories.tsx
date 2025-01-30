@@ -22,12 +22,6 @@ export const Default = () => (
   </div>
 );
 
-export const TooltipTop = () => (
-  <div style={wrapperStyle}>
-    <AccountSwitchModalView currentAddress={address}></AccountSwitchModalView>
-  </div>
-);
-
 export const Full = () => (
   <div style={wrapperStyle}>
     <AccountSwitchModalView

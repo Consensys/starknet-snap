@@ -41,3 +41,8 @@ export const AccountImageStyled = styled(AccountImage)`
   margin-left: ${(props) => props.theme.spacing.small};
   cursor: pointer;
 `;
+
+export const Container = styled.div`
+  display: flex;
+  alignitems: center;
+`;

@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { shortenAddress, shortenDomain } from 'utils/utils';
 import {
   AccountImageStyled,
   Normal,
   Wrapper,
   AccountSwitchMenuItem,
+  Container,
 } from './AccountSwitchModal.style';
 import { Menu } from '@headlessui/react';
 import {
@@ -21,7 +22,7 @@ import { useStarkNetSnap } from 'services';
 import IconButton from '@mui/material/IconButton';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import VisibilityIcon from '@mui/icons-material/Visibility';
-import { useEffect } from 'react';
+import { Box } from '@mui/material';
 
 interface Props {
   currentAddress: string;
@@ -53,15 +54,21 @@ export const AccountSwitchModalView = ({
     (account) => account.visibility === false,
   );
 
+  let displayName;
+
+  if (full) {
+    displayName = starkName ?? currentAddress;
+  } else if (starkName) {
+    displayName = shortenDomain(starkName);
+  } else {
+    displayName = shortenAddress(currentAddress);
+  }
+
   return (
     <Menu as="div" style={{ display: 'inline-block', position: 'relative' }}>
       <Menu.Button style={{ background: 'none', border: 'none' }}>
         <Wrapper backgroundTransparent iconRight="angle-down">
-          {full
-            ? starkName ?? currentAddress
-            : starkName
-            ? shortenDomain(starkName)
-            : shortenAddress(currentAddress)}
+          {displayName}
         </Wrapper>
       </Menu.Button>
 
@@ -77,9 +84,9 @@ export const AccountSwitchModalView = ({
                 alignItems: 'center',
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center' }}>
+              <Container>
                 <Normal>Accounts</Normal>
-              </div>
+              </Container>
               {hiddenAccounts.length > 0 && (
                 <IconButton
                   onClick={() => setShowHiddenAccounts(!showHiddenAccounts)}
@@ -105,7 +112,7 @@ export const AccountSwitchModalView = ({
               <Menu.Item key={account.address}>
                 <AccountSwitchMenuItem
                   style={{
-                    paddingLeft: 20,
+                    paddingLeft: 22,
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
@@ -116,7 +123,7 @@ export const AccountSwitchModalView = ({
                     unHideAccount(chainId, account.address);
                   }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <Container>
                     <AccountImageStyled size={30} address={account.address} />
                     <MenuItemText style={{ marginLeft: 20 }}>
                       <div>Account {account.addressIndex + 1}</div>
@@ -126,7 +133,7 @@ export const AccountSwitchModalView = ({
                           : shortenAddress(account.address)}
                       </div>
                     </MenuItemText>
-                  </div>
+                  </Container>
                   {/* Unhide button */}
                   <IconButton disabled size="small">
                     <VisibilityIcon fontSize="small" />
@@ -156,28 +163,34 @@ export const AccountSwitchModalView = ({
                       alignItems: 'center',
                     }}
                   >
-                    <div
-                      style={{ display: 'flex', alignItems: 'center' }}
-                      onClick={() => switchAccount(chainId, account.address)}
+                    <AccountSwitchMenuItem
+                      style={{
+                        padding: '0px',
+                      }}
+                      onClick={
+                        !isSelected
+                          ? () => switchAccount(chainId, account.address)
+                          : undefined
+                      }
                     >
-                      <AccountImageStyled
-                        size={30}
-                        address={account.address}
-                        connected={account.address === currentAddress}
-                      />
-                      <MenuItemText
-                        style={{ marginLeft: isSelected ? 19 : 20 }}
-                      >
-                        <div>
+                      <Box style={{ display: 'flex', alignItems: 'center' }}>
+                        <AccountImageStyled
+                          size={30}
+                          address={account.address}
+                          connected={account.address === currentAddress}
+                        />
+                        <MenuItemText
+                          style={{ marginLeft: isSelected ? 19 : 20 }}
+                        >
                           <div>Account {account.addressIndex + 1}</div>
                           <div>
                             {full
                               ? account.address
                               : shortenAddress(account.address)}
                           </div>
-                        </div>
-                      </MenuItemText>
-                    </div>
+                        </MenuItemText>
+                      </Box>
+                    </AccountSwitchMenuItem>
                     <IconButton
                       onClick={(e) => {
                         if (
