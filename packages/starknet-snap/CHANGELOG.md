@@ -1,5 +1,19 @@
 # Changelog
 
+## [3.2.0](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v3.1.0...starknet-snap-v3.2.0) (2025-01-31)
+
+
+### Features
+
+* include locales files in production ([#481](https://github.com/Consensys/starknet-snap/issues/481)) ([d1da20f](https://github.com/Consensys/starknet-snap/commit/d1da20f9094a6122f573f28e5395e1c290296a10))
+* localization ([#471](https://github.com/Consensys/starknet-snap/issues/471)) ([de42c08](https://github.com/Consensys/starknet-snap/commit/de42c084e6e391cfe6a961e364a1e781fbf17786))
+* wallet-ui translation ([#495](https://github.com/Consensys/starknet-snap/issues/495)) ([ece4e17](https://github.com/Consensys/starknet-snap/commit/ece4e1793bf16c2be2ae86f1999f81273e131878))
+
+
+### Bug Fixes
+
+* qa localisation  ([#489](https://github.com/Consensys/starknet-snap/issues/489)) ([d1bdd22](https://github.com/Consensys/starknet-snap/commit/d1bdd22fa213e98c20435e32d35a900c1148da38))
+
 ## [3.1.0](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v3.0.0...starknet-snap-v3.1.0) (2024-12-19)
 
 
