@@ -36,6 +36,7 @@ export const UpgradeModelView = ({ address }: Props) => {
   const toastr = new Toastr();
 
   const onUpgrade = async () => {
+    if (!translate) return;
     try {
       const resp = await upgradeAccount(address, '0', chainId);
 
