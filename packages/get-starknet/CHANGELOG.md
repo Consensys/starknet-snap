@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.1](https://github.com/Consensys/starknet-snap/compare/get-starknet-v1.4.0...get-starknet-v1.4.1) (2025-01-31)
+
+
+### Bug Fixes
+
+* Add "to be deprecated" message for the `get-starknet@3.3.0` properties (https://github.com/Consensys/starknet-snap/issues/488) ([4e76a73](https://github.com/Consensys/starknet-snap/commit/4e76a7379593896b0190fda44e7f8143b463c98c)) ([4e76a73](https://github.com/Consensys/starknet-snap/commit/4e76a7379593896b0190fda44e7f8143b463c98c))
+
 ## [1.4.0](https://github.com/Consensys/starknet-snap/compare/get-starknet-v1.3.0...get-starknet-v1.4.0) (2024-12-19)
 
 
