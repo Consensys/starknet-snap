@@ -55,3 +55,7 @@ export const Container = styled.div`
   display: flex;
   alignitems: center;
 `;
+
+export const MenuItemText = styled.span`
+  ${(props) => props.theme.typography.p2};
+`;
