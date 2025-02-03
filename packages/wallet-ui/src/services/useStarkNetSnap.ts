@@ -192,11 +192,15 @@ export const useStarkNetSnap = () => {
     dispatch(disableLoading());
   };
 
-  const hideAccount = async (
-    chainId: string,
-    address: string,
-    currentAddress: string,
-  ) => {
+  const hideAccount = async ({
+    chainId,
+    address,
+    currentAddress,
+  }: {
+    chainId: string;
+    address: string;
+    currentAddress: string;
+  }) => {
     try {
       if (!loader.isLoading) {
         dispatch(
@@ -206,7 +210,10 @@ export const useStarkNetSnap = () => {
       const account = await toggleAccountVisibility(chainId, address, false);
       dispatch(updateAccount({ address, updates: { visibility: false } }));
       if (account.address !== currentAddress) {
-        await switchAccount(chainId, account.address);
+        await initWalletData({
+          account,
+          chainId,
+        });
       }
     } catch (error) {
       const toastr = new Toastr();
@@ -218,24 +225,21 @@ export const useStarkNetSnap = () => {
     }
   };
 
-  const unHideAccount = async (chainId: string, address: string) => {
-    try {
-      if (!loader.isLoading) {
-        dispatch(
-          enableLoadingWithMessage(
-            `Showing account ${shortenAddress(address)}`,
-          ),
-        );
-      }
-      await toggleAccountVisibility(chainId, address, true);
-      dispatch(updateAccount({ address, updates: { visibility: true } }));
-      await switchAccount(chainId, address);
-    } catch (error) {
-      //eslint-disable-next-line no-console
-      console.log(`error while processing unHideAccount: ${error}`);
-    } finally {
-      dispatch(disableLoading());
+  const unHideAccount = async ({
+    chainId,
+    address,
+  }: {
+    chainId: string;
+    address: string;
+  }) => {
+    if (!loader.isLoading) {
+      dispatch(
+        enableLoadingWithMessage(`Showing account ${shortenAddress(address)}`),
+      );
     }
+    await toggleAccountVisibility(chainId, address, true);
+    dispatch(updateAccount({ address, updates: { visibility: true } }));
+    dispatch(disableLoading());
   };
 
   const setAccount = async (chainId: string, currentAccount: Account) => {

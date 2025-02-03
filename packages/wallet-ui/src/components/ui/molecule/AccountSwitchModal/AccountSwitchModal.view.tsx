@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { shortenAddress, shortenDomain } from 'utils/utils';
 import {
   AccountImageStyled,
@@ -23,6 +23,7 @@ import IconButton from '@mui/material/IconButton';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { Box } from '@mui/material';
+import { Account } from 'types';
 
 interface Props {
   currentAddress: string;
@@ -43,16 +44,17 @@ export const AccountSwitchModalView = ({
 
   const [showHiddenAccounts, setShowHiddenAccounts] = useState(false);
 
-  useEffect(() => {
-    console.log('Updated accounts:', accounts);
-  }, [accounts]);
-
-  const visibleAccounts = accounts.filter(
-    (account) => account.visibility !== false,
-  );
-  const hiddenAccounts = accounts.filter(
-    (account) => account.visibility === false,
-  );
+  const visibleAccounts: Account[] = [];
+  const hiddenAccounts: Account[] = [];
+  for (const account of accounts) {
+    // account.visibility = `undefined` refer to the case when previous account state doesnt include this field
+    // hence we consider it is `visible`
+    if (account.visibility === undefined || account.visibility === true) {
+      visibleAccounts.push(account);
+    } else {
+      hiddenAccounts.push(account);
+    }
+  }
 
   let displayName;
 
@@ -79,9 +81,6 @@ export const AccountSwitchModalView = ({
             <AccountSwitchMenuItem
               style={{
                 paddingLeft: 20,
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
               }}
             >
               <Container>
@@ -113,14 +112,12 @@ export const AccountSwitchModalView = ({
                 <AccountSwitchMenuItem
                   style={{
                     paddingLeft: 22,
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    opacity: 0.5, // Make it semi-transparent
+                    opacity: 0.5,
                   }}
-                  onClick={() => {
+                  onClick={(e) => {
                     setShowHiddenAccounts(false);
-                    unHideAccount(chainId, account.address);
+                    unHideAccount({ chainId, address: account.address });
+                    e.preventDefault();
                   }}
                 >
                   <Container>
@@ -134,7 +131,6 @@ export const AccountSwitchModalView = ({
                       </div>
                     </MenuItemText>
                   </Container>
-                  {/* Unhide button */}
                   <IconButton disabled size="small">
                     <VisibilityIcon fontSize="small" />
                   </IconButton>
@@ -158,9 +154,6 @@ export const AccountSwitchModalView = ({
                         ? `4px solid ${theme.palette.secondary.main}`
                         : 'none',
                       paddingLeft: isSelected ? 15 : 22,
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
                     }}
                   >
                     <AccountSwitchMenuItem
@@ -193,13 +186,14 @@ export const AccountSwitchModalView = ({
                     </AccountSwitchMenuItem>
                     <IconButton
                       onClick={(e) => {
-                        if (
-                          account.address !== currentAddress &&
-                          visibleAccounts.length > 2
-                        ) {
+                        if (visibleAccounts.length > 2) {
                           e.preventDefault();
                         }
-                        hideAccount(chainId, account.address, currentAddress);
+                        hideAccount({
+                          chainId,
+                          address: account.address,
+                          currentAddress,
+                        });
                       }}
                       size="small"
                     >

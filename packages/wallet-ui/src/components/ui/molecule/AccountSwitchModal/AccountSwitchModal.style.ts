@@ -35,6 +35,7 @@ export const AccountSwitchMenuItem = styled.div`
   display: flex;
   align-items: center;
   padding: 14px;
+  justify-content: space-between;
 `;
 
 export const AccountImageStyled = styled(AccountImage)`
