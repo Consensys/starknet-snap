@@ -21,13 +21,15 @@ const accounts = [
   {
     address: '0x123...abcd',
     addressIndex: 0,
-  },{
+  },
+  {
     address: '0x456...efgh',
     addressIndex: 1,
-  },{
+  },
+  {
     address: '0x789...ijkl',
     addressIndex: 2,
-  }, 
+  },
 ] as Account[];
 
 export const Default = () => (

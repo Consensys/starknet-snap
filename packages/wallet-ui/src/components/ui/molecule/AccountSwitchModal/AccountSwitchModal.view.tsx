@@ -81,7 +81,11 @@ export const AccountSwitchModalView = ({
                   <MenuItemText style={{ marginLeft: isSelected ? 19 : 20 }}>
                     <div>
                       <div>Account {account.addressIndex + 1}</div>
-                      <div>{full ? account.address : shortenAddress(account.address)}</div>
+                      <div>
+                        {full
+                          ? account.address
+                          : shortenAddress(account.address)}
+                      </div>
                     </div>
                   </MenuItemText>
                 </AccountSwitchMenuItem>
