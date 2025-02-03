@@ -1,5 +1,6 @@
 import { Meta } from '@storybook/react';
 import { AccountSwitchModalView } from './AccountSwitchModal.view';
+import { Account } from 'types';
 
 export default {
   title: 'Molecule/AccountAddress',
@@ -16,15 +17,24 @@ const wrapperStyle = {
   justifyContent: 'center',
 };
 
-const accounts = ['0x123...abcd', '0x456...efgh', '0x789...ijkl'];
-const accountsIndex = [0, 1, 2];
+const accounts = [
+  {
+    address: '0x123...abcd',
+    addressIndex: 0,
+  },{
+    address: '0x456...efgh',
+    addressIndex: 1,
+  },{
+    address: '0x789...ijkl',
+    addressIndex: 2,
+  }, 
+] as Account[];
 
 export const Default = () => (
   <div style={wrapperStyle}>
     <AccountSwitchModalView
       currentAddress={address}
       accounts={accounts}
-      accountsIndex={accountsIndex}
     ></AccountSwitchModalView>
   </div>
 );
@@ -34,7 +44,6 @@ export const TooltipTop = () => (
     <AccountSwitchModalView
       currentAddress={address}
       accounts={accounts}
-      accountsIndex={accountsIndex}
     ></AccountSwitchModalView>
   </div>
 );
@@ -44,7 +53,6 @@ export const Full = () => (
     <AccountSwitchModalView
       currentAddress={address}
       accounts={accounts}
-      accountsIndex={accountsIndex}
       full
     ></AccountSwitchModalView>
   </div>
@@ -55,7 +63,6 @@ export const DarkerBackground = () => (
     <AccountSwitchModalView
       currentAddress={address}
       accounts={accounts}
-      accountsIndex={accountsIndex}
       full
     ></AccountSwitchModalView>
   </div>

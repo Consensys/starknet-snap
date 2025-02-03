@@ -37,12 +37,12 @@ function App() {
   } = useAppSelector((state) => state.modals);
   const { loader } = useAppSelector((state) => state.UI);
   const networks = useAppSelector((state) => state.networks);
-  const { currentAccount, currentAccountIndex } = useAppSelector(
+  const { currentAccount } = useAppSelector(
     (state) => state.wallet,
   );
   const { hasMetamask } = useHasMetamask();
   const chainId = networks.items?.[networks.activeNetwork]?.chainId;
-  const address = currentAccount ?? DUMMY_ADDRESS;
+  const address = currentAccount?.address ?? DUMMY_ADDRESS;
 
   useEffect(() => {
     if (!provider) {
@@ -99,7 +99,7 @@ function App() {
         >
           <DeployModal address={address} />
         </PopIn>
-        <Home address={address} addressIndex={currentAccountIndex} />
+        <Home address={address} addressIndex={currentAccount?.addressIndex || 0} />
         <PopIn isOpen={loading}>
           {loading && (
             <LoadingBackdrop>{loader.loadingMessage}</LoadingBackdrop>

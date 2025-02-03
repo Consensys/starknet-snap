@@ -120,8 +120,7 @@ export const SideBarView = ({ address, addressIndex }: Props) => {
         <AccountSwitchModal
           currentAddress={address}
           starkName={starkName}
-          accounts={accounts.map((account) => account.address)}
-          accountsIndex={accounts.map((account) => account.addressIndex)}
+          accounts={accounts.map((account) => account)}
         />
         <PopperTooltip content="Copied!" closeTrigger="click">
           <CopyIcon

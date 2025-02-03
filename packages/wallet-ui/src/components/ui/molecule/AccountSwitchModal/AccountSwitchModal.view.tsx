@@ -17,11 +17,11 @@ import { theme } from 'theme/default';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useAppSelector } from 'hooks/redux';
 import { useStarkNetSnap } from 'services';
+import { Account } from 'types';
 
 interface Props {
   currentAddress: string;
-  accounts: string[];
-  accountsIndex: number[];
+  accounts: Account[];
   full?: boolean;
   starkName?: string;
 }
@@ -29,7 +29,6 @@ interface Props {
 export const AccountSwitchModalView = ({
   currentAddress,
   accounts,
-  accountsIndex,
   full,
   starkName,
 }: Props) => {
@@ -59,11 +58,11 @@ export const AccountSwitchModalView = ({
         <MenuDivider />
         <MenuSection style={{ height: 201, overflowY: 'auto' }}>
           {accounts.map((account, index) => {
-            const isSelected = account === currentAddress; // Check if the account is selected
+            const isSelected = account.address === currentAddress; // Check if the account is selected
             return (
-              <Menu.Item key={account}>
+              <Menu.Item key={account.address}>
                 <AccountSwitchMenuItem
-                  onClick={() => switchAccount(chainId, account)}
+                  onClick={() => switchAccount(chainId, account.address)}
                   style={{
                     backgroundColor: isSelected
                       ? theme.palette.grey.grey4
@@ -76,13 +75,13 @@ export const AccountSwitchModalView = ({
                 >
                   <AccountImageStyled
                     size={30}
-                    address={account}
-                    connected={account === currentAddress}
+                    address={account.address}
+                    connected={account.address === currentAddress}
                   />
                   <MenuItemText style={{ marginLeft: isSelected ? 19 : 20 }}>
                     <div>
-                      <div>Account {accountsIndex[index] + 1}</div>
-                      <div>{full ? account : shortenAddress(account)}</div>
+                      <div>Account {account.addressIndex + 1}</div>
+                      <div>{full ? account.address : shortenAddress(account.address)}</div>
                     </div>
                   </MenuItemText>
                 </AccountSwitchMenuItem>
