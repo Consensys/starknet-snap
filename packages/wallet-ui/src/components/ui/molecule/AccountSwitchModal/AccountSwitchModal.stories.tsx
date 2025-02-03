@@ -1,6 +1,5 @@
 import { Meta } from '@storybook/react';
 import { AccountSwitchModalView } from './AccountSwitchModal.view';
-import { Account } from 'types';
 
 export default {
   title: 'Molecule/AccountAddress',
@@ -19,17 +18,13 @@ const wrapperStyle = {
 
 export const Default = () => (
   <div style={wrapperStyle}>
-    <AccountSwitchModalView
-      currentAddress={address}
-    ></AccountSwitchModalView>
+    <AccountSwitchModalView currentAddress={address}></AccountSwitchModalView>
   </div>
 );
 
 export const TooltipTop = () => (
   <div style={wrapperStyle}>
-    <AccountSwitchModalView
-      currentAddress={address}
-    ></AccountSwitchModalView>
+    <AccountSwitchModalView currentAddress={address}></AccountSwitchModalView>
   </div>
 );
 

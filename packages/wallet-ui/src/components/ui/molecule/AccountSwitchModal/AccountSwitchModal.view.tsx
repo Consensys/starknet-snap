@@ -23,7 +23,6 @@ import IconButton from '@mui/material/IconButton';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { Box } from '@mui/material';
-import { Account } from 'types';
 
 interface Props {
   currentAddress: string;
