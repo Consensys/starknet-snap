@@ -29,7 +29,7 @@ export const TransactionsListView = ({ transactions }: Props) => {
       timeoutHandle.current = setTimeout(
         () =>
           getTransactions(
-            currentAccount,
+            currentAccount.address,
             erc20TokenBalanceSelected.address,
             10,
             chainId,
@@ -48,7 +48,7 @@ export const TransactionsListView = ({ transactions }: Props) => {
       if (chainId && currentAccount && erc20TokenBalanceSelected.address) {
         clearTimeout(timeoutHandle.current); // cancel the timeout that was in-flight
         getTransactions(
-          currentAccount,
+          currentAccount.address,
           erc20TokenBalanceSelected.address,
           10,
           chainId,

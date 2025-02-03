@@ -106,7 +106,7 @@ export const AddTokenModalView = ({ closeModal }: Props) => {
                 fields.symbol,
                 parseFloat(fields.decimal),
                 chainId,
-                currentAccount,
+                currentAccount?.address || '0x',
               );
               if (newToken) {
                 setErc20TokenBalance(newToken);

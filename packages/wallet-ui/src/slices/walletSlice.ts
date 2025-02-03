@@ -9,8 +9,7 @@ export interface WalletState {
   isLoading: boolean;
   forceReconnect: boolean;
   accounts: Account[];
-  currentAccount: string;
-  currentAccountIndex: number;
+  currentAccount?: Account;
   erc20TokenBalances: Erc20TokenBalance[];
   erc20TokenBalanceSelected: Erc20TokenBalance;
   transactions: Transaction[];
@@ -23,8 +22,7 @@ const initialState: WalletState = {
   isLoading: false,
   forceReconnect: false,
   accounts: [],
-  currentAccount: '',
-  currentAccountIndex: 0,
+  currentAccount: undefined,
   erc20TokenBalances: [],
   erc20TokenBalanceSelected: {} as Erc20TokenBalance,
   transactions: [],
@@ -57,7 +55,7 @@ export const walletSlice = createSlice({
 
       const accountSet = new Set(
         state.accounts.map((account) => account.address),
-      ); // Create a set of addresses
+      );
 
       for (const account of accountsToInsert) {
         if (!accountSet.has(account.address)) {
@@ -76,8 +74,7 @@ export const walletSlice = createSlice({
       );
     },
     setCurrentAccount: (state, { payload }: { payload: Account }) => {
-      state.currentAccount = payload.address;
-      state.currentAccountIndex = payload.addressIndex;
+      state.currentAccount = payload;
     },
     setErc20TokenBalances: (state, { payload }) => {
       state.erc20TokenBalances = payload;
@@ -125,7 +122,7 @@ export const walletSlice = createSlice({
     },
     clearAccounts: (state) => {
       state.accounts = [];
-      state.currentAccount = '';
+      state.currentAccount = undefined;
     },
     resetWallet: (state) => {
       return {
