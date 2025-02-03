@@ -97,11 +97,21 @@ export const mockAccountStateManager = () => {
     AccountStateManager.prototype,
     'upsertAccount',
   );
+  const getCurrentAccountSpy = jest.spyOn(
+    AccountStateManager.prototype,
+    'getCurrentAccount',
+  );
+  const switchAccountSpy = jest.spyOn(
+    AccountStateManager.prototype,
+    'switchAccount',  
+  );
 
   return {
+    getCurrentAccountSpy,
     getAccountSpy,
     getNextIndexSpy,
     upsertAccountSpy,
+    switchAccountSpy,
   };
 };
 
