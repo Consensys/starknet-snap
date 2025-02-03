@@ -2,6 +2,14 @@ import { AccountImage } from 'components/ui/atom/AccountImage';
 import { Button } from 'components/ui/atom/Button';
 import styled from 'styled-components';
 
+export const MenuSection = styled.div`
+  padding: 0px 10px;
+  display: flex;
+  flex-direction: column;
+  height: 202;
+  overflow-y: auto;
+`;
+
 export const Wrapper = styled(Button).attrs((props) => ({
   fontSize: props.theme.typography.c1.fontSize,
   upperCaseOnly: false,
