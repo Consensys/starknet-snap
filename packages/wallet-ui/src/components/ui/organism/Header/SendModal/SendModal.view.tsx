@@ -50,6 +50,7 @@ export const SendModalView = ({ closeModal }: Props) => {
 
   const handleChange = (fieldName: string, fieldValue: string) => {
     //Check if input amount does not exceed user balance
+    if (!translate) return;
     setErrors((prevErrors) => ({
       ...prevErrors,
       [fieldName]: '',
