@@ -16,6 +16,7 @@ import { VisibleAccountsList } from './VisibleAccountsList';
 import { HiddenAccountsList } from './HiddenAccountsList';
 import { DUMMY_ADDRESS } from 'utils/constants';
 import { Account } from 'types';
+import Toastr from 'toastr2';
 
 interface Props {
   full?: boolean;
@@ -37,11 +38,16 @@ export const AccountSwitchModalView = ({ full, starkName }: Props) => {
   };
 
   const onAccountHiddenClick = (account: Account) => {
-    hideAccount({
-      chainId,
-      address: account.address,
-      currentAddress,
-    });
+    if (accounts.filter((account) => account.visibility).length < 2) {
+      const toastr = new Toastr();
+      toastr.error('You cannot hide the last remaining account.');
+    } else {
+      hideAccount({
+        chainId,
+        address: account.address,
+        currentAddress,
+      });
+    }
   };
 
   const onAccountSwitchClick = (account: Account) => {

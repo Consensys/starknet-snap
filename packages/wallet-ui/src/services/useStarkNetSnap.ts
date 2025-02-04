@@ -216,11 +216,8 @@ export const useStarkNetSnap = () => {
         });
       }
     } catch (error) {
-      const toastr = new Toastr();
       //eslint-disable-next-line no-console
       console.log(`error while processing hideAccount: ${error}`);
-      console.log(error);
-      toastr.error('You cannot hide the last remaining account.');
     } finally {
       dispatch(disableLoading());
     }
