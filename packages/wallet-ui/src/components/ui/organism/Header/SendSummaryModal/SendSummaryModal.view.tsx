@@ -81,32 +81,30 @@ export const SendSummaryModalView = ({
 
   useEffect(() => {
     const fetchGasFee = () => {
-      if (currentAccount) {
-        setGasFeesError(false);
-        setEstimatingGas(true);
-        const amountBN = ethers.utils.parseUnits(
-          amount,
-          wallet.erc20TokenBalanceSelected.decimals,
-        );
-        const callData = address + ',' + amountBN.toString() + ',0';
-        estimateFees(
-          wallet.erc20TokenBalanceSelected.address,
-          ContractFuncName.Transfer,
-          callData,
-          currentAccount.address,
-          chainId,
-          selectedFeeToken === FeeToken.STRK
-            ? constants.TRANSACTION_VERSION.V3
-            : undefined,
-        )
-          .then((response) => {
-            setGasFees(response);
-            setEstimatingGas(false);
-          })
-          .catch(() => {
-            toastr.error('Error when trying to calculate the gas fees');
-          });
-      }
+      setGasFeesError(false);
+      setEstimatingGas(true);
+      const amountBN = ethers.utils.parseUnits(
+        amount,
+        wallet.erc20TokenBalanceSelected.decimals,
+      );
+      const callData = address + ',' + amountBN.toString() + ',0';
+      estimateFees(
+        wallet.erc20TokenBalanceSelected.address,
+        ContractFuncName.Transfer,
+        callData,
+        currentAccount.address,
+        chainId,
+        selectedFeeToken === FeeToken.STRK
+          ? constants.TRANSACTION_VERSION.V3
+          : undefined,
+      )
+        .then((response) => {
+          setGasFees(response);
+          setEstimatingGas(false);
+        })
+        .catch(() => {
+          toastr.error('Error when trying to calculate the gas fees');
+        });
     };
     fetchGasFee();
   }, [currentAccount]);
@@ -171,45 +169,43 @@ export const SendSummaryModalView = ({
   }, [amount, wallet.erc20TokenBalanceSelected]);
 
   const handleConfirmClick = () => {
-    if (currentAccount) {
-      const amountBN = ethers.utils.parseUnits(
-        amount,
-        wallet.erc20TokenBalanceSelected.decimals,
-      );
-      const callData = address + ',' + amountBN.toString() + ',0';
-      sendTransaction(
-        wallet.erc20TokenBalanceSelected.address,
-        ContractFuncName.Transfer,
-        callData,
-        currentAccount.address,
-        gasFees.suggestedMaxFee,
-        chainId,
-        selectedFeeToken,
-      )
-        .then((result) => {
-          if (result) {
-            toastr.success('Transaction sent successfully');
-            getTransactions(
-              currentAccount.address,
-              wallet.erc20TokenBalanceSelected.address,
-              10,
-              chainId,
-              false,
-              true,
-            ).catch((err) => {
-              console.error(
-                `handleConfirmClick: error from getTransactions: ${err}`,
-              );
-            });
-          } else {
-            toastr.info('Transaction rejected by user');
-          }
-        })
-        .catch(() => {
-          toastr.error('Error while sending the transaction');
-        });
-      closeModal && closeModal();
-    }
+    const amountBN = ethers.utils.parseUnits(
+      amount,
+      wallet.erc20TokenBalanceSelected.decimals,
+    );
+    const callData = address + ',' + amountBN.toString() + ',0';
+    sendTransaction(
+      wallet.erc20TokenBalanceSelected.address,
+      ContractFuncName.Transfer,
+      callData,
+      currentAccount.address,
+      gasFees.suggestedMaxFee,
+      chainId,
+      selectedFeeToken,
+    )
+      .then((result) => {
+        if (result) {
+          toastr.success('Transaction sent successfully');
+          getTransactions(
+            currentAccount.address,
+            wallet.erc20TokenBalanceSelected.address,
+            10,
+            chainId,
+            false,
+            true,
+          ).catch((err) => {
+            console.error(
+              `handleConfirmClick: error from getTransactions: ${err}`,
+            );
+          });
+        } else {
+          toastr.info('Transaction rejected by user');
+        }
+      })
+      .catch(() => {
+        toastr.error('Error while sending the transaction');
+      });
+    closeModal && closeModal();
   };
 
   const totalAmountDisplay = () => {

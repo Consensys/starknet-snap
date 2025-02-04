@@ -14,7 +14,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { AccountsHeader } from './AccountsHeader';
 import { VisibleAccountsList } from './VisibleAccountsList';
 import { HiddenAccountsList } from './HiddenAccountsList';
-import { DUMMY_ADDRESS } from 'utils/constants';
 import { Account } from 'types';
 import Toastr from 'toastr2';
 
@@ -65,7 +64,7 @@ export const AccountSwitchModalView = ({ full, starkName }: Props) => {
       hiddenAccounts.push(account);
     }
   }
-  const currentAddress = currentAccount?.address ?? DUMMY_ADDRESS;
+  const currentAddress = currentAccount.address;
   const displayName = full
     ? starkName ?? currentAddress
     : starkName
