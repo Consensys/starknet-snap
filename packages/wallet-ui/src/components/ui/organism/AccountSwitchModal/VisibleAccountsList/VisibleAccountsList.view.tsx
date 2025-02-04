@@ -60,6 +60,8 @@ export const VisibleAccountsListView = ({
             </AccountSwitchMenuItem>
             <IconButton
               onClick={(e) => {
+                // Hiding accounts does not close the switch dropdown if there are still hidden accounts left.
+                // This allows to hide several accounts more effectively.
                 if (accounts.length > 2) {
                   e.preventDefault();
                 }
