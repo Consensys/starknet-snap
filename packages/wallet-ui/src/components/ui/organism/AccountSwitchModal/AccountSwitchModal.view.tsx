@@ -4,9 +4,9 @@ import { Menu } from '@headlessui/react';
 import { useAppSelector } from 'hooks/redux';
 import { useStarkNetSnap } from 'services';
 import {
-  Wrapper,
   AccountSwitchMenuItem,
   MenuSection,
+  Wrapper,
 } from './AccountSwitchModal.style';
 import { MenuItems, MenuDivider } from 'components/ui/organism/Menu/Menu.style';
 import { theme } from 'theme/default';
@@ -14,20 +14,16 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { AccountsHeader } from './AccountsHeader';
 import { VisibleAccountsList } from './VisibleAccountsList';
 import { HiddenAccountsList } from './HiddenAccountsList';
+import { DUMMY_ADDRESS } from 'utils/constants';
 
 interface Props {
-  currentAddress: string;
   full?: boolean;
   starkName?: string;
 }
 
-export const AccountSwitchModalView = ({
-  currentAddress,
-  full,
-  starkName,
-}: Props) => {
+export const AccountSwitchModalView = ({ full, starkName }: Props) => {
   const networks = useAppSelector((state) => state.networks);
-  const accounts = useAppSelector((state) => state.wallet.accounts);
+  const { currentAccount, accounts } = useAppSelector((state) => state.wallet);
   const { switchAccount, addNewAccount, hideAccount, unHideAccount } =
     useStarkNetSnap();
   const chainId = networks?.items[networks.activeNetwork]?.chainId;
@@ -38,7 +34,7 @@ export const AccountSwitchModalView = ({
     (acc) => acc.visibility === undefined || acc.visibility,
   );
   const hiddenAccounts = accounts.filter((acc) => acc.visibility === false);
-
+  const currentAddress = currentAccount?.address ?? DUMMY_ADDRESS;
   const displayName = full
     ? starkName ?? currentAddress
     : starkName
