@@ -97,10 +97,7 @@ function App() {
         >
           <DeployModal address={address} />
         </PopIn>
-        <Home
-          address={address}
-          addressIndex={currentAccount?.addressIndex || 0}
-        />
+        <Home />
         <PopIn isOpen={loading}>
           {loading && (
             <LoadingBackdrop>{loader.loadingMessage}</LoadingBackdrop>

@@ -12,16 +12,15 @@ import {
 import { openExplorerTab } from 'utils/utils';
 import { useAppSelector } from 'hooks/redux';
 import { useStarkNetSnap } from 'services';
+import { DUMMY_ADDRESS } from 'utils/constants';
 
-interface Props {
-  address: string;
-  addressIndex: number;
-}
-
-export const AccountDetailsModalView = ({ address, addressIndex }: Props) => {
+export const AccountDetailsModalView = () => {
   const networks = useAppSelector((state) => state.networks);
+  const currentAccount = useAppSelector((state) => state.wallet.currentAccount);
   const { getPrivateKeyFromAddress } = useStarkNetSnap();
   const chainId = networks?.items[networks.activeNetwork]?.chainId;
+  const address = currentAccount?.address ?? DUMMY_ADDRESS;
+  const addressIndex = currentAccount?.addressIndex ?? 0;
   return (
     <div>
       <AccountImageDiv>

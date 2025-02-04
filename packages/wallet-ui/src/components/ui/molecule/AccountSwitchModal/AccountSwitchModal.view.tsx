@@ -17,25 +17,19 @@ import { theme } from 'theme/default';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useAppSelector } from 'hooks/redux';
 import { useStarkNetSnap } from 'services';
-import { Account } from 'types';
+import { DUMMY_ADDRESS } from 'utils/constants';
 
 interface Props {
-  currentAddress: string;
-  accounts: Account[];
   full?: boolean;
   starkName?: string;
 }
 
-export const AccountSwitchModalView = ({
-  currentAddress,
-  accounts,
-  full,
-  starkName,
-}: Props) => {
+export const AccountSwitchModalView = ({ full, starkName }: Props) => {
   const networks = useAppSelector((state) => state.networks);
+  const { currentAccount, accounts } = useAppSelector((state) => state.wallet);
   const { switchAccount, addNewAccount } = useStarkNetSnap();
   const chainId = networks?.items[networks.activeNetwork]?.chainId;
-
+  const currentAddress = currentAccount?.address ?? DUMMY_ADDRESS;
   return (
     <Menu as="div" style={{ display: 'inline-block', position: 'relative' }}>
       <Menu.Button style={{ background: 'none', border: 'none' }}>
