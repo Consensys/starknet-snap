@@ -252,6 +252,9 @@ export const useStarkNetSnap = () => {
       dispatch(setAccounts(accounts));
     }
 
+    // TODO: hardcode to set the info modal visible,
+    // but it should only visible when the account is not deployed
+    // dispatch(setInfoModalVisible(true));
     dispatch(setUpgradeModalVisible(upgradeRequired));
     dispatch(setDeployModalVisible(deployRequired));
   };
