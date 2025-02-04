@@ -12,16 +12,12 @@ import { shortenAddress } from 'utils/utils';
 
 interface Props {
   accounts: Account[];
-  unHideAccount: (params: { chainId: string; address: string }) => void;
-  setShowHiddenAccounts: (value: boolean) => void;
-  chainId: string;
+  onAccountVisibleClick: (account: Account) => void;
 }
 
 export const HiddenAccountsListView = ({
   accounts,
-  unHideAccount,
-  setShowHiddenAccounts,
-  chainId,
+  onAccountVisibleClick,
 }: Props) => (
   <MenuSection style={{ height: 201, overflowY: 'auto' }}>
     {accounts.map((account) => (
@@ -29,9 +25,8 @@ export const HiddenAccountsListView = ({
         <AccountSwitchMenuItem
           style={{ paddingLeft: 22, opacity: 0.5 }}
           onClick={(e) => {
-            setShowHiddenAccounts(false);
-            unHideAccount({ chainId, address: account.address });
             e.preventDefault();
+            onAccountVisibleClick(account);
           }}
         >
           <Box style={{ display: 'flex', alignItems: 'center' }}>

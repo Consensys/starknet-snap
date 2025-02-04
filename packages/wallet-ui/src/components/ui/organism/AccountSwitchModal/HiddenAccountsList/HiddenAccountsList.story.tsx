@@ -12,15 +12,13 @@ const accounts = [
   { address: '0x456', addressIndex: 1, visibility: false },
 ];
 
-const setShowHiddenAccounts = (value: boolean) => {};
-
 export const Default = () => {
   return (
     <HiddenAccountsListView
       accounts={accounts as Account[]}
-      unHideAccount={(params) => console.log(`Unhide ${params.address}`)}
-      setShowHiddenAccounts={setShowHiddenAccounts}
-      chainId="test-chain"
+      onAccountVisibleClick={(account: Account) =>
+        console.log(`Show account ${account.address}`)
+      }
     />
   );
 };

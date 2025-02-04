@@ -219,6 +219,7 @@ export const useStarkNetSnap = () => {
       const toastr = new Toastr();
       //eslint-disable-next-line no-console
       console.log(`error while processing hideAccount: ${error}`);
+      console.log(error);
       toastr.error('You cannot hide the last remaining account.');
     } finally {
       dispatch(disableLoading());
@@ -233,9 +234,7 @@ export const useStarkNetSnap = () => {
     address: string;
   }) => {
     if (!loader.isLoading) {
-      dispatch(
-        enableLoadingWithMessage(`Showing account ${shortenAddress(address)}`),
-      );
+      dispatch(enableLoadingWithMessage(`Loading...`));
     }
     await toggleAccountVisibility(chainId, address, true);
     dispatch(updateAccount({ address, updates: { visibility: true } }));

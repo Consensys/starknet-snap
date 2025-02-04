@@ -16,8 +16,11 @@ export const Default = () => (
   <VisibleAccountsListView
     accounts={accounts as Account[]}
     currentAddress="0xabc"
-    switchAccount={(chainId, address) => console.log(`Switch to ${address}`)}
-    hideAccount={(params) => console.log(`Hide ${params.address}`)}
-    chainId="test-chain"
+    onAccountSwitchClick={(account: Account) =>
+      console.log(`Switch to ${account.address}`)
+    }
+    onAccountHiddenClick={(account: Account) =>
+      console.log(`Hide account ${account.address}`)
+    }
   />
 );

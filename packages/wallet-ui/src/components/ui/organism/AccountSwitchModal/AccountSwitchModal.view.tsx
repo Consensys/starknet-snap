@@ -15,6 +15,7 @@ import { AccountsHeader } from './AccountsHeader';
 import { VisibleAccountsList } from './VisibleAccountsList';
 import { HiddenAccountsList } from './HiddenAccountsList';
 import { DUMMY_ADDRESS } from 'utils/constants';
+import { Account } from 'types';
 
 interface Props {
   full?: boolean;
@@ -30,10 +31,34 @@ export const AccountSwitchModalView = ({ full, starkName }: Props) => {
 
   const [showHiddenAccounts, setShowHiddenAccounts] = useState(false);
 
-  const visibleAccounts = accounts.filter(
-    (acc) => acc.visibility === undefined || acc.visibility,
-  );
-  const hiddenAccounts = accounts.filter((acc) => acc.visibility === false);
+  const onAccountVisibleClick = (account: Account) => {
+    setShowHiddenAccounts(false);
+    unHideAccount({ chainId, address: account.address });
+  };
+
+  const onAccountHiddenClick = (account: Account) => {
+    hideAccount({
+      chainId,
+      address: account.address,
+      currentAddress,
+    });
+  };
+
+  const onAccountSwitchClick = (account: Account) => {
+    switchAccount(chainId, account.address);
+  };
+
+  const visibleAccounts: Account[] = [];
+  const hiddenAccounts: Account[] = [];
+  for (const account of accounts) {
+    // account.visibility = `undefined` refer to the case when previous account state doesnt include this field
+    // hence we consider it is `visible`
+    if (account.visibility === undefined || account.visibility === true) {
+      visibleAccounts.push(account);
+    } else {
+      hiddenAccounts.push(account);
+    }
+  }
   const currentAddress = currentAccount?.address ?? DUMMY_ADDRESS;
   const displayName = full
     ? starkName ?? currentAddress
@@ -62,17 +87,14 @@ export const AccountSwitchModalView = ({ full, starkName }: Props) => {
         {showHiddenAccounts ? (
           <HiddenAccountsList
             accounts={hiddenAccounts}
-            unHideAccount={unHideAccount}
-            setShowHiddenAccounts={setShowHiddenAccounts}
-            chainId={chainId}
+            onAccountVisibleClick={onAccountVisibleClick}
           />
         ) : (
           <VisibleAccountsList
             accounts={visibleAccounts}
             currentAddress={currentAddress}
-            switchAccount={switchAccount}
-            hideAccount={hideAccount}
-            chainId={chainId}
+            onAccountHiddenClick={onAccountHiddenClick}
+            onAccountSwitchClick={onAccountSwitchClick}
           />
         )}
 
