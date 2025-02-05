@@ -24,7 +24,7 @@ import { openExplorerTab } from 'utils/utils';
 import { useAppSelector } from 'hooks/redux';
 import { AddTokenModal } from '../AddTokenModal';
 import { useStarkNetSnap } from 'services';
-import { DUMMY_ADDRESS } from 'utils/constants';
+import { defaultAccount } from 'utils/constants';
 import { PopperTooltip } from 'components/ui/molecule/PopperTooltip';
 
 export const SideBarView = () => {
@@ -54,7 +54,7 @@ export const SideBarView = () => {
   }, [wallet.erc20TokenBalances]);
 
   useEffect(() => {
-    if (address && address !== DUMMY_ADDRESS) {
+    if (address && address !== defaultAccount.address) {
       getStarkName(address, chainId)
         .then((name) => {
           setStarkName(name);

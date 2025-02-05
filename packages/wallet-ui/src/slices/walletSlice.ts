@@ -3,7 +3,7 @@ import { Account } from 'types';
 import { Erc20TokenBalance } from 'types';
 import { Transaction } from 'types';
 import { ethers } from 'ethers';
-import { DUMMY_ADDRESS } from 'utils/constants';
+import { defaultAccount } from 'utils/constants';
 
 export interface WalletState {
   connected: boolean;
@@ -23,10 +23,7 @@ const initialState: WalletState = {
   isLoading: false,
   forceReconnect: false,
   accounts: [],
-  currentAccount: {
-    address: DUMMY_ADDRESS,
-    addressIndex: 0,
-  } as Account,
+  currentAccount: defaultAccount,
   erc20TokenBalances: [],
   erc20TokenBalanceSelected: {} as Erc20TokenBalance,
   transactions: [],
@@ -126,10 +123,7 @@ export const walletSlice = createSlice({
     },
     clearAccounts: (state) => {
       state.accounts = [];
-      state.currentAccount = {
-        address: DUMMY_ADDRESS,
-        addressIndex: 0,
-      } as Account;
+      state.currentAccount = defaultAccount;
     },
     resetWallet: (state) => {
       return {
