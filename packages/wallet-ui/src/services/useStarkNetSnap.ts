@@ -217,7 +217,7 @@ export const useStarkNetSnap = () => {
       }
     } catch (error) {
       const toastr = new Toastr();
-      toastr.error('Snap is unable to hide the requested Account');
+      toastr.error('Failed to hide the account');
     } finally {
       dispatch(disableLoading());
     }
@@ -238,7 +238,7 @@ export const useStarkNetSnap = () => {
       dispatch(updateAccount({ address, updates: { visibility: true } }));
     } catch (err) {
       const toastr = new Toastr();
-      toastr.error('Snap is unable to show the requested Account');
+      toastr.error('Failed to show the account');
     } finally {
       dispatch(disableLoading());
     }
