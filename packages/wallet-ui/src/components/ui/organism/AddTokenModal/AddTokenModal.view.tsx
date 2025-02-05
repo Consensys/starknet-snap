@@ -100,21 +100,19 @@ export const AddTokenModalView = ({ closeModal }: Props) => {
           enabled={enabled}
           onClick={async () => {
             try {
-              if (currentAccount) {
-                const newToken = await addErc20Token(
-                  fields.address,
-                  fields.name,
-                  fields.symbol,
-                  parseFloat(fields.decimal),
-                  chainId,
-                  currentAccount.address,
-                );
-                if (newToken) {
-                  setErc20TokenBalance(newToken);
-                  toastr.success('Token added successfully');
-                }
-                closeModal();
+              const newToken = await addErc20Token(
+                fields.address,
+                fields.name,
+                fields.symbol,
+                parseFloat(fields.decimal),
+                chainId,
+                currentAccount.address,
+              );
+              if (newToken) {
+                setErc20TokenBalance(newToken);
+                toastr.success('Token added successfully');
               }
+              closeModal();
             } catch (err) {
               toastr.error('Error while adding token');
             }

@@ -38,7 +38,7 @@ export const SideBarView = () => {
   const [addTokenOpen, setAddTokenOpen] = useState(false);
   const { getStarkName } = useStarkNetSnap();
   const [starkName, setStarkName] = useState<string | undefined>(undefined);
-  const address = currentAccount?.address ?? DUMMY_ADDRESS;
+  const address = currentAccount.address;
   const addressIndex = currentAccount?.addressIndex ?? 0;
   const ref = useRef<HTMLDivElement>();
 
