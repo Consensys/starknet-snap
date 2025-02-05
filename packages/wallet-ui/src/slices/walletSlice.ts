@@ -3,13 +3,14 @@ import { Account } from 'types';
 import { Erc20TokenBalance } from 'types';
 import { Transaction } from 'types';
 import { ethers } from 'ethers';
+import { defaultAccount } from 'utils/constants';
 
 export interface WalletState {
   connected: boolean;
   isLoading: boolean;
   forceReconnect: boolean;
   accounts: Account[];
-  currentAccount?: Account;
+  currentAccount: Account;
   erc20TokenBalances: Erc20TokenBalance[];
   erc20TokenBalanceSelected: Erc20TokenBalance;
   transactions: Transaction[];
@@ -22,7 +23,7 @@ const initialState: WalletState = {
   isLoading: false,
   forceReconnect: false,
   accounts: [],
-  currentAccount: undefined,
+  currentAccount: defaultAccount,
   erc20TokenBalances: [],
   erc20TokenBalanceSelected: {} as Erc20TokenBalance,
   transactions: [],
@@ -62,6 +63,16 @@ export const walletSlice = createSlice({
           state.accounts.push(account);
         }
       }
+    },
+    updateAccount: (
+      state,
+      { payload }: { payload: { address: string; updates: Partial<Account> } },
+    ) => {
+      state.accounts = state.accounts.map((account) =>
+        account.address === payload.address
+          ? { ...account, ...payload.updates }
+          : account,
+      );
     },
     setCurrentAccount: (state, { payload }: { payload: Account }) => {
       state.currentAccount = payload;
@@ -112,7 +123,7 @@ export const walletSlice = createSlice({
     },
     clearAccounts: (state) => {
       state.accounts = [];
-      state.currentAccount = undefined;
+      state.currentAccount = defaultAccount;
     },
     resetWallet: (state) => {
       return {
@@ -129,6 +140,7 @@ export const {
   setForceReconnect,
   setCurrentAccount,
   setAccounts,
+  updateAccount,
   clearAccounts,
   setErc20TokenBalances,
   setErc20TokenBalanceSelected,

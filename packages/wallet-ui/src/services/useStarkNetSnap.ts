@@ -14,6 +14,7 @@ import {
   setTransactions,
   setTransactionDeploy,
   setForceReconnect,
+  updateAccount,
 } from '../slices/walletSlice';
 import Toastr from 'toastr2';
 import {
@@ -191,6 +192,58 @@ export const useStarkNetSnap = () => {
     dispatch(disableLoading());
   };
 
+  const hideAccount = async ({
+    chainId,
+    address,
+    currentAddress,
+  }: {
+    chainId: string;
+    address: string;
+    currentAddress: string;
+  }) => {
+    try {
+      if (!loader.isLoading) {
+        dispatch(
+          enableLoadingWithMessage(`Hiding account ${shortenAddress(address)}`),
+        );
+      }
+      const account = await toggleAccountVisibility(chainId, address, false);
+      dispatch(updateAccount({ address, updates: { visibility: false } }));
+      if (account.address !== currentAddress) {
+        await initWalletData({
+          account,
+          chainId,
+        });
+      }
+    } catch (error) {
+      const toastr = new Toastr();
+      toastr.error('Failed to hide the account');
+    } finally {
+      dispatch(disableLoading());
+    }
+  };
+
+  const unHideAccount = async ({
+    chainId,
+    address,
+  }: {
+    chainId: string;
+    address: string;
+  }) => {
+    if (!loader.isLoading) {
+      dispatch(enableLoadingWithMessage(`Loading...`));
+    }
+    try {
+      await toggleAccountVisibility(chainId, address, true);
+      dispatch(updateAccount({ address, updates: { visibility: true } }));
+    } catch (err) {
+      const toastr = new Toastr();
+      toastr.error('Failed to show the account');
+    } finally {
+      dispatch(disableLoading());
+    }
+  };
+
   const setAccount = async (chainId: string, currentAccount: Account) => {
     const { upgradeRequired, deployRequired } = currentAccount;
 
@@ -202,10 +255,9 @@ export const useStarkNetSnap = () => {
       dispatch(setAccounts(accounts));
     }
 
-    // FIXME: hardcode to set the info modal visible,
+    // TODO: hardcode to set the info modal visible,
     // but it should only visible when the account is not deployed
     // dispatch(setInfoModalVisible(true));
-
     dispatch(setUpgradeModalVisible(upgradeRequired));
     dispatch(setDeployModalVisible(deployRequired));
   };
@@ -799,6 +851,21 @@ export const useStarkNetSnap = () => {
     });
   };
 
+  const toggleAccountVisibility = async (
+    chainId: string,
+    address: string,
+    visibility: boolean,
+  ) => {
+    return await invokeSnap<Account>({
+      method: 'starkNet_toggleAccountVisibility',
+      params: {
+        chainId,
+        address,
+        visibility,
+      },
+    });
+  };
+
   const switchAccount = async (chainId: string, address: string) => {
     dispatch(
       enableLoadingWithMessage(
@@ -832,9 +899,12 @@ export const useStarkNetSnap = () => {
     connectToSnap,
     getNetworks,
     getAccounts,
+    hideAccount,
+    unHideAccount,
     switchAccount,
     getCurrentAccount,
     addNewAccount,
+    toggleAccountVisibility,
     setAccount,
     setErc20TokenBalance,
     getPrivateKeyFromAddress,

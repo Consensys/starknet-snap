@@ -19,7 +19,6 @@ import 'toastr2/dist/toastr.min.css';
 import { NoMetamaskModal } from 'components/ui/organism/NoMetamaskModal';
 import { MinVersionModal } from './components/ui/organism/MinVersionModal';
 import { useHasMetamask } from 'hooks/useHasMetamask';
-import { DUMMY_ADDRESS } from 'utils/constants';
 import { DeployModal } from 'components/ui/organism/DeployModal';
 
 library.add(fas, far);
@@ -40,7 +39,7 @@ function App() {
   const { currentAccount } = useAppSelector((state) => state.wallet);
   const { hasMetamask } = useHasMetamask();
   const chainId = networks.items?.[networks.activeNetwork]?.chainId;
-  const address = currentAccount?.address ?? DUMMY_ADDRESS;
+  const address = currentAccount.address;
 
   useEffect(() => {
     if (!provider) {

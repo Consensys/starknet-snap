@@ -3,7 +3,6 @@ import { Header } from 'components/ui/organism/Header';
 import { SideBar } from 'components/ui/organism/SideBar';
 import { RightPart, Wrapper, NoTransactions } from './Home.style';
 import { useAppSelector } from 'hooks/redux';
-import { DUMMY_ADDRESS } from 'utils/constants';
 
 export const HomeView = () => {
   const { erc20TokenBalanceSelected, transactions } = useAppSelector(
@@ -11,7 +10,7 @@ export const HomeView = () => {
   );
   const loader = useAppSelector((state) => state.UI.loader);
   const currentAccount = useAppSelector((state) => state.wallet.currentAccount);
-  const address = currentAccount?.address ?? DUMMY_ADDRESS;
+  const address = currentAccount.address;
   const { upgradeModalVisible } = useAppSelector((state) => state.modals);
 
   return (
