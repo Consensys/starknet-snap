@@ -10,6 +10,7 @@ import { Box, IconButton } from '@mui/material';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { theme } from 'theme/default';
 import { shortenAddress } from 'utils/utils';
+import { useMultiLanguage } from 'services';
 
 interface Props {
   accounts: Account[];
@@ -23,8 +24,9 @@ export const VisibleAccountsListView = ({
   currentAddress,
   onAccountSwitchClick,
   onAccountHiddenClick,
-}: Props) => (
-  <MenuSection>
+}: Props) => {
+  const { translate } = useMultiLanguage();
+  return <MenuSection>
     {accounts.map((account) => {
       const isSelected = account.address === currentAddress;
       return (
@@ -53,7 +55,7 @@ export const VisibleAccountsListView = ({
                   connected={isSelected}
                 />
                 <MenuItemText style={{ marginLeft: isSelected ? 19 : 20 }}>
-                  <div>Account {account.addressIndex + 1}</div>
+                  <div>{translate('account')} {account.addressIndex + 1}</div>
                   <div>{shortenAddress(account.address)}</div>
                 </MenuItemText>
               </Box>
@@ -76,4 +78,4 @@ export const VisibleAccountsListView = ({
       );
     })}
   </MenuSection>
-);
+};

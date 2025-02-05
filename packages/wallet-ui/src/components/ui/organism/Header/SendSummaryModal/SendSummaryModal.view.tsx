@@ -82,37 +82,30 @@ export const SendSummaryModalView = ({
 
   useEffect(() => {
     const fetchGasFee = () => {
-      if (wallet.accounts) {
-        setGasFeesError(false);
-        setEstimatingGas(true);
-        const amountBN = ethers.utils.parseUnits(
-          amount,
-          wallet.erc20TokenBalanceSelected.decimals,
-        );
-        const callData = address + ',' + amountBN.toString() + ',0';
-        estimateFees(
-          wallet.erc20TokenBalanceSelected.address,
-          ContractFuncName.Transfer,
-          callData,
-          wallet.accounts[0] as unknown as string,
-          chainId,
-          selectedFeeToken === FeeToken.STRK
-            ? constants.TRANSACTION_VERSION.V3
-            : undefined,
-        )
-          .then((response) => {
-            if (response.message && response.message.includes('Error')) {
-              toastr.error(translate('errorCalculatingGasFees'));
-              setGasFeesError(true);
-            } else {
-              setGasFees(response);
-            }
-            setEstimatingGas(false);
-          })
-          .catch(() => {
-            toastr.error(translate('errorCalculatingGasFees'));
-          });
-      }
+      setGasFeesError(false);
+      setEstimatingGas(true);
+      const amountBN = ethers.utils.parseUnits(
+        amount,
+        wallet.erc20TokenBalanceSelected.decimals,
+      );
+      const callData = address + ',' + amountBN.toString() + ',0';
+      estimateFees(
+        wallet.erc20TokenBalanceSelected.address,
+        ContractFuncName.Transfer,
+        callData,
+        currentAccount.address,
+        chainId,
+        selectedFeeToken === FeeToken.STRK
+          ? constants.TRANSACTION_VERSION.V3
+          : undefined,
+      )
+        .then((response) => {
+          setGasFees(response);
+          setEstimatingGas(false);
+        })
+        .catch(() => {
+          toastr.error(translate('errorCalculatingGasFees'));
+        });
     };
     fetchGasFee();
   }, [currentAccount]);

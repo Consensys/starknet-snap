@@ -9,6 +9,7 @@ import { Menu } from '@headlessui/react';
 import { IconButton } from '@mui/material';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import VisibilityIcon from '@mui/icons-material/Visibility';
+import { useMultiLanguage } from 'services';
 
 interface Props {
   showHiddenAccounts: boolean;
@@ -20,12 +21,13 @@ export const AccountsHeaderView = ({
   showHiddenAccounts,
   setShowHiddenAccounts,
   hiddenAccounts,
-}: Props) => (
-  <MenuSection>
+}: Props) => {
+  const { translate } = useMultiLanguage();
+  return <MenuSection>
     <Menu.Item disabled>
       <AccountSwitchMenuItem style={{ paddingLeft: 20 }}>
         <Container>
-          <Normal>Accounts</Normal>
+          <Normal>{translate('accounts')}</Normal>
         </Container>
         {hiddenAccounts.length > 0 && (
           <IconButton
@@ -42,4 +44,4 @@ export const AccountsHeaderView = ({
       </AccountSwitchMenuItem>
     </Menu.Item>
   </MenuSection>
-);
+};

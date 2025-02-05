@@ -23,7 +23,7 @@ import {
 import { openExplorerTab } from 'utils/utils';
 import { useAppSelector } from 'hooks/redux';
 import { AddTokenModal } from '../AddTokenModal';
-import { useStarkNetSnap } from 'services';
+import { useMultiLanguage, useStarkNetSnap } from 'services';
 import { defaultAccount } from 'utils/constants';
 import { PopperTooltip } from 'components/ui/molecule/PopperTooltip';
 
@@ -111,7 +111,7 @@ export const SideBarView = () => {
         <AccountImageStyled address={address} connected={wallet.connected} />
       </AccountDetails>
 
-      <AccountLabel>Account {addressIndex + 1} </AccountLabel>
+      <AccountLabel>{translate('account')} {addressIndex + 1} </AccountLabel>
       <RowDiv>
         <InfoIcon onClick={() => setInfoModalOpen(true)}>i</InfoIcon>
         <AccountSwitchModal starkName={starkName} />

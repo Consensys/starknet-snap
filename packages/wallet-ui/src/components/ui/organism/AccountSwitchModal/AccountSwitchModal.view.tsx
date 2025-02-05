@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { shortenAddress, shortenDomain } from 'utils/utils';
 import { Menu } from '@headlessui/react';
 import { useAppSelector } from 'hooks/redux';
-import { useStarkNetSnap } from 'services';
+import { useMultiLanguage, useStarkNetSnap } from 'services';
 import {
   AccountSwitchMenuItem,
   MenuSection,
@@ -27,6 +27,7 @@ export const AccountSwitchModalView = ({ full, starkName }: Props) => {
   const { currentAccount, accounts } = useAppSelector((state) => state.wallet);
   const { switchAccount, addNewAccount, hideAccount, unHideAccount } =
     useStarkNetSnap();
+  const { translate } = useMultiLanguage();
   const chainId = networks?.items[networks.activeNetwork]?.chainId;
 
   const [showHiddenAccounts, setShowHiddenAccounts] = useState(false);
@@ -39,7 +40,7 @@ export const AccountSwitchModalView = ({ full, starkName }: Props) => {
   const onAccountHiddenClick = (account: Account) => {
     if (accounts.filter((account) => account.visibility).length < 2) {
       const toastr = new Toastr();
-      toastr.error('You cannot hide the last remaining account.');
+      toastr.error(translate('youCannotHideLastAccount'));
     } else {
       hideAccount({
         chainId,
