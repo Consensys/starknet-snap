@@ -5,6 +5,7 @@ import {
   UserRejectedOpError,
   InvalidRequestParamsError,
 } from '../utils/exceptions';
+import { loadLocale } from '../utils/locale';
 import { createAccountObject } from '../wallet/account/__test__/helper';
 import {
   setupAccountController,
@@ -45,6 +46,7 @@ describe('displayPrivateKey', () => {
   };
 
   it('displays private key correctly', async () => {
+    await loadLocale();
     const { account, alertDialogSpy, request } =
       await setupDisplayPrivateKeyTest();
 

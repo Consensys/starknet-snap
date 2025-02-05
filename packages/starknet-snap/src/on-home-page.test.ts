@@ -8,6 +8,8 @@ import {
   ETHER_MAINNET,
   STARKNET_MAINNET_NETWORK,
 } from './utils/constants';
+import { loadLocale } from './utils/locale';
+import * as snapHelper from './utils/snap';
 import * as starknetUtils from './utils/starknetUtils';
 
 jest.mock('./utils/snap');
@@ -39,6 +41,7 @@ describe('homepageController', () => {
     };
 
     it('returns the correct homepage response', async () => {
+      await loadLocale();
       const balance = '100';
 
       const { getBalanceSpy, account } = await setupExecuteTest(

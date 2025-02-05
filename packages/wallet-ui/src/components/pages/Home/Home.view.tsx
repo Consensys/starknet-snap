@@ -3,6 +3,7 @@ import { Header } from 'components/ui/organism/Header';
 import { SideBar } from 'components/ui/organism/SideBar';
 import { RightPart, Wrapper, NoTransactions } from './Home.style';
 import { useAppSelector } from 'hooks/redux';
+import { useMultiLanguage } from 'services';
 
 export const HomeView = () => {
   const { erc20TokenBalanceSelected, transactions } = useAppSelector(
@@ -12,6 +13,7 @@ export const HomeView = () => {
   const currentAccount = useAppSelector((state) => state.wallet.currentAccount);
   const address = currentAccount.address;
   const { upgradeModalVisible } = useAppSelector((state) => state.modals);
+  const { translate } = useMultiLanguage();
 
   return (
     <Wrapper>
@@ -25,7 +27,7 @@ export const HomeView = () => {
         {!upgradeModalVisible &&
           Object.keys(transactions).length === 0 &&
           !loader.isLoading && (
-            <NoTransactions> You have no transactions</NoTransactions>
+            <NoTransactions>{translate('noTransactions')}</NoTransactions>
           )}
       </RightPart>
     </Wrapper>

@@ -28,7 +28,7 @@ import {
 } from './SendSummaryModal.style';
 import { useAppSelector } from 'hooks/redux';
 import { useEffect, useState } from 'react';
-import { useStarkNetSnap } from 'services';
+import { useMultiLanguage, useStarkNetSnap } from 'services';
 import { ethers } from 'ethers';
 import Toastr from 'toastr2';
 import { constants } from 'starknet';
@@ -66,6 +66,7 @@ export const SendSummaryModalView = ({
   const [totalAmountUSD, setTotalAmountUSD] = useState('');
   const [totalExceedsBalance, setTotalExceedsBalance] = useState(false);
   const { estimateFees, sendTransaction, getTransactions } = useStarkNetSnap();
+  const { translate } = useMultiLanguage();
 
   const ethToken = wallet.erc20TokenBalances[0];
   const feeToken =
@@ -81,30 +82,37 @@ export const SendSummaryModalView = ({
 
   useEffect(() => {
     const fetchGasFee = () => {
-      setGasFeesError(false);
-      setEstimatingGas(true);
-      const amountBN = ethers.utils.parseUnits(
-        amount,
-        wallet.erc20TokenBalanceSelected.decimals,
-      );
-      const callData = address + ',' + amountBN.toString() + ',0';
-      estimateFees(
-        wallet.erc20TokenBalanceSelected.address,
-        ContractFuncName.Transfer,
-        callData,
-        currentAccount.address,
-        chainId,
-        selectedFeeToken === FeeToken.STRK
-          ? constants.TRANSACTION_VERSION.V3
-          : undefined,
-      )
-        .then((response) => {
-          setGasFees(response);
-          setEstimatingGas(false);
-        })
-        .catch(() => {
-          toastr.error('Error when trying to calculate the gas fees');
-        });
+      if (wallet.accounts) {
+        setGasFeesError(false);
+        setEstimatingGas(true);
+        const amountBN = ethers.utils.parseUnits(
+          amount,
+          wallet.erc20TokenBalanceSelected.decimals,
+        );
+        const callData = address + ',' + amountBN.toString() + ',0';
+        estimateFees(
+          wallet.erc20TokenBalanceSelected.address,
+          ContractFuncName.Transfer,
+          callData,
+          wallet.accounts[0] as unknown as string,
+          chainId,
+          selectedFeeToken === FeeToken.STRK
+            ? constants.TRANSACTION_VERSION.V3
+            : undefined,
+        )
+          .then((response) => {
+            if (response.message && response.message.includes('Error')) {
+              toastr.error(translate('errorCalculatingGasFees'));
+              setGasFeesError(true);
+            } else {
+              setGasFees(response);
+            }
+            setEstimatingGas(false);
+          })
+          .catch(() => {
+            toastr.error(translate('errorCalculatingGasFees'));
+          });
+      }
     };
     fetchGasFee();
   }, [currentAccount]);
@@ -185,7 +193,7 @@ export const SendSummaryModalView = ({
     )
       .then((result) => {
         if (result) {
-          toastr.success('Transaction sent successfully');
+          toastr.success(translate('transactionSentSuccessfully'));
           getTransactions(
             currentAccount.address,
             wallet.erc20TokenBalanceSelected.address,
@@ -199,11 +207,11 @@ export const SendSummaryModalView = ({
             );
           });
         } else {
-          toastr.info('Transaction rejected by user');
+          toastr.info(translate('transactionRejectedByUser'));
         }
       })
       .catch(() => {
-        toastr.error('Error while sending the transaction');
+        toastr.error(translate('errorSendingTransaction'));
       });
     closeModal && closeModal();
   };
@@ -229,7 +237,7 @@ export const SendSummaryModalView = ({
     <div>
       <Wrapper>
         <Header>
-          <Title>Send</Title>
+          <Title>{translate('send')}</Title>
         </Header>
         <ToDiv>To</ToDiv>
         <AddressDiv>{shortenAddress(address)}</AddressDiv>
@@ -250,14 +258,13 @@ export const SendSummaryModalView = ({
               closeTrigger="hover"
               content={
                 <EstimatedFeesTooltip>
-                  Gas fees are defined by the network and fluctuate depending on
-                  network traffic and transaction complexity.
+                  {translate('gasFeesDefinition')}
                   <br></br>
                   <br></br>
                 </EstimatedFeesTooltip>
               }
             >
-              Estimated Fee
+              {translate('estimatedFee')}
             </PopperTooltip>
           </LeftSummary>
           <RightSummary>
@@ -274,11 +281,13 @@ export const SendSummaryModalView = ({
         </Summary>
         {!estimatingGas && (
           <TotalAmount>
-            Maximum fees: {gasFeesAmount} {selectedFeeToken}
+            {translate('maximumFees')} {gasFeesAmount} {selectedFeeToken}
           </TotalAmount>
         )}
         {gasFees.includeDeploy && (
-          <IncludeDeploy>*Fees include a one-time deployment fee</IncludeDeploy>
+          <IncludeDeploy>
+            *{translate('feesIncludeOneTimeDeploymentFee')}
+          </IncludeDeploy>
         )}
         <Summary>
           <LeftSummary>
@@ -287,7 +296,7 @@ export const SendSummaryModalView = ({
               closeTrigger="hover"
               content="Amount + Fee"
             >
-              Total
+              {translate('total')}
             </PopperTooltip>
           </LeftSummary>
           <RightSummary>
@@ -297,25 +306,25 @@ export const SendSummaryModalView = ({
         </Summary>
         {totalAmount && (
           <TotalAmount>
-            Maximum amount: {totalAmount} {selectedFeeToken}
+            {translate('maximumAmount')} {totalAmount} {selectedFeeToken}
           </TotalAmount>
         )}
         {totalExceedsBalance && (
           <AlertTotalExceedsAmount
-            text="Insufficient funds for fees"
+            text={translate('insufficientFundsForFees')}
             variant="warning"
           />
         )}
       </Wrapper>
       <Buttons>
         <ButtonStyled onClick={closeModal} backgroundTransparent borderVisible>
-          REJECT
+          {translate('reject')}
         </ButtonStyled>
         <ButtonStyled
           enabled={!estimatingGas && !gasFeesError && !totalExceedsBalance}
           onClick={handleConfirmClick}
         >
-          CONFIRM
+          {translate('confirm')}
         </ButtonStyled>
       </Buttons>
     </div>

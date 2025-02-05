@@ -12,6 +12,7 @@
   "files": [
     "dist/",
     "images/",
+    "locales/",
     "snap.manifest.json"
   ],
   "scripts": {

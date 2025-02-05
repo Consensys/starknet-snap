@@ -9,6 +9,7 @@ import {
   InvalidRequestParamsError,
   UnknownError,
 } from '../utils/exceptions';
+import { loadLocale } from '../utils/locale';
 import * as starknetUtils from '../utils/starknetUtils';
 import {
   buildDividerComponent,
@@ -61,6 +62,7 @@ describe('DeclareContractRpc', () => {
     payload: DeclareContractPayload,
     details: UniversalDetails,
   ) => {
+    await loadLocale();
     const { confirmDialogSpy } = mockConfirmDialog();
 
     const { account } = await setupAccountController({});

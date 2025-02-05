@@ -13,6 +13,7 @@ import { NetworkStateManager } from './state/network-state-manager';
 import type { Network } from './types/snapState';
 import { getDappUrl, logger, toJson } from './utils';
 import { BlockIdentifierEnum, ETHER_MAINNET } from './utils/constants';
+import { getTranslator } from './utils/locale';
 import { createAccountService } from './utils/factory';
 import { getBalance } from './utils/starknetUtils';
 /**
@@ -80,16 +81,15 @@ export class HomePageController {
     network: Network,
     balance: string,
   ): OnHomePageResponse {
+    const translate = getTranslator();
     const panelItems: Component[] = [];
-    panelItems.push(text('Address'));
+    panelItems.push(text(translate('address')));
     panelItems.push(copyable(`${address}`));
-    panelItems.push(row('Network', text(`${network.name}`)));
-    panelItems.push(row('Balance', text(`${balance} ETH`)));
+    panelItems.push(row(translate('network'), text(`${network.name}`)));
+    panelItems.push(row(translate('balance'), text(`${balance} ETH`)));
     panelItems.push(divider());
     panelItems.push(
-      text(
-        `Visit the [companion dapp for Starknet](${getDappUrl()}) to manage your account.`,
-      ),
+      text(translate('visitCompanionDappHomePage', getDappUrl())),
     );
     return {
       content: panel(panelItems),

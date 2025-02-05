@@ -43,6 +43,10 @@ export class MetaMaskSnapWallet implements StarknetWindowObject {
 
   icon: string;
 
+  /**
+   * Determines whether the wallet is connected.
+   * @deprecated This property is deprecated and will be removed in a future release.
+   */
   isConnected: boolean;
 
   snap: MetaMaskSnap;
@@ -148,6 +152,10 @@ export class MetaMaskSnapWallet implements StarknetWindowObject {
     return accountResponse.address;
   }
 
+  /**
+   * Starknet.js Account interface.
+   * @deprecated This property is deprecated and will be removed in a future release.
+   */
   get account() {
     if (!this.#account) {
       if (!this.selectedAddress) {
@@ -161,6 +169,10 @@ export class MetaMaskSnapWallet implements StarknetWindowObject {
     return this.#account;
   }
 
+  /**
+   * Starknet.js  Provider interface.
+   * @deprecated This property is deprecated and will be removed in a future release.
+   */
   get provider(): ProviderInterface {
     if (!this.#provider) {
       if (!this.#network) {
@@ -174,10 +186,18 @@ export class MetaMaskSnapWallet implements StarknetWindowObject {
     return this.#provider;
   }
 
+  /**
+   * The selected account's address of the wallet.
+   * @deprecated This property is deprecated and will be removed in a future release. Use RPC `wallet_requestAccounts` instead.
+   */
   get selectedAddress(): string {
     return this.#selectedAddress;
   }
 
+  /**
+   * The selected chain id of the wallet.
+   * @deprecated This property is deprecated and will be removed in a future release. Use RPC `wallet_requestChainId` instead.
+   */
   get chainId(): string {
     return this.#chainId;
   }
@@ -237,12 +257,17 @@ export class MetaMaskSnapWallet implements StarknetWindowObject {
    * accommodate potential support for multiple addresses in the future.
    *
    * @returns An array of address.
+   * @deprecated This property is deprecated and will be removed in a future release.
    */
   async enable() {
     await this.init();
     return [this.selectedAddress];
   }
 
+  /**
+   * Checks if the wallet is preauthorized.
+   * @deprecated This property is deprecated and will be removed in a future release.
+   */
   async isPreauthorized() {
     return true;
   }

@@ -3,6 +3,7 @@ import { Box, Heading, Section } from '@metamask/snaps-sdk/jsx';
 import type { Infer } from 'superstruct';
 
 import type { TypeDataStruct } from '../../utils';
+import { getTranslator } from '../../utils/locale';
 import { JsonDataUI, SignerUI } from '../fragments';
 
 export type SignMessageUIProps = {
@@ -25,12 +26,13 @@ export const SignMessageUI: SnapComponent<SignMessageUIProps> = ({
   chainId,
   typedDataMessage,
 }) => {
+  const translate = getTranslator();
   return (
     <Box>
-      <Heading>Do you want to sign this message?</Heading>
+      <Heading>{translate('signeMessagePrompt')}</Heading>
       <Section>
         <SignerUI address={address} chainId={chainId} />
-        <JsonDataUI label="Message" data={typedDataMessage} />
+        <JsonDataUI label={translate('message')} data={typedDataMessage} />
       </Section>
     </Box>
   );

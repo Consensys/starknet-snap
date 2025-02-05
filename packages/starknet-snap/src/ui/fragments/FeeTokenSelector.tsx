@@ -9,6 +9,7 @@ import {
 } from '@metamask/snaps-sdk/jsx';
 
 import { FeeToken, FeeTokenUnit } from '../../types/snapApi';
+import { getTranslator } from '../../utils/locale';
 
 /**
  * The props for the {@link FeeTokenSelector} component.
@@ -32,12 +33,13 @@ export const FeeTokenSelector: SnapComponent<FeeTokenSelectorProps> = ({
   selectedToken,
   error,
 }) => {
+  const translate = getTranslator();
   return (
     <Form name="form-fee-token-selection">
-      <Field label="Fee Token" error={error}>
+      <Field label={translate('feeToken')} error={error}>
         <Selector
           name="feeTokenSelector"
-          title="Select Fee Token"
+          title={translate('selectFeeToken')}
           value={selectedToken}
         >
           <SelectorOption value={FeeToken.ETH}>
@@ -48,10 +50,7 @@ export const FeeTokenSelector: SnapComponent<FeeTokenSelectorProps> = ({
           </SelectorOption>
         </Selector>
       </Field>
-      <Text color="muted">
-        If the chosen token has no funds, the system will automatically switch
-        to a funded token.
-      </Text>
+      <Text color="muted">{translate('autoSwitchToFundedToken')}</Text>
     </Form>
   );
 };

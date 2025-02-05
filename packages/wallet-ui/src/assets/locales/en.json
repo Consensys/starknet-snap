@@ -1,0 +1,302 @@
+{
+  "locale": "en",
+  "messages": {
+    "aboutThisSnap": {
+      "message": "About this snap"
+    },
+    "accountDeployedSuccessfully": {
+      "message": "Account deployed successfully."
+    },
+    "accountDetails": {
+      "message": "Account details"
+    },
+    "accountGeneratedWithRecoveryPhrase": {
+      "message": "This account was generated with your MetaMask Secret Recovery Phrase."
+    },
+    "accountRecoveryInfo": {
+      "message": "Note: Your account will be automatically recovered. Future upgrades will be managed automatically."
+    },
+    "accountUpgradedSuccessfully": {
+      "message": "Account upgraded successfully."
+    },
+    "add": {
+      "message": "ADD"
+    },
+    "addToken": {
+      "message": "Add Token"
+    },
+    "amount": {
+      "message": "Amount"
+    },
+    "cancel": {
+      "message": "CANCEL"
+    },
+    "confirm": {
+      "message": "CONFIRM"
+    },
+    "connectTo": {
+      "message": "Connect to"
+    },
+    "connectToMetaMask": {
+      "message": "Click on connect, the new version will be proposed for installation."
+    },
+    "connectWithMetaMask": {
+      "message": "Connect with MetaMask"
+    },
+    "connectedToStarknetSnap": {
+      "message": "Connected to Starknet Snap"
+    },
+    "contractAddress": {
+      "message": "Contract Address"
+    },
+    "copied": {
+      "message": "Copied!"
+    },
+    "copyToClipboard": {
+      "message": "Copy to clipboard"
+    },
+    "decimal": {
+      "message": "Decimal"
+    },
+    "deleteCurrentVersionMetaMask": {
+      "message": "Delete the current version in MetaMask by going in Settings > Snaps > @consensys/starknet-snap > See details > Remove Snap"
+    },
+    "deploy": {
+      "message": "Deploy"
+    },
+    "deployAccount": {
+      "message": "Deploy Account"
+    },
+    "deployAccountFailed": {
+      "message": "Deploy account failed"
+    },
+    "deployTransactionPendingPart1": {
+      "message": "Your deploy transaction is still pending and has reached the maximum retry limit for status checks. Please wait for the transaction to complete."
+    },
+    "deployTransactionPendingPart2": {
+      "message": "Please try again in a couple of hours."
+    },
+    "deployTransactionPendingPart3": {
+      "message": "Thank you for your comprehension."
+    },
+    "deploymentNecessaryToProceedPart1": {
+      "message": "A deployment of your address is necessary to proceed with the Snap."
+    },
+    "deploymentNecessaryToProceedPart2": {
+      "message": "Click on the \"Deploy\" button to proceed."
+    },
+    "deploymentNecessaryToProceedPart3": {
+      "message": "Thank you!"
+    },
+    "disableMetaMaskExtension": {
+      "message": "Please make sure that the regular MetaMask extension is disabled or use a different browser profile"
+    },
+    "disconnect": {
+      "message": "Disconnect"
+    },
+    "downloadMetaMask": {
+      "message": "Download MetaMask"
+    },
+    "downloadMetaMaskFlask": {
+      "message": "Download MetaMask Flask"
+    },
+    "errorAddingToken": {
+      "message": "Error while adding token"
+    },
+    "errorCalculatingGasFees": {
+      "message": "Error when trying to calculate the gas fees"
+    },
+    "errorSendingTransaction": {
+      "message": "Error while sending the transaction"
+    },
+    "estimatedFee": {
+      "message": "Estimated Fee"
+    },
+    "exportPrivateKey": {
+      "message": "EXPORT PRIVATE KEY"
+    },
+    "feesIncludeOneTimeDeploymentFee": {
+      "message": "Fees include a one-time deployment fee"
+    },
+    "gasFeesDefinition": {
+      "message": "Gas fees are defined by the network and fluctuate depending on network traffic and transaction complexity."
+    },
+    "goToMetaMaskWebsite": {
+      "message": "Go to MetaMask Website"
+    },
+    "gotIt": {
+      "message": "GOT IT!"
+    },
+    "inputAmountExceedsBalance": {
+      "message": "Input amount exceeds user balance"
+    },
+    "installLatestVersion": {
+      "message": "To use this dapp, please install the latest version by following those steps:"
+    },
+    "installMetaMaskFlaskToUseSnap": {
+      "message": "You need to install MetaMask Flask extension in order to use the Starknet Snap."
+    },
+    "installMetaMaskToUseSnap": {
+      "message": "You need to install MetaMask extension in order to use the Starknet Snap."
+    },
+    "insufficientFundsForFees": {
+      "message": "Insufficient funds for fees"
+    },
+    "invalidAddressFormat": {
+      "message": "Invalid address format"
+    },
+    "loading": {
+      "message": "Loading"
+    },
+    "maximumAmount": {
+      "message": "Maximum amount:"
+    },
+    "maximumFees": {
+      "message": "Maximum fees:"
+    },
+    "metaMaskExtensionRequired": {
+      "message": "You don't have the MetaMask extension"
+    },
+    "metaMaskFlaskExtensionRequired": {
+      "message": "You don't have the MetaMask Flask extension"
+    },
+    "metaMaskUpgradeNeeded": {
+      "message": "An upgrade of MetaMask is needed to use this dApp"
+    },
+    "myAccount": {
+      "message": "My account"
+    },
+    "name": {
+      "message": "Name"
+    },
+    "network": {
+      "message": "Network"
+    },
+    "newVersionAvailable": {
+      "message": "A new version of the Starknet Snap is available"
+    },
+    "newVersionOfSmartContractNecessaryPart1": {
+      "message": "A new version of the smart contract is necessary to proceed with the Snap."
+    },
+    "newVersionOfSmartContractNecessaryPart2": {
+      "message": "New enhancements will come with this version."
+    },
+    "newVersionOfSmartContractNecessaryPart3": {
+      "message": "Click on the \"Upgrade\" button to install it."
+    },
+    "newVersionOfSmartContractNecessaryPart4": {
+      "message": "Thank you!"
+    },
+    "noTransactions": {
+      "message": "You don't have any transactions"
+    },
+    "nonZeroBalanceOnCairo0": {
+      "message": "You have a non-zero balance on a Cairo 0 non-deployed address"
+    },
+    "openBetaVersion": {
+      "message": "This is the Open Beta version of the dapp, updates are made regularly"
+    },
+    "pasteRecipientAddress": {
+      "message": "Paste recipient address or .stark name here"
+    },
+    "poweredBy": {
+      "message": "Powered by"
+    },
+    "privacyPolicy": {
+      "message": "Privacy Policy"
+    },
+    "readMore": {
+      "message": "Read more"
+    },
+    "receive": {
+      "message": "Receive"
+    },
+    "refreshPage": {
+      "message": "Refresh the page"
+    },
+    "reject": {
+      "message": "REJECT"
+    },
+    "selectAnOption": {
+      "message": "Select an option"
+    },
+    "selectTokenForTransactionFees": {
+      "message": "Select Token for Transaction Fees"
+    },
+    "send": {
+      "message": "Send"
+    },
+    "snapsExtendMetaMask": {
+      "message": "Snaps extend the capabilities of MetaMask by adding new functionalities. This Snap allows MetaMask to be compatible with Starknet and manage your keys."
+    },
+    "starkNameDoesNotExist": {
+      "message": ".stark name doesn’t exist"
+    },
+    "starknetAccount": {
+      "message": "Starknet account"
+    },
+    "starknetSnapInstallationPrompt": {
+      "message": "If you do not have the Starknet snap installed you will be prompted to install it."
+    },
+    "symbol": {
+      "message": "Symbol"
+    },
+    "termsOfUse": {
+      "message": "Terms of Use"
+    },
+    "to": {
+      "message": "To"
+    },
+    "tokenAddedSuccessfully": {
+      "message": "Token added successfully"
+    },
+    "tokenCreationWarning": {
+      "message": "Anyone can create a token, including creating fake versions of existing tokens. Learn more about scams and security risks."
+    },
+    "total": {
+      "message": "Total"
+    },
+    "transactionHash": {
+      "message": "Transaction Hash:"
+    },
+    "transactionRejectedByUser": {
+      "message": "Transaction rejected by user"
+    },
+    "transactionSentSuccessfully": {
+      "message": "Transaction sent successfully"
+    },
+    "updateMetaMaskVersion": {
+      "message": "Please update to MetaMask Version {1} or higher."
+    },
+    "upgrade": {
+      "message": "Upgrade"
+    },
+    "upgradeAccount": {
+      "message": "Upgrade Account"
+    },
+    "upgradeAccountFailed": {
+      "message": "Upgrade account failed"
+    },
+    "upgradeTransactionPendingPart1": {
+      "message": "Your upgrade transaction is still pending and has reached the maximum retry limit for status checks. Please wait for the transaction to complete."
+    },
+    "upgradeTransactionPendingPart2": {
+      "message": "Please try again in a couple of hours."
+    },
+    "upgradeTransactionPendingPart3": {
+      "message": "Thank you for your comprehension."
+    },
+    "validStarknetAddressOnly": {
+      "message": "Please only enter a valid Starknet address or .stark name. Sending funds to a different network might result in permanent loss."
+    },
+    "viewOnExplorer": {
+      "message": "View on explorer"
+    },
+    "waitingForTransaction": {
+      "message": "Waiting for transaction to be complete."
+    },
+    "whatIsASnap": {
+      "message": "What is a snap?"
+    }
+  }
+}

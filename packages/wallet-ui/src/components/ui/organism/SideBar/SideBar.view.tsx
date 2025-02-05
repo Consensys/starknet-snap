@@ -37,6 +37,7 @@ export const SideBarView = () => {
   const wallet = useAppSelector((state) => state.wallet);
   const [addTokenOpen, setAddTokenOpen] = useState(false);
   const { getStarkName } = useStarkNetSnap();
+  const { translate } = useMultiLanguage();
   const [starkName, setStarkName] = useState<string | undefined>(undefined);
   const address = currentAccount.address;
   const addressIndex = currentAccount?.addressIndex ?? 0;
@@ -95,14 +96,14 @@ export const SideBarView = () => {
               iconLeft="qrcode"
               onClick={() => setAccountDetailsOpen(true)}
             >
-              Account details
+              {translate('accountDetails')}
             </AccountDetailButton>
             <AccountDetailButton
               backgroundTransparent
               iconLeft="external-link"
               onClick={() => openExplorerTab(address, 'contract', chainId)}
             >
-              View on explorer
+              {translate('viewOnExplorer')}
             </AccountDetailButton>
           </AccountDetailsContent>
         }
@@ -135,7 +136,7 @@ export const SideBarView = () => {
         shadowVisible={listOverflow}
         onClick={() => setAddTokenOpen(true)}
       >
-        ADD TOKEN
+        {translate('addToken').toUpperCase()}
       </AddTokenButton>
       <PopIn isOpen={addTokenOpen} setIsOpen={setAddTokenOpen}>
         <AddTokenModal closeModal={() => setAddTokenOpen(false)} />

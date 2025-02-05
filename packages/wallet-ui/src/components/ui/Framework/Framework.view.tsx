@@ -8,6 +8,7 @@ import {
   MenuStyled,
   Wrapper,
 } from './Framework.style';
+import { useMultiLanguage } from 'services';
 
 interface Props {
   connected: boolean;
@@ -16,6 +17,8 @@ interface Props {
 
 export const FrameworkView = ({ connected, children }: Props) => {
   const [bannerOpen, setBannerOpen] = useState(true);
+  const { translate } = useMultiLanguage();
+
   return (
     <Wrapper>
       <ColMiddle>
@@ -25,7 +28,7 @@ export const FrameworkView = ({ connected, children }: Props) => {
       </ColMiddle>
       {bannerOpen && (
         <Banner>
-          This is the Open Beta version of the dapp, updates are made regularly{' '}
+          {translate('openBetaVersion')}{' '}
           <CloseIcon icon={'close'} onClick={() => setBannerOpen(false)} />
         </Banner>
       )}

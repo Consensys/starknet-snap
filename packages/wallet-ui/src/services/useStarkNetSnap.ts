@@ -14,6 +14,8 @@ import {
   setTransactions,
   setTransactionDeploy,
   setForceReconnect,
+  setLocale,
+  setTranslations,
   updateAccount,
 } from '../slices/walletSlice';
 import Toastr from 'toastr2';
@@ -86,10 +88,42 @@ export const useStarkNetSnap = () => {
       });
   };
 
+  const loadLocale = async () => {
+    try {
+      const { locale } = await provider.request({
+        method: 'wallet_invokeSnap',
+        params: {
+          snapId,
+          request: {
+            method: 'starkNet_getPreferences',
+          },
+        },
+      });
+      const messages = await import(`../assets/locales/${locale}.json`);
+      dispatch(setLocale(locale));
+      dispatch(setTranslations(messages.messages));
+    } catch (error) {
+      console.error(
+        'Failed to load user preferences. Falling back to default locale.',
+        error,
+      );
+    }
+  };
+
   const getNetworks = async () => {
-    return await invokeSnap<Network[]>({
-      method: 'starkNet_getStoredNetworks',
-    });
+    const data = (await provider.request({
+      method: 'wallet_invokeSnap',
+      params: {
+        snapId,
+        request: {
+          method: 'starkNet_getStoredNetworks',
+          params: {
+            ...defaultParam,
+          },
+        },
+      },
+    })) as Network[];
+    return data;
   };
 
   const getTokens = async (chainId: string) => {
@@ -897,6 +931,7 @@ export const useStarkNetSnap = () => {
 
   return {
     connectToSnap,
+    loadLocale,
     getNetworks,
     getAccounts,
     hideAccount,

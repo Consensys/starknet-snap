@@ -19,7 +19,7 @@ import { Menu } from '@headlessui/react';
 import { theme } from 'theme/default';
 import { Radio, Skeleton } from '@mui/material';
 import { useAppDispatch, useAppSelector } from 'hooks/redux';
-import { useStarkNetSnap } from 'services';
+import { useMultiLanguage, useStarkNetSnap } from 'services';
 import {
   setWalletConnection,
   setForceReconnect,
@@ -34,6 +34,7 @@ interface IProps extends HTMLAttributes<HTMLElement> {
 
 export const MenuView = ({ connected, ...otherProps }: IProps) => {
   const { switchNetwork } = useStarkNetSnap();
+  const { translate } = useMultiLanguage();
   const networks = useAppSelector((state) => state.networks);
   const dispatch = useAppDispatch();
 
@@ -90,7 +91,7 @@ export const MenuView = ({ connected, ...otherProps }: IProps) => {
             <MenuSection>
               <Menu.Item disabled>
                 <div style={{ padding: '8px 0px 0px 8px' }}>
-                  <Bold>Network</Bold>
+                  <Bold>{translate('network')}</Bold>
                 </div>
               </Menu.Item>
             </MenuSection>
@@ -163,7 +164,9 @@ export const MenuView = ({ connected, ...otherProps }: IProps) => {
                       padding: '0px 10px',
                     }}
                   />
-                  <MenuItemText>Connected to Starknet Snap</MenuItemText>
+                  <MenuItemText>
+                    {translate('connectedToStarknetSnap')}
+                  </MenuItemText>
                 </div>
               </Menu.Item>
             </MenuSection>
@@ -194,7 +197,7 @@ export const MenuView = ({ connected, ...otherProps }: IProps) => {
                       target="_blank"
                       rel="noreferrer"
                     >
-                      <MenuItemText>About this snap</MenuItemText>
+                      <MenuItemText>{translate('aboutThisSnap')}</MenuItemText>
                     </a>
                   </div>
                 )}
@@ -220,7 +223,7 @@ export const MenuView = ({ connected, ...otherProps }: IProps) => {
                         padding: '0px 10px',
                       }}
                     />
-                    <MenuItemText>Disconnect</MenuItemText>
+                    <MenuItemText>{translate('disconnect')}</MenuItemText>
                   </div>
                 )}
               </Menu.Item>

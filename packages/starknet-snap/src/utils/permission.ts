@@ -1,6 +1,7 @@
 import { UnauthorizedError } from '@metamask/snaps-sdk';
 
 export enum RpcMethod {
+  GetPreferences = 'starkNet_getPreferences',
   ExtractPublicKey = 'starkNet_extractPublicKey',
   GetCurrentNetwork = 'starkNet_getCurrentNetwork',
   GetStoredNetworks = 'starkNet_getStoredNetworks',
@@ -62,6 +63,7 @@ const publicPermissions = [
 ];
 // RpcMethod that are restricted to be called by wallet UI origins
 const walletUIDappPermissions = publicPermissions.concat([
+  RpcMethod.GetPreferences,
   RpcMethod.DeployCario0Account,
   RpcMethod.GetTransactions,
   RpcMethod.UpgradeAccContract,

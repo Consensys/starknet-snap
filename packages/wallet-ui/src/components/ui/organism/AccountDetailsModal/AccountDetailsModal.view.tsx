@@ -11,12 +11,14 @@ import {
 } from './AccountDetailsModal.style';
 import { openExplorerTab } from 'utils/utils';
 import { useAppSelector } from 'hooks/redux';
-import { useStarkNetSnap } from 'services';
+import { useMultiLanguage, useStarkNetSnap } from 'services';
 
 export const AccountDetailsModalView = () => {
   const networks = useAppSelector((state) => state.networks);
   const currentAccount = useAppSelector((state) => state.wallet.currentAccount);
   const { getPrivateKeyFromAddress } = useStarkNetSnap();
+  const { translate } = useMultiLanguage();
+
   const chainId = networks?.items[networks.activeNetwork]?.chainId;
   const address = currentAccount.address;
   const addressIndex = currentAccount?.addressIndex ?? 0;
@@ -39,14 +41,14 @@ export const AccountDetailsModalView = () => {
           borderVisible
           onClick={() => openExplorerTab(address, 'contract', chainId)}
         >
-          VIEW ON EXPLORER
+          {translate('viewOnExplorer').toUpperCase()}
         </ButtonStyled>
         <ButtonStyled
           backgroundTransparent
           borderVisible
           onClick={() => getPrivateKeyFromAddress(address, chainId)}
         >
-          EXPORT PRIVATE KEY
+          {translate('exportPrivateKey')}
         </ButtonStyled>
       </ButtonDiv>
     </div>

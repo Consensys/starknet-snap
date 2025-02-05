@@ -88,6 +88,7 @@ import {
 } from './utils/constants';
 import { UnknownError } from './utils/exceptions';
 import { getAddressKeyDeriver } from './utils/keyPair';
+import { getTranslator, loadLocale } from './utils/locale';
 import { acquireLock } from './utils/lock';
 import { logger } from './utils/logger';
 import { RpcMethod, validateOrigin } from './utils/permission';
@@ -105,6 +106,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
   origin,
   request,
 }) => {
+  await loadLocale();
   const requestParams = request?.params as unknown as ApiRequestParams;
 
   logger.log(`${request.method}:\nrequestParams: ${toJson(requestParams)}`);
@@ -157,6 +159,13 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
     };
 
     switch (request.method) {
+      case RpcMethod.GetPreferences: {
+        const { locale } = await snap.request({
+          method: 'snap_getPreferences',
+        });
+        return { locale };
+      }
+
       case RpcMethod.CreateAccount:
         apiParams.keyDeriver = await getAddressKeyDeriver(snap);
         return await createAccount(
@@ -328,30 +337,35 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
 };
 
 export const onInstall: OnInstallHandler = async () => {
+  await loadLocale();
+  const translate = getTranslator();
   await ensureJsxSupport(
     <Box>
-      <Text>Your MetaMask wallet is now compatible with Starknet!</Text>
+      <Text>{translate('walletIsCompatible')}</Text>
       <Text>
-        To manage your Starknet account and send and receive funds, visit the{' '}
-        <Link href={getDappUrl()}>companion dapp for Starknet</Link>.
+        {translate('accountManagementIntro')}{' '}
+        <Link href={getDappUrl()}>{translate('companionDapp')}</Link>.
       </Text>
     </Box>,
   );
 };
 
 export const onUpdate: OnUpdateHandler = async () => {
+  await loadLocale();
+  const translate = getTranslator();
   await ensureJsxSupport(
     <Box>
-      <Text>Your Starknet Snap is now up-to-date !</Text>
+      <Text>{translate('snapIsUpToDate')}</Text>
       <Text>
-        As usual, to manage your Starknet account and send and receive funds,
-        visit the <Link href={getDappUrl()}>companion dapp for Starknet</Link>.
+        {translate('accountManagementReminder')}{' '}
+        <Link href={getDappUrl()}>{translate('companionDapp')}</Link>.
       </Text>
     </Box>,
   );
 };
 
 export const onHomePage: OnHomePageHandler = async () => {
+  await loadLocale();
   return await homePageController.execute();
 };
 
