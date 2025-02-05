@@ -216,8 +216,8 @@ export const useStarkNetSnap = () => {
         });
       }
     } catch (error) {
-      //eslint-disable-next-line no-console
-      console.log(`error while processing hideAccount: ${error}`);
+      const toastr = new Toastr();
+      toastr.error('Snap is unable to hide the requested Account');
     } finally {
       dispatch(disableLoading());
     }
@@ -233,9 +233,15 @@ export const useStarkNetSnap = () => {
     if (!loader.isLoading) {
       dispatch(enableLoadingWithMessage(`Loading...`));
     }
-    await toggleAccountVisibility(chainId, address, true);
-    dispatch(updateAccount({ address, updates: { visibility: true } }));
-    dispatch(disableLoading());
+    try {
+      await toggleAccountVisibility(chainId, address, true);
+      dispatch(updateAccount({ address, updates: { visibility: true } }));
+    } catch (err) {
+      const toastr = new Toastr();
+      toastr.error('Snap is unable to show the requested Account');
+    } finally {
+      dispatch(disableLoading());
+    }
   };
 
   const setAccount = async (chainId: string, currentAccount: Account) => {
