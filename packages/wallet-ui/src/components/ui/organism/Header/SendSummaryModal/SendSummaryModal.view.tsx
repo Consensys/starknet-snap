@@ -93,7 +93,7 @@ export const SendSummaryModalView = ({
           wallet.erc20TokenBalanceSelected.address,
           ContractFuncName.Transfer,
           callData,
-          currentAccount,
+          currentAccount.address,
           chainId,
           selectedFeeToken === FeeToken.STRK
             ? constants.TRANSACTION_VERSION.V3
@@ -181,7 +181,7 @@ export const SendSummaryModalView = ({
         wallet.erc20TokenBalanceSelected.address,
         ContractFuncName.Transfer,
         callData,
-        currentAccount,
+        currentAccount.address,
         gasFees.suggestedMaxFee,
         chainId,
         selectedFeeToken,
@@ -190,7 +190,7 @@ export const SendSummaryModalView = ({
           if (result) {
             toastr.success('Transaction sent successfully');
             getTransactions(
-              currentAccount,
+              currentAccount.address,
               wallet.erc20TokenBalanceSelected.address,
               10,
               chainId,

@@ -40,7 +40,7 @@ function App() {
   const { currentAccount } = useAppSelector((state) => state.wallet);
   const { hasMetamask } = useHasMetamask();
   const chainId = networks.items?.[networks.activeNetwork]?.chainId;
-  const address = currentAccount ?? DUMMY_ADDRESS;
+  const address = currentAccount?.address ?? DUMMY_ADDRESS;
 
   useEffect(() => {
     if (!provider) {
@@ -97,7 +97,7 @@ function App() {
         >
           <DeployModal address={address} />
         </PopIn>
-        <Home address={address} />
+        <Home />
         <PopIn isOpen={loading}>
           {loading && (
             <LoadingBackdrop>{loader.loadingMessage}</LoadingBackdrop>

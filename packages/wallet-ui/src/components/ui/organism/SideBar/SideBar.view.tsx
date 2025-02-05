@@ -27,13 +27,9 @@ import { useStarkNetSnap } from 'services';
 import { DUMMY_ADDRESS } from 'utils/constants';
 import { PopperTooltip } from 'components/ui/molecule/PopperTooltip';
 
-interface Props {
-  address: string;
-}
-
-export const SideBarView = ({ address }: Props) => {
+export const SideBarView = () => {
   const networks = useAppSelector((state) => state.networks);
-  const accounts = useAppSelector((state) => state.wallet.accounts);
+  const currentAccount = useAppSelector((state) => state.wallet.currentAccount);
   const chainId = networks?.items[networks.activeNetwork]?.chainId;
   const [listOverflow, setListOverflow] = useState(false);
   const [infoModalOpen, setInfoModalOpen] = useState(false);
@@ -42,7 +38,8 @@ export const SideBarView = ({ address }: Props) => {
   const [addTokenOpen, setAddTokenOpen] = useState(false);
   const { getStarkName } = useStarkNetSnap();
   const [starkName, setStarkName] = useState<string | undefined>(undefined);
-
+  const address = currentAccount?.address ?? DUMMY_ADDRESS;
+  const addressIndex = currentAccount?.addressIndex ?? 0;
   const ref = useRef<HTMLDivElement>();
 
   useEffect(() => {
@@ -75,7 +72,7 @@ export const SideBarView = ({ address }: Props) => {
         isOpen={accountDetailsOpen}
         setIsOpen={setAccountDetailsOpen}
       >
-        <AccountDetailsModal address={address} />
+        <AccountDetailsModal />
       </PopInStyled>
       <PopIn
         isOpen={infoModalOpen}
@@ -113,14 +110,10 @@ export const SideBarView = ({ address }: Props) => {
         <AccountImageStyled address={address} connected={wallet.connected} />
       </AccountDetails>
 
-      <AccountLabel>My account</AccountLabel>
+      <AccountLabel>Account {addressIndex + 1} </AccountLabel>
       <RowDiv>
         <InfoIcon onClick={() => setInfoModalOpen(true)}>i</InfoIcon>
-        <AccountSwitchModal
-          currentAddress={address}
-          starkName={starkName}
-          accounts={accounts}
-        />
+        <AccountSwitchModal starkName={starkName} />
         <PopperTooltip content="Copied!" closeTrigger="click">
           <CopyIcon
             onClick={async () => navigator.clipboard.writeText(address)}
