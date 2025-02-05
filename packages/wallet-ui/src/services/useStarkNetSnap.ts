@@ -93,9 +93,7 @@ export const useStarkNetSnap = () => {
       const { locale } = await invokeSnap<{
         locale: string;
       }>({
-        
-            method: 'starkNet_getPreferences',
-          
+        method: 'starkNet_getPreferences',
       });
       const messages = await import(`../assets/locales/${locale}.json`);
       dispatch(setLocale(locale));
@@ -110,10 +108,9 @@ export const useStarkNetSnap = () => {
 
   const getNetworks = async () => {
     return await invokeSnap<Network[]>({
-          method: 'starkNet_getStoredNetworks',
-          params: {
-          },
-        });
+      method: 'starkNet_getStoredNetworks',
+      params: {},
+    });
   };
 
   const getTokens = async (chainId: string) => {

@@ -23,25 +23,27 @@ export const AccountsHeaderView = ({
   hiddenAccounts,
 }: Props) => {
   const { translate } = useMultiLanguage();
-  return <MenuSection>
-    <Menu.Item disabled>
-      <AccountSwitchMenuItem style={{ paddingLeft: 20 }}>
-        <Container>
-          <Normal>{translate('accounts')}</Normal>
-        </Container>
-        {hiddenAccounts.length > 0 && (
-          <IconButton
-            onClick={() => setShowHiddenAccounts(!showHiddenAccounts)}
-            size="small"
-          >
-            {showHiddenAccounts ? (
-              <VisibilityOffIcon fontSize="small" />
-            ) : (
-              <VisibilityIcon fontSize="small" />
-            )}
-          </IconButton>
-        )}
-      </AccountSwitchMenuItem>
-    </Menu.Item>
-  </MenuSection>
+  return (
+    <MenuSection>
+      <Menu.Item disabled>
+        <AccountSwitchMenuItem style={{ paddingLeft: 20 }}>
+          <Container>
+            <Normal>{translate('accounts')}</Normal>
+          </Container>
+          {hiddenAccounts.length > 0 && (
+            <IconButton
+              onClick={() => setShowHiddenAccounts(!showHiddenAccounts)}
+              size="small"
+            >
+              {showHiddenAccounts ? (
+                <VisibilityOffIcon fontSize="small" />
+              ) : (
+                <VisibilityIcon fontSize="small" />
+              )}
+            </IconButton>
+          )}
+        </AccountSwitchMenuItem>
+      </Menu.Item>
+    </MenuSection>
+  );
 };

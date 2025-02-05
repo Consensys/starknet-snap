@@ -29,7 +29,9 @@ export const AccountDetailsModalView = () => {
       </AccountImageDiv>
       <Wrapper>
         <TitleDiv>
-          <Title>{translate('account')} {addressIndex + 1}</Title>
+          <Title>
+            {translate('account')} {addressIndex + 1}
+          </Title>
           {/* <ModifyIcon /> */}
         </TitleDiv>
         <AddressQrCode value={address} />

@@ -9,7 +9,6 @@ import {
   STARKNET_MAINNET_NETWORK,
 } from './utils/constants';
 import { loadLocale } from './utils/locale';
-import * as snapHelper from './utils/snap';
 import * as starknetUtils from './utils/starknetUtils';
 
 jest.mock('./utils/snap');

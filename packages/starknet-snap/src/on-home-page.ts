@@ -13,8 +13,8 @@ import { NetworkStateManager } from './state/network-state-manager';
 import type { Network } from './types/snapState';
 import { getDappUrl, logger, toJson } from './utils';
 import { BlockIdentifierEnum, ETHER_MAINNET } from './utils/constants';
-import { getTranslator } from './utils/locale';
 import { createAccountService } from './utils/factory';
+import { getTranslator } from './utils/locale';
 import { getBalance } from './utils/starknetUtils';
 /**
  * The onHomePage handler to execute the home page event operation.

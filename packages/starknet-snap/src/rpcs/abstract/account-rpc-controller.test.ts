@@ -9,6 +9,7 @@ import {
 import * as snapUtils from '../../utils/snapUtils';
 import { setupAccountController } from '../__tests__/helper';
 import { AccountRpcController } from './account-rpc-controller';
+import { loadLocale } from '../../utils/locale';
 
 jest.mock('../../utils/snap');
 jest.mock('../../utils/logger');
@@ -82,6 +83,7 @@ describe('AccountRpcController', () => {
   });
 
   it(`displays a request deploy dialog if account is required deploy and \`showInvalidAccountAlert\` is true`, async () => {
+    await loadLocale();
     const { account, showDeployRequestModalSpy } = await setupRpcExecuteTest({
       requireDeploy: true,
     });
@@ -100,6 +102,7 @@ describe('AccountRpcController', () => {
   });
 
   it(`displays a request upgrade dialog if account is required upgrade and \`showInvalidAccountAlert\` is true`, async () => {
+    await loadLocale();
     const { account, showUpgradeRequestModalSpy } = await setupRpcExecuteTest({
       requireUpgrade: true,
     });
