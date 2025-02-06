@@ -13,16 +13,15 @@ import { openExplorerTab } from 'utils/utils';
 import { useAppSelector } from 'hooks/redux';
 import { useMultiLanguage, useStarkNetSnap } from 'services';
 
-interface Props {
-  address: string;
-}
-
-export const AccountDetailsModalView = ({ address }: Props) => {
+export const AccountDetailsModalView = () => {
   const networks = useAppSelector((state) => state.networks);
+  const currentAccount = useAppSelector((state) => state.wallet.currentAccount);
   const { getPrivateKeyFromAddress } = useStarkNetSnap();
   const { translate } = useMultiLanguage();
 
   const chainId = networks?.items[networks.activeNetwork]?.chainId;
+  const address = currentAccount.address;
+  const addressIndex = currentAccount?.addressIndex ?? 0;
   return (
     <div>
       <AccountImageDiv>
@@ -30,7 +29,9 @@ export const AccountDetailsModalView = ({ address }: Props) => {
       </AccountImageDiv>
       <Wrapper>
         <TitleDiv>
-          <Title>{translate('myAccount')}</Title>
+          <Title>
+            {translate('account')} {addressIndex + 1}
+          </Title>
           {/* <ModifyIcon /> */}
         </TitleDiv>
         <AddressQrCode value={address} />

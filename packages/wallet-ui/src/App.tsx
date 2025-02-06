@@ -19,13 +19,12 @@ import 'toastr2/dist/toastr.min.css';
 import { NoMetamaskModal } from 'components/ui/organism/NoMetamaskModal';
 import { MinVersionModal } from './components/ui/organism/MinVersionModal';
 import { useHasMetamask } from 'hooks/useHasMetamask';
-import { DUMMY_ADDRESS } from 'utils/constants';
 import { DeployModal } from 'components/ui/organism/DeployModal';
 
 library.add(fas, far);
 
 function App() {
-  const { initSnap, getWalletData, checkConnection, loadLocale } =
+  const { initSnap, initWalletData, checkConnection, loadLocale } =
     useStarkNetSnap();
   const { connected, forceReconnect, provider } = useAppSelector(
     (state) => state.wallet,
@@ -38,11 +37,10 @@ function App() {
   } = useAppSelector((state) => state.modals);
   const { loader } = useAppSelector((state) => state.UI);
   const networks = useAppSelector((state) => state.networks);
-  const { accounts } = useAppSelector((state) => state.wallet);
+  const { currentAccount } = useAppSelector((state) => state.wallet);
   const { hasMetamask } = useHasMetamask();
-
-  const address =
-    accounts?.length > 0 ? (accounts[0] as unknown as string) : DUMMY_ADDRESS;
+  const chainId = networks.items?.[networks.activeNetwork]?.chainId;
+  const address = currentAccount.address;
 
   useEffect(() => {
     if (!provider) {
@@ -58,12 +56,11 @@ function App() {
   }, [connected, forceReconnect, hasMetamask, provider]);
 
   useEffect(() => {
-    if (provider && networks.items.length > 0) {
-      const chainId = networks.items[networks.activeNetwork].chainId;
-      getWalletData(chainId);
+    if (provider && networks.items.length > 0 && chainId) {
+      initWalletData({ chainId });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [networks.activeNetwork, provider]);
+  }, [networks.activeNetwork, provider, chainId]);
 
   useEffect(() => {
     if (connected) {
@@ -106,7 +103,7 @@ function App() {
         >
           <DeployModal address={address} />
         </PopIn>
-        <Home address={address} />
+        <Home />
         <PopIn isOpen={loading}>
           {loading && (
             <LoadingBackdrop>{loader.loadingMessage}</LoadingBackdrop>

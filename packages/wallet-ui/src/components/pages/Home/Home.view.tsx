@@ -4,21 +4,20 @@ import { SideBar } from 'components/ui/organism/SideBar';
 import { RightPart, Wrapper, NoTransactions } from './Home.style';
 import { useAppSelector } from 'hooks/redux';
 import { useMultiLanguage } from 'services';
-interface Props {
-  address: string;
-}
 
-export const HomeView = ({ address }: Props) => {
+export const HomeView = () => {
   const { erc20TokenBalanceSelected, transactions } = useAppSelector(
     (state) => state.wallet,
   );
   const loader = useAppSelector((state) => state.UI.loader);
+  const currentAccount = useAppSelector((state) => state.wallet.currentAccount);
+  const address = currentAccount.address;
   const { upgradeModalVisible } = useAppSelector((state) => state.modals);
   const { translate } = useMultiLanguage();
 
   return (
     <Wrapper>
-      <SideBar address={address} />
+      <SideBar />
       <RightPart>
         {!upgradeModalVisible &&
           Object.keys(erc20TokenBalanceSelected).length > 0 && (
