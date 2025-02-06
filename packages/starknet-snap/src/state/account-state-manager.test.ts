@@ -160,6 +160,21 @@ describe('AccountStateManager', () => {
     });
   });
 
+  it('updates the account name', async () => {
+    const accounts = await generateTestnetAccounts();
+    await mockStateWithMainnetAccounts(accounts);
+    const accountToToggle = accounts[0];
+
+    const stateManager = new AccountStateManager();
+    await stateManager.setAccountName({
+      address: accountToToggle.address,
+      chainId: accountToToggle.chainId,
+      accountName: 'mySuperAccount',
+    });
+
+    expect(accountToToggle.accountName).toBe('mySuperAccount');
+  });
+
   describe('toggleAccountVisibility', () => {
     it.each([true, false])(
       'toggles the account visibility - %s',

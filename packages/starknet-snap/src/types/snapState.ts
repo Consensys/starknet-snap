@@ -70,6 +70,7 @@ export type AccContract = {
   deployRequired?: boolean;
   cairoVersion?: string;
   visibility?: boolean;
+  accountName?: string;
 };
 
 export type Erc20Token = {
