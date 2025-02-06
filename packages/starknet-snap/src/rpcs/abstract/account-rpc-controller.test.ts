@@ -6,10 +6,10 @@ import {
   DeployRequiredError,
   UpgradeRequiredError,
 } from '../../utils/exceptions';
-import { loadLocale } from '../../utils/locale';
 import * as snapUtils from '../../utils/snapUtils';
 import { setupAccountController } from '../__tests__/helper';
 import { AccountRpcController } from './account-rpc-controller';
+import { loadLocale } from '../../utils/locale';
 
 jest.mock('../../utils/snap');
 jest.mock('../../utils/logger');
