@@ -1,11 +1,11 @@
 import { constants } from 'starknet';
 
 import typedDataExample from '../__tests__/fixture/typedDataExample.json';
-import type { SnapState } from '../types/snapState';
+import { generateAccounts } from '../__tests__/helper';
 import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../utils/constants';
 import { InvalidRequestParamsError } from '../utils/exceptions';
 import * as starknetUtils from '../utils/starknetUtils';
-import { mockAccount, prepareMockAccount } from './__tests__/helper';
+import { setupAccountController } from './__tests__/helper';
 import { verifySignature } from './verify-signature';
 import type { VerifySignatureParams } from './verify-signature';
 
@@ -13,16 +13,27 @@ jest.mock('../utils/snap');
 jest.mock('../utils/logger');
 
 describe('verifySignature', () => {
-  const state: SnapState = {
-    accContracts: [],
-    erc20Tokens: [],
-    networks: [STARKNET_SEPOLIA_TESTNET_NETWORK],
-    transactions: [],
+  const network = STARKNET_SEPOLIA_TESTNET_NETWORK;
+
+  const setupVerifySignatureTest = async () => {
+    const { account } = await setupAccountController({
+      network,
+    });
+
+    const request = {
+      chainId: network.chainId as constants.StarknetChainId,
+      address: account.address,
+      typedDataMessage: typedDataExample,
+    };
+
+    return {
+      request,
+      account,
+    };
   };
 
   it('returns true if the signature is correct', async () => {
-    const account = await mockAccount(constants.StarknetChainId.SN_SEPOLIA);
-    prepareMockAccount(account, state);
+    const { account, request } = await setupVerifySignatureTest();
 
     const signature = await starknetUtils.signMessage(
       account.privateKey,
@@ -30,39 +41,41 @@ describe('verifySignature', () => {
       account.address,
     );
 
-    const request = {
-      chainId: constants.StarknetChainId.SN_SEPOLIA,
-      address: account.address,
-      typedDataMessage: typedDataExample,
+    const result = await verifySignature.execute({
+      ...request,
       signature,
-    };
-
-    const result = await verifySignature.execute(request);
+    });
 
     expect(result).toBe(true);
   });
 
   it('returns false if the signature is incorrect', async () => {
-    const account = await mockAccount(constants.StarknetChainId.SN_SEPOLIA);
-    const invalidSignatueAccount = await mockAccount(
-      constants.StarknetChainId.SN_MAIN,
-    );
-    prepareMockAccount(account, state);
+    const { account } = await setupAccountController({
+      network,
+    });
 
-    const invalidSignatue = await starknetUtils.signMessage(
-      invalidSignatueAccount.privateKey,
+    const [invalidSignatureAccount] = await generateAccounts(
+      network.chainId,
+      1,
+    );
+
+    const invalidSignature = await starknetUtils.signMessage(
+      invalidSignatureAccount.privateKey,
       typedDataExample,
-      invalidSignatueAccount.address,
+      invalidSignatureAccount.address,
     );
 
     const request = {
       chainId: constants.StarknetChainId.SN_SEPOLIA,
       address: account.address,
       typedDataMessage: typedDataExample,
-      signature: invalidSignatue,
+      signature: invalidSignature,
     };
 
-    const result = await verifySignature.execute(request);
+    const result = await verifySignature.execute({
+      ...request,
+      signature: invalidSignature,
+    });
 
     expect(result).toBe(false);
   });

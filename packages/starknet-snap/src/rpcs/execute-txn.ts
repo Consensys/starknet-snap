@@ -235,7 +235,7 @@ export class ExecuteTxnRpc extends AccountRpcController<
   }: ConfirmTransactionParams): Promise<TransactionRequest> {
     const requestId = uuidv4();
     const { chainId, name: networkName } = this.network;
-    const { addressIndex } = this.account;
+    const { hdIndex: addressIndex } = this.account;
 
     const formattedCalls = await Promise.all(
       calls.map(async (call) =>

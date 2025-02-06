@@ -1,17 +1,13 @@
-import { constants } from 'starknet';
+import type { constants } from 'starknet';
 
-import type { SnapState } from '../types/snapState';
-import {
-  ACCOUNT_CLASS_HASH,
-  CAIRO_VERSION,
-  STARKNET_SEPOLIA_TESTNET_NETWORK,
-} from '../utils/constants';
+import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../utils/constants';
 import {
   InvalidRequestParamsError,
   AccountAlreadyDeployedError,
+  ContractNotDeployedError,
 } from '../utils/exceptions';
-import * as starknetUtils from '../utils/starknetUtils';
-import { mockAccount, prepareMockAccount } from './__tests__/helper';
+import { mockAccountContractReader } from '../wallet/account/__test__/helper';
+import { setupAccountController } from './__tests__/helper';
 import type { GetDeploymentDataParams } from './get-deployment-data';
 import { getDeploymentData } from './get-deployment-data';
 
@@ -19,33 +15,23 @@ jest.mock('../utils/snap');
 jest.mock('../utils/logger');
 
 describe('GetDeploymentDataRpc', () => {
-  const state: SnapState = {
-    accContracts: [],
-    erc20Tokens: [],
-    networks: [STARKNET_SEPOLIA_TESTNET_NETWORK],
-    transactions: [],
-  };
+  const network = STARKNET_SEPOLIA_TESTNET_NETWORK;
 
-  const createRequest = (
-    chainId: constants.StarknetChainId,
-    address: string,
-  ) => ({
-    address,
-    chainId,
-  });
+  const setupGetDeploymentDataTest = async (deployed: boolean) => {
+    const { getVersionSpy } = mockAccountContractReader({});
 
-  const mockIsAccountDeployed = (deployed: boolean) => {
-    const spy = jest.spyOn(starknetUtils, 'isAccountDeployed');
-    spy.mockResolvedValue(deployed);
-    return spy;
-  };
+    if (!deployed) {
+      getVersionSpy.mockRejectedValue(new ContractNotDeployedError());
+    }
+    const { account } = await setupAccountController({
+      network,
+      isDeployed: deployed,
+    });
 
-  const prepareGetDeploymentDataTest = async (deployed: boolean) => {
-    const chainId = constants.StarknetChainId.SN_SEPOLIA;
-    const account = await mockAccount(chainId);
-    prepareMockAccount(account, state);
-    mockIsAccountDeployed(deployed);
-    const request = createRequest(chainId, account.address);
+    const request = {
+      address: account.address,
+      chainId: network.chainId as constants.StarknetChainId,
+    };
 
     return {
       account,
@@ -54,18 +40,26 @@ describe('GetDeploymentDataRpc', () => {
   };
 
   it('returns the deployment data', async () => {
-    const { account, request } = await prepareGetDeploymentDataTest(false);
-    const { address, publicKey } = account;
+    const { account, request } = await setupGetDeploymentDataTest(false);
+    const {
+      address,
+      accountContract: {
+        deployPayload: {
+          classHash,
+          addressSalt: salt,
+          constructorCalldata: calldata,
+        },
+        cairoVerion,
+      },
+    } = account;
+
     const expectedResult = {
       address,
       // eslint-disable-next-line @typescript-eslint/naming-convention
-      class_hash: ACCOUNT_CLASS_HASH,
-      salt: publicKey,
-      calldata: starknetUtils.getDeployAccountCallData(
-        publicKey,
-        CAIRO_VERSION,
-      ),
-      version: CAIRO_VERSION,
+      class_hash: classHash,
+      salt,
+      calldata,
+      version: cairoVerion.toString(10),
     };
 
     const result = await getDeploymentData.execute(request);
@@ -74,7 +68,7 @@ describe('GetDeploymentDataRpc', () => {
   });
 
   it('throws `AccountAlreadyDeployedError` if the account has deployed', async () => {
-    const { request } = await prepareGetDeploymentDataTest(true);
+    const { request } = await setupGetDeploymentDataTest(true);
 
     await expect(getDeploymentData.execute(request)).rejects.toThrow(
       AccountAlreadyDeployedError,

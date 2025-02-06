@@ -18,7 +18,6 @@ import type {
   DeployAccountSignerDetails,
   CairoVersion,
   InvocationsSignerDetails,
-  ProviderInterface,
   GetTransactionReceiptResponse,
   BigNumberish,
   ArraySignatureType,
@@ -128,7 +127,7 @@ export const getCallDataArray = (callDataStr: string): string[] => {
 export const getProvider = (
   network: Network,
   blockIdentifier?: BlockIdentifierEnum,
-): ProviderInterface => {
+): Provider => {
   let providerParam: ProviderOptions = {};
   providerParam = {
     nodeUrl: getRPCUrl(network.chainId),

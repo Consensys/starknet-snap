@@ -398,7 +398,7 @@ export async function upsertAccount(
       storedAccount.derivationPath = userAccount.derivationPath;
       storedAccount.publicKey = userAccount.publicKey;
       storedAccount.deployTxnHash =
-        userAccount.deployTxnHash || storedAccount.deployTxnHash;
+        userAccount.deployTxnHash ?? storedAccount.deployTxnHash;
       storedAccount.upgradeRequired = userAccount.upgradeRequired;
       storedAccount.deployRequired = userAccount.deployRequired;
     }
