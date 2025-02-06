@@ -11,7 +11,7 @@ import {
   InvalidNetworkError,
   UserRejectedOpError,
 } from '../utils/exceptions';
-import { prepareRenderWatchAssetUI } from './__tests__/helper';
+import { mockRenderWatchAssetUI } from './__tests__/helper';
 import type { WatchAssetParams } from './watch-asset';
 import { watchAsset } from './watch-asset';
 
@@ -63,7 +63,7 @@ describe('WatchAssetRpc', () => {
     return { upsertTokenSpy };
   };
 
-  const prepareWatchAssetTest = async ({
+  const setupWatchAssetTest = async ({
     network = STARKNET_SEPOLIA_TESTNET_NETWORK,
   }: {
     network?: Network;
@@ -71,7 +71,7 @@ describe('WatchAssetRpc', () => {
     const request = createRequest({
       chainId: network.chainId as unknown as constants.StarknetChainId,
     });
-    const { confirmDialogSpy } = prepareRenderWatchAssetUI();
+    const { confirmDialogSpy } = mockRenderWatchAssetUI();
     const { getNetworkSpy } = mockNetworkStateManager({
       network,
     });
@@ -86,7 +86,7 @@ describe('WatchAssetRpc', () => {
   };
 
   it('returns true if the token is added', async () => {
-    const { request } = await prepareWatchAssetTest({});
+    const { request } = await setupWatchAssetTest({});
 
     const expectedResult = true;
 
@@ -97,7 +97,7 @@ describe('WatchAssetRpc', () => {
 
   it('renders confirmation dialog', async () => {
     const network = STARKNET_SEPOLIA_TESTNET_NETWORK;
-    const { request, confirmDialogSpy } = await prepareWatchAssetTest({
+    const { request, confirmDialogSpy } = await setupWatchAssetTest({
       network,
     });
 
@@ -116,7 +116,7 @@ describe('WatchAssetRpc', () => {
   });
 
   it('throws `InvalidNetworkError` if the network can not be found', async () => {
-    const { request, getNetworkSpy } = await prepareWatchAssetTest({});
+    const { request, getNetworkSpy } = await setupWatchAssetTest({});
     getNetworkSpy.mockResolvedValue(null);
 
     await expect(watchAsset.execute(request)).rejects.toThrow(
@@ -131,7 +131,7 @@ describe('WatchAssetRpc', () => {
     const network = Config.availableNetworks.find(
       (net) => net.chainId === chainId,
     );
-    await prepareWatchAssetTest({
+    await setupWatchAssetTest({
       network,
     });
     const request = createRequest({
@@ -148,7 +148,7 @@ describe('WatchAssetRpc', () => {
   });
 
   it('throws `UserRejectedOpError` if user denied the operation', async () => {
-    const { request, confirmDialogSpy } = await prepareWatchAssetTest({});
+    const { request, confirmDialogSpy } = await setupWatchAssetTest({});
     confirmDialogSpy.mockResolvedValue(false);
 
     await expect(watchAsset.execute(request)).rejects.toThrow(

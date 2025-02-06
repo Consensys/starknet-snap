@@ -12,7 +12,7 @@ import {
   InvalidRequestParamsError,
   UserRejectedOpError,
 } from '../utils/exceptions';
-import { prepareRenderSwitchNetworkUI } from './__tests__/helper';
+import { mockRenderSwitchNetworkUI } from './__tests__/helper';
 import { switchNetwork } from './switch-network';
 import type { SwitchNetworkParams } from './switch-network';
 
@@ -116,7 +116,7 @@ describe('switchNetwork', () => {
       currentNetwork,
       network: requestNetwork,
     });
-    const { confirmDialogSpy } = prepareRenderSwitchNetworkUI();
+    const { confirmDialogSpy } = mockRenderSwitchNetworkUI();
     const request = createRequestParam(requestNetwork.chainId, true);
 
     await switchNetwork.execute(request);
@@ -134,7 +134,7 @@ describe('switchNetwork', () => {
       currentNetwork,
       network: requestNetwork,
     });
-    const { confirmDialogSpy } = prepareRenderSwitchNetworkUI();
+    const { confirmDialogSpy } = mockRenderSwitchNetworkUI();
     confirmDialogSpy.mockResolvedValue(false);
     const request = createRequestParam(requestNetwork.chainId, true);
 

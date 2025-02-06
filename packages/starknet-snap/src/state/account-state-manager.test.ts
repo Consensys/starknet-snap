@@ -1,188 +1,161 @@
 import { constants } from 'starknet';
 
-import { mockAcccounts, mockState } from './__tests__/helper';
+import type { StarknetAccount } from '../__tests__/helper';
 import {
-  AddressFilter,
-  ChainIdFilter,
-  AccountStateManager,
-} from './account-state-manager';
+  generateMainnetAccounts,
+  generateTestnetAccounts,
+  mockState,
+} from './__tests__/helper';
+import { AccountStateManager } from './account-state-manager';
 
 describe('AccountStateManager', () => {
+  const testnetChainId = constants.StarknetChainId.SN_SEPOLIA;
+  const mainnetChainId = constants.StarknetChainId.SN_MAIN;
+
+  const mockStateWithMainnetAccounts = async (
+    accounts: StarknetAccount[] = [],
+  ) => {
+    const mainnetAccounts = await generateMainnetAccounts();
+
+    const { state } = await mockState({
+      accounts: mainnetAccounts.concat(accounts),
+    });
+    return state;
+  };
+
   describe('getAccount', () => {
     it('returns the account', async () => {
-      const chainId = constants.StarknetChainId.SN_SEPOLIA;
-      const accountsInTestnet = await mockAcccounts(chainId);
-      const accountsInMainnet = await mockAcccounts(
-        constants.StarknetChainId.SN_MAIN,
-      );
-      await mockState({
-        accounts: [...accountsInTestnet, ...accountsInMainnet],
-      });
+      const accountsInTestnet = await generateTestnetAccounts();
+      await mockStateWithMainnetAccounts(accountsInTestnet);
 
       const stateManager = new AccountStateManager();
       const result = await stateManager.getAccount({
         address: accountsInTestnet[0].address,
-        chainId,
+        chainId: testnetChainId,
       });
 
       expect(result).toStrictEqual(accountsInTestnet[0]);
     });
 
     it('returns null if the account address can not be found', async () => {
-      const chainId = constants.StarknetChainId.SN_SEPOLIA;
-      const [accountNotExist, ...accounts] = await mockAcccounts(chainId);
-      await mockState({
-        accounts,
-      });
+      const [accountNotExist, ...accounts] = await generateTestnetAccounts();
+      await mockStateWithMainnetAccounts(accounts);
 
       const stateManager = new AccountStateManager();
       const result = await stateManager.getAccount({
         address: accountNotExist.address,
-        chainId,
+        chainId: testnetChainId,
       });
 
       expect(result).toBeNull();
     });
 
-    it('returns null if the account chainId is not match', async () => {
-      const chainId = constants.StarknetChainId.SN_SEPOLIA;
-      const accounts = await mockAcccounts(chainId);
-      await mockState({
-        accounts,
-      });
+    it('returns null if the account chainId does not match', async () => {
+      const accounts = await generateTestnetAccounts();
+      await mockStateWithMainnetAccounts(accounts);
 
       const stateManager = new AccountStateManager();
       const result = await stateManager.getAccount({
         address: accounts[0].address,
-        chainId: constants.StarknetChainId.SN_MAIN,
+        chainId: mainnetChainId,
       });
 
       expect(result).toBeNull();
     });
   });
 
-  describe('list', () => {
-    it('returns the list of account', async () => {
-      const chainId = constants.StarknetChainId.SN_SEPOLIA;
-      const accountsInTestnet = await mockAcccounts(chainId);
-      const accountsInMainnet = await mockAcccounts(
-        constants.StarknetChainId.SN_MAIN,
-      );
+  describe('findAccounts', () => {
+    it('returns the list of accounts', async () => {
+      const accountsInTestnet = await generateTestnetAccounts();
+      const accountsInMainnet = await generateMainnetAccounts();
+
       await mockState({
         accounts: [...accountsInTestnet, ...accountsInMainnet],
       });
       const stateManager = new AccountStateManager();
-      const result = await stateManager.list([
-        new AddressFilter([
-          accountsInTestnet[0].address,
-          accountsInMainnet[0].address,
-        ]),
-      ]);
+      const result = await stateManager.findAccounts({
+        chainId: testnetChainId,
+      });
 
-      expect(result).toStrictEqual([
-        accountsInTestnet[0],
-        accountsInMainnet[0],
-      ]);
+      expect(result).toStrictEqual(accountsInTestnet);
     });
 
     it('returns empty array if the account address can not be found', async () => {
-      const chainId = constants.StarknetChainId.SN_SEPOLIA;
-      const [accountNotExist, ...accounts] = await mockAcccounts(chainId);
+      const accounts = await generateTestnetAccounts();
       await mockState({
         accounts,
       });
 
       const stateManager = new AccountStateManager();
-      const result = await stateManager.list([
-        new AddressFilter([accountNotExist.address]),
-        new ChainIdFilter([chainId]),
-      ]);
+      const result = await stateManager.findAccounts({
+        chainId: mainnetChainId,
+      });
 
       expect(result).toStrictEqual([]);
     });
   });
 
-  describe('updateAccount', () => {
-    it('updates the account', async () => {
-      const chainId = constants.StarknetChainId.SN_SEPOLIA;
-      const accounts = await mockAcccounts(chainId);
-      const { state } = await mockState({
-        accounts,
-      });
+  describe('upsertAccount', () => {
+    it('adds an account if the account does not exist', async () => {
+      const [account] = await generateTestnetAccounts(1);
+      const state = await mockStateWithMainnetAccounts();
+      const originalAccountsFromState = [...state.accContracts];
 
       const stateManager = new AccountStateManager();
-      const updatedAccount = { ...accounts[0], deployTxnHash: '0x1234' };
-      await stateManager.updateAccount(updatedAccount);
+      await stateManager.upsertAccount(account);
 
-      expect(state.accContracts?.[0]).toStrictEqual(updatedAccount);
-      expect(state.accContracts?.[0].upgradeRequired).toBeUndefined();
-      expect(state.accContracts?.[0].deployRequired).toBeUndefined();
+      expect(state.accContracts).toStrictEqual(
+        originalAccountsFromState.concat([account]),
+      );
     });
 
-    it('updates upgradeRequired and deployRequired of the account', async () => {
-      const chainId = constants.StarknetChainId.SN_SEPOLIA;
-      const accounts = await mockAcccounts(chainId);
-      const { state } = await mockState({
-        accounts,
-      });
-
-      const stateManager = new AccountStateManager();
+    it('updates the account if the account is found', async () => {
+      const accounts = await generateTestnetAccounts();
       const updatedAccount = {
         ...accounts[0],
         upgradeRequired: true,
-        deployRequired: false,
       };
-      await stateManager.updateAccount(updatedAccount);
-
-      expect(state.accContracts?.[0]).toStrictEqual(updatedAccount);
-      expect(state.accContracts?.[0].upgradeRequired).toBe(true);
-      expect(state.accContracts?.[0].deployRequired).toBe(false);
-    });
-
-    it('throws `Account does not exist` error if the update account can not be found', async () => {
-      const chainId = constants.StarknetChainId.SN_SEPOLIA;
-      const [accountNotExist, ...accounts] = await mockAcccounts(chainId);
-      await mockState({
-        accounts,
-      });
+      const state = await mockStateWithMainnetAccounts(accounts);
+      const originalAccountsLength = state.accContracts.length;
 
       const stateManager = new AccountStateManager();
-      const account = { ...accountNotExist, deployTxnHash: '0x1234' };
-      await expect(stateManager.updateAccount(account)).rejects.toThrow(
-        'Account does not exist',
-      );
+      await stateManager.upsertAccount(updatedAccount);
+
+      expect(state.accContracts).toHaveLength(originalAccountsLength);
+      expect(
+        state.accContracts.find(
+          (acc) =>
+            acc.address === updatedAccount.address &&
+            acc.chainId === updatedAccount.chainId,
+        ),
+      ).toStrictEqual(updatedAccount);
     });
   });
 
-  describe('addAccount', () => {
-    it('add an account', async () => {
-      const chainId = constants.StarknetChainId.SN_SEPOLIA;
-      const [accountNotExist, ...accounts] = await mockAcccounts(chainId, 5);
-      const { state } = await mockState({
-        accounts,
-      });
+  describe('getNextIndex', () => {
+    const setupGetNextIndexTest = async () => {
+      const state = await mockStateWithMainnetAccounts();
+      return state;
+    };
+
+    it('returns index 0 if `accContracts` are empty for the given chainId', async () => {
+      await setupGetNextIndexTest();
 
       const stateManager = new AccountStateManager();
-      await stateManager.addAccount(accountNotExist);
+      const result = await stateManager.getNextIndex(testnetChainId);
 
-      expect(state.accContracts?.length).toBe(5);
-      expect(
-        state.accContracts?.[state.accContracts?.length - 1],
-      ).toStrictEqual(accountNotExist);
+      expect(result).toBe(0);
     });
 
-    it('throws `Account already exist` error if the account is exist', async () => {
-      const chainId = constants.StarknetChainId.SN_SEPOLIA;
-      const accounts = await mockAcccounts(chainId);
-      await mockState({
-        accounts,
-      });
+    it('returns the length of index `accContracts` for the given chainId', async () => {
+      const accounts = await generateTestnetAccounts();
+      const state = await setupGetNextIndexTest();
+      state.accContracts = state.accContracts.concat(accounts);
 
       const stateManager = new AccountStateManager();
+      const result = await stateManager.getNextIndex(testnetChainId);
 
-      await expect(stateManager.addAccount(accounts[0])).rejects.toThrow(
-        'Account already exist',
-      );
+      expect(result).toStrictEqual(accounts.length);
     });
   });
 });

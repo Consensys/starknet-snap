@@ -2,22 +2,14 @@ import type { Invocations } from 'starknet';
 import { constants, TransactionType } from 'starknet';
 
 import callsExamples from '../__tests__/fixture/callsExamples.json';
-import { mockAccount, prepareMockAccount } from '../rpcs/__tests__/helper';
+import { mockAccount } from '../rpcs/__tests__/helper';
 import { FeeTokenUnit } from '../types/snapApi';
-import type { SnapState } from '../types/snapState';
 import type { TransactionVersion } from '../types/starknet';
 import { mockEstimateFeeBulkResponse } from './__tests__/helper';
 import { STARKNET_SEPOLIA_TESTNET_NETWORK } from './constants';
 import * as starknetUtils from './starknetUtils';
 
 describe('getEstimatedFees', () => {
-  const state: SnapState = {
-    accContracts: [],
-    erc20Tokens: [],
-    networks: [STARKNET_SEPOLIA_TESTNET_NETWORK],
-    transactions: [],
-  };
-
   const prepareGetEstimatedFees = async (deployed: boolean) => {
     const chainId = constants.StarknetChainId.SN_SEPOLIA;
     const account = await mockAccount(chainId);
@@ -29,7 +21,6 @@ describe('getEstimatedFees', () => {
       },
     ];
 
-    prepareMockAccount(account, state);
     const accountDeployedSpy = jest.spyOn(starknetUtils, 'isAccountDeployed');
     accountDeployedSpy.mockResolvedValue(deployed);
 

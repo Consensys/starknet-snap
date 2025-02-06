@@ -31,10 +31,9 @@ import {
   transactionVersionToNumber,
 } from '../utils/transaction';
 import {
-  mockAccount,
   mockGetEstimatedFeesResponse,
-  prepareConfirmDialogInteractiveUI,
-  prepareMockAccount,
+  mockConfirmDialogInteractiveUI,
+  setupAccountController,
 } from './__tests__/helper';
 import type {
   ConfirmTransactionParams,
@@ -73,20 +72,6 @@ class MockExecuteTxnRpc extends ExecuteTxnRpc {
   }
 }
 
-const generateAccount = async (network) => {
-  const state = {
-    accContracts: [],
-    erc20Tokens: [],
-    networks: [network],
-    transactions: [],
-  };
-
-  const account = await mockAccount(network);
-  prepareMockAccount(account, state);
-
-  return account;
-};
-
 const createMockRpc = () => {
   const rpc = new MockExecuteTxnRpc({
     showInvalidAccountAlert: true,
@@ -95,7 +80,7 @@ const createMockRpc = () => {
 };
 
 const setupMockRpc = async (network: Network, calls: Call[]) => {
-  const account = await generateAccount(network);
+  const { account } = await setupAccountController({ network });
 
   const rpc = createMockRpc();
 
@@ -149,7 +134,7 @@ const mockGenerateExecuteTxnFlow = () => {
 
 describe('ExecuteTxn', () => {
   describe('confirmTransaction', () => {
-    const prepareConfirmTransaction = async (confirm = true) => {
+    const setupConfirmTransactionTest = async (confirm = true) => {
       const network = STARKNET_SEPOLIA_TESTNET_NETWORK;
       const includeDeploy = true;
       const txnVersion = constants.TRANSACTION_VERSION.V3;
@@ -171,19 +156,35 @@ describe('ExecuteTxn', () => {
         includeDeploy,
       };
 
+      const { formattedCalls } = mockCallToTransactionReqCall(calls);
+      const { interfaceId } = mockGenerateExecuteTxnFlow();
+      const txnMgrMocks = mockTransactionRequestStateManager();
+
+      const transactionRequest = {
+        chainId: network.chainId,
+        networkName: network.name,
+        id: uuidv4(),
+        interfaceId,
+        type: TransactionType.INVOKE,
+        signer: account.address,
+        addressIndex: 0,
+        maxFee,
+        calls: formattedCalls,
+        resourceBounds,
+        selectedFeeToken: transactionVersionToFeeToken(txnVersion),
+        includeDeploy,
+      };
+      txnMgrMocks.getTransactionRequestSpy.mockResolvedValue(
+        transactionRequest,
+      );
+
       return {
         request,
         rpc,
-        network,
-        account,
-        maxFee,
-        resourceBounds,
-        txnVersion,
-        includeDeploy,
-        ...prepareConfirmDialogInteractiveUI(confirm),
-        ...mockCallToTransactionReqCall(calls),
-        ...mockGenerateExecuteTxnFlow(),
-        ...mockTransactionRequestStateManager(),
+        transactionRequest,
+        interfaceId,
+        ...mockConfirmDialogInteractiveUI(confirm),
+        ...txnMgrMocks,
       };
     };
 
@@ -192,35 +193,20 @@ describe('ExecuteTxn', () => {
         request,
         rpc,
         interfaceId,
-        account: { address },
-        formattedCalls,
-        maxFee,
-        resourceBounds,
-        txnVersion,
-        includeDeploy,
-        network: { chainId, name: networkName },
+        transactionRequest,
         upsertTransactionRequestSpy,
         confirmDialogSpy,
         getTransactionRequestSpy,
         removeTransactionRequestSpy,
-      } = await prepareConfirmTransaction();
+      } = await setupConfirmTransactionTest();
+
+      const expectedTransactionRequest = {
+        ...transactionRequest,
+        id: expect.any(String),
+      };
 
       const result = await rpc.confirmTransaction(request);
 
-      const expectedTransactionRequest = {
-        chainId,
-        networkName,
-        id: expect.any(String),
-        interfaceId,
-        type: TransactionType.INVOKE,
-        signer: address,
-        addressIndex: 0,
-        maxFee,
-        calls: formattedCalls,
-        resourceBounds,
-        selectedFeeToken: transactionVersionToFeeToken(txnVersion),
-        includeDeploy,
-      };
       expect(result).toStrictEqual(expectedTransactionRequest);
       expect(upsertTransactionRequestSpy).toHaveBeenCalledWith(
         expectedTransactionRequest,
@@ -236,7 +222,7 @@ describe('ExecuteTxn', () => {
 
     it('does not throw an error if remove request failed', async () => {
       const { request, rpc, removeTransactionRequestSpy } =
-        await prepareConfirmTransaction();
+        await setupConfirmTransactionTest();
 
       removeTransactionRequestSpy.mockRejectedValue(
         new Error('Failed to remove request'),
@@ -254,7 +240,7 @@ describe('ExecuteTxn', () => {
         rpc,
         getTransactionRequestSpy,
         removeTransactionRequestSpy,
-      } = await prepareConfirmTransaction();
+      } = await setupConfirmTransactionTest();
 
       getTransactionRequestSpy.mockResolvedValue(null);
 
@@ -268,7 +254,7 @@ describe('ExecuteTxn', () => {
     });
 
     it('throws UserRejectedOpError if user denied the operation', async () => {
-      const { request, rpc } = await prepareConfirmTransaction(false);
+      const { request, rpc } = await setupConfirmTransactionTest(false);
 
       await expect(rpc.confirmTransaction(request)).rejects.toThrow(
         UserRejectedOpError,
@@ -277,7 +263,7 @@ describe('ExecuteTxn', () => {
   });
 
   describe('deployAccount', () => {
-    const prepareDeployAccount = async () => {
+    const setupDeployAccountTest = async () => {
       const network = STARKNET_SEPOLIA_TESTNET_NETWORK;
       const txnVersion = constants.TRANSACTION_VERSION.V3;
       const { calls } = callsExamples.multipleCalls;
@@ -320,7 +306,7 @@ describe('ExecuteTxn', () => {
         deployAccountResponse,
         deployAccountSpy,
         accountDeploymentData,
-      } = await prepareDeployAccount();
+      } = await setupDeployAccountTest();
 
       const result = await rpc.deployAccount(request);
 
@@ -338,7 +324,7 @@ describe('ExecuteTxn', () => {
 
     it('throws `Failed to deploy account` error if the execution transaction hash is empty', async () => {
       const { rpc, request, deployAccountSpy, deployAccountResponse } =
-        await prepareDeployAccount();
+        await setupDeployAccountTest();
       deployAccountSpy.mockResolvedValue({
         ...deployAccountResponse,
         transaction_hash: '',
@@ -351,7 +337,7 @@ describe('ExecuteTxn', () => {
   });
 
   describe('sendTransaction', () => {
-    const prepareConfirmTransaction = async () => {
+    const setupConfirmTransactionTest = async () => {
       const network = STARKNET_SEPOLIA_TESTNET_NETWORK;
       const txnVersion = constants.TRANSACTION_VERSION.V3;
       const { calls } = callsExamples.multipleCalls;
@@ -391,7 +377,7 @@ describe('ExecuteTxn', () => {
         account: { privateKey },
         executeTxnResponse,
         executeTxnSpy,
-      } = await prepareConfirmTransaction();
+      } = await setupConfirmTransactionTest();
 
       const result = await rpc.sendTransaction(request);
 
@@ -407,7 +393,8 @@ describe('ExecuteTxn', () => {
     });
 
     it('throws `Failed to execute transaction` error if the execution transaction hash is empty', async () => {
-      const { rpc, request, executeTxnSpy } = await prepareConfirmTransaction();
+      const { rpc, request, executeTxnSpy } =
+        await setupConfirmTransactionTest();
       executeTxnSpy.mockResolvedValue({ transaction_hash: '' });
 
       await expect(rpc.sendTransaction(request)).rejects.toThrow(
@@ -417,9 +404,9 @@ describe('ExecuteTxn', () => {
   });
 
   describe('execute', () => {
-    const prepareExecute = async (accountDeployed = true) => {
+    const setupExecuteTest = async (accountDeployed = true) => {
       const network = STARKNET_SEPOLIA_TESTNET_NETWORK;
-      const account = await generateAccount(network);
+      const { account } = await setupAccountController({ network });
 
       const { getEstimatedFeesResponse, getEstimatedFeesSpy } =
         mockGetEstimatedFeesResponse({
@@ -495,7 +482,7 @@ describe('ExecuteTxn', () => {
         deployAccountSpy,
         saveDataToStateSpy,
         transactionRequest,
-      } = await prepareExecute();
+      } = await setupExecuteTest();
       const updatedTxnVersion = feeTokenToTransactionVersion(
         transactionRequest.selectedFeeToken,
       );
@@ -554,7 +541,7 @@ describe('ExecuteTxn', () => {
         saveDataToStateSpy,
         transactionRequest,
         sendTransactionSpy,
-      } = await prepareExecute(false);
+      } = await setupExecuteTest(false);
       const updatedTxnVersion = feeTokenToTransactionVersion(
         transactionRequest.selectedFeeToken,
       );
@@ -595,7 +582,7 @@ describe('ExecuteTxn', () => {
   });
 
   describe('saveDataToState', () => {
-    const prepareSaveDataToState = async () => {
+    const setupSaveDataToStateTest = async () => {
       const network = STARKNET_SEPOLIA_TESTNET_NETWORK;
       const txnVersion = constants.TRANSACTION_VERSION.V3;
       const { hash: txnHashForExecute, calls } = callsExamples.multipleCalls;
@@ -664,7 +651,7 @@ describe('ExecuteTxn', () => {
         addTransactionSpy,
         updateAccountAsDeploySpy,
         newInvokeTransaction,
-      } = await prepareSaveDataToState();
+      } = await setupSaveDataToStateTest();
 
       await rpc.saveDataToState({
         ...request,
@@ -685,7 +672,7 @@ describe('ExecuteTxn', () => {
         updateAccountAsDeploySpy,
         newInvokeTransaction,
         newDeployTransaction,
-      } = await prepareSaveDataToState();
+      } = await setupSaveDataToStateTest();
 
       await rpc.saveDataToState(request);
 
