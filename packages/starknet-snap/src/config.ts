@@ -60,6 +60,7 @@ export const Config: SnapConfig = {
       txnsInLastNumOfDays: 10,
     },
   },
+
   // eslint-disable-next-line no-restricted-globals
   rpcApiKey: process.env.DIN_API_KEY ?? '',
 
