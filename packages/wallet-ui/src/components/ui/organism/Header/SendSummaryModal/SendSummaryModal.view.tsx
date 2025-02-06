@@ -50,6 +50,7 @@ export const SendSummaryModalView = ({
   selectedFeeToken,
 }: Props) => {
   const wallet = useAppSelector((state) => state.wallet);
+  const currentAccount = wallet.currentAccount;
   const [estimatingGas, setEstimatingGas] = useState(true);
   const [gasFees, setGasFees] = useState({
     suggestedMaxFee: '0',
@@ -81,40 +82,33 @@ export const SendSummaryModalView = ({
 
   useEffect(() => {
     const fetchGasFee = () => {
-      if (wallet.accounts) {
-        setGasFeesError(false);
-        setEstimatingGas(true);
-        const amountBN = ethers.utils.parseUnits(
-          amount,
-          wallet.erc20TokenBalanceSelected.decimals,
-        );
-        const callData = address + ',' + amountBN.toString() + ',0';
-        estimateFees(
-          wallet.erc20TokenBalanceSelected.address,
-          ContractFuncName.Transfer,
-          callData,
-          wallet.accounts[0] as unknown as string,
-          chainId,
-          selectedFeeToken === FeeToken.STRK
-            ? constants.TRANSACTION_VERSION.V3
-            : undefined,
-        )
-          .then((response) => {
-            if (response.message && response.message.includes('Error')) {
-              toastr.error(translate('errorCalculatingGasFees'));
-              setGasFeesError(true);
-            } else {
-              setGasFees(response);
-            }
-            setEstimatingGas(false);
-          })
-          .catch(() => {
-            toastr.error(translate('errorCalculatingGasFees'));
-          });
-      }
+      setGasFeesError(false);
+      setEstimatingGas(true);
+      const amountBN = ethers.utils.parseUnits(
+        amount,
+        wallet.erc20TokenBalanceSelected.decimals,
+      );
+      const callData = address + ',' + amountBN.toString() + ',0';
+      estimateFees(
+        wallet.erc20TokenBalanceSelected.address,
+        ContractFuncName.Transfer,
+        callData,
+        currentAccount.address,
+        chainId,
+        selectedFeeToken === FeeToken.STRK
+          ? constants.TRANSACTION_VERSION.V3
+          : undefined,
+      )
+        .then((response) => {
+          setGasFees(response);
+          setEstimatingGas(false);
+        })
+        .catch(() => {
+          toastr.error(translate('errorCalculatingGasFees'));
+        });
     };
     fetchGasFee();
-  }, []);
+  }, [currentAccount]);
 
   useEffect(() => {
     if (gasFees?.suggestedMaxFee) {
@@ -176,45 +170,43 @@ export const SendSummaryModalView = ({
   }, [amount, wallet.erc20TokenBalanceSelected]);
 
   const handleConfirmClick = () => {
-    if (wallet.accounts) {
-      const amountBN = ethers.utils.parseUnits(
-        amount,
-        wallet.erc20TokenBalanceSelected.decimals,
-      );
-      const callData = address + ',' + amountBN.toString() + ',0';
-      sendTransaction(
-        wallet.erc20TokenBalanceSelected.address,
-        ContractFuncName.Transfer,
-        callData,
-        wallet.accounts[0] as unknown as string,
-        gasFees.suggestedMaxFee,
-        chainId,
-        selectedFeeToken,
-      )
-        .then((result) => {
-          if (result) {
-            toastr.success(translate('transactionSentSuccessfully'));
-            getTransactions(
-              wallet.accounts[0] as unknown as string,
-              wallet.erc20TokenBalanceSelected.address,
-              10,
-              chainId,
-              false,
-              true,
-            ).catch((err) => {
-              console.error(
-                `handleConfirmClick: error from getTransactions: ${err}`,
-              );
-            });
-          } else {
-            toastr.info(translate('transactionRejectedByUser'));
-          }
-        })
-        .catch(() => {
-          toastr.error(translate('errorSendingTransaction'));
-        });
-      closeModal && closeModal();
-    }
+    const amountBN = ethers.utils.parseUnits(
+      amount,
+      wallet.erc20TokenBalanceSelected.decimals,
+    );
+    const callData = address + ',' + amountBN.toString() + ',0';
+    sendTransaction(
+      wallet.erc20TokenBalanceSelected.address,
+      ContractFuncName.Transfer,
+      callData,
+      currentAccount.address,
+      gasFees.suggestedMaxFee,
+      chainId,
+      selectedFeeToken,
+    )
+      .then((result) => {
+        if (result) {
+          toastr.success(translate('transactionSentSuccessfully'));
+          getTransactions(
+            currentAccount.address,
+            wallet.erc20TokenBalanceSelected.address,
+            10,
+            chainId,
+            false,
+            true,
+          ).catch((err) => {
+            console.error(
+              `handleConfirmClick: error from getTransactions: ${err}`,
+            );
+          });
+        } else {
+          toastr.info(translate('transactionRejectedByUser'));
+        }
+      })
+      .catch(() => {
+        toastr.error(translate('errorSendingTransaction'));
+      });
+    closeModal && closeModal();
   };
 
   const totalAmountDisplay = () => {
