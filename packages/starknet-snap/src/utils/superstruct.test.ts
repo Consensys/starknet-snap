@@ -6,11 +6,13 @@ import transactionExample from '../__tests__/fixture/transactionExample.json';
 import typedDataExample from '../__tests__/fixture/typedDataExample.json';
 import { generateTransactions } from '../__tests__/helper';
 import { ContractFuncName } from '../types/snapState';
+import { createAccountObject } from '../wallet/account/__test__/helper';
 import {
   ACCOUNT_CLASS_HASH,
   CAIRO_VERSION,
   CAIRO_VERSION_LEGACY,
   ETHER_SEPOLIA_TESTNET,
+  STARKNET_SEPOLIA_TESTNET_NETWORK,
 } from './constants';
 import {
   AddressStruct,
@@ -30,6 +32,7 @@ import {
   TokenSymbolStruct,
   TokenNameStruct,
   TransactionStruct,
+  AccountStruct,
 } from './superstruct';
 
 describe('TokenNameStruct', () => {
@@ -560,5 +563,27 @@ describe('TransactionStruct', () => {
         TransactionStruct,
       ),
     ).toThrow(StructError);
+  });
+});
+
+describe('AccountStruct', () => {
+  it('does not throw error if the account is valid', async () => {
+    const network = STARKNET_SEPOLIA_TESTNET_NETWORK;
+    const { accountObj } = await createAccountObject(network);
+
+    jest
+      .spyOn(accountObj.accountContract, 'isRequireUpgrade')
+      .mockResolvedValue(false);
+    jest
+      .spyOn(accountObj.accountContract, 'isRequireDeploy')
+      .mockResolvedValue(false);
+
+    const account = await accountObj.serialize();
+
+    expect(() => assert(account, AccountStruct)).not.toThrow();
+  });
+
+  it('throws error if the account is invalid', () => {
+    expect(() => assert({}, AccountStruct)).toThrow(StructError);
   });
 });

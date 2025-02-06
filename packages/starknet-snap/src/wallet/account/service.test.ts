@@ -196,4 +196,84 @@ describe('AccountService', () => {
       ).rejects.toThrow(AccountNotFoundError);
     });
   });
+
+  describe('getCurrentAccount', () => {
+    // To test the case when the account is not selected,
+    // make sure the mock account is not derived from 0.
+    const setupGetCurrentAccountTest = async (hdIndex = 1) => {
+      const getCurrentAccountSpy = jest.spyOn(
+        AccountStateManager.prototype,
+        'getCurrentAccount',
+      );
+      const deriveAccountByIndexSpy = jest.spyOn(
+        AccountService.prototype,
+        'deriveAccountByIndex',
+      );
+      mockAccountContractReader({});
+
+      const { accountObj } = await createAccountObject(network, hdIndex);
+      getCurrentAccountSpy.mockResolvedValue(await accountObj.serialize());
+      deriveAccountByIndexSpy.mockResolvedValue(accountObj);
+
+      return {
+        deriveAccountByIndexSpy,
+        getCurrentAccountSpy,
+        accountObj,
+      };
+    };
+
+    it('returns the selected `Account` object', async () => {
+      const { accountObj, getCurrentAccountSpy, deriveAccountByIndexSpy } =
+        await setupGetCurrentAccountTest();
+
+      const service = createAccountService(network);
+      const result = await service.getCurrentAccount();
+
+      expect(deriveAccountByIndexSpy).toHaveBeenCalledWith(
+        result.hdIndex,
+        await accountObj.serialize(),
+      );
+      expect(getCurrentAccountSpy).toHaveBeenCalledWith({
+        chainId: accountObj.chainId,
+      });
+      expect(result).toStrictEqual(accountObj);
+    });
+
+    it('returns a `Account` object that derived from index 0 if no account selected', async () => {
+      const defaultIndex = 0;
+      const { accountObj, getCurrentAccountSpy, deriveAccountByIndexSpy } =
+        await setupGetCurrentAccountTest(defaultIndex);
+      getCurrentAccountSpy.mockResolvedValue(null);
+
+      const service = createAccountService(network);
+      const result = await service.getCurrentAccount();
+
+      expect(deriveAccountByIndexSpy).toHaveBeenCalledWith(
+        defaultIndex,
+        undefined,
+      );
+      expect(result).toStrictEqual(accountObj);
+      expect(result.hdIndex).toStrictEqual(defaultIndex);
+    });
+  });
+
+  describe('switchAccount', () => {
+    it('switches the account for the network', async () => {
+      const switchAccountSpy = jest.spyOn(
+        AccountStateManager.prototype,
+        'switchAccount',
+      );
+      switchAccountSpy.mockResolvedValue();
+      mockAccountContractReader({});
+      const { accountObj } = await createAccountObject(network, 0);
+
+      const service = createAccountService(network);
+      await service.switchAccount(accountObj.chainId, accountObj);
+
+      expect(switchAccountSpy).toHaveBeenCalledWith({
+        chainId: accountObj.chainId,
+        accountToSwitch: await accountObj.serialize(),
+      });
+    });
+  });
 });

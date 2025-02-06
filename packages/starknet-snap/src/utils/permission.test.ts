@@ -9,13 +9,15 @@ describe('validateOrigin', () => {
   const publicPermissions = Array.from(originPermissions.get('*')!);
   const restrictedPermissions = [
     RpcMethod.DeployCario0Account,
-    RpcMethod.ListAccounts,
     RpcMethod.GetTransactions,
     RpcMethod.UpgradeAccContract,
     RpcMethod.GetStarkName,
     RpcMethod.GetAddressByStarkName,
     RpcMethod.ReadContract,
     RpcMethod.GetStoredErc20Tokens,
+    RpcMethod.AddAccount,
+    RpcMethod.SwitchAccount,
+    RpcMethod.ToggleAccountVisibility,
   ];
 
   it.each(walletUIDappPermissions)(

@@ -15,7 +15,12 @@ export enum RpcMethod {
   SignTransaction = 'starkNet_signTransaction',
   SignDeclareTransaction = 'starkNet_signDeclareTransaction',
   SignDeployAccountTransaction = 'starkNet_signDeployAccountTransaction',
+  GetCurrentAccount = 'starkNet_getCurrentAccount',
+  ListAccounts = 'starkNet_listAccounts',
 
+  ToggleAccountVisibility = 'starkNet_toggleAccountVisibility',
+  SwitchAccount = 'starkNet_switchAccount',
+  AddAccount = 'starkNet_addAccount',
   CreateAccount = 'starkNet_createAccount',
   DisplayPrivateKey = 'starkNet_displayPrivateKey',
   GetErc20TokenBalance = 'starkNet_getErc20TokenBalance',
@@ -23,7 +28,6 @@ export enum RpcMethod {
   EstimateFee = 'starkNet_estimateFee',
   VerifySignedMessage = 'starkNet_verifySignedMessage',
   DeployCario0Account = 'starkNet_createAccountLegacy',
-  ListAccounts = 'starkNet_getStoredUserAccounts',
   GetTransactions = 'starkNet_getTransactions',
   UpgradeAccContract = 'starkNet_upgradeAccContract',
   GetStarkName = 'starkNet_getStarkName',
@@ -35,6 +39,7 @@ export enum RpcMethod {
 // RpcMethod that are allowed to be called by any origin
 const publicPermissions = [
   RpcMethod.ExtractPublicKey,
+  RpcMethod.ListAccounts,
   RpcMethod.GetCurrentNetwork,
   RpcMethod.GetStoredNetworks,
   RpcMethod.SwitchNetwork,
@@ -48,6 +53,7 @@ const publicPermissions = [
   RpcMethod.SignDeclareTransaction,
   RpcMethod.SignDeployAccountTransaction,
   RpcMethod.CreateAccount,
+  RpcMethod.GetCurrentAccount,
   RpcMethod.DisplayPrivateKey,
   RpcMethod.GetErc20TokenBalance,
   RpcMethod.GetTransactionStatus,
@@ -59,13 +65,15 @@ const publicPermissions = [
 const walletUIDappPermissions = publicPermissions.concat([
   RpcMethod.GetPreferences,
   RpcMethod.DeployCario0Account,
-  RpcMethod.ListAccounts,
   RpcMethod.GetTransactions,
   RpcMethod.UpgradeAccContract,
   RpcMethod.GetStarkName,
   RpcMethod.GetAddressByStarkName,
   RpcMethod.ReadContract,
   RpcMethod.GetStoredErc20Tokens,
+  RpcMethod.AddAccount,
+  RpcMethod.SwitchAccount,
+  RpcMethod.ToggleAccountVisibility,
 ]);
 
 const publicPermissionsSet = new Set(publicPermissions);
