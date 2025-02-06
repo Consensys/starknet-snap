@@ -18,7 +18,6 @@ import { getErc20TokenBalance } from './getErc20TokenBalance';
 import { getStarkName } from './getStarkName';
 import { getStoredErc20Tokens } from './getStoredErc20Tokens';
 import { getStoredNetworks } from './getStoredNetworks';
-import { getStoredUserAccounts } from './getStoredUserAccounts';
 import { getValue } from './getValue';
 import { homePageController } from './on-home-page';
 import { recoverAccounts } from './recoverAccounts';
@@ -37,6 +36,11 @@ import type {
   GetAddrFromStarkNameParams,
   GetTransactionStatusParams,
   ListTransactionsParams,
+  AddAccountParams,
+  GetCurrentAccountParams,
+  ListAccountsParams,
+  SwitchAccountParams,
+  ToggleAccountVisibilityParams,
 } from './rpcs';
 import {
   displayPrivateKey,
@@ -53,6 +57,11 @@ import {
   getAddrFromStarkName,
   getTransactionStatus,
   listTransactions,
+  addAccount,
+  getCurrentAccount,
+  listAccounts,
+  switchAccount,
+  toggleAccountVisibility,
 } from './rpcs';
 import { signDeployAccountTransaction } from './signDeployAccountTransaction';
 import type {
@@ -173,7 +182,9 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
         );
 
       case RpcMethod.ListAccounts:
-        return await getStoredUserAccounts(apiParams);
+        return await listAccounts.execute(
+          requestParams as unknown as ListAccountsParams,
+        );
 
       case RpcMethod.DisplayPrivateKey:
         return await displayPrivateKey.execute(
@@ -286,6 +297,26 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
       case RpcMethod.GetAddressByStarkName:
         return await getAddrFromStarkName.execute(
           apiParams.requestParams as unknown as GetAddrFromStarkNameParams,
+        );
+
+      case RpcMethod.AddAccount:
+        return await addAccount.execute(
+          requestParams as unknown as AddAccountParams,
+        );
+
+      case RpcMethod.GetCurrentAccount:
+        return await getCurrentAccount.execute(
+          requestParams as unknown as GetCurrentAccountParams,
+        );
+
+      case RpcMethod.SwitchAccount:
+        return await switchAccount.execute(
+          requestParams as unknown as SwitchAccountParams,
+        );
+
+      case RpcMethod.ToggleAccountVisibility:
+        return await toggleAccountVisibility.execute(
+          requestParams as unknown as ToggleAccountVisibilityParams,
         );
 
       default:
