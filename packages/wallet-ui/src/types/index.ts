@@ -32,6 +32,9 @@ export type Account = {
   publicKey: string;
   upgradeRequired: boolean;
   deployRequired: boolean;
+  chainId: string;
+  addressIndex: number;
+  visibility?: boolean;
 };
 
 export type Network = {

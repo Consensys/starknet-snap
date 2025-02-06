@@ -16,7 +16,7 @@ jest.mock('../utils/snap');
 jest.mock('../utils/logger');
 
 describe('GetTransactionStatusRpc', () => {
-  const prepareGetTransactionStatusTest = ({
+  const setupGetTransactionStatusTest = ({
     network,
     status,
   }: {
@@ -49,7 +49,7 @@ describe('GetTransactionStatusRpc', () => {
       finalityStatus: TransactionFinalityStatus.ACCEPTED_ON_L1,
       executionStatus: TransactionExecutionStatus.SUCCEEDED,
     };
-    const { getTransactionStatusSpy } = prepareGetTransactionStatusTest({
+    const { getTransactionStatusSpy } = setupGetTransactionStatusTest({
       network,
       status: expectedResult,
     });

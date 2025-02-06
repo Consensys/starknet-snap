@@ -4,6 +4,12 @@
     "aboutThisSnap": {
       "message": "À propos de ce snap"
     },
+    "account": {
+      "message": "Compte"
+    },
+    "accounts": {
+      "message": "Comptes"
+    },
     "accountDeployedSuccessfully": {
       "message": "Compte déployé avec succès."
     },
@@ -294,6 +300,9 @@
     },
     "whatIsASnap": {
       "message": "Qu'est-ce qu'un snap ?"
+    },
+    "youCannotHideLastAccount": {
+      "message": "Vous ne pouvez pas masquer le dernier compte restant."
     }
   }
 }

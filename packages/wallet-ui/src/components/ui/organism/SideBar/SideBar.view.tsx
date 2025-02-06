@@ -1,7 +1,7 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useEffect, useRef, useState } from 'react';
 import { RoundedIcon } from 'components/ui/atom/RoundedIcon';
-import { AccountAddress } from 'components/ui/molecule/AccountAddress';
+import { AccountSwitchModal } from 'components/ui/organism/AccountSwitchModal';
 import { AssetsList } from 'components/ui/molecule/AssetsList';
 import { PopIn } from 'components/ui/molecule/PopIn';
 import { AccountDetailsModal } from '../AccountDetailsModal';
@@ -12,6 +12,7 @@ import {
   AccountDetailsContent,
   AccountImageStyled,
   AccountLabel,
+  CopyIcon,
   AddTokenButton,
   DivList,
   InfoIcon,
@@ -23,14 +24,12 @@ import { openExplorerTab } from 'utils/utils';
 import { useAppSelector } from 'hooks/redux';
 import { AddTokenModal } from '../AddTokenModal';
 import { useMultiLanguage, useStarkNetSnap } from 'services';
-import { DUMMY_ADDRESS } from 'utils/constants';
+import { defaultAccount } from 'utils/constants';
+import { PopperTooltip } from 'components/ui/molecule/PopperTooltip';
 
-interface Props {
-  address: string;
-}
-
-export const SideBarView = ({ address }: Props) => {
+export const SideBarView = () => {
   const networks = useAppSelector((state) => state.networks);
+  const currentAccount = useAppSelector((state) => state.wallet.currentAccount);
   const chainId = networks?.items[networks.activeNetwork]?.chainId;
   const [listOverflow, setListOverflow] = useState(false);
   const [infoModalOpen, setInfoModalOpen] = useState(false);
@@ -40,7 +39,8 @@ export const SideBarView = ({ address }: Props) => {
   const { getStarkName } = useStarkNetSnap();
   const { translate } = useMultiLanguage();
   const [starkName, setStarkName] = useState<string | undefined>(undefined);
-
+  const address = currentAccount.address;
+  const addressIndex = currentAccount?.addressIndex ?? 0;
   const ref = useRef<HTMLDivElement>();
 
   useEffect(() => {
@@ -55,7 +55,7 @@ export const SideBarView = ({ address }: Props) => {
   }, [wallet.erc20TokenBalances]);
 
   useEffect(() => {
-    if (address && address !== DUMMY_ADDRESS) {
+    if (address && address !== defaultAccount.address) {
       getStarkName(address, chainId)
         .then((name) => {
           setStarkName(name);
@@ -73,7 +73,7 @@ export const SideBarView = ({ address }: Props) => {
         isOpen={accountDetailsOpen}
         setIsOpen={setAccountDetailsOpen}
       >
-        <AccountDetailsModal address={address} />
+        <AccountDetailsModal />
       </PopInStyled>
       <PopIn
         isOpen={infoModalOpen}
@@ -111,10 +111,19 @@ export const SideBarView = ({ address }: Props) => {
         <AccountImageStyled address={address} connected={wallet.connected} />
       </AccountDetails>
 
-      <AccountLabel>{translate('myAccount')}</AccountLabel>
+      <AccountLabel>
+        {translate('account')} {addressIndex + 1}{' '}
+      </AccountLabel>
       <RowDiv>
         <InfoIcon onClick={() => setInfoModalOpen(true)}>i</InfoIcon>
-        <AccountAddress address={address} starkName={starkName} />
+        <AccountSwitchModal starkName={starkName} />
+        <PopperTooltip content="Copied!" closeTrigger="click">
+          <CopyIcon
+            onClick={async () => navigator.clipboard.writeText(address)}
+          >
+            <FontAwesomeIcon icon="copy" />
+          </CopyIcon>
+        </PopperTooltip>
       </RowDiv>
       <DivList ref={ref as any}>
         <AssetsList />

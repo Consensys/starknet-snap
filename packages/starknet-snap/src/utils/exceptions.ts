@@ -31,6 +31,41 @@ export class InvalidNetworkError extends SnapError {
   }
 }
 
+export class AccountNotFoundError extends SnapError {
+  constructor(message?: string) {
+    super(
+      message ?? 'Account not found',
+      createWalletRpcErrorWrapper(WalletRpcErrorCode.Unknown),
+    );
+  }
+}
+
+export class AccountDiscoveryError extends SnapError {
+  constructor(message?: string) {
+    super(
+      message ?? 'Account discovery found',
+      createWalletRpcErrorWrapper(WalletRpcErrorCode.Unknown),
+    );
+  }
+}
+
+export class ContractReadError extends SnapError {
+  constructor(message: string) {
+    super(message, createWalletRpcErrorWrapper(WalletRpcErrorCode.Unknown));
+  }
+}
+
+export const CONTRACT_NOT_DEPLOYED_ERROR = 'Contract not found';
+
+export class ContractNotDeployedError extends SnapError {
+  constructor(message?: string) {
+    super(
+      message ?? CONTRACT_NOT_DEPLOYED_ERROR,
+      createWalletRpcErrorWrapper(WalletRpcErrorCode.Unknown),
+    );
+  }
+}
+
 export class UserRejectedOpError extends UserRejectedRequestError {
   constructor(message?: string) {
     super(message, createWalletRpcErrorWrapper(WalletRpcErrorCode.UserDeny));

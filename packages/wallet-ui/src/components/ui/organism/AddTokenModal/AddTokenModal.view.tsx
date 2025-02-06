@@ -27,8 +27,8 @@ export const AddTokenModalView = ({ closeModal }: Props) => {
   const { translate } = useMultiLanguage();
   const [enabled, setEnabled] = useState(false);
   const networks = useAppSelector((state) => state.networks);
-  const { accounts } = useAppSelector((state) => state.wallet);
-  const chain = networks && networks.items[networks.activeNetwork].chainId;
+  const { currentAccount } = useAppSelector((state) => state.wallet);
+  const chainId = networks?.items[networks.activeNetwork].chainId;
   const [isValidAddress, setIsValidAddress] = useState(false);
   const [fields, setFields] = useState({
     address: '',
@@ -103,8 +103,8 @@ export const AddTokenModalView = ({ closeModal }: Props) => {
                 fields.name,
                 fields.symbol,
                 parseFloat(fields.decimal),
-                chain,
-                accounts[0] as unknown as string,
+                chainId,
+                currentAccount.address,
               );
               if (newToken) {
                 setErc20TokenBalance(newToken);

@@ -38,7 +38,6 @@ export const DeployModalView = ({ address }: Props) => {
   const toastr = new Toastr();
 
   const onDeploy = async () => {
-    if (!translate) return;
     try {
       const resp = await deployAccount(address, '0', chainId);
 

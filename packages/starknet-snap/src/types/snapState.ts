@@ -15,6 +15,7 @@ export type SnapState = {
   transactions: Transaction[];
   currentNetwork?: Network;
   transactionRequests?: TransactionRequest[];
+  currentAccount?: Record<string, AccContract>;
 };
 
 export type TokenTransferData = {
@@ -62,11 +63,13 @@ export type AccContract = {
   publicKey: string; // in hex
   address: string; // in hex
   addressIndex: number;
-  derivationPath: string;
-  deployTxnHash: string; // in hex
+  derivationPath?: string;
+  deployTxnHash?: string; // in hex
   chainId: string; // in hex
   upgradeRequired?: boolean;
   deployRequired?: boolean;
+  cairoVersion?: string;
+  visibility?: boolean;
 };
 
 export type Erc20Token = {

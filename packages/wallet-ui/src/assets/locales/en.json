@@ -4,6 +4,12 @@
     "aboutThisSnap": {
       "message": "About this snap"
     },
+    "account": {
+      "message": "Compte"
+    },
+    "accounts": {
+      "message": "Comptes"
+    },
     "accountDeployedSuccessfully": {
       "message": "Account deployed successfully."
     },
@@ -300,6 +306,9 @@
     },
     "whatIsASnap": {
       "message": "What is a snap?"
+    },
+    "youCannotHideLastAccount": {
+      "message": "You cannot hide the last remaining account."
     }
   }
 }
