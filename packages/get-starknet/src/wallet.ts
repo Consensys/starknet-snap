@@ -69,13 +69,15 @@ export class MetaMaskSnapWallet implements StarknetWindowObject {
 
   #pollingController: AbortController | undefined;
 
+  // eslint-disable-next-line no-restricted-syntax
   #accountChangeHandlers: Set<AccountChangeEventHandler> = new Set();
 
+  // eslint-disable-next-line no-restricted-syntax
   #networkChangeHandlers: Set<NetworkChangeEventHandler> = new Set();
 
-  static readonly pollingDelayMs = 100;
+  protected pollingDelayMs = 100;
 
-  static readonly pollingTimeoutMs = 5000;
+  protected pollingTimeoutMs = 5000;
 
   // eslint-disable-next-line @typescript-eslint/naming-convention, no-restricted-globals
   static readonly snapId = process.env.SNAP_ID ?? 'npm:@consensys/starknet-snap';
@@ -141,10 +143,10 @@ export class MetaMaskSnapWallet implements StarknetWindowObject {
   }
 
   async #getWalletAddress(chainId: string) {
-    const accountResponse = await this.snap.recoverDefaultAccount(chainId);
+    const accountResponse = await this.snap.getCurrentAccount({ chainId, fromState: true });
 
     if (!accountResponse?.address) {
-      throw new Error('Unable to recover accounts');
+      throw new Error('Unable to retrieve the wallet account');
     }
 
     return accountResponse.address;
@@ -227,18 +229,22 @@ export class MetaMaskSnapWallet implements StarknetWindowObject {
       throw new Error('Unable to find the selected network');
     }
 
+    const address = await this.#getWalletAddress(network.chainId);
     if (!this.#network || network.chainId !== this.#network.chainId) {
-      // address is depends on network, if network changes, address will update
-      this.#selectedAddress = await this.#getWalletAddress(network.chainId);
       // provider is depends on network.nodeUrl, if network changes, set provider to undefine for reinitialization
       this.#provider = undefined;
       // account is depends on address and provider, if network changes, address will update,
       // hence set account to undefine for reinitialization
-      // TODO : This should be removed. The walletAccount is created with the SWO as input.
-      // This means account is not managed from within the SWO but from outside.
-      // Event handling helps ensure that the correct address is set.
       this.#account = undefined;
     }
+
+    if (address !== this.#selectedAddress) {
+      // account is depend on address,
+      // hence set account to undefine for reinitialization
+      this.#account = undefined;
+    }
+
+    this.#selectedAddress = address;
 
     this.#network = network;
     this.#chainId = network.chainId;
@@ -281,7 +287,7 @@ export class MetaMaskSnapWallet implements StarknetWindowObject {
       throw new Error(`Unsupported event: ${String(event)}`);
     }
     if (!this.#pollingController) {
-      this.#startPolling();
+      this.startPolling();
     }
   }
 
@@ -300,7 +306,7 @@ export class MetaMaskSnapWallet implements StarknetWindowObject {
       throw new Error(`Unsupported event: ${String(event)}`);
     }
     if (this.#accountChangeHandlers.size + this.#networkChangeHandlers.size === 0) {
-      this.#stopPolling();
+      this.stopPolling();
     }
   }
 
@@ -322,7 +328,7 @@ export class MetaMaskSnapWallet implements StarknetWindowObject {
     while (!signal.aborted) {
       // Early exit if there are no handlers left
       if (this.#accountChangeHandlers.size + this.#networkChangeHandlers.size === 0) {
-        this.#stopPolling();
+        this.stopPolling();
         return;
       }
 
@@ -337,13 +343,15 @@ export class MetaMaskSnapWallet implements StarknetWindowObject {
           // Fetch network, assign address and chainId for thread safe.
           this.#init(),
           new Promise((_, reject) =>
-            // Timeout after `MetaMaskSnapWallet.pollingTimeoutMs`.
-            setTimeout(() => reject(new Error('Polling timeout exceeded')), MetaMaskSnapWallet.pollingTimeoutMs),
+            // Timeout after `this.pollingTimeoutMs`.
+            setTimeout(() => reject(new Error('Polling timeout exceeded')), this.pollingTimeoutMs),
           ),
         ]);
 
-        // Check for network change
-        if (previousNetwork !== this.#chainId) {
+        // By checking the previous network is undefined
+        // it will not sending event to client when the wallet object initialized first time
+        if (previousNetwork !== this.#chainId && previousNetwork !== undefined) {
+          // With `Promise.allSettled`, we can handle all promises and continue even if some fail.
           await Promise.allSettled(
             Array.from(this.#networkChangeHandlers).map(async (callback) =>
               resolver(callback, this.#chainId, [this.#selectedAddress]),
@@ -351,8 +359,10 @@ export class MetaMaskSnapWallet implements StarknetWindowObject {
           );
         }
 
-        // Check for account change
-        if (previousAddress !== this.#selectedAddress) {
+        // By checking the previous address is undefined
+        // it will not sending event to client when the wallet object initialized first tim
+        if (previousAddress !== this.#selectedAddress && previousAddress !== undefined) {
+          // With `Promise.allSettled`, we can handle all promises and continue even if some fail.
           await Promise.allSettled(
             Array.from(this.#accountChangeHandlers).map(async (callback) =>
               resolver(callback, [this.#selectedAddress]),
@@ -363,17 +373,17 @@ export class MetaMaskSnapWallet implements StarknetWindowObject {
         // Silently handle errors to avoid breaking the loop
       }
 
-      await new Promise((resolve) => setTimeout(resolve, MetaMaskSnapWallet.pollingDelayMs));
+      await new Promise((resolve) => setTimeout(resolve, this.pollingDelayMs));
     }
   };
 
-  #startPolling(): void {
+  protected startPolling(): void {
     this.#pollingController = new AbortController();
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
     this.#pollingFunction();
   }
 
-  #stopPolling(): void {
+  protected stopPolling(): void {
     if (this.#pollingController) {
       this.#pollingController.abort();
       this.#pollingController = undefined;
