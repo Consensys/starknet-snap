@@ -5,6 +5,7 @@
 
 ### Features
 
+
 * Enable get-starknet to watch account change when multiple account supported in SNAP. ([#505](https://github.com/Consensys/starknet-snap/issues/505)) ([c129f1c](https://github.com/Consensys/starknet-snap/commit/c129f1c5d48f2a310c1c9ecb521b5fb9ed11f60c))
 
 
