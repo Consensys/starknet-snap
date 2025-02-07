@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.5.0](https://github.com/Consensys/starknet-snap/compare/get-starknet-v1.4.0...get-starknet-v1.5.0) (2025-02-07)
+
+
+### Features
+
+* Enable get-starknet to watch account change when multiple account supported in SNAP. ([#505](https://github.com/Consensys/starknet-snap/issues/505)) ([c129f1c](https://github.com/Consensys/starknet-snap/commit/c129f1c5d48f2a310c1c9ecb521b5fb9ed11f60c))
+
+
+### Bug Fixes
+
+* Add "to be deprecated" message for the `get-starknet@3.3.0` properties (https://github.com/Consensys/starknet-snap/issues/488) ([4e76a73](https://github.com/Consensys/starknet-snap/commit/4e76a7379593896b0190fda44e7f8143b463c98c)) ([4e76a73](https://github.com/Consensys/starknet-snap/commit/4e76a7379593896b0190fda44e7f8143b463c98c))
+
 ## [1.4.0](https://github.com/Consensys/starknet-snap/compare/get-starknet-v1.3.0...get-starknet-v1.4.0) (2024-12-19)
 
 
