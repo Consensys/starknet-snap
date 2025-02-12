@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAppSelector } from 'hooks/redux';
 import { useMultiLanguage, useStarkNetSnap } from 'services';
 import { InputWithLabel } from 'components/ui/molecule/InputWithLabel';
@@ -21,7 +21,7 @@ interface Props {
 }
 
 export const AddAccountModalView = ({ closeModal }: Props) => {
-  const { addNewAccount,getNextAccountIndex } = useStarkNetSnap();
+  const { addNewAccount, getNextAccountIndex } = useStarkNetSnap();
   const { translate } = useMultiLanguage();
   const [enabled, setEnabled] = useState(false);
   const networks = useAppSelector((state) => state.networks);
@@ -30,18 +30,18 @@ export const AddAccountModalView = ({ closeModal }: Props) => {
     accountName: '',
   });
 
+  const fetchNextIndex = useCallback(async () => {
+    try {
+      const response = await getNextAccountIndex(chainId);
+      setFields({ accountName: `Account ${response.addressIndex + 1}` });
+    } catch (error) {
+      console.error('Failed to fetch next account index:', error);
+    }
+  }, [chainId, setFields]); 
+  
   useEffect(() => {
-    const fetchNextIndex = async () => {
-      try {
-        const response = await getNextAccountIndex(chainId);
-        setFields({ accountName: `Account ${response.addressIndex+1}` });
-      } catch (error) {
-        console.error('Failed to fetch next account index:', error);
-      }
-    };
-
     fetchNextIndex();
-  }, []);
+  }, [fetchNextIndex]);
 
   const handleChange = (fieldName: string, fieldValue: string) => {
     setFields((prevFields) => ({
@@ -66,7 +66,9 @@ export const AddAccountModalView = ({ closeModal }: Props) => {
           <InputWithLabel
             label={translate('accountName')}
             value={fields.accountName}
-            onChange={(event) => handleChange('accountName', event.target.value)}
+            onChange={(event) =>
+              handleChange('accountName', event.target.value)
+            }
           />
         </FormGroup>
       </Wrapper>
@@ -78,7 +80,7 @@ export const AddAccountModalView = ({ closeModal }: Props) => {
           enabled={enabled}
           onClick={async () => {
             try {
-              await addNewAccount(chainId,fields.accountName);
+              await addNewAccount(chainId, fields.accountName);
               closeModal();
             } catch (err) {
               toastr.error(translate('errorAddingAccount'));
