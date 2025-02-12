@@ -34,6 +34,9 @@
     "amount": {
       "message": "Montant"
     },
+    "back": {
+      "message": "Retour"
+    },
     "cancel": {
       "message": "ANNULER"
     },
