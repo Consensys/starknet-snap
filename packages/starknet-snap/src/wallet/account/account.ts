@@ -3,9 +3,10 @@ import type { CairoVersion } from 'starknet';
 import type { AccContract } from '../../types/snapState';
 import type { CairoAccountContract } from './contract';
 
-export type AccountMetaData = { visibility?: boolean };
+export type AccountMetaData = { accountName: string; visibility?: boolean };
 
 export const DefaultAccountMetaData: AccountMetaData = {
+  accountName: 'Account 1',
   visibility: true,
 };
 
@@ -70,6 +71,11 @@ export class Account {
     if (jsonData.visibility !== undefined) {
       this.metadata.visibility = jsonData.visibility;
     }
+    if (jsonData.accountName === undefined) {
+      this.metadata.accountName = `Account ${this.hdIndex + 1}`;
+    } else {
+      this.metadata.accountName = jsonData.accountName;
+    }
   }
 
   /**
@@ -94,6 +100,7 @@ export class Account {
       deployRequired,
       upgradeRequired,
       visibility: this.metadata.visibility,
+      accountName: this.metadata.accountName,
     };
   }
 }
