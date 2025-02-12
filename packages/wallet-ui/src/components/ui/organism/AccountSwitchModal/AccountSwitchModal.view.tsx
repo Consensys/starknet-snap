@@ -27,8 +27,7 @@ interface Props {
 export const AccountSwitchModalView = ({ full, starkName }: Props) => {
   const networks = useAppSelector((state) => state.networks);
   const { currentAccount, accounts } = useAppSelector((state) => state.wallet);
-  const { switchAccount, hideAccount, unHideAccount } =
-    useStarkNetSnap();
+  const { switchAccount, hideAccount, unHideAccount } = useStarkNetSnap();
   const { translate } = useMultiLanguage();
   const chainId = networks?.items[networks.activeNetwork]?.chainId;
 

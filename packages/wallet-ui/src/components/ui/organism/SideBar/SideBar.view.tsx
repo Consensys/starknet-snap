@@ -110,9 +110,7 @@ export const SideBarView = () => {
         <AccountImageStyled address={address} connected={wallet.connected} />
       </AccountDetails>
 
-      <AccountLabel>
-        {currentAccount.accountName}
-      </AccountLabel>
+      <AccountLabel>{currentAccount.accountName}</AccountLabel>
       <RowDiv>
         <InfoIcon onClick={() => setInfoModalOpen(true)}>i</InfoIcon>
         <AccountSwitchModal starkName={starkName} />

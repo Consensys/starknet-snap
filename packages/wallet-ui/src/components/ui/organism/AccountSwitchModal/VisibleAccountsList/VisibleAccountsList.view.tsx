@@ -54,9 +54,7 @@ export const VisibleAccountsListView = ({
                     connected={isSelected}
                   />
                   <MenuItemText style={{ marginLeft: isSelected ? 19 : 20 }}>
-                    <div>
-                      {account.accountName}
-                    </div>
+                    <div>{account.accountName}</div>
                     <div>{shortenAddress(account.address)}</div>
                   </MenuItemText>
                 </Box>

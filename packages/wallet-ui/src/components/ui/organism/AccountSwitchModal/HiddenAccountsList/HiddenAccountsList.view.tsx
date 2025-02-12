@@ -33,9 +33,7 @@ export const HiddenAccountsListView = ({
             <Box style={{ display: 'flex', alignItems: 'center' }}>
               <AccountImageStyled size={30} address={account.address} />
               <MenuItemText style={{ marginLeft: 20 }}>
-                <div>
-                  {account.accountName}
-                </div>
+                <div>{account.accountName}</div>
                 <div>{shortenAddress(account.address)}</div>
               </MenuItemText>
             </Box>

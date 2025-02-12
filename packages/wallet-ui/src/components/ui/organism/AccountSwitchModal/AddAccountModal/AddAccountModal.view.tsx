@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useAppSelector } from 'hooks/redux';
 import { useMultiLanguage, useStarkNetSnap } from 'services';
 import { InputWithLabel } from 'components/ui/molecule/InputWithLabel';
@@ -30,18 +30,19 @@ export const AddAccountModalView = ({ closeModal }: Props) => {
     accountName: '',
   });
 
-  const fetchNextIndex = useCallback(async () => {
-    try {
-      const response = await getNextAccountIndex(chainId);
-      setFields({ accountName: `Account ${response.addressIndex + 1}` });
-    } catch (error) {
-      console.error('Failed to fetch next account index:', error);
-    }
-  }, [chainId, setFields]); 
-  
   useEffect(() => {
-    fetchNextIndex();
-  }, [fetchNextIndex]);
+    const fetchNextIndex = async () => {
+      try {
+        const response = await getNextAccountIndex(chainId);
+        setFields({ accountName: `Account ${response.addressIndex + 1}` });
+      } catch (error) {
+        console.error('Failed to fetch next account index:', error);
+      }
+    };
+    if (fields.accountName === '') {
+      fetchNextIndex();
+    }
+  });
 
   const handleChange = (fieldName: string, fieldValue: string) => {
     setFields((prevFields) => ({
