@@ -5,10 +5,10 @@
       "message": "About this snap"
     },
     "account": {
-      "message": "Compte"
+      "message": "Account"
     },
     "accounts": {
-      "message": "Comptes"
+      "message": "Accounts"
     },
     "accountDeployedSuccessfully": {
       "message": "Account deployed successfully."
