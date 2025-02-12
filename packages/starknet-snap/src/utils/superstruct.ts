@@ -437,4 +437,5 @@ export const AccountStruct = object({
   upgradeRequired: boolean(),
   deployRequired: boolean(),
   visibility: optional(boolean()),
+  accountName: string(),
 });

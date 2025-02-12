@@ -190,6 +190,7 @@ export async function generateAccounts(
       derivationPath: keyDeriver.path,
       deployTxnHash: '',
       chainId: network,
+      accountName: `Account ${i + 1}`,
     });
   }
   return accounts;
