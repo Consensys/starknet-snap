@@ -1,5 +1,14 @@
 # Changelog
 
+## [3.2.0](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v3.1.0...starknet-snap-v3.2.0) (2025-02-07)
+
+
+### Features
+
+* Add `AccountService` to refactor  the Cairo Contract 1 and 0 discovery logic ([#503](https://github.com/Consensys/starknet-snap/issues/503)) ([3d76d1c](https://github.com/Consensys/starknet-snap/commit/3d76d1c91f341f1d33cefbe7ffee880c228d8e49))
+* Enable multiple accounts support in SNAP with new RPC API `starkNet_listAccounts`,`starkNet_swtichAccount`,`starkNet_addAccount`,`starkNet_toggleAccountVisibility` ([#504](https://github.com/Consensys/starknet-snap/issues/504), [#477](https://github.com/Consensys/starknet-snap/issues/477), [#478](https://github.com/Consensys/starknet-snap/issues/478), [#474](https://github.com/Consensys/starknet-snap/issues/474), [#476](https://github.com/Consensys/starknet-snap/issues/476)) ([6124ed3](https://github.com/Consensys/starknet-snap/commit/6124ed387da0ef491f08b5c709ca47e29b838dda))
+* Enable multiple languages (FR) to support in SNAP and Wallet UI ([#495](https://github.com/Consensys/starknet-snap/issues/495), [#481](https://github.com/Consensys/starknet-snap/issues/481)) ([ece4e17](https://github.com/Consensys/starknet-snap/commit/ece4e1793bf16c2be2ae86f1999f81273e131878))
+
 ## [3.1.0](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v3.0.0...starknet-snap-v3.1.0) (2024-12-19)
 
 
