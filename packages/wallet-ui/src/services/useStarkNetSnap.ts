@@ -836,13 +836,14 @@ export const useStarkNetSnap = () => {
     });
   };
 
-  const addNewAccount = async (chainId: string) => {
+  const addNewAccount = async (chainId: string, accountName: string) => {
     dispatch(enableLoadingWithMessage('Adding new account...'));
     try {
       const account = await invokeSnap<Account>({
         method: 'starkNet_addAccount',
         params: {
           chainId,
+          accountName,
         },
       });
 
@@ -927,6 +928,7 @@ export const useStarkNetSnap = () => {
     getCurrentAccount,
     addNewAccount,
     toggleAccountVisibility,
+    getNextAccountIndex,
     setAccount,
     setErc20TokenBalance,
     getPrivateKeyFromAddress,
