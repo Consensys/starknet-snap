@@ -7,6 +7,9 @@
     "account": {
       "message": "Account"
     },
+    "accountName": {
+      "message": "Account name"
+    },
     "accounts": {
       "message": "Accounts"
     },
@@ -27,6 +30,9 @@
     },
     "add": {
       "message": "ADD"
+    },
+    "addAccount": {
+      "message": "Add Account"
     },
     "addToken": {
       "message": "Add Token"
@@ -105,6 +111,9 @@
     },
     "downloadMetaMaskFlask": {
       "message": "Download MetaMask Flask"
+    },
+    "errorAddingAccount": {
+      "message": "Error while adding account"
     },
     "errorAddingToken": {
       "message": "Error while adding token"

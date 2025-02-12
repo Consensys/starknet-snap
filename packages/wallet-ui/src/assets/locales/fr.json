@@ -7,6 +7,9 @@
     "account": {
       "message": "Compte"
     },
+    "accountName": {
+      "message": "Nom du compte"
+    },
     "accounts": {
       "message": "Comptes"
     },
@@ -27,6 +30,9 @@
     },
     "add": {
       "message": "AJOUTER"
+    },
+    "addAccount": {
+      "message": "Ajouter un compte"
     },
     "addToken": {
       "message": "Ajouter un jeton"
@@ -99,6 +105,9 @@
     },
     "downloadMetaMaskFlask": {
       "message": "Télécharger MetaMask Flask"
+    },
+    "errorAddingAccount": {
+      "message": "Erreur lors de la création du compte"
     },
     "errorAddingToken": {
       "message": "Erreur lors de l'ajout du jeton"
