@@ -888,6 +888,26 @@ export const useStarkNetSnap = () => {
     });
   };
 
+  const setAccountName = async (
+    chainId: string,
+    address: string,
+    accountName: string,
+  ) => {
+    dispatch(enableLoadingWithMessage('Changing Account Name...'));
+    const account = await invokeSnap<Account>({
+      method: 'starkNet_setAccountName',
+      params: {
+        chainId,
+        address,
+        accountName,
+      },
+    });
+    dispatch(
+      updateAccount({ address, updates: { accountName: account.accountName } }),
+    );
+    dispatch(setCurrentAccount(account));
+  };
+
   const getNextAccountIndex = async (chainId: string) => {
     dispatch(enableLoadingWithMessage('Getting next index'));
     const index = await invokeSnap<Account>({
@@ -940,6 +960,7 @@ export const useStarkNetSnap = () => {
     getCurrentAccount,
     addNewAccount,
     toggleAccountVisibility,
+    setAccountName,
     getNextAccountIndex,
     setAccount,
     setErc20TokenBalance,
