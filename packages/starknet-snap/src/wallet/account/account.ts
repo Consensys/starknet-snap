@@ -1,9 +1,7 @@
 import type { CairoVersion } from 'starknet';
 
-import type { AccContract } from '../../types/snapState';
+import type { AccContract, AccountMetaData } from '../../types/snapState';
 import type { CairoAccountContract } from './contract';
-
-export type AccountMetaData = { accountName: string; visibility?: boolean };
 
 export const DefaultAccountMetaData: AccountMetaData = {
   accountName: 'Account 1',
@@ -47,7 +45,7 @@ export class Account {
     hdIndex: number;
     addressSalt: string;
     accountContract: CairoAccountContract;
-    jsonData?: AccContract;
+    jsonData?: AccountMetaData;
   }) {
     this.privateKey = props.privateKey;
     this.publicKey = props.publicKey;
@@ -64,7 +62,7 @@ export class Account {
     this.#jsonDataToMetaData(props.jsonData);
   }
 
-  #jsonDataToMetaData(jsonData?: AccContract): void {
+  #jsonDataToMetaData(jsonData?: Partial<AccContract>): void {
     if (!jsonData) {
       return;
     }

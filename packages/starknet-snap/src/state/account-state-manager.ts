@@ -23,7 +23,6 @@ export class AccountStateManager extends StateManager<AccContract> {
 
   protected updateEntity(dataInState: AccContract, data: AccContract): void {
     dataInState.deployTxnHash = data.deployTxnHash;
-
     if (data.upgradeRequired !== undefined) {
       dataInState.upgradeRequired = data.upgradeRequired;
     }
@@ -203,7 +202,6 @@ export class AccountStateManager extends StateManager<AccContract> {
         }
 
         accountInState.visibility = visibility;
-
         // if the current account is the account to be hide,
         // switch to the next visible account
         if (!this.#isAccountVisible(accountInState)) {
@@ -264,6 +262,7 @@ export class AccountStateManager extends StateManager<AccContract> {
         }
 
         accountInState.accountName = accountName;
+        this.#setCurrentAccount(accountInState, state);
       });
     } catch (error) {
       throw new StateManagerError(error.message);

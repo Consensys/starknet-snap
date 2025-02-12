@@ -1,5 +1,5 @@
 import { AccountStateManager } from '../../state/account-state-manager';
-import type { AccContract, Network } from '../../types/snapState';
+import type { AccountMetaData, Network } from '../../types/snapState';
 import { getBip44Deriver } from '../../utils';
 import { AccountNotFoundError } from '../../utils/exceptions';
 import { Account } from './account';
@@ -27,6 +27,12 @@ export class AccountService {
     );
   }
 
+  async getNextIndex(): Promise<number> {
+    const { chainId } = this.network;
+
+    return await this.accountStateMgr.getNextIndex(chainId);
+  }
+
   /**
    * Derives a BIP44 node from an index and constructs a new `Account` object using the derived private key and public key.
    * The `Account` object is assigned a `CairoAccountContract` contract and is then serialized and persisted to the state.
@@ -37,7 +43,7 @@ export class AccountService {
    */
   async deriveAccountByIndex(
     index?: number,
-    jsonData?: AccContract,
+    jsonData?: AccountMetaData,
   ): Promise<Account> {
     const { chainId } = this.network;
 

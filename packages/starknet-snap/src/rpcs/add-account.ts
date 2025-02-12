@@ -1,10 +1,15 @@
-import { type Infer } from 'superstruct';
+import { assign, object, optional, string, type Infer } from 'superstruct';
 
 import { BaseRequestStruct, AccountStruct, logger } from '../utils';
 import { createAccountService } from '../utils/factory';
 import { ChainRpcController } from './abstract/chain-rpc-controller';
 
-export const AddAccountRequestStruct = BaseRequestStruct;
+export const AddAccountRequestStruct = assign(
+  BaseRequestStruct,
+  object({
+    accountName: optional(string()),
+  }),
+);
 
 export const AddAccountResponseStruct = AccountStruct;
 
@@ -35,8 +40,11 @@ export class AddAccountRpc extends ChainRpcController<
     params: AddAccountParams,
   ): Promise<AddAccountResponse> {
     const accountService = createAccountService(this.network);
-
-    const account = await accountService.deriveAccountByIndex();
+    const index = await accountService.getNextIndex();
+    const metadata = {
+      accountName: params.accountName ?? `Account ${index + 1}`,
+    };
+    const account = await accountService.deriveAccountByIndex(index, metadata);
 
     try {
       // after derive an account, the current account will switch to the new account.
