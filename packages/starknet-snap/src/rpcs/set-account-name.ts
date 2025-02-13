@@ -1,15 +1,20 @@
 import type { Infer } from 'superstruct';
-import { assign, object, string } from 'superstruct';
+import { assign, object } from 'superstruct';
 
 import { AccountStateManager } from '../state/account-state-manager';
-import { AccountStruct, AddressStruct, BaseRequestStruct } from '../utils';
+import {
+  AccountNameStruct,
+  AccountStruct,
+  AddressStruct,
+  BaseRequestStruct,
+} from '../utils';
 import { AccountRpcController } from './abstract/account-rpc-controller';
 
 export const SetAccountNameRequestStruct = assign(
   BaseRequestStruct,
   object({
     address: AddressStruct,
-    accountName: string(),
+    accountName: AccountNameStruct,
   }),
 );
 
@@ -20,7 +25,7 @@ export type SetAccountNameParams = Infer<typeof SetAccountNameRequestStruct>;
 export type SetAccountNameResponse = Infer<typeof SetAccountNameResponseStruct>;
 
 /**
- * The RPC handler to toggle the account visibility.
+ * The RPC handler to set the account name.
  */
 export class SetAccountNameRpc extends AccountRpcController<
   SetAccountNameParams,
@@ -31,13 +36,13 @@ export class SetAccountNameRpc extends AccountRpcController<
   protected responseStruct = SetAccountNameResponseStruct;
 
   /**
-   * Execute the toggle account visibility request handler.
+   * Executes the request to update an account's name.
    *
    * @param params - The parameters of the request.
-   * @param params.chainId - The chain id of the network to switch.
-   * @param params.address - The address of the account to change the visibility.
-   * @param params.visibility - The visibility status of the account.
-   * @returns A promise that resolves to the current account.
+   * @param params.chainId - The chain ID of the network where the account resides.
+   * @param params.address - The address of the account whose name will be updated.
+   * @param params.accountName - The new name to assign to the account.
+   * @returns A promise that resolves to the updated account details.
    */
   protected async handleRequest(
     params: SetAccountNameParams,

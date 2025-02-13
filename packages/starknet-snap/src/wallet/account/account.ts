@@ -1,10 +1,11 @@
 import type { CairoVersion } from 'starknet';
 
 import type { AccContract, AccountMetaData } from '../../types/snapState';
+import { getDefaultAccountName } from '../../utils/account';
 import type { CairoAccountContract } from './contract';
 
 export const DefaultAccountMetaData: AccountMetaData = {
-  accountName: 'Account 1',
+  accountName: getDefaultAccountName(0),
   visibility: true,
 };
 
@@ -70,7 +71,7 @@ export class Account {
       this.metadata.visibility = jsonData.visibility;
     }
     if (jsonData.accountName === undefined) {
-      this.metadata.accountName = `Account ${this.hdIndex + 1}`;
+      this.metadata.accountName = getDefaultAccountName(this.hdIndex);
     } else {
       this.metadata.accountName = jsonData.accountName;
     }

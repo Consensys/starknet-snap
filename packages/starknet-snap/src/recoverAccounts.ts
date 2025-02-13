@@ -84,7 +84,6 @@ export async function recoverAccounts(params: ApiParamsWithKeyDeriver) {
         chainId: network.chainId,
         upgradeRequired,
         deployRequired,
-        accountName: `Account ${addressIndex}`,
       };
 
       logger.log(
