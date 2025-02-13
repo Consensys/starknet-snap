@@ -223,7 +223,7 @@ export const AccountNameStruct = refine(
   string(),
   'AccountNameStruct',
   (value: string) => {
-    if (value.length > 1 && value.length < 20) {
+    if (value.length >= 1 && value.length <= 20) {
       return true;
     }
     return `The given account name is invalid`;
