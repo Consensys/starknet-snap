@@ -20,6 +20,7 @@ export const Wrapper = styled.div`
 export const AccountImageDiv = styled.div`
   width: ${(props) => props.theme.modal.noPadding};
   background-color: transparent;
+  padding-left: 12px;
 `;
 
 export const AccountImageStyled = styled(AccountImage)`
@@ -33,6 +34,7 @@ export const TitleDiv = styled.div`
   flex-direction: row;
   align-items: center;
   margin-bottom: 24px;
+  margin-left: 52px;
 `;
 
 export const Title = styled.div`
@@ -105,9 +107,10 @@ export const IconButton = styled.button`
 `;
 
 export const AccountNameInput = styled.input`
-  font-size: 16px;
+  font-size: 23px;
   font-weight: bold;
   padding: 4px 8px;
+  margin-left: 7px;
   border: 1px solid #ccc;
   border-radius: 4px;
   outline: none;
