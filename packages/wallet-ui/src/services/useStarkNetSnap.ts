@@ -905,6 +905,7 @@ export const useStarkNetSnap = () => {
     });
     dispatch(updateAccount({ address, updates: { accountName } }));
     dispatch(updateCurrentAccount({ accountName }));
+    dispatch(disableLoading());
   };
 
   const switchAccount = async (chainId: string, address: string) => {
