@@ -240,46 +240,6 @@ export class AccountStateManager extends StateManager<AccContract> {
   }
 
   /**
-   * Sets the name of a account by address and chain ID.
-   *
-   * @param params - The parameters for toggle the account visibility.
-   * @param params.address - The address of the account.
-   * @param params.chainId - The chain ID of the account.
-   * @param params.accountName - The name of the account.
-   * @throws {StateManagerError} If the account to be removed does not exist.
-   */
-  async setAccountName({
-    address,
-    chainId,
-    accountName,
-  }: {
-    address: string;
-    chainId: string;
-    accountName: string;
-  }): Promise<void> {
-    try {
-      await this.update(async (state: SnapState) => {
-        const accountInState = await this.getAccount(
-          {
-            address,
-            chainId,
-          },
-          state,
-        );
-
-        if (!accountInState) {
-          throw new StateManagerError(`Account does not exist`);
-        }
-
-        accountInState.accountName = accountName;
-        this.#setCurrentAccount(accountInState, state);
-      });
-    } catch (error) {
-      throw new StateManagerError(error.message);
-    }
-  }
-
-  /**
    * Gets the next visible account base on the address index of a specified account.
    * The next visible account is the first visible account that has a larger address index.
    * If there is no next visible account, the first visible account is returned.
