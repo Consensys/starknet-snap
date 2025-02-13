@@ -58,6 +58,9 @@
     "contractAddress": {
       "message": "Contract Address"
     },
+    "contractInteraction": {
+      "message": "Intéraction avec un contrat"
+    },
     "copied": {
       "message": "Copied!"
     },
