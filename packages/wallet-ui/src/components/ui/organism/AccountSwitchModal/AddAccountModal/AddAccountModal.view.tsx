@@ -53,7 +53,7 @@ export const AddAccountModalView = ({ closeModal }: Props) => {
         <FormGroup>
           <InputWithLabel
             label={translate('accountName')}
-            value={fields.accountName}
+            placeholder={fields.accountName}
             onChange={(event) =>
               handleChange('accountName', event.target.value)
             }
