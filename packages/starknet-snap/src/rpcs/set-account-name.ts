@@ -47,7 +47,7 @@ export class SetAccountNameRpc extends AccountRpcController<
   protected async handleRequest(
     params: SetAccountNameParams,
   ): Promise<SetAccountNameResponse> {
-    const { accountName, chainId } = params;
+    const { accountName } = params;
 
     const accMgt = new AccountStateManager();
 
@@ -56,9 +56,7 @@ export class SetAccountNameRpc extends AccountRpcController<
       accountName,
     });
 
-    return (await accMgt.getCurrentAccount({
-      chainId,
-    })) as SetAccountNameResponse;
+    return (await this.account.serialize()) as SetAccountNameResponse;
   }
 }
 
