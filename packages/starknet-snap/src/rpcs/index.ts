@@ -18,4 +18,3 @@ export * from './list-accounts';
 export * from './switch-account';
 export * from './toggle-account-visibility';
 export * from './set-account-name';
-export * from './get-next-account-index';

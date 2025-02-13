@@ -18,7 +18,6 @@ export enum RpcMethod {
   GetCurrentAccount = 'starkNet_getCurrentAccount',
   ListAccounts = 'starkNet_listAccounts',
 
-  GetNextAccountIndex = 'starkNet_getNextAccountIndex',
   SetAccountName = 'starkNet_setAccountName',
   ToggleAccountVisibility = 'starkNet_toggleAccountVisibility',
   SwitchAccount = 'starkNet_switchAccount',
@@ -65,7 +64,6 @@ const publicPermissions = [
 ];
 // RpcMethod that are restricted to be called by wallet UI origins
 const walletUIDappPermissions = publicPermissions.concat([
-  RpcMethod.GetNextAccountIndex,
   RpcMethod.GetPreferences,
   RpcMethod.DeployCario0Account,
   RpcMethod.GetTransactions,

@@ -25,23 +25,10 @@ export const AddAccountModalView = ({ closeModal }: Props) => {
   const { translate } = useMultiLanguage();
   const [enabled, setEnabled] = useState(false);
   const networks = useAppSelector((state) => state.networks);
+  const accounts = useAppSelector((state) => state.wallet.accounts);
   const chainId = networks?.items[networks.activeNetwork].chainId;
   const [fields, setFields] = useState({
-    accountName: '',
-  });
-
-  useEffect(() => {
-    const fetchNextIndex = async () => {
-      try {
-        const response = await getNextAccountIndex(chainId);
-        setFields({ accountName: `Account ${response.addressIndex + 1}` });
-      } catch (error) {
-        console.error('Failed to fetch next account index:', error);
-      }
-    };
-    if (fields.accountName === '') {
-      fetchNextIndex();
-    }
+    accountName: `Account ${accounts.length+1}`,
   });
 
   const handleChange = (fieldName: string, fieldValue: string) => {

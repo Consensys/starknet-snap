@@ -138,7 +138,6 @@ export async function createAccount(
           chainId: network.chainId,
           upgradeRequired: cairoVersion === CAIRO_VERSION_LEGACY,
           deployRequired: false,
-          accountName: `Account ${addressIndexInUsed + 1}`,
         };
 
         await upsertAccount(userAccount, wallet, saveMutex);

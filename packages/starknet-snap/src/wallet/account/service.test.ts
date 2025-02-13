@@ -4,6 +4,7 @@ import { AccountService } from '.';
 import { generateKeyDeriver } from '../../__tests__/helper';
 import { mockAccountStateManager } from '../../state/__tests__/helper';
 import { AccountStateManager } from '../../state/account-state-manager';
+import { getDefaultAccountName } from '../../utils/account';
 import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../../utils/constants';
 import { AccountNotFoundError } from '../../utils/exceptions';
 import { createAccountService } from '../../utils/factory';
@@ -82,7 +83,6 @@ describe('AccountService', () => {
 
       const service = createAccountService(network);
       const result = await service.deriveAccountByIndex();
-
       expect(getNextIndexSpy).toHaveBeenCalled();
       expect(upsertAccountSpy).toHaveBeenCalledWith(await result.serialize());
       expect(getCairoContractSpy).toHaveBeenCalledWith(account.publicKey);
@@ -120,7 +120,10 @@ describe('AccountService', () => {
       expect(result).toHaveProperty('publicKey', account.publicKey);
       expect(result).toHaveProperty('hdIndex', hdIndex);
       expect(result).toHaveProperty('addressSalt', account.publicKey);
-      expect(result).toHaveProperty('metadata', DefaultAccountMetaData);
+      expect(result).toHaveProperty('metadata', {
+        ...DefaultAccountMetaData,
+        accountName: getDefaultAccountName(hdIndex),
+      });
     });
 
     it('derives an account along with the metadata', async () => {

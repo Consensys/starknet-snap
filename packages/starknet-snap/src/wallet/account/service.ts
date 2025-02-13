@@ -1,6 +1,7 @@
 import { AccountStateManager } from '../../state/account-state-manager';
 import type { AccountMetaData, Network } from '../../types/snapState';
 import { getBip44Deriver } from '../../utils';
+import { getDefaultAccountName } from '../../utils/account';
 import { AccountNotFoundError } from '../../utils/exceptions';
 import { Account } from './account';
 import { AccountContractDiscovery } from './discovery';
@@ -27,6 +28,11 @@ export class AccountService {
     );
   }
 
+  /**
+   * Retrieves the next available index for account derivation.
+   *
+   * @returns A promise that resolves to the next available index.
+   */
   async getNextIndex(): Promise<number> {
     const { chainId } = this.network;
 
@@ -73,7 +79,7 @@ export class AccountService {
         hdIndex,
         addressSalt: publicKey,
         accountContract,
-        jsonData,
+        jsonData: { accountName: getDefaultAccountName(index), ...jsonData },
       });
 
       await this.accountStateMgr.upsertAccount(await account.serialize());

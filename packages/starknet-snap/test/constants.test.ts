@@ -28,7 +28,6 @@ export const account1: AccContract = {
   addressSalt:
     '0x0154c7b20442ee954f50831702ca844ec185ad484c21719575d351583deec90b',
   addressIndex: 0,
-  accountName: `Account ${0 + 1}`,
   derivationPath: "m / bip32:44' / bip32:9004' / bip32:0' / bip32:0",
   deployTxnHash:
     '0x5da2d94a324bc56f80cf1fb985c22c85769db434ed403ae71774a07103d229b',
@@ -42,7 +41,6 @@ export const account2: AccContract = {
   addressSalt:
     '0x019e59f349e1aa813ab4556c5836d0472e5e1ae82d1e5c3b3e8aabfeb290befd',
   addressIndex: 1,
-  accountName: `Account ${1 + 1}`,
   derivationPath: "m / bip32:44' / bip32:9004' / bip32:0' / bip32:0",
   deployTxnHash:
     '0x5bc00132b8f2fc0f673dc232594b26727e712b204a2716f9dc28a8c5f607b5e',
@@ -56,7 +54,6 @@ export const account3: AccContract = {
   addressSalt:
     '0x0797efd8e3971dfca4f928485860896201320ce2997ca4789d9343204219599d',
   addressIndex: 2,
-  accountName: `Account ${2 + 1}`,
   derivationPath: "m / bip32:44' / bip32:9004' / bip32:0' / bip32:0",
   deployTxnHash: '',
   publicKey:
@@ -69,7 +66,6 @@ export const account4: AccContract = {
   addressSalt:
     '0x0110e50179b0ef539fd1558571698a98cfe90d6829ff8203bfe577fdda6fc44e',
   addressIndex: 3,
-  accountName: `Account ${3 + 1}`,
   derivationPath: "m / bip32:44' / bip32:9004' / bip32:0' / bip32:0",
   deployTxnHash:
     '0x3b690b4c9dd639881a46f6a344ee90254562175ed7a7f5a028f69b8c32ccb47',
@@ -82,7 +78,6 @@ export const Cairo1Account1: AccContract = {
   addressSalt:
     '0x019e59f349e1aa813ab4556c5836d0472e5e1ae82d1e5c3b3e8aabfeb290befd',
   addressIndex: 1,
-  accountName: `Account ${1 + 1}`,
   derivationPath: "m / bip32:44' / bip32:9004' / bip32:0' / bip32:0",
   deployTxnHash:
     '0x5bc00132b8f2fc0f673dc232594b26727e712b204a2716f9dc28a8c5f607b5e',
