@@ -1,9 +1,13 @@
 import type { constants } from 'starknet';
 
-import { AccountStateManager } from '../state/account-state-manager';
+import { mockAccountStateManager } from '../state/__tests__/helper';
 import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../utils/constants';
 import { InvalidRequestParamsError } from '../utils/exceptions';
-import { setupAccountController } from './__tests__/helper';
+import { AccountService } from '../wallet/account';
+import {
+  createAccountObject,
+  mockAccountContractReader,
+} from '../wallet/account/__test__/helper';
 import { getCurrentAccount } from './get-current-account';
 import type { GetCurrentAccountParams } from './get-current-account';
 
@@ -14,17 +18,18 @@ describe('GetCurrentAccountRpc', () => {
   const network = STARKNET_SEPOLIA_TESTNET_NETWORK;
 
   const setupGetCurrentAccountTest = async () => {
-    // Although `GetCurrentAccountRpc` does not inherit `AccountRpcController`,
-    // but we can still use `setupAccountController` to mock the `AccountService`.
-    const { account, deriveAccountByIndexSpy } = await setupAccountController(
-      {},
-    );
+    const { accountObj } = await createAccountObject(network);
 
-    const getCurrentAccountSpy = jest.spyOn(
-      AccountStateManager.prototype,
+    mockAccountContractReader({});
+
+    const { getCurrentAccountSpy } = mockAccountStateManager();
+    getCurrentAccountSpy.mockResolvedValue(await accountObj.serialize());
+
+    const getCurrentAccountServiceSpy = jest.spyOn(
+      AccountService.prototype,
       'getCurrentAccount',
     );
-    getCurrentAccountSpy.mockResolvedValue(await account.serialize());
+    getCurrentAccountServiceSpy.mockResolvedValue(accountObj);
 
     const request = {
       chainId: network.chainId as unknown as constants.StarknetChainId,
@@ -32,24 +37,24 @@ describe('GetCurrentAccountRpc', () => {
 
     return {
       getCurrentAccountSpy,
-      deriveAccountByIndexSpy,
-      account,
+      getCurrentAccountServiceSpy,
+      account: accountObj,
       request,
     };
   };
 
   it('returns the selected `Account`', async () => {
-    const { account, request, deriveAccountByIndexSpy } =
+    const { account, request, getCurrentAccountServiceSpy } =
       await setupGetCurrentAccountTest();
 
     const result = await getCurrentAccount.execute(request);
 
     expect(result).toStrictEqual(await account.serialize());
-    expect(deriveAccountByIndexSpy).toHaveBeenCalled();
+    expect(getCurrentAccountServiceSpy).toHaveBeenCalled();
   });
 
   it('returns the selected `Account` from state if the param `fromState` was given', async () => {
-    const { account, request, deriveAccountByIndexSpy } =
+    const { account, request, getCurrentAccountServiceSpy } =
       await setupGetCurrentAccountTest();
 
     const result = await getCurrentAccount.execute({
@@ -58,12 +63,16 @@ describe('GetCurrentAccountRpc', () => {
     });
 
     expect(result).toStrictEqual(await account.serialize());
-    expect(deriveAccountByIndexSpy).not.toHaveBeenCalled();
+    expect(getCurrentAccountServiceSpy).not.toHaveBeenCalled();
   });
 
   it('derives the selected `Account` if the param `fromState` was given but the account does not found from state', async () => {
-    const { account, request, deriveAccountByIndexSpy, getCurrentAccountSpy } =
-      await setupGetCurrentAccountTest();
+    const {
+      account,
+      request,
+      getCurrentAccountServiceSpy,
+      getCurrentAccountSpy,
+    } = await setupGetCurrentAccountTest();
     getCurrentAccountSpy.mockResolvedValue(null);
 
     const result = await getCurrentAccount.execute({
@@ -72,7 +81,7 @@ describe('GetCurrentAccountRpc', () => {
     });
 
     expect(result).toStrictEqual(await account.serialize());
-    expect(deriveAccountByIndexSpy).toHaveBeenCalled();
+    expect(getCurrentAccountServiceSpy).toHaveBeenCalled();
   });
 
   it('throws `InvalidRequestParamsError` when request parameter is not correct', async () => {

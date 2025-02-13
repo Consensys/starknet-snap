@@ -37,11 +37,12 @@ export class SwitchAccountRpc extends AccountRpcController<
    * @returns A promise that resolves to the switched account.
    */
   protected async handleRequest(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     params: SwitchAccountParams,
   ): Promise<SwitchAccountResponse> {
     const accountService = createAccountService(this.network);
 
-    await accountService.switchAccount(params.chainId, this.account);
+    await accountService.switchAccount(this.account);
 
     return (await this.account.serialize()) as unknown as SwitchAccountResponse;
   }

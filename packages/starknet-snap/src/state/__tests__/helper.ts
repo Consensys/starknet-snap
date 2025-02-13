@@ -93,9 +93,9 @@ export const mockAccountStateManager = () => {
     AccountStateManager.prototype,
     'getNextIndex',
   );
-  const upsertAccountSpy = jest.spyOn(
+  const updateAccountByAddressSpy = jest.spyOn(
     AccountStateManager.prototype,
-    'upsertAccount',
+    'updateAccountByAddress',
   );
   const getCurrentAccountSpy = jest.spyOn(
     AccountStateManager.prototype,
@@ -103,15 +103,22 @@ export const mockAccountStateManager = () => {
   );
   const switchAccountSpy = jest.spyOn(
     AccountStateManager.prototype,
-    'switchAccount',  
+    'switchAccount',
+  );
+  const addAccountSpy = jest.spyOn(AccountStateManager.prototype, 'addAccount');
+  const setCurrentAccountSpy = jest.spyOn(
+    AccountStateManager.prototype,
+    'setCurrentAccount',
   );
 
   return {
+    setCurrentAccountSpy,
     getCurrentAccountSpy,
     getAccountSpy,
     getNextIndexSpy,
-    upsertAccountSpy,
+    updateAccountByAddressSpy,
     switchAccountSpy,
+    addAccountSpy,
   };
 };
 

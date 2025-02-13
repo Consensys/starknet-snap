@@ -38,7 +38,7 @@ export type SnapConfig = {
   };
   account: {
     defaultAccountIndex: number;
-  }
+  };
 };
 
 export enum DataClient {
@@ -96,5 +96,5 @@ export const Config: SnapConfig = {
 
   account: {
     defaultAccountIndex: 0,
-  }
+  },
 };
