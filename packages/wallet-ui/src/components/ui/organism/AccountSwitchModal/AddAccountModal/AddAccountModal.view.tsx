@@ -21,14 +21,14 @@ interface Props {
 }
 
 export const AddAccountModalView = ({ closeModal }: Props) => {
-  const { addNewAccount, getNextAccountIndex } = useStarkNetSnap();
+  const { addNewAccount } = useStarkNetSnap();
   const { translate } = useMultiLanguage();
   const [enabled, setEnabled] = useState(false);
   const networks = useAppSelector((state) => state.networks);
   const accounts = useAppSelector((state) => state.wallet.accounts);
   const chainId = networks?.items[networks.activeNetwork].chainId;
   const [fields, setFields] = useState({
-    accountName: `Account ${accounts.length+1}`,
+    accountName: `Account ${accounts.length + 1}`,
   });
 
   const handleChange = (fieldName: string, fieldValue: string) => {

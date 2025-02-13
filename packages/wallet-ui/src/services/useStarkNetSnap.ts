@@ -17,6 +17,7 @@ import {
   setLocale,
   setTranslations,
   updateAccount,
+  updateCurrentAccount,
 } from '../slices/walletSlice';
 import Toastr from 'toastr2';
 import {
@@ -894,7 +895,7 @@ export const useStarkNetSnap = () => {
     accountName: string,
   ) => {
     dispatch(enableLoadingWithMessage('Changing Account Name...'));
-    const account = await invokeSnap<Account>({
+    await invokeSnap<Account>({
       method: 'starkNet_setAccountName',
       params: {
         chainId,
@@ -902,10 +903,8 @@ export const useStarkNetSnap = () => {
         accountName,
       },
     });
-    dispatch(
-      updateAccount({ address, updates: { accountName: account.accountName } }),
-    );
-    dispatch(setCurrentAccount(account));
+    dispatch(updateAccount({ address, updates: { accountName } }));
+    dispatch(updateCurrentAccount({ accountName }));
   };
 
   const getNextAccountIndex = async (chainId: string) => {
