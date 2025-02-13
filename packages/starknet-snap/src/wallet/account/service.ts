@@ -152,6 +152,9 @@ export class AccountService {
 
       const accountJsonData = await account.serialize();
 
+      // While getting the current account,
+      // if the account is not found in the state, add it to the state.
+      // Otherwise, it is not necessary to update it to the state.
       if (accountInState === null) {
         await this.accountStateMgr.addAccount(accountJsonData);
         await this.accountStateMgr.setCurrentAccount(accountJsonData);
@@ -207,7 +210,7 @@ export class AccountService {
   /**
    * A safeguard to ensure the derived account address is match with the provided address.
    * Expecting the derived account should have the same address with the given one.
-   * 
+   *
    * @param account - The derived account.
    * @param address - The address to compare.
    * @throws `AccountMissMatchError` if the derived account address does not match the provided address.
