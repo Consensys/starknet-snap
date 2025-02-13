@@ -74,10 +74,10 @@
       "message": "Supprimer la version actuelle dans MetaMask en allant dans Paramètres > Snaps > @consensys/starknet-snap > Voir les détails > Supprimer le Snap"
     },
     "deploy": {
-      "message": "Déployer"
+      "message": "Déploiement"
     },
     "deployAccount": {
-      "message": "Déployer le compte"
+      "message": "Déploiement du compte"
     },
     "deployAccountFailed": {
       "message": "Échec du déploiement du compte"
@@ -230,7 +230,7 @@
       "message": "Sélectionner un jeton pour les frais de transaction"
     },
     "send": {
-      "message": "Envoyer"
+      "message": "Envoie"
     },
     "snapsExtendMetaMask": {
       "message": "Les Snaps étendent les capacités de MetaMask en ajoutant de nouvelles fonctionnalités. Ce Snap permet à MetaMask de être compatible avec Starknet et de gérer vos clés."
