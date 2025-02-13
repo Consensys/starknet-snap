@@ -40,8 +40,8 @@ export class AddAccountRpc extends ChainRpcController<
     params: AddAccountParams,
   ): Promise<AddAccountResponse> {
     const accountService = createAccountService(this.network);
-
-    const account = await accountService.addAccount();
+    const { accountName } = params;
+    const account = await accountService.addAccount({ accountName });
 
     return account.serialize() as unknown as AddAccountResponse;
   }

@@ -310,7 +310,7 @@ describe('AccountService', () => {
       expect(result).toStrictEqual(accountObj);
       expect(addAccountSpy).toHaveBeenCalledWith(accountJsonData);
       expect(setCurrentAccountSpy).toHaveBeenCalledWith(accountJsonData);
-      expect(deriveAccountByIndexSpy).toHaveBeenCalledWith(nextIndex);
+      expect(deriveAccountByIndexSpy).toHaveBeenCalledWith(nextIndex, undefined);
     });
   });
 });
