@@ -59,7 +59,7 @@
       "message": "Contract Address"
     },
     "contractInteraction": {
-      "message": "Intéraction avec un contrat"
+      "message": "Contract Interaction"
     },
     "copied": {
       "message": "Copied!"
@@ -276,6 +276,9 @@
     },
     "transactionSentSuccessfully": {
       "message": "Transaction sent successfully"
+    },
+    "unknown": {
+      "message": "Unknown"
     },
     "updateMetaMaskVersion": {
       "message": "Please update to MetaMask Version {1} or higher."

@@ -271,6 +271,9 @@
     "transactionSentSuccessfully": {
       "message": "Transaction envoyée avec succès"
     },
+    "unknown": {
+      "message": "Unknown"
+    },
     "updateMetaMaskVersion": {
       "message": "Veuillez mettre à jour vers la version MetaMask {1} ou supérieure."
     },

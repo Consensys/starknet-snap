@@ -30,15 +30,6 @@ interface Props {
   transaction: Transaction;
 }
 
-function toCamelCase(str: string) {
-  return str
-    .replace(/(?:^\w|[A-Z]|\b\w|\s+|_|-)/g, (match, index) =>
-      index === 0 ? match.toLowerCase() : match.toUpperCase(),
-    )
-    .replace(/\s+/g, '')
-    .replace(/[-_]+/g, '');
-}
-
 export const TransactionListItemView = ({ transaction }: Props) => {
   const wallet = useAppSelector((state) => state.wallet);
   const tokenAddress = wallet.erc20TokenBalanceSelected.address;
@@ -73,7 +64,11 @@ export const TransactionListItemView = ({ transaction }: Props) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const txnName = getTxnName(transaction, tokenAddress);
+  const { txName, txNameTranslated } = getTxnName(
+    transaction,
+    tokenAddress,
+    translate,
+  );
   const txnDate = getTxnDate(transaction, locale);
   const txnStatus = getTxnStatus(transaction);
   const txnToFromLabel = '';
@@ -86,10 +81,10 @@ export const TransactionListItemView = ({ transaction }: Props) => {
     >
       <Left>
         <LeftIcon>
-          <IconStyled transactionname={txnName} icon={getIcon(txnName)} />
+          <IconStyled transactionname={txName} icon={getIcon(txName)} />
         </LeftIcon>
         <Column>
-          <Label>{translate(toCamelCase(txnName))}</Label>
+          <Label>{txNameTranslated}</Label>
           <Description>
             {txnDate}
             <br />
@@ -102,7 +97,7 @@ export const TransactionListItemView = ({ transaction }: Props) => {
       </Left>
       <Middle>{txnToFromLabel} </Middle>
       <Right>
-        {txnName === 'Send' && (
+        {txName === 'Send' && (
           <AssetQuantity
             currency={currencySymbol}
             currencyValue={txnValue}

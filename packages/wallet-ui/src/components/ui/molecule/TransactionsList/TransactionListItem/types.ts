@@ -20,7 +20,8 @@ export const getIcon = (transactionName: string): IconProp => {
 export const getTxnName = (
   transaction: Transaction,
   contractAddress: string,
-): string => {
+  translate: (key: string, ...args: (string | undefined)[]) => string,
+): { txName: string; txNameTranslated: string } => {
   switch (transaction.txnType) {
     case TransactionType.INVOKE:
       if (
@@ -29,20 +30,38 @@ export const getTxnName = (
       ) {
         for (const call of transaction.accountCalls[contractAddress]) {
           if (call.contractFuncName === ContractFuncName.Transfer) {
-            return 'Send';
+            return {
+              txName: 'Send',
+              txNameTranslated: translate('send'),
+            };
           }
           if (call.contractFuncName === ContractFuncName.Upgrade) {
-            return 'Upgrade Account';
+            return {
+              txName: 'Upgrade Account',
+              txNameTranslated: translate('upgradeAccount'),
+            };
           }
         }
       }
-      return 'Contract Interaction';
+      return {
+        txName: 'Contract Interaction',
+        txNameTranslated: translate('contractInteraction'),
+      };
     case TransactionType.DEPLOY:
-      return 'Depoly';
+      return {
+        txName: 'Deploy',
+        txNameTranslated: translate('deploy'),
+      };
     case TransactionType.DEPLOY_ACCOUNT:
-      return 'Deploy Account';
+      return {
+        txName: 'Deploy Account',
+        txNameTranslated: translate('deployAccount'),
+      };
     default:
-      return 'Unknown';
+      return {
+        txName: 'Unknown',
+        txNameTranslated: translate('unknown'),
+      };
   }
 };
 
