@@ -36,6 +36,9 @@ export type SnapConfig = {
       txnsInLastNumOfDays: number;
     };
   };
+  account: {
+    defaultAccountIndex: number;
+  };
 };
 
 export enum DataClient {
@@ -90,4 +93,8 @@ export const Config: SnapConfig = {
     STRK_MAINNET,
     STRK_SEPOLIA_TESTNET,
   ],
+
+  account: {
+    defaultAccountIndex: 0,
+  },
 };

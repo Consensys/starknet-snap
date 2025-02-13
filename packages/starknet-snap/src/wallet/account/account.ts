@@ -59,12 +59,13 @@ export class Account {
       10,
     ) as CairoVersion;
     this.accountContract = props.accountContract;
-
     this.#jsonDataToMetaData(props.jsonData);
   }
 
   #jsonDataToMetaData(jsonData?: Partial<AccContract>): void {
     if (!jsonData) {
+      this.metadata.visibility = true;
+      this.metadata.accountName = getDefaultAccountName(this.hdIndex);
       return;
     }
     if (jsonData.visibility !== undefined) {

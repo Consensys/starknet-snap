@@ -1,6 +1,5 @@
 import { type constants } from 'starknet';
 
-import { Logger } from '../utils';
 import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../utils/constants';
 import { InvalidRequestParamsError } from '../utils/exceptions';
 import { AccountService } from '../wallet/account';
@@ -17,50 +16,29 @@ describe('AddAccountRpc', () => {
   const setupAddAccountTest = async () => {
     // Although `AddAccountRpc` does not inherit `AccountRpcController`,
     // but we can still use `setupAccountController` to mock the `AccountService`.
-    const { account, deriveAccountByIndexSpy } = await setupAccountController(
-      {},
-    );
+    const { account } = await setupAccountController({});
 
-    const switchAccountSpy = jest.spyOn(
-      AccountService.prototype,
-      'switchAccount',
-    );
-    switchAccountSpy.mockReturnThis();
+    const addAccountSpy = jest.spyOn(AccountService.prototype, 'addAccount');
+    addAccountSpy.mockResolvedValue(account);
 
     const request = {
       chainId: network.chainId as unknown as constants.StarknetChainId,
     };
 
     return {
-      deriveAccountByIndexSpy,
-      switchAccountSpy,
+      addAccountSpy,
       account,
       request,
     };
   };
 
   it('add a `Account`', async () => {
-    const { account, request, deriveAccountByIndexSpy, switchAccountSpy } =
-      await setupAddAccountTest();
+    const { account, request, addAccountSpy } = await setupAddAccountTest();
 
     const result = await addAccount.execute(request);
 
     expect(result).toStrictEqual(await account.serialize());
-    expect(deriveAccountByIndexSpy).toHaveBeenCalled();
-    expect(switchAccountSpy).toHaveBeenCalledWith(network.chainId, account);
-  });
-
-  it('does not throw an error if switch account failed', async () => {
-    const { account, request, switchAccountSpy } = await setupAddAccountTest();
-    switchAccountSpy.mockRejectedValueOnce(
-      new Error('Failed to switch account'),
-    );
-    const loggerSpy = jest.spyOn(Logger.prototype, 'warn');
-
-    const result = await addAccount.execute(request);
-
-    expect(result).toStrictEqual(await account.serialize());
-    expect(loggerSpy).toHaveBeenCalled();
+    expect(addAccountSpy).toHaveBeenCalled();
   });
 
   it('throws `InvalidRequestParamsError` when request parameter is not correct', async () => {

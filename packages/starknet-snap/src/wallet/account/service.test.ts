@@ -2,11 +2,14 @@ import { generateMnemonic } from 'bip39';
 
 import { AccountService } from '.';
 import { generateKeyDeriver } from '../../__tests__/helper';
+import { Config } from '../../config';
 import { mockAccountStateManager } from '../../state/__tests__/helper';
-import { AccountStateManager } from '../../state/account-state-manager';
 import { getDefaultAccountName } from '../../utils/account';
 import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../../utils/constants';
-import { AccountNotFoundError } from '../../utils/exceptions';
+import {
+  AccountMissMatchError,
+  AccountNotFoundError,
+} from '../../utils/exceptions';
 import { createAccountService } from '../../utils/factory';
 import * as snapUtils from '../../utils/snap';
 import {
@@ -58,59 +61,22 @@ describe('AccountService', () => {
       );
       await mockSnapDeriver(mnemonicString);
 
-      const { getNextIndexSpy, upsertAccountSpy } = mockAccountStateManager();
-
       mockAccountContractReader({});
 
-      getNextIndexSpy.mockResolvedValue(hdIndex);
-
       return {
-        upsertAccountSpy,
-        getNextIndexSpy,
         getCairoContractSpy,
         account: accountObj,
       };
     };
 
-    it('derives an account with the auto increment index', async () => {
-      const hdIndex = 0;
-      const {
-        getNextIndexSpy,
-        getCairoContractSpy,
-        upsertAccountSpy,
-        account,
-      } = await setupDeriveAccountByIndexTest(hdIndex);
-
-      const service = createAccountService(network);
-      const result = await service.deriveAccountByIndex();
-      expect(getNextIndexSpy).toHaveBeenCalled();
-      expect(upsertAccountSpy).toHaveBeenCalledWith(await result.serialize());
-      expect(getCairoContractSpy).toHaveBeenCalledWith(account.publicKey);
-      expect(result).toBeInstanceOf(Account);
-      expect(result).toHaveProperty('accountContract', account.accountContract);
-      expect(result).toHaveProperty('address', account.address);
-      expect(result).toHaveProperty('chainId', account.chainId);
-      expect(result).toHaveProperty('privateKey', account.privateKey);
-      expect(result).toHaveProperty('publicKey', account.publicKey);
-      expect(result).toHaveProperty('hdIndex', hdIndex);
-      expect(result).toHaveProperty('addressSalt', account.publicKey);
-      expect(result).toHaveProperty('metadata', DefaultAccountMetaData);
-    });
-
     it('derives an account with the given index', async () => {
       const hdIndex = 2;
-      const {
-        getNextIndexSpy,
-        getCairoContractSpy,
-        account,
-        upsertAccountSpy,
-      } = await setupDeriveAccountByIndexTest(hdIndex);
+      const { getCairoContractSpy, account } =
+        await setupDeriveAccountByIndexTest(hdIndex);
 
       const service = createAccountService(network);
       const result = await service.deriveAccountByIndex(hdIndex);
 
-      expect(getNextIndexSpy).not.toHaveBeenCalled();
-      expect(upsertAccountSpy).toHaveBeenCalledWith(await result.serialize());
       expect(getCairoContractSpy).toHaveBeenCalledWith(account.publicKey);
       expect(result).toBeInstanceOf(Account);
       expect(result).toHaveProperty('accountContract', account.accountContract);
@@ -144,14 +110,16 @@ describe('AccountService', () => {
 
   describe('deriveAccountFromAddress', () => {
     const setupDeriveAccountByAddressTest = async () => {
-      const getAccountSpy = jest.spyOn(
-        AccountStateManager.prototype,
-        'getAccount',
-      );
       const deriveAccountByIndexSpy = jest.spyOn(
         AccountService.prototype,
         'deriveAccountByIndex',
       );
+
+      const { updateAccountByAddressSpy, getAccountSpy } =
+        mockAccountStateManager();
+
+      updateAccountByAddressSpy.mockReturnThis();
+
       mockAccountContractReader({});
 
       const { accountObj: account } = await createAccountObject(network, 0);
@@ -161,25 +129,26 @@ describe('AccountService', () => {
       return {
         deriveAccountByIndexSpy,
         getAccountSpy,
+        updateAccountByAddressSpy,
         account,
       };
     };
 
     it('derives an account by address', async () => {
-      const { getAccountSpy, deriveAccountByIndexSpy, account } =
-        await setupDeriveAccountByAddressTest();
+      const {
+        getAccountSpy,
+        updateAccountByAddressSpy,
+        deriveAccountByIndexSpy,
+        account,
+      } = await setupDeriveAccountByAddressTest();
 
-      const jsonData = {
-        ...(await account.serialize()),
-        visibility: false,
-      };
-
-      getAccountSpy.mockResolvedValue(jsonData);
+      const jsonData = await account.serialize();
 
       const service = createAccountService(network);
       await service.deriveAccountByAddress(account.address);
 
       expect(getAccountSpy).toHaveBeenCalled();
+      expect(updateAccountByAddressSpy).toHaveBeenCalledWith(jsonData);
       expect(deriveAccountByIndexSpy).toHaveBeenCalledWith(
         account.hdIndex,
         jsonData,
@@ -198,16 +167,30 @@ describe('AccountService', () => {
         service.deriveAccountByAddress(account.address),
       ).rejects.toThrow(AccountNotFoundError);
     });
+
+    it('throws `AccountMissMatchError` if the derived address is not match with state', async () => {
+      const { account, deriveAccountByIndexSpy } =
+        await setupDeriveAccountByAddressTest();
+
+      const { accountObj: accountWithDifferentAddress } =
+        await createAccountObject(network, 1);
+
+      deriveAccountByIndexSpy.mockResolvedValue(accountWithDifferentAddress);
+
+      const service = createAccountService(network);
+
+      await expect(
+        service.deriveAccountByAddress(account.address),
+      ).rejects.toThrow(AccountMissMatchError);
+    });
   });
 
   describe('getCurrentAccount', () => {
     // To test the case when the account is not selected,
-    // make sure the mock account is not derived from 0.
-    const setupGetCurrentAccountTest = async (hdIndex = 1) => {
-      const getCurrentAccountSpy = jest.spyOn(
-        AccountStateManager.prototype,
-        'getCurrentAccount',
-      );
+    const setupGetCurrentAccountTest = async ({ hdIndex }) => {
+      const { addAccountSpy, getCurrentAccountSpy, getAccountSpy } =
+        mockAccountStateManager();
+
       const deriveAccountByIndexSpy = jest.spyOn(
         AccountService.prototype,
         'deriveAccountByIndex',
@@ -215,68 +198,119 @@ describe('AccountService', () => {
       mockAccountContractReader({});
 
       const { accountObj } = await createAccountObject(network, hdIndex);
-      getCurrentAccountSpy.mockResolvedValue(await accountObj.serialize());
+      const accountJsonData = await accountObj.serialize();
+
       deriveAccountByIndexSpy.mockResolvedValue(accountObj);
+      getCurrentAccountSpy.mockResolvedValue(accountJsonData);
+      getAccountSpy.mockResolvedValue(accountJsonData);
+      addAccountSpy.mockReturnThis();
 
       return {
         deriveAccountByIndexSpy,
         getCurrentAccountSpy,
+        addAccountSpy,
+        getAccountSpy,
         accountObj,
       };
     };
 
-    it('returns the selected `Account` object', async () => {
-      const { accountObj, getCurrentAccountSpy, deriveAccountByIndexSpy } =
-        await setupGetCurrentAccountTest();
+    it('returns the selected `Account` object if the current account has been set', async () => {
+      const { accountObj, addAccountSpy, deriveAccountByIndexSpy } =
+        await setupGetCurrentAccountTest({ hdIndex: 1 });
+      const accountJsonData = await accountObj.serialize();
 
       const service = createAccountService(network);
       const result = await service.getCurrentAccount();
 
+      expect(result).toStrictEqual(accountObj);
+      expect(addAccountSpy).not.toHaveBeenCalled();
       expect(deriveAccountByIndexSpy).toHaveBeenCalledWith(
         result.hdIndex,
-        await accountObj.serialize(),
+        accountJsonData,
       );
-      expect(getCurrentAccountSpy).toHaveBeenCalledWith({
-        chainId: accountObj.chainId,
-      });
-      expect(result).toStrictEqual(accountObj);
     });
 
-    it('returns a `Account` object that derived from index 0 if no account selected', async () => {
-      const defaultIndex = 0;
-      const { accountObj, getCurrentAccountSpy, deriveAccountByIndexSpy } =
-        await setupGetCurrentAccountTest(defaultIndex);
+    it('returns a `Account` object that derived from index 0 if the current account has not been set', async () => {
+      const defaultIndex = Config.account.defaultAccountIndex;
+      const {
+        accountObj,
+        getCurrentAccountSpy,
+        deriveAccountByIndexSpy,
+        getAccountSpy,
+        addAccountSpy,
+      } = await setupGetCurrentAccountTest({ hdIndex: defaultIndex });
+      // Simulate the case when the current account has not been set.
       getCurrentAccountSpy.mockResolvedValue(null);
+      getAccountSpy.mockResolvedValue(null);
+      const accountJsonData = await accountObj.serialize();
 
       const service = createAccountService(network);
       const result = await service.getCurrentAccount();
 
+      expect(result).toStrictEqual(accountObj);
+      expect(result.hdIndex).toStrictEqual(defaultIndex);
+      expect(addAccountSpy).toHaveBeenCalledWith(accountJsonData);
       expect(deriveAccountByIndexSpy).toHaveBeenCalledWith(
         defaultIndex,
         undefined,
       );
-      expect(result).toStrictEqual(accountObj);
-      expect(result.hdIndex).toStrictEqual(defaultIndex);
+    });
+
+    it('throws `AccountNotFoundError` if the current account is set but the account does not exist from state', async () => {
+      const defaultIndex = Config.account.defaultAccountIndex;
+      const { getAccountSpy } = await setupGetCurrentAccountTest({
+        hdIndex: defaultIndex,
+      });
+      // Simulate the case when the current account is set, but the account does not exist from state.
+      getAccountSpy.mockResolvedValue(null);
+
+      const service = createAccountService(network);
+      await expect(service.getCurrentAccount()).rejects.toThrow(
+        AccountNotFoundError,
+      );
     });
   });
 
   describe('switchAccount', () => {
     it('switches the account for the network', async () => {
-      const switchAccountSpy = jest.spyOn(
-        AccountStateManager.prototype,
-        'switchAccount',
-      );
+      const { switchAccountSpy } = mockAccountStateManager();
       switchAccountSpy.mockResolvedValue();
       mockAccountContractReader({});
       const { accountObj } = await createAccountObject(network, 0);
 
       const service = createAccountService(network);
-      await service.switchAccount(accountObj.chainId, accountObj);
+      await service.switchAccount(accountObj);
 
       expect(switchAccountSpy).toHaveBeenCalledWith({
         chainId: accountObj.chainId,
         accountToSwitch: await accountObj.serialize(),
       });
+    });
+  });
+
+  describe('addAccount', () => {
+    it('addd the account for the network', async () => {
+      const { addAccountSpy, getNextIndexSpy, setCurrentAccountSpy } =
+        mockAccountStateManager();
+      const nextIndex = 1;
+      const deriveAccountByIndexSpy = jest.spyOn(
+        AccountService.prototype,
+        'deriveAccountByIndex',
+      );
+      addAccountSpy.mockReturnThis();
+      getNextIndexSpy.mockResolvedValue(nextIndex);
+      mockAccountContractReader({});
+      const { accountObj } = await createAccountObject(network, nextIndex);
+      deriveAccountByIndexSpy.mockResolvedValue(accountObj);
+      const accountJsonData = await accountObj.serialize();
+
+      const service = createAccountService(network);
+      const result = await service.addAccount();
+
+      expect(result).toStrictEqual(accountObj);
+      expect(addAccountSpy).toHaveBeenCalledWith(accountJsonData);
+      expect(setCurrentAccountSpy).toHaveBeenCalledWith(accountJsonData);
+      expect(deriveAccountByIndexSpy).toHaveBeenCalledWith(nextIndex);
     });
   });
 });
