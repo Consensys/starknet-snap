@@ -888,18 +888,6 @@ export const useStarkNetSnap = () => {
     });
   };
 
-  const getNextAccountIndex = async (chainId: string) => {
-    dispatch(enableLoadingWithMessage('Getting next index'));
-    const index = await invokeSnap<Account>({
-      method: 'starkNet_getNextAccountIndex',
-      params: {
-        chainId,
-      },
-    });
-    dispatch(disableLoading());
-    return index;
-  };
-
   const switchAccount = async (chainId: string, address: string) => {
     dispatch(
       enableLoadingWithMessage(
@@ -940,7 +928,6 @@ export const useStarkNetSnap = () => {
     getCurrentAccount,
     addNewAccount,
     toggleAccountVisibility,
-    getNextAccountIndex,
     setAccount,
     setErc20TokenBalance,
     getPrivateKeyFromAddress,
