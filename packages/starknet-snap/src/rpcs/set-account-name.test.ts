@@ -21,9 +21,9 @@ describe('SetAccountName', () => {
 
     const { accountObj: nextAccount } = await createAccountObject(network, 1);
 
-    const setAccountNameSpy = jest.spyOn(
+    const uspertAccountSpy = jest.spyOn(
       AccountStateManager.prototype,
-      'setAccountName',
+      'upsertAccount',
     );
 
     const getCurrentAccountSpy = jest.spyOn(
@@ -31,7 +31,7 @@ describe('SetAccountName', () => {
       'getCurrentAccount',
     );
 
-    setAccountNameSpy.mockReturnThis();
+    uspertAccountSpy.mockReturnThis();
     getCurrentAccountSpy.mockResolvedValue(await nextAccount.serialize());
 
     const request = {
@@ -42,7 +42,7 @@ describe('SetAccountName', () => {
 
     return {
       getCurrentAccountSpy,
-      setAccountNameSpy,
+      uspertAccountSpy,
       request,
       account,
       nextAccount,
@@ -52,22 +52,32 @@ describe('SetAccountName', () => {
   it('sets account name', async () => {
     const accountName = 'My Account';
     const {
-      account: { address, chainId },
-      nextAccount,
+      account: {
+        address,
+        addressSalt,
+        chainId,
+        hdIndex,
+        cairoVersion,
+        publicKey,
+      },
       request,
-      setAccountNameSpy,
-      getCurrentAccountSpy,
+      uspertAccountSpy,
     } = await setupSetAccountNameTest(accountName);
 
-    const result = await setAccountName.execute(request);
+    await setAccountName.execute(request);
 
-    expect(result).toStrictEqual(await nextAccount.serialize());
-    expect(setAccountNameSpy).toHaveBeenCalledWith({
-      address,
-      chainId,
+    expect(uspertAccountSpy).toHaveBeenCalledWith({
       accountName,
+      address,
+      addressSalt,
+      cairoVersion,
+      chainId,
+      publicKey,
+      addressIndex: hdIndex,
+      deployRequired: false,
+      upgradeRequired: false,
+      visibility: true,
     });
-    expect(getCurrentAccountSpy).toHaveBeenCalled();
   });
 
   it('throws `InvalidRequestParamsError` when request parameter is not correct', async () => {

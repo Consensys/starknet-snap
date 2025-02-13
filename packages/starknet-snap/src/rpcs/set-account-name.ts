@@ -51,18 +51,12 @@ export class SetAccountNameRpc extends AccountRpcController<
 
     const accMgt = new AccountStateManager();
 
-    const { address, chainId } = this.account;
-
-    const accountJsonData = await accMgt.withTransaction(async (state) => {
-      await accMgt.setAccountName({
-        address,
-        chainId,
-        accountName,
-      });
-      return await accMgt.getCurrentAccount({ chainId }, state);
+    await accMgt.upsertAccount({
+      ...(await this.account.serialize()),
+      accountName,
     });
 
-    return accountJsonData as SetAccountNameResponse;
+    return (await this.account.serialize()) as SetAccountNameResponse;
   }
 }
 
