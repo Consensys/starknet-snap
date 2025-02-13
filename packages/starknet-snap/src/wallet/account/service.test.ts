@@ -4,6 +4,7 @@ import { AccountService } from '.';
 import { generateKeyDeriver } from '../../__tests__/helper';
 import { Config } from '../../config';
 import { mockAccountStateManager } from '../../state/__tests__/helper';
+import { getDefaultAccountName } from '../../utils/account';
 import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../../utils/constants';
 import {
   AccountMissMatchError,
@@ -85,7 +86,10 @@ describe('AccountService', () => {
       expect(result).toHaveProperty('publicKey', account.publicKey);
       expect(result).toHaveProperty('hdIndex', hdIndex);
       expect(result).toHaveProperty('addressSalt', account.publicKey);
-      expect(result).toHaveProperty('metadata', DefaultAccountMetaData);
+      expect(result).toHaveProperty('metadata', {
+        ...DefaultAccountMetaData,
+        accountName: getDefaultAccountName(hdIndex),
+      });
     });
 
     it('derives an account along with the metadata', async () => {
@@ -306,7 +310,10 @@ describe('AccountService', () => {
       expect(result).toStrictEqual(accountObj);
       expect(addAccountSpy).toHaveBeenCalledWith(accountJsonData);
       expect(setCurrentAccountSpy).toHaveBeenCalledWith(accountJsonData);
-      expect(deriveAccountByIndexSpy).toHaveBeenCalledWith(nextIndex);
+      expect(deriveAccountByIndexSpy).toHaveBeenCalledWith(
+        nextIndex,
+        undefined,
+      );
     });
   });
 });

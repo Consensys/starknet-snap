@@ -33,6 +33,7 @@ import {
   type Transaction,
   type TransactionRequest,
 } from '../types/snapState';
+import { getDefaultAccountName } from '../utils/account';
 import {
   ACCOUNT_CLASS_HASH,
   ACCOUNT_CLASS_HASH_LEGACY,
@@ -190,6 +191,8 @@ export async function generateAccounts(
       derivationPath: keyDeriver.path,
       deployTxnHash: '',
       chainId: network,
+      accountName: getDefaultAccountName(i + 1),
+      visibility: true,
     });
   }
   return accounts;

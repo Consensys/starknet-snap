@@ -1,11 +1,11 @@
 import type { CairoVersion } from 'starknet';
 
-import type { AccContract } from '../../types/snapState';
+import type { AccContract, AccountMetaData } from '../../types/snapState';
+import { getDefaultAccountName } from '../../utils/account';
 import type { CairoAccountContract } from './contract';
 
-export type AccountMetaData = { visibility?: boolean };
-
 export const DefaultAccountMetaData: AccountMetaData = {
+  accountName: getDefaultAccountName(0),
   visibility: true,
 };
 
@@ -46,7 +46,7 @@ export class Account {
     hdIndex: number;
     addressSalt: string;
     accountContract: CairoAccountContract;
-    jsonData?: AccContract;
+    jsonData?: AccountMetaData;
   }) {
     this.privateKey = props.privateKey;
     this.publicKey = props.publicKey;
@@ -59,16 +59,22 @@ export class Account {
       10,
     ) as CairoVersion;
     this.accountContract = props.accountContract;
-
     this.#jsonDataToMetaData(props.jsonData);
   }
 
-  #jsonDataToMetaData(jsonData?: AccContract): void {
+  #jsonDataToMetaData(jsonData?: Partial<AccContract>): void {
     if (!jsonData) {
+      this.metadata.visibility = true;
+      this.metadata.accountName = getDefaultAccountName(this.hdIndex);
       return;
     }
     if (jsonData.visibility !== undefined) {
       this.metadata.visibility = jsonData.visibility;
+    }
+    if (jsonData.accountName === undefined) {
+      this.metadata.accountName = getDefaultAccountName(this.hdIndex);
+    } else {
+      this.metadata.accountName = jsonData.accountName;
     }
   }
 
@@ -94,6 +100,7 @@ export class Account {
       deployRequired,
       upgradeRequired,
       visibility: this.metadata.visibility,
+      accountName: this.metadata.accountName,
     };
   }
 }

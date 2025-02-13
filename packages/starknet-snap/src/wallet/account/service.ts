@@ -1,6 +1,10 @@
 import { Config } from '../../config';
 import { AccountStateManager } from '../../state/account-state-manager';
-import type { AccContract, Network } from '../../types/snapState';
+import type {
+  AccContract,
+  AccountMetaData,
+  Network,
+} from '../../types/snapState';
 import { getBip44Deriver, logger } from '../../utils';
 import {
   AccountMissMatchError,
@@ -32,6 +36,17 @@ export class AccountService {
   }
 
   /**
+   * Retrieves the next available index for account derivation.
+   *
+   * @returns A promise that resolves to the next available index.
+   */
+  async getNextIndex(): Promise<number> {
+    const { chainId } = this.network;
+
+    return await this.accountStateMgr.getNextIndex(chainId);
+  }
+
+  /**
    * Derives a BIP44 node from an index and constructs a new `Account` object using the derived private key and public key.
    * The `Account` object is assigned a `CairoAccountContract` contract and is then serialized and persisted to the state.
    *
@@ -41,7 +56,7 @@ export class AccountService {
    */
   async deriveAccountByIndex(
     hdIndex: number,
-    jsonData?: AccContract,
+    jsonData?: Partial<AccContract>,
   ): Promise<Account> {
     // Derive a BIP44 node from an index. e.g m/44'/60'/0'/0/{hdIndex}
     const deriver = await getBip44Deriver();
@@ -54,7 +69,6 @@ export class AccountService {
 
     const accountContract =
       await this.accountContractDiscoveryService.getContract(publicKey);
-
     const account = new Account({
       privateKey,
       publicKey,
@@ -185,15 +199,16 @@ export class AccountService {
    * Add a account for the network.
    * And set the current account to the newly added account.
    *
+   * @param metadata
    * @returns A promise that resolves to an `Account` object.
    */
-  async addAccount(): Promise<Account> {
+  async addAccount(metadata?: AccountMetaData): Promise<Account> {
     const { chainId } = this.network;
 
     return await this.accountStateMgr.withTransaction(async (state) => {
       const nextIndex = await this.accountStateMgr.getNextIndex(chainId, state);
 
-      const account = await this.deriveAccountByIndex(nextIndex);
+      const account = await this.deriveAccountByIndex(nextIndex, metadata);
 
       const accountJsonData = await account.serialize();
 

@@ -219,6 +219,17 @@ export const StarkNameStruct = refine(
   },
 );
 
+export const AccountNameStruct = refine(
+  string(),
+  'AccountNameStruct',
+  (value: string) => {
+    if (value.length >= 1 && value.length <= 20) {
+      return true;
+    }
+    return `The given account name is invalid`;
+  },
+);
+
 /* ------------------------------ Contract Struct ------------------------------ */
 /* eslint-disable */
 export const SierraContractEntryPointFieldsStruct = object({
@@ -437,4 +448,5 @@ export const AccountStruct = object({
   upgradeRequired: boolean(),
   deployRequired: boolean(),
   visibility: optional(boolean()),
+  accountName: optional(string()),
 });

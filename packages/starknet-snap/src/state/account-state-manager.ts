@@ -1,4 +1,5 @@
 import type { AccContract, SnapState } from '../types/snapState';
+import { getDefaultAccountName } from '../utils/account';
 import type { IFilter } from './filter';
 import {
   AddressFilter as BaseAddressFilter,
@@ -43,6 +44,9 @@ export class AccountStateManager extends StateManager<AccContract> {
     }
     if (data.visibility !== undefined) {
       dataInState.visibility = data.visibility;
+    }
+    if (data.accountName !== undefined) {
+      dataInState.accountName = data.accountName;
     }
   }
 
@@ -89,12 +93,13 @@ export class AccountStateManager extends StateManager<AccContract> {
   }
 
   /**
-   * List the account in the state that matches the chain ID.
+   * List the accounts in the state that match the chain ID, ensuring default values
+   * for `visibility` and `accountName` if they are not set.
    *
    * @param param - An object containing the chain ID to search for.
-   * @param param.chainId - The chain ID of the account to search for.
+   * @param param.chainId - The chain ID of the accounts to search for.
    * @param [state] - The optional SnapState object.
-   * @returns A Promise that resolves with a array of the matching AccContract object.
+   * @returns A Promise that resolves with an array of the matching `AccContract` objects, with defaults applied.
    */
   async findAccounts(
     {
@@ -104,13 +109,20 @@ export class AccountStateManager extends StateManager<AccContract> {
     },
     state?: SnapState,
   ): Promise<AccContract[]> {
-    return this.list(
+    const accounts = await this.list(
       [new ChainIdFilter([chainId])],
       // sort by index in asc order
       (entityA: AccContract, entityB: AccContract) =>
         entityA.addressIndex - entityB.addressIndex,
       state,
     );
+    // Ensure default values for visibility and accountName
+    return accounts.map((account) => ({
+      ...account,
+      visibility: account.visibility ?? true,
+      accountName:
+        account.accountName ?? getDefaultAccountName(account.addressIndex),
+    }));
   }
 
   /**

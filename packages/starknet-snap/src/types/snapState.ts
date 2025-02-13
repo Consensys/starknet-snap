@@ -58,6 +58,8 @@ export type TransactionRequest = {
   includeDeploy: boolean;
 };
 
+export type AccountMetaData = { accountName?: string; visibility?: boolean };
+
 export type AccContract = {
   addressSalt: string;
   publicKey: string; // in hex
@@ -69,8 +71,7 @@ export type AccContract = {
   upgradeRequired?: boolean;
   deployRequired?: boolean;
   cairoVersion?: string;
-  visibility?: boolean;
-};
+} & AccountMetaData;
 
 export type Erc20Token = {
   address: string; // in hex
