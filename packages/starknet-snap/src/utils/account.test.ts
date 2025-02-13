@@ -7,8 +7,13 @@ describe('getDefaultAccountName', () => {
     [1, 'Account 2'],
     [5, 'Account 6'],
     [999, 'Account 1000'],
-    [-1, 'Account 0'], // Edge case: negative number
-  ])("should return '%s' when hdIndex is %s", (hdIndex, expected) => {
+  ])("returns '%s' when hdIndex is %s", (hdIndex, expected) => {
     expect(getDefaultAccountName(hdIndex as number)).toBe(expected);
+  });
+
+  it('throws an error when hdIndex is negative', () => {
+    expect(() => getDefaultAccountName(-1)).toThrow(
+      'hdIndex cannot be negative.',
+    );
   });
 });

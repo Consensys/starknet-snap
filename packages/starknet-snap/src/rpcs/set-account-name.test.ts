@@ -22,9 +22,8 @@ describe('SetAccountName', () => {
 
     mockAccountContractReader({});
 
-    const { getAccountSpy, getCurrentAccountSpy } = mockAccountStateManager();
+    const { getAccountSpy } = mockAccountStateManager();
     getAccountSpy.mockResolvedValue(await account.serialize());
-    getCurrentAccountSpy.mockResolvedValue(await account.serialize());
 
     const deriveAccountByAddressSpy = jest.spyOn(
       AccountService.prototype,
