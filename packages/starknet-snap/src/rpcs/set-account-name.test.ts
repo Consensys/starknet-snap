@@ -1,10 +1,13 @@
 import type { constants } from 'starknet';
 
-import { AccountStateManager } from '../state/account-state-manager';
+import { mockAccountStateManager } from '../state/__tests__/helper';
 import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../utils/constants';
 import { InvalidRequestParamsError } from '../utils/exceptions';
-import { createAccountObject } from '../wallet/account/__test__/helper';
-import { setupAccountController } from './__tests__/helper';
+import { AccountService } from '../wallet/account';
+import {
+  createAccountObject,
+  mockAccountContractReader,
+} from '../wallet/account/__test__/helper';
 import { setAccountName } from './set-account-name';
 import type { SetAccountNameParams } from './set-account-name';
 
@@ -15,24 +18,20 @@ describe('SetAccountName', () => {
   const network = STARKNET_SEPOLIA_TESTNET_NETWORK;
 
   const setupSetAccountNameTest = async (accountName = 'My Account Name') => {
-    const { account } = await setupAccountController({
-      network,
-    });
+    const { accountObj: account } = await createAccountObject(network);
 
-    const { accountObj: nextAccount } = await createAccountObject(network, 1);
+    mockAccountContractReader({});
 
-    const uspertAccountSpy = jest.spyOn(
-      AccountStateManager.prototype,
-      'upsertAccount',
+    const { getAccountSpy } = mockAccountStateManager();
+    getAccountSpy.mockResolvedValue(await account.serialize());
+
+    const deriveAccountByAddressSpy = jest.spyOn(
+      AccountService.prototype,
+      'deriveAccountByAddress',
     );
+    deriveAccountByAddressSpy.mockResolvedValue(account);
 
-    const getCurrentAccountSpy = jest.spyOn(
-      AccountStateManager.prototype,
-      'getCurrentAccount',
-    );
-
-    uspertAccountSpy.mockReturnThis();
-    getCurrentAccountSpy.mockResolvedValue(await nextAccount.serialize());
+    const { updateAccountByAddressSpy } = mockAccountStateManager();
 
     const request = {
       chainId: network.chainId as constants.StarknetChainId,
@@ -41,11 +40,9 @@ describe('SetAccountName', () => {
     };
 
     return {
-      getCurrentAccountSpy,
-      uspertAccountSpy,
+      updateAccountByAddressSpy,
       request,
       account,
-      nextAccount,
     };
   };
 
@@ -61,12 +58,12 @@ describe('SetAccountName', () => {
         publicKey,
       },
       request,
-      uspertAccountSpy,
+      updateAccountByAddressSpy,
     } = await setupSetAccountNameTest(accountName);
 
     await setAccountName.execute(request);
 
-    expect(uspertAccountSpy).toHaveBeenCalledWith({
+    expect(updateAccountByAddressSpy).toHaveBeenCalledWith({
       accountName,
       address,
       addressSalt,

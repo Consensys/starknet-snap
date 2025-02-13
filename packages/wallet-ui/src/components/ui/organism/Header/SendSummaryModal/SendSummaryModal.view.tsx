@@ -39,6 +39,7 @@ interface Props {
   amount: string;
   chainId: string;
   closeModal?: () => void;
+  handleBack: () => void;
   selectedFeeToken: FeeToken;
 }
 
@@ -47,6 +48,7 @@ export const SendSummaryModalView = ({
   amount,
   chainId,
   closeModal,
+  handleBack,
   selectedFeeToken,
 }: Props) => {
   const wallet = useAppSelector((state) => state.wallet);
@@ -310,8 +312,12 @@ export const SendSummaryModalView = ({
         )}
       </Wrapper>
       <Buttons>
-        <ButtonStyled onClick={closeModal} backgroundTransparent borderVisible>
-          {translate('reject')}
+        <ButtonStyled
+          onClick={() => handleBack()}
+          backgroundTransparent
+          borderVisible
+        >
+          {translate('back').toUpperCase()}
         </ButtonStyled>
         <ButtonStyled
           enabled={!estimatingGas && !gasFeesError && !totalExceedsBalance}

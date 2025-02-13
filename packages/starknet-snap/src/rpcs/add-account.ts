@@ -1,11 +1,6 @@
 import { assign, object, optional, type Infer } from 'superstruct';
 
-import {
-  BaseRequestStruct,
-  AccountStruct,
-  logger,
-  AccountNameStruct,
-} from '../utils';
+import { BaseRequestStruct, AccountStruct, AccountNameStruct } from '../utils';
 import { createAccountService } from '../utils/factory';
 import { ChainRpcController } from './abstract/chain-rpc-controller';
 
@@ -45,19 +40,8 @@ export class AddAccountRpc extends ChainRpcController<
     params: AddAccountParams,
   ): Promise<AddAccountResponse> {
     const accountService = createAccountService(this.network);
-    const account = await accountService.deriveAccountByIndex(undefined, {
-      accountName: params.accountName,
-    });
-
-    try {
-      // after derive an account, the current account will switch to the new account.
-      // however if the account is failed to switch,
-      // it is better not to throw an error to maintain the user experience.
-      await accountService.switchAccount(this.network.chainId, account);
-    } catch (error) {
-      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-      logger.warn(`Failed to switch account: ${error.message}`);
-    }
+    const { accountName } = params;
+    const account = await accountService.addAccount({ accountName });
 
     return account.serialize() as unknown as AddAccountResponse;
   }

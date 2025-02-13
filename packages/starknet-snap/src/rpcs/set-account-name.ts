@@ -51,7 +51,7 @@ export class SetAccountNameRpc extends AccountRpcController<
 
     const accMgt = new AccountStateManager();
 
-    await accMgt.upsertAccount({
+    await accMgt.updateAccountByAddress({
       ...(await this.account.serialize()),
       accountName,
     });

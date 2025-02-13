@@ -41,7 +41,7 @@ describe('SwitchAccountRpc', () => {
     const result = await switchAccount.execute(request);
 
     expect(result).toStrictEqual(await account.serialize());
-    expect(switchAccountSpy).toHaveBeenCalledWith(network.chainId, account);
+    expect(switchAccountSpy).toHaveBeenCalledWith(account);
   });
 
   it('throws `InvalidRequestParamsError` when request parameter is not correct', async () => {
