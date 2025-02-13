@@ -113,3 +113,9 @@ export class InsufficientFundsError extends SnapError {
     super(message ?? 'Insufficient Funds');
   }
 }
+
+export class AccountMissMatchError extends SnapError {
+  constructor(message?: string) {
+    super(message ?? 'Account address does not match the address in the state');
+  }
+}
