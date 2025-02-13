@@ -17,3 +17,4 @@ export * from './get-current-account';
 export * from './list-accounts';
 export * from './switch-account';
 export * from './toggle-account-visibility';
+export * from './set-account-name';

@@ -41,6 +41,7 @@ import type {
   ListAccountsParams,
   SwitchAccountParams,
   ToggleAccountVisibilityParams,
+  SetAccountNameParams,
 } from './rpcs';
 import {
   displayPrivateKey,
@@ -62,6 +63,7 @@ import {
   listAccounts,
   switchAccount,
   toggleAccountVisibility,
+  setAccountName,
 } from './rpcs';
 import { signDeployAccountTransaction } from './signDeployAccountTransaction';
 import type {
@@ -317,6 +319,11 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
       case RpcMethod.ToggleAccountVisibility:
         return await toggleAccountVisibility.execute(
           requestParams as unknown as ToggleAccountVisibilityParams,
+        );
+
+      case RpcMethod.SetAccountName:
+        return await setAccountName.execute(
+          requestParams as unknown as SetAccountNameParams,
         );
 
       default:

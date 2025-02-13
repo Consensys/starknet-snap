@@ -32,6 +32,17 @@ export class AccountService {
   }
 
   /**
+   * Retrieves the next available index for account derivation.
+   *
+   * @returns A promise that resolves to the next available index.
+   */
+  async getNextIndex(): Promise<number> {
+    const { chainId } = this.network;
+
+    return await this.accountStateMgr.getNextIndex(chainId);
+  }
+
+  /**
    * Derives a BIP44 node from an index and constructs a new `Account` object using the derived private key and public key.
    * The `Account` object is assigned a `CairoAccountContract` contract and is then serialized and persisted to the state.
    *

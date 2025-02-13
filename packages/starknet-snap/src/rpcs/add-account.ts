@@ -1,10 +1,15 @@
-import { type Infer } from 'superstruct';
+import { assign, object, optional, type Infer } from 'superstruct';
 
 import { BaseRequestStruct, AccountStruct } from '../utils';
 import { createAccountService } from '../utils/factory';
 import { ChainRpcController } from './abstract/chain-rpc-controller';
 
-export const AddAccountRequestStruct = BaseRequestStruct;
+export const AddAccountRequestStruct = assign(
+  BaseRequestStruct,
+  object({
+    accountName: optional(AccountNameStruct),
+  }),
+);
 
 export const AddAccountResponseStruct = AccountStruct;
 

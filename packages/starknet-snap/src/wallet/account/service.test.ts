@@ -17,6 +17,7 @@ import {
 } from './__test__/helper';
 import { Account, DefaultAccountMetaData } from './account';
 import { AccountContractDiscovery } from './discovery';
+import { getDefaultAccountName } from '../../utils/account';
 
 jest.mock('../../utils/logger');
 jest.mock('../../utils/snap');
@@ -85,7 +86,10 @@ describe('AccountService', () => {
       expect(result).toHaveProperty('publicKey', account.publicKey);
       expect(result).toHaveProperty('hdIndex', hdIndex);
       expect(result).toHaveProperty('addressSalt', account.publicKey);
-      expect(result).toHaveProperty('metadata', DefaultAccountMetaData);
+      expect(result).toHaveProperty('metadata', {
+        ...DefaultAccountMetaData,
+        accountName: getDefaultAccountName(hdIndex),
+      });
     });
 
     it('derives an account along with the metadata', async () => {
