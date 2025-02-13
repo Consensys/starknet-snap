@@ -8,7 +8,7 @@ import { getNextAccountIndex } from './get-next-account-index';
 jest.mock('../utils/snap');
 jest.mock('../utils/logger');
 
-describe('AddAccountRpc', () => {
+describe('GetNextAccountIndexRpc', () => {
   const network = STARKNET_SEPOLIA_TESTNET_NETWORK;
 
   const setupAddAccountTest = async () => {
