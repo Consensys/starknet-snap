@@ -65,7 +65,6 @@ export class AccountService {
 
     const accountContract =
       await this.accountContractDiscoveryService.getContract(publicKey);
-
     const account = new Account({
       privateKey,
       publicKey,

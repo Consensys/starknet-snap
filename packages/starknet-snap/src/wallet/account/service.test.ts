@@ -4,6 +4,7 @@ import { AccountService } from '.';
 import { generateKeyDeriver } from '../../__tests__/helper';
 import { Config } from '../../config';
 import { mockAccountStateManager } from '../../state/__tests__/helper';
+import { getDefaultAccountName } from '../../utils/account';
 import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../../utils/constants';
 import {
   AccountMissMatchError,
@@ -17,7 +18,6 @@ import {
 } from './__test__/helper';
 import { Account, DefaultAccountMetaData } from './account';
 import { AccountContractDiscovery } from './discovery';
-import { getDefaultAccountName } from '../../utils/account';
 
 jest.mock('../../utils/logger');
 jest.mock('../../utils/snap');
