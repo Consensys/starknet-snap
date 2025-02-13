@@ -960,7 +960,6 @@ export const useStarkNetSnap = () => {
     addNewAccount,
     toggleAccountVisibility,
     setAccountName,
-    getNextAccountIndex,
     setAccount,
     setErc20TokenBalance,
     getPrivateKeyFromAddress,
