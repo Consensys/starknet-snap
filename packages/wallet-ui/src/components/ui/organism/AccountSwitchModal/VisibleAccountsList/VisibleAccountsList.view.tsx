@@ -27,7 +27,7 @@ export const VisibleAccountsListView = ({
 }: Props) => {
   const { translate } = useMultiLanguage();
   return (
-    <MenuSection>
+    <MenuSection style={{ height: 201, overflowY: 'auto' }}>
       {accounts.map((account) => {
         const isSelected = account.address === currentAddress;
         return (
