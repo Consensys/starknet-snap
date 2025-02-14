@@ -20,6 +20,7 @@ export const Wrapper = styled.div`
 export const AccountImageDiv = styled.div`
   width: ${(props) => props.theme.modal.noPadding};
   background-color: transparent;
+  padding-left: 12px;
 `;
 
 export const AccountImageStyled = styled(AccountImage)`
@@ -33,6 +34,7 @@ export const TitleDiv = styled.div`
   flex-direction: row;
   align-items: center;
   margin-bottom: 24px;
+  margin-left: 52px;
 `;
 
 export const Title = styled.div`
@@ -74,4 +76,52 @@ export const ButtonStyled = styled(Button).attrs(() => ({
   borderVisible: true,
 }))`
   width: 240px;
+`;
+
+export const EditIcon = styled.button`
+  background: none;
+  border: none;
+  margin-left: 8px;
+  cursor: pointer;
+  color: #888;
+  font-size: 14px;
+  transition: color 0.2s;
+
+  &:hover {
+    color: #000;
+  }
+`;
+
+export const IconButton = styled.button<{ disabled: boolean }>`
+  background-color: transparent;
+  border: none;
+  opacity: ${(props) => (props.disabled ? 0.5 : 1)};
+  cursor: ${(props) => (props.disabled ? 'not-allowed' : 'pointer')};
+  border: none;
+  cursor: pointer;
+  margin-left: 6px;
+  font-size: 14px;
+  color: #333;
+  transition: color 0.2s;
+
+  &:hover {
+    color: #000;
+  }
+`;
+
+export const AccountNameInput = styled.input`
+  font-size: 23px;
+  font-weight: bold;
+  padding: 4px 8px;
+  margin-left: 7px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  outline: none;
+  width: 150px;
+  text-align: center;
+  transition: border-color 0.2s;
+
+  &:focus {
+    border-color: #007bff;
+  }
 `;

@@ -2,7 +2,10 @@ import { useAppSelector } from 'hooks/redux';
 import { FC, useEffect, useRef } from 'react';
 import { useStarkNetSnap } from 'services';
 import { Transaction } from 'types';
-import { TRANSACTIONS_REFRESH_FREQUENCY } from 'utils/constants';
+import {
+  defaultAccount,
+  TRANSACTIONS_REFRESH_FREQUENCY,
+} from 'utils/constants';
 import { IListProps } from '../List/List.view';
 import { TransactionListItem } from './TransactionListItem';
 import { Wrapper } from './TransactionsList.style';
@@ -14,14 +17,15 @@ interface Props {
 export const TransactionsListView = ({ transactions }: Props) => {
   const { getTransactions } = useStarkNetSnap();
   const networks = useAppSelector((state) => state.networks);
-  const wallet = useAppSelector((state) => state.wallet);
+  const currentAccount = useAppSelector((state) => state.wallet.currentAccount);
+  const erc20TokenBalanceSelected = useAppSelector(
+    (state) => state.wallet.erc20TokenBalanceSelected,
+  );
+  const walletTransactions = useAppSelector(
+    (state) => state.wallet.transactions,
+  );
   const timeoutHandle = useRef(setTimeout(() => {}));
   const chainId = networks.items[networks.activeNetwork]?.chainId;
-  const {
-    currentAccount,
-    erc20TokenBalanceSelected,
-    transactions: walletTransactions,
-  } = wallet;
 
   useEffect(() => {
     if (chainId && erc20TokenBalanceSelected.address) {
@@ -45,7 +49,11 @@ export const TransactionsListView = ({ transactions }: Props) => {
 
   useEffect(
     () => {
-      if (chainId && erc20TokenBalanceSelected.address) {
+      if (
+        chainId &&
+        erc20TokenBalanceSelected.address &&
+        currentAccount.address !== defaultAccount.address
+      ) {
         clearTimeout(timeoutHandle.current); // cancel the timeout that was in-flight
         getTransactions(
           currentAccount.address,
@@ -62,14 +70,16 @@ export const TransactionsListView = ({ transactions }: Props) => {
       // eslint-disable-next-line react-hooks/exhaustive-deps
       erc20TokenBalanceSelected.chainId,
       // eslint-disable-next-line react-hooks/exhaustive-deps
-      currentAccount,
+      currentAccount.address,
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      currentAccount.chainId,
       chainId,
     ],
   );
 
   return (
     <Wrapper<FC<IListProps<Transaction>>>
-      data={transactions.length > 0 ? transactions : wallet.transactions}
+      data={transactions.length > 0 ? transactions : walletTransactions}
       render={(transaction) => (
         <TransactionListItem transaction={transaction} />
       )}
