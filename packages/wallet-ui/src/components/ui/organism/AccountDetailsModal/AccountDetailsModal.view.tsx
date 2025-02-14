@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   AccountImageDiv,
   AccountImageStyled,
@@ -28,18 +28,28 @@ export const AccountDetailsModalView = () => {
   const chainId = networks?.items[networks.activeNetwork]?.chainId;
   const address = currentAccount.address;
 
-  const [isEditing, setIsEditing] = useState(false);
   const [newAccountName, setNewAccountName] = useState(
     currentAccount.accountName,
   );
+  const [isEditing, setIsEditing] = useState(false);
+  const [isEnabled, setIsEnabled] = useState(true);
+
+  useEffect(() => {
+    const accountName = newAccountName.trim();
+    setIsEnabled(accountName.length >= 1 && accountName.length <= 20);
+  }, [newAccountName]);
 
   const handleSaveName = async () => {
-    if (
-      newAccountName.trim() &&
-      newAccountName !== currentAccount.accountName
-    ) {
-      await setAccountName(chainId, address, newAccountName);
+    const accountName = newAccountName.trim();
+
+    if (accountName.length < 1 || accountName.length > 20) {
+      return;
     }
+
+    if (accountName !== currentAccount.accountName) {
+      await setAccountName(chainId, address, accountName);
+    }
+
     setIsEditing(false);
   };
 
@@ -55,13 +65,20 @@ export const AccountDetailsModalView = () => {
               <AccountNameInput
                 type="text"
                 value={newAccountName}
-                onChange={(e) => setNewAccountName(e.target.value)}
+                onChange={(event) => setNewAccountName(event.target.value)}
                 autoFocus
               />
-              <IconButton onClick={handleSaveName}>
+              <IconButton
+                onClick={handleSaveName}
+                disabled={!isEnabled}
+                style={{
+                  opacity: isEnabled ? 1 : 0.5, // Makes the button translucent when disabled
+                  cursor: isEnabled ? 'pointer' : 'not-allowed', // Changes cursor to 'not-allowed' when disabled
+                }}
+              >
                 <FontAwesomeIcon icon={faCheck} />
               </IconButton>
-              <IconButton onClick={() => setIsEditing(false)}>
+              <IconButton disabled={false} onClick={() => setIsEditing(false)}>
                 <FontAwesomeIcon icon={faTimes} />
               </IconButton>
             </>

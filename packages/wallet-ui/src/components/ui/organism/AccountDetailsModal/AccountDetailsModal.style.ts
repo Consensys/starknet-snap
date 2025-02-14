@@ -92,8 +92,11 @@ export const EditIcon = styled.button`
   }
 `;
 
-export const IconButton = styled.button`
-  background: none;
+export const IconButton = styled.button<{ disabled: boolean }>`
+  background-color: transparent;
+  border: none;
+  opacity: ${(props) => (props.disabled ? 0.5 : 1)};
+  cursor: ${(props) => (props.disabled ? 'not-allowed' : 'pointer')};
   border: none;
   cursor: pointer;
   margin-left: 6px;

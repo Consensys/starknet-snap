@@ -894,18 +894,24 @@ export const useStarkNetSnap = () => {
     address: string,
     accountName: string,
   ) => {
-    dispatch(enableLoadingWithMessage('Changing Account Name...'));
-    await invokeSnap<Account>({
-      method: 'starkNet_setAccountName',
-      params: {
-        chainId,
-        address,
-        accountName,
-      },
-    });
-    dispatch(updateAccount({ address, updates: { accountName } }));
-    dispatch(updateCurrentAccount({ accountName }));
-    dispatch(disableLoading());
+    try {
+      dispatch(enableLoadingWithMessage('Changing Account Name...'));
+      await invokeSnap<Account>({
+        method: 'starkNet_setAccountName',
+        params: {
+          chainId,
+          address,
+          accountName,
+        },
+      });
+      dispatch(updateAccount({ address, updates: { accountName } }));
+      dispatch(updateCurrentAccount({ accountName }));
+    } catch (err: any) {
+      const toastr = new Toastr();
+      toastr.error(err.message as unknown as string);
+    } finally {
+      dispatch(disableLoading());
+    }
   };
 
   const switchAccount = async (chainId: string, address: string) => {
