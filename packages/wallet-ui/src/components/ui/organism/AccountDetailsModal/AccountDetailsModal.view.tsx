@@ -40,17 +40,11 @@ export const AccountDetailsModalView = () => {
   }, [newAccountName]);
 
   const handleSaveName = async () => {
-    const accountName = newAccountName.trim();
-
-    if (accountName.length < 1 || accountName.length > 20) {
-      return;
-    }
-
-    if (accountName !== currentAccount.accountName) {
+    if (isEnabled) {
+      const accountName = newAccountName.trim();
       await setAccountName(chainId, address, accountName);
+      setIsEditing(false);
     }
-
-    setIsEditing(false);
   };
 
   return (
@@ -78,7 +72,13 @@ export const AccountDetailsModalView = () => {
               >
                 <FontAwesomeIcon icon={faCheck} />
               </IconButton>
-              <IconButton disabled={false} onClick={() => setIsEditing(false)}>
+              <IconButton
+                disabled={false}
+                onClick={() => {
+                  setNewAccountName(currentAccount.accountName);
+                  setIsEditing(false);
+                }}
+              >
                 <FontAwesomeIcon icon={faTimes} />
               </IconButton>
             </>
