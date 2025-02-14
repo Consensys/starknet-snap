@@ -37,7 +37,7 @@ function App() {
   } = useAppSelector((state) => state.modals);
   const { loader } = useAppSelector((state) => state.UI);
   const networks = useAppSelector((state) => state.networks);
-  const { currentAccount } = useAppSelector((state) => state.wallet);
+  const currentAccount = useAppSelector((state) => state.wallet.currentAccount);
   const { hasMetamask } = useHasMetamask();
   const chainId = networks.items?.[networks.activeNetwork]?.chainId;
   const address = currentAccount.address;

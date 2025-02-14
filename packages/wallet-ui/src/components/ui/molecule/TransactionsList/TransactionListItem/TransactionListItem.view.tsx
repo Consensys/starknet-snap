@@ -40,19 +40,23 @@ function toCamelCase(str: string) {
 }
 
 export const TransactionListItemView = ({ transaction }: Props) => {
-  const wallet = useAppSelector((state) => state.wallet);
-  const tokenAddress = wallet.erc20TokenBalanceSelected.address;
+  const { translate } = useMultiLanguage();
+  const erc20TokenBalances = useAppSelector(
+    (state) => state.wallet.erc20TokenBalances,
+  );
+  const erc20TokenBalanceSelected = useAppSelector(
+    (state) => state.wallet.erc20TokenBalanceSelected,
+  );
+  const locale = useAppSelector((state) => state.wallet.locale);
   const [currencySymbol, setCurrencySymbol] = useState('N/A');
   const [txnValue, setTxnValue] = useState('0');
   const [txnUsdValue, setTxnUsdValue] = useState('0.00');
-  const { translate } = useMultiLanguage();
-
-  const { locale } = useAppSelector((state) => state.wallet);
+  const tokenAddress = erc20TokenBalanceSelected.address;
 
   useEffect(() => {
     const fetchData = async () => {
       // Find the matching token
-      const foundToken = wallet.erc20TokenBalances.find((token) =>
+      const foundToken = erc20TokenBalances.find((token) =>
         ethers.BigNumber.from(token.address).eq(
           ethers.BigNumber.from(tokenAddress),
         ),

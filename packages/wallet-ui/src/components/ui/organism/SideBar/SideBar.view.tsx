@@ -30,11 +30,14 @@ import { PopperTooltip } from 'components/ui/molecule/PopperTooltip';
 export const SideBarView = () => {
   const networks = useAppSelector((state) => state.networks);
   const currentAccount = useAppSelector((state) => state.wallet.currentAccount);
+  const erc20TokenBalances = useAppSelector(
+    (state) => state.wallet.erc20TokenBalances,
+  );
+  const connected = useAppSelector((state) => state.wallet.connected);
   const chainId = networks?.items[networks.activeNetwork]?.chainId;
   const [listOverflow, setListOverflow] = useState(false);
   const [infoModalOpen, setInfoModalOpen] = useState(false);
   const [accountDetailsOpen, setAccountDetailsOpen] = useState(false);
-  const wallet = useAppSelector((state) => state.wallet);
   const [addTokenOpen, setAddTokenOpen] = useState(false);
   const { getStarkName } = useStarkNetSnap();
   const { translate } = useMultiLanguage();
@@ -52,7 +55,7 @@ export const SideBarView = () => {
         setListOverflow(false);
       }
     }
-  }, [wallet.erc20TokenBalances]);
+  }, [erc20TokenBalances]);
 
   useEffect(() => {
     if (address && address !== defaultAccount.address) {
@@ -108,7 +111,7 @@ export const SideBarView = () => {
           </AccountDetailsContent>
         }
       >
-        <AccountImageStyled address={address} connected={wallet.connected} />
+        <AccountImageStyled address={address} connected={connected} />
       </AccountDetails>
 
       <AccountLabel>

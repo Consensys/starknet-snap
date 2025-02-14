@@ -51,8 +51,13 @@ export const SendSummaryModalView = ({
   handleBack,
   selectedFeeToken,
 }: Props) => {
-  const wallet = useAppSelector((state) => state.wallet);
-  const currentAccount = wallet.currentAccount;
+  const currentAccount = useAppSelector((state) => state.wallet.currentAccount);
+  const erc20TokenBalances = useAppSelector(
+    (state) => state.wallet.erc20TokenBalances,
+  );
+  const erc20TokenBalanceSelected = useAppSelector(
+    (state) => state.wallet.erc20TokenBalanceSelected,
+  );
   const [estimatingGas, setEstimatingGas] = useState(true);
   const [gasFees, setGasFees] = useState({
     suggestedMaxFee: '0',
@@ -70,11 +75,10 @@ export const SendSummaryModalView = ({
   const { estimateFees, sendTransaction, getTransactions } = useStarkNetSnap();
   const { translate } = useMultiLanguage();
 
-  const ethToken = wallet.erc20TokenBalances[0];
+  const ethToken = erc20TokenBalances[0];
   const feeToken =
-    wallet.erc20TokenBalances.find(
-      (token) => token.symbol === selectedFeeToken,
-    ) ?? ethToken;
+    erc20TokenBalances.find((token) => token.symbol === selectedFeeToken) ??
+    ethToken;
 
   const toastr = new Toastr({
     closeDuration: 10000000,
@@ -88,11 +92,11 @@ export const SendSummaryModalView = ({
       setEstimatingGas(true);
       const amountBN = ethers.utils.parseUnits(
         amount,
-        wallet.erc20TokenBalanceSelected.decimals,
+        erc20TokenBalanceSelected.decimals,
       );
       const callData = address + ',' + amountBN.toString() + ',0';
       estimateFees(
-        wallet.erc20TokenBalanceSelected.address,
+        erc20TokenBalanceSelected.address,
         ContractFuncName.Transfer,
         callData,
         currentAccount.address,
@@ -128,11 +132,11 @@ export const SendSummaryModalView = ({
       }
       const amountBN = ethers.utils.parseUnits(
         amount,
-        wallet.erc20TokenBalanceSelected.decimals,
+        erc20TokenBalanceSelected.decimals,
       );
       // Combine the transaction amount and fee amount if they are the same token.
       // And verify if the combined amount is not exceeding the total balance.
-      if (wallet.erc20TokenBalanceSelected.address === feeToken.address) {
+      if (erc20TokenBalanceSelected.address === feeToken.address) {
         const totalAmountBN = gasFeesBN.add(amountBN);
         totalToCheck = totalAmountBN;
         const totalAmount = ethers.utils.formatUnits(
@@ -165,20 +169,20 @@ export const SendSummaryModalView = ({
 
   useEffect(() => {
     const amountFloat = parseFloat(amount);
-    wallet.erc20TokenBalanceSelected.usdPrice &&
+    erc20TokenBalanceSelected.usdPrice &&
       setAmountUsdPrice(
-        getAmountPrice(wallet.erc20TokenBalanceSelected, amountFloat, false),
+        getAmountPrice(erc20TokenBalanceSelected, amountFloat, false),
       );
-  }, [amount, wallet.erc20TokenBalanceSelected]);
+  }, [amount, erc20TokenBalanceSelected]);
 
   const handleConfirmClick = () => {
     const amountBN = ethers.utils.parseUnits(
       amount,
-      wallet.erc20TokenBalanceSelected.decimals,
+      erc20TokenBalanceSelected.decimals,
     );
     const callData = address + ',' + amountBN.toString() + ',0';
     sendTransaction(
-      wallet.erc20TokenBalanceSelected.address,
+      erc20TokenBalanceSelected.address,
       ContractFuncName.Transfer,
       callData,
       currentAccount.address,
@@ -191,7 +195,7 @@ export const SendSummaryModalView = ({
           toastr.success(translate('transactionSentSuccessfully'));
           getTransactions(
             currentAccount.address,
-            wallet.erc20TokenBalanceSelected.address,
+            erc20TokenBalanceSelected.address,
             10,
             chainId,
             false,
@@ -212,14 +216,14 @@ export const SendSummaryModalView = ({
   };
 
   const totalAmountDisplay = () => {
-    if (wallet.erc20TokenBalances.length > 0) {
-      if (wallet.erc20TokenBalanceSelected.address === feeToken.address) {
+    if (erc20TokenBalances.length > 0) {
+      if (erc20TokenBalanceSelected.address === feeToken.address) {
         return totalAmount + ` ${feeToken.symbol}`;
       } else {
         return (
-          getHumanReadableAmount(wallet.erc20TokenBalanceSelected, amount) +
+          getHumanReadableAmount(erc20TokenBalanceSelected, amount) +
           ' ' +
-          wallet.erc20TokenBalanceSelected.symbol +
+          erc20TokenBalanceSelected.symbol +
           ' + ' +
           gasFeesAmount +
           ` ${feeToken.symbol}`
@@ -237,9 +241,9 @@ export const SendSummaryModalView = ({
         <ToDiv>To</ToDiv>
         <AddressDiv>{shortenAddress(address)}</AddressDiv>
         <AssetQuantity
-          currency={wallet.erc20TokenBalanceSelected.symbol}
+          currency={erc20TokenBalanceSelected.symbol}
           currencyValue={getMaxDecimalsReadable(
-            wallet.erc20TokenBalanceSelected,
+            erc20TokenBalanceSelected,
             amount,
           )}
           USDValue={amountUsdPrice}

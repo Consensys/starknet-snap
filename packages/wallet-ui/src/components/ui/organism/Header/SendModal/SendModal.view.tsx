@@ -30,7 +30,9 @@ interface Props {
 export const SendModalView = ({ closeModal }: Props) => {
   const networks = useAppSelector((state) => state.networks);
   const chainId = networks?.items[networks.activeNetwork]?.chainId;
-  const wallet = useAppSelector((state) => state.wallet);
+  const erc20TokenBalanceSelected = useAppSelector(
+    (state) => state.wallet.erc20TokenBalanceSelected,
+  );
   const { getAddrFromStarkName } = useStarkNetSnap();
   const { translate } = useMultiLanguage();
   const [summaryModalOpen, setSummaryModalOpen] = useState(false);
@@ -63,9 +65,9 @@ export const SendModalView = ({ closeModal }: Props) => {
         if (fieldValue !== '' && fieldValue !== '.') {
           const inputAmount = ethers.utils.parseUnits(
             fieldValue,
-            wallet.erc20TokenBalanceSelected.decimals,
+            erc20TokenBalanceSelected.decimals,
           );
-          const userBalance = wallet.erc20TokenBalanceSelected.amount;
+          const userBalance = erc20TokenBalanceSelected.amount;
           if (inputAmount.gt(userBalance)) {
             setErrors((prevErrors) => ({
               ...prevErrors,
@@ -166,8 +168,8 @@ export const SendModalView = ({ closeModal }: Props) => {
               value={fields.amount}
               error={errors.amount !== '' ? true : false}
               helperText={errors.amount}
-              decimalsMax={wallet.erc20TokenBalanceSelected.decimals}
-              asset={wallet.erc20TokenBalanceSelected}
+              decimalsMax={erc20TokenBalanceSelected.decimals}
+              asset={erc20TokenBalanceSelected}
             />
             <SeparatorSmall />
             <div>
