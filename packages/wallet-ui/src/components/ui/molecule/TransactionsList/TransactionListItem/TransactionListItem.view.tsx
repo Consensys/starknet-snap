@@ -17,11 +17,13 @@ import {
 } from './TransactionListItem.style';
 import {
   getIcon,
+  getTranslationNameForTxnType,
   getTxnDate,
   getTxnFailureReason,
-  getTxnName,
   getTxnStatus,
+  getTxnName,
   getTxnValues,
+  TxnType,
 } from './types';
 import { getHumanReadableAmount, openExplorerTab } from 'utils/utils';
 import { useMultiLanguage } from 'services';
@@ -63,12 +65,8 @@ export const TransactionListItemView = ({ transaction }: Props) => {
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const { txName, txNameTranslated } = getTxnName(
-    transaction,
-    tokenAddress,
-    translate,
-  );
+  const txnName = getTxnName(transaction, tokenAddress);
+  const txnNameTranslated = getTranslationNameForTxnType(txnName, translate);
   const txnDate = getTxnDate(transaction, locale);
   const txnStatus = getTxnStatus(transaction);
   const txnToFromLabel = '';
@@ -81,10 +79,10 @@ export const TransactionListItemView = ({ transaction }: Props) => {
     >
       <Left>
         <LeftIcon>
-          <IconStyled transactionname={txName} icon={getIcon(txName)} />
+          <IconStyled transactionname={txnName} icon={getIcon(txnName)} />
         </LeftIcon>
         <Column>
-          <Label>{txNameTranslated}</Label>
+          <Label>{txnNameTranslated}</Label>
           <Description>
             {txnDate}
             <br />
@@ -97,7 +95,7 @@ export const TransactionListItemView = ({ transaction }: Props) => {
       </Left>
       <Middle>{txnToFromLabel} </Middle>
       <Right>
-        {txName === 'Send' && (
+        {txnName === TxnType.Send && (
           <AssetQuantity
             currency={currencySymbol}
             currencyValue={txnValue}

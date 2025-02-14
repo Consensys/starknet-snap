@@ -3,12 +3,19 @@ import { IconProp } from '@fortawesome/fontawesome-svg-core';
 import { ContractFuncName, Transaction, TransactionStatus } from 'types';
 import { ethers } from 'ethers';
 
+export enum TxnType {
+  Send = 'send',
+  UpgradeAccount = 'upgradeAccount',
+  ContractInteraction = 'contractInteraction',
+  Deploy = 'deploy',
+  DeployAccount = 'deployAccount',
+  Unknown = 'unknown',
+}
+
 export const getIcon = (transactionName: string): IconProp => {
   switch (transactionName) {
     case 'Send':
       return ['fas', 'long-arrow-alt-up'];
-    case 'Receive':
-      return ['fas', 'long-arrow-alt-down'];
     case 'Deploy':
     case 'Deploy Account':
       return ['fas', 'long-arrow-alt-up'];
@@ -17,11 +24,30 @@ export const getIcon = (transactionName: string): IconProp => {
   }
 };
 
+export const getTranslationNameForTxnType = (
+  txnType: TxnType,
+  translate: (key: string) => string,
+): string => {
+  switch (txnType) {
+    case TxnType.Send:
+      return translate('send');
+    case TxnType.UpgradeAccount:
+      return translate('upgradeAccount');
+    case TxnType.ContractInteraction:
+      return translate('contractInteraction');
+    case TxnType.Deploy:
+      return translate('deploy');
+    case TxnType.DeployAccount:
+      return translate('deployAccount');
+    default:
+      return translate('unknown');
+  }
+};
+
 export const getTxnName = (
   transaction: Transaction,
   contractAddress: string,
-  translate: (key: string, ...args: (string | undefined)[]) => string,
-): { txName: string; txNameTranslated: string } => {
+): TxnType => {
   switch (transaction.txnType) {
     case TransactionType.INVOKE:
       if (
@@ -30,38 +56,20 @@ export const getTxnName = (
       ) {
         for (const call of transaction.accountCalls[contractAddress]) {
           if (call.contractFuncName === ContractFuncName.Transfer) {
-            return {
-              txName: 'Send',
-              txNameTranslated: translate('send'),
-            };
+            return TxnType.Send;
           }
           if (call.contractFuncName === ContractFuncName.Upgrade) {
-            return {
-              txName: 'Upgrade Account',
-              txNameTranslated: translate('upgradeAccount'),
-            };
+            return TxnType.UpgradeAccount;
           }
         }
       }
-      return {
-        txName: 'Contract Interaction',
-        txNameTranslated: translate('contractInteraction'),
-      };
+      return TxnType.ContractInteraction;
     case TransactionType.DEPLOY:
-      return {
-        txName: 'Deploy',
-        txNameTranslated: translate('deploy'),
-      };
+      return TxnType.Deploy;
     case TransactionType.DEPLOY_ACCOUNT:
-      return {
-        txName: 'Deploy Account',
-        txNameTranslated: translate('deployAccount'),
-      };
+      return TxnType.DeployAccount;
     default:
-      return {
-        txName: 'Unknown',
-        txNameTranslated: translate('unknown'),
-      };
+      return TxnType.Unknown;
   }
 };
 
