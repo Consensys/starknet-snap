@@ -10,12 +10,7 @@ import {
   Title,
   Wrapper,
 } from './AddAccountModal.style';
-import Toastr from 'toastr2';
-const toastr = new Toastr({
-  closeDuration: 10000000,
-  showDuration: 1000000000,
-  positionClass: 'toast-top-center',
-});
+import { getDefaultAccountName } from 'utils/utils';
 interface Props {
   closeModal: () => void;
 }
@@ -27,23 +22,17 @@ export const AddAccountModalView = ({ closeModal }: Props) => {
   const networks = useAppSelector((state) => state.networks);
   const accounts = useAppSelector((state) => state.wallet.accounts);
   const chainId = networks?.items[networks.activeNetwork].chainId;
-  const [fields, setFields] = useState({
-    accountName: `Account ${accounts.length + 1}`,
-  });
-
-  const handleChange = (fieldName: string, fieldValue: string) => {
-    setFields((prevFields) => ({
-      ...prevFields,
-      [fieldName]: fieldValue,
-    }));
-  };
+  const [accountName, setAccountName] = useState(
+    getDefaultAccountName(accounts.length),
+  );
 
   useEffect(() => {
-    const allFieldFilled = Object.values(fields).every((field) => {
-      return field.trim() !== '' && field.length < 20;
-    });
-    setEnabled(allFieldFilled);
-  }, [fields]);
+    setEnabled(
+      accountName.trim() !== '' &&
+        accountName.length <= 20 &&
+        accountName.length >= 1,
+    );
+  }, [accountName]);
 
   return (
     <>
@@ -53,10 +42,15 @@ export const AddAccountModalView = ({ closeModal }: Props) => {
         <FormGroup>
           <InputWithLabel
             label={translate('accountName')}
-            placeholder={fields.accountName}
-            onChange={(event) =>
-              handleChange('accountName', event.target.value)
-            }
+            placeholder={accountName}
+            onChange={(event) => {
+              const value = event.target.value;
+              setAccountName(
+                value.trim() === ''
+                  ? getDefaultAccountName(accounts.length)
+                  : value,
+              );
+            }}
           />
         </FormGroup>
       </Wrapper>
@@ -67,12 +61,8 @@ export const AddAccountModalView = ({ closeModal }: Props) => {
         <ButtonStyled
           enabled={enabled}
           onClick={async () => {
-            try {
-              await addNewAccount(chainId, fields.accountName);
-              closeModal();
-            } catch (err) {
-              toastr.error(translate('errorAddingAccount'));
-            }
+            await addNewAccount(chainId, accountName);
+            closeModal();
           }}
         >
           {translate('add')}
