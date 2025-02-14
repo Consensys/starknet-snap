@@ -12,12 +12,12 @@ export enum TxnType {
   Unknown = 'unknown',
 }
 
-export const getIcon = (transactionName: string): IconProp => {
-  switch (transactionName) {
-    case 'Send':
+export const getIcon = (txnType: TxnType): IconProp => {
+  switch (txnType) {
+    case TxnType.Send:
       return ['fas', 'long-arrow-alt-up'];
-    case 'Deploy':
-    case 'Deploy Account':
+    case TxnType.Deploy:
+    case TxnType.DeployAccount:
       return ['fas', 'long-arrow-alt-up'];
     default:
       return ['fas', 'arrow-right-arrow-left'];
