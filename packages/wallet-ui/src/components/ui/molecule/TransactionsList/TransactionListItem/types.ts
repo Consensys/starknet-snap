@@ -44,7 +44,7 @@ export const getTranslationNameForTxnType = (
   }
 };
 
-export const getTxnName = (
+export const getTxnType = (
   transaction: Transaction,
   contractAddress: string,
 ): TxnType => {

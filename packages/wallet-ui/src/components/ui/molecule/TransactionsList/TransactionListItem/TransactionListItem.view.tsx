@@ -21,7 +21,7 @@ import {
   getTxnDate,
   getTxnFailureReason,
   getTxnStatus,
-  getTxnName,
+  getTxnType,
   getTxnValues,
   TxnType,
 } from './types';
@@ -65,7 +65,7 @@ export const TransactionListItemView = ({ transaction }: Props) => {
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  const txnName = getTxnName(transaction, tokenAddress);
+  const txnName = getTxnType(transaction, tokenAddress);
   const txnNameTranslated = getTranslationNameForTxnType(txnName, translate);
   const txnDate = getTxnDate(transaction, locale);
   const txnStatus = getTxnStatus(transaction);
