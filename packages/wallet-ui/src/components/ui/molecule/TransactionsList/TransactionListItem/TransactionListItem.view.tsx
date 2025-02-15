@@ -17,26 +17,19 @@ import {
 } from './TransactionListItem.style';
 import {
   getIcon,
+  getTranslationNameForTxnType,
   getTxnDate,
   getTxnFailureReason,
-  getTxnName,
   getTxnStatus,
+  getTxnType,
   getTxnValues,
+  TxnType,
 } from './types';
 import { getHumanReadableAmount, openExplorerTab } from 'utils/utils';
 import { useMultiLanguage } from 'services';
 
 interface Props {
   transaction: Transaction;
-}
-
-function toCamelCase(str: string) {
-  return str
-    .replace(/(?:^\w|[A-Z]|\b\w|\s+|_|-)/g, (match, index) =>
-      index === 0 ? match.toLowerCase() : match.toUpperCase(),
-    )
-    .replace(/\s+/g, '')
-    .replace(/[-_]+/g, '');
 }
 
 export const TransactionListItemView = ({ transaction }: Props) => {
@@ -72,8 +65,8 @@ export const TransactionListItemView = ({ transaction }: Props) => {
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const txnName = getTxnName(transaction, tokenAddress);
+  const txnName = getTxnType(transaction, tokenAddress);
+  const txnNameTranslated = getTranslationNameForTxnType(txnName, translate);
   const txnDate = getTxnDate(transaction, locale);
   const txnStatus = getTxnStatus(transaction);
   const txnToFromLabel = '';
@@ -89,7 +82,7 @@ export const TransactionListItemView = ({ transaction }: Props) => {
           <IconStyled transactionname={txnName} icon={getIcon(txnName)} />
         </LeftIcon>
         <Column>
-          <Label>{translate(toCamelCase(txnName))}</Label>
+          <Label>{txnNameTranslated}</Label>
           <Description>
             {txnDate}
             <br />
@@ -102,7 +95,7 @@ export const TransactionListItemView = ({ transaction }: Props) => {
       </Left>
       <Middle>{txnToFromLabel} </Middle>
       <Right>
-        {txnName === 'Send' && (
+        {txnName === TxnType.Send && (
           <AssetQuantity
             currency={currencySymbol}
             currencyValue={txnValue}
