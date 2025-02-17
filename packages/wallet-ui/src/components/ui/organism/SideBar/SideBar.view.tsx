@@ -1,7 +1,6 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useEffect, useRef, useState } from 'react';
 import { RoundedIcon } from 'components/ui/atom/RoundedIcon';
-import { AccountSwitchModal } from 'components/ui/organism/AccountSwitchModal';
 import { AssetsList } from 'components/ui/molecule/AssetsList';
 import { PopIn } from 'components/ui/molecule/PopIn';
 import { AccountDetailsModal } from '../AccountDetailsModal';
@@ -26,6 +25,7 @@ import { AddTokenModal } from '../AddTokenModal';
 import { useMultiLanguage, useStarkNetSnap } from 'services';
 import { defaultAccount } from 'utils/constants';
 import { PopperTooltip } from 'components/ui/molecule/PopperTooltip';
+import { AccountDrawer } from '../AccountDrawer';
 
 export const SideBarView = () => {
   const networks = useAppSelector((state) => state.networks);
@@ -116,7 +116,7 @@ export const SideBarView = () => {
       <AccountLabel>{currentAccount.accountName}</AccountLabel>
       <RowDiv>
         <InfoIcon onClick={() => setInfoModalOpen(true)}>i</InfoIcon>
-        <AccountSwitchModal starkName={starkName} />
+        <AccountDrawer starkName={starkName} />
         <PopperTooltip content="Copied!" closeTrigger="click">
           <CopyIcon
             onClick={async () => navigator.clipboard.writeText(address)}
