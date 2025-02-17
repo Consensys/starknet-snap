@@ -17,27 +17,25 @@ interface Props {
 }
 
 export const HeaderView = ({ address }: Props) => {
+  const { updateTokenBalance } = useStarkNetSnap();
+  const { translate } = useMultiLanguage();
   const [receiveOpen, setReceiveOpen] = useState(false);
   const [sendOpen, setSendOpen] = useState(false);
   const networks = useAppSelector((state) => state.networks);
-  const wallet = useAppSelector((state) => state.wallet);
-  const { updateTokenBalance } = useStarkNetSnap();
-  const { translate } = useMultiLanguage();
+  const erc20TokenBalanceSelected = useAppSelector(
+    (state) => state.wallet.erc20TokenBalanceSelected,
+  );
   const timeoutHandle = useRef(setTimeout(() => {}));
 
   const getUSDValue = () => {
     const amountFloat = parseFloat(
       ethers.utils.formatUnits(
-        wallet.erc20TokenBalanceSelected.amount,
-        wallet.erc20TokenBalanceSelected.decimals,
+        erc20TokenBalanceSelected.amount,
+        erc20TokenBalanceSelected.decimals,
       ),
     );
-    if (wallet.erc20TokenBalanceSelected.usdPrice)
-      return getAmountPrice(
-        wallet.erc20TokenBalanceSelected,
-        amountFloat,
-        false,
-      );
+    if (erc20TokenBalanceSelected.usdPrice)
+      return getAmountPrice(erc20TokenBalanceSelected, amountFloat, false);
     return '';
   };
 
@@ -47,7 +45,7 @@ export const HeaderView = ({ address }: Props) => {
       clearTimeout(timeoutHandle.current); // cancel the timeout that was in-flight
       timeoutHandle.current = setTimeout(async () => {
         await updateTokenBalance(
-          wallet.erc20TokenBalanceSelected.address,
+          erc20TokenBalanceSelected.address,
           address,
           chain,
         );
@@ -55,7 +53,7 @@ export const HeaderView = ({ address }: Props) => {
       return () => clearTimeout(timeoutHandle.current);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [wallet.erc20TokenBalanceSelected]);
+  }, [erc20TokenBalanceSelected]);
 
   const handleSendClick = () => {
     setSendOpen(true);
@@ -65,10 +63,8 @@ export const HeaderView = ({ address }: Props) => {
     <Wrapper>
       <AssetQuantity
         USDValue={getUSDValue()}
-        currencyValue={getSpendableTotalBalance(
-          wallet.erc20TokenBalanceSelected,
-        )}
-        currency={wallet.erc20TokenBalanceSelected.symbol}
+        currencyValue={getSpendableTotalBalance(erc20TokenBalanceSelected)}
+        currency={erc20TokenBalanceSelected.symbol}
         size="big"
         centered
       />

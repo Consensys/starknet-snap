@@ -27,7 +27,7 @@ export const AddTokenModalView = ({ closeModal }: Props) => {
   const { translate } = useMultiLanguage();
   const [enabled, setEnabled] = useState(false);
   const networks = useAppSelector((state) => state.networks);
-  const { currentAccount } = useAppSelector((state) => state.wallet);
+  const currentAccount = useAppSelector((state) => state.wallet.currentAccount);
   const chainId = networks?.items[networks.activeNetwork].chainId;
   const [isValidAddress, setIsValidAddress] = useState(false);
   const [fields, setFields] = useState({
@@ -36,6 +36,7 @@ export const AddTokenModalView = ({ closeModal }: Props) => {
     symbol: '',
     decimal: '',
   });
+
   const handleChange = (fieldName: string, fieldValue: string) => {
     setFields((prevFields) => ({
       ...prevFields,

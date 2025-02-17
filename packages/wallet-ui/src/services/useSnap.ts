@@ -17,7 +17,7 @@ export type SnapsMetaData = {
 };
 
 export const useSnap = () => {
-  const { provider } = useAppSelector((state) => state.wallet);
+  const provider = useAppSelector((state) => state.wallet.provider);
   const snapId = process.env.REACT_APP_SNAP_ID
     ? process.env.REACT_APP_SNAP_ID
     : 'local:http://localhost:8081';

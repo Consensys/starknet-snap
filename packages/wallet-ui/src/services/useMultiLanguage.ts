@@ -1,7 +1,7 @@
 import { useAppSelector } from 'hooks/redux';
 
 export const useMultiLanguage = () => {
-  const { translations } = useAppSelector((state) => state.wallet);
+  const translations = useAppSelector((state) => state.wallet.translations);
 
   const translate = (key: string, ...args: (string | undefined)[]): string => {
     const template = translations[key]?.message ?? `{${key}}`;
