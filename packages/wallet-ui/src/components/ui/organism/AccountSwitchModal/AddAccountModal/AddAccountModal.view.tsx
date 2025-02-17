@@ -35,7 +35,7 @@ export const AddAccountModalView = ({ closeModal }: Props) => {
         (trimedAccountName.length <= maxLength &&
           trimedAccountName.length >= minLength),
     );
-  }, [accountName]);
+  }, [accountName, minLength, maxLength]);
 
   const onAccountNameChange = (event: ChangeEvent<HTMLInputElement>) => {
     setAccountName(event.target.value);

@@ -40,7 +40,7 @@ export const AccountDetailsModalView = () => {
       trimedAccountName.length <= maxLength &&
         trimedAccountName.length >= minLength,
     );
-  }, [accountName]);
+  }, [accountName, minLength, maxLength]);
 
   const onAccountNameUpdate = async () => {
     const trimedAccountName = accountName.trim();
