@@ -30,18 +30,32 @@ export const AccountImageStyled = styled(AccountImage)`
 `;
 
 export const TitleDiv = styled.div`
+  margin-bottom: 25px;
+`;
+
+export const RowDiv = styled.div`
   display: flex;
   flex-direction: row;
   align-items: center;
-  margin-bottom: 24px;
-  margin-left: 52px;
+  justify-content: center;
+`;
+
+export const ErrorMsg = styled.div`
+  text-align: center;
+  color: ${(props) => props.theme.palette.error.main};
+  font-size: ${(props) => props.theme.typography.c1.fontSize};
+  font-weight: ${(props) => props.theme.typography.c1.fontSize};
+  font-family: ${(props) => props.theme.typography.c1.fontFamily};
 `;
 
 export const Title = styled.div`
   font-size: ${(props) => props.theme.typography.h3.fontSize};
   font-weight: ${(props) => props.theme.typography.h3.fontSize};
   font-family: ${(props) => props.theme.typography.h3.fontFamily};
-  margin-right: 13px;
+  word-break: break-word;
+  max-width: 200px;
+  text-align: left;
+  line-height: 1.4;
 `;
 
 export const ModifyIcon = styled(FontAwesomeIcon).attrs((props) => ({
@@ -98,7 +112,6 @@ export const IconButton = styled.button<{ disabled: boolean }>`
   opacity: ${(props) => (props.disabled ? 0.5 : 1)};
   cursor: ${(props) => (props.disabled ? 'not-allowed' : 'pointer')};
   border: none;
-  cursor: pointer;
   margin-left: 6px;
   font-size: 14px;
   color: #333;
@@ -117,7 +130,7 @@ export const AccountNameInput = styled.input`
   border: 1px solid #ccc;
   border-radius: 4px;
   outline: none;
-  width: 150px;
+  width: 200px;
   text-align: center;
   transition: border-color 0.2s;
 

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { ChangeEvent, useEffect, useState } from 'react';
 import {
   AccountImageDiv,
   AccountImageStyled,
@@ -8,7 +8,9 @@ import {
   ButtonDiv,
   ButtonStyled,
   EditIcon,
+  ErrorMsg,
   IconButton,
+  RowDiv,
   Title,
   TitleDiv,
   Wrapper,
@@ -17,34 +19,48 @@ import { openExplorerTab } from 'utils/utils';
 import { useAppSelector } from 'hooks/redux';
 import { useMultiLanguage, useStarkNetSnap } from 'services';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPen, faCheck, faTimes } from '@fortawesome/free-solid-svg-icons';
+import { faPen, faCheck } from '@fortawesome/free-solid-svg-icons';
+import { ACCOUNT_NAME_LENGTH } from 'utils/constants';
 
 export const AccountDetailsModalView = () => {
+  const [minLength, maxLength] = ACCOUNT_NAME_LENGTH;
+  const { getPrivateKeyFromAddress, updateAccountName } = useStarkNetSnap();
+  const { translate } = useMultiLanguage();
   const networks = useAppSelector((state) => state.networks);
   const currentAccount = useAppSelector((state) => state.wallet.currentAccount);
-  const { getPrivateKeyFromAddress, setAccountName } = useStarkNetSnap();
-  const { translate } = useMultiLanguage();
-
-  const chainId = networks?.items[networks.activeNetwork]?.chainId;
-  const address = currentAccount.address;
-
-  const [newAccountName, setNewAccountName] = useState(
-    currentAccount.accountName,
-  );
+  const [accountName, setAccountName] = useState(currentAccount.accountName);
   const [isEditing, setIsEditing] = useState(false);
-  const [isEnabled, setIsEnabled] = useState(true);
+  const [enabled, setEnabled] = useState(true);
+  const chainId = networks?.items[networks.activeNetwork]?.chainId;
+  const { address, accountName: currentAccountName } = currentAccount;
 
   useEffect(() => {
-    const accountName = newAccountName.trim();
-    setIsEnabled(accountName.length >= 1 && accountName.length <= 20);
-  }, [newAccountName]);
+    const trimedAccountName = accountName.trim();
+    setEnabled(
+      trimedAccountName.length <= maxLength &&
+        trimedAccountName.length >= minLength,
+    );
+  }, [accountName]);
 
-  const handleSaveName = async () => {
-    if (isEnabled) {
-      const accountName = newAccountName.trim();
-      await setAccountName(chainId, address, accountName);
+  const onAccountNameUpdate = async () => {
+    const trimedAccountName = accountName.trim();
+
+    if (trimedAccountName === currentAccountName) {
+      setIsEditing(false);
+      return;
+    }
+    if (enabled) {
+      await updateAccountName(chainId, address, trimedAccountName);
       setIsEditing(false);
     }
+  };
+
+  const onAccountNameChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setAccountName(event.target.value);
+  };
+
+  const onEditStart = () => {
+    setIsEditing(true);
   };
 
   return (
@@ -56,39 +72,37 @@ export const AccountDetailsModalView = () => {
         <TitleDiv>
           {isEditing ? (
             <>
-              <AccountNameInput
-                type="text"
-                value={newAccountName}
-                onChange={(event) => setNewAccountName(event.target.value)}
-                autoFocus
-              />
-              <IconButton
-                onClick={handleSaveName}
-                disabled={!isEnabled}
-                style={{
-                  opacity: isEnabled ? 1 : 0.5, // Makes the button translucent when disabled
-                  cursor: isEnabled ? 'pointer' : 'not-allowed', // Changes cursor to 'not-allowed' when disabled
-                }}
-              >
-                <FontAwesomeIcon icon={faCheck} />
-              </IconButton>
-              <IconButton
-                disabled={false}
-                onClick={() => {
-                  setNewAccountName(currentAccount.accountName);
-                  setIsEditing(false);
-                }}
-              >
-                <FontAwesomeIcon icon={faTimes} />
-              </IconButton>
+              <RowDiv>
+                <AccountNameInput
+                  type="text"
+                  value={accountName}
+                  onChange={onAccountNameChange}
+                  autoFocus
+                  maxLength={maxLength}
+                />
+                {/* Save edit button */}
+                <IconButton onClick={onAccountNameUpdate} disabled={!enabled}>
+                  <FontAwesomeIcon icon={faCheck} />
+                </IconButton>
+              </RowDiv>
+              {!enabled && (
+                <ErrorMsg>
+                  {translate(
+                    'accountNameLengthError',
+                    minLength.toString(),
+                    maxLength.toString(),
+                  )}
+                </ErrorMsg>
+              )}
             </>
           ) : (
-            <>
-              <Title>{currentAccount.accountName}</Title>
-              <EditIcon onClick={() => setIsEditing(true)}>
+            <RowDiv>
+              {/* Edit button */}
+              <Title>{currentAccountName}</Title>
+              <EditIcon onClick={onEditStart}>
                 <FontAwesomeIcon icon={faPen} />
               </EditIcon>
-            </>
+            </RowDiv>
           )}
         </TitleDiv>
         <AddressQrCode value={address} />

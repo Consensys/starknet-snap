@@ -312,6 +312,9 @@
     },
     "youCannotHideLastAccount": {
       "message": "Vous ne pouvez pas masquer le dernier compte restant."
+    },
+    "accountNameLengthError": {
+      "message": "Le nom du compte doit comporter entre {1} et {2} caractères."
     }
   }
 }

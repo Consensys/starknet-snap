@@ -263,3 +263,10 @@ export const getDefaultAccountName = (hdIndex = 0) => {
   }
   return `Account ${hdIndex + 1}`;
 };
+
+export const removeUndefined = (obj: Record<string, unknown>) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  return Object.fromEntries(
+    Object.entries(obj).filter(([_, val]) => val !== undefined),
+  );
+};

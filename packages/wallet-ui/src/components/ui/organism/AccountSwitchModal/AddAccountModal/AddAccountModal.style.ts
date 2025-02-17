@@ -42,3 +42,11 @@ export const ButtonsWrapper = styled.div`
   border-radius: 0px 0px 8px 8px;
   width: ${(props) => props.theme.modal.base};
 `;
+
+export const ErrorMsg = styled.div`
+  text-align: center;
+  color: ${(props) => props.theme.palette.error.main};
+  font-size: ${(props) => props.theme.typography.c1.fontSize};
+  font-weight: ${(props) => props.theme.typography.c1.fontSize};
+  font-family: ${(props) => props.theme.typography.c1.fontFamily};
+`;
