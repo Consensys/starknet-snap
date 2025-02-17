@@ -837,7 +837,7 @@ export const useStarkNetSnap = () => {
     });
   };
 
-  const addNewAccount = async (chainId: string, accountName: string) => {
+  const addNewAccount = async (chainId: string, accountName?: string) => {
     dispatch(enableLoadingWithMessage('Adding new account...'));
     try {
       const account = await invokeSnap<Account>({
@@ -889,7 +889,7 @@ export const useStarkNetSnap = () => {
     });
   };
 
-  const setAccountName = async (
+  const updateAccountName = async (
     chainId: string,
     address: string,
     accountName: string,
@@ -954,7 +954,7 @@ export const useStarkNetSnap = () => {
     getCurrentAccount,
     addNewAccount,
     toggleAccountVisibility,
-    setAccountName,
+    updateAccountName,
     setAccount,
     setErc20TokenBalance,
     getPrivateKeyFromAddress,

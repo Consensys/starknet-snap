@@ -318,6 +318,9 @@
     },
     "youCannotHideLastAccount": {
       "message": "You cannot hide the last remaining account."
+    },
+    "accountNameLengthError": {
+      "message": "Account name must be between {1} and {2} characters."
     }
   }
 }

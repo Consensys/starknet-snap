@@ -1,38 +1,56 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, ChangeEvent } from 'react';
 import { useAppSelector } from 'hooks/redux';
 import { useMultiLanguage, useStarkNetSnap } from 'services';
 import { InputWithLabel } from 'components/ui/molecule/InputWithLabel';
 import {
   ButtonStyled,
   ButtonsWrapper,
+  ErrorMsg,
   FormGroup,
   Space,
   Title,
   Wrapper,
 } from './AddAccountModal.style';
 import { getDefaultAccountName } from 'utils/utils';
+import { ACCOUNT_NAME_LENGTH } from 'utils/constants';
+
 interface Props {
   closeModal: () => void;
 }
 
 export const AddAccountModalView = ({ closeModal }: Props) => {
+  const [minLength, maxLength] = ACCOUNT_NAME_LENGTH;
   const { addNewAccount } = useStarkNetSnap();
   const { translate } = useMultiLanguage();
-  const [enabled, setEnabled] = useState(false);
   const networks = useAppSelector((state) => state.networks);
   const accounts = useAppSelector((state) => state.wallet.accounts);
+  const [enabled, setEnabled] = useState(true);
+  const [accountName, setAccountName] = useState('');
   const chainId = networks?.items[networks.activeNetwork].chainId;
-  const [accountName, setAccountName] = useState(
-    getDefaultAccountName(accounts.length),
-  );
 
   useEffect(() => {
+    const trimedAccountName = accountName.trim();
     setEnabled(
-      accountName.trim() !== '' &&
-        accountName.length <= 20 &&
-        accountName.length >= 1,
+      !trimedAccountName ||
+        (trimedAccountName.length <= maxLength &&
+          trimedAccountName.length >= minLength),
     );
-  }, [accountName]);
+  }, [accountName, minLength, maxLength]);
+
+  const onAccountNameChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setAccountName(event.target.value);
+  };
+
+  const onAddAccount = async () => {
+    const trimedAccountName = accountName.trim();
+    // Reset account name to undefined if it is empty,
+    // so that the default account name is used in Snap
+    await addNewAccount(
+      chainId,
+      trimedAccountName === '' ? undefined : trimedAccountName,
+    );
+    closeModal();
+  };
 
   return (
     <>
@@ -42,29 +60,26 @@ export const AddAccountModalView = ({ closeModal }: Props) => {
         <FormGroup>
           <InputWithLabel
             label={translate('accountName')}
-            placeholder={accountName}
-            onChange={(event) => {
-              const value = event.target.value;
-              setAccountName(
-                value.trim() === ''
-                  ? getDefaultAccountName(accounts.length)
-                  : value,
-              );
-            }}
+            placeholder={getDefaultAccountName(accounts.length)}
+            onChange={onAccountNameChange}
+            maxLength={maxLength}
           />
+          {!enabled && (
+            <ErrorMsg>
+              {translate(
+                'accountNameLengthError',
+                minLength.toString(),
+                maxLength.toString(),
+              )}
+            </ErrorMsg>
+          )}
         </FormGroup>
       </Wrapper>
       <ButtonsWrapper>
         <ButtonStyled onClick={closeModal} backgroundTransparent borderVisible>
           {translate('cancel')}
         </ButtonStyled>
-        <ButtonStyled
-          enabled={enabled}
-          onClick={async () => {
-            await addNewAccount(chainId, accountName);
-            closeModal();
-          }}
-        >
+        <ButtonStyled enabled={enabled} onClick={onAddAccount}>
           {translate('add')}
         </ButtonStyled>
       </ButtonsWrapper>

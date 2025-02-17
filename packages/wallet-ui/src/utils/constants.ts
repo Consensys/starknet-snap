@@ -72,3 +72,6 @@ export const DEFAULT_FEE_TOKEN = FeeToken.ETH;
 export const MIN_METAMASK_VERSION = '12.5.0';
 
 export const DENY_ERROR_CODE = 113;
+
+// Account name length range - [min, max]
+export const ACCOUNT_NAME_LENGTH = [1, 20];
