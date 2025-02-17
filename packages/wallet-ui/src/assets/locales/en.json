@@ -10,9 +10,6 @@
     "accountName": {
       "message": "Account name"
     },
-    "accounts": {
-      "message": "Accounts"
-    },
     "accountDeployedSuccessfully": {
       "message": "Account deployed successfully."
     },
@@ -148,6 +145,9 @@
     "gotIt": {
       "message": "GOT IT!"
     },
+    "hiddenAccounts": {
+      "message": "Hidden accounts"
+    },
     "inputAmountExceedsBalance": {
       "message": "Input amount exceeds user balance"
     },
@@ -243,6 +243,9 @@
     },
     "selectTokenForTransactionFees": {
       "message": "Select Token for Transaction Fees"
+    },
+    "selectAnAccount": {
+      "message": "Select an account"
     },
     "send": {
       "message": "Send"
