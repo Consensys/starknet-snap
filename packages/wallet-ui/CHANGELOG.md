@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
 
+## [1.28.0](https://github.com/Consensys/starknet-snap/compare/wallet-ui-v1.27.0...wallet-ui-v1.28.0) (2025-02-17)
+
+
+### Features
+
+* Enable back button from send transaction ([710cca7](https://github.com/Consensys/starknet-snap/commit/710cca794dcd6e3f1f239d1b34baac62dc7b84c7))
+* Support account name management in wallet-ui ([d31f6a0](https://github.com/Consensys/starknet-snap/commit/d31f6a002c5793fffb0159b595322a2845554549))
+
 ## [1.27.0](https://github.com/Consensys/starknet-snap/compare/wallet-ui-v1.26.0...wallet-ui-v1.27.0) (2025-02-07)
 
 
