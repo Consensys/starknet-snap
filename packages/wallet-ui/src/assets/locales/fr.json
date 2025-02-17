@@ -7,6 +7,9 @@
     "account": {
       "message": "Compte"
     },
+    "accountName": {
+      "message": "Nom du compte"
+    },
     "accounts": {
       "message": "Comptes"
     },
@@ -27,6 +30,9 @@
     },
     "add": {
       "message": "AJOUTER"
+    },
+    "addAccount": {
+      "message": "Ajouter un compte"
     },
     "addToken": {
       "message": "Ajouter un jeton"
@@ -58,6 +64,9 @@
     "contractAddress": {
       "message": "Adresse du contrat"
     },
+    "contractInteraction": {
+      "message": "Intéraction avec un contrat"
+    },
     "copied": {
       "message": "Copié !"
     },
@@ -71,10 +80,10 @@
       "message": "Supprimer la version actuelle dans MetaMask en allant dans Paramètres > Snaps > @consensys/starknet-snap > Voir les détails > Supprimer le Snap"
     },
     "deploy": {
-      "message": "Déployer"
+      "message": "Déploiement"
     },
     "deployAccount": {
-      "message": "Déployer le compte"
+      "message": "Déploiement du compte"
     },
     "deployAccountFailed": {
       "message": "Échec du déploiement du compte"
@@ -102,6 +111,9 @@
     },
     "downloadMetaMaskFlask": {
       "message": "Télécharger MetaMask Flask"
+    },
+    "errorAddingAccount": {
+      "message": "Erreur lors de la création du compte"
     },
     "errorAddingToken": {
       "message": "Erreur lors de l'ajout du jeton"
@@ -227,7 +239,7 @@
       "message": "Sélectionner un jeton pour les frais de transaction"
     },
     "send": {
-      "message": "Envoyer"
+      "message": "Envoie"
     },
     "snapsExtendMetaMask": {
       "message": "Les Snaps étendent les capacités de MetaMask en ajoutant de nouvelles fonctionnalités. Ce Snap permet à MetaMask de être compatible avec Starknet et de gérer vos clés."
@@ -268,6 +280,9 @@
     "transactionSentSuccessfully": {
       "message": "Transaction envoyée avec succès"
     },
+    "unknown": {
+      "message": "Unknown"
+    },
     "updateMetaMaskVersion": {
       "message": "Veuillez mettre à jour vers la version MetaMask {1} ou supérieure."
     },
@@ -303,6 +318,9 @@
     },
     "youCannotHideLastAccount": {
       "message": "Vous ne pouvez pas masquer le dernier compte restant."
+    },
+    "accountNameLengthError": {
+      "message": "Le nom du compte doit comporter entre {1} et {2} caractères."
     }
   }
 }

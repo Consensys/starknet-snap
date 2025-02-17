@@ -17,6 +17,7 @@ import {
   setLocale,
   setTranslations,
   updateAccount,
+  updateCurrentAccount,
 } from '../slices/walletSlice';
 import Toastr from 'toastr2';
 import {
@@ -836,13 +837,14 @@ export const useStarkNetSnap = () => {
     });
   };
 
-  const addNewAccount = async (chainId: string) => {
+  const addNewAccount = async (chainId: string, accountName?: string) => {
     dispatch(enableLoadingWithMessage('Adding new account...'));
     try {
       const account = await invokeSnap<Account>({
         method: 'starkNet_addAccount',
         params: {
           chainId,
+          accountName,
         },
       });
 
@@ -887,6 +889,31 @@ export const useStarkNetSnap = () => {
     });
   };
 
+  const updateAccountName = async (
+    chainId: string,
+    address: string,
+    accountName: string,
+  ) => {
+    try {
+      dispatch(enableLoadingWithMessage('Changing Account Name...'));
+      await invokeSnap<Account>({
+        method: 'starkNet_setAccountName',
+        params: {
+          chainId,
+          address,
+          accountName,
+        },
+      });
+      dispatch(updateAccount({ address, updates: { accountName } }));
+      dispatch(updateCurrentAccount({ accountName }));
+    } catch (err: any) {
+      const toastr = new Toastr();
+      toastr.error(err.message as unknown as string);
+    } finally {
+      dispatch(disableLoading());
+    }
+  };
+
   const switchAccount = async (chainId: string, address: string) => {
     dispatch(
       enableLoadingWithMessage(
@@ -927,6 +954,7 @@ export const useStarkNetSnap = () => {
     getCurrentAccount,
     addNewAccount,
     toggleAccountVisibility,
+    updateAccountName,
     setAccount,
     setErc20TokenBalance,
     getPrivateKeyFromAddress,

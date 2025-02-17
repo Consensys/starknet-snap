@@ -1,4 +1,5 @@
 import { useAppSelector } from 'hooks/redux';
+import { removeUndefined } from 'utils/utils';
 
 export type InvokeSnapParams = {
   method: string;
@@ -38,7 +39,7 @@ export const useSnap = () => {
           snapId,
           request: {
             method,
-            params,
+            params: params ? removeUndefined(params) : params,
           },
         },
       });

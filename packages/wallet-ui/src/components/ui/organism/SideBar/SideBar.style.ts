@@ -22,6 +22,8 @@ export const AccountLabel = styled.h3`
   align-self: center;
   margin-top: ${(props) => props.theme.spacing.base};
   margin-bottom: 12px;
+  word-break: break-word;
+  width: 200px;
 `;
 
 export const RowDiv = styled.div`

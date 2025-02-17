@@ -9,7 +9,6 @@ import { Menu } from '@headlessui/react';
 import { Box, IconButton } from '@mui/material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { shortenAddress } from 'utils/utils';
-import { useMultiLanguage } from 'services';
 
 interface Props {
   accounts: Account[];
@@ -20,7 +19,6 @@ export const HiddenAccountsListView = ({
   accounts,
   onAccountVisibleClick,
 }: Props) => {
-  const { translate } = useMultiLanguage();
   return (
     <MenuSection style={{ height: 201, overflowY: 'auto' }}>
       {accounts.map((account) => (
@@ -35,9 +33,7 @@ export const HiddenAccountsListView = ({
             <Box style={{ display: 'flex', alignItems: 'center' }}>
               <AccountImageStyled size={30} address={account.address} />
               <MenuItemText style={{ marginLeft: 20 }}>
-                <div>
-                  {translate('account')} {account.addressIndex + 1}
-                </div>
+                <div>{account.accountName}</div>
                 <div>{shortenAddress(account.address)}</div>
               </MenuItemText>
             </Box>

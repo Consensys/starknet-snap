@@ -16,6 +16,8 @@ import { VisibleAccountsList } from './VisibleAccountsList';
 import { HiddenAccountsList } from './HiddenAccountsList';
 import { Account } from 'types';
 import Toastr from 'toastr2';
+import { PopIn } from 'components/ui/molecule/PopIn';
+import { AddAccountModal } from './AddAccountModal';
 
 interface Props {
   full?: boolean;
@@ -26,12 +28,13 @@ export const AccountSwitchModalView = ({ full, starkName }: Props) => {
   const networks = useAppSelector((state) => state.networks);
   const currentAccount = useAppSelector((state) => state.wallet.currentAccount);
   const accounts = useAppSelector((state) => state.wallet.accounts);
-  const { switchAccount, addNewAccount, hideAccount, unHideAccount } =
+  const { switchAccount, hideAccount, unHideAccount } =
     useStarkNetSnap();
   const { translate } = useMultiLanguage();
   const chainId = networks?.items[networks.activeNetwork]?.chainId;
 
   const [showHiddenAccounts, setShowHiddenAccounts] = useState(false);
+  const [addAccountOpen, setAddAccountOpen] = useState(false);
 
   const onAccountVisibleClick = (account: Account) => {
     setShowHiddenAccounts(false);
@@ -109,7 +112,7 @@ export const AccountSwitchModalView = ({ full, starkName }: Props) => {
         <MenuSection>
           <Menu.Item>
             <AccountSwitchMenuItem
-              onClick={async () => await addNewAccount(chainId)}
+              onClick={() => setAddAccountOpen(true)}
               style={{
                 justifyContent: 'center',
                 padding: '8px 0',
@@ -125,6 +128,9 @@ export const AccountSwitchModalView = ({ full, starkName }: Props) => {
           </Menu.Item>
         </MenuSection>
       </MenuItems>
+      <PopIn isOpen={addAccountOpen} setIsOpen={setAddAccountOpen}>
+        <AddAccountModal closeModal={() => setAddAccountOpen(false)} />
+      </PopIn>
     </Menu>
   );
 };

@@ -7,6 +7,9 @@
     "account": {
       "message": "Account"
     },
+    "accountName": {
+      "message": "Account name"
+    },
     "accounts": {
       "message": "Accounts"
     },
@@ -27,6 +30,9 @@
     },
     "add": {
       "message": "ADD"
+    },
+    "addAccount": {
+      "message": "Add Account"
     },
     "addToken": {
       "message": "Add Token"
@@ -57,6 +63,9 @@
     },
     "contractAddress": {
       "message": "Contract Address"
+    },
+    "contractInteraction": {
+      "message": "Contract Interaction"
     },
     "copied": {
       "message": "Copied!"
@@ -108,6 +117,9 @@
     },
     "downloadMetaMaskFlask": {
       "message": "Download MetaMask Flask"
+    },
+    "errorAddingAccount": {
+      "message": "Error while adding account"
     },
     "errorAddingToken": {
       "message": "Error while adding token"
@@ -274,6 +286,9 @@
     "transactionSentSuccessfully": {
       "message": "Transaction sent successfully"
     },
+    "unknown": {
+      "message": "Unknown"
+    },
     "updateMetaMaskVersion": {
       "message": "Please update to MetaMask Version {1} or higher."
     },
@@ -309,6 +324,9 @@
     },
     "youCannotHideLastAccount": {
       "message": "You cannot hide the last remaining account."
+    },
+    "accountNameLengthError": {
+      "message": "Account name must be between {1} and {2} characters."
     }
   }
 }
