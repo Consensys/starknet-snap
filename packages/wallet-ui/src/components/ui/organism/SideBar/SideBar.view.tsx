@@ -40,7 +40,6 @@ export const SideBarView = () => {
   const { translate } = useMultiLanguage();
   const [starkName, setStarkName] = useState<string | undefined>(undefined);
   const address = currentAccount.address;
-  const addressIndex = currentAccount?.addressIndex ?? 0;
   const ref = useRef<HTMLDivElement>();
 
   useEffect(() => {
@@ -111,9 +110,7 @@ export const SideBarView = () => {
         <AccountImageStyled address={address} connected={wallet.connected} />
       </AccountDetails>
 
-      <AccountLabel>
-        {translate('account')} {addressIndex + 1}{' '}
-      </AccountLabel>
+      <AccountLabel>{currentAccount.accountName}</AccountLabel>
       <RowDiv>
         <InfoIcon onClick={() => setInfoModalOpen(true)}>i</InfoIcon>
         <AccountSwitchModal starkName={starkName} />

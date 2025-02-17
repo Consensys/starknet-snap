@@ -7,6 +7,9 @@
     "account": {
       "message": "Compte"
     },
+    "accountName": {
+      "message": "Nom du compte"
+    },
     "accounts": {
       "message": "Comptes"
     },
@@ -27,6 +30,9 @@
     },
     "add": {
       "message": "AJOUTER"
+    },
+    "addAccount": {
+      "message": "Ajouter un compte"
     },
     "addToken": {
       "message": "Ajouter un jeton"
@@ -105,6 +111,9 @@
     },
     "downloadMetaMaskFlask": {
       "message": "Télécharger MetaMask Flask"
+    },
+    "errorAddingAccount": {
+      "message": "Erreur lors de la création du compte"
     },
     "errorAddingToken": {
       "message": "Erreur lors de l'ajout du jeton"
@@ -309,6 +318,9 @@
     },
     "youCannotHideLastAccount": {
       "message": "Vous ne pouvez pas masquer le dernier compte restant."
+    },
+    "accountNameLengthError": {
+      "message": "Le nom du compte doit comporter entre {1} et {2} caractères."
     }
   }
 }
