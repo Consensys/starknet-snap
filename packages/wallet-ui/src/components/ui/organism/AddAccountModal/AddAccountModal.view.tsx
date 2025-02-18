@@ -23,10 +23,11 @@ export const AddAccountModalView = ({ onClose }: Props) => {
   const [minLength, maxLength] = ACCOUNT_NAME_LENGTH;
   const { addNewAccount } = useStarkNetSnap();
   const { translate } = useMultiLanguage();
-  const { chainId } = useCurrentNetwork();
+  const currentNework = useCurrentNetwork();
   const accounts = useAppSelector((state) => state.wallet.accounts);
   const [enabled, setEnabled] = useState(true);
   const [accountName, setAccountName] = useState('');
+  const chainId = currentNework?.chainId;
 
   useEffect(() => {
     const trimedAccountName = accountName.trim();

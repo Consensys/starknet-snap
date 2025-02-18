@@ -32,7 +32,7 @@ import { useCurrentNetwork } from 'hooks/useCurrentNetwork';
 export const SideBarView = () => {
   const { getStarkName } = useStarkNetSnap();
   const { translate } = useMultiLanguage();
-  const { chainId } = useCurrentNetwork();
+  const currentNework = useCurrentNetwork();
   const { address, accountName } = useCurrentAccount();
   const erc20TokenBalances = useAppSelector(
     (state) => state.wallet.erc20TokenBalances,
@@ -44,6 +44,7 @@ export const SideBarView = () => {
   const [addTokenOpen, setAddTokenOpen] = useState(false);
   const [starkName, setStarkName] = useState<string | undefined>(undefined);
   const ref = useRef<HTMLDivElement>();
+  const chainId = currentNework?.chainId;
 
   useEffect(() => {
     if (ref.current) {

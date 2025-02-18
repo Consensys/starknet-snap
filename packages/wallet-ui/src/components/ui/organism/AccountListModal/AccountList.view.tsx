@@ -27,7 +27,7 @@ export const AccountListModalView = ({
   const toastr = new Toastr();
   const { switchAccount, hideAccount, unHideAccount } = useStarkNetSnap();
   const { translate } = useMultiLanguage();
-  const { chainId } = useCurrentNetwork();
+  const currentNework = useCurrentNetwork();
   const { address: currentAddress } = useCurrentAccount();
   const accounts = useAppSelector((state) => state.wallet.accounts);
   const [visibility, setVisibility] = useState(true);
@@ -46,6 +46,7 @@ export const AccountListModalView = ({
     }
     return [visibleAccounts, hiddenAccounts];
   }, [accounts]);
+  const chainId = currentNework?.chainId;
 
   const onAccountSwitchClick = async (account: Account) => {
     await switchAccount(chainId, account.address);
