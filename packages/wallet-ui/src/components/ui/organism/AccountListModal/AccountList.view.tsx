@@ -1,19 +1,21 @@
 import {
   Wrapper,
-  ButtonDiv,
+  ButtonWrapper,
   Title,
-  ButtonStyled,
   ScrollableWrapper,
   HiddenAccountBar,
+  HiddenAccountBarLeftIcon,
+  HiddenAccountBarRightIcon,
 } from './AccountList.style';
 import { useAppSelector } from 'hooks/redux';
 import { useMultiLanguage, useStarkNetSnap } from 'services';
 import React, { useMemo, useState } from 'react';
 import { Account } from 'types';
-import { theme } from 'theme/default';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Toastr from 'toastr2';
 import { AccountItem } from './AccountItem.view';
+import { Button } from 'components/ui/atom/Button';
+import { useCurrentNetwork } from 'hooks/useCurrentNetwork';
+import { useCurrentAccount } from 'hooks/useCurrentAccount';
 
 export const AccountListModalView = ({
   onClose,
@@ -25,16 +27,14 @@ export const AccountListModalView = ({
   const toastr = new Toastr();
   const { switchAccount, hideAccount, unHideAccount } = useStarkNetSnap();
   const { translate } = useMultiLanguage();
-  const networks = useAppSelector((state) => state.networks);
-  const currentAccount = useAppSelector((state) => state.wallet.currentAccount);
+  const { chainId } = useCurrentNetwork();
+  const { address: currentAddress } = useCurrentAccount();
   const accounts = useAppSelector((state) => state.wallet.accounts);
-
-  const [showHiddenAccounts, setShowHiddenAccounts] = useState(false);
-
+  const [visibility, setVisibility] = useState(true);
+  // Use useMemo to avoid re-rendering the component when the state changes
   const [visibleAccounts, hiddenAccounts] = useMemo(() => {
     const visibleAccounts: Account[] = [];
     const hiddenAccounts: Account[] = [];
-
     for (const account of accounts) {
       // account.visibility = `undefined` refer to the case when previous account state doesnt include this field
       // hence we consider it is `visible`
@@ -47,13 +47,7 @@ export const AccountListModalView = ({
     return [visibleAccounts, hiddenAccounts];
   }, [accounts]);
 
-  const currentAddress = currentAccount.address;
-  const chainId = networks?.items[networks.activeNetwork]?.chainId;
-
-  const onAccountSwitchClick = async (
-    event: React.MouseEvent,
-    account: Account,
-  ) => {
+  const onAccountSwitchClick = async (account: Account) => {
     await switchAccount(chainId, account.address);
     onClose();
   };
@@ -66,7 +60,7 @@ export const AccountListModalView = ({
     event.preventDefault();
     // Prevent triggering the parent onClick event
     event.stopPropagation();
-    if (accounts.filter((account) => account.visibility).length < 2) {
+    if (visibleAccounts.length < 2) {
       toastr.error(translate('youCannotHideLastAccount'));
     } else {
       await hideAccount({
@@ -85,7 +79,6 @@ export const AccountListModalView = ({
     event.preventDefault();
     // Prevent triggering the parent onClick event
     event.stopPropagation();
-
     await unHideAccount({
       chainId,
       address: account.address,
@@ -93,25 +86,23 @@ export const AccountListModalView = ({
   };
 
   return (
-    <div>
+    <>
       <Wrapper>
         <Title>{translate('selectAnAccount')}</Title>
         <ScrollableWrapper>
-          {!showHiddenAccounts &&
+          {visibility &&
             visibleAccounts.map((account) => (
               <AccountItem
                 selected={currentAddress === account.address}
                 visible={true}
                 account={account}
-                onAccountItemClick={(event) =>
-                  onAccountSwitchClick(event, account)
-                }
+                onAccountItemClick={() => onAccountSwitchClick(account)}
                 onAccountIconClick={(event) =>
                   onAccountHiddenClick(event, account)
                 }
               />
             ))}
-          {showHiddenAccounts &&
+          {!visibility &&
             hiddenAccounts.map((account) => (
               <AccountItem
                 selected={false}
@@ -123,37 +114,29 @@ export const AccountListModalView = ({
               />
             ))}
         </ScrollableWrapper>
-        <HiddenAccountBar
-          onClick={() => setShowHiddenAccounts(!showHiddenAccounts)}
-        >
+        <HiddenAccountBar onClick={() => setVisibility(!visibility)}>
           <div>
-            <FontAwesomeIcon
-              icon={'eye-slash'}
-              color={theme.palette.primary.main}
-              style={{ marginRight: '8px' }}
-            />
+            <HiddenAccountBarLeftIcon icon={'eye-slash'} />
             {translate('hiddenAccounts')}
           </div>
           <div>
             {hiddenAccounts.length}
-            <FontAwesomeIcon
-              style={{ marginLeft: '8px' }}
-              icon={showHiddenAccounts ? 'angle-up' : 'angle-down'}
-              color={theme.palette.primary.main}
+            <HiddenAccountBarRightIcon
+              icon={visibility ? 'angle-up' : 'angle-down'}
             />
           </div>
         </HiddenAccountBar>
       </Wrapper>
-      <ButtonDiv>
-        <ButtonStyled onClick={onAddAccountClick}>
-          <FontAwesomeIcon
-            icon="plus"
-            color={theme.palette.primary.main}
-            style={{ marginRight: '8px' }}
-          />
+      <ButtonWrapper>
+        <Button
+          onClick={() => onAddAccountClick()}
+          iconLeft="plus"
+          backgroundTransparent
+          borderVisible
+        >
           {translate('addAccount')}
-        </ButtonStyled>
-      </ButtonDiv>
-    </div>
+        </Button>
+      </ButtonWrapper>
+    </>
   );
 };

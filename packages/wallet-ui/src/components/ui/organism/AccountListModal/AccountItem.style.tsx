@@ -1,5 +1,6 @@
 import styled from 'styled-components';
 import { AccountImage } from 'components/ui/atom/AccountImage';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 export const Wrapper = styled.div<{ selected: boolean; visible: boolean }>`
   display: flex;
@@ -26,4 +27,8 @@ export const AccountDetailWrapper = styled.div`
 
 export const AccountImageStyled = styled(AccountImage)`
   cursor: pointer;
+`;
+
+export const VisibilityIcon = styled(FontAwesomeIcon)`
+  color: ${(props) => props.theme.palette.grey.grey1};
 `;

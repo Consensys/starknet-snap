@@ -1,13 +1,12 @@
 import {
   AccountDetailWrapper,
   AccountImageStyled,
+  VisibilityIcon,
   Wrapper,
 } from './AccountItem.style';
 import { IconButton } from '@mui/material';
-import { theme } from 'theme/default';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Account } from 'types';
-import { shortenAddress } from 'utils/utils';
+import { formatAddress } from 'utils/utils';
 
 export interface Props {
   account: Account;
@@ -24,6 +23,7 @@ export const AccountItem = ({
   onAccountItemClick,
   onAccountIconClick,
 }: Props) => {
+  const { address, accountName } = account;
   return (
     <Wrapper
       selected={selected}
@@ -35,17 +35,14 @@ export const AccountItem = ({
       }
     >
       <AccountDetailWrapper>
-        <AccountImageStyled size={30} address={account.address} />
+        <AccountImageStyled size={30} address={address} />
         <div>
-          <div>{account.accountName}</div>
-          <div>{shortenAddress(account.address)}</div>
+          <div>{accountName}</div>
+          <div>{formatAddress(address)}</div>
         </div>
       </AccountDetailWrapper>
       <IconButton size="small" onClick={onAccountIconClick}>
-        <FontAwesomeIcon
-          icon={visible ? 'eye-slash' : 'eye'}
-          color={theme.palette.primary.main}
-        />
+        <VisibilityIcon icon={visible ? 'eye-slash' : 'eye'} />
       </IconButton>
     </Wrapper>
   );

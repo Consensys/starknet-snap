@@ -13,6 +13,7 @@ import {
 } from './AddAccountModal.style';
 import { getDefaultAccountName } from 'utils/utils';
 import { ACCOUNT_NAME_LENGTH } from 'utils/constants';
+import { useCurrentNetwork } from 'hooks/useCurrentNetwork';
 
 interface Props {
   onClose: () => void;
@@ -22,11 +23,10 @@ export const AddAccountModalView = ({ onClose }: Props) => {
   const [minLength, maxLength] = ACCOUNT_NAME_LENGTH;
   const { addNewAccount } = useStarkNetSnap();
   const { translate } = useMultiLanguage();
-  const networks = useAppSelector((state) => state.networks);
+  const { chainId } = useCurrentNetwork();
   const accounts = useAppSelector((state) => state.wallet.accounts);
   const [enabled, setEnabled] = useState(true);
   const [accountName, setAccountName] = useState('');
-  const chainId = networks?.items[networks.activeNetwork].chainId;
 
   useEffect(() => {
     const trimedAccountName = accountName.trim();
@@ -83,7 +83,7 @@ export const AddAccountModalView = ({ onClose }: Props) => {
         >
           {translate('cancel')}
         </ButtonStyled>
-        <ButtonStyled enabled={enabled} onClick={onAddAccount}>
+        <ButtonStyled enabled={enabled} onClick={() => onAddAccount()}>
           {translate('add')}
         </ButtonStyled>
       </ButtonsWrapper>

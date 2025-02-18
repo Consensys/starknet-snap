@@ -3,7 +3,8 @@ import { AccountListModal } from '../AccountListModal';
 import { PopIn } from 'components/ui/molecule/PopIn';
 import { Drawer } from './AccountDrawer.style';
 import { AddAccountModal } from '../AddAccountModal';
-import { useFormattedDisplayName } from 'hooks/useAccountName';
+import { formatAddress } from 'utils/utils';
+import { useCurrentAccount } from 'hooks/useCurrentAccount';
 
 export interface Props {
   starkName?: string;
@@ -12,7 +13,7 @@ export interface Props {
 export const AccountDrawerView = ({ starkName }: Props) => {
   const [accountListModalOpen, setAccountListModalOpen] = useState(false);
   const [accountAddModalOpen, setAccountAddModalOpen] = useState(false);
-  const displayName = useFormattedDisplayName(starkName);
+  const { address } = useCurrentAccount();
 
   return (
     <>
@@ -33,7 +34,7 @@ export const AccountDrawerView = ({ starkName }: Props) => {
         iconRight="angle-down"
         onClick={() => setAccountListModalOpen(true)}
       >
-        {displayName}
+        {formatAddress(address, starkName)}
       </Drawer>
     </>
   );

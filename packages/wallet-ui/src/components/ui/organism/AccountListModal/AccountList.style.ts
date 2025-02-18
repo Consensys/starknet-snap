@@ -1,5 +1,5 @@
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import styled from 'styled-components';
-import { Button } from 'components/ui/atom/Button';
 
 export const Wrapper = styled.div`
   background-color: ${(props) => props.theme.palette.grey.white};
@@ -15,23 +15,11 @@ export const ScrollableWrapper = styled.div`
   margin: 0px 15px;
 `;
 
-export const ButtonDiv = styled.div`
+export const ButtonWrapper = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 0px 24px 24px 24px;
-  width: ${(props) => props.theme.modal.base};
-  background-color: ${(props) => props.theme.palette.grey.white};
-  border-radius: 0px 0px 8px 8px;
-  gap: 16px;
-  box-shadow: inset 0px 1px 0px rgba(212, 212, 225, 0.4);
-`;
-
-export const ButtonStyled = styled(Button).attrs(() => ({
-  backgroundTransparent: true,
-  borderVisible: true,
-}))`
-  width: 240px;
 `;
 
 export const Title = styled.div`
@@ -47,4 +35,14 @@ export const HiddenAccountBar = styled.div`
   justify-content: space-between;
   padding: 15px 40px 0px 30px;
   cursor: pointer;
+`;
+
+export const HiddenAccountBarLeftIcon = styled(FontAwesomeIcon)`
+  color: ${(props) => props.theme.palette.grey.grey1};
+  margin-right: 8px;
+`;
+
+export const HiddenAccountBarRightIcon = styled(FontAwesomeIcon)`
+  color: ${(props) => props.theme.palette.grey.grey1};
+  margin-left: 8px;
 `;
