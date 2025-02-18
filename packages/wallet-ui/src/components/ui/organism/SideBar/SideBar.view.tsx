@@ -1,7 +1,6 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useEffect, useRef, useState } from 'react';
 import { RoundedIcon } from 'components/ui/atom/RoundedIcon';
-import { AccountSwitchModal } from 'components/ui/organism/AccountSwitchModal';
 import { AssetsList } from 'components/ui/molecule/AssetsList';
 import { PopIn } from 'components/ui/molecule/PopIn';
 import { AccountDetailsModal } from '../AccountDetailsModal';
@@ -26,24 +25,26 @@ import { AddTokenModal } from '../AddTokenModal';
 import { useMultiLanguage, useStarkNetSnap } from 'services';
 import { defaultAccount } from 'utils/constants';
 import { PopperTooltip } from 'components/ui/molecule/PopperTooltip';
+import { AccountDrawer } from '../AccountDrawer';
+import { useCurrentAccount } from 'hooks/useCurrentAccount';
+import { useCurrentNetwork } from 'hooks/useCurrentNetwork';
 
 export const SideBarView = () => {
-  const networks = useAppSelector((state) => state.networks);
-  const currentAccount = useAppSelector((state) => state.wallet.currentAccount);
+  const { getStarkName } = useStarkNetSnap();
+  const { translate } = useMultiLanguage();
+  const currentNework = useCurrentNetwork();
+  const { address, accountName } = useCurrentAccount();
   const erc20TokenBalances = useAppSelector(
     (state) => state.wallet.erc20TokenBalances,
   );
   const connected = useAppSelector((state) => state.wallet.connected);
-  const chainId = networks?.items[networks.activeNetwork]?.chainId;
   const [listOverflow, setListOverflow] = useState(false);
   const [infoModalOpen, setInfoModalOpen] = useState(false);
   const [accountDetailsOpen, setAccountDetailsOpen] = useState(false);
   const [addTokenOpen, setAddTokenOpen] = useState(false);
-  const { getStarkName } = useStarkNetSnap();
-  const { translate } = useMultiLanguage();
   const [starkName, setStarkName] = useState<string | undefined>(undefined);
-  const address = currentAccount.address;
   const ref = useRef<HTMLDivElement>();
+  const chainId = currentNework?.chainId;
 
   useEffect(() => {
     if (ref.current) {
@@ -113,10 +114,10 @@ export const SideBarView = () => {
         <AccountImageStyled address={address} connected={connected} />
       </AccountDetails>
 
-      <AccountLabel>{currentAccount.accountName}</AccountLabel>
+      <AccountLabel>{accountName}</AccountLabel>
       <RowDiv>
         <InfoIcon onClick={() => setInfoModalOpen(true)}>i</InfoIcon>
-        <AccountSwitchModal starkName={starkName} />
+        <AccountDrawer starkName={starkName} />
         <PopperTooltip content="Copied!" closeTrigger="click">
           <CopyIcon
             onClick={async () => navigator.clipboard.writeText(address)}
