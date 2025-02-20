@@ -5,7 +5,7 @@ import { useMultiLanguage, useStarkNetSnap } from 'services';
 import { useCurrentNetwork, useCurrentAccount, useAppSelector } from 'hooks';
 import { Account } from 'types';
 import { Button } from 'components/ui/atom/Button';
-import { Scrollable } from 'components/ui/atom/ScrollView';
+import { Scrollable } from 'components/ui/atom/Scrollable';
 import {
   Wrapper,
   ButtonWrapper,
