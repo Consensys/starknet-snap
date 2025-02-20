@@ -1,8 +1,16 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useEffect, useRef, useState } from 'react';
+
+import { useAppSelector, useCurrentAccount, useCurrentNetwork } from 'hooks';
+import { useMultiLanguage, useStarkNetSnap } from 'services';
 import { RoundedIcon } from 'components/ui/atom/RoundedIcon';
 import { AssetsList } from 'components/ui/molecule/AssetsList';
 import { PopIn } from 'components/ui/molecule/PopIn';
+import { PopperTooltip } from 'components/ui/molecule/PopperTooltip';
+import { openExplorerTab } from 'utils/utils';
+import { defaultAccount } from 'utils/constants';
+import { AccountDrawer } from '../AccountDrawer';
+import { AddTokenModal } from '../AddTokenModal';
 import { AccountDetailsModal } from '../AccountDetailsModal';
 import { ConnectInfoModal } from '../ConnectInfoModal';
 import {
@@ -19,15 +27,6 @@ import {
   RowDiv,
   Wrapper,
 } from './SideBar.style';
-import { openExplorerTab } from 'utils/utils';
-import { useAppSelector } from 'hooks/redux';
-import { AddTokenModal } from '../AddTokenModal';
-import { useMultiLanguage, useStarkNetSnap } from 'services';
-import { defaultAccount } from 'utils/constants';
-import { PopperTooltip } from 'components/ui/molecule/PopperTooltip';
-import { AccountDrawer } from '../AccountDrawer';
-import { useCurrentAccount } from 'hooks/useCurrentAccount';
-import { useCurrentNetwork } from 'hooks/useCurrentNetwork';
 
 export const SideBarView = () => {
   const { getStarkName } = useStarkNetSnap();

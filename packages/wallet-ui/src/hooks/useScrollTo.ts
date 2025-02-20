@@ -26,6 +26,7 @@ export const useScrollTo = <Element extends HTMLElement>(
 
   useEffect(() => {
     scrollToView();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [scrollTo]);
 
   return {
