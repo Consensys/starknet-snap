@@ -2,47 +2,45 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import styled from 'styled-components';
 
 export const Wrapper = styled.div`
+  width: ${(props) => props.theme.modal.base};
+  padding: ${(props) => props.theme.spacing.base};
   background-color: ${(props) => props.theme.palette.grey.white};
-  width: ${(props) => props.theme.modal.noPadding};
-  border-radius: 8px 8px 0px 0px;
-  padding-top: 56px;
-  padding-bottom: 24px;
-`;
-
-export const ScrollableWrapper = styled.div`
-  overflow-y: scroll;
-  height: 365px;
-  margin: 0px 15px;
+  border-radius: ${(props) => props.theme.corner.small};
 `;
 
 export const ButtonWrapper = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 0px 24px 24px 24px;
+  padding: ${(props) => props.theme.spacing.base};
+  padding-top: 0;
 `;
 
 export const Title = styled.div`
-  font-size: ${(props) => props.theme.typography.h3.fontSize};
-  font-weight: ${(props) => props.theme.typography.h3.fontSize};
-  font-family: ${(props) => props.theme.typography.h3.fontFamily};
   text-align: center;
-  margin-bottom: 25px;
+  font-style: normal;
+  font-weight: ${(props) => props.theme.typography.h3.fontWeight};
+  font-size: ${(props) => props.theme.typography.h3.fontSize};
+  font-family: ${(props) => props.theme.typography.h3.fontFamily};
+  line-height: ${(props) => props.theme.typography.h3.lineHeight};
+  color: ${(props) => props.theme.palette.primary.main};
+  margin-bottom: ${(props) => props.theme.spacing.base};
 `;
 
 export const HiddenAccountBar = styled.div`
   display: flex;
   justify-content: space-between;
-  padding: 15px 40px 0px 30px;
+  padding: ${(props) => props.theme.spacing.base};
+  padding-bottom: 0;
   cursor: pointer;
 `;
 
 export const HiddenAccountBarLeftIcon = styled(FontAwesomeIcon)`
   color: ${(props) => props.theme.palette.grey.grey1};
-  margin-right: 8px;
+  margin-right: ${(props) => props.theme.spacing.tiny2};
 `;
 
 export const HiddenAccountBarRightIcon = styled(FontAwesomeIcon)`
   color: ${(props) => props.theme.palette.grey.grey1};
-  margin-left: 8px;
+  margin-left: ${(props) => props.theme.spacing.tiny2};
 `;

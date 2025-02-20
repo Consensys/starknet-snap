@@ -1,19 +1,18 @@
 import { useState, useEffect, ChangeEvent } from 'react';
-import { useAppSelector } from 'hooks/redux';
+
+import { useAppSelector, useCurrentNetwork } from 'hooks';
 import { useMultiLanguage, useStarkNetSnap } from 'services';
+import { getDefaultAccountName } from 'utils/utils';
+import { ACCOUNT_NAME_LENGTH } from 'utils/constants';
 import { InputWithLabel } from 'components/ui/molecule/InputWithLabel';
 import {
   ButtonStyled,
   ButtonsWrapper,
   ErrorMsg,
   FormGroup,
-  Space,
   Title,
   Wrapper,
 } from './AddAccountModal.style';
-import { getDefaultAccountName } from 'utils/utils';
-import { ACCOUNT_NAME_LENGTH } from 'utils/constants';
-import { useCurrentNetwork } from 'hooks/useCurrentNetwork';
 
 interface Props {
   onClose: () => void;
@@ -43,6 +42,9 @@ export const AddAccountModalView = ({ onClose }: Props) => {
   };
 
   const onAddAccount = async () => {
+    // The UX is better if we close the modal before adding the account
+    onClose();
+
     const trimedAccountName = accountName.trim();
     // Reset account name to undefined if it is empty,
     // so that the default account name is used in Snap
@@ -50,14 +52,12 @@ export const AddAccountModalView = ({ onClose }: Props) => {
       chainId,
       trimedAccountName === '' ? undefined : trimedAccountName,
     );
-    onClose();
   };
 
   return (
     <>
       <Wrapper>
         <Title>{translate('addAccount')}</Title>
-        <Space />
         <FormGroup>
           <InputWithLabel
             label={translate('accountName')}

@@ -11,16 +11,13 @@ export const Wrapper = styled.div<{ selected: boolean; visible: boolean }>`
     props.selected ? props.theme.palette.grey.grey4 : 'transparent'};
   border-left: ${(props) =>
     props.selected
-      ? `4px solid ${props.theme.palette.secondary.main}`
-      : 'none'};
-  padding-top: 14px;
-  padding-bottom: 14px;
-  padding-left: ${(props) => (props.selected ? '18px' : '22px')};
-  padding-right: 14px;
+      ? `${props.theme.spacing.tiny} solid ${props.theme.palette.secondary.main}`
+      : `${props.theme.spacing.tiny} solid ${props.theme.palette.secondary.contrastText}`};
+  padding: ${(props) => props.theme.spacing.small};
   cursor: pointer;
 `;
 
-export const AccountDetailWrapper = styled.div`
+export const AccountInfoWrapper = styled.div`
   display: flex;
   align-items: center;
 `;

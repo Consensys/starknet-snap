@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { AccountListModal } from '../AccountListModal';
+
 import { PopIn } from 'components/ui/molecule/PopIn';
-import { Drawer } from './AccountDrawer.style';
-import { AddAccountModal } from '../AddAccountModal';
 import { formatAddress } from 'utils/utils';
-import { useCurrentAccount } from 'hooks/useCurrentAccount';
+import { useCurrentAccount } from 'hooks';
+import { AccountListModal } from '../AccountListModal';
+import { AddAccountModal } from '../AddAccountModal';
+import { Drawer } from './AccountDrawer.style';
 
 export interface Props {
   starkName?: string;

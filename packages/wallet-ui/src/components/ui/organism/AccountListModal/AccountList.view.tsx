@@ -1,21 +1,20 @@
+import React, { useMemo, useState } from 'react';
+import Toastr from 'toastr2';
+
+import { useMultiLanguage, useStarkNetSnap } from 'services';
+import { useCurrentNetwork, useCurrentAccount, useAppSelector } from 'hooks';
+import { Account } from 'types';
+import { Button } from 'components/ui/atom/Button';
+import { Scrollable } from 'components/ui/atom/ScrollView';
 import {
   Wrapper,
   ButtonWrapper,
   Title,
-  ScrollableWrapper,
   HiddenAccountBar,
   HiddenAccountBarLeftIcon,
   HiddenAccountBarRightIcon,
 } from './AccountList.style';
-import { useAppSelector } from 'hooks/redux';
-import { useMultiLanguage, useStarkNetSnap } from 'services';
-import React, { useMemo, useState } from 'react';
-import { Account } from 'types';
-import Toastr from 'toastr2';
 import { AccountItem } from './AccountItem.view';
-import { Button } from 'components/ui/atom/Button';
-import { useCurrentNetwork } from 'hooks/useCurrentNetwork';
-import { useCurrentAccount } from 'hooks/useCurrentAccount';
 
 export const AccountListModalView = ({
   onClose,
@@ -26,6 +25,7 @@ export const AccountListModalView = ({
 }) => {
   const toastr = new Toastr();
   const { switchAccount, hideAccount, unHideAccount } = useStarkNetSnap();
+
   const { translate } = useMultiLanguage();
   const currentNework = useCurrentNetwork();
   const { address: currentAddress } = useCurrentAccount();
@@ -48,19 +48,25 @@ export const AccountListModalView = ({
   }, [accounts]);
   const chainId = currentNework?.chainId;
 
+  const preventDefaultMouseEvent = (event: React.MouseEvent) => {
+    // Prevent triggering the native behaviour
+    event.preventDefault();
+    // Prevent triggering the parent onClick event
+    event.stopPropagation();
+  };
+
   const onAccountSwitchClick = async (account: Account) => {
-    await switchAccount(chainId, account.address);
     onClose();
+
+    await switchAccount(chainId, account.address);
   };
 
   const onAccountHiddenClick = async (
     event: React.MouseEvent,
     account: Account,
   ) => {
-    // Prevent triggering the native behaviour
-    event.preventDefault();
-    // Prevent triggering the parent onClick event
-    event.stopPropagation();
+    preventDefaultMouseEvent(event);
+
     if (visibleAccounts.length < 2) {
       toastr.error(translate('youCannotHideLastAccount'));
     } else {
@@ -76,10 +82,8 @@ export const AccountListModalView = ({
     event: React.MouseEvent,
     account: Account,
   ) => {
-    // Prevent triggering the native behaviour
-    event.preventDefault();
-    // Prevent triggering the parent onClick event
-    event.stopPropagation();
+    preventDefaultMouseEvent(event);
+
     await unHideAccount({
       chainId,
       address: account.address,
@@ -90,31 +94,47 @@ export const AccountListModalView = ({
     <>
       <Wrapper>
         <Title>{translate('selectAnAccount')}</Title>
-        <ScrollableWrapper>
-          {visibility &&
-            visibleAccounts.map((account) => (
-              <AccountItem
-                selected={currentAddress === account.address}
-                visible={true}
-                account={account}
-                onAccountItemClick={() => onAccountSwitchClick(account)}
-                onAccountIconClick={(event) =>
-                  onAccountHiddenClick(event, account)
-                }
-              />
-            ))}
-          {!visibility &&
-            hiddenAccounts.map((account) => (
-              <AccountItem
-                selected={false}
-                visible={false}
-                account={account}
-                onAccountIconClick={(event) =>
-                  onAccountUnHideClick(event, account)
-                }
-              />
-            ))}
-        </ScrollableWrapper>
+        {visibility && (
+          <Scrollable<HTMLDivElement>
+            height={365}
+            child={(scrollTo) => (
+              <>
+                {visibleAccounts.map((account) => (
+                  <AccountItem
+                    scrollToRef={
+                      currentAddress === account.address ? scrollTo : null
+                    }
+                    selected={currentAddress === account.address}
+                    visible={true}
+                    account={account}
+                    onAccountItemClick={() => onAccountSwitchClick(account)}
+                    onAccountIconClick={(event) =>
+                      onAccountHiddenClick(event, account)
+                    }
+                  />
+                ))}
+              </>
+            )}
+          />
+        )}
+        {!visibility && (
+          <Scrollable<HTMLDivElement>
+            height={365}
+            child={() => (
+              <>
+                {hiddenAccounts.map((account) => (
+                  <AccountItem
+                    visible={false}
+                    account={account}
+                    onAccountIconClick={(event) =>
+                      onAccountUnHideClick(event, account)
+                    }
+                  />
+                ))}
+              </>
+            )}
+          />
+        )}
         <HiddenAccountBar onClick={() => setVisibility(!visibility)}>
           <div>
             <HiddenAccountBarLeftIcon icon={'eye-slash'} />

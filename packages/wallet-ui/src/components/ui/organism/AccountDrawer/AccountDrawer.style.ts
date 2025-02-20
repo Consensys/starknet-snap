@@ -13,10 +13,10 @@ export const Drawer = styled(Button).attrs((props) => ({
     color: props.theme.palette.grey.grey1,
   },
 }))`
-  padding: 4px 5px;
-  height: 25px;
+  padding: ${(props) => props.theme.spacing.tiny2};
+  height: ${(props) => props.theme.spacing.base};
   color: ${(props) => props.theme.palette.grey.black};
-  border-radius: 24px;
+  border-radius: ${(props) => props.theme.corner.medium};
   border: 1px solid ${(props) => props.theme.palette.grey.grey3};
 
   :hover {
