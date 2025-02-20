@@ -25,7 +25,6 @@ export const AccountListModalView = ({
 }) => {
   const toastr = new Toastr();
   const { switchAccount, hideAccount, unHideAccount } = useStarkNetSnap();
-
   const { translate } = useMultiLanguage();
   const currentNework = useCurrentNetwork();
   const { address: currentAddress } = useCurrentAccount();
