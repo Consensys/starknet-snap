@@ -81,6 +81,9 @@ function App() {
         <PopIn isOpen={!connected && !loading} showClose={false}>
           <NoMetamaskModal />
         </PopIn>
+        <PopIn isOpen={minVersionModalVisible} showClose={false}>
+          <MinVersionModal />
+        </PopIn>
         <PopIn isOpen={minMMVersionModalVisible} showClose={false}>
           <MinMetamaskVersionModal />
         </PopIn>
