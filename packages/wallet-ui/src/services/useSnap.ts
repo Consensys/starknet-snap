@@ -80,7 +80,7 @@ export const useSnap = () => {
     if (typeof snaps[snapId]?.version !== 'undefined') {
       // if the minSnapVersion is *, we should always allowed
       if (minSnapVersion === '*') {
-        return true;
+        return false;
       }
       return semver.lt(snaps[snapId]?.version?.split('-')?.[0], minSnapVersion);
     }
