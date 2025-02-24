@@ -24,7 +24,11 @@ export const AccountListModalView = ({
   onAddAccountClick: () => void;
 }) => {
   const toastr = new Toastr();
-  const { switchAccount, hideAccount, unHideAccount } = useStarkNetSnap();
+  const {
+    switchAccount: switchSnapAccount,
+    hideAccount: hideSnapAccount,
+    unHideAccount: showSnapAccount,
+  } = useStarkNetSnap();
   const { translate } = useMultiLanguage();
   const currentNework = useCurrentNetwork();
   const { address: currentAddress } = useCurrentAccount();
@@ -47,29 +51,16 @@ export const AccountListModalView = ({
   }, [accounts]);
   const chainId = currentNework?.chainId;
 
-  const preventDefaultMouseEvent = (event: React.MouseEvent) => {
-    // Prevent triggering the native behaviour
-    event.preventDefault();
-    // Prevent triggering the parent onClick event
-    event.stopPropagation();
-  };
-
-  const onAccountSwitchClick = async (account: Account) => {
+  const switchAccount = async (account: Account) => {
     onClose();
-
-    await switchAccount(chainId, account.address);
+    await switchSnapAccount(chainId, account.address);
   };
 
-  const onAccountHiddenClick = async (
-    event: React.MouseEvent,
-    account: Account,
-  ) => {
-    preventDefaultMouseEvent(event);
-
+  const hideAccount = async (account: Account) => {
     if (visibleAccounts.length < 2) {
       toastr.error(translate('youCannotHideLastAccount'));
     } else {
-      await hideAccount({
+      await hideSnapAccount({
         chainId,
         address: account.address,
         currentAddress,
@@ -77,13 +68,8 @@ export const AccountListModalView = ({
     }
   };
 
-  const onAccountUnHideClick = async (
-    event: React.MouseEvent,
-    account: Account,
-  ) => {
-    preventDefaultMouseEvent(event);
-
-    await unHideAccount({
+  const showAccount = async (account: Account) => {
+    await showSnapAccount({
       chainId,
       address: account.address,
     });
@@ -106,12 +92,8 @@ export const AccountListModalView = ({
                       selected={selected}
                       visible={true}
                       account={account}
-                      onAccountItemClick={() =>
-                        selected ? undefined : onAccountSwitchClick(account)
-                      }
-                      onAccountIconClick={(event) =>
-                        onAccountHiddenClick(event, account)
-                      }
+                      onItemClick={selected ? undefined : switchAccount}
+                      onIconButtonClick={hideAccount}
                     />
                   );
                 })}
@@ -128,9 +110,7 @@ export const AccountListModalView = ({
                   <AccountItem
                     visible={false}
                     account={account}
-                    onAccountIconClick={(event) =>
-                      onAccountUnHideClick(event, account)
-                    }
+                    onIconButtonClick={showAccount}
                   />
                 ))}
               </>

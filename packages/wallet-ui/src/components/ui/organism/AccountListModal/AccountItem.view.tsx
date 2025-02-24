@@ -14,8 +14,8 @@ export interface Props {
   selected?: boolean;
   visible: boolean;
   scrollToRef?: React.RefObject<HTMLDivElement> | null;
-  onAccountItemClick?: (event: React.MouseEvent) => void;
-  onAccountIconClick: (event: React.MouseEvent) => void;
+  onItemClick?: (account: Account) => Promise<void>;
+  onIconButtonClick: (account: Account) => Promise<void>;
 }
 
 export const AccountItem = ({
@@ -23,20 +23,36 @@ export const AccountItem = ({
   account,
   visible,
   scrollToRef,
-  onAccountItemClick,
-  onAccountIconClick,
+  onItemClick,
+  onIconButtonClick,
 }: Props) => {
   const { address, accountName } = account;
+
+  const preventDefaultMouseEvent = (event: React.MouseEvent) => {
+    // Prevent triggering the native behaviour
+    event.preventDefault();
+    // Prevent triggering the parent onClick event
+    event.stopPropagation();
+  };
+
+  const onIconBtnClick = async (event: React.MouseEvent) => {
+    preventDefaultMouseEvent(event);
+    await onIconButtonClick(account);
+  };
+
+  const onClick = async (event: React.MouseEvent) => {
+    preventDefaultMouseEvent(event);
+    if (typeof onItemClick === 'function') {
+      await onItemClick(account);
+    }
+  };
+
   return (
     <Wrapper
       ref={scrollToRef}
       selected={selected}
       visible={visible}
-      onClick={
-        typeof onAccountItemClick === 'function'
-          ? onAccountItemClick
-          : undefined
-      }
+      onClick={onClick}
     >
       <AccountInfoWrapper>
         <AccountImageStyled size={30} address={address} />
@@ -45,7 +61,7 @@ export const AccountItem = ({
           <div>{formatAddress(address)}</div>
         </div>
       </AccountInfoWrapper>
-      <IconButton size="small" onClick={onAccountIconClick}>
+      <IconButton size="small" onClick={onIconBtnClick}>
         <VisibilityIcon icon={visible ? 'eye-slash' : 'eye'} />
       </IconButton>
     </Wrapper>
