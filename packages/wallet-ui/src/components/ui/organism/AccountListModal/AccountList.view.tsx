@@ -98,20 +98,23 @@ export const AccountListModalView = ({
             height={365}
             child={(scrollTo) => (
               <>
-                {visibleAccounts.map((account) => (
-                  <AccountItem
-                    scrollToRef={
-                      currentAddress === account.address ? scrollTo : null
-                    }
-                    selected={currentAddress === account.address}
-                    visible={true}
-                    account={account}
-                    onAccountItemClick={() => onAccountSwitchClick(account)}
-                    onAccountIconClick={(event) =>
-                      onAccountHiddenClick(event, account)
-                    }
-                  />
-                ))}
+                {visibleAccounts.map((account) => {
+                  const selected = currentAddress === account.address;
+                  return (
+                    <AccountItem
+                      scrollToRef={selected ? scrollTo : null}
+                      selected={selected}
+                      visible={true}
+                      account={account}
+                      onAccountItemClick={() =>
+                        selected ? undefined : onAccountSwitchClick(account)
+                      }
+                      onAccountIconClick={(event) =>
+                        onAccountHiddenClick(event, account)
+                      }
+                    />
+                  );
+                })}
               </>
             )}
           />
