@@ -1,8 +1,14 @@
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import Toastr from 'toastr2';
 
 import { useMultiLanguage, useStarkNetSnap } from 'services';
-import { useCurrentNetwork, useCurrentAccount, useAppSelector } from 'hooks';
+import {
+  useCurrentNetwork,
+  useCurrentAccount,
+  useAccountVisibility,
+  MinAccountToHideError,
+  SwitchAccountError,
+} from 'hooks';
 import { Account } from 'types';
 import { Button } from 'components/ui/atom/Button';
 import { Scrollable } from 'components/ui/atom/Scrollable';
@@ -24,27 +30,13 @@ export const AccountListModalView = ({
   onAddAccountClick: () => void;
 }) => {
   const toastr = new Toastr();
-  const { switchAccount, hideAccount, unHideAccount } = useStarkNetSnap();
+  const { switchAccount } = useStarkNetSnap();
   const { translate } = useMultiLanguage();
   const currentNework = useCurrentNetwork();
   const { address: currentAddress } = useCurrentAccount();
-  const accounts = useAppSelector((state) => state.wallet.accounts);
   const [visibility, setVisibility] = useState(true);
-  // Use useMemo to avoid re-rendering the component when the state changes
-  const [visibleAccounts, hiddenAccounts] = useMemo(() => {
-    const visibleAccounts: Account[] = [];
-    const hiddenAccounts: Account[] = [];
-    for (const account of accounts) {
-      // account.visibility = `undefined` refer to the case when previous account state doesnt include this field
-      // hence we consider it is `visible`
-      if (account.visibility === undefined || account.visibility === true) {
-        visibleAccounts.push(account);
-      } else {
-        hiddenAccounts.push(account);
-      }
-    }
-    return [visibleAccounts, hiddenAccounts];
-  }, [accounts]);
+  const { visibleAccounts, hiddenAccounts, showAccount, hideAccount } =
+    useAccountVisibility();
   const chainId = currentNework?.chainId;
 
   const preventDefaultMouseEvent = (event: React.MouseEvent) => {
@@ -56,7 +48,6 @@ export const AccountListModalView = ({
 
   const onAccountSwitchClick = async (account: Account) => {
     onClose();
-
     await switchAccount(chainId, account.address);
   };
 
@@ -65,15 +56,17 @@ export const AccountListModalView = ({
     account: Account,
   ) => {
     preventDefaultMouseEvent(event);
-
-    if (visibleAccounts.length < 2) {
-      toastr.error(translate('youCannotHideLastAccount'));
-    } else {
-      await hideAccount({
-        chainId,
-        address: account.address,
-        currentAddress,
-      });
+    try {
+      await hideAccount(account);
+    } catch (error) {
+      // TODO: Add translation
+      if (error instanceof MinAccountToHideError) {
+        toastr.error(translate('youCannotHideLastAccount'));
+      } else if (error instanceof SwitchAccountError) {
+        toastr.error(translate('switchAccountError'));
+      } else {
+        toastr.error(translate('hideAccountFail'));
+      }
     }
   };
 
@@ -82,11 +75,7 @@ export const AccountListModalView = ({
     account: Account,
   ) => {
     preventDefaultMouseEvent(event);
-
-    await unHideAccount({
-      chainId,
-      address: account.address,
-    });
+    await showAccount(account);
   };
 
   return (

@@ -5,6 +5,7 @@ import { Transaction } from 'types';
 import { ethers } from 'ethers';
 import { defaultAccount } from 'utils/constants';
 import defaultLocale from '../assets/locales/en.json';
+import { constants } from 'starknet';
 
 export interface WalletState {
   connected: boolean;
@@ -19,6 +20,9 @@ export interface WalletState {
   transactions: Transaction[];
   transactionDeploy?: Transaction;
   provider?: any; //TODO: metamask SDK is not export types
+  visibility: {
+    [key: string]: Record<string, boolean>;
+  };
 }
 
 const initialState: WalletState = {
@@ -34,12 +38,20 @@ const initialState: WalletState = {
   transactions: [],
   transactionDeploy: undefined,
   provider: undefined,
+  visibility: {
+    [constants.StarknetChainId.SN_MAIN]: {},
+    [constants.StarknetChainId.SN_SEPOLIA]: {},
+  },
 };
 
 export const walletSlice = createSlice({
   name: 'wallet',
   initialState,
   reducers: {
+    setAccountVisibility: (state, { payload }) => {
+      const { chainId, index, visibility } = payload;
+      state.visibility[chainId][index] = visibility;
+    },
     setLocale: (state, { payload }) => {
       state.locale = payload;
     },
@@ -155,6 +167,7 @@ export const walletSlice = createSlice({
 });
 
 export const {
+  setAccountVisibility,
   setWalletConnection,
   setForceReconnect,
   setCurrentAccount,
