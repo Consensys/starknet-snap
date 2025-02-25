@@ -3,6 +3,7 @@ import { createSlice } from '@reduxjs/toolkit';
 export interface modalState {
   infoModalVisible: boolean;
   minVersionModalVisible: boolean;
+  minMMVersionModalVisible: boolean;
   upgradeModalVisible: boolean;
   deployModalVisible: boolean;
 }
@@ -10,6 +11,7 @@ export interface modalState {
 const initialState: modalState = {
   infoModalVisible: false,
   minVersionModalVisible: false,
+  minMMVersionModalVisible: false,
   upgradeModalVisible: false,
   deployModalVisible: false,
 };
@@ -31,6 +33,9 @@ export const modalSlice = createSlice({
     setMinVersionModalVisible: (state, { payload }) => {
       state.minVersionModalVisible = payload;
     },
+    setMinMMVersionModalVisible: (state, { payload }) => {
+      state.minMMVersionModalVisible = payload;
+    },
   },
 });
 
@@ -39,6 +44,7 @@ export const {
   setMinVersionModalVisible,
   setUpgradeModalVisible,
   setDeployModalVisible,
+  setMinMMVersionModalVisible,
 } = modalSlice.actions;
 
 export default modalSlice.reducer;
