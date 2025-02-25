@@ -24,12 +24,25 @@ import type {
 } from './type';
 
 export class MetaMaskSnap {
+  /**
+   * The wallet RPC provider.
+   */
   #provider: MetaMaskProvider;
 
+  /**
+   * The ID of the SNAP.
+   */
   #snapId: string;
 
+  /**
+   * The version of the SNAP to install.
+   */
   #version: string;
 
+  /**
+   * The minimum version of the SNAP.
+   * If the installed version is lower than this version, the SNAP will be updated.
+   */
   #minSnapVersion: string;
 
   constructor(snapId: string, version: string, provider: MetaMaskProvider, minSnapVersion?: string) {
