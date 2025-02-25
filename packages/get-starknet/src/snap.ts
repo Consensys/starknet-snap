@@ -1,3 +1,4 @@
+import semver from 'semver/preload';
 import type {
   Abi,
   AllowArray,
@@ -13,19 +14,43 @@ import type {
   TypedData,
 } from 'starknet';
 
-import type { AccContract, DeploymentData, MetaMaskProvider, Network, RequestSnapResponse } from './type';
+import type {
+  AccContract,
+  DeploymentData,
+  MetaMaskProvider,
+  Network,
+  RequestSnapResponse,
+  SnapsMetaData,
+} from './type';
 
 export class MetaMaskSnap {
+  /**
+   * The wallet RPC provider.
+   */
   #provider: MetaMaskProvider;
 
+  /**
+   * The ID of the SNAP.
+   */
   #snapId: string;
 
+  /**
+   * The version of the SNAP to install.
+   */
   #version: string;
 
-  constructor(snapId: string, version: string, provider: MetaMaskProvider) {
+  /**
+   * The minimum version of the SNAP.
+   * If the installed version is lower than this version, the SNAP will be updated.
+   */
+  #minSnapVersion: string;
+
+  constructor(snapId: string, version: string, provider: MetaMaskProvider, minSnapVersion?: string) {
     this.#provider = provider;
     this.#snapId = snapId;
     this.#version = version;
+    // unless specified, the minSnapVersion is the same as the snapVersion
+    this.#minSnapVersion = minSnapVersion ?? version;
   }
 
   async getPubKey({ userAddress, chainId }: { userAddress: string; chainId?: string }): Promise<string> {
@@ -402,23 +427,26 @@ export class MetaMaskSnap {
   }
 
   async installIfNot(): Promise<boolean> {
-    // if the snap is already installed, return true, to bypass the prompt
-    if (await this.isInstalled()) {
+    if ((await this.isInstalled()) && !(await this.isSnapRequireUpdate())) {
       return true;
     }
+    // `wallet_requestSnaps` will force the SNAP to reconnect,
+    // If the SNAP is not installed, it will be installed
+    // If the SNAP is installed, it will update the SNAP if the version is different
     const response = (await this.#provider.request({
       method: 'wallet_requestSnaps',
       params: {
         [this.#snapId]: { version: this.#version },
       },
     })) as RequestSnapResponse;
+
     if (!response?.[this.#snapId]?.enabled) {
       return false;
     }
     return true;
   }
 
-  async isInstalled() {
+  protected async isInstalled(): Promise<boolean> {
     try {
       await this.#provider.request({
         method: 'wallet_invokeSnap',
@@ -438,5 +466,26 @@ export class MetaMaskSnap {
   #removeUndefined(obj: Record<string, unknown>) {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     return Object.fromEntries(Object.entries(obj).filter(([_, val]) => val !== undefined));
+  }
+
+  protected async getInstalledSnaps(): Promise<SnapsMetaData> {
+    return (await this.#provider.request({ method: 'wallet_getSnaps' })) as SnapsMetaData;
+  }
+
+  protected async isSnapRequireUpdate(): Promise<boolean> {
+    const snaps = await this.getInstalledSnaps();
+
+    if (typeof snaps[this.#snapId]?.version !== 'undefined') {
+      // if the minSnapVersion is *, we should always allowed
+      if (this.#minSnapVersion === '*') {
+        return false;
+      }
+
+      const currentVersion = snaps[this.#snapId]?.version.split('-')?.[0];
+
+      return semver.lt(currentVersion, this.#minSnapVersion);
+    }
+
+    return false;
   }
 }
