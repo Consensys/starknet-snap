@@ -1,32 +1,32 @@
 import { useState, useEffect, ChangeEvent } from 'react';
-import { useAppSelector } from 'hooks/redux';
+
+import { useAppSelector, useCurrentNetwork } from 'hooks';
 import { useMultiLanguage, useStarkNetSnap } from 'services';
+import { getDefaultAccountName } from 'utils/utils';
+import { ACCOUNT_NAME_LENGTH } from 'utils/constants';
 import { InputWithLabel } from 'components/ui/molecule/InputWithLabel';
 import {
   ButtonStyled,
   ButtonsWrapper,
   ErrorMsg,
   FormGroup,
-  Space,
   Title,
   Wrapper,
 } from './AddAccountModal.style';
-import { getDefaultAccountName } from 'utils/utils';
-import { ACCOUNT_NAME_LENGTH } from 'utils/constants';
 
 interface Props {
-  closeModal: () => void;
+  onClose: () => void;
 }
 
-export const AddAccountModalView = ({ closeModal }: Props) => {
+export const AddAccountModalView = ({ onClose }: Props) => {
   const [minLength, maxLength] = ACCOUNT_NAME_LENGTH;
   const { addNewAccount } = useStarkNetSnap();
   const { translate } = useMultiLanguage();
-  const networks = useAppSelector((state) => state.networks);
+  const currentNework = useCurrentNetwork();
   const accounts = useAppSelector((state) => state.wallet.accounts);
   const [enabled, setEnabled] = useState(true);
   const [accountName, setAccountName] = useState('');
-  const chainId = networks?.items[networks.activeNetwork].chainId;
+  const chainId = currentNework?.chainId;
 
   useEffect(() => {
     const trimedAccountName = accountName.trim();
@@ -42,6 +42,9 @@ export const AddAccountModalView = ({ closeModal }: Props) => {
   };
 
   const onAddAccount = async () => {
+    // The UX is better if we close the modal before adding the account
+    onClose();
+
     const trimedAccountName = accountName.trim();
     // Reset account name to undefined if it is empty,
     // so that the default account name is used in Snap
@@ -49,14 +52,12 @@ export const AddAccountModalView = ({ closeModal }: Props) => {
       chainId,
       trimedAccountName === '' ? undefined : trimedAccountName,
     );
-    closeModal();
   };
 
   return (
     <>
       <Wrapper>
         <Title>{translate('addAccount')}</Title>
-        <Space />
         <FormGroup>
           <InputWithLabel
             label={translate('accountName')}
@@ -76,10 +77,14 @@ export const AddAccountModalView = ({ closeModal }: Props) => {
         </FormGroup>
       </Wrapper>
       <ButtonsWrapper>
-        <ButtonStyled onClick={closeModal} backgroundTransparent borderVisible>
+        <ButtonStyled
+          onClick={() => onClose()}
+          backgroundTransparent
+          borderVisible
+        >
           {translate('cancel')}
         </ButtonStyled>
-        <ButtonStyled enabled={enabled} onClick={onAddAccount}>
+        <ButtonStyled enabled={enabled} onClick={() => onAddAccount()}>
           {translate('add')}
         </ButtonStyled>
       </ButtonsWrapper>

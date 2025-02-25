@@ -10,9 +10,6 @@
     "accountName": {
       "message": "Nom du compte"
     },
-    "accounts": {
-      "message": "Comptes"
-    },
     "accountDeployedSuccessfully": {
       "message": "Compte déployé avec succès."
     },
@@ -142,6 +139,9 @@
     "gotIt": {
       "message": "COMPRIS !"
     },
+    "hiddenAccounts": {
+      "message": "Comptes cachés"
+    },
     "inputAmountExceedsBalance": {
       "message": "Le montant entré dépasse le solde de l'utilisateur"
     },
@@ -208,6 +208,9 @@
     "nonZeroBalanceOnCairo0": {
       "message": "Vous avez un solde non nul sur une adresse Cairo 0 non déployée"
     },
+    "noHiddenAccount": {
+      "message": "Pas de comptes cachés"
+    },
     "openBetaVersion": {
       "message": "Il s'agit de la version Open Beta de la dApp, des mises à jour sont effectuées régulièrement"
     },
@@ -237,6 +240,9 @@
     },
     "selectTokenForTransactionFees": {
       "message": "Sélectionner un jeton pour les frais de transaction"
+    },
+    "selectAnAccount": {
+      "message": "Sélectionnez un compte"
     },
     "send": {
       "message": "Envoie"

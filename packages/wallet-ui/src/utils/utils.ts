@@ -257,16 +257,24 @@ export const isUserDenyError = (error: any): Boolean => {
   return false;
 };
 
-export const getDefaultAccountName = (hdIndex = 0) => {
+export const getDefaultAccountName = (hdIndex = 0): string => {
   if (hdIndex < 0) {
     throw new Error('hdIndex cannot be negative.');
   }
   return `Account ${hdIndex + 1}`;
 };
 
-export const removeUndefined = (obj: Record<string, unknown>) => {
+export const removeUndefined = (
+  obj: Record<string, unknown>,
+): Record<string, unknown> => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   return Object.fromEntries(
     Object.entries(obj).filter(([_, val]) => val !== undefined),
   );
+};
+
+export const formatAddress = (address: string, starkName?: string): string => {
+  return starkName
+    ? shortenDomain(starkName)
+    : (shortenAddress(address) as string);
 };

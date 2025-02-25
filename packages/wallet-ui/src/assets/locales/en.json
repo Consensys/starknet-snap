@@ -10,9 +10,6 @@
     "accountName": {
       "message": "Account name"
     },
-    "accounts": {
-      "message": "Accounts"
-    },
     "accountDeployedSuccessfully": {
       "message": "Account deployed successfully."
     },
@@ -148,6 +145,9 @@
     "gotIt": {
       "message": "GOT IT!"
     },
+    "hiddenAccounts": {
+      "message": "Hidden accounts"
+    },
     "inputAmountExceedsBalance": {
       "message": "Input amount exceeds user balance"
     },
@@ -214,6 +214,9 @@
     "nonZeroBalanceOnCairo0": {
       "message": "You have a non-zero balance on a Cairo 0 non-deployed address"
     },
+    "noHiddenAccount": {
+      "message": "No hidden accounts"
+    },
     "openBetaVersion": {
       "message": "This is the Open Beta version of the dapp, updates are made regularly"
     },
@@ -243,6 +246,9 @@
     },
     "selectTokenForTransactionFees": {
       "message": "Select Token for Transaction Fees"
+    },
+    "selectAnAccount": {
+      "message": "Select an account"
     },
     "send": {
       "message": "Send"
