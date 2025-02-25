@@ -41,3 +41,13 @@ export type RequestSnapResponse = {
     blocked: boolean;
   };
 };
+
+export type SnapsMetaData = {
+  [key in string]: {
+    id: string;
+    version: string;
+    enabled: boolean;
+    blocked: boolean;
+    initialPermissions: string;
+  };
+};

@@ -1,10 +1,19 @@
+import { BigNumber, ethers } from 'ethers';
+import Toastr from 'toastr2';
+import {
+  Call,
+  constants,
+  Invocations,
+  TransactionType,
+  UniversalDetails,
+} from 'starknet';
+
+import { useAppDispatch, useAppSelector } from 'hooks/redux';
 import {
   setMinVersionModalVisible,
   setUpgradeModalVisible,
   setDeployModalVisible,
 } from 'slices/modalSlice';
-import { setNetworks } from 'slices/networkSlice';
-import { useAppDispatch, useAppSelector } from 'hooks/redux';
 import {
   setErc20TokenBalanceSelected,
   upsertErc20TokenBalance,
@@ -18,8 +27,19 @@ import {
   setTranslations,
   updateAccount,
   updateCurrentAccount,
-} from '../slices/walletSlice';
-import Toastr from 'toastr2';
+  setWalletConnection,
+} from 'slices/walletSlice';
+import { setActiveNetwork, setNetworks } from 'slices/networkSlice';
+import { disableLoading, enableLoadingWithMessage } from 'slices/UISlice';
+import {
+  Transaction,
+  Account,
+  FeeToken,
+  FeeTokenUnit,
+  Network,
+  Erc20TokenBalance,
+  Erc20Token,
+} from 'types';
 import {
   hexToString,
   retry,
@@ -27,36 +47,13 @@ import {
   getTokenBalanceWithDetails,
   isUserDenyError,
   shortenAddress,
-} from '../utils/utils';
-import { setWalletConnection } from '../slices/walletSlice';
-import { FeeToken, FeeTokenUnit, Network } from '../types';
-import { Account } from '../types';
-import { Erc20TokenBalance, Erc20Token } from '../types';
-import { disableLoading, enableLoadingWithMessage } from '../slices/UISlice';
-import { Transaction } from 'types';
-import { BigNumber, ethers } from 'ethers';
+} from 'utils/utils';
 import { getAssetPriceUSD } from './coinGecko';
-import semver from 'semver/preload';
-import { setActiveNetwork } from 'slices/networkSlice';
-import {
-  Call,
-  constants,
-  Invocations,
-  TransactionType,
-  UniversalDetails,
-} from 'starknet';
 import { useSnap } from './useSnap';
 
 export const useStarkNetSnap = () => {
   const dispatch = useAppDispatch();
-  const {
-    invokeSnap,
-    getInstalledSnaps,
-    requestSnap,
-    minSnapVersion,
-    ping,
-    snapId,
-  } = useSnap();
+  const { invokeSnap, isSnapRequireUpdate, requestSnap, ping } = useSnap();
   const { loader } = useAppSelector((state) => state.UI);
   const erc20TokenBalances = useAppSelector(
     (state) => state.wallet.erc20TokenBalances,
@@ -133,22 +130,11 @@ export const useStarkNetSnap = () => {
     });
   };
 
-  const oldVersionDetected = async () => {
-    const snaps = await getInstalledSnaps();
-    if (typeof snaps[snapId]?.version !== 'undefined') {
-      // console.log(`snaps[snapId][version]: ${snaps[snapId]?.version}`);
-      // console.log(`snaps[snapId][version].split('_')[0]: ${snaps[snapId]?.version?.split('-')?.[0]}`);
-      // console.log(`minSnapVersion: ${minSnapVersion}`);
-      // console.log(`semver.lt: ${semver.lt(snaps[snapId]?.version?.split('-')?.[0], minSnapVersion)}`);
-      return semver.lt(snaps[snapId]?.version?.split('-')?.[0], minSnapVersion);
-    }
-    return false;
-  };
-
   const initSnap = async () => {
-    if (await oldVersionDetected()) {
-      dispatch(setMinVersionModalVisible(true));
-      dispatch(disableLoading());
+    if (await isSnapRequireUpdate()) {
+      // If the SNAP requires an update,
+      // re-connect with the SNAP to kick off the update process
+      await connectToSnap();
       return;
     }
     if (!loader.isLoading) {
@@ -981,6 +967,5 @@ export const useStarkNetSnap = () => {
     getCurrentNetwork,
     getStarkName,
     getAddrFromStarkName,
-    satisfiesVersion: oldVersionDetected,
   };
 };
