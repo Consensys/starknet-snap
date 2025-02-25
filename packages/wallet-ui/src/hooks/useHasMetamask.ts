@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useAppDispatch } from 'hooks/redux';
 import { setProvider } from 'slices/walletSlice';
-import { setMinVersionModalVisible } from 'slices/modalSlice';
+import { setMinMMVersionModalVisible } from 'slices/modalSlice';
 import { enableLoadingWithMessage, disableLoading } from 'slices/UISlice';
 import { MIN_METAMASK_VERSION } from 'utils/constants';
 import semver from 'semver/preload';
@@ -92,9 +92,6 @@ async function detectMetamaskSupport(windowObject: Window & typeof globalThis) {
 export const useHasMetamask = () => {
   const dispatch = useAppDispatch();
   const [hasMetamask, setHasMetamask] = useState<boolean | null>(null);
-  const [metaMaskUpgradeRequired, setMetaMaskUpgradeRequired] = useState<
-    boolean | null
-  >(null);
 
   useEffect(() => {
     const init = async () => {
@@ -106,8 +103,7 @@ export const useHasMetamask = () => {
           dispatch(setProvider(provider));
           setHasMetamask(provider != null);
           if (await isMetaMaskUpgradeRequired(provider)) {
-            dispatch(setMinVersionModalVisible(true));
-            setMetaMaskUpgradeRequired(true);
+            dispatch(setMinMMVersionModalVisible(true));
           }
         } else {
           dispatch(setProvider(null));
@@ -125,7 +121,6 @@ export const useHasMetamask = () => {
 
   return {
     hasMetamask,
-    metaMaskUpgradeRequired,
   };
 };
 
