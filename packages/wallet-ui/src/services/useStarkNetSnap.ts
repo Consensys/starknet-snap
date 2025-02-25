@@ -58,9 +58,10 @@ export const useStarkNetSnap = () => {
     snapId,
   } = useSnap();
   const { loader } = useAppSelector((state) => state.UI);
-  const { erc20TokenBalances, accounts } = useAppSelector(
-    (state) => state.wallet,
+  const erc20TokenBalances = useAppSelector(
+    (state) => state.wallet.erc20TokenBalances,
   );
+  const accounts = useAppSelector((state) => state.wallet.accounts);
 
   const connectToSnap = () => {
     dispatch(enableLoadingWithMessage('Connecting...'));
