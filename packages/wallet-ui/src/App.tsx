@@ -82,11 +82,11 @@ function App() {
         <PopIn isOpen={!connected && !loading} showClose={false}>
           <NoMetamaskModal />
         </PopIn>
-        {/* This Modal will be showed when the SNAP must re-installed due to breaking change from Metamask  */}
+        {/* This Modal will be shown when the SNAP must re-installed due to breaking change from Metamask  */}
         <PopIn isOpen={minVersionModalVisible} showClose={false}>
           <MinVersionModal />
         </PopIn>
-        {/* This Modal will be showed when the Metamask version is outdate to support the SNAP */}
+        {/* This Modal will be shown when the Metamask version is outdate to support the SNAP */}
         <PopIn isOpen={minMMVersionModalVisible} showClose={false}>
           <MinMetamaskVersionModal />
         </PopIn>
