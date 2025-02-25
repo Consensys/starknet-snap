@@ -208,6 +208,9 @@
     "nonZeroBalanceOnCairo0": {
       "message": "Vous avez un solde non nul sur une adresse Cairo 0 non déployée"
     },
+    "noHiddenAccount": {
+      "message": "Pas de comptes cachés"
+    },
     "openBetaVersion": {
       "message": "Il s'agit de la version Open Beta de la dApp, des mises à jour sont effectuées régulièrement"
     },

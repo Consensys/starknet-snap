@@ -13,6 +13,8 @@ import {
   HiddenAccountBar,
   HiddenAccountBarLeftIcon,
   HiddenAccountBarRightIcon,
+  NoHiddenAccountText,
+  VerticalAlignBox,
 } from './AccountList.style';
 import { AccountItem } from './AccountItem.view';
 
@@ -106,13 +108,21 @@ export const AccountListModalView = ({
             height={365}
             child={() => (
               <>
-                {hiddenAccounts.map((account) => (
-                  <AccountItem
-                    visible={false}
-                    account={account}
-                    onIconButtonClick={showAccount}
-                  />
-                ))}
+                {hiddenAccounts.length === 0 ? (
+                  <VerticalAlignBox>
+                    <NoHiddenAccountText>
+                      {translate('noHiddenAccount')}
+                    </NoHiddenAccountText>
+                  </VerticalAlignBox>
+                ) : (
+                  hiddenAccounts.map((account) => (
+                    <AccountItem
+                      visible={false}
+                      account={account}
+                      onIconButtonClick={showAccount}
+                    />
+                  ))
+                )}
               </>
             )}
           />
