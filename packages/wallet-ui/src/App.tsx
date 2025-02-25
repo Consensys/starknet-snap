@@ -27,9 +27,10 @@ library.add(fas, far);
 function App() {
   const { initSnap, initWalletData, checkConnection, loadLocale } =
     useStarkNetSnap();
-  const { connected, forceReconnect, provider } = useAppSelector(
-    (state) => state.wallet,
-  );
+  const connected = useAppSelector((state) => state.wallet.connected);
+  const forceReconnect = useAppSelector((state) => state.wallet.forceReconnect);
+  const provider = useAppSelector((state) => state.wallet.provider);
+  const currentAccount = useAppSelector((state) => state.wallet.currentAccount);
   const {
     infoModalVisible,
     minVersionModalVisible,
@@ -39,7 +40,6 @@ function App() {
   } = useAppSelector((state) => state.modals);
   const { loader } = useAppSelector((state) => state.UI);
   const networks = useAppSelector((state) => state.networks);
-  const { currentAccount } = useAppSelector((state) => state.wallet);
   const { hasMetamask } = useHasMetamask();
   const chainId = networks.items?.[networks.activeNetwork]?.chainId;
   const address = currentAccount.address;
