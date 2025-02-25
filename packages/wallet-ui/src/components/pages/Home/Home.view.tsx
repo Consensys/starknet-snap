@@ -6,12 +6,12 @@ import { useAppSelector } from 'hooks/redux';
 import { useMultiLanguage } from 'services';
 
 export const HomeView = () => {
-  const { erc20TokenBalanceSelected, transactions } = useAppSelector(
-    (state) => state.wallet,
+  const erc20TokenBalanceSelected = useAppSelector(
+    (state) => state.wallet.erc20TokenBalanceSelected,
   );
+  const transactions = useAppSelector((state) => state.wallet.transactions);
+  const { address } = useAppSelector((state) => state.wallet.currentAccount);
   const loader = useAppSelector((state) => state.UI.loader);
-  const currentAccount = useAppSelector((state) => state.wallet.currentAccount);
-  const address = currentAccount.address;
   const { upgradeModalVisible } = useAppSelector((state) => state.modals);
   const { translate } = useMultiLanguage();
 

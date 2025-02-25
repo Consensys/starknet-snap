@@ -20,24 +20,26 @@ import { NoMetamaskModal } from 'components/ui/organism/NoMetamaskModal';
 import { MinVersionModal } from './components/ui/organism/MinVersionModal';
 import { useHasMetamask } from 'hooks/useHasMetamask';
 import { DeployModal } from 'components/ui/organism/DeployModal';
+import { MinMetamaskVersionModal } from 'components/ui/organism/MinMetamaskVersionModal';
 
 library.add(fas, far);
 
 function App() {
   const { initSnap, initWalletData, checkConnection, loadLocale } =
     useStarkNetSnap();
-  const { connected, forceReconnect, provider } = useAppSelector(
-    (state) => state.wallet,
-  );
+  const connected = useAppSelector((state) => state.wallet.connected);
+  const forceReconnect = useAppSelector((state) => state.wallet.forceReconnect);
+  const provider = useAppSelector((state) => state.wallet.provider);
+  const currentAccount = useAppSelector((state) => state.wallet.currentAccount);
   const {
     infoModalVisible,
     minVersionModalVisible,
+    minMMVersionModalVisible,
     upgradeModalVisible,
     deployModalVisible,
   } = useAppSelector((state) => state.modals);
   const { loader } = useAppSelector((state) => state.UI);
   const networks = useAppSelector((state) => state.networks);
-  const currentAccount = useAppSelector((state) => state.wallet.currentAccount);
   const { hasMetamask } = useHasMetamask();
   const chainId = networks.items?.[networks.activeNetwork]?.chainId;
   const address = currentAccount.address;
@@ -69,6 +71,9 @@ function App() {
   }, [connected, loadLocale]);
 
   const loading = loader.isLoading;
+  const isModalEligibleToShow =
+    !minVersionModalVisible && !minMMVersionModalVisible;
+
   return (
     <ThemeProvider theme={theme}>
       <GlobalStyle />
@@ -79,6 +84,9 @@ function App() {
         <PopIn isOpen={minVersionModalVisible} showClose={false}>
           <MinVersionModal />
         </PopIn>
+        <PopIn isOpen={minMMVersionModalVisible} showClose={false}>
+          <MinMetamaskVersionModal />
+        </PopIn>
         <PopIn
           isOpen={!loading && !!hasMetamask && !connected}
           showClose={false}
@@ -86,19 +94,19 @@ function App() {
           <ConnectModal />
         </PopIn>
         <PopIn
-          isOpen={infoModalVisible && !minVersionModalVisible}
+          isOpen={isModalEligibleToShow && infoModalVisible}
           showClose={false}
         >
           <ConnectInfoModal address={address} />
         </PopIn>
         <PopIn
-          isOpen={!minVersionModalVisible && upgradeModalVisible}
+          isOpen={isModalEligibleToShow && upgradeModalVisible}
           showClose={false}
         >
           <UpgradeModel address={address} />
         </PopIn>
         <PopIn
-          isOpen={!minVersionModalVisible && deployModalVisible}
+          isOpen={isModalEligibleToShow && deployModalVisible}
           showClose={false}
         >
           <DeployModal address={address} />
