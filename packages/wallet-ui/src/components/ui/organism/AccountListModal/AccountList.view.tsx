@@ -28,14 +28,15 @@ export const AccountListModalView = ({
   onClose: () => void;
   onAddAccountClick: () => void;
 }) => {
-  const {
-    switchAccount: switchSnapAccount,
-    hideAccount: hideSnapAccount,
-    unHideAccount: showSnapAccount,
-  } = useStarkNetSnap();
+  const { switchAccount: switchSnapAccount } = useStarkNetSnap();
   const { translate } = useMultiLanguage();
-  const { visibleAccounts, hiddenAccounts, canHideAccount } =
-    useAccountVisibility();
+  const {
+    visibleAccounts,
+    hiddenAccounts,
+    canHideAccount,
+    hideAccount,
+    showAccount,
+  } = useAccountVisibility();
   const currentNework = useCurrentNetwork();
   const { address: currentAddress } = useCurrentAccount();
   const [visibility, setVisibility] = useState(true);
@@ -45,23 +46,6 @@ export const AccountListModalView = ({
   const switchAccount = async (account: Account) => {
     onClose();
     await switchSnapAccount(chainId, account.address);
-  };
-
-  const hideAccount = async (account: Account) => {
-    if (canHideAccount) {
-      await hideSnapAccount({
-        chainId,
-        address: account.address,
-        currentAddress,
-      });
-    }
-  };
-
-  const showAccount = async (account: Account) => {
-    await showSnapAccount({
-      chainId,
-      address: account.address,
-    });
   };
 
   return (

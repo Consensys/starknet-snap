@@ -1,14 +1,21 @@
 import { useMemo } from 'react';
 
 import { Account } from 'types';
+import { useStarkNetSnap } from 'services';
 import { useAppSelector } from './redux';
+import { useCurrentAccount } from './useCurrentAccount';
+import { useCurrentNetwork } from './useCurrentNetwork';
 
 /**
  * A hook to get the list of visible and hidden accounts.
  *
- * @returns the list of visible and hidden accounts and a boolean indicating if an account can be hidden
+ * @returns An object containing the visible accounts, hidden accounts, and functions to hide and show accounts.
  */
 export const useAccountVisibility = () => {
+  const { hideAccount: hideSnapAccount, unHideAccount: showSnapAccount } =
+    useStarkNetSnap();
+  const { address: currentAddress } = useCurrentAccount();
+  const currentNetwork = useCurrentNetwork();
   const accounts = useAppSelector((state) => state.wallet.accounts);
 
   // Use useMemo to avoid re-rendering the component when the state changes
@@ -30,5 +37,30 @@ export const useAccountVisibility = () => {
   // An account can be hidden only if there are more than one visible account
   const canHideAccount = visibleAccounts.length > 1;
 
-  return { visibleAccounts, hiddenAccounts, canHideAccount };
+  const chainId = currentNetwork?.chainId;
+
+  const hideAccount = async (account: Account) => {
+    if (canHideAccount) {
+      await hideSnapAccount({
+        chainId,
+        address: account.address,
+        currentAddress,
+      });
+    }
+  };
+
+  const showAccount = async (account: Account) => {
+    await showSnapAccount({
+      chainId,
+      address: account.address,
+    });
+  };
+
+  return {
+    visibleAccounts,
+    hiddenAccounts,
+    canHideAccount,
+    hideAccount,
+    showAccount,
+  };
 };
