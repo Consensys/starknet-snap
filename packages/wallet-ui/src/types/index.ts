@@ -32,6 +32,7 @@ export type Account = {
   publicKey: string;
   upgradeRequired: boolean;
   deployRequired: boolean;
+  isDeployed: boolean;
   chainId: string;
   addressIndex: number;
   accountName: string;
@@ -102,3 +103,9 @@ export type Translator = (
   key: string,
   ...args: (string | undefined)[]
 ) => string;
+
+export interface FeeEstimate {
+  fee: string;
+  timestamp: number;
+  includeDeploy: boolean;
+}

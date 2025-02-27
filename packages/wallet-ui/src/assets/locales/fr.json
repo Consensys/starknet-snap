@@ -266,7 +266,7 @@
       "message": "Conditions d'utilisation"
     },
     "to": {
-      "message": "À"
+      "message": "Destinaire"
     },
     "tokenAddedSuccessfully": {
       "message": "Jeton ajouté avec succès"
@@ -327,6 +327,9 @@
     },
     "accountNameLengthError": {
       "message": "Le nom du compte doit comporter entre {1} et {2} caractères."
+    },
+    "invalidAmount": {
+      "message": "Montant invalide"
     }
   }
 }
