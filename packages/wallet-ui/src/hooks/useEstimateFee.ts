@@ -9,7 +9,7 @@ import { useAppSelector } from './redux';
 import { Erc20TokenBalance } from 'types';
 import { useCurrentAccount } from 'hooks';
 
-const cacheRefreshTime = 10000;
+const cacheRefreshTime = 60000;
 const globalFetchingStatus: Record<string, boolean> = {}; // Tracks ongoing fetches
 
 export const useEstimateFee = (
