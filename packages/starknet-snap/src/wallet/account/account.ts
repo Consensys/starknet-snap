@@ -97,6 +97,7 @@ export class Account {
       addressIndex: this.hdIndex,
       chainId: this.chainId,
       cairoVersion: this.cairoVersion,
+      isDeployed: await this.accountContract.isDeployed(),
       deployRequired,
       upgradeRequired,
       visibility: this.metadata.visibility,

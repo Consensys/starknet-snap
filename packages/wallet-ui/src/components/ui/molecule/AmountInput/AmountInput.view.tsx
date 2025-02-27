@@ -11,6 +11,7 @@ import {
   RowWrapper,
   USDDiv,
   Wrapper,
+  Spinner,
 } from './AmountInput.style';
 import { Erc20TokenBalance } from 'types';
 import { ethers } from 'ethers';
@@ -24,6 +25,10 @@ interface Props extends InputHTMLAttributes<HTMLInputElement> {
   decimalsMax?: number;
   asset: Erc20TokenBalance;
   onChangeCustom?: (value: string) => void;
+  shouldApplyMax: boolean;
+  setShouldApplyMax: (value: boolean) => void;
+  fetchingFee: boolean;
+  feeEstimate?: string;
 }
 
 export const AmountInputView = ({
@@ -35,6 +40,10 @@ export const AmountInputView = ({
   decimalsMax = 18,
   asset,
   onChangeCustom,
+  shouldApplyMax,
+  setShouldApplyMax,
+  fetchingFee,
+  feeEstimate,
   ...otherProps
 }: Props) => {
   const [focused, setFocused] = useState(false);
@@ -84,6 +93,17 @@ export const AmountInputView = ({
     }
   };
 
+  useEffect(
+    () => {
+      if (shouldApplyMax && !fetchingFee) {
+        handleMaxClick();
+        setShouldApplyMax(false);
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [shouldApplyMax, fetchingFee],
+  );
+
   const handleContainerClick = () => {
     if (inputRef.current !== null) {
       inputRef.current.focus();
@@ -91,8 +111,17 @@ export const AmountInputView = ({
   };
 
   const handleMaxClick = () => {
+    if (fetchingFee) {
+      setShouldApplyMax(true);
+      return;
+    }
+    let amountBN = ethers.BigNumber.from(asset.amount);
+    if (feeEstimate) {
+      const feeBN = ethers.BigNumber.from(feeEstimate);
+      amountBN = amountBN.sub(feeBN);
+    }
     const amountStr = ethers.utils
-      .formatUnits(asset.amount, asset.decimals)
+      .formatUnits(amountBN, asset.decimals)
       .toString();
     const amountFloat = parseFloat(amountStr);
     const value = usdMode
@@ -136,6 +165,7 @@ export const AmountInputView = ({
             onChange={(event) => triggerOnChange(event.target.value)}
             {...otherProps}
           />
+          {fetchingFee && shouldApplyMax && <Spinner />}
           {!usdMode && (
             <>
               {asset.symbol}

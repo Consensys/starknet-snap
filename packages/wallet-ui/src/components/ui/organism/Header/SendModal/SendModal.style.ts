@@ -9,6 +9,7 @@ export const Wrapper = styled.div`
   width: ${(props) => props.theme.modal.base};
   padding: ${(props) => props.theme.spacing.base};
   border-radius: 8px 8px 0px 0px;
+  min-height: 100%;
 `;
 
 export const Header = styled.div`

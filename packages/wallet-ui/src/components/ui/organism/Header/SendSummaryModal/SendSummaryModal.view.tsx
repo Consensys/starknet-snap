@@ -22,17 +22,18 @@ import {
   USDAmount,
   Wrapper,
   EstimatedFeesTooltip,
-  LoadingWrapper,
   IncludeDeploy,
   AlertTotalExceedsAmount,
+  LoadingWrapper,
 } from './SendSummaryModal.style';
-import { useAppSelector } from 'hooks/redux';
+import { useAppDispatch, useAppSelector } from 'hooks/redux';
 import { useEffect, useState } from 'react';
 import { useMultiLanguage, useStarkNetSnap } from 'services';
 import { ethers } from 'ethers';
 import Toastr from 'toastr2';
-import { constants } from 'starknet';
 import { ContractFuncName, FeeToken, FeeTokenUnit } from 'types';
+import { updateCurrentAccount } from 'slices/walletSlice';
+import { useCurrentAccount, useEstimateFee } from 'hooks';
 
 interface Props {
   address: string;
@@ -51,77 +52,40 @@ export const SendSummaryModalView = ({
   handleBack,
   selectedFeeToken,
 }: Props) => {
-  const currentAccount = useAppSelector((state) => state.wallet.currentAccount);
+  const dispatch = useAppDispatch();
+  const { address: currentAddress } = useCurrentAccount();
   const erc20TokenBalances = useAppSelector(
     (state) => state.wallet.erc20TokenBalances,
   );
   const erc20TokenBalanceSelected = useAppSelector(
     (state) => state.wallet.erc20TokenBalanceSelected,
   );
-  const [estimatingGas, setEstimatingGas] = useState(true);
-  const [gasFees, setGasFees] = useState({
-    suggestedMaxFee: '0',
-    unit:
-      selectedFeeToken === FeeToken.ETH ? FeeTokenUnit.ETH : FeeTokenUnit.STRK,
-    includeDeploy: false,
-  });
-  const [gasFeesError, setGasFeesError] = useState(false);
+  const { feeEstimates, isFeeEstimateValid, estimateFees } =
+    useEstimateFee(chainId);
   const [gasFeesAmount, setGasFeesAmount] = useState('');
   const [gasFeesAmountUSD, setGasFeesAmountUSD] = useState('');
   const [amountUsdPrice, setAmountUsdPrice] = useState('');
   const [totalAmount, setTotalAmount] = useState('');
   const [totalAmountUSD, setTotalAmountUSD] = useState('');
   const [totalExceedsBalance, setTotalExceedsBalance] = useState(false);
-  const { estimateFees, sendTransaction, getTransactions } = useStarkNetSnap();
+  const { sendTransaction, getTransactions } = useStarkNetSnap();
   const { translate } = useMultiLanguage();
-
   const ethToken = erc20TokenBalances[0];
   const feeToken =
     erc20TokenBalances.find((token) => token.symbol === selectedFeeToken) ??
     ethToken;
 
+  const gasFees = feeEstimates[selectedFeeToken];
+  const estimatingGas = !isFeeEstimateValid(gasFees);
   const toastr = new Toastr({
     closeDuration: 10000000,
     showDuration: 1000000000,
     positionClass: 'toast-top-center',
   });
-
+  estimateFees(selectedFeeToken);
   useEffect(() => {
-    const fetchGasFee = () => {
-      setGasFeesError(false);
-      setEstimatingGas(true);
-      const amountBN = ethers.utils.parseUnits(
-        amount,
-        erc20TokenBalanceSelected.decimals,
-      );
-      const callData = address + ',' + amountBN.toString() + ',0';
-      estimateFees(
-        erc20TokenBalanceSelected.address,
-        ContractFuncName.Transfer,
-        callData,
-        currentAccount.address,
-        chainId,
-        selectedFeeToken === FeeToken.STRK
-          ? constants.TRANSACTION_VERSION.V3
-          : undefined,
-      )
-        .then((response) => {
-          setGasFees(response);
-          setEstimatingGas(false);
-        })
-        .catch(() => {
-          toastr.error(translate('errorCalculatingGasFees'));
-        });
-    };
-    fetchGasFee();
-  }, [currentAccount]);
-
-  useEffect(() => {
-    if (gasFees?.suggestedMaxFee) {
-      const gasFeesBN = ethers.utils.parseUnits(
-        gasFees.suggestedMaxFee,
-        FeeTokenUnit.ETH,
-      );
+    if (gasFees?.fee) {
+      const gasFeesBN = ethers.utils.parseUnits(gasFees.fee, FeeTokenUnit.ETH);
       let totalToCheck = gasFeesBN;
 
       const gasFeesStr = ethers.utils.formatUnits(gasFeesBN, feeToken.decimals);
@@ -185,8 +149,8 @@ export const SendSummaryModalView = ({
       erc20TokenBalanceSelected.address,
       ContractFuncName.Transfer,
       callData,
-      currentAccount.address,
-      gasFees.suggestedMaxFee,
+      currentAddress,
+      gasFees.fee,
       chainId,
       selectedFeeToken,
     )
@@ -194,7 +158,7 @@ export const SendSummaryModalView = ({
         if (result) {
           toastr.success(translate('transactionSentSuccessfully'));
           getTransactions(
-            currentAccount.address,
+            currentAddress,
             erc20TokenBalanceSelected.address,
             10,
             chainId,
@@ -205,6 +169,9 @@ export const SendSummaryModalView = ({
               `handleConfirmClick: error from getTransactions: ${err}`,
             );
           });
+          if (gasFees.includeDeploy) {
+            dispatch(updateCurrentAccount({ isDeployed: true }));
+          }
         } else {
           toastr.info(translate('transactionRejectedByUser'));
         }
@@ -278,11 +245,10 @@ export const SendSummaryModalView = ({
             )}
           </RightSummary>
         </Summary>
-        {!estimatingGas && (
-          <TotalAmount>
-            {translate('maximumFees')} {gasFeesAmount} {selectedFeeToken}
-          </TotalAmount>
-        )}
+
+        <TotalAmount>
+          {translate('maximumFees')} {gasFeesAmount} {selectedFeeToken}
+        </TotalAmount>
         {gasFees.includeDeploy && (
           <IncludeDeploy>
             *{translate('feesIncludeOneTimeDeploymentFee')}
@@ -324,7 +290,7 @@ export const SendSummaryModalView = ({
           {translate('back').toUpperCase()}
         </ButtonStyled>
         <ButtonStyled
-          enabled={!estimatingGas && !gasFeesError && !totalExceedsBalance}
+          enabled={!estimatingGas && !totalExceedsBalance}
           onClick={handleConfirmClick}
         >
           {translate('confirm')}

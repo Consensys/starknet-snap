@@ -22,6 +22,7 @@ import { DEFAULT_FEE_TOKEN } from 'utils/constants';
 import { FeeToken } from 'types';
 import { useMultiLanguage, useStarkNetSnap } from 'services';
 import { InfoText } from 'components/ui/molecule/AddressInput/AddressInput.style';
+import { useEstimateFee } from 'hooks/useEstimateFee';
 
 interface Props {
   closeModal?: () => void;
@@ -32,6 +33,11 @@ export const SendModalView = ({ closeModal }: Props) => {
   const chainId = networks?.items[networks.activeNetwork]?.chainId;
   const erc20TokenBalanceSelected = useAppSelector(
     (state) => state.wallet.erc20TokenBalanceSelected,
+  );
+  const ethBalance = useAppSelector((state) =>
+    state.wallet.erc20TokenBalances.find(
+      (token) => token.symbol === DEFAULT_FEE_TOKEN,
+    ),
   );
   const { getAddrFromStarkName } = useStarkNetSnap();
   const { translate } = useMultiLanguage();
@@ -48,14 +54,17 @@ export const SendModalView = ({ closeModal }: Props) => {
   const [errors, setErrors] = useState({ amount: '', address: '' });
   const [resolvedAddress, setResolvedAddress] = useState('');
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
-  const [loading, setLoading] = useState(false);
+  const { estimateFees, fetchingFee, feeEstimates } = useEstimateFee(
+    chainId,
+    ethBalance,
+  );
+  const [shouldApplyMax, setShouldApplyMax] = useState(false);
 
   const handleBack = () => {
     setSummaryModalOpen(false);
   };
 
   const handleChange = (fieldName: string, fieldValue: string) => {
-    //Check if input amount does not exceed user balance
     setErrors((prevErrors) => ({
       ...prevErrors,
       [fieldName]: '',
@@ -63,15 +72,22 @@ export const SendModalView = ({ closeModal }: Props) => {
     switch (fieldName) {
       case 'amount':
         if (fieldValue !== '' && fieldValue !== '.') {
-          const inputAmount = ethers.utils.parseUnits(
-            fieldValue,
-            erc20TokenBalanceSelected.decimals,
-          );
-          const userBalance = erc20TokenBalanceSelected.amount;
-          if (inputAmount.gt(userBalance)) {
+          try {
+            const inputAmount = ethers.utils.parseUnits(
+              fieldValue,
+              erc20TokenBalanceSelected.decimals,
+            );
+            const userBalance = erc20TokenBalanceSelected.amount;
+            if (inputAmount.gt(userBalance)) {
+              setErrors((prevErrors) => ({
+                ...prevErrors,
+                amount: translate('inputAmountExceedsBalance'),
+              }));
+            }
+          } catch (error) {
             setErrors((prevErrors) => ({
               ...prevErrors,
-              amount: translate('inputAmountExceedsBalance'),
+              amount: translate('invalidAmount'),
             }));
           }
         }
@@ -85,7 +101,6 @@ export const SendModalView = ({ closeModal }: Props) => {
             break;
           } else if (isValidStarkName(fieldValue)) {
             debounceRef.current = setTimeout(() => {
-              setLoading(true);
               getAddrFromStarkName(fieldValue, chainId)
                 .then((address) => {
                   setResolvedAddress(address);
@@ -96,9 +111,6 @@ export const SendModalView = ({ closeModal }: Props) => {
                     ...prevErrors,
                     address: translate('starkNameDoesNotExist'),
                   }));
-                })
-                .finally(() => {
-                  setLoading(false);
                 });
             }, 300);
           } else {
@@ -115,6 +127,7 @@ export const SendModalView = ({ closeModal }: Props) => {
           ...prevFields,
           feeToken: fieldValue as FeeToken,
         }));
+        estimateFees(fieldValue as FeeToken);
         break;
     }
     setFields((prevFields) => ({
@@ -129,8 +142,13 @@ export const SendModalView = ({ closeModal }: Props) => {
       !errors.amount &&
       fields.amount.length > 0 &&
       fields.address.length > 0 &&
-      !loading
+      !(fetchingFee && shouldApplyMax)
     );
+  };
+
+  const feeEstimate = feeEstimates[fields.feeToken] ?? {
+    fee: '0',
+    includeDeploy: false,
   };
 
   return (
@@ -170,6 +188,14 @@ export const SendModalView = ({ closeModal }: Props) => {
               helperText={errors.amount}
               decimalsMax={erc20TokenBalanceSelected.decimals}
               asset={erc20TokenBalanceSelected}
+              shouldApplyMax={shouldApplyMax}
+              setShouldApplyMax={setShouldApplyMax}
+              fetchingFee={fetchingFee}
+              feeEstimate={
+                fields.feeToken === erc20TokenBalanceSelected.symbol
+                  ? feeEstimate?.fee
+                  : undefined
+              }
             />
             <SeparatorSmall />
             <div>
@@ -203,7 +229,6 @@ export const SendModalView = ({ closeModal }: Props) => {
           </Buttons>
         </div>
       )}
-
       {summaryModalOpen && (
         <SendSummaryModal
           closeModal={closeModal}
