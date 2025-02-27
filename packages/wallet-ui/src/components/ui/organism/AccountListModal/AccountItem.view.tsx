@@ -13,9 +13,10 @@ export interface Props {
   account: Account;
   selected?: boolean;
   visible: boolean;
+  showIconButton?: boolean;
   scrollToRef?: React.RefObject<HTMLDivElement> | null;
   onItemClick?: (account: Account) => Promise<void>;
-  onIconButtonClick: (account: Account) => Promise<void>;
+  onIconButtonClick?: (account: Account) => Promise<void>;
 }
 
 export const AccountItem = ({
@@ -23,6 +24,7 @@ export const AccountItem = ({
   account,
   visible,
   scrollToRef,
+  showIconButton = true,
   onItemClick,
   onIconButtonClick,
 }: Props) => {
@@ -37,7 +39,9 @@ export const AccountItem = ({
 
   const onIconBtnClick = async (event: React.MouseEvent) => {
     preventDefaultMouseEvent(event);
-    await onIconButtonClick(account);
+    if (typeof onIconButtonClick === 'function') {
+      await onIconButtonClick(account);
+    }
   };
 
   const onClick = async (event: React.MouseEvent) => {
@@ -61,9 +65,11 @@ export const AccountItem = ({
           <div>{formatAddress(address)}</div>
         </div>
       </AccountInfoWrapper>
-      <IconButton size="small" onClick={onIconBtnClick}>
-        <VisibilityIcon icon={visible ? 'eye-slash' : 'eye'} />
-      </IconButton>
+      {showIconButton && (
+        <IconButton size="small" onClick={onIconBtnClick}>
+          <VisibilityIcon icon={visible ? 'eye-slash' : 'eye'} />
+        </IconButton>
+      )}
     </Wrapper>
   );
 };
