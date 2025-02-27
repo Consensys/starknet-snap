@@ -445,9 +445,9 @@ export const AccountStruct = object({
   addressSalt: HexStruct,
   addressIndex: number(),
   cairoVersion: CairoVersionStruct,
-  isDeployed: boolean(),
   upgradeRequired: boolean(),
   deployRequired: boolean(),
   visibility: optional(boolean()),
   accountName: optional(string()),
+  isDeployed: optional(boolean()),
 });

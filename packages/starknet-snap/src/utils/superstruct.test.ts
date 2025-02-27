@@ -577,6 +577,9 @@ describe('AccountStruct', () => {
     jest
       .spyOn(accountObj.accountContract, 'isRequireDeploy')
       .mockResolvedValue(false);
+    jest
+      .spyOn(accountObj.accountContract, 'isDeployed')
+      .mockResolvedValue(true);
 
     const account = await accountObj.serialize();
 

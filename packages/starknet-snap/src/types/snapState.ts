@@ -68,7 +68,7 @@ export type AccContract = {
   derivationPath?: string;
   deployTxnHash?: string; // in hex
   chainId: string; // in hex
-  isDeployed: boolean;
+  isDeployed?: boolean;
   upgradeRequired?: boolean;
   deployRequired?: boolean;
   cairoVersion?: string;
