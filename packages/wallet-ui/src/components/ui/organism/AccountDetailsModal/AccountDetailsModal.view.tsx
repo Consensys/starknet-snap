@@ -16,22 +16,25 @@ import {
   Wrapper,
 } from './AccountDetailsModal.style';
 import { openExplorerTab } from 'utils/utils';
-import { useAppSelector } from 'hooks/redux';
 import { useMultiLanguage, useStarkNetSnap } from 'services';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPen, faCheck } from '@fortawesome/free-solid-svg-icons';
 import { ACCOUNT_NAME_LENGTH } from 'utils/constants';
+import { useCurrentAccount, useCurrentNetwork } from 'hooks';
 
 export const AccountDetailsModalView = () => {
   const [minLength, maxLength] = ACCOUNT_NAME_LENGTH;
   const { getPrivateKeyFromAddress, updateAccountName } = useStarkNetSnap();
   const { translate } = useMultiLanguage();
-  const networks = useAppSelector((state) => state.networks);
-  const currentAccount = useAppSelector((state) => state.wallet.currentAccount);
-  const [accountName, setAccountName] = useState(currentAccount.accountName);
+  const currentNetwork = useCurrentNetwork();
+  const currentAccount = useCurrentAccount();
+  // Assign an empty string to accountName if it is undefined, to prevent the JS error from the trim() function
+  const [accountName, setAccountName] = useState(
+    currentAccount.accountName ?? '',
+  );
   const [isEditing, setIsEditing] = useState(false);
   const [enabled, setEnabled] = useState(true);
-  const chainId = networks?.items[networks.activeNetwork]?.chainId;
+  const chainId = currentNetwork?.chainId;
   const { address, accountName: currentAccountName } = currentAccount;
 
   useEffect(() => {
