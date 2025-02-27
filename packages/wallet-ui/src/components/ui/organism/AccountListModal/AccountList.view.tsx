@@ -1,8 +1,11 @@
-import React, { useMemo, useState } from 'react';
-import Toastr from 'toastr2';
+import { useState } from 'react';
 
 import { useMultiLanguage, useStarkNetSnap } from 'services';
-import { useCurrentNetwork, useCurrentAccount, useAppSelector } from 'hooks';
+import {
+  useCurrentNetwork,
+  useCurrentAccount,
+  useAccountVisibility,
+} from 'hooks';
 import { Account } from 'types';
 import { Button } from 'components/ui/atom/Button';
 import { Scrollable } from 'components/ui/atom/Scrollable';
@@ -25,32 +28,18 @@ export const AccountListModalView = ({
   onClose: () => void;
   onAddAccountClick: () => void;
 }) => {
-  const toastr = new Toastr();
   const {
     switchAccount: switchSnapAccount,
     hideAccount: hideSnapAccount,
     unHideAccount: showSnapAccount,
   } = useStarkNetSnap();
   const { translate } = useMultiLanguage();
+  const { visibleAccounts, hiddenAccounts, canHideAccount } =
+    useAccountVisibility();
   const currentNework = useCurrentNetwork();
   const { address: currentAddress } = useCurrentAccount();
-  const accounts = useAppSelector((state) => state.wallet.accounts);
   const [visibility, setVisibility] = useState(true);
-  // Use useMemo to avoid re-rendering the component when the state changes
-  const [visibleAccounts, hiddenAccounts] = useMemo(() => {
-    const visibleAccounts: Account[] = [];
-    const hiddenAccounts: Account[] = [];
-    for (const account of accounts) {
-      // account.visibility = `undefined` refer to the case when previous account state doesnt include this field
-      // hence we consider it is `visible`
-      if (account.visibility === undefined || account.visibility === true) {
-        visibleAccounts.push(account);
-      } else {
-        hiddenAccounts.push(account);
-      }
-    }
-    return [visibleAccounts, hiddenAccounts];
-  }, [accounts]);
+
   const chainId = currentNework?.chainId;
 
   const switchAccount = async (account: Account) => {
@@ -59,9 +48,7 @@ export const AccountListModalView = ({
   };
 
   const hideAccount = async (account: Account) => {
-    if (visibleAccounts.length < 2) {
-      toastr.error(translate('youCannotHideLastAccount'));
-    } else {
+    if (canHideAccount) {
       await hideSnapAccount({
         chainId,
         address: account.address,
@@ -95,7 +82,10 @@ export const AccountListModalView = ({
                       visible={true}
                       account={account}
                       onItemClick={selected ? undefined : switchAccount}
-                      onIconButtonClick={hideAccount}
+                      onIconButtonClick={
+                        canHideAccount ? hideAccount : undefined
+                      }
+                      showIconButton={canHideAccount}
                     />
                   );
                 })}
