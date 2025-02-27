@@ -74,6 +74,7 @@ describe('SetAccountName', () => {
       deployRequired: false,
       upgradeRequired: false,
       visibility: true,
+      isDeployed: true,
     });
   });
 
