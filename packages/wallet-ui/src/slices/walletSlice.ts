@@ -1,23 +1,10 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { Account, FeeEstimate, FeeToken, Locale } from 'types';
+import { Account, Locale } from 'types';
 import { Erc20TokenBalance } from 'types';
 import { Transaction } from 'types';
 import { ethers } from 'ethers';
 import { defaultAccount } from 'utils/constants';
 import defaultLocale from '../assets/locales/en.json';
-
-const initFeeEstimates = {
-  [FeeToken.ETH]: {
-    fee: '0',
-    timestamp: 0,
-    includeDeploy: false,
-  },
-  [FeeToken.STRK]: {
-    fee: '0',
-    timestamp: 0,
-    includeDeploy: false,
-  },
-};
 
 export interface WalletState {
   connected: boolean;
@@ -32,7 +19,6 @@ export interface WalletState {
   transactions: Transaction[];
   transactionDeploy?: Transaction;
   provider?: any; //TODO: metamask SDK is not export types
-  feeEstimates: { [key in FeeToken]: FeeEstimate };
 }
 
 const initialState: WalletState = {
@@ -48,7 +34,6 @@ const initialState: WalletState = {
   transactions: [],
   transactionDeploy: undefined,
   provider: undefined,
-  feeEstimates: initFeeEstimates,
 };
 
 export const walletSlice = createSlice({
@@ -166,23 +151,6 @@ export const walletSlice = createSlice({
         forceReconnect: true,
       };
     },
-    setFeeEstimate: (
-      state,
-      {
-        payload,
-      }: {
-        payload: { feeToken: FeeToken; fee: string; includeDeploy: boolean };
-      },
-    ) => {
-      state.feeEstimates[payload.feeToken] = {
-        fee: payload.fee,
-        timestamp: Date.now(),
-        includeDeploy: payload.includeDeploy,
-      };
-    },
-    clearFeeEstimates: (state) => {
-      state.feeEstimates = initFeeEstimates;
-    },
   },
 });
 
@@ -203,8 +171,6 @@ export const {
   setProvider,
   setTranslations,
   setLocale,
-  setFeeEstimate,
-  clearFeeEstimates,
 } = walletSlice.actions;
 
 export default walletSlice.reducer;

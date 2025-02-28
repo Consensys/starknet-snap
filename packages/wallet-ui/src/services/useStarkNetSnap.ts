@@ -28,7 +28,6 @@ import {
   updateAccount,
   updateCurrentAccount,
   setWalletConnection,
-  clearFeeEstimates,
 } from 'slices/walletSlice';
 import { setActiveNetwork, setNetworks } from 'slices/networkSlice';
 import { disableLoading, enableLoadingWithMessage } from 'slices/UISlice';
@@ -387,7 +386,6 @@ export const useStarkNetSnap = () => {
         throw error;
       }
     } finally {
-      dispatch(clearFeeEstimates());
       dispatch(disableLoading());
     }
   }
@@ -796,9 +794,6 @@ export const useStarkNetSnap = () => {
     } catch (error) {
       dispatch(disableLoading());
       return false;
-    } finally {
-      dispatch(clearFeeEstimates());
-      dispatch(disableLoading());
     }
   };
 
@@ -930,7 +925,7 @@ export const useStarkNetSnap = () => {
       const toastr = new Toastr();
       toastr.error(err.message as unknown as string);
     } finally {
-      dispatch(clearFeeEstimates());
+      dispatch(disableLoading());
     }
   };
 

@@ -31,9 +31,9 @@ import { useEffect, useState } from 'react';
 import { useMultiLanguage, useStarkNetSnap } from 'services';
 import { ethers } from 'ethers';
 import Toastr from 'toastr2';
-import { ContractFuncName, FeeToken, FeeTokenUnit } from 'types';
+import { ContractFuncName, FeeToken, FeeTokenUnit, FeeEstimate } from 'types';
 import { updateCurrentAccount } from 'slices/walletSlice';
-import { useCurrentAccount, useEstimateFee } from 'hooks';
+import { useCurrentAccount } from 'hooks';
 
 interface Props {
   address: string;
@@ -42,6 +42,7 @@ interface Props {
   closeModal?: () => void;
   handleBack: () => void;
   selectedFeeToken: FeeToken;
+  gasFees: FeeEstimate;
 }
 
 export const SendSummaryModalView = ({
@@ -51,6 +52,7 @@ export const SendSummaryModalView = ({
   closeModal,
   handleBack,
   selectedFeeToken,
+  gasFees,
 }: Props) => {
   const dispatch = useAppDispatch();
   const { address: currentAddress } = useCurrentAccount();
@@ -60,8 +62,6 @@ export const SendSummaryModalView = ({
   const erc20TokenBalanceSelected = useAppSelector(
     (state) => state.wallet.erc20TokenBalanceSelected,
   );
-  const { feeEstimates, isFeeEstimateValid, estimateFees } =
-    useEstimateFee(chainId);
   const [gasFeesAmount, setGasFeesAmount] = useState('');
   const [gasFeesAmountUSD, setGasFeesAmountUSD] = useState('');
   const [amountUsdPrice, setAmountUsdPrice] = useState('');
@@ -75,14 +75,13 @@ export const SendSummaryModalView = ({
     erc20TokenBalances.find((token) => token.symbol === selectedFeeToken) ??
     ethToken;
 
-  const gasFees = feeEstimates[selectedFeeToken];
-  const estimatingGas = !isFeeEstimateValid(gasFees);
+  const estimatingGas = false;
   const toastr = new Toastr({
     closeDuration: 10000000,
     showDuration: 1000000000,
     positionClass: 'toast-top-center',
   });
-  estimateFees(selectedFeeToken);
+
   useEffect(() => {
     if (gasFees?.fee) {
       const gasFeesBN = ethers.utils.parseUnits(gasFees.fee, FeeTokenUnit.ETH);
