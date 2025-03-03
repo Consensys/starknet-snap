@@ -19,24 +19,11 @@ const asset = {
 };
 
 export const Default = () => (
-  <AmountInputView
-    label="Amount"
-    asset={asset}
-    shouldApplyMax={false}
-    setShouldApplyMax={() => {}}
-    fetchingFee={false}
-  />
+  <AmountInputView label="Amount" asset={asset} isFetchingFee={false} />
 );
 
 export const ErrorView = () => (
-  <AmountInputView
-    error
-    label="Amount"
-    asset={asset}
-    shouldApplyMax={false}
-    setShouldApplyMax={() => {}}
-    fetchingFee={false}
-  />
+  <AmountInputView error label="Amount" asset={asset} isFetchingFee={false} />
 );
 
 export const Disabled = () => (
@@ -44,9 +31,7 @@ export const Disabled = () => (
     disabled
     label="Amount"
     asset={asset}
-    shouldApplyMax={false}
-    setShouldApplyMax={() => {}}
-    fetchingFee={false}
+    isFetchingFee={false}
   />
 );
 
@@ -56,8 +41,6 @@ export const WithHelperText = () => (
     helperText="Helper text"
     label="Amount"
     asset={asset}
-    shouldApplyMax={false}
-    setShouldApplyMax={() => {}}
-    fetchingFee={false}
+    isFetchingFee={false}
   />
 );

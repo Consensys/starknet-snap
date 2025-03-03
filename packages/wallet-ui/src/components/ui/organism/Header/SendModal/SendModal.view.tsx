@@ -1,6 +1,24 @@
 import { useRef, useState } from 'react';
+import { ethers } from 'ethers';
+
+import { useAppSelector, useCurrentNetwork, useEstimateFee } from 'hooks';
+import { FeeToken } from 'types';
+import { useMultiLanguage, useStarkNetSnap } from 'services';
+import { DEFAULT_FEE_TOKEN } from 'utils/constants';
+import {
+  getMaxAmountToSpend,
+  isValidAddress,
+  isValidStarkName,
+  shortenAddress,
+} from 'utils/utils';
 import { AmountInput } from 'components/ui/molecule/AmountInput';
-import { SendSummaryModal } from '../SendSummaryModal';
+import { AddressInput } from 'components/ui/molecule/AddressInput';
+import { DropDown } from 'components/ui/molecule/DropDown';
+import {
+  Bold,
+  Normal,
+} from 'components/ui/organism/ConnectInfoModal/ConnectInfoModal.style';
+import { InfoText } from 'components/ui/molecule/AddressInput/AddressInput.style';
 import {
   Buttons,
   ButtonStyled,
@@ -12,17 +30,7 @@ import {
   Title,
   Wrapper,
 } from './SendModal.style';
-import { useAppSelector } from 'hooks/redux';
-import { ethers } from 'ethers';
-import { AddressInput } from 'components/ui/molecule/AddressInput';
-import { isValidAddress, isValidStarkName, shortenAddress } from 'utils/utils';
-import { Bold, Normal } from '../../ConnectInfoModal/ConnectInfoModal.style';
-import { DropDown } from 'components/ui/molecule/DropDown';
-import { DEFAULT_FEE_TOKEN } from 'utils/constants';
-import { FeeToken } from 'types';
-import { useMultiLanguage, useStarkNetSnap } from 'services';
-import { InfoText } from 'components/ui/molecule/AddressInput/AddressInput.style';
-import { useEstimateFee } from 'hooks/useEstimateFee';
+import { SendSummaryModal } from '../SendSummaryModal';
 
 interface Props {
   closeModal?: () => void;
@@ -30,35 +38,24 @@ interface Props {
 
 export const SendModalView = ({ closeModal }: Props) => {
   const networks = useAppSelector((state) => state.networks);
-  const chainId = networks?.items[networks.activeNetwork]?.chainId;
+  const chainId = useCurrentNetwork()?.chainId;
   const erc20TokenBalanceSelected = useAppSelector(
     (state) => state.wallet.erc20TokenBalanceSelected,
-  );
-  const ethBalance = useAppSelector((state) =>
-    state.wallet.erc20TokenBalances.find(
-      (token) => token.symbol === DEFAULT_FEE_TOKEN,
-    ),
   );
   const { getAddrFromStarkName } = useStarkNetSnap();
   const { translate } = useMultiLanguage();
   const [summaryModalOpen, setSummaryModalOpen] = useState(false);
+  const [shouldApplyMax, setShouldApplyMax] = useState(false);
   const [fields, setFields] = useState({
     amount: '',
     address: '',
-    chainId:
-      networks.items.length > 0
-        ? networks.items[networks.activeNetwork].chainId
-        : '',
+    chainId: chainId ?? '',
     feeToken: DEFAULT_FEE_TOKEN, // Default fee token
   });
   const [errors, setErrors] = useState({ amount: '', address: '' });
   const [resolvedAddress, setResolvedAddress] = useState('');
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
-  const { estimateFees, fetchingFee, feeEstimates } = useEstimateFee(
-    chainId,
-    ethBalance,
-  );
-  const [shouldApplyMax, setShouldApplyMax] = useState(false);
+  const { loading, feeEstimates } = useEstimateFee(fields.feeToken);
 
   const handleBack = () => {
     setSummaryModalOpen(false);
@@ -127,7 +124,6 @@ export const SendModalView = ({ closeModal }: Props) => {
           ...prevFields,
           feeToken: fieldValue as FeeToken,
         }));
-        estimateFees(fieldValue as FeeToken);
         break;
     }
     setFields((prevFields) => ({
@@ -142,13 +138,8 @@ export const SendModalView = ({ closeModal }: Props) => {
       !errors.amount &&
       fields.amount.length > 0 &&
       fields.address.length > 0 &&
-      !(fetchingFee && shouldApplyMax)
+      !(loading && shouldApplyMax)
     );
-  };
-
-  const feeEstimate = feeEstimates[fields.feeToken] ?? {
-    fee: '0',
-    includeDeploy: false,
   };
 
   return (
@@ -187,15 +178,16 @@ export const SendModalView = ({ closeModal }: Props) => {
               error={errors.amount !== '' ? true : false}
               helperText={errors.amount}
               decimalsMax={erc20TokenBalanceSelected.decimals}
-              asset={erc20TokenBalanceSelected}
-              shouldApplyMax={shouldApplyMax}
+              asset={{
+                ...erc20TokenBalanceSelected,
+                amount: getMaxAmountToSpend(
+                  erc20TokenBalanceSelected,
+                  feeEstimates?.fee,
+                ),
+              }}
+              isFetchingFee={loading}
               setShouldApplyMax={setShouldApplyMax}
-              fetchingFee={fetchingFee}
-              feeEstimate={
-                fields.feeToken === erc20TokenBalanceSelected.symbol
-                  ? feeEstimate?.fee
-                  : undefined
-              }
+              shouldApplyMax={shouldApplyMax}
             />
             <SeparatorSmall />
             <div>
@@ -236,6 +228,7 @@ export const SendModalView = ({ closeModal }: Props) => {
           address={resolvedAddress}
           amount={fields.amount}
           chainId={fields.chainId}
+          gasFees={feeEstimates}
           selectedFeeToken={fields.feeToken} // Pass the selected fee token
         />
       )}

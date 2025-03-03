@@ -25,10 +25,9 @@ interface Props extends InputHTMLAttributes<HTMLInputElement> {
   decimalsMax?: number;
   asset: Erc20TokenBalance;
   onChangeCustom?: (value: string) => void;
-  shouldApplyMax: boolean;
-  setShouldApplyMax: (value: boolean) => void;
-  fetchingFee: boolean;
-  feeEstimate?: string;
+  isFetchingFee: boolean;
+  shouldApplyMax?: boolean;
+  setShouldApplyMax?: (value: boolean) => void;
 }
 
 export const AmountInputView = ({
@@ -40,10 +39,9 @@ export const AmountInputView = ({
   decimalsMax = 18,
   asset,
   onChangeCustom,
-  shouldApplyMax,
+  isFetchingFee,
+  shouldApplyMax = false,
   setShouldApplyMax,
-  fetchingFee,
-  feeEstimate,
   ...otherProps
 }: Props) => {
   const [focused, setFocused] = useState(false);
@@ -95,13 +93,13 @@ export const AmountInputView = ({
 
   useEffect(
     () => {
-      if (shouldApplyMax && !fetchingFee) {
+      if (shouldApplyMax && !isFetchingFee) {
         handleMaxClick();
-        setShouldApplyMax(false);
+        typeof setShouldApplyMax === 'function' && setShouldApplyMax(false);
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [shouldApplyMax, fetchingFee],
+    [shouldApplyMax, isFetchingFee],
   );
 
   const handleContainerClick = () => {
@@ -111,15 +109,11 @@ export const AmountInputView = ({
   };
 
   const handleMaxClick = () => {
-    if (fetchingFee) {
-      setShouldApplyMax(true);
+    if (isFetchingFee) {
+      typeof setShouldApplyMax === 'function' && setShouldApplyMax(true);
       return;
     }
     let amountBN = ethers.BigNumber.from(asset.amount);
-    if (feeEstimate) {
-      const feeBN = ethers.BigNumber.from(feeEstimate);
-      amountBN = amountBN.sub(feeBN);
-    }
     const amountStr = ethers.utils
       .formatUnits(amountBN, asset.decimals)
       .toString();
@@ -165,7 +159,7 @@ export const AmountInputView = ({
             onChange={(event) => triggerOnChange(event.target.value)}
             {...otherProps}
           />
-          {fetchingFee && shouldApplyMax && <Spinner />}
+          {isFetchingFee && shouldApplyMax && <Spinner />}
           {!usdMode && (
             <>
               {asset.symbol}

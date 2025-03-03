@@ -1,123 +1,105 @@
-import { useEffect, useRef, useState } from 'react';
-import { useDispatch } from 'react-redux';
-import { ethers } from 'ethers';
+import { useEffect, useState } from 'react';
+import { constants } from 'starknet';
+
 import { FeeToken, ContractFuncName, FeeEstimate } from 'types';
 import { useStarkNetSnap } from 'services';
-import { setFeeEstimate } from 'slices/walletSlice';
-import { constants } from 'starknet';
-import { useAppSelector } from './redux';
-import { Erc20TokenBalance } from 'types';
-import { useCurrentAccount } from 'hooks';
+import {
+  useCurrentAccount,
+  useCurrentNetwork,
+  useAppSelector,
+  useCacheData,
+  useAsyncRecursivePull,
+} from 'hooks';
+import {
+  ESTIMATE_FEE_REFRESH_FREQUENCY,
+  ESTIMATE_FEE_CACHE_DURATION,
+} from 'utils/constants';
+import { getMinAmountToSpend } from 'utils/utils';
 
-const cacheRefreshTime = 60000;
-const globalFetchingStatus: Record<string, boolean> = {}; // Tracks ongoing fetches
-
-export const useEstimateFee = (
-  chainId: string,
-  ethBalance?: Erc20TokenBalance,
-) => {
-  const dispatch = useDispatch();
+/**
+ * A hook to pull estimate fee data continuously
+ *
+ * @param feeToken - The fee token to estimate the fee in.
+ * @returns { estimateFees, loading, feeEstimates }
+ */
+export const useEstimateFee = (feeToken: FeeToken = FeeToken.ETH) => {
+  const chainId = useCurrentNetwork()?.chainId;
   const { isDeployed, address } = useCurrentAccount();
+  const { estimateFees: estimateFeesApi } = useStarkNetSnap();
+  const cacheKey = `${address}-${feeToken}-${chainId}`;
+  const { expired, cacheData, saveCache } = useCacheData<FeeEstimate>({
+    cacheKey,
+    cacheDurtion: ESTIMATE_FEE_CACHE_DURATION,
+  });
   const erc20TokenBalanceSelected = useAppSelector(
     (state) => state.wallet.erc20TokenBalanceSelected,
   );
-  const feeEstimates = useAppSelector((state) => state.wallet.feeEstimates);
-  const { estimateFees: estimateFeesApi } = useStarkNetSnap();
   const [loading, setLoading] = useState(false);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
-
-  const isFeeEstimateValid = (feeEstimate: FeeEstimate) => {
-    return (
-      feeEstimate &&
-      feeEstimate.fee &&
-      feeEstimate.timestamp &&
-      Date.now() - feeEstimate.timestamp < cacheRefreshTime
-    );
-  };
 
   const estimateFees = async (feeToken: FeeToken) => {
-    // Skip if not deployed and no eth balance
-    if (!isDeployed && (ethBalance?.amount.eq(0) || !ethBalance)) {
+    // if the balance is 0, we don't need to estimate the fee
+    if (erc20TokenBalanceSelected.amount.lte(0)) {
       return;
     }
 
-    const cacheKey = `${address}-${feeToken}-${chainId}`;
+    // We only process fee estimation when:
+    // - No cached data or
+    // - Cache expired or
+    // - Cache does not expired but the estimation result is include deployment fee and the account is deployed, as it means the estimation result is not valid anymore
+    if (!cacheData || expired || (cacheData.includeDeploy && isDeployed)) {
+      setLoading(true);
+      console.log('fetching new fee', feeToken);
+      try {
+        const callData =
+          address + ',' + getMinAmountToSpend().toString() + ',0';
 
-    // Skip if fetching is already in progress
-    if (globalFetchingStatus[cacheKey]) {
-      return;
-    }
+        const response = await estimateFeesApi(
+          erc20TokenBalanceSelected.address,
+          ContractFuncName.Transfer,
+          callData,
+          address,
+          chainId,
+          feeToken === FeeToken.STRK
+            ? constants.TRANSACTION_VERSION.V3
+            : undefined,
+        );
 
-    const cachedFeeEstimate = feeEstimates[feeToken];
-    const isCacheValid =
-      cachedFeeEstimate &&
-      Date.now() - cachedFeeEstimate.timestamp < cacheRefreshTime;
-
-    if (isCacheValid) {
-      if (cachedFeeEstimate.includeDeploy && isDeployed) {
-        // Update fee cache because account is now deployed
-      } else {
-        return;
-      }
-    }
-
-    globalFetchingStatus[cacheKey] = true;
-    setLoading(true);
-
-    try {
-      const amountBN = ethers.utils.parseUnits(
-        '0.000000001',
-        erc20TokenBalanceSelected.decimals,
-      );
-      const callData = address + ',' + amountBN.toString() + ',0';
-
-      const response = await estimateFeesApi(
-        erc20TokenBalanceSelected.address,
-        ContractFuncName.Transfer,
-        callData,
-        address,
-        chainId,
-        feeToken === FeeToken.STRK
-          ? constants.TRANSACTION_VERSION.V3
-          : undefined,
-      );
-
-      dispatch(
-        setFeeEstimate({
-          feeToken,
+        saveCache({
           fee: response.suggestedMaxFee,
           includeDeploy: response.includeDeploy,
-        }),
-      );
-    } finally {
-      globalFetchingStatus[cacheKey] = false;
-      setLoading(false);
+        });
+      } finally {
+        setLoading(false);
+      }
+    } else {
+      console.log('cached hitted', Date.now());
     }
   };
 
-  useEffect(
-    () => {
-      estimateFees(FeeToken.ETH);
+  // Kick off the fee estimation refresh when doEstimation changes
+  const { start, stop } = useAsyncRecursivePull(async () => {
+    estimateFees(feeToken);
+  }, ESTIMATE_FEE_REFRESH_FREQUENCY);
 
-      intervalRef.current = setInterval(() => {
-        estimateFees(FeeToken.ETH);
-      }, cacheRefreshTime);
-
-      return () => {
-        if (intervalRef.current) {
-          clearInterval(intervalRef.current);
-        }
-      };
-    },
+  // Kick off the first fee estimation when
+  // - chainId, address, feeToken or erc20TokenBalanceSelected changes
+  useEffect(() => {
+    stop();
+    estimateFees(feeToken)
+      .catch((error) => {
+        // Log the error but do not throw it to avoid breaking the app
+        console.error('Failed to estimate fees', error);
+      })
+      .finally(() => {
+        // Trigger the refresh regardless if failed or success
+        start();
+      });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [address, erc20TokenBalanceSelected, chainId],
-  );
+  }, [chainId, address, feeToken, erc20TokenBalanceSelected]);
 
   return {
     estimateFees,
     loading,
-    fetchingFee: loading,
-    feeEstimates,
-    isFeeEstimateValid,
+    feeEstimates: cacheData,
   };
 };
