@@ -39,6 +39,7 @@ export const useEstimateFee = (feeToken: FeeToken = FeeToken.ETH) => {
   const estimateFees = async (feeToken: FeeToken) => {
     // if the balance is 0, we don't need to estimate the fee
     if (erc20TokenBalanceSelected.amount.lte(0)) {
+      
       return;
     }
 
