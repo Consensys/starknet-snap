@@ -1,5 +1,4 @@
 import {
-  Description,
   StarknetLogo,
   MetaMaskLogo,
   Title,
