@@ -37,7 +37,7 @@ export const Title = styled.div`
   font-weight: ${(props) => props.theme.typography.h3.fontWeight};
   font-family: ${(props) => props.theme.typography.h3.fontFamily};
   line-height: ${(props) => props.theme.typography.h3.lineHeight};
-  margin-bottom: ${(props) => props.theme.spacing.xxLarge};
+  margin-bottom: 8px;
 `;
 
 export const Description = styled.div`

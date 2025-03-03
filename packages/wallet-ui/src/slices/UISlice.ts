@@ -14,7 +14,7 @@ const initialState: UIState = {
   },
 };
 
-export const networkSlice = createSlice({
+export const uiSlice = createSlice({
   name: 'UI',
   initialState,
   reducers: {
@@ -29,7 +29,6 @@ export const networkSlice = createSlice({
   },
 });
 
-export const { enableLoadingWithMessage, disableLoading } =
-  networkSlice.actions;
+export const { enableLoadingWithMessage, disableLoading } = uiSlice.actions;
 
-export default networkSlice.reducer;
+export default uiSlice.reducer;
