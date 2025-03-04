@@ -1,28 +1,29 @@
 import {
-  Description,
   StarknetLogo,
+  MetaMaskLogo,
   Title,
   Wrapper,
+  Description,
 } from './MinVersionModal.style';
-import { useMultiLanguage } from 'services';
+
+import { ConnectButton } from '../ConnectModal/ConnectModal.style';
+import { useMultiLanguage, useStarkNetSnap } from 'services';
 
 export const MinVersionModalView = () => {
   const { translate } = useMultiLanguage();
-
+  const { completeUpgradeSnap } = useStarkNetSnap();
   return (
     <Wrapper>
       <StarknetLogo />
       <>
         <Title>{translate('newVersionAvailable')}</Title>
-        <Description>
-          {translate('installLatestVersion')}
-          <ul>
-            <li>{translate('deleteCurrentVersionMetaMask')}</li>
-            <li>{translate('refreshPage')}</li>
-            <li>{translate('connectToMetaMask')}</li>
-          </ul>
-          {translate('accountRecoveryInfo')}
-        </Description>
+        <Description>{translate('upgradeLatestSnapVersion')}</Description>
+        <ConnectButton
+          customIconLeft={<MetaMaskLogo />}
+          onClick={completeUpgradeSnap}
+        >
+          {translate('upgrade')}
+        </ConnectButton>
       </>
     </Wrapper>
   );
