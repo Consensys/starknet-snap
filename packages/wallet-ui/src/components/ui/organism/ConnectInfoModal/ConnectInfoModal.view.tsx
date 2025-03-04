@@ -19,7 +19,6 @@ export const ConnectInfoModalView = ({ address, onButtonClick }: Props) => {
 
   return (
     <Modal>
-      <Modal.Logo none />
       <Modal.Body align="left">
         <p>
           <Normal>{translate('network')}</Normal>

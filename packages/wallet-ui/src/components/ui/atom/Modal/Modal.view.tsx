@@ -19,10 +19,6 @@ export interface BodyProps extends ChildrenProps {
   align?: 'center' | 'left' | 'right';
 }
 
-export interface LogoProps extends ChildrenProps {
-  none?: boolean;
-}
-
 export interface ButtonProps extends ChildrenProps {
   onClick?: (event: React.MouseEvent) => void | Promise<void>;
 }
@@ -33,12 +29,8 @@ export const ModalView = ({ children }: ChildrenProps) => {
 
 ModalView.Title = (props: ChildrenProps) => <Title>{props.children}</Title>;
 
-ModalView.Logo = (props: LogoProps) => (
-  <>
-    {props.none === undefined ? (
-      <Logo variant={LogoVariant.Starknet} mb="medium" mt="medium" />
-    ) : null}
-  </>
+ModalView.Logo = () => (
+  <Logo variant={LogoVariant.Starknet} mb="medium" mt="medium" />
 );
 
 ModalView.Body = (props: BodyProps) => (
