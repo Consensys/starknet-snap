@@ -3,6 +3,7 @@ import {
   MetaMaskLogo,
   Title,
   Wrapper,
+  Description,
 } from './MinVersionModal.style';
 
 import { ConnectButton } from '../ConnectModal/ConnectModal.style';
@@ -16,7 +17,7 @@ export const MinVersionModalView = () => {
       <StarknetLogo />
       <>
         <Title>{translate('newVersionAvailable')}</Title>
-
+        <Description>{translate('upgradeLatestSnapVersion')}</Description>
         <ConnectButton
           customIconLeft={<MetaMaskLogo />}
           onClick={completeUpgradeSnap}

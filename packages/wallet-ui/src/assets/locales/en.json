@@ -307,6 +307,9 @@
     "upgradeAccountFailed": {
       "message": "Upgrade account failed"
     },
+    "upgradeLatestSnapVersion": {
+      "message": "To use this dapp, please upgrade to the latest version by clicking the button below:"
+    },
     "upgradeTransactionPendingPart1": {
       "message": "Your upgrade transaction is still pending and has reached the maximum retry limit for status checks. Please wait for the transaction to complete."
     },
