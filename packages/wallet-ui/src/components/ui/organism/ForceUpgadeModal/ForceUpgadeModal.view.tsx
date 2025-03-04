@@ -1,29 +1,22 @@
-import {
-  Description,
-  StarknetLogo,
-  Title,
-  Wrapper,
-} from './ForceUpgadeModal.style';
+import { Modal } from 'components/ui/atom/Modal';
 import { useMultiLanguage } from 'services';
 
 export const ForceUpgadeModalView = () => {
   const { translate } = useMultiLanguage();
 
   return (
-    <Wrapper>
-      <StarknetLogo />
-      <>
-        <Title>{translate('newVersionAvailable')}</Title>
-        <Description>
-          {translate('installLatestVersion')}
-          <ul>
-            <li>{translate('deleteCurrentVersionMetaMask')}</li>
-            <li>{translate('refreshPage')}</li>
-            <li>{translate('connectToMetaMask')}</li>
-          </ul>
-          {translate('accountRecoveryInfo')}
-        </Description>
-      </>
-    </Wrapper>
+    <Modal>
+      <Modal.Logo />
+      <Modal.Title>{translate('newVersionAvailable')}</Modal.Title>
+      <Modal.Body align="left">
+        {translate('installLatestVersion')}
+        <ul>
+          <li>{translate('deleteCurrentVersionMetaMask')}</li>
+          <li>{translate('refreshPage')}</li>
+          <li>{translate('connectToMetaMask')}</li>
+        </ul>
+        {translate('accountRecoveryInfo')}
+      </Modal.Body>
+    </Modal>
   );
 };
