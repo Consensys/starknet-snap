@@ -1,9 +1,11 @@
-import { Alert } from 'components/ui/atom/Alert';
-import { Button } from 'components/ui/atom/Button';
-import { Bold, ButtonDiv, Normal, Wrapper } from './ConnectInfoModal.style';
 import { useAppDispatch, useAppSelector } from 'hooks/redux';
+
 import { setInfoModalVisible } from 'slices/modalSlice';
 import { useMultiLanguage } from 'services';
+import { Alert } from 'components/ui/atom/Alert';
+import { Button } from 'components/ui/atom/Button';
+import { Modal } from 'components/ui/atom/Modal';
+import { Bold, Normal } from './ConnectInfoModal.style';
 
 interface Props {
   address: string;
@@ -16,31 +18,29 @@ export const ConnectInfoModalView = ({ address, onButtonClick }: Props) => {
   const { translate } = useMultiLanguage();
 
   return (
-    <div>
-      <Wrapper>
-        <div>
+    <Modal>
+      <Modal.Body align="left">
+        <p>
           <Normal>{translate('network')}</Normal>
-          <Bold>{networks.items[networks.activeNetwork].name}</Bold>
-        </div>
-        <div>
+          <Bold>{networks.items[networks.activeNetwork]?.name}</Bold>
+        </p>
+        <p>
           <Normal>{translate('starknetAccount')}</Normal>
           <Bold>{address}</Bold>
-        </div>
+        </p>
         <Alert
           variant="info"
           text={translate('accountGeneratedWithRecoveryPhrase')}
         />
-      </Wrapper>
-      <ButtonDiv>
-        <Button
-          onClick={() => {
-            dispatch(setInfoModalVisible(false));
-            onButtonClick && onButtonClick();
-          }}
-        >
-          {translate('gotIt')}
-        </Button>
-      </ButtonDiv>
-    </div>
+      </Modal.Body>
+      <Button
+        onClick={() => {
+          dispatch(setInfoModalVisible(false));
+          onButtonClick && onButtonClick();
+        }}
+      >
+        {translate('gotIt')}
+      </Button>
+    </Modal>
   );
 };

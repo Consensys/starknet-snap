@@ -1,17 +1,12 @@
 import { useMultiLanguage, useStarkNetSnap } from 'services';
 import { SNAPS_DOC_URL } from 'utils/constants';
 
+import { Modal } from 'components/ui/atom/Modal';
 import {
-  ConnectButton,
   Description,
-  DescriptionCentered,
-  MetamaskIcon,
   ReadMore,
-  StarknetLogo,
-  Title,
   WhatIsSnap,
   WhatIsSnapDiv,
-  Wrapper,
 } from './ConnectModal.style';
 
 export const ConnectModalView = () => {
@@ -23,26 +18,27 @@ export const ConnectModalView = () => {
   };
 
   return (
-    <Wrapper>
-      <StarknetLogo />
-      <Title>
+    <Modal>
+      <Modal.Logo />
+      <Modal.Title>
         {translate('connectTo')} MetaMask
         <br />
         Starknet Snap
-      </Title>
-      <DescriptionCentered>
+      </Modal.Title>
+      <Modal.Body>
         {translate('starknetSnapInstallationPrompt')}
-      </DescriptionCentered>
-      <WhatIsSnapDiv>
-        <WhatIsSnap>{translate('whatIsASnap')}</WhatIsSnap>
-        <Description>{translate('snapsExtendMetaMask')}</Description>
-        <ReadMore onClick={handleReadMoreClick}>
-          {translate('readMore')}
-        </ReadMore>
-      </WhatIsSnapDiv>
-      <ConnectButton customIconLeft={<MetamaskIcon />} onClick={connectToSnap}>
+
+        <WhatIsSnapDiv>
+          <WhatIsSnap>{translate('whatIsASnap')}</WhatIsSnap>
+          <Description>{translate('snapsExtendMetaMask')}</Description>
+          <ReadMore onClick={handleReadMoreClick}>
+            {translate('readMore')}
+          </ReadMore>
+        </WhatIsSnapDiv>
+      </Modal.Body>
+      <Modal.Button onClick={connectToSnap}>
         {translate('connectWithMetaMask')}
-      </ConnectButton>
-    </Wrapper>
+      </Modal.Button>
+    </Modal>
   );
 };

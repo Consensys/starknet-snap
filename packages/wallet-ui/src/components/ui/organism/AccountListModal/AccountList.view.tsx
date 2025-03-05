@@ -10,9 +10,6 @@ import { Account } from 'types';
 import { Button } from 'components/ui/atom/Button';
 import { Scrollable } from 'components/ui/atom/Scrollable';
 import {
-  Wrapper,
-  ButtonWrapper,
-  Title,
   HiddenAccountBar,
   HiddenAccountBarLeftIcon,
   HiddenAccountBarRightIcon,
@@ -20,6 +17,7 @@ import {
   VerticalAlignBox,
 } from './AccountList.style';
 import { AccountItem } from './AccountItem.view';
+import { Modal } from 'components/ui/atom/Modal';
 
 export const AccountListModalView = ({
   onClose,
@@ -49,9 +47,9 @@ export const AccountListModalView = ({
   };
 
   return (
-    <>
-      <Wrapper>
-        <Title>{translate('selectAnAccount')}</Title>
+    <Modal>
+      <Modal.Title>{translate('selectAnAccount')}</Modal.Title>
+      <Modal.Body>
         {visibility && (
           <Scrollable<HTMLDivElement>
             height={365}
@@ -113,17 +111,15 @@ export const AccountListModalView = ({
             />
           </div>
         </HiddenAccountBar>
-      </Wrapper>
-      <ButtonWrapper>
-        <Button
-          onClick={() => onAddAccountClick()}
-          iconLeft="plus"
-          backgroundTransparent
-          borderVisible
-        >
-          {translate('addAccount')}
-        </Button>
-      </ButtonWrapper>
-    </>
+      </Modal.Body>
+      <Button
+        onClick={() => onAddAccountClick()}
+        iconLeft="plus"
+        backgroundTransparent
+        borderVisible
+      >
+        {translate('addAccount')}
+      </Button>
+    </Modal>
   );
 };

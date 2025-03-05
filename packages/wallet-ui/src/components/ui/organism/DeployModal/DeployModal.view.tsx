@@ -3,16 +3,10 @@ import { useMultiLanguage, useStarkNetSnap } from 'services';
 import { useAppSelector, useAppDispatch } from 'hooks/redux';
 import Toastr from 'toastr2';
 
+import { Modal } from 'components/ui/atom/Modal';
 import { setDeployModalVisible } from 'slices/modalSlice';
-import { openExplorerTab, shortenAddress } from '../../../../utils/utils';
-import {
-  DeployButton,
-  StarknetLogo,
-  Title,
-  Wrapper,
-  DescriptionCentered,
-  Txnlink,
-} from './DeployModal.style';
+import { openExplorerTab, shortenAddress } from 'utils/utils';
+import { Txnlink } from './DeployModal.style';
 import { AccountAddressView } from 'components/ui/molecule/AccountAddress/AccountAddress.view';
 
 interface Props {
@@ -84,7 +78,7 @@ export const DeployModalView = ({ address }: Props) => {
       case Stage.INIT:
         return (
           <>
-            <DescriptionCentered>
+            <Modal.Body>
               {translate('nonZeroBalanceOnCairo0')}
               <br />
               <br />
@@ -97,25 +91,19 @@ export const DeployModalView = ({ address }: Props) => {
               {translate('deploymentNecessaryToProceedPart2')} <br />
               <br />
               {translate('deploymentNecessaryToProceedPart3')}
-            </DescriptionCentered>
-            <DeployButton onClick={onDeploy}>Deploy</DeployButton>
+            </Modal.Body>
+            <Modal.Button onClick={onDeploy}>Deploy</Modal.Button>
           </>
         );
       case Stage.WAITING_FOR_TXN:
-        return (
-          <DescriptionCentered>
-            {translate('waitingForTransaction')}
-          </DescriptionCentered>
-        );
+        return <Modal.Body>{translate('waitingForTransaction')}</Modal.Body>;
       case Stage.SUCCESS:
         return (
-          <DescriptionCentered>
-            {translate('accountDeployedSuccessfully')}
-          </DescriptionCentered>
+          <Modal.Body>{translate('accountDeployedSuccessfully')}</Modal.Body>
         );
       default:
         return (
-          <DescriptionCentered>
+          <Modal.Body>
             {translate('transactionHash')} <br />{' '}
             <Txnlink onClick={() => openExplorerTab(txnHash, 'tx', chainId)}>
               {shortenAddress(txnHash)}{' '}
@@ -126,16 +114,16 @@ export const DeployModalView = ({ address }: Props) => {
             {translate('deployTransactionPendingPart2')} <br />
             <br />
             {translate('deployTransactionPendingPart3')}
-          </DescriptionCentered>
+          </Modal.Body>
         );
     }
   };
 
   return (
-    <Wrapper>
-      <StarknetLogo />
-      <Title>{translate('deployAccount')}</Title>
+    <Modal>
+      <Modal.Title>{translate('deployAccount')}</Modal.Title>
+      <Modal.Logo />
       {renderComponent()}
-    </Wrapper>
+    </Modal>
   );
 };
