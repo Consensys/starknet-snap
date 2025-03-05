@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.3.0](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v3.2.0...starknet-snap-v3.3.0) (2025-03-04)
+
+
+### Features
+
+* Support account name management in Snap ([9a8651f](https://github.com/Consensys/starknet-snap/commit/9a8651f68373a0366eeb71a10aa75998ae71f71e))
+
 ## [3.2.0](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v3.1.0...starknet-snap-v3.2.0) (2025-02-07)
 
 
