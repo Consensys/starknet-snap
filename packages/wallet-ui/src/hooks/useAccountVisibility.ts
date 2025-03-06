@@ -90,7 +90,7 @@ export const useAccountVisibility = () => {
       }
     }
     return [visibleAccounts, hiddenAccounts];
-  }, [accounts, visibilities, chainId]);
+  }, [accounts, visibilities]);
 
   const canHideAccount = visibleAccounts.length > 1;
 
