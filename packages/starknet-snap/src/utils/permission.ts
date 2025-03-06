@@ -19,7 +19,6 @@ export enum RpcMethod {
   ListAccounts = 'starkNet_listAccounts',
 
   SetAccountName = 'starkNet_setAccountName',
-  ToggleAccountVisibility = 'starkNet_toggleAccountVisibility',
   SwitchAccount = 'starkNet_switchAccount',
   AddAccount = 'starkNet_addAccount',
   CreateAccount = 'starkNet_createAccount',
@@ -74,7 +73,6 @@ const walletUIDappPermissions = publicPermissions.concat([
   RpcMethod.GetStoredErc20Tokens,
   RpcMethod.AddAccount,
   RpcMethod.SwitchAccount,
-  RpcMethod.ToggleAccountVisibility,
   RpcMethod.SetAccountName,
 ]);
 
