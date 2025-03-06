@@ -192,7 +192,6 @@ export async function generateAccounts(
       deployTxnHash: '',
       chainId: network,
       accountName: getDefaultAccountName(i + 1),
-      visibility: true,
     });
   }
   return accounts;
