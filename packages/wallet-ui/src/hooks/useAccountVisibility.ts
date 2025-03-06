@@ -89,7 +89,10 @@ export const useAccountVisibility = () => {
     );
   };
 
+  const canHideAccount = visibleAccounts.length > 1;
+
   return {
+    canHideAccount,
     visibleAccounts,
     hiddenAccounts,
     showAccount,

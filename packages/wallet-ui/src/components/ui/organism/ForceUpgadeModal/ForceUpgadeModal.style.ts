@@ -36,12 +36,10 @@ export const Title = styled.div`
   font-weight: ${(props) => props.theme.typography.h3.fontWeight};
   font-family: ${(props) => props.theme.typography.h3.fontFamily};
   line-height: ${(props) => props.theme.typography.h3.lineHeight};
-  margin-bottom: ${(props) => props.theme.spacing.base};
+  margin-bottom: 8px;
 `;
 
 export const Description = styled.div`
   font-size: ${(props) => props.theme.typography.p2.fontSize};
   color: ${(props) => props.theme.palette.grey.grey1};
-  margin-bottom: ${(props) => props.theme.spacing.base};
-  text-align: center;
 `;

@@ -8,8 +8,8 @@ export const Wrapper = styled.div`
   background-color: ${(props) => props.theme.palette.grey.white};
   width: ${(props) => props.theme.modal.base};
   padding: ${(props) => props.theme.spacing.base};
-  padding-top: ${(props) => props.theme.spacing.large};
-  border-radius: ${(props) => props.theme.spacing.base};
+  padding-top: 40px;
+  border-radius: 8px;
   align-items: center;
   a {
     all: unset;
@@ -19,15 +19,16 @@ export const Wrapper = styled.div`
 export const StarknetLogo = styled.img.attrs(() => ({
   src: starknetSrc,
 }))`
-  height: ${(props) => props.theme.spacing.medium};
-  margin-bottom: ${(props) => props.theme.spacing.medium};
+  width: 158px;
+  height: 32px;
+  margin-bottom: 32px;
 `;
 
 export const MetaMaskLogo = styled.img.attrs(() => ({
   src: metamaskSrc,
 }))`
-  width: ${(props) => props.theme.spacing.medium};
-  height: ${(props) => props.theme.spacing.medium};
+  width: 32px;
+  height: 32px;
 `;
 
 export const Title = styled.div`
@@ -36,12 +37,10 @@ export const Title = styled.div`
   font-weight: ${(props) => props.theme.typography.h3.fontWeight};
   font-family: ${(props) => props.theme.typography.h3.fontFamily};
   line-height: ${(props) => props.theme.typography.h3.lineHeight};
-  margin-bottom: ${(props) => props.theme.spacing.base};
+  margin-bottom: 8px;
 `;
 
 export const Description = styled.div`
   font-size: ${(props) => props.theme.typography.p2.fontSize};
   color: ${(props) => props.theme.palette.grey.grey1};
-  margin-bottom: ${(props) => props.theme.spacing.base};
-  text-align: center;
 `;

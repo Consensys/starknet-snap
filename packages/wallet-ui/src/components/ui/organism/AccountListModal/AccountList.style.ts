@@ -44,3 +44,16 @@ export const HiddenAccountBarRightIcon = styled(FontAwesomeIcon)`
   color: ${(props) => props.theme.palette.grey.grey1};
   margin-left: ${(props) => props.theme.spacing.tiny2};
 `;
+
+export const NoHiddenAccountText = styled.span`
+  color: ${(props) => props.theme.palette.grey.grey1};
+`;
+
+export const VerticalAlignBox = styled.div`
+  height: 100%;
+  display: flex;
+  align-item: center;
+  justify-content: center;
+  flex-direction: column;
+  text-align: center;
+`;

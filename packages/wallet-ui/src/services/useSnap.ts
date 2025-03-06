@@ -1,4 +1,6 @@
 import { useAppSelector } from 'hooks/redux';
+import semver from 'semver/preload';
+
 import { removeUndefined } from 'utils/utils';
 
 export type InvokeSnapParams = {
@@ -24,9 +26,10 @@ export const useSnap = () => {
   const snapVersion = process.env.REACT_APP_SNAP_VERSION
     ? process.env.REACT_APP_SNAP_VERSION
     : '*';
+  // unless specified, the minSnapVersion is the same as the snapVersion
   const minSnapVersion = process.env.REACT_APP_MIN_SNAP_VERSION
     ? process.env.REACT_APP_MIN_SNAP_VERSION
-    : '2.0.1';
+    : snapVersion;
 
   const invokeSnap = async <Resp>({
     method,
@@ -71,9 +74,23 @@ export const useSnap = () => {
     });
   };
 
+  const isSnapRequireUpdate = async (): Promise<boolean> => {
+    const snaps = await getInstalledSnaps();
+
+    if (typeof snaps[snapId]?.version !== 'undefined') {
+      // if the minSnapVersion is *, we should always allowed
+      if (minSnapVersion === '*') {
+        return false;
+      }
+      return semver.lt(snaps[snapId]?.version?.split('-')?.[0], minSnapVersion);
+    }
+    return false;
+  };
+
   return {
     ping,
     requestSnap,
+    isSnapRequireUpdate,
     getInstalledSnaps,
     invokeSnap,
     snapId,
