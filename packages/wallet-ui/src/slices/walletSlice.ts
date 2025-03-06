@@ -86,6 +86,15 @@ export const walletSlice = createSlice({
           state.accounts.push(account);
         }
       }
+
+      const chainId = accountsToInsert[0].chainId;
+      // There may be a edge case:
+      // - User delete and resintall the SNAP, but the previous visibility is still presisted.
+      // When resintalling a SNAP, it will flush the SNAP data and hence only 1 account will be returned.
+      // Therefore we can assuming when only 1 account exist, we should reset the visibility.
+      if (state.accounts.length === 1) {
+        state.visibility[chainId] = {};
+      }
     },
     updateAccount: (
       state,
