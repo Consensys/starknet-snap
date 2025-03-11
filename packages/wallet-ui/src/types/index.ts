@@ -104,8 +104,12 @@ export type Translator = (
   ...args: (string | undefined)[]
 ) => string;
 
-export interface FeeEstimate {
+export type FeeEstimate = {
   fee: string;
-  timestamp: number;
   includeDeploy: boolean;
-}
+};
+
+export type CacheContent<Data> = {
+  expiredAt: number;
+  data: Data;
+};
