@@ -130,6 +130,7 @@ export class AccountStateManager extends StateManager<AccContract> {
    *
    * @param account - The AccContract object to update.
    * @throws {StateManagerError} If the account does not exist in the state.
+   * or if an account with the same name already exists.
    */
   async updateAccountByAddress(account: AccContract): Promise<void> {
     try {
@@ -146,6 +147,16 @@ export class AccountStateManager extends StateManager<AccContract> {
 
         if (!accountInState) {
           throw new Error(`Account does not exists`);
+        }
+
+        if (
+          account.accountName &&
+          (await this.isAccountNameExist(
+            { accountName: account.accountName, chainId: account.chainId },
+            state,
+          ))
+        ) {
+          throw new Error(`Account name already exists`);
         }
 
         this.updateEntity(accountInState, account);
@@ -431,6 +442,18 @@ export class AccountStateManager extends StateManager<AccContract> {
         (data) =>
           (data.address === address || data.addressIndex === addressIndex) &&
           data.chainId === chainId,
+      ) !== undefined
+    );
+  }
+
+  async isAccountNameExist(
+    { accountName, chainId }: { accountName: string; chainId: string },
+    state,
+  ): Promise<boolean> {
+    const snapState = state ?? (await this.get());
+    return (
+      this.getCollection(snapState).find(
+        (data) => data.accountName === accountName && data.chainId === chainId,
       ) !== undefined
     );
   }
