@@ -4,15 +4,9 @@ import { useAppSelector, useAppDispatch } from 'hooks/redux';
 import Toastr from 'toastr2';
 
 import { setUpgradeModalVisible } from 'slices/modalSlice';
-import { openExplorerTab, shortenAddress } from '../../../../utils/utils';
-import {
-  UpgradeButton,
-  StarknetLogo,
-  Title,
-  Wrapper,
-  DescriptionCentered,
-  Txnlink,
-} from './UpgradeModel.style';
+import { Modal } from 'components/ui/atom/Modal';
+import { openExplorerTab, shortenAddress } from 'utils/utils';
+import { Txnlink } from './UpgradeModel.style';
 
 interface Props {
   address: string;
@@ -82,34 +76,28 @@ export const UpgradeModelView = ({ address }: Props) => {
       case Stage.INIT:
         return (
           <>
-            <DescriptionCentered>
+            <Modal.Body>
               {translate('newVersionOfSmartContractNecessaryPart1')} <br />
               <br />
               {translate('newVersionOfSmartContractNecessaryPart2')} <br />
               <br />
               {translate('newVersionOfSmartContractNecessaryPart3')} <br />
               {translate('newVersionOfSmartContractNecessaryPart4')}
-            </DescriptionCentered>
-            <UpgradeButton onClick={onUpgrade}>
+            </Modal.Body>
+            <Modal.Button onClick={onUpgrade}>
               {translate('upgrade')}
-            </UpgradeButton>
+            </Modal.Button>
           </>
         );
       case Stage.WAITING_FOR_TXN:
-        return (
-          <DescriptionCentered>
-            {translate('waitingForTransaction')}
-          </DescriptionCentered>
-        );
+        return <Modal.Body>{translate('waitingForTransaction')}</Modal.Body>;
       case Stage.SUCCESS:
         return (
-          <DescriptionCentered>
-            {translate('accountUpgradedSuccessfully')}
-          </DescriptionCentered>
+          <Modal.Body>{translate('accountUpgradedSuccessfully')}</Modal.Body>
         );
       default:
         return (
-          <DescriptionCentered>
+          <Modal.Body>
             {translate('transactionHash')} <br />{' '}
             <Txnlink onClick={() => openExplorerTab(txnHash, 'tx', chainId)}>
               {shortenAddress(txnHash)}{' '}
@@ -120,16 +108,17 @@ export const UpgradeModelView = ({ address }: Props) => {
             {translate('upgradeTransactionPendingPart2')} <br />
             <br />
             {translate('upgradeTransactionPendingPart3')}
-          </DescriptionCentered>
+          </Modal.Body>
         );
     }
   };
 
   return (
-    <Wrapper>
-      <StarknetLogo />
-      <Title>{translate('upgradeAccount')}</Title>
+    <Modal>
+      <Modal.Logo />
+      <Modal.Title>{translate('upgradeAccount')}</Modal.Title>
+
       {renderComponent()}
-    </Wrapper>
+    </Modal>
   );
 };
