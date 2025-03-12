@@ -11,7 +11,7 @@ import {
   RowWrapper,
   USDDiv,
   Wrapper,
-  Spinner,
+  LoadingWrapper,
 } from './AmountInput.style';
 import { Erc20TokenBalance } from 'types';
 import { ethers } from 'ethers';
@@ -93,6 +93,8 @@ export const AmountInputView = ({
 
   useEffect(
     () => {
+      // If shouldApplyMax is true and the fees are not being fetched,
+      // apply the maximum amount and reset shouldApplyMax to false.
       if (shouldApplyMax && !isFetchingFee) {
         handleMaxClick();
         typeof setShouldApplyMax === 'function' && setShouldApplyMax(false);
@@ -109,6 +111,8 @@ export const AmountInputView = ({
   };
 
   const handleMaxClick = () => {
+    // If the fees are being fetched, set shouldApplyMax to true
+    // to apply the maximum amount once the fees are fetched.
     if (isFetchingFee) {
       typeof setShouldApplyMax === 'function' && setShouldApplyMax(true);
       return;
@@ -159,7 +163,7 @@ export const AmountInputView = ({
             onChange={(event) => triggerOnChange(event.target.value)}
             {...otherProps}
           />
-          {isFetchingFee && shouldApplyMax && <Spinner />}
+          {isFetchingFee && shouldApplyMax && <LoadingWrapper />}
           {!usdMode && (
             <>
               {asset.symbol}

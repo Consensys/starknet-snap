@@ -33,7 +33,7 @@ import { ethers } from 'ethers';
 import Toastr from 'toastr2';
 import { ContractFuncName, FeeToken, FeeTokenUnit, FeeEstimate } from 'types';
 import { updateCurrentAccount } from 'slices/walletSlice';
-import { useCurrentAccount } from 'hooks';
+import { useCurrentAccount, useEstimateFee } from 'hooks';
 
 interface Props {
   address: string;
@@ -43,6 +43,7 @@ interface Props {
   handleBack: () => void;
   selectedFeeToken: FeeToken;
   gasFees: FeeEstimate;
+  isEstimatingGas: boolean;
 }
 
 export const SendSummaryModalView = ({
@@ -53,6 +54,7 @@ export const SendSummaryModalView = ({
   handleBack,
   selectedFeeToken,
   gasFees,
+  isEstimatingGas,
 }: Props) => {
   const dispatch = useAppDispatch();
   const { address: currentAddress } = useCurrentAccount();
@@ -62,6 +64,7 @@ export const SendSummaryModalView = ({
   const erc20TokenBalanceSelected = useAppSelector(
     (state) => state.wallet.erc20TokenBalanceSelected,
   );
+  const { deleteFee } = useEstimateFee(selectedFeeToken);
   const [gasFeesAmount, setGasFeesAmount] = useState('');
   const [gasFeesAmountUSD, setGasFeesAmountUSD] = useState('');
   const [amountUsdPrice, setAmountUsdPrice] = useState('');
@@ -75,7 +78,6 @@ export const SendSummaryModalView = ({
     erc20TokenBalances.find((token) => token.symbol === selectedFeeToken) ??
     ethToken;
 
-  const estimatingGas = false;
   const toastr = new Toastr({
     closeDuration: 10000000,
     showDuration: 1000000000,
@@ -177,6 +179,12 @@ export const SendSummaryModalView = ({
       })
       .catch(() => {
         toastr.error(translate('errorSendingTransaction'));
+      })
+      .finally(() => {
+        if (gasFees.includeDeploy) {
+          dispatch(updateCurrentAccount({ isDeployed: true }));
+          deleteFee();
+        }
       });
     closeModal && closeModal();
   };
@@ -233,8 +241,8 @@ export const SendSummaryModalView = ({
             </PopperTooltip>
           </LeftSummary>
           <RightSummary>
-            {estimatingGas && <LoadingWrapper />}
-            {!estimatingGas && (
+            {isEstimatingGas && <LoadingWrapper />}
+            {!isEstimatingGas && (
               <>
                 <CurrencyAmount>
                   {gasFeesAmount} {selectedFeeToken}
@@ -248,7 +256,7 @@ export const SendSummaryModalView = ({
         <TotalAmount>
           {translate('maximumFees')} {gasFeesAmount} {selectedFeeToken}
         </TotalAmount>
-        {gasFees.includeDeploy && (
+        {gasFees && gasFees.includeDeploy && (
           <IncludeDeploy>
             *{translate('feesIncludeOneTimeDeploymentFee')}
           </IncludeDeploy>
@@ -273,7 +281,7 @@ export const SendSummaryModalView = ({
             {translate('maximumAmount')} {totalAmount} {selectedFeeToken}
           </TotalAmount>
         )}
-        {totalExceedsBalance && (
+        {!isEstimatingGas && totalExceedsBalance && (
           <AlertTotalExceedsAmount
             text={translate('insufficientFundsForFees')}
             variant="warning"
@@ -289,7 +297,7 @@ export const SendSummaryModalView = ({
           {translate('back').toUpperCase()}
         </ButtonStyled>
         <ButtonStyled
-          enabled={!estimatingGas && !totalExceedsBalance}
+          enabled={!isEstimatingGas && !totalExceedsBalance}
           onClick={handleConfirmClick}
         >
           {translate('confirm')}

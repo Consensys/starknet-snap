@@ -27,10 +27,11 @@ export const useEstimateFee = (feeToken: FeeToken = FeeToken.ETH) => {
   const { isDeployed, address } = useCurrentAccount();
   const { estimateFees: estimateFeesApi } = useStarkNetSnap();
   const cacheKey = `${address}-${feeToken}-${chainId}`;
-  const { expired, cacheData, saveCache } = useCacheData<FeeEstimate>({
-    cacheKey,
-    cacheDurtion: ESTIMATE_FEE_CACHE_DURATION,
-  });
+  const { expired, cacheData, saveCache, deleteCache } =
+    useCacheData<FeeEstimate>({
+      cacheKey,
+      cacheDurtion: ESTIMATE_FEE_CACHE_DURATION,
+    });
   const erc20TokenBalanceSelected = useAppSelector(
     (state) => state.wallet.erc20TokenBalanceSelected,
   );
@@ -98,6 +99,7 @@ export const useEstimateFee = (feeToken: FeeToken = FeeToken.ETH) => {
   }, [chainId, address, feeToken, erc20TokenBalanceSelected]);
 
   return {
+    deleteFee: deleteCache,
     estimateFees,
     loading,
     feeEstimates: cacheData,

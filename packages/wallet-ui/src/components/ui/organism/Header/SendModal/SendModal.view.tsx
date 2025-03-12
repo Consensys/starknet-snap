@@ -45,7 +45,11 @@ export const SendModalView = ({ closeModal }: Props) => {
   const { getAddrFromStarkName } = useStarkNetSnap();
   const { translate } = useMultiLanguage();
   const [summaryModalOpen, setSummaryModalOpen] = useState(false);
+  // Indicates if the max amount should be auto-applied.
+  // When "Max" is clicked while fees are fetching, shouldApplyMax is set to true.
+  // Once fees are fetched, it applies the max amount and resets to false.
   const [shouldApplyMax, setShouldApplyMax] = useState(false);
+  const [loadingStrkName, setLoadingStrkName] = useState(false);
   const [fields, setFields] = useState({
     amount: '',
     address: '',
@@ -56,7 +60,6 @@ export const SendModalView = ({ closeModal }: Props) => {
   const [resolvedAddress, setResolvedAddress] = useState('');
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
   const { loading, feeEstimates } = useEstimateFee(fields.feeToken);
-
   const handleBack = () => {
     setSummaryModalOpen(false);
   };
@@ -98,6 +101,7 @@ export const SendModalView = ({ closeModal }: Props) => {
             break;
           } else if (isValidStarkName(fieldValue)) {
             debounceRef.current = setTimeout(() => {
+              setLoadingStrkName(true);
               getAddrFromStarkName(fieldValue, chainId)
                 .then((address) => {
                   setResolvedAddress(address);
@@ -108,6 +112,9 @@ export const SendModalView = ({ closeModal }: Props) => {
                     ...prevErrors,
                     address: translate('starkNameDoesNotExist'),
                   }));
+                })
+                .finally(() => {
+                  setLoadingStrkName(false);
                 });
             }, 300);
           } else {
@@ -138,6 +145,11 @@ export const SendModalView = ({ closeModal }: Props) => {
       !errors.amount &&
       fields.amount.length > 0 &&
       fields.address.length > 0 &&
+      !loadingStrkName &&
+      // Disable confirm button if loading is true
+      // and shouldApplyMax is true (i.e. the user clicked the "Max" button)
+      // in order to prevent the user from confirming the transaction
+      // before the maximum amount is applied.
       !(loading && shouldApplyMax)
     );
   };
@@ -229,7 +241,8 @@ export const SendModalView = ({ closeModal }: Props) => {
           amount={fields.amount}
           chainId={fields.chainId}
           gasFees={feeEstimates}
-          selectedFeeToken={fields.feeToken} // Pass the selected fee token
+          selectedFeeToken={fields.feeToken}
+          isEstimatingGas={loading}
         />
       )}
     </>
