@@ -13,6 +13,7 @@ import {
   setMinVersionModalVisible,
   setUpgradeModalVisible,
   setDeployModalVisible,
+  setForceReconnectModalVisible,
 } from 'slices/modalSlice';
 import {
   setErc20TokenBalanceSelected,
@@ -60,31 +61,29 @@ export const useStarkNetSnap = () => {
   );
   const accounts = useAppSelector((state) => state.wallet.accounts);
 
-  const connectToSnap = () => {
+  const connectToSnap = async () => {
     dispatch(enableLoadingWithMessage('Connecting...'));
-    requestSnap()
-      .then(() => {
-        dispatch(setWalletConnection(true));
-        dispatch(setForceReconnect(false));
-      })
-      .catch(() => {
-        dispatch(setWalletConnection(false));
-        dispatch(disableLoading());
-      });
+    try {
+      await requestSnap();
+      dispatch(setWalletConnection(true));
+      dispatch(setForceReconnect(false));
+    } catch (error) {
+      dispatch(setWalletConnection(false));
+    } finally {
+      dispatch(disableLoading());
+    }
   };
 
-  const checkConnection = () => {
-    dispatch(enableLoadingWithMessage('Connecting...'));
-    ping()
-      .then(() => {
-        dispatch(setWalletConnection(true));
-      })
-      .catch((error: any) => {
-        dispatch(setWalletConnection(false));
-        dispatch(disableLoading());
-        //eslint-disable-next-line no-console
-        console.log(error);
-      });
+  const checkConnection = async () => {
+    dispatch(enableLoadingWithMessage('checking connection...'));
+    try {
+      await ping();
+      dispatch(setWalletConnection(true));
+    } catch (error) {
+      dispatch(setWalletConnection(false));
+    } finally {
+      dispatch(disableLoading());
+    }
   };
 
   const loadLocale = async () => {
@@ -130,17 +129,28 @@ export const useStarkNetSnap = () => {
     });
   };
 
+  const requestUpgradeSnap = () => {
+    dispatch(setMinVersionModalVisible(true));
+  };
+
+  const completeUpgradeSnap = async () => {
+    dispatch(setMinVersionModalVisible(false));
+    await connectToSnap();
+    await initSnap();
+  };
+
   const initSnap = async () => {
     if (await isSnapRequireUpdate()) {
-      // If the SNAP requires an update,
-      // re-connect with the SNAP to kick off the update process
-      await connectToSnap();
+      requestUpgradeSnap();
       return;
     }
+
     if (!loader.isLoading) {
       dispatch(enableLoadingWithMessage('Initializing wallet ...'));
     }
     try {
+      await loadLocale();
+
       const networks = await getNetworks();
       if (networks.length === 0) {
         console.error('No networks found');
@@ -167,7 +177,7 @@ export const useStarkNetSnap = () => {
         //We have to make the user reinstall the snap after the flask update to 10.25.0
         //following the breaking change : snap_manageState now uses SIP-6 algorithm for encryption
         //This change breaks the old snap state, hence the reinstallation
-        dispatch(setMinVersionModalVisible(true));
+        dispatch(setForceReconnectModalVisible(true));
       }
       //eslint-disable-next-line no-console
       console.error('Error while Initializing wallet', err);
@@ -930,6 +940,7 @@ export const useStarkNetSnap = () => {
   };
 
   return {
+    completeUpgradeSnap,
     connectToSnap,
     loadLocale,
     getNetworks,

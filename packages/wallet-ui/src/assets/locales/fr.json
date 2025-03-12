@@ -301,6 +301,9 @@
     "upgradeAccountFailed": {
       "message": "Échec de la mise à jour du compte"
     },
+    "upgradeLatestSnapVersion": {
+      "message": "Pour utiliser cette dapp, veuillez passer à la dernière version en cliquant sur le bouton ci-dessous:"
+    },
     "upgradeTransactionPendingPart1": {
       "message": "Votre transaction de mise à jour est toujours en attente et a atteint la limite maximale de tentatives pour vérifier son statut. Veuillez attendre la fin de la transaction."
     },
