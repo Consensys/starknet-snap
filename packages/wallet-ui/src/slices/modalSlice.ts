@@ -6,6 +6,7 @@ export interface modalState {
   minMMVersionModalVisible: boolean;
   upgradeModalVisible: boolean;
   deployModalVisible: boolean;
+  forceReconnectModalVisible: boolean;
 }
 
 const initialState: modalState = {
@@ -14,6 +15,7 @@ const initialState: modalState = {
   minMMVersionModalVisible: false,
   upgradeModalVisible: false,
   deployModalVisible: false,
+  forceReconnectModalVisible: false,
 };
 
 export const modalSlice = createSlice({
@@ -33,6 +35,9 @@ export const modalSlice = createSlice({
     setMinVersionModalVisible: (state, { payload }) => {
       state.minVersionModalVisible = payload;
     },
+    setForceReconnectModalVisible: (state, { payload }) => {
+      state.forceReconnectModalVisible = payload;
+    },
     setMinMMVersionModalVisible: (state, { payload }) => {
       state.minMMVersionModalVisible = payload;
     },
@@ -45,6 +50,7 @@ export const {
   setUpgradeModalVisible,
   setDeployModalVisible,
   setMinMMVersionModalVisible,
+  setForceReconnectModalVisible,
 } = modalSlice.actions;
 
 export default modalSlice.reducer;

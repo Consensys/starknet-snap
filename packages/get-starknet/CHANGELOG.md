@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.1](https://github.com/Consensys/starknet-snap/compare/get-starknet-v1.5.0...get-starknet-v1.5.1) (2025-03-04)
+
+
+### Bug Fixes
+
+* SNAP version does not auto update in get-starknet ([b91e762](https://github.com/Consensys/starknet-snap/commit/b91e762a33c18345df9ae2501999c61b0b1a497f))
+
 ## [1.5.0](https://github.com/Consensys/starknet-snap/compare/get-starknet-v1.4.0...get-starknet-v1.5.0) (2025-02-07)
 
 

@@ -1,7 +1,6 @@
 import styled from 'styled-components';
-import starknetSrc from 'assets/images/starknet-logo.svg';
-import foxIconSrc from 'assets/images/flask-fox-icon.svg';
-import { Button } from 'components/ui/atom/Button';
+
+import { Button } from '../Button';
 
 export const Wrapper = styled.div`
   display: flex;
@@ -9,43 +8,39 @@ export const Wrapper = styled.div`
   background-color: ${(props) => props.theme.palette.grey.white};
   width: ${(props) => props.theme.modal.base};
   padding: ${(props) => props.theme.spacing.base};
-  padding-top: 40px;
-  border-radius: 8px;
+  border-radius: ${(props) => props.theme.spacing.tiny2};
   align-items: center;
-  a {
-    all: unset;
-  }
-`;
-
-export const StarknetLogo = styled.img.attrs(() => ({
-  src: starknetSrc,
-}))`
-  width: 158px;
-  height: 32px;
-  margin-bottom: 32px;
+  overflow-wrap: break-word;
 `;
 
 export const Title = styled.div`
   text-align: center;
-  font-size: ${(props) => props.theme.typography.h3.fontSize};
   font-weight: ${(props) => props.theme.typography.h3.fontWeight};
+  font-size: ${(props) => props.theme.typography.h3.fontSize};
   font-family: ${(props) => props.theme.typography.h3.fontFamily};
   line-height: ${(props) => props.theme.typography.h3.lineHeight};
-  margin-bottom: 8px;
+  margin-bottom: ${(props) => props.theme.spacing.base};
 `;
 
-export const Description = styled.div`
+export const Content = styled.div<{ align?: 'center' | 'left' | 'right' }>`
   font-size: ${(props) => props.theme.typography.p2.fontSize};
   color: ${(props) => props.theme.palette.grey.grey1};
+  text-align: ${(props) => props.align ?? 'center'};
+  margin-bottom: ${(props) => props.theme.spacing.base};
+  overflow-wrap: break-word;
+  width: 100%;
 `;
 
-export const DescriptionCentered = styled(Description)`
-  text-align: center;
-  margin-bottom: 20px;
-  width: 264px;
+export const ButtonWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  align-content: center;
+  width: 100%;
 `;
 
-export const ConnectButton = styled(Button).attrs((props) => ({
+export const StyledButton = styled(Button).attrs((props) => ({
   textStyle: {
     fontSize: props.theme.typography.p1.fontSize,
     fontWeight: 900,
@@ -54,12 +49,6 @@ export const ConnectButton = styled(Button).attrs((props) => ({
   backgroundTransparent: true,
 }))`
   box-shadow: 0px 14px 24px -6px rgba(106, 115, 125, 0.2);
-  padding-top: 16px;
-  padding-bottom: 16px;
-`;
-
-export const FlaskIcon = styled.img.attrs(() => ({
-  src: foxIconSrc,
-}))`
-  margin-right: 8px;
+  padding-top: ${(props) => props.theme.spacing.small};
+  padding-bottom: ${(props) => props.theme.spacing.small};
 `;
