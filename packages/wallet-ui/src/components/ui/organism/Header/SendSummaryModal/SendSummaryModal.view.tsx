@@ -9,23 +9,20 @@ import { AssetQuantity } from 'components/ui/molecule/AssetQuantity';
 import { PopperTooltip } from 'components/ui/molecule/PopperTooltip';
 import {
   AddressDiv,
-  Buttons,
   ButtonStyled,
   CurrencyAmount,
-  Header,
   LeftSummary,
-  Title,
   RightSummary,
   Summary,
   ToDiv,
   TotalAmount,
   USDAmount,
-  Wrapper,
   EstimatedFeesTooltip,
   IncludeDeploy,
   AlertTotalExceedsAmount,
   LoadingWrapper,
 } from './SendSummaryModal.style';
+import { Modal } from 'components/ui/atom/Modal';
 import { useAppDispatch, useAppSelector } from 'hooks/redux';
 import { useEffect, useState } from 'react';
 import { useMultiLanguage, useStarkNetSnap } from 'services';
@@ -207,11 +204,9 @@ export const SendSummaryModalView = ({
   };
 
   return (
-    <div>
-      <Wrapper>
-        <Header>
-          <Title>{translate('send')}</Title>
-        </Header>
+    <Modal>
+      <Modal.Title>{translate('send')}</Modal.Title>
+      <Modal.Body>
         <ToDiv>To</ToDiv>
         <AddressDiv>{shortenAddress(address)}</AddressDiv>
         <AssetQuantity
@@ -287,8 +282,8 @@ export const SendSummaryModalView = ({
             variant="warning"
           />
         )}
-      </Wrapper>
-      <Buttons>
+      </Modal.Body>
+      <Modal.Buttons>
         <ButtonStyled
           onClick={() => handleBack()}
           backgroundTransparent
@@ -302,7 +297,7 @@ export const SendSummaryModalView = ({
         >
           {translate('confirm')}
         </ButtonStyled>
-      </Buttons>
-    </div>
+      </Modal.Buttons>
+    </Modal>
   );
 };

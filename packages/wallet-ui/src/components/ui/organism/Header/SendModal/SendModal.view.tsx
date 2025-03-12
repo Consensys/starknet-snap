@@ -20,16 +20,13 @@ import {
 } from 'components/ui/organism/ConnectInfoModal/ConnectInfoModal.style';
 import { InfoText } from 'components/ui/molecule/AddressInput/AddressInput.style';
 import {
-  Buttons,
   ButtonStyled,
-  Header,
   MessageAlert,
   Network,
   Separator,
   SeparatorSmall,
-  Title,
-  Wrapper,
 } from './SendModal.style';
+import { Modal } from 'components/ui/atom/Modal';
 import { SendSummaryModal } from '../SendSummaryModal';
 
 interface Props {
@@ -157,11 +154,9 @@ export const SendModalView = ({ closeModal }: Props) => {
   return (
     <>
       {!summaryModalOpen && (
-        <div>
-          <Wrapper>
-            <Header>
-              <Title>{translate('send')}</Title>
-            </Header>
+        <Modal>
+          <Modal.Title>{translate('send')}</Modal.Title>
+          <Modal.Body>
             <Network>
               <Normal>{translate('network')}</Normal>
               <Bold>{networks.items[networks.activeNetwork].name}</Bold>
@@ -215,8 +210,8 @@ export const SendModalView = ({ closeModal }: Props) => {
                 onChange={(e) => handleChange('feeToken', e.value)}
               />
             </div>
-          </Wrapper>
-          <Buttons>
+          </Modal.Body>
+          <Modal.Buttons>
             <ButtonStyled
               onClick={closeModal}
               backgroundTransparent
@@ -230,8 +225,8 @@ export const SendModalView = ({ closeModal }: Props) => {
             >
               {translate('confirm')}
             </ButtonStyled>
-          </Buttons>
-        </div>
+          </Modal.Buttons>
+        </Modal>
       )}
       {summaryModalOpen && (
         <SendSummaryModal
