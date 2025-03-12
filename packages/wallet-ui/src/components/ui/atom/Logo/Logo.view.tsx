@@ -1,10 +1,11 @@
 import type { DefaultTheme } from 'styled-components';
 
-import { StarknetLogo, MetaMaskLogo } from './Logo.style';
+import { StarknetLogo, MetaMaskLogo, FlaskIcon } from './Logo.style';
 
 export enum Variant {
   Starknet = 'starknet',
   MetaMask = 'metamask',
+  Flask = 'flask',
 }
 
 export interface Props {
@@ -22,6 +23,8 @@ export const LogoView = (props: Props) => {
       return <StarknetLogo mb={mb} ml={ml} mr={mr} mt={mt} />;
     case Variant.MetaMask:
       return <MetaMaskLogo mb={mb} ml={ml} mr={mr} mt={mt} />;
+    case Variant.Flask:
+      return <FlaskIcon mb={mb} ml={ml} mr={mr} mt={mt} />;
     default:
       return null;
   }

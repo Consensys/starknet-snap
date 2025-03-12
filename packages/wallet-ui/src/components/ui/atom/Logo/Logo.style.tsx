@@ -30,3 +30,9 @@ export const MetaMaskLogo = styled(ImgLogo).attrs(() => ({
   width: ${(props) => props.theme.spacing.medium};
   height: ${(props) => props.theme.spacing.medium};
 `;
+
+export const FlaskIcon = styled(ImgLogo).attrs(() => ({
+  src: foxIconSrc,
+}))<Size>`
+  height: ${(props) => props.theme.spacing.medium};
+`;
