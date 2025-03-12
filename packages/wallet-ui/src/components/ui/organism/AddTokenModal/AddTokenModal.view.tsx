@@ -1,23 +1,20 @@
 import { useState, useEffect } from 'react';
+import Toastr from 'toastr2';
 import { useAppSelector } from 'hooks/redux';
+
 import { useMultiLanguage, useStarkNetSnap } from 'services';
 import { Alert } from 'components/ui/atom/Alert';
 import { AddressInput } from 'components/ui/molecule/AddressInput';
 import { InputWithLabel } from 'components/ui/molecule/InputWithLabel';
-import {
-  ButtonStyled,
-  ButtonsWrapper,
-  FormGroup,
-  Space,
-  Title,
-  Wrapper,
-} from './AddToken.style';
-import Toastr from 'toastr2';
+import { Modal } from 'components/ui/atom/Modal';
+import { ButtonStyled, FormGroup, Space } from './AddToken.style';
+
 const toastr = new Toastr({
   closeDuration: 10000000,
   showDuration: 1000000000,
   positionClass: 'toast-top-center',
 });
+
 interface Props {
   closeModal: () => void;
 }
@@ -52,9 +49,9 @@ export const AddTokenModalView = ({ closeModal }: Props) => {
   }, [fields, isValidAddress]);
 
   return (
-    <>
-      <Wrapper>
-        <Title>{translate('addToken')}</Title>
+    <Modal>
+      <Modal.Title>{translate('addToken')}</Modal.Title>
+      <Modal.Body>
         <Alert text={translate('tokenCreationWarning')} variant="warning" />
         <Space />
         <FormGroup>
@@ -90,8 +87,8 @@ export const AddTokenModalView = ({ closeModal }: Props) => {
             }
           />
         </FormGroup>
-      </Wrapper>
-      <ButtonsWrapper>
+      </Modal.Body>
+      <Modal.Buttons>
         <ButtonStyled onClick={closeModal} backgroundTransparent borderVisible>
           {translate('cancel')}
         </ButtonStyled>
@@ -119,7 +116,7 @@ export const AddTokenModalView = ({ closeModal }: Props) => {
         >
           {translate('add')}
         </ButtonStyled>
-      </ButtonsWrapper>
-    </>
+      </Modal.Buttons>
+    </Modal>
   );
 };

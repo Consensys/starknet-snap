@@ -1,6 +1,6 @@
 {
   "name": "wallet-ui",
-  "version": "1.27.0",
+  "version": "1.28.0",
   "private": true,
   "homepage": "/starknet",
   "license": "(Apache-2.0 OR MIT)",

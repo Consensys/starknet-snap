@@ -1,29 +1,18 @@
-import {
-  Description,
-  StarknetLogo,
-  Title,
-  Wrapper,
-} from './MinVersionModal.style';
-import { useMultiLanguage } from 'services';
+import { Modal } from 'components/ui/atom/Modal';
+import { useMultiLanguage, useStarkNetSnap } from 'services';
 
 export const MinVersionModalView = () => {
   const { translate } = useMultiLanguage();
+  const { completeUpgradeSnap } = useStarkNetSnap();
 
   return (
-    <Wrapper>
-      <StarknetLogo />
-      <>
-        <Title>{translate('newVersionAvailable')}</Title>
-        <Description>
-          {translate('installLatestVersion')}
-          <ul>
-            <li>{translate('deleteCurrentVersionMetaMask')}</li>
-            <li>{translate('refreshPage')}</li>
-            <li>{translate('connectToMetaMask')}</li>
-          </ul>
-          {translate('accountRecoveryInfo')}
-        </Description>
-      </>
-    </Wrapper>
+    <Modal>
+      <Modal.Logo />
+      <Modal.Title>{translate('newVersionAvailable')}</Modal.Title>
+      <Modal.Body>{translate('upgradeLatestSnapVersion')}</Modal.Body>
+      <Modal.Button onClick={completeUpgradeSnap}>
+        {translate('upgrade')}
+      </Modal.Button>
+    </Modal>
   );
 };

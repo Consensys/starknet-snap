@@ -22,12 +22,12 @@ import { MinVersionModal } from 'components/ui/organism/MinVersionModal';
 import { DeployModal } from 'components/ui/organism/DeployModal';
 import { MinMetamaskVersionModal } from 'components/ui/organism/MinMetamaskVersionModal';
 import { Home } from 'components/pages/Home';
+import { ForceUpgadeModal } from 'components/ui/organism/ForceUpgadeModal';
 
 library.add(fas, far);
 
 function App() {
-  const { initSnap, initWalletData, checkConnection, loadLocale } =
-    useStarkNetSnap();
+  const { initSnap, initWalletData, checkConnection } = useStarkNetSnap();
   const connected = useAppSelector((state) => state.wallet.connected);
   const forceReconnect = useAppSelector((state) => state.wallet.forceReconnect);
   const provider = useAppSelector((state) => state.wallet.provider);
@@ -38,6 +38,7 @@ function App() {
     minMMVersionModalVisible,
     upgradeModalVisible,
     deployModalVisible,
+    forceReconnectModalVisible,
   } = useAppSelector((state) => state.modals);
   const { loader } = useAppSelector((state) => state.UI);
   const networks = useAppSelector((state) => state.networks);
@@ -65,12 +66,6 @@ function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [networks.activeNetwork, provider, chainId]);
 
-  useEffect(() => {
-    if (connected) {
-      loadLocale();
-    }
-  }, [connected, loadLocale]);
-
   const loading = loader.isLoading;
   const isModalEligibleToShow =
     !minVersionModalVisible && !minMMVersionModalVisible;
@@ -89,6 +84,9 @@ function App() {
         {/* This Modal will be shown when the Metamask version is outdate to support the SNAP */}
         <PopIn isOpen={minMMVersionModalVisible} showClose={false}>
           <MinMetamaskVersionModal />
+        </PopIn>
+        <PopIn isOpen={forceReconnectModalVisible} showClose={false}>
+          <ForceUpgadeModal />
         </PopIn>
         <PopIn
           isOpen={!loading && !!hasMetamask && !connected}
