@@ -207,19 +207,6 @@ export class AccountService {
     const { chainId } = this.network;
 
     return await this.accountStateMgr.withTransaction(async (state) => {
-      // Check if an account with the same name already exists
-      if (
-        metadata?.accountName &&
-        (await this.accountStateMgr.isAccountNameExist(
-          { accountName: metadata.accountName, chainId },
-          state,
-        ))
-      ) {
-        throw new Error(
-          `An account with the name "${metadata.accountName}" already exists.`,
-        );
-      }
-
       const nextIndex = await this.accountStateMgr.getNextIndex(chainId, state);
 
       const account = await this.deriveAccountByIndex(nextIndex, metadata);

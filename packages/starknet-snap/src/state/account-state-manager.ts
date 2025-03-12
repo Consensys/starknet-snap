@@ -151,6 +151,7 @@ export class AccountStateManager extends StateManager<AccContract> {
 
         if (
           account.accountName &&
+          account.accountName !== accountInState.accountName &&
           (await this.isAccountNameExist(
             { accountName: account.accountName, chainId: account.chainId },
             state,
@@ -181,6 +182,16 @@ export class AccountStateManager extends StateManager<AccContract> {
           await this.isAccountExist({ address, addressIndex, chainId }, state)
         ) {
           throw new Error(`Account already exists`);
+        }
+
+        if (
+          account.accountName &&
+          (await this.isAccountNameExist(
+            { accountName: account.accountName, chainId: account.chainId },
+            state,
+          ))
+        ) {
+          throw new Error(`Account name already exists`);
         }
 
         state.accContracts.push(account);
