@@ -2,7 +2,6 @@ import styled, { type DefaultTheme } from 'styled-components';
 
 import starknetSrc from 'assets/images/starknet-logo.svg';
 import metamaskSrc from 'assets/images/metamask-fox-icon.svg';
-import foxIconSrc from 'assets/images/flask-fox-icon.svg';
 
 export type Size = {
   mr?: keyof DefaultTheme['spacing'];
@@ -28,11 +27,5 @@ export const MetaMaskLogo = styled(ImgLogo).attrs(() => ({
   src: metamaskSrc,
 }))<Size>`
   width: ${(props) => props.theme.spacing.medium};
-  height: ${(props) => props.theme.spacing.medium};
-`;
-
-export const FlaskIcon = styled(ImgLogo).attrs(() => ({
-  src: foxIconSrc,
-}))<Size>`
   height: ${(props) => props.theme.spacing.medium};
 `;
