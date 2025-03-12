@@ -3,7 +3,7 @@ import { LoadingSpinner, LoadingText, Wrapper } from './LoadingSmall.style';
 import { useMultiLanguage } from 'services';
 
 interface Props extends HTMLAttributes<HTMLDivElement> {
-  showText: boolean;
+  showText?: boolean;
 }
 
 export const LoadingSmallView = ({ showText = true, ...otherProps }: Props) => {
