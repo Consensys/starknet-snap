@@ -30,7 +30,7 @@ import { ethers } from 'ethers';
 import Toastr from 'toastr2';
 import { ContractFuncName, FeeToken, FeeTokenUnit, FeeEstimate } from 'types';
 import { updateCurrentAccount } from 'slices/walletSlice';
-import { useCurrentAccount, useEstimateFee } from 'hooks';
+import { useCurrentAccount } from 'hooks';
 
 interface Props {
   address: string;
@@ -61,7 +61,6 @@ export const SendSummaryModalView = ({
   const erc20TokenBalanceSelected = useAppSelector(
     (state) => state.wallet.erc20TokenBalanceSelected,
   );
-  const { deleteFee } = useEstimateFee(selectedFeeToken);
   const [gasFeesAmount, setGasFeesAmount] = useState('');
   const [gasFeesAmountUSD, setGasFeesAmountUSD] = useState('');
   const [amountUsdPrice, setAmountUsdPrice] = useState('');
@@ -176,12 +175,6 @@ export const SendSummaryModalView = ({
       })
       .catch(() => {
         toastr.error(translate('errorSendingTransaction'));
-      })
-      .finally(() => {
-        if (gasFees.includeDeploy) {
-          dispatch(updateCurrentAccount({ isDeployed: true }));
-          deleteFee();
-        }
       });
     closeModal && closeModal();
   };

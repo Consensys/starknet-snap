@@ -56,7 +56,7 @@ export const SendModalView = ({ closeModal }: Props) => {
   const [errors, setErrors] = useState({ amount: '', address: '' });
   const [resolvedAddress, setResolvedAddress] = useState('');
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
-  const { loading, feeEstimates } = useEstimateFee(fields.feeToken);
+  const { loading, feeEstimates, deleteFee } = useEstimateFee(fields.feeToken);
   const handleBack = () => {
     setSummaryModalOpen(false);
   };
@@ -230,7 +230,12 @@ export const SendModalView = ({ closeModal }: Props) => {
       )}
       {summaryModalOpen && (
         <SendSummaryModal
-          closeModal={closeModal}
+          closeModal={() => {
+            if (feeEstimates.includeDeploy) {
+              deleteFee();
+            }
+            closeModal && closeModal();
+          }}
           handleBack={handleBack}
           address={resolvedAddress}
           amount={fields.amount}
