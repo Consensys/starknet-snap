@@ -61,7 +61,7 @@ export const SendModalView = ({ closeModal }: Props) => {
     }));
     switch (fieldName) {
       case 'amount':
-        if (fieldValue === '' || /^[0-9]*\.?[0-9]*$/.test(fieldValue)) {
+        if (fieldValue === '' || !isNaN(Number(fieldValue))) {
           setErrors((prevErrors) => ({
             ...prevErrors,
             amount: '',
