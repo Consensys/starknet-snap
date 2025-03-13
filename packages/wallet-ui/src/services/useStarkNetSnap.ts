@@ -286,7 +286,6 @@ export const useStarkNetSnap = () => {
         },
       },
     ];
-
     return await invokeSnap<{
       suggestedMaxFee: string;
       unit: FeeTokenUnit;

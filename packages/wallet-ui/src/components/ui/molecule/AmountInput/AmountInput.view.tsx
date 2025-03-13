@@ -11,6 +11,7 @@ import {
   RowWrapper,
   USDDiv,
   Wrapper,
+  Spinner,
 } from './AmountInput.style';
 import { Erc20TokenBalance } from 'types';
 import { ethers } from 'ethers';
@@ -24,6 +25,9 @@ interface Props extends InputHTMLAttributes<HTMLInputElement> {
   decimalsMax?: number;
   asset: Erc20TokenBalance;
   onChangeCustom?: (value: string) => void;
+  isFetchingFee: boolean;
+  shouldApplyMax?: boolean;
+  setShouldApplyMax?: (value: boolean) => void;
 }
 
 export const AmountInputView = ({
@@ -35,6 +39,9 @@ export const AmountInputView = ({
   decimalsMax = 18,
   asset,
   onChangeCustom,
+  isFetchingFee,
+  shouldApplyMax = false,
+  setShouldApplyMax,
   ...otherProps
 }: Props) => {
   const [focused, setFocused] = useState(false);
@@ -84,6 +91,17 @@ export const AmountInputView = ({
     }
   };
 
+  useEffect(
+    () => {
+      if (shouldApplyMax && !isFetchingFee) {
+        handleMaxClick();
+        typeof setShouldApplyMax === 'function' && setShouldApplyMax(false);
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [shouldApplyMax, isFetchingFee],
+  );
+
   const handleContainerClick = () => {
     if (inputRef.current !== null) {
       inputRef.current.focus();
@@ -91,8 +109,13 @@ export const AmountInputView = ({
   };
 
   const handleMaxClick = () => {
+    if (isFetchingFee) {
+      typeof setShouldApplyMax === 'function' && setShouldApplyMax(true);
+      return;
+    }
+    let amountBN = ethers.BigNumber.from(asset.amount);
     const amountStr = ethers.utils
-      .formatUnits(asset.amount, asset.decimals)
+      .formatUnits(amountBN, asset.decimals)
       .toString();
     const amountFloat = parseFloat(amountStr);
     const value = usdMode
@@ -136,6 +159,7 @@ export const AmountInputView = ({
             onChange={(event) => triggerOnChange(event.target.value)}
             {...otherProps}
           />
+          {isFetchingFee && shouldApplyMax && <Spinner />}
           {!usdMode && (
             <>
               {asset.symbol}

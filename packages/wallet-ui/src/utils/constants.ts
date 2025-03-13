@@ -4,6 +4,12 @@ import { Account, FeeToken } from 'types';
 // TODO: Importing directly from constants when upgrading to starknet.js v6
 export const SEPOLIA_CHAINID = '0x534e5f5345504f4c4941';
 
+export const ETH_TOKEN_ADDR =
+  '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7';
+
+export const STRK_TOKEN_ADDR =
+  '0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d';
+
 export const TOKENS: any = {
   [constants.StarknetChainId.SN_MAIN]: {
     '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7': {
@@ -49,6 +55,10 @@ export const SNAPS_DOC_URL = 'https://docs.metamask.io/guide/snaps.html';
 export const STARKNET_ADDRESS_LENGTH = 66;
 
 export const ASSETS_PRICE_REFRESH_FREQUENCY = 120000;
+
+export const ESTIMATE_FEE_REFRESH_FREQUENCY = 3000;
+
+export const ESTIMATE_FEE_CACHE_DURATION = 60000;
 
 export const INPUT_MAX_LENGTH = 100;
 
