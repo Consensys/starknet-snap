@@ -17,7 +17,6 @@ describe('validateOrigin', () => {
     RpcMethod.GetStoredErc20Tokens,
     RpcMethod.AddAccount,
     RpcMethod.SwitchAccount,
-    RpcMethod.ToggleAccountVisibility,
   ];
 
   it.each(walletUIDappPermissions)(
