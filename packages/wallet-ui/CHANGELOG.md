@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
 
+## [1.29.0](https://github.com/Consensys/starknet-snap/compare/wallet-ui-v1.28.0...wallet-ui-v1.29.0) (2025-03-14)
+
+
+### Features
+
+* **wallet-ui:** Enhance account visibility management operation by persisting the account visibility on local ([#529](https://github.com/Consensys/starknet-snap/issues/529)) ([04426cd](https://github.com/Consensys/starknet-snap/commit/04426cdb98a9228fe1354bbe37a7e896e28c2876))
+
 ## [1.28.0](https://github.com/Consensys/starknet-snap/compare/wallet-ui-v1.27.0...wallet-ui-v1.28.0) (2025-03-04)
 
 
