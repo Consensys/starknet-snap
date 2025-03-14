@@ -449,4 +449,5 @@ export const AccountStruct = type({
   upgradeRequired: boolean(),
   deployRequired: boolean(),
   accountName: optional(string()),
+  isDeployed: optional(boolean()),
 });
