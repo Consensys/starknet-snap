@@ -59,6 +59,7 @@ export const AccountListModalView = ({
                   const selected = currentAddress === account.address;
                   return (
                     <AccountItem
+                      key={account.address}
                       scrollToRef={selected ? scrollTo : null}
                       selected={selected}
                       visible={true}

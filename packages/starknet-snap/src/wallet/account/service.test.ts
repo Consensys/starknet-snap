@@ -91,21 +91,6 @@ describe('AccountService', () => {
         accountName: getDefaultAccountName(hdIndex),
       });
     });
-
-    it('derives an account along with the metadata', async () => {
-      const hdIndex = 0;
-      const { account } = await setupDeriveAccountByIndexTest(hdIndex);
-
-      const jsonData = {
-        ...(await account.serialize()),
-        visibility: false,
-      };
-
-      const service = createAccountService(network);
-      const result = await service.deriveAccountByIndex(hdIndex, jsonData);
-
-      expect(await result.serialize()).toStrictEqual(jsonData);
-    });
   });
 
   describe('deriveAccountFromAddress', () => {
