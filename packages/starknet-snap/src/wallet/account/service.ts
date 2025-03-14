@@ -196,11 +196,12 @@ export class AccountService {
   }
 
   /**
-   * Add a account for the network.
+   * Add an account for the network.
    * And set the current account to the newly added account.
    *
    * @param metadata
    * @returns A promise that resolves to an `Account` object.
+   * @throws `Error` if an account with the same name already exists.
    */
   async addAccount(metadata?: AccountMetaData): Promise<Account> {
     const { chainId } = this.network;
