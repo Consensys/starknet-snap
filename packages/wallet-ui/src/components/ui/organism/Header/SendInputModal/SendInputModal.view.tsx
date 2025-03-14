@@ -1,8 +1,12 @@
+import { useRef, useState } from 'react';
+import { ethers } from 'ethers';
+
 import { useAppSelector } from 'hooks';
 import { FeeToken } from 'types';
-import { useMultiLanguage } from 'services';
+import { useMultiLanguage, useStarkNetSnap } from 'services';
 import {
   getMaxAmountToSpend,
+  isValidAddress,
   isValidStarkName,
   shortenAddress,
 } from 'utils/utils';
@@ -23,46 +27,138 @@ import {
 } from './SendInputModal.style';
 import { Modal } from 'components/ui/atom/Modal';
 
+interface Fields {
+  amount: string;
+  address: string;
+  chainId: string;
+  feeToken: FeeToken;
+}
+
 interface Props {
   closeModal?: () => void;
   setSummaryModalOpen: (open: boolean) => void;
-  confirmEnabled: () => boolean;
-  handleChange: (fieldName: string, fieldValue: string) => void;
+  feeEstimates: any;
+  isEstimatingGas: boolean;
+  handlSetFields: (fields: Partial<Fields>) => void;
+  setResolvedAddress: (address: string) => void;
   fields: {
     amount: string;
     address: string;
     chainId: string;
     feeToken: FeeToken;
   };
-  errors: {
-    amount: string;
-    address: string;
-  };
   resolvedAddress: string;
-  loading: boolean;
-  shouldApplyMax: boolean;
-  setShouldApplyMax: (value: boolean) => void;
-  feeEstimates: any;
 }
 
 export const SendInputModalView = ({
   closeModal,
   setSummaryModalOpen,
-  confirmEnabled,
-  handleChange,
-  fields,
-  errors,
-  resolvedAddress,
-  loading,
-  shouldApplyMax,
-  setShouldApplyMax,
   feeEstimates,
+  isEstimatingGas,
+  handlSetFields,
+  setResolvedAddress,
+  fields,
+  resolvedAddress,
 }: Props) => {
   const networks = useAppSelector((state) => state.networks);
+  const chainId = networks?.items[networks.activeNetwork]?.chainId;
   const erc20TokenBalanceSelected = useAppSelector(
     (state) => state.wallet.erc20TokenBalanceSelected,
   );
+  const { getAddrFromStarkName } = useStarkNetSnap();
   const { translate } = useMultiLanguage();
+  const [errors, setErrors] = useState({ amount: '', address: '' });
+  const [isMaxAmountPending, setIsMaxAmountPending] = useState(false);
+  const [loadingStrkName, setLoadingStrkName] = useState(false);
+  const debounceRef = useRef<NodeJS.Timeout | null>(null);
+
+  const confirmEnabled = () => {
+    return (
+      !errors.address &&
+      !errors.amount &&
+      fields.amount.length > 0 &&
+      fields.address.length > 0 &&
+      !loadingStrkName &&
+      // Disable confirm button if isEstimatingGas is true
+      // and isMaxAmountPending is true (i.e. the user clicked the "Max" button)
+      // in order to prevent the user from confirming the transaction
+      // before the maximum amount is applied.
+      !(isEstimatingGas && isMaxAmountPending)
+    );
+  };
+
+  const handleChange = (fieldName: string, fieldValue: string) => {
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      [fieldName]: '',
+    }));
+    switch (fieldName) {
+      case 'amount':
+        if (fieldValue !== '' && fieldValue !== '.') {
+          try {
+            const inputAmount = ethers.utils.parseUnits(
+              fieldValue,
+              erc20TokenBalanceSelected.decimals,
+            );
+            const userBalance = erc20TokenBalanceSelected.amount;
+            if (inputAmount.gt(userBalance)) {
+              setErrors((prevErrors) => ({
+                ...prevErrors,
+                amount: translate('inputAmountExceedsBalance'),
+              }));
+            }
+          } catch (error) {
+            setErrors((prevErrors) => ({
+              ...prevErrors,
+              amount: translate('invalidAmount'),
+            }));
+          }
+        }
+        break;
+      case 'address':
+        if (fieldValue !== '') {
+          if (debounceRef.current) clearTimeout(debounceRef.current);
+
+          if (isValidAddress(fieldValue)) {
+            setResolvedAddress(fieldValue);
+            break;
+          } else if (isValidStarkName(fieldValue)) {
+            debounceRef.current = setTimeout(() => {
+              setLoadingStrkName(true);
+              getAddrFromStarkName(fieldValue, chainId)
+                .then((address) => {
+                  setResolvedAddress(address);
+                })
+                .catch(() => {
+                  setResolvedAddress('');
+                  setErrors((prevErrors) => ({
+                    ...prevErrors,
+                    address: translate('starkNameDoesNotExist'),
+                  }));
+                })
+                .finally(() => {
+                  setLoadingStrkName(false);
+                });
+            }, 300);
+          } else {
+            setResolvedAddress('');
+            setErrors((prevErrors) => ({
+              ...prevErrors,
+              address: translate('invalidAddressFormat'),
+            }));
+          }
+        }
+        break;
+      case 'feeToken':
+        handlSetFields({
+          feeToken: fieldValue as FeeToken,
+        });
+        break;
+    }
+    handlSetFields({
+      [fieldName]: fieldValue,
+    });
+  };
 
   return (
     <Modal>
@@ -103,9 +199,9 @@ export const SendInputModalView = ({
               feeEstimates?.fee,
             ),
           }}
-          isFetchingFee={loading}
-          setShouldApplyMax={setShouldApplyMax}
-          shouldApplyMax={shouldApplyMax}
+          isEstimatingGas={isEstimatingGas}
+          setIsMaxAmountPending={setIsMaxAmountPending}
+          isMaxAmountPending={isMaxAmountPending}
         />
         <SeparatorSmall />
         <div>

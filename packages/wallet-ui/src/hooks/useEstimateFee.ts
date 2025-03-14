@@ -99,7 +99,7 @@ export const useEstimateFee = (feeToken: FeeToken = FeeToken.ETH) => {
   }, [chainId, address, feeToken, erc20TokenBalanceSelected]);
 
   return {
-    deleteFee: deleteCache,
+    flushFeeCache: deleteCache,
     estimateFees,
     loading,
     feeEstimates: cacheData,

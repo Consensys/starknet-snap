@@ -25,9 +25,9 @@ interface Props extends InputHTMLAttributes<HTMLInputElement> {
   decimalsMax?: number;
   asset: Erc20TokenBalance;
   onChangeCustom?: (value: string) => void;
-  isFetchingFee: boolean;
-  shouldApplyMax?: boolean;
-  setShouldApplyMax?: (value: boolean) => void;
+  isEstimatingGas: boolean;
+  isMaxAmountPending?: boolean;
+  setIsMaxAmountPending?: (value: boolean) => void;
 }
 
 export const AmountInputView = ({
@@ -39,9 +39,9 @@ export const AmountInputView = ({
   decimalsMax = 18,
   asset,
   onChangeCustom,
-  isFetchingFee,
-  shouldApplyMax = false,
-  setShouldApplyMax,
+  isEstimatingGas,
+  isMaxAmountPending = false,
+  setIsMaxAmountPending,
   ...otherProps
 }: Props) => {
   const [focused, setFocused] = useState(false);
@@ -93,15 +93,16 @@ export const AmountInputView = ({
 
   useEffect(
     () => {
-      // If shouldApplyMax is true and the fees are not being fetched,
-      // apply the maximum amount and reset shouldApplyMax to false.
-      if (shouldApplyMax && !isFetchingFee) {
+      // If isMaxAmountPending is true and the fees are not being fetched,
+      // apply the maximum amount and reset isMaxAmountPending to false.
+      if (isMaxAmountPending && !isEstimatingGas) {
         handleMaxClick();
-        typeof setShouldApplyMax === 'function' && setShouldApplyMax(false);
+        typeof setIsMaxAmountPending === 'function' &&
+          setIsMaxAmountPending(false);
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [shouldApplyMax, isFetchingFee],
+    [isMaxAmountPending, isEstimatingGas],
   );
 
   const handleContainerClick = () => {
@@ -111,10 +112,11 @@ export const AmountInputView = ({
   };
 
   const handleMaxClick = () => {
-    // If the fees are being fetched, set shouldApplyMax to true
+    // If the fees are being fetched, set isMaxAmountPending to true
     // to apply the maximum amount once the fees are fetched.
-    if (isFetchingFee) {
-      typeof setShouldApplyMax === 'function' && setShouldApplyMax(true);
+    if (isEstimatingGas) {
+      typeof setIsMaxAmountPending === 'function' &&
+        setIsMaxAmountPending(true);
       return;
     }
     let amountBN = ethers.BigNumber.from(asset.amount);
@@ -163,7 +165,7 @@ export const AmountInputView = ({
             onChange={(event) => triggerOnChange(event.target.value)}
             {...otherProps}
           />
-          {isFetchingFee && shouldApplyMax && <LoadingWrapper />}
+          {isEstimatingGas && isMaxAmountPending && <LoadingWrapper />}
           {!usdMode && (
             <>
               {asset.symbol}
