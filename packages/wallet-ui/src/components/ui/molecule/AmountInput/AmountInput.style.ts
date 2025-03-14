@@ -1,7 +1,8 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Button } from 'components/ui/atom/Button';
-import styled, { keyframes } from 'styled-components';
+import styled from 'styled-components';
 import { theme } from 'theme/default';
+import { LoadingSmall } from 'components/ui/atom/LoadingSmall'; // Import LoadingSmall
 
 interface IInput {
   focused?: boolean;
@@ -42,19 +43,12 @@ const getInputBorderColorByState = (
   return theme.palette.grey.grey2;
 };
 
-const spin = keyframes`
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-`;
-
-export const Spinner = styled.div`
-  border: 4px solid rgba(0, 0, 0, 0.1);
-  border-top: 4px solid #3498db;
-  border-radius: 50%;
-  margin-right: 10px;
+export const LoadingWrapper = styled(LoadingSmall).attrs({
+  showText: false,
+})`
   width: 16px;
   height: 16px;
-  animation: ${spin} 1s linear infinite;
+  margin-right: 10px;
 `;
 
 export const Wrapper = styled.div`

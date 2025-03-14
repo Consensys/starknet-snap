@@ -24,7 +24,7 @@ export const Title = styled.div`
 
 export const Content = styled.div<{ align?: 'center' | 'left' | 'right' }>`
   font-size: ${(props) => props.theme.typography.p2.fontSize};
-  color: ${(props) => props.theme.palette.grey.grey1};
+  color: ${(props) => props.theme.palette.primary.main};
   text-align: ${(props) => props.align ?? 'center'};
   margin-bottom: ${(props) => props.theme.spacing.base};
   overflow-wrap: break-word;

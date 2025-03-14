@@ -9,23 +9,20 @@ import { AssetQuantity } from 'components/ui/molecule/AssetQuantity';
 import { PopperTooltip } from 'components/ui/molecule/PopperTooltip';
 import {
   AddressDiv,
-  Buttons,
   ButtonStyled,
   CurrencyAmount,
-  Header,
   LeftSummary,
-  Title,
   RightSummary,
   Summary,
   ToDiv,
   TotalAmount,
   USDAmount,
-  Wrapper,
   EstimatedFeesTooltip,
   IncludeDeploy,
   AlertTotalExceedsAmount,
   LoadingWrapper,
 } from './SendSummaryModal.style';
+import { Modal } from 'components/ui/atom/Modal';
 import { useAppDispatch, useAppSelector } from 'hooks/redux';
 import { useEffect, useState } from 'react';
 import { useMultiLanguage, useStarkNetSnap } from 'services';
@@ -43,6 +40,7 @@ interface Props {
   handleBack: () => void;
   selectedFeeToken: FeeToken;
   gasFees: FeeEstimate;
+  isEstimatingGas: boolean;
 }
 
 export const SendSummaryModalView = ({
@@ -53,6 +51,7 @@ export const SendSummaryModalView = ({
   handleBack,
   selectedFeeToken,
   gasFees,
+  isEstimatingGas,
 }: Props) => {
   const dispatch = useAppDispatch();
   const { address: currentAddress } = useCurrentAccount();
@@ -75,7 +74,6 @@ export const SendSummaryModalView = ({
     erc20TokenBalances.find((token) => token.symbol === selectedFeeToken) ??
     ethToken;
 
-  const estimatingGas = false;
   const toastr = new Toastr({
     closeDuration: 10000000,
     showDuration: 1000000000,
@@ -199,11 +197,9 @@ export const SendSummaryModalView = ({
   };
 
   return (
-    <div>
-      <Wrapper>
-        <Header>
-          <Title>{translate('send')}</Title>
-        </Header>
+    <Modal>
+      <Modal.Title>{translate('send')}</Modal.Title>
+      <Modal.Body>
         <ToDiv>To</ToDiv>
         <AddressDiv>{shortenAddress(address)}</AddressDiv>
         <AssetQuantity
@@ -233,8 +229,8 @@ export const SendSummaryModalView = ({
             </PopperTooltip>
           </LeftSummary>
           <RightSummary>
-            {estimatingGas && <LoadingWrapper />}
-            {!estimatingGas && (
+            {isEstimatingGas && <LoadingWrapper />}
+            {!isEstimatingGas && (
               <>
                 <CurrencyAmount>
                   {gasFeesAmount} {selectedFeeToken}
@@ -248,7 +244,7 @@ export const SendSummaryModalView = ({
         <TotalAmount>
           {translate('maximumFees')} {gasFeesAmount} {selectedFeeToken}
         </TotalAmount>
-        {gasFees.includeDeploy && (
+        {gasFees && gasFees.includeDeploy && (
           <IncludeDeploy>
             *{translate('feesIncludeOneTimeDeploymentFee')}
           </IncludeDeploy>
@@ -273,14 +269,14 @@ export const SendSummaryModalView = ({
             {translate('maximumAmount')} {totalAmount} {selectedFeeToken}
           </TotalAmount>
         )}
-        {totalExceedsBalance && (
+        {!isEstimatingGas && totalExceedsBalance && (
           <AlertTotalExceedsAmount
             text={translate('insufficientFundsForFees')}
             variant="warning"
           />
         )}
-      </Wrapper>
-      <Buttons>
+      </Modal.Body>
+      <Modal.Buttons>
         <ButtonStyled
           onClick={() => handleBack()}
           backgroundTransparent
@@ -289,12 +285,12 @@ export const SendSummaryModalView = ({
           {translate('back').toUpperCase()}
         </ButtonStyled>
         <ButtonStyled
-          enabled={!estimatingGas && !totalExceedsBalance}
+          enabled={!isEstimatingGas && !totalExceedsBalance}
           onClick={handleConfirmClick}
         >
           {translate('confirm')}
         </ButtonStyled>
-      </Buttons>
-    </div>
+      </Modal.Buttons>
+    </Modal>
   );
 };
