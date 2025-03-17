@@ -149,11 +149,12 @@ export class AccountStateManager extends StateManager<AccContract> {
           throw new Error(`Account does not exists`);
         }
 
+        const trimedAccountName = account.accountName?.trim();
         if (
-          account.accountName &&
-          account.accountName !== accountInState.accountName &&
+          trimedAccountName &&
+          trimedAccountName !== accountInState.accountName &&
           (await this.isAccountNameExist(
-            { accountName: account.accountName, chainId: account.chainId },
+            { accountName: trimedAccountName, chainId },
             state,
           ))
         ) {
@@ -184,10 +185,11 @@ export class AccountStateManager extends StateManager<AccContract> {
           throw new Error(`Account already exists`);
         }
 
+        const trimedAccountName = account.accountName?.trim();
         if (
-          account.accountName &&
+          trimedAccountName &&
           (await this.isAccountNameExist(
-            { accountName: account.accountName, chainId: account.chainId },
+            { accountName: trimedAccountName, chainId },
             state,
           ))
         ) {
