@@ -139,6 +139,12 @@
     "gotIt": {
       "message": "COMPRIS !"
     },
+    "hide": {
+      "message": "Masquer"
+    },
+    "unhide": {
+      "message": "Afficher"
+    },
     "hiddenAccounts": {
       "message": "Comptes cachés"
     },
