@@ -241,6 +241,9 @@
     "reject": {
       "message": "REJECT"
     },
+    "searchAccounts": {
+      "message": "Search accounts"
+    },
     "selectAnOption": {
       "message": "Select an option"
     },

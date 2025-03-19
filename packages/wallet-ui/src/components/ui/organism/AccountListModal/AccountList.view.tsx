@@ -15,6 +15,9 @@ import {
   HiddenAccountBarRightIcon,
   NoHiddenAccountText,
   VerticalAlignBox,
+  SearchInputWrapper,
+  SearchInput,
+  SearchIcon,
 } from './AccountList.style';
 import { AccountItem } from './AccountItem.view';
 import { Modal } from 'components/ui/atom/Modal';
@@ -38,6 +41,7 @@ export const AccountListModalView = ({
   const currentNework = useCurrentNetwork();
   const { address: currentAddress } = useCurrentAccount();
   const [visibility, setVisibility] = useState(true);
+  const [searchTerm, setSearchTerm] = useState(''); // State for search input
 
   const chainId = currentNework?.chainId;
 
@@ -46,16 +50,37 @@ export const AccountListModalView = ({
     await switchSnapAccount(chainId, account.address);
   };
 
+  // Filter visible accounts based on search term
+  const filteredVisibleAccounts = visibleAccounts.filter((account) =>
+    account.accountName.toLowerCase().includes(searchTerm.toLowerCase()),
+  );
+
+  // Filter hidden accounts based on search term
+  const filteredHiddenAccounts = hiddenAccounts.filter((account) =>
+    account.accountName.toLowerCase().includes(searchTerm.toLowerCase()),
+  );
+
   return (
     <Modal>
       <Modal.Title>{translate('selectAnAccount')}</Modal.Title>
       <Modal.Body>
+        {/* Search Input */}
+        <SearchInputWrapper>
+          <SearchIcon icon="search" />
+          <SearchInput
+            type="text"
+            placeholder={translate('searchAccounts')}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </SearchInputWrapper>
+
         {visibility && (
           <Scrollable<HTMLDivElement>
             height={365}
             child={(scrollTo) => (
               <>
-                {visibleAccounts.map((account) => {
+                {filteredVisibleAccounts.map((account) => {
                   const selected = currentAddress === account.address;
                   return (
                     <AccountItem
@@ -81,15 +106,16 @@ export const AccountListModalView = ({
             height={365}
             child={() => (
               <>
-                {hiddenAccounts.length === 0 ? (
+                {filteredHiddenAccounts.length === 0 ? (
                   <VerticalAlignBox>
                     <NoHiddenAccountText>
                       {translate('noHiddenAccount')}
                     </NoHiddenAccountText>
                   </VerticalAlignBox>
                 ) : (
-                  hiddenAccounts.map((account) => (
+                  filteredHiddenAccounts.map((account) => (
                     <AccountItem
+                      key={account.address}
                       visible={false}
                       account={account}
                       onIconButtonClick={showAccount}
