@@ -9,7 +9,7 @@ The Starknet Snap allows users to **deploy Starknet accounts, make transactions 
 
 [Blog Post](https://consensys.io/blog/metamask-integrates-starkware-into-first-of-its-kind-zk-rollup-snap/)
 
-## Table of Contents
+## Table of Contentssd
 
 - [Getting Started](#getting-started)
   - [Install the Snap](#install-the-snap)
