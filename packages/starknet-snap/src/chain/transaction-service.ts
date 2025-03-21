@@ -70,8 +70,8 @@ export class TransactionService {
     contractAddress: string,
   ): AsyncGenerator<Transaction> {
     for (const tx of transactions) {
-      // Only return transaction that are related to the contract address or a deployed transactions.
-      if (this.hasMatchingContractOrIsDeploy(tx, contractAddress)) {
+      // Only return transaction that are related to the contract address / deployed transactions or failed.
+      if (this.hasMatchingContractOrIsDeploy(tx, contractAddress) || tx.failureReason) {
         yield tx;
       }
     }
@@ -107,14 +107,19 @@ export class TransactionService {
     const transactionsOnState: Transaction[] = [];
     const transactionsToRemove: string[] = [];
     const transactionsOnChainSet = new Set<string>();
+    const transactionsOnChainFailed = new Set<string>();
 
     for await (const tx of this.getTransactionsOnChain(
       address,
       contractAddress,
       tillToInDays,
     )) {
-      transactionsOnChain.push(tx);
-      transactionsOnChainSet.add(tx.txnHash);
+      if (tx.failureReason) {
+        transactionsOnChainFailed.add(tx.txnHash);
+      } else {
+        transactionsOnChain.push(tx);
+        transactionsOnChainSet.add(tx.txnHash);
+      }
     }
 
     for await (const tx of this.getTransactionsOnState(
@@ -122,7 +127,7 @@ export class TransactionService {
       contractAddress,
     )) {
       // eslint-disable-next-line no-negated-condition
-      if (!transactionsOnChainSet.has(tx.txnHash)) {
+      if (!transactionsOnChainSet.has(tx.txnHash) && !transactionsOnChainFailed.has(tx.txnHash)) {
         transactionsOnState.push(tx);
       } else {
         transactionsToRemove.push(tx.txnHash);
