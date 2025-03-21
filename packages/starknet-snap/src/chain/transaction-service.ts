@@ -71,7 +71,10 @@ export class TransactionService {
   ): AsyncGenerator<Transaction> {
     for (const tx of transactions) {
       // Only return transaction that are related to the contract address / deployed transactions or failed.
-      if (this.hasMatchingContractOrIsDeploy(tx, contractAddress) || tx.failureReason) {
+      if (
+        this.hasMatchingContractOrIsDeploy(tx, contractAddress) ||
+        tx.failureReason
+      ) {
         yield tx;
       }
     }
@@ -127,7 +130,10 @@ export class TransactionService {
       contractAddress,
     )) {
       // eslint-disable-next-line no-negated-condition
-      if (!transactionsOnChainSet.has(tx.txnHash) && !transactionsOnChainFailed.has(tx.txnHash)) {
+      if (
+        !transactionsOnChainSet.has(tx.txnHash) &&
+        !transactionsOnChainFailed.has(tx.txnHash)
+      ) {
         transactionsOnState.push(tx);
       } else {
         transactionsToRemove.push(tx.txnHash);
