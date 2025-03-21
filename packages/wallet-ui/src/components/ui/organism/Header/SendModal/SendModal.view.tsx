@@ -12,15 +12,16 @@ interface Props {
 export const SendModalView = ({ closeModal }: Props) => {
   const chainId = useCurrentNetwork()?.chainId;
   const [summaryModalOpen, setSummaryModalOpen] = useState(false);
-  const { loading, feeEstimates, flushFeeCache } =
-    useEstimateFee(DEFAULT_FEE_TOKEN);
   const [resolvedAddress, setResolvedAddress] = useState('');
   const [fields, setFields] = useState({
     amount: '',
     address: '',
     chainId: chainId ?? '',
-    feeToken: FeeToken.ETH, // Default fee token
+    feeToken: DEFAULT_FEE_TOKEN,
   });
+  const { loading, feeEstimates, flushFeeCache } = useEstimateFee(
+    fields.feeToken,
+  );
 
   const handlSetFields = (
     fields: Partial<{
