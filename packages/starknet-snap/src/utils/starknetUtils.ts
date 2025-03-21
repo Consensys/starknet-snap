@@ -454,6 +454,197 @@ export const getTransactionsFromVoyager = async (
   ) as unknown as VoyagerTransactions;
 };
 
+const getTransactionsFromVoyagerHelper = async (
+  toAddress: numUtils.BigNumberish,
+  pageSize: number,
+  minTimestamp: number, // in ms
+  withDeployTxn: boolean,
+  network: Network,
+) => {
+  let txns: VoyagerTransactionItem[] = [];
+  let i = 1;
+  let maxPage = i;
+  do {
+    try {
+      const { items, lastPage } = await getTransactionsFromVoyager(
+        toAddress,
+        pageSize,
+        i,
+        network,
+      );
+      txns.push(...items);
+      maxPage = lastPage;
+    } catch (error) {
+      logger.error(
+        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+        `getTransactionsFromVoyagerHelper: error received from getTransactionsFromVoyager: ${error}`,
+      );
+    }
+    i += 1;
+  } while (
+    i <= maxPage &&
+    txns[txns.length - 1]?.timestamp * 1000 >= minTimestamp
+  );
+  // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+  logger.log(
+    `getTransactionsFromVoyagerHelper: minTimestamp = ${minTimestamp}, i = ${i}, maxPage = ${maxPage}, total = ${txns.length}`,
+  );
+
+  let deployTxns: VoyagerTransactionItem[] = [];
+  if (withDeployTxn) {
+    if (i <= maxPage) {
+      // means lastPage not fetched
+      try {
+        const { items: lastPageTxns } = await getTransactionsFromVoyager(
+          toAddress,
+          pageSize,
+          maxPage,
+          network,
+        );
+        deployTxns = lastPageTxns.filter(
+          (txn) =>
+            txn.type.toLowerCase() === TransactionType.DEPLOY.toLowerCase() ||
+            txn.type.toLowerCase() ===
+              TransactionType.DEPLOY_ACCOUNT.toLowerCase(),
+        );
+        txns = [...txns, ...deployTxns];
+      } catch (error) {
+        logger.error(
+          // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+          `getTransactionsFromVoyagerHelper: error received from getTransactionsFromVoyager at last page: ${error}`,
+        );
+      }
+    } else {
+      deployTxns = txns.filter(
+        (txn) =>
+          txn.type.toLowerCase() === TransactionType.DEPLOY.toLowerCase() ||
+          txn.type.toLowerCase() ===
+            TransactionType.DEPLOY_ACCOUNT.toLowerCase(),
+      );
+    }
+  }
+
+  // ensure the txns comes after or at the min timestamp or its in the deploy txns
+  txns = txns.filter(
+    (txn) =>
+      txn.timestamp * 1000 >= minTimestamp ||
+      deployTxns.find((deployTxn) => deployTxn.hash === txn.hash),
+  );
+
+  return {
+    txns,
+    deployTxns,
+  };
+};
+
+export const getMassagedTransactions = async (
+  toAddress: numUtils.BigNumberish,
+  contractAddress: numUtils.BigNumberish | undefined,
+  pageSize: number,
+  minTimestamp: number, // in ms
+  withDeployTxn: boolean,
+  network: Network,
+): Promise<Transaction[]> => {
+  const { txns, deployTxns } = await getTransactionsFromVoyagerHelper(
+    toAddress,
+    pageSize,
+    minTimestamp,
+    withDeployTxn,
+    network,
+  );
+
+  const bigIntTransferSelectorHex = numUtils.toBigInt(TRANSFER_SELECTOR_HEX);
+  const bigIntUpgradeSelectorHex = numUtils.toBigInt(UPGRADE_SELECTOR_HEX);
+  let massagedTxns = await Promise.all(
+    txns.map(async (txn) => {
+      logger.log(`getMassagedTransactions: txn:\n${toJson(txn)}`);
+
+      let txnResp: TransactionResponse | undefined;
+      let statusResp: TransactionStatuses | undefined;
+      try {
+        txnResp = await getTransaction(txn.hash, network);
+        statusResp = (await getTransactionStatus(
+          txn.hash,
+          network,
+        )) as unknown as TransactionStatuses;
+        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+        logger.log(`getMassagedTransactions: txnResp:\n${toJson(txnResp)}`);
+        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+        logger.log(
+          `getMassagedTransactions: statusResp:\n${toJson(statusResp)}`,
+        );
+      } catch (error) {
+        logger.error(
+          // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+          `getMassagedTransactions: error received from getTransaction: ${error}`,
+        );
+      }
+
+      const txCallData = txnResp?.calldata;
+      const txSenderAddress =
+        txnResp?.sender_address ??
+        txnResp?.contract_address ??
+        txn.contractAddress ??
+        '';
+      const txContractAddress =
+        txCallData?.[1] ??
+        txnResp?.contract_address ??
+        txn.contractAddress ??
+        '';
+      const txFuncSelector = numUtils.toBigInt(txCallData?.[2] ?? '');
+      let txContractFuncName = '';
+      switch (txFuncSelector) {
+        case bigIntTransferSelectorHex:
+          txContractFuncName = ContractFuncName.Transfer;
+          break;
+        case bigIntUpgradeSelectorHex:
+          txContractFuncName = ContractFuncName.Upgrade;
+          break;
+        default:
+          txContractFuncName = '';
+      }
+      /* eslint-disable */
+      const massagedTxn: Transaction = {
+        txnHash: txnResp?.transaction_hash ?? txn.hash,
+        txnType: txn.type?.toLowerCase(),
+        chainId: network.chainId,
+        senderAddress: txSenderAddress,
+        contractAddress: txContractAddress,
+        contractFuncName: txContractFuncName,
+        contractCallData: txCallData ?? [],
+        timestamp: txn.timestamp,
+        status: '', // DEPRECATION
+        finalityStatus: statusResp?.finalityStatus ?? '',
+        executionStatus: statusResp?.executionStatus ?? '',
+        eventIds: [],
+        failureReason: '',
+      };
+      /* eslint-disable */
+
+      return massagedTxn;
+    }),
+  );
+  // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+  logger.log(
+    `getMassagedTransactions: massagedTxns total = ${massagedTxns.length}`,
+  );
+  // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+  logger.log(`getMassagedTransactions: massagedTxns:\n${toJson(massagedTxns)}`);
+
+  if (contractAddress) {
+    const bigIntContractAddress = numUtils.toBigInt(contractAddress);
+    massagedTxns = massagedTxns.filter(
+      (massagedTxn) =>
+        numUtils.toBigInt(massagedTxn.contractAddress) ===
+          bigIntContractAddress ||
+        massagedTxn.contractFuncName === 'upgrade' ||
+        deployTxns.find((deployTxn) => deployTxn.hash === massagedTxn.txnHash),
+    );
+  }
+
+  return massagedTxns;
+};
+
 /**
  *
  * @param privateKey
