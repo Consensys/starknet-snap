@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import { useMultiLanguage, useStarkNetSnap } from 'services';
 import {
@@ -51,14 +51,18 @@ export const AccountListModalView = ({
   };
 
   // Filter visible accounts based on search term
-  const filteredVisibleAccounts = visibleAccounts.filter((account) =>
-    account.accountName.toLowerCase().includes(searchTerm.toLowerCase()),
-  );
+  const filteredVisibleAccounts = useMemo(() => {
+    return visibleAccounts.filter((account) =>
+      account.accountName.toLowerCase().includes(searchTerm.toLowerCase()),
+    );
+  }, [visibleAccounts, searchTerm]);
 
   // Filter hidden accounts based on search term
-  const filteredHiddenAccounts = hiddenAccounts.filter((account) =>
-    account.accountName.toLowerCase().includes(searchTerm.toLowerCase()),
-  );
+  const filteredHiddenAccounts = useMemo(() => {
+    return hiddenAccounts.filter((account) =>
+      account.accountName.toLowerCase().includes(searchTerm.toLowerCase()),
+    );
+  }, [hiddenAccounts, searchTerm]);
 
   return (
     <Modal>
