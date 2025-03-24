@@ -13,7 +13,7 @@ import {
   HiddenAccountBar,
   HiddenAccountBarLeftIcon,
   HiddenAccountBarRightIcon,
-  NoHiddenAccountText,
+  NoAccountsFoundText,
   VerticalAlignBox,
   SearchInputWrapper,
   SearchInput,
@@ -69,7 +69,14 @@ export const AccountListModalView = ({
       <Modal.Title>{translate('selectAnAccount')}</Modal.Title>
       <Modal.Body>
         {/* Search Input */}
-        <SearchInputWrapper>
+        <SearchInputWrapper
+          style={{
+            visibility:
+              visibility || (!visibility && hiddenAccounts.length > 0)
+                ? 'visible'
+                : 'hidden',
+          }}
+        >
           <SearchIcon icon="search" />
           <SearchInput
             type="text"
@@ -84,23 +91,31 @@ export const AccountListModalView = ({
             height={365}
             child={(scrollTo) => (
               <>
-                {filteredVisibleAccounts.map((account) => {
-                  const selected = currentAddress === account.address;
-                  return (
-                    <AccountItem
-                      key={account.address}
-                      scrollToRef={selected ? scrollTo : null}
-                      selected={selected}
-                      visible={true}
-                      account={account}
-                      onItemClick={selected ? undefined : switchAccount}
-                      onIconButtonClick={
-                        canHideAccount ? hideAccount : undefined
-                      }
-                      showIconButton={canHideAccount}
-                    />
-                  );
-                })}
+                {filteredVisibleAccounts.length === 0 ? (
+                  <VerticalAlignBox>
+                    <NoAccountsFoundText>
+                      {translate('noAccountForSearchQuery')}
+                    </NoAccountsFoundText>
+                  </VerticalAlignBox>
+                ) : (
+                  filteredVisibleAccounts.map((account) => {
+                    const selected = currentAddress === account.address;
+                    return (
+                      <AccountItem
+                        key={account.address}
+                        scrollToRef={selected ? scrollTo : null}
+                        selected={selected}
+                        visible={true}
+                        account={account}
+                        onItemClick={selected ? undefined : switchAccount}
+                        onIconButtonClick={
+                          canHideAccount ? hideAccount : undefined
+                        }
+                        showIconButton={canHideAccount}
+                      />
+                    );
+                  })
+                )}
               </>
             )}
           />
@@ -112,9 +127,11 @@ export const AccountListModalView = ({
               <>
                 {filteredHiddenAccounts.length === 0 ? (
                   <VerticalAlignBox>
-                    <NoHiddenAccountText>
-                      {translate('noHiddenAccount')}
-                    </NoHiddenAccountText>
+                    <NoAccountsFoundText>
+                      {hiddenAccounts.length > 0 && searchTerm !== ''
+                        ? translate('noAccountForSearchQuery')
+                        : translate('noHiddenAccount')}
+                    </NoAccountsFoundText>
                   </VerticalAlignBox>
                 ) : (
                   filteredHiddenAccounts.map((account) => (

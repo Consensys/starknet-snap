@@ -19,7 +19,7 @@ export const HiddenAccountBarRightIcon = styled(FontAwesomeIcon)`
   margin-left: ${(props) => props.theme.spacing.tiny2};
 `;
 
-export const NoHiddenAccountText = styled.span`
+export const NoAccountsFoundText = styled.span`
   color: ${(props) => props.theme.palette.grey.grey1};
 `;
 

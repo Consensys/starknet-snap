@@ -208,6 +208,9 @@
     "newVersionOfSmartContractNecessaryPart4": {
       "message": "Thank you!"
     },
+    "noAccountForSearchQuery": {
+      "message": "No account found for the given search query"
+    },
     "noTransactions": {
       "message": "You don't have any transactions"
     },

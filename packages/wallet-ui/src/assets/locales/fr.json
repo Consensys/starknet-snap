@@ -208,6 +208,9 @@
     "nonZeroBalanceOnCairo0": {
       "message": "Vous avez un solde non nul sur une adresse Cairo 0 non déployée"
     },
+    "noAccountForSearchQuery": {
+      "message": "Aucun compte trouvé pour la requête de recherche"
+    },
     "noHiddenAccount": {
       "message": "Pas de comptes cachés"
     },
