@@ -161,7 +161,10 @@ export class AccountStateManager extends StateManager<AccContract> {
           throw new Error(`Account name already exists`);
         }
 
-        this.updateEntity(accountInState, account);
+        this.updateEntity(accountInState, {
+          ...account,
+          accountName: trimedAccountName,
+        });
       });
     } catch (error) {
       throw new StateManagerError(error.message);
@@ -196,7 +199,10 @@ export class AccountStateManager extends StateManager<AccContract> {
           throw new Error(`Account name already exists`);
         }
 
-        state.accContracts.push(account);
+        state.accContracts.push({
+          ...account,
+          accountName: trimedAccountName,
+        });
       });
     } catch (error) {
       throw new StateManagerError(error.message);
