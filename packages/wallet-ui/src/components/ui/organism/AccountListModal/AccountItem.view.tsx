@@ -35,6 +35,7 @@ export const AccountItem = ({
   const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null);
 
   const preventDefaultMouseEvent = (event: React.MouseEvent) => {
+    // Prevent triggering the native behaviour
     event.preventDefault();
     event.stopPropagation();
   };
@@ -54,9 +55,10 @@ export const AccountItem = ({
     }
   };
 
-  const handleCopyAddress = () => {
+  const handleCopyAddress = (event: React.MouseEvent) => {
+    preventDefaultMouseEvent(event);
     navigator.clipboard.writeText(address);
-    setMenuAnchorEl(null); // Ferme le menu après la copie
+    setMenuAnchorEl(null);
   };
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
