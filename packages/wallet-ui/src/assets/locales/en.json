@@ -145,6 +145,12 @@
     "gotIt": {
       "message": "GOT IT!"
     },
+    "hide": {
+      "message": "Hide"
+    },
+    "unhide": {
+      "message": "Unhide"
+    },
     "hiddenAccounts": {
       "message": "Hidden accounts"
     },
