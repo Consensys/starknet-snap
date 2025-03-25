@@ -63,7 +63,7 @@ export const AccountDetailsModalView = () => {
 
     // Check if the account name already exists
     const accountExists = accounts.some(
-      (account) => account.accountName === trimedAccountName,
+      (account) => account.accountName.trim() === trimedAccountName,
     );
 
     if (accountExists) {
