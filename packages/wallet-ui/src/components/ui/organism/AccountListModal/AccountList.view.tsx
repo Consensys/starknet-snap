@@ -128,9 +128,9 @@ export const AccountListModalView = ({
                 {filteredHiddenAccounts.length === 0 ? (
                   <VerticalAlignBox>
                     <NoAccountsFoundText>
-                      {hiddenAccounts.length > 0
-                        ? translate('noAccountForSearchQuery')
-                        : translate('noHiddenAccount')}
+                      {hiddenAccounts.length === 0
+                        ? translate('noHiddenAccount')
+                        : translate('noAccountForSearchQuery')}
                     </NoAccountsFoundText>
                   </VerticalAlignBox>
                 ) : (
