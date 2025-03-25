@@ -6,7 +6,6 @@ import type { CairoAccountContract } from './contract';
 
 export const DefaultAccountMetaData: AccountMetaData = {
   accountName: getDefaultAccountName(0),
-  visibility: true,
 };
 
 /**
@@ -64,12 +63,8 @@ export class Account {
 
   #jsonDataToMetaData(jsonData?: Partial<AccContract>): void {
     if (!jsonData) {
-      this.metadata.visibility = true;
       this.metadata.accountName = getDefaultAccountName(this.hdIndex);
       return;
-    }
-    if (jsonData.visibility !== undefined) {
-      this.metadata.visibility = jsonData.visibility;
     }
     if (jsonData.accountName === undefined) {
       this.metadata.accountName = getDefaultAccountName(this.hdIndex);
@@ -84,11 +79,12 @@ export class Account {
    * @returns A promise that resolves to the serialized `Account` object.
    */
   async serialize(): Promise<AccContract> {
-    // When a Account object discovery by the account service,
-    // it should already cached the status of requireDeploy and requireUpgrade.
-    const [upgradeRequired, deployRequired] = await Promise.all([
+    // When an Account object is discovered by the account service,
+    // it should already cache the status of requireDeploy and requireUpgrade.
+    const [upgradeRequired, deployRequired, isDeployed] = await Promise.all([
       this.accountContract.isRequireUpgrade(),
       this.accountContract.isRequireDeploy(),
+      this.accountContract.isDeployed(),
     ]);
     return {
       addressSalt: this.publicKey,
@@ -97,9 +93,9 @@ export class Account {
       addressIndex: this.hdIndex,
       chainId: this.chainId,
       cairoVersion: this.cairoVersion,
+      isDeployed,
       deployRequired,
       upgradeRequired,
-      visibility: this.metadata.visibility,
       accountName: this.metadata.accountName,
     };
   }

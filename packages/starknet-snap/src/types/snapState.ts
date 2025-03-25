@@ -58,7 +58,7 @@ export type TransactionRequest = {
   includeDeploy: boolean;
 };
 
-export type AccountMetaData = { accountName?: string; visibility?: boolean };
+export type AccountMetaData = { accountName?: string };
 
 export type AccContract = {
   addressSalt: string;
@@ -68,6 +68,7 @@ export type AccContract = {
   derivationPath?: string;
   deployTxnHash?: string; // in hex
   chainId: string; // in hex
+  isDeployed?: boolean;
   upgradeRequired?: boolean;
   deployRequired?: boolean;
   cairoVersion?: string;
