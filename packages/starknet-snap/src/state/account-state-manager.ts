@@ -472,7 +472,7 @@ export class AccountStateManager extends StateManager<AccContract> {
     const snapState = state ?? (await this.get());
     return (
       this.getCollection(snapState).find(
-        (data) => data.accountName === accountName && data.chainId === chainId,
+        (data) => data.accountName?.trim() === accountName && data.chainId === chainId,
       ) !== undefined
     );
   }
