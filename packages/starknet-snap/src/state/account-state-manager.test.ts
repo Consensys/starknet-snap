@@ -151,6 +151,18 @@ describe('AccountStateManager', () => {
         'Account already exists',
       );
     });
+
+    it('throws a `Account name already exists` error if the account name chosen already exist', async () => {
+      const [account1, account2] = await generateTestnetAccounts(2);
+      await mockStateWithMainnetAccounts([account1]);
+
+      const stateManager = new AccountStateManager();
+      account2.accountName = account1.accountName;
+
+      await expect(stateManager.addAccount(account2)).rejects.toThrow(
+        'Account name already exists',
+      );
+    });
   });
 
   describe('updateAccountByAddress', () => {
@@ -185,6 +197,19 @@ describe('AccountStateManager', () => {
       await expect(
         stateManager.updateAccountByAddress(account),
       ).rejects.toThrow('Account does not exists');
+    });
+
+    it('throws `Account name already exists` error if the account name is already used', async () => {
+      const accounts = await generateTestnetAccounts();
+      const updatedAccount = {
+        ...accounts[0],
+        accountName: 'Account 3',
+      };
+      await mockStateWithMainnetAccounts(accounts);
+      const stateManager = new AccountStateManager();
+      await expect(
+        stateManager.updateAccountByAddress(updatedAccount),
+      ).rejects.toThrow('Account name already exists');
     });
   });
 

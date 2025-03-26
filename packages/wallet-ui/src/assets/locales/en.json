@@ -148,6 +148,12 @@
     "gotIt": {
       "message": "GOT IT!"
     },
+    "hide": {
+      "message": "Hide"
+    },
+    "unhide": {
+      "message": "Unhide"
+    },
     "hiddenAccounts": {
       "message": "Hidden accounts"
     },
@@ -211,6 +217,9 @@
     "newVersionOfSmartContractNecessaryPart4": {
       "message": "Thank you!"
     },
+    "noAccountForSearchQuery": {
+      "message": "No account found for the given search query"
+    },
     "noTransactions": {
       "message": "You don't have any transactions"
     },
@@ -243,6 +252,9 @@
     },
     "reject": {
       "message": "REJECT"
+    },
+    "searchAccounts": {
+      "message": "Search accounts"
     },
     "selectAnOption": {
       "message": "Select an option"

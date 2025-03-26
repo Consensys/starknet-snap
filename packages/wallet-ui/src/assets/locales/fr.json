@@ -142,6 +142,12 @@
     "gotIt": {
       "message": "COMPRIS !"
     },
+    "hide": {
+      "message": "Masquer"
+    },
+    "unhide": {
+      "message": "Afficher"
+    },
     "hiddenAccounts": {
       "message": "Comptes cachés"
     },
@@ -211,6 +217,9 @@
     "nonZeroBalanceOnCairo0": {
       "message": "Vous avez un solde non nul sur une adresse Cairo 0 non déployée"
     },
+    "noAccountForSearchQuery": {
+      "message": "Aucun compte trouvé pour la requête de recherche"
+    },
     "noHiddenAccount": {
       "message": "Pas de comptes cachés"
     },
@@ -237,6 +246,9 @@
     },
     "reject": {
       "message": "REJETER"
+    },
+    "searchAccounts": {
+      "message": "Rechercher des comptes"
     },
     "selectAnOption": {
       "message": "Sélectionner une option"
