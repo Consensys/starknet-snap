@@ -6,7 +6,6 @@ import type { CairoAccountContract } from './contract';
 
 export const DefaultAccountMetaData: AccountMetaData = {
   accountName: getDefaultAccountName(0),
-  visibility: true,
 };
 
 /**
@@ -64,12 +63,8 @@ export class Account {
 
   #jsonDataToMetaData(jsonData?: Partial<AccContract>): void {
     if (!jsonData) {
-      this.metadata.visibility = true;
       this.metadata.accountName = getDefaultAccountName(this.hdIndex);
       return;
-    }
-    if (jsonData.visibility !== undefined) {
-      this.metadata.visibility = jsonData.visibility;
     }
     if (jsonData.accountName === undefined) {
       this.metadata.accountName = getDefaultAccountName(this.hdIndex);
@@ -101,7 +96,6 @@ export class Account {
       isDeployed,
       deployRequired,
       upgradeRequired,
-      visibility: this.metadata.visibility,
       accountName: this.metadata.accountName,
     };
   }

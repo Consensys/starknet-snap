@@ -42,9 +42,6 @@ export class AccountStateManager extends StateManager<AccContract> {
     if (data.cairoVersion !== undefined) {
       dataInState.cairoVersion = data.cairoVersion;
     }
-    if (data.visibility !== undefined) {
-      dataInState.visibility = data.visibility;
-    }
     if (data.accountName !== undefined) {
       dataInState.accountName = data.accountName;
     }
@@ -94,7 +91,7 @@ export class AccountStateManager extends StateManager<AccContract> {
 
   /**
    * List the accounts in the state that match the chain ID, ensuring default values
-   * for `visibility` and `accountName` if they are not set.
+   * for `accountName` if they are not set.
    *
    * @param param - An object containing the chain ID to search for.
    * @param param.chainId - The chain ID of the accounts to search for.
@@ -116,10 +113,9 @@ export class AccountStateManager extends StateManager<AccContract> {
         entityA.addressIndex - entityB.addressIndex,
       state,
     );
-    // Ensure default values for visibility and accountName
+    // Ensure default values for accountName
     return accounts.map((account) => ({
       ...account,
-      visibility: account.visibility ?? true,
       accountName:
         account.accountName ?? getDefaultAccountName(account.addressIndex),
     }));
@@ -130,6 +126,7 @@ export class AccountStateManager extends StateManager<AccContract> {
    *
    * @param account - The AccContract object to update.
    * @throws {StateManagerError} If the account does not exist in the state.
+   * or if an account with the same name already exists.
    */
   async updateAccountByAddress(account: AccContract): Promise<void> {
     try {
@@ -148,7 +145,22 @@ export class AccountStateManager extends StateManager<AccContract> {
           throw new Error(`Account does not exists`);
         }
 
-        this.updateEntity(accountInState, account);
+        const trimedAccountName = account.accountName?.trim();
+        if (
+          trimedAccountName &&
+          trimedAccountName !== accountInState.accountName &&
+          (await this.isAccountNameExist(
+            { accountName: trimedAccountName, chainId },
+            state,
+          ))
+        ) {
+          throw new Error(`Account name already exists`);
+        }
+
+        this.updateEntity(accountInState, {
+          ...account,
+          accountName: trimedAccountName,
+        });
       });
     } catch (error) {
       throw new StateManagerError(error.message);
@@ -172,7 +184,21 @@ export class AccountStateManager extends StateManager<AccContract> {
           throw new Error(`Account already exists`);
         }
 
-        state.accContracts.push(account);
+        const trimedAccountName = account.accountName?.trim();
+        if (
+          trimedAccountName &&
+          (await this.isAccountNameExist(
+            { accountName: trimedAccountName, chainId },
+            state,
+          ))
+        ) {
+          throw new Error(`Account name already exists`);
+        }
+
+        state.accContracts.push({
+          ...account,
+          accountName: trimedAccountName,
+        });
       });
     } catch (error) {
       throw new StateManagerError(error.message);
@@ -221,123 +247,6 @@ export class AccountStateManager extends StateManager<AccContract> {
    */
   async getNextIndex(chainId: string, state?: SnapState): Promise<number> {
     return (await this.findAccounts({ chainId }, state)).length;
-  }
-
-  /**
-   * Toggles the visibility of a account by address and chain ID.
-   * If the visibility is `true`, the account will be shown.
-   * If the visibility is `false`, the account will be hidden.
-   * If the account to be hidden is the current selected account,
-   * it will be switched to the next visible account.
-   *
-   * @param params - The parameters for toggle the account visibility.
-   * @param params.address - The address of the account.
-   * @param params.chainId - The chain ID of the account.
-   * @param params.visibility - The visibility of the account.
-   * @throws {StateManagerError} If the account to be removed does not exist.
-   */
-  async toggleAccountVisibility({
-    address,
-    chainId,
-    visibility,
-  }: {
-    address: string;
-    chainId: string;
-    visibility: boolean;
-  }): Promise<void> {
-    try {
-      await this.update(async (state: SnapState) => {
-        const accountToHideFromState = await this.getAccount(
-          {
-            address,
-            chainId,
-          },
-          state,
-        );
-
-        if (!accountToHideFromState) {
-          throw new Error(`Account does not exist`);
-        }
-
-        accountToHideFromState.visibility = visibility;
-
-        // if the current account is the account to hide, switch to the next visible account
-        if (!this.#isAccountVisible(accountToHideFromState)) {
-          const currentAccount = await this.getCurrentAccount(
-            { chainId },
-            state,
-          );
-
-          if (
-            currentAccount?.addressIndex === accountToHideFromState.addressIndex
-          ) {
-            const accountToSwitch = await this.#getNextVisibleAccount(
-              accountToHideFromState,
-              state,
-            );
-            if (!accountToSwitch) {
-              throw new Error(
-                `No visible accounts found, at least one account should be visible`,
-              );
-            }
-            this.#setCurrentAccount(accountToSwitch, state);
-          }
-        }
-      });
-    } catch (error) {
-      throw new StateManagerError(error.message);
-    }
-  }
-
-  /**
-   * Gets the next visible account base on the address index of a specified account.
-   * The next visible account is the first visible account that has a larger address index.
-   * If there is no next visible account, the first visible account is returned.
-   * if there is no visible account, null is returned.
-   *
-   * @param account - The account to get the next visible account.
-   * @param [state] - The optional SnapState object.
-   * @returns A Promise that resolves to the next visible account.
-   */
-  async #getNextVisibleAccount(
-    account: AccContract,
-    state: SnapState,
-  ): Promise<AccContract | null> {
-    const data = state ?? (await this.get());
-
-    const { chainId, addressIndex } = account;
-
-    const accounts = await this.findAccounts({ chainId }, data);
-
-    let firstAccount: AccContract | null = null;
-
-    // Get the next visible account with the following rules:
-    // - return the first visible account that has larger addressIndex if there is one
-    // - return the first visible account if there is no next account
-    for (const nextAccount of accounts) {
-      // Ensure the account is not hidden and not the current account.
-      // in case nextAccount.visibility may be undefined, check if it is not false instead
-      if (
-        this.#isAccountVisible(nextAccount) &&
-        nextAccount.addressIndex !== addressIndex
-      ) {
-        // return the first visible account that has larger addressIndex if there is one
-        if (nextAccount.addressIndex > addressIndex) {
-          return nextAccount;
-        }
-        // assign the first visible account if there is no next account
-        else if (firstAccount === null) {
-          firstAccount = nextAccount;
-        }
-      }
-    }
-
-    // firstAccount may be null if there is no visible account
-    return firstAccount;
-  }
-
-  #isAccountVisible(account: AccContract): boolean {
-    return account.visibility !== false;
   }
 
   /**
@@ -401,15 +310,6 @@ export class AccountStateManager extends StateManager<AccContract> {
           throw new Error(`Account does not exist`);
         }
 
-        // Safe guard to ensure the account to switch is not hidden,
-        // by verifying the `visibility` property from state and the incoming `accountToSwitch` object
-        if (
-          !this.#isAccountVisible(accountInState) ||
-          !this.#isAccountVisible(accountToSwitch)
-        ) {
-          throw new Error(`Hidden account cannot be switched`);
-        }
-
         this.#setCurrentAccount(accountToSwitch, state);
       });
     } catch (error) {
@@ -431,6 +331,19 @@ export class AccountStateManager extends StateManager<AccContract> {
         (data) =>
           (data.address === address || data.addressIndex === addressIndex) &&
           data.chainId === chainId,
+      ) !== undefined
+    );
+  }
+
+  async isAccountNameExist(
+    { accountName, chainId }: { accountName: string; chainId: string },
+    state,
+  ): Promise<boolean> {
+    const snapState = state ?? (await this.get());
+    return (
+      this.getCollection(snapState).find(
+        (data) =>
+          data.accountName?.trim() === accountName && data.chainId === chainId,
       ) !== undefined
     );
   }

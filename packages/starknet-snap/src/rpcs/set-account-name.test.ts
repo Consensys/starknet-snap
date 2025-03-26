@@ -73,7 +73,6 @@ describe('SetAccountName', () => {
       addressIndex: hdIndex,
       deployRequired: false,
       upgradeRequired: false,
-      visibility: true,
       isDeployed: true,
     });
   });
