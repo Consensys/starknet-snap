@@ -117,12 +117,8 @@ export class TransactionService {
       contractAddress,
       tillToInDays,
     )) {
-      if (tx.failureReason) {
-        transactionsOnChainFailed.add(tx.txnHash);
-      } else {
         transactionsOnChain.push(tx);
         transactionsOnChainSet.add(tx.txnHash);
-      }
     }
 
     for await (const tx of this.getTransactionsOnState(
@@ -131,8 +127,7 @@ export class TransactionService {
     )) {
       // eslint-disable-next-line no-negated-condition
       if (
-        !transactionsOnChainSet.has(tx.txnHash) &&
-        !transactionsOnChainFailed.has(tx.txnHash)
+        !transactionsOnChainSet.has(tx.txnHash)
       ) {
         transactionsOnState.push(tx);
       } else {
