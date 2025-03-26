@@ -126,6 +126,7 @@ export class AccountStateManager extends StateManager<AccContract> {
    *
    * @param account - The AccContract object to update.
    * @throws {StateManagerError} If the account does not exist in the state.
+   * or if an account with the same name already exists.
    */
   async updateAccountByAddress(account: AccContract): Promise<void> {
     try {
@@ -144,7 +145,22 @@ export class AccountStateManager extends StateManager<AccContract> {
           throw new Error(`Account does not exists`);
         }
 
-        this.updateEntity(accountInState, account);
+        const trimedAccountName = account.accountName?.trim();
+        if (
+          trimedAccountName &&
+          trimedAccountName !== accountInState.accountName &&
+          (await this.isAccountNameExist(
+            { accountName: trimedAccountName, chainId },
+            state,
+          ))
+        ) {
+          throw new Error(`Account name already exists`);
+        }
+
+        this.updateEntity(accountInState, {
+          ...account,
+          accountName: trimedAccountName,
+        });
       });
     } catch (error) {
       throw new StateManagerError(error.message);
@@ -168,7 +184,21 @@ export class AccountStateManager extends StateManager<AccContract> {
           throw new Error(`Account already exists`);
         }
 
-        state.accContracts.push(account);
+        const trimedAccountName = account.accountName?.trim();
+        if (
+          trimedAccountName &&
+          (await this.isAccountNameExist(
+            { accountName: trimedAccountName, chainId },
+            state,
+          ))
+        ) {
+          throw new Error(`Account name already exists`);
+        }
+
+        state.accContracts.push({
+          ...account,
+          accountName: trimedAccountName,
+        });
       });
     } catch (error) {
       throw new StateManagerError(error.message);
@@ -301,6 +331,19 @@ export class AccountStateManager extends StateManager<AccContract> {
         (data) =>
           (data.address === address || data.addressIndex === addressIndex) &&
           data.chainId === chainId,
+      ) !== undefined
+    );
+  }
+
+  async isAccountNameExist(
+    { accountName, chainId }: { accountName: string; chainId: string },
+    state,
+  ): Promise<boolean> {
+    const snapState = state ?? (await this.get());
+    return (
+      this.getCollection(snapState).find(
+        (data) =>
+          data.accountName?.trim() === accountName && data.chainId === chainId,
       ) !== undefined
     );
   }

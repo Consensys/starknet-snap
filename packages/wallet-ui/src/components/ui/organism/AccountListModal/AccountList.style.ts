@@ -19,7 +19,7 @@ export const HiddenAccountBarRightIcon = styled(FontAwesomeIcon)`
   margin-left: ${(props) => props.theme.spacing.tiny2};
 `;
 
-export const NoHiddenAccountText = styled.span`
+export const NoAccountsFoundText = styled.span`
   color: ${(props) => props.theme.palette.grey.grey1};
 `;
 
@@ -30,4 +30,32 @@ export const VerticalAlignBox = styled.div`
   justify-content: center;
   flex-direction: column;
   text-align: center;
+`;
+
+export const SearchInputWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  margin-bottom: ${(props) => props.theme.spacing.small};
+  padding: ${(props) => props.theme.spacing.tiny};
+  border: 1px solid ${(props) => props.theme.palette.grey.grey3};
+  border-radius: 8px;
+  background-color: ${(props) => props.theme.palette.grey.white};
+`;
+
+export const SearchIcon = styled(FontAwesomeIcon)`
+  margin-right: ${(props) => props.theme.spacing.tiny};
+  color: ${(props) => props.theme.palette.grey.grey2};
+`;
+
+export const SearchInput = styled.input`
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: ${(props) => props.theme.typography.p2.fontSize};
+  color: ${(props) => props.theme.palette.grey.grey1};
+  background-color: transparent;
+
+  &::placeholder {
+    color: ${(props) => props.theme.palette.grey.grey3};
+  }
 `;
