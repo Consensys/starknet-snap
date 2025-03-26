@@ -110,15 +110,14 @@ export class TransactionService {
     const transactionsOnState: Transaction[] = [];
     const transactionsToRemove: string[] = [];
     const transactionsOnChainSet = new Set<string>();
-    const transactionsOnChainFailed = new Set<string>();
 
     for await (const tx of this.getTransactionsOnChain(
       address,
       contractAddress,
       tillToInDays,
     )) {
-        transactionsOnChain.push(tx);
-        transactionsOnChainSet.add(tx.txnHash);
+      transactionsOnChain.push(tx);
+      transactionsOnChainSet.add(tx.txnHash);
     }
 
     for await (const tx of this.getTransactionsOnState(
@@ -126,9 +125,7 @@ export class TransactionService {
       contractAddress,
     )) {
       // eslint-disable-next-line no-negated-condition
-      if (
-        !transactionsOnChainSet.has(tx.txnHash)
-      ) {
+      if (!transactionsOnChainSet.has(tx.txnHash)) {
         transactionsOnState.push(tx);
       } else {
         transactionsToRemove.push(tx.txnHash);
