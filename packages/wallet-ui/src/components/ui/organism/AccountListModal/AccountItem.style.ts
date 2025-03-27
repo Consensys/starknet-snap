@@ -40,6 +40,13 @@ export const AccountItemWrapper = styled.div`
   border-bottom: 1px solid ${(props) => props.theme.palette.grey.grey3};
 `;
 
+export const AccountDetailsWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding-left: ${(props) => props.theme.spacing.small};
+`;
+
 export const AccountName = styled.div`
   font-size: ${(props) => props.theme.typography.p1.fontSize};
   font-weight: bold;
