@@ -30,7 +30,7 @@ import {
   updateCurrentAccount,
   setWalletConnection,
 } from 'slices/walletSlice';
-import { setActiveNetwork, setNetworks } from 'slices/networkSlice';
+import { setNetworksAndActiveNetwork } from 'slices/networkSlice';
 import { disableLoading, enableLoadingWithMessage } from 'slices/UISlice';
 import {
   Transaction,
@@ -156,13 +156,18 @@ export const useStarkNetSnap = () => {
         console.error('No networks found');
         return;
       }
-      dispatch(setNetworks(networks));
 
       const currentNetwork = await getCurrentNetwork();
       const idx = networks.findIndex(
         (network) => network.chainId === currentNetwork.chainId,
       );
-      dispatch(setActiveNetwork(idx));
+
+      dispatch(
+        setNetworksAndActiveNetwork({
+          networks,
+          activeNetwork: idx,
+        }),
+      );
 
       await initWalletData({
         chainId: currentNetwork.chainId,
