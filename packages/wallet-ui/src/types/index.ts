@@ -32,6 +32,7 @@ export type Account = {
   publicKey: string;
   upgradeRequired: boolean;
   deployRequired: boolean;
+  isDeployed: boolean;
   chainId: string;
   addressIndex: number;
   accountName: string;
@@ -102,3 +103,13 @@ export type Translator = (
   key: string,
   ...args: (string | undefined)[]
 ) => string;
+
+export type FeeEstimate = {
+  fee: string;
+  includeDeploy: boolean;
+};
+
+export type CacheContent<Data> = {
+  expiredAt: number;
+  data: Data;
+};

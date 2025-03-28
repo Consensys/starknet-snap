@@ -351,6 +351,9 @@
     },
     "accountNameLengthError": {
       "message": "Account name must be between {1} and {2} characters."
+    },
+    "invalidAmount": {
+      "message": "Invalid amount"
     }
   }
 }
