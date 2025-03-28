@@ -15,9 +15,6 @@ export const networkSlice = createSlice({
   name: 'network',
   initialState,
   reducers: {
-    setNetworks: (state, action) => {
-      state.items = action.payload;
-    },
     setActiveNetwork: (state, action) => {
       state.activeNetwork = action.payload;
     },
@@ -33,11 +30,7 @@ export const networkSlice = createSlice({
   },
 });
 
-export const {
-  setNetworks,
-  setActiveNetwork,
-  setNetworksAndActiveNetwork,
-  resetNetwork,
-} = networkSlice.actions;
+export const { setActiveNetwork, setNetworksAndActiveNetwork, resetNetwork } =
+  networkSlice.actions;
 
 export default networkSlice.reducer;
