@@ -94,25 +94,36 @@ export const SendInputModalView = ({
     }));
     switch (fieldName) {
       case 'amount':
-        if (fieldValue !== '' && fieldValue !== '.') {
-          try {
-            const inputAmount = ethers.utils.parseUnits(
-              fieldValue,
-              erc20TokenBalanceSelected.decimals,
-            );
-            const userBalance = erc20TokenBalanceSelected.amount;
-            if (inputAmount.gt(userBalance)) {
+        if (fieldValue === '' || !isNaN(Number(fieldValue))) {
+          setErrors((prevErrors) => ({
+            ...prevErrors,
+            amount: '',
+          }));
+          if (fieldValue !== '') {
+            try {
+              const inputAmount = ethers.utils.parseUnits(
+                fieldValue,
+                erc20TokenBalanceSelected.decimals,
+              );
+              const userBalance = erc20TokenBalanceSelected.amount;
+              if (inputAmount.gt(userBalance)) {
+                setErrors((prevErrors) => ({
+                  ...prevErrors,
+                  amount: translate('inputAmountExceedsBalance'),
+                }));
+              }
+            } catch (error) {
               setErrors((prevErrors) => ({
                 ...prevErrors,
-                amount: translate('inputAmountExceedsBalance'),
+                amount: translate('invalidAmount'),
               }));
             }
-          } catch (error) {
-            setErrors((prevErrors) => ({
-              ...prevErrors,
-              amount: translate('invalidAmount'),
-            }));
           }
+        } else {
+          setErrors((prevErrors) => ({
+            ...prevErrors,
+            amount: translate('invalidAmount'),
+          }));
         }
         break;
       case 'address':

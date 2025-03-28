@@ -169,6 +169,9 @@
     "invalidAddressFormat": {
       "message": "Format d'adresse invalide"
     },
+    "invalidAmount": {
+      "message": "Montant invalide"
+    },
     "loading": {
       "message": "Chargement"
     },
