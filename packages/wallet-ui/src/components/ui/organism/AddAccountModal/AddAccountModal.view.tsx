@@ -7,6 +7,13 @@ import { ACCOUNT_NAME_LENGTH } from 'utils/constants';
 import { InputWithLabel } from 'components/ui/molecule/InputWithLabel';
 import { ButtonStyled, ErrorMsg, FormGroup } from './AddAccountModal.style';
 import { Modal } from 'components/ui/atom/Modal';
+import Toastr from 'toastr2';
+
+const toastr = new Toastr({
+  closeDuration: 10000000,
+  showDuration: 1000000000,
+  positionClass: 'toast-top-center',
+});
 
 interface Props {
   onClose: () => void;
@@ -36,10 +43,22 @@ export const AddAccountModalView = ({ onClose }: Props) => {
   };
 
   const onAddAccount = async () => {
+    const trimedAccountName = accountName.trim();
+
+    // Check if the account name already exists
+    const accountExists = accounts.some(
+      (account) => account.accountName.trim() === trimedAccountName,
+    );
+
+    if (accountExists) {
+      // Show toastr message if account name already exists
+      toastr.error(translate('accountNameExistsError'));
+      return;
+    }
+
     // The UX is better if we close the modal before adding the account
     onClose();
 
-    const trimedAccountName = accountName.trim();
     // Reset account name to undefined if it is empty,
     // so that the default account name is used in Snap
     await addNewAccount(

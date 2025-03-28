@@ -33,6 +33,7 @@ import {
   unknown,
   empty,
   nullable,
+  type,
 } from 'superstruct';
 
 import { TransactionDataVersion } from '../types/snapState';
@@ -438,7 +439,7 @@ export const TransactionStruct = object({
   dataVersion: enums(Object.values(TransactionDataVersion)),
 });
 
-export const AccountStruct = object({
+export const AccountStruct = type({
   address: AddressStruct,
   chainId: ChainIdStruct,
   publicKey: HexStruct,
@@ -447,6 +448,6 @@ export const AccountStruct = object({
   cairoVersion: CairoVersionStruct,
   upgradeRequired: boolean(),
   deployRequired: boolean(),
-  visibility: optional(boolean()),
   accountName: optional(string()),
+  isDeployed: optional(boolean()),
 });

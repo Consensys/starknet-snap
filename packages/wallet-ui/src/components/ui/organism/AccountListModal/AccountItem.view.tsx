@@ -1,5 +1,5 @@
-import { IconButton } from '@mui/material';
-
+import { IconButton, Menu } from '@mui/material';
+import { useState } from 'react';
 import { Account } from 'types';
 import { formatAddress } from 'utils/utils';
 import {
@@ -7,7 +7,12 @@ import {
   AccountImageStyled,
   VisibilityIcon,
   Wrapper,
+  MenuItem,
+  AccountDetailsWrapper,
+  AccountName,
+  AccountAddress,
 } from './AccountItem.style';
+import { useMultiLanguage } from 'services';
 
 export interface Props {
   account: Account;
@@ -28,12 +33,13 @@ export const AccountItem = ({
   onItemClick,
   onIconButtonClick,
 }: Props) => {
+  const { translate } = useMultiLanguage();
   const { address, accountName } = account;
+  const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null);
 
   const preventDefaultMouseEvent = (event: React.MouseEvent) => {
     // Prevent triggering the native behaviour
     event.preventDefault();
-    // Prevent triggering the parent onClick event
     event.stopPropagation();
   };
 
@@ -42,6 +48,7 @@ export const AccountItem = ({
     if (typeof onIconButtonClick === 'function') {
       await onIconButtonClick(account);
     }
+    setMenuAnchorEl(null);
   };
 
   const onClick = async (event: React.MouseEvent) => {
@@ -49,6 +56,21 @@ export const AccountItem = ({
     if (typeof onItemClick === 'function') {
       await onItemClick(account);
     }
+  };
+
+  const handleCopyAddress = (event: React.MouseEvent) => {
+    preventDefaultMouseEvent(event);
+    navigator.clipboard.writeText(address);
+    setMenuAnchorEl(null);
+  };
+
+  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    preventDefaultMouseEvent(event);
+    setMenuAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setMenuAnchorEl(null);
   };
 
   return (
@@ -60,16 +82,36 @@ export const AccountItem = ({
     >
       <AccountInfoWrapper>
         <AccountImageStyled size={30} address={address} />
-        <div>
-          <div>{accountName}</div>
-          <div>{formatAddress(address)}</div>
-        </div>
+        <AccountDetailsWrapper>
+          <AccountName>{accountName}</AccountName>
+          <AccountAddress>{formatAddress(address)}</AccountAddress>
+        </AccountDetailsWrapper>
       </AccountInfoWrapper>
-      {showIconButton && (
-        <IconButton size="small" onClick={onIconBtnClick}>
-          <VisibilityIcon icon={visible ? 'eye-slash' : 'eye'} />
+      <div>
+        <IconButton
+          size="small"
+          style={{ width: '30px' }}
+          onClick={handleMenuOpen}
+        >
+          <VisibilityIcon icon="ellipsis-vertical" />
         </IconButton>
-      )}
+        <Menu
+          anchorEl={menuAnchorEl}
+          open={Boolean(menuAnchorEl)}
+          onClose={handleMenuClose}
+        >
+          {showIconButton && (
+            <MenuItem onClick={onIconBtnClick}>
+              <VisibilityIcon icon={visible ? 'eye-slash' : 'eye'} />
+              <span>{visible ? translate('hide') : translate('unhide')}</span>
+            </MenuItem>
+          )}
+          <MenuItem onClick={handleCopyAddress}>
+            <VisibilityIcon icon="clone" />
+            <span>{translate('copyToClipboard')}</span>
+          </MenuItem>
+        </Menu>
+      </div>
     </Wrapper>
   );
 };

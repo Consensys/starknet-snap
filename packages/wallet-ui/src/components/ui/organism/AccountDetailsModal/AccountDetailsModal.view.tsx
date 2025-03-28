@@ -20,7 +20,14 @@ import { useMultiLanguage, useStarkNetSnap } from 'services';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPen, faCheck } from '@fortawesome/free-solid-svg-icons';
 import { ACCOUNT_NAME_LENGTH } from 'utils/constants';
-import { useCurrentAccount, useCurrentNetwork } from 'hooks';
+import { useCurrentAccount, useCurrentNetwork, useAppSelector } from 'hooks';
+import Toastr from 'toastr2';
+
+const toastr = new Toastr({
+  closeDuration: 10000000,
+  showDuration: 1000000000,
+  positionClass: 'toast-top-center',
+});
 
 export const AccountDetailsModalView = () => {
   const [minLength, maxLength] = ACCOUNT_NAME_LENGTH;
@@ -28,6 +35,7 @@ export const AccountDetailsModalView = () => {
   const { translate } = useMultiLanguage();
   const currentNetwork = useCurrentNetwork();
   const currentAccount = useCurrentAccount();
+  const accounts = useAppSelector((state) => state.wallet.accounts);
   // Assign an empty string to accountName if it is undefined, to prevent the JS error from the trim() function
   const [accountName, setAccountName] = useState(
     currentAccount.accountName ?? '',
@@ -52,6 +60,18 @@ export const AccountDetailsModalView = () => {
       setIsEditing(false);
       return;
     }
+
+    // Check if the account name already exists
+    const accountExists = accounts.some(
+      (account) => account.accountName.trim() === trimedAccountName,
+    );
+
+    if (accountExists) {
+      // Show toastr message if account name already exists
+      toastr.error(translate('accountNameExistsError'));
+      return;
+    }
+
     if (enabled) {
       await updateAccountName(chainId, address, trimedAccountName);
       setIsEditing(false);

@@ -70,8 +70,11 @@ export class TransactionService {
     contractAddress: string,
   ): AsyncGenerator<Transaction> {
     for (const tx of transactions) {
-      // Only return transaction that are related to the contract address or a deployed transactions.
-      if (this.hasMatchingContractOrIsDeploy(tx, contractAddress)) {
+      // Only return transaction that are related to the contract address / deployed transactions or failed.
+      if (
+        this.hasMatchingContractOrIsDeploy(tx, contractAddress) ||
+        tx.failureReason
+      ) {
         yield tx;
       }
     }

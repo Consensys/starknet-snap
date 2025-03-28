@@ -11,6 +11,7 @@ import {
   RowWrapper,
   USDDiv,
   Wrapper,
+  LoadingWrapper,
 } from './AmountInput.style';
 import { Erc20TokenBalance } from 'types';
 import { ethers } from 'ethers';
@@ -24,6 +25,9 @@ interface Props extends InputHTMLAttributes<HTMLInputElement> {
   decimalsMax?: number;
   asset: Erc20TokenBalance;
   onChangeCustom?: (value: string) => void;
+  isEstimatingGas: boolean;
+  isMaxAmountPending?: boolean;
+  setIsMaxAmountPending?: (value: boolean) => void;
 }
 
 export const AmountInputView = ({
@@ -35,6 +39,9 @@ export const AmountInputView = ({
   decimalsMax = 18,
   asset,
   onChangeCustom,
+  isEstimatingGas,
+  isMaxAmountPending = false,
+  setIsMaxAmountPending,
   ...otherProps
 }: Props) => {
   const [focused, setFocused] = useState(false);
@@ -84,6 +91,20 @@ export const AmountInputView = ({
     }
   };
 
+  useEffect(
+    () => {
+      // If isMaxAmountPending is true and the fees are not being fetched,
+      // apply the maximum amount and reset isMaxAmountPending to false.
+      if (isMaxAmountPending && !isEstimatingGas) {
+        handleMaxClick();
+        typeof setIsMaxAmountPending === 'function' &&
+          setIsMaxAmountPending(false);
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [isMaxAmountPending, isEstimatingGas],
+  );
+
   const handleContainerClick = () => {
     if (inputRef.current !== null) {
       inputRef.current.focus();
@@ -91,8 +112,16 @@ export const AmountInputView = ({
   };
 
   const handleMaxClick = () => {
+    // If the fees are being fetched, set isMaxAmountPending to true
+    // to apply the maximum amount once the fees are fetched.
+    if (isEstimatingGas) {
+      typeof setIsMaxAmountPending === 'function' &&
+        setIsMaxAmountPending(true);
+      return;
+    }
+    let amountBN = ethers.BigNumber.from(asset.amount);
     const amountStr = ethers.utils
-      .formatUnits(asset.amount, asset.decimals)
+      .formatUnits(amountBN, asset.decimals)
       .toString();
     const amountFloat = parseFloat(amountStr);
     const value = usdMode
@@ -136,6 +165,7 @@ export const AmountInputView = ({
             onChange={(event) => triggerOnChange(event.target.value)}
             {...otherProps}
           />
+          {isEstimatingGas && isMaxAmountPending && <LoadingWrapper />}
           {!usdMode && (
             <>
               {asset.symbol}

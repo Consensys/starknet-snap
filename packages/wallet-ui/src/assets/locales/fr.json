@@ -10,6 +10,9 @@
     "accountName": {
       "message": "Nom du compte"
     },
+    "accountNameExistsError": {
+      "message": "Un compte avec ce nom existe déjà."
+    },
     "accountDeployedSuccessfully": {
       "message": "Compte déployé avec succès."
     },
@@ -139,6 +142,12 @@
     "gotIt": {
       "message": "COMPRIS !"
     },
+    "hide": {
+      "message": "Masquer"
+    },
+    "unhide": {
+      "message": "Afficher"
+    },
     "hiddenAccounts": {
       "message": "Comptes cachés"
     },
@@ -211,6 +220,9 @@
     "nonZeroBalanceOnCairo0": {
       "message": "Vous avez un solde non nul sur une adresse Cairo 0 non déployée"
     },
+    "noAccountForSearchQuery": {
+      "message": "Aucun compte trouvé pour la requête de recherche"
+    },
     "noHiddenAccount": {
       "message": "Pas de comptes cachés"
     },
@@ -237,6 +249,9 @@
     },
     "reject": {
       "message": "REJETER"
+    },
+    "searchAccounts": {
+      "message": "Rechercher des comptes"
     },
     "selectAnOption": {
       "message": "Sélectionner une option"
@@ -269,7 +284,7 @@
       "message": "Conditions d'utilisation"
     },
     "to": {
-      "message": "À"
+      "message": "Destinaire"
     },
     "tokenAddedSuccessfully": {
       "message": "Jeton ajouté avec succès"
@@ -333,6 +348,9 @@
     },
     "accountNameLengthError": {
       "message": "Le nom du compte doit comporter entre {1} et {2} caractères."
+    },
+    "invalidAmount": {
+      "message": "Montant invalide"
     }
   }
 }

@@ -1,5 +1,7 @@
 import { KeyboardEvent } from 'react';
-import { ethers } from 'ethers';
+import { BigNumber, ethers } from 'ethers';
+import { constants } from 'starknet';
+
 import {
   DECIMALS_DISPLAYED_MAX_LENGTH,
   STARKNET_MAINNET_EXPLORER,
@@ -8,9 +10,10 @@ import {
   TIMEOUT_DURATION,
   MIN_ACC_CONTRACT_VERSION,
   DENY_ERROR_CODE,
+  ETH_TOKEN_ADDR,
+  STRK_TOKEN_ADDR,
 } from './constants';
 import { Erc20Token, Erc20TokenBalance, TokenBalance } from 'types';
-import { constants } from 'starknet';
 
 export const shortenAddress = (address: string, num = 3) => {
   if (!address) return '';
@@ -140,6 +143,20 @@ export const getMaxDecimals = (asset: Erc20TokenBalance) => {
     return MAX_DECIMALS;
   }
   return asset.decimals;
+};
+
+export const getMinAmountToSpend = (): number => {
+  return 1;
+};
+
+export const getMaxAmountToSpend = (
+  asset: Erc20TokenBalance,
+  gasFee?: string,
+): BigNumber => {
+  if (gasFee && [ETH_TOKEN_ADDR, STRK_TOKEN_ADDR].includes(asset.address)) {
+    return asset.amount.sub(gasFee);
+  }
+  return asset.amount;
 };
 
 export const isSpecialInputKey = (event: KeyboardEvent<HTMLInputElement>) => {

@@ -18,14 +18,21 @@ const asset = {
   usdPrice: 1000,
 };
 
-export const Default = () => <AmountInputView label="Amount" asset={asset} />;
+export const Default = () => (
+  <AmountInputView label="Amount" asset={asset} isEstimatingGas={false} />
+);
 
 export const ErrorView = () => (
-  <AmountInputView error label="Amount" asset={asset} />
+  <AmountInputView error label="Amount" asset={asset} isEstimatingGas={false} />
 );
 
 export const Disabled = () => (
-  <AmountInputView disabled label="Amount" asset={asset} />
+  <AmountInputView
+    disabled
+    label="Amount"
+    asset={asset}
+    isEstimatingGas={false}
+  />
 );
 
 export const WithHelperText = () => (
@@ -34,5 +41,6 @@ export const WithHelperText = () => (
     helperText="Helper text"
     label="Amount"
     asset={asset}
+    isEstimatingGas={false}
   />
 );

@@ -30,7 +30,7 @@ import {
   updateCurrentAccount,
   setWalletConnection,
 } from 'slices/walletSlice';
-import { setActiveNetwork, setNetworks } from 'slices/networkSlice';
+import { setNetworksAndActiveNetwork } from 'slices/networkSlice';
 import { disableLoading, enableLoadingWithMessage } from 'slices/UISlice';
 import {
   Transaction,
@@ -156,13 +156,18 @@ export const useStarkNetSnap = () => {
         console.error('No networks found');
         return;
       }
-      dispatch(setNetworks(networks));
 
       const currentNetwork = await getCurrentNetwork();
       const idx = networks.findIndex(
         (network) => network.chainId === currentNetwork.chainId,
       );
-      dispatch(setActiveNetwork(idx));
+
+      dispatch(
+        setNetworksAndActiveNetwork({
+          networks,
+          activeNetwork: idx,
+        }),
+      );
 
       await initWalletData({
         chainId: currentNetwork.chainId,
@@ -209,58 +214,6 @@ export const useStarkNetSnap = () => {
     await initTokensAndBalances(chainId, address);
 
     dispatch(disableLoading());
-  };
-
-  const hideAccount = async ({
-    chainId,
-    address,
-    currentAddress,
-  }: {
-    chainId: string;
-    address: string;
-    currentAddress: string;
-  }) => {
-    try {
-      if (!loader.isLoading) {
-        dispatch(
-          enableLoadingWithMessage(`Hiding account ${shortenAddress(address)}`),
-        );
-      }
-      const account = await toggleAccountVisibility(chainId, address, false);
-      dispatch(updateAccount({ address, updates: { visibility: false } }));
-      if (account.address !== currentAddress) {
-        await initWalletData({
-          account,
-          chainId,
-        });
-      }
-    } catch (error) {
-      const toastr = new Toastr();
-      toastr.error('Failed to hide the account');
-    } finally {
-      dispatch(disableLoading());
-    }
-  };
-
-  const unHideAccount = async ({
-    chainId,
-    address,
-  }: {
-    chainId: string;
-    address: string;
-  }) => {
-    if (!loader.isLoading) {
-      dispatch(enableLoadingWithMessage(`Loading...`));
-    }
-    try {
-      await toggleAccountVisibility(chainId, address, true);
-      dispatch(updateAccount({ address, updates: { visibility: true } }));
-    } catch (err) {
-      const toastr = new Toastr();
-      toastr.error('Failed to show the account');
-    } finally {
-      dispatch(disableLoading());
-    }
   };
 
   const setAccount = async (chainId: string, currentAccount: Account) => {
@@ -946,8 +899,6 @@ export const useStarkNetSnap = () => {
     loadLocale,
     getNetworks,
     getAccounts,
-    hideAccount,
-    unHideAccount,
     switchAccount,
     getCurrentAccount,
     addNewAccount,
