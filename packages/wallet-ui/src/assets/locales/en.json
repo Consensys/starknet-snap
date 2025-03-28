@@ -10,6 +10,9 @@
     "accountName": {
       "message": "Account name"
     },
+    "accountNameExistsError": {
+      "message": "Account name already exists"
+    },
     "accountDeployedSuccessfully": {
       "message": "Account deployed successfully."
     },
