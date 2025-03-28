@@ -3,6 +3,23 @@
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
 
+## [1.29.0](https://github.com/Consensys/starknet-snap/compare/wallet-ui-v1.28.0...wallet-ui-v1.29.0) (2025-03-28)
+
+
+### Features
+
+* account list contextual menu with hide/unhide and copy address feature ([#538](https://github.com/Consensys/starknet-snap/issues/538)) ([223c1c0](https://github.com/Consensys/starknet-snap/commit/223c1c025b9434714eea1186df3b9dde44cc83c4))
+* cache system for transaction fee estimation in wallet-ui ([#524](https://github.com/Consensys/starknet-snap/issues/524)) ([4549a37](https://github.com/Consensys/starknet-snap/commit/4549a37b2f9782e117a77db4ff5da09d13da9380))
+* search account by name in account list ([#537](https://github.com/Consensys/starknet-snap/issues/537)) ([866264f](https://github.com/Consensys/starknet-snap/commit/866264fa91474ef174a2b53d157f401c2153b21e))
+* unique account name in wallet ui ([#535](https://github.com/Consensys/starknet-snap/issues/535)) ([17a5b38](https://github.com/Consensys/starknet-snap/commit/17a5b38e67c6146ee719d8e000e60896be92f140))
+* **wallet-ui:** Enhance account visibility management operation by persisting the account visibility on local ([#529](https://github.com/Consensys/starknet-snap/issues/529)) ([04426cd](https://github.com/Consensys/starknet-snap/commit/04426cdb98a9228fe1354bbe37a7e896e28c2876))
+
+
+### Bug Fixes
+
+* account list mismatch when reconnecting Snap ([#541](https://github.com/Consensys/starknet-snap/issues/541)) ([6fb81a4](https://github.com/Consensys/starknet-snap/commit/6fb81a486de78b7dce351a6970651da4fed20d1a))
+* align items in account list modal ([#542](https://github.com/Consensys/starknet-snap/issues/542)) ([d9f6906](https://github.com/Consensys/starknet-snap/commit/d9f69067a64750b2a1c236bb9e297352739891f9))
+
 ## [1.28.0](https://github.com/Consensys/starknet-snap/compare/wallet-ui-v1.27.0...wallet-ui-v1.28.0) (2025-03-04)
 
 
