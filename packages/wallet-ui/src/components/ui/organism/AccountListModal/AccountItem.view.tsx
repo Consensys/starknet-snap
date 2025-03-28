@@ -8,6 +8,9 @@ import {
   VisibilityIcon,
   Wrapper,
   MenuItem,
+  AccountDetailsWrapper,
+  AccountName,
+  AccountAddress,
 } from './AccountItem.style';
 import { useMultiLanguage } from 'services';
 
@@ -79,10 +82,10 @@ export const AccountItem = ({
     >
       <AccountInfoWrapper>
         <AccountImageStyled size={30} address={address} />
-        <div>
-          <div>{accountName}</div>
-          <div>{formatAddress(address)}</div>
-        </div>
+        <AccountDetailsWrapper>
+          <AccountName>{accountName}</AccountName>
+          <AccountAddress>{formatAddress(address)}</AccountAddress>
+        </AccountDetailsWrapper>
       </AccountInfoWrapper>
       <div>
         <IconButton
