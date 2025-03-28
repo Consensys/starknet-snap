@@ -1,5 +1,5 @@
 {
-  "version": "3.3.0",
+  "version": "3.4.0",
   "description": "Manage Starknet accounts and assets with MetaMask.",
   "proposedName": "Starknet",
   "repository": {
@@ -16,7 +16,10 @@
         "registry": "https://registry.npmjs.org"
       }
     },
-    "locales": ["locales/en.json", "locales/fr.json"]
+    "locales": [
+      "locales/en.json",
+      "locales/fr.json"
+    ]
   },
   "initialPermissions": {
     "snap_getPreferences": {},
