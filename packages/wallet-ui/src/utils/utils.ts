@@ -285,9 +285,9 @@ export const removeUndefined = (
   obj: Record<string, unknown>,
 ): Record<string, unknown> => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  return Object.fromEntries(
+  return JSON.parse(JSON.stringify(Object.fromEntries(
     Object.entries(obj).filter(([_, val]) => val !== undefined),
-  );
+  )));
 };
 
 export const formatAddress = (address: string, starkName?: string): string => {
