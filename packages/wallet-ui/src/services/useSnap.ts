@@ -40,10 +40,9 @@ export const useSnap = () => {
         method: 'wallet_invokeSnap',
         params: {
           snapId,
-          request: {
-            method,
-            params: params ? removeUndefined(params) : params,
-          },
+          request: !params
+            ? { method }
+            : { method, params: params ? removeUndefined(params) : params },
         },
       });
       return response as unknown as Resp;
