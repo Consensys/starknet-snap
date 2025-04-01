@@ -94,36 +94,34 @@ export const SendInputModalView = ({
     }));
     switch (fieldName) {
       case 'amount':
-        if (fieldValue === '' || !isNaN(Number(fieldValue))) {
-          setErrors((prevErrors) => ({
-            ...prevErrors,
-            amount: '',
-          }));
-          if (fieldValue !== '') {
-            try {
-              const inputAmount = ethers.utils.parseUnits(
-                fieldValue,
-                erc20TokenBalanceSelected.decimals,
-              );
-              const userBalance = erc20TokenBalanceSelected.amount;
-              if (inputAmount.gt(userBalance)) {
-                setErrors((prevErrors) => ({
-                  ...prevErrors,
-                  amount: translate('inputAmountExceedsBalance'),
-                }));
-              }
-            } catch (error) {
+        // If input is not empty, attempt to parse and validate against balance.
+        // Parsing failures or insufficient balance will trigger relevant errors.
+        // Empty input is allowed here (not a format error) — required validation is handled separately.
+        const isEmpty = fieldValue === '';
+        setErrors((prevErrors) => ({
+          ...prevErrors,
+          amount: '',
+        }));
+        if (!isEmpty) {
+          try {
+            const inputAmount = ethers.utils.parseUnits(
+              fieldValue,
+              erc20TokenBalanceSelected.decimals,
+            );
+            const userBalance = erc20TokenBalanceSelected.amount;
+            if (inputAmount.gt(userBalance)) {
               setErrors((prevErrors) => ({
                 ...prevErrors,
-                amount: translate('invalidAmount'),
+                amount: translate('inputAmountExceedsBalance'),
               }));
             }
+          } catch (error) {
+            console.log(error);
+            setErrors((prevErrors) => ({
+              ...prevErrors,
+              amount: translate('invalidAmount'),
+            }));
           }
-        } else {
-          setErrors((prevErrors) => ({
-            ...prevErrors,
-            amount: translate('invalidAmount'),
-          }));
         }
         break;
       case 'address':
