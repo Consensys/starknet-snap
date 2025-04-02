@@ -94,7 +94,17 @@ export const SendInputModalView = ({
     }));
     switch (fieldName) {
       case 'amount':
-        if (fieldValue !== '' && fieldValue !== '.') {
+        // If input is not empty, attempt to parse and validate against balance.
+        // Parsing failures or insufficient balance will trigger relevant errors.
+        // Empty input is allowed here (not a format error) — required validation is handled separately.
+        const isEmpty = fieldValue === '';
+        // Reset error message, if any, when the input is cleared.
+        // This allows the user to clear the input without showing an error.
+        setErrors((prevErrors) => ({
+          ...prevErrors,
+          amount: '',
+        }));
+        if (!isEmpty) {
           try {
             const inputAmount = ethers.utils.parseUnits(
               fieldValue,
