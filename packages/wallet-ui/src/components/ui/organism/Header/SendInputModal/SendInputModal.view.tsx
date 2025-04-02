@@ -98,6 +98,8 @@ export const SendInputModalView = ({
         // Parsing failures or insufficient balance will trigger relevant errors.
         // Empty input is allowed here (not a format error) — required validation is handled separately.
         const isEmpty = fieldValue === '';
+        // Reset error message, if any, when the input is cleared.
+        // This allows the user to clear the input without showing an error.
         setErrors((prevErrors) => ({
           ...prevErrors,
           amount: '',
@@ -116,7 +118,6 @@ export const SendInputModalView = ({
               }));
             }
           } catch (error) {
-            console.log(error);
             setErrors((prevErrors) => ({
               ...prevErrors,
               amount: translate('invalidAmount'),
