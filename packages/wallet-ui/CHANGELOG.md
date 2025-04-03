@@ -3,6 +3,23 @@
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
 
+## [1.29.0](https://github.com/Consensys/starknet-snap/compare/wallet-ui-v1.28.0...wallet-ui-v1.29.0) (2025-04-03)
+
+
+### Features
+
+* add account list contextual menu ([223c1c0](https://github.com/Consensys/starknet-snap/commit/223c1c025b9434714eea1186df3b9dde44cc83c4))
+* enable account search by name ([866264f](https://github.com/Consensys/starknet-snap/commit/866264fa91474ef174a2b53d157f401c2153b21e))
+* enhance account visibility management ([04426cd](https://github.com/Consensys/starknet-snap/commit/04426cdb98a9228fe1354bbe37a7e896e28c2876))
+* enhance transaction fee estimation UX with cache ([4549a37](https://github.com/Consensys/starknet-snap/commit/4549a37b2f9782e117a77db4ff5da09d13da9380))
+* prevent account with same name ([17a5b38](https://github.com/Consensys/starknet-snap/commit/17a5b38e67c6146ee719d8e000e60896be92f140))
+
+
+### Bug Fixes
+
+* invalid inputs on send transaction cause Error ([#533](https://github.com/Consensys/starknet-snap/issues/533)) ([cf6713a](https://github.com/Consensys/starknet-snap/commit/cf6713a6d86e091a6e51576aadc673a694f0e2eb))
+* ui fails to send Snap RPC request on Firefox ([7453796](https://github.com/Consensys/starknet-snap/commit/745379627389237077eec8fca8f9bff861fe3fe1))
+
 ## [1.28.0](https://github.com/Consensys/starknet-snap/compare/wallet-ui-v1.27.0...wallet-ui-v1.28.0) (2025-03-04)
 
 
