@@ -1,9 +1,13 @@
 import { TransactionFinalityStatus, TransactionType } from 'starknet';
 
 import { TransactionStateManager } from '../state/transaction-state-manager';
-import type { Network, Transaction, V2Transaction } from '../types/snapState';
+import type {
+  Network,
+  Transaction,
+  TransactionsCursor,
+  V2Transaction,
+} from '../types/snapState';
 import { TransactionDataVersion } from '../types/snapState';
-import { dayToSec, msToSec } from '../utils';
 import type { IDataClient } from './data-client';
 
 export class TransactionService {
@@ -27,17 +31,30 @@ export class TransactionService {
     this.txnStateMgr = txnStateMgr;
   }
 
+  /**
+   *
+   * Get the transactions by the given address and contract address.
+   * The transactions will be filtered by the contract address.
+   * Cursor is used to paginate the transactions.
+   *
+   * @param address
+   * @param contractAddress
+   * @param cursor
+   * @param cursor.blockNumber
+   * @param cursor.txnHash
+   * @yields getTransactionsOnChain: Yields transactions filtered by contract address and a cursor for pagination.
+   */
   protected async *getTransactionsOnChain(
     address: string,
     contractAddress: string,
-    tillToInDays: number,
-  ): AsyncGenerator<Transaction> {
-    // Get the transactions till the given days in second unit.
-    const tillToInSec = msToSec(Date.now()) - dayToSec(tillToInDays);
-    const transactions = await this.dataClient.getTransactions(
-      address,
-      tillToInSec,
-    );
+    cursor?: { blockNumber: number; txnHash: string },
+  ): AsyncGenerator<Transaction | { cursor: TransactionsCursor }> {
+    const { transactions, cursor: newCursor } =
+      await this.dataClient.getTransactions(address, cursor);
+
+    // Yield the cursor for the next page of transactions.
+    yield { cursor: newCursor };
+
     yield* this.filterTransactionsByContractAddress(
       transactions,
       contractAddress,
@@ -98,26 +115,37 @@ export class TransactionService {
    *
    * @param address - The account address.
    * @param contractAddress - The contract address.
-   * @param tillToInDays - The filter includes the transaction till to the given days.
+   * @param cursor
+   * @param cursor.blockNumber
+   * @param cursor.txnHash
    * @returns A promise that resolves to an array of transactions of the given address.
    */
   public async getTransactions(
     address: string,
     contractAddress: string,
-    tillToInDays: number,
-  ): Promise<Transaction[]> {
+    cursor?: { blockNumber: number; txnHash: string },
+  ): Promise<{ transactions: Transaction[]; cursor: TransactionsCursor }> {
     const transactionsOnChain: Transaction[] = [];
     const transactionsOnState: Transaction[] = [];
     const transactionsToRemove: string[] = [];
     const transactionsOnChainSet = new Set<string>();
 
-    for await (const tx of this.getTransactionsOnChain(
+    let nextCursor: TransactionsCursor = {
+      blockNumber: -1,
+      txnHash: '',
+    };
+
+    for await (const result of this.getTransactionsOnChain(
       address,
       contractAddress,
-      tillToInDays,
+      cursor,
     )) {
-      transactionsOnChain.push(tx);
-      transactionsOnChainSet.add(tx.txnHash);
+      if ('cursor' in result) {
+        nextCursor = result.cursor;
+      } else {
+        transactionsOnChain.push(result);
+        transactionsOnChainSet.add(result.txnHash);
+      }
     }
 
     for await (const tx of this.getTransactionsOnState(
@@ -139,6 +167,9 @@ export class TransactionService {
     }
     // Merge the transactions from state and chain.
     // The transactions from state will be added first, then the transactions from chain.
-    return transactionsOnState.concat(transactionsOnChain);
+    return {
+      transactions: transactionsOnState.concat(transactionsOnChain),
+      cursor: nextCursor,
+    };
   }
 }

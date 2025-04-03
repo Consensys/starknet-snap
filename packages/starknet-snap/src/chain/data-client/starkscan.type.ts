@@ -25,6 +25,7 @@ export const StarkScanTransactionStruct = object({
   transaction_type: enums(Object.values(TransactionType)),
   // The transaction version, 1 or 3, where 3 represents the fee will be paid in STRK
   version: number(),
+  block_number: number(),
   max_fee: NullableStringStruct,
   actual_fee: NullableStringStruct,
   nonce: NullableStringStruct,

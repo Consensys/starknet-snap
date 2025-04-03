@@ -17,13 +17,9 @@ describe('TransactionService', () => {
     async *getTransactionsOnChain(
       address: string,
       contractAddress: string,
-      tillToInDays: number,
+      cursor?: { blockNumber: number; txnHash: string },
     ) {
-      yield* super.getTransactionsOnChain(
-        address,
-        contractAddress,
-        tillToInDays,
-      );
+      yield* super.getTransactionsOnChain(address, contractAddress, cursor);
     }
 
     async *getTransactionsOnState(address: string, contractAddress: string) {
@@ -124,7 +120,13 @@ describe('TransactionService', () => {
     const { getTransactionsSpy, dataClient } = mockDataClient();
     removeTransactionsSpy.mockReturnThis();
     findTransactionsSpy.mockResolvedValue(transactionsFromDataClientOrState);
-    getTransactionsSpy.mockResolvedValue(transactionsFromDataClientOrState);
+    getTransactionsSpy.mockResolvedValue({
+      transactions: transactionsFromDataClientOrState,
+      cursor: {
+        blockNumber: -1,
+        txnHash: '',
+      },
+    });
 
     const service = mockTransactionService(network, dataClient);
 
@@ -160,15 +162,12 @@ describe('TransactionService', () => {
       for await (const tx of service.getTransactionsOnChain(
         address,
         contractAddress,
-        10,
       )) {
-        transactions.push(tx);
+        if (tx && typeof tx === 'object' && 'txnHash' in tx) {
+          transactions.push(tx);
+        }
       }
-
-      expect(getTransactionsSpy).toHaveBeenCalledWith(
-        address,
-        expect.any(Number),
-      );
+      expect(getTransactionsSpy).toHaveBeenCalledWith(address, undefined);
       expect(transactions).toStrictEqual(filteredTransactions);
     });
   });
@@ -230,15 +229,11 @@ describe('TransactionService', () => {
       });
       findTransactionsSpy.mockResolvedValue(transactionFromState);
 
-      const result = await service.getTransactions(
-        address,
-        contractAddress,
-        10,
-      );
+      const result = await service.getTransactions(address, contractAddress);
 
       const expectedResult = transactionFromState.concat(transactionsFromChain);
 
-      expect(result).toStrictEqual(expectedResult);
+      expect(result.transactions).toStrictEqual(expectedResult);
     });
 
     it('remove the transactions that are already on chain', async () => {
@@ -257,7 +252,7 @@ describe('TransactionService', () => {
 
       findTransactionsSpy.mockResolvedValue(duplicatedTransactions);
 
-      await service.getTransactions(address, contractAddress, 10);
+      await service.getTransactions(address, contractAddress);
 
       expect(removeTransactionsSpy).toHaveBeenCalledWith({
         txnHash: [duplicatedTransactions[0].txnHash],
