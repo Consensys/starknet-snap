@@ -49,7 +49,6 @@ export const useEstimateFee = (feeToken: FeeToken = FeeToken.ETH) => {
     // - Cache does not expired but the estimation result is include deployment fee and the account is deployed, as it means the estimation result is not valid anymore
     if (!cacheData || expired || (cacheData.includeDeploy && isDeployed)) {
       setLoading(true);
-      console.log('fetching new fee', feeToken);
       try {
         const callData =
           address + ',' + getMinAmountToSpend().toString() + ',0';

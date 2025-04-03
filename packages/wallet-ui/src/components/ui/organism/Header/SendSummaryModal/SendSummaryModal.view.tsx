@@ -157,10 +157,8 @@ export const SendSummaryModalView = ({
           getTransactions(
             currentAddress,
             erc20TokenBalanceSelected.address,
-            10,
             chainId,
             false,
-            true,
           ).catch((err) => {
             console.error(
               `handleConfirmClick: error from getTransactions: ${err}`,

@@ -29,6 +29,8 @@ import {
   updateAccount,
   updateCurrentAccount,
   setWalletConnection,
+  setTransactionCursor,
+  appendTransactions,
 } from 'slices/walletSlice';
 import { setNetworksAndActiveNetwork } from 'slices/networkSlice';
 import { disableLoading, enableLoadingWithMessage } from 'slices/UISlice';
@@ -60,6 +62,9 @@ export const useStarkNetSnap = () => {
     (state) => state.wallet.erc20TokenBalances,
   );
   const accounts = useAppSelector((state) => state.wallet.accounts);
+  const transactionDeploy = useAppSelector(
+    (state) => state.wallet.transactionDeploy,
+  );
 
   const connectToSnap = async () => {
     dispatch(enableLoadingWithMessage('Connecting...'));
@@ -236,6 +241,7 @@ export const useStarkNetSnap = () => {
 
   const setErc20TokenBalance = (erc20TokenBalance: Erc20TokenBalance) => {
     dispatch(setErc20TokenBalanceSelected(erc20TokenBalance));
+    dispatch(setTransactionDeploy(null));
   };
 
   const initTokensAndBalances = async (chainId: string, address: string) => {
@@ -443,28 +449,41 @@ export const useStarkNetSnap = () => {
   const getTransactions = async (
     senderAddress: string,
     contractAddress: string,
-    txnsInLastNumOfDays: number,
     chainId: string,
     showLoading: boolean = true,
-    onlyFromState: boolean = false,
+    cursor?: { blockNumber: number; txnHash: string },
   ) => {
+    if (transactionDeploy) {
+      return;
+    }
     if (showLoading) {
       dispatch(enableLoadingWithMessage('Retrieving transactions...'));
     }
 
     try {
-      const data = await invokeSnap<Array<Transaction>>({
+      const response = await invokeSnap<{
+        transactions: Transaction[];
+        cursor: { txnHash: string; blockNumber: number };
+      }>({
         method: 'starkNet_getTransactions',
         params: {
           senderAddress,
           contractAddress,
-          txnsInLastNumOfDays,
+          cursor,
           chainId,
         },
       });
 
+      const data = response.transactions;
+      const newCursor = response.cursor;
+
       let storedTxns = data;
 
+      if (cursor) {
+        dispatch(appendTransactions(storedTxns));
+      } else {
+        dispatch(setTransactions(storedTxns));
+      }
       //Set the deploy transaction
       const deployTransaction = storedTxns.find(
         (txn: Transaction) =>
@@ -472,9 +491,7 @@ export const useStarkNetSnap = () => {
           txn.txnType === TransactionType.DEPLOY_ACCOUNT,
       );
       dispatch(setTransactionDeploy(deployTransaction));
-
-      dispatch(setTransactions(storedTxns));
-
+      dispatch(setTransactionCursor(newCursor));
       return data;
     } catch (error) {
       dispatch(setTransactions([]));

@@ -1,5 +1,5 @@
 import { useAppSelector } from 'hooks/redux';
-import { FC, useEffect, useRef } from 'react';
+import { FC, useEffect, useRef, useState, useCallback } from 'react';
 import { useStarkNetSnap } from 'services';
 import { Transaction } from 'types';
 import {
@@ -16,6 +16,9 @@ interface Props {
 
 export const TransactionsListView = ({ transactions }: Props) => {
   const { getTransactions } = useStarkNetSnap();
+  const seenCursors = useRef<Set<{ txnHash: string; blockNumber: number }>>(
+    new Set(),
+  );
   const networks = useAppSelector((state) => state.networks);
   const currentAccount = useAppSelector((state) => state.wallet.currentAccount);
   const erc20TokenBalanceSelected = useAppSelector(
@@ -24,8 +27,67 @@ export const TransactionsListView = ({ transactions }: Props) => {
   const walletTransactions = useAppSelector(
     (state) => state.wallet.transactions,
   );
+  const walletTransactionsCursor = useAppSelector(
+    (state) => state.wallet.transactionCursor,
+  );
   const timeoutHandle = useRef(setTimeout(() => {}));
   const chainId = networks.items[networks.activeNetwork]?.chainId;
+
+  const [isFetchingMore, setIsFetchingMore] = useState(false);
+
+  const fetchMore = useCallback(async () => {
+    if (
+      walletTransactionsCursor &&
+      !seenCursors.current.has({
+        txnHash: walletTransactionsCursor.txnHash,
+        blockNumber: walletTransactionsCursor.blockNumber,
+      })
+    ) {
+      seenCursors.current.add({
+        txnHash: walletTransactionsCursor.txnHash,
+        blockNumber: walletTransactionsCursor.blockNumber,
+      });
+      setIsFetchingMore(true);
+
+      await getTransactions(
+        currentAccount.address,
+        erc20TokenBalanceSelected.address,
+        chainId,
+        false,
+        walletTransactionsCursor,
+      );
+
+      setIsFetchingMore(false);
+    }
+  }, [
+    walletTransactionsCursor,
+    getTransactions,
+    currentAccount.address,
+    erc20TokenBalanceSelected.address,
+    chainId,
+  ]);
+
+  const checkIfShouldFetchMore = (
+    scrollTop: number,
+    scrollHeight: number,
+    clientHeight: number,
+  ) => {
+    return scrollTop + clientHeight >= scrollHeight - 10;
+  };
+
+  const handleScroll = useCallback(
+    async (event: React.UIEvent<HTMLDivElement>) => {
+      const { scrollTop, scrollHeight, clientHeight } = event.currentTarget;
+
+      if (
+        checkIfShouldFetchMore(scrollTop, scrollHeight, clientHeight) &&
+        !isFetchingMore
+      ) {
+        await fetchMore();
+      }
+    },
+    [isFetchingMore, fetchMore],
+  );
 
   useEffect(() => {
     if (chainId && erc20TokenBalanceSelected.address) {
@@ -35,10 +97,8 @@ export const TransactionsListView = ({ transactions }: Props) => {
           getTransactions(
             currentAccount.address,
             erc20TokenBalanceSelected.address,
-            10,
             chainId,
             false,
-            true,
           ),
         TRANSACTIONS_REFRESH_FREQUENCY,
       );
@@ -58,20 +118,15 @@ export const TransactionsListView = ({ transactions }: Props) => {
         getTransactions(
           currentAccount.address,
           erc20TokenBalanceSelected.address,
-          10,
           chainId,
         );
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
-      // eslint-disable-next-line react-hooks/exhaustive-deps
       erc20TokenBalanceSelected.address,
-      // eslint-disable-next-line react-hooks/exhaustive-deps
       erc20TokenBalanceSelected.chainId,
-      // eslint-disable-next-line react-hooks/exhaustive-deps
       currentAccount.address,
-      // eslint-disable-next-line react-hooks/exhaustive-deps
       currentAccount.chainId,
       chainId,
     ],
@@ -79,6 +134,7 @@ export const TransactionsListView = ({ transactions }: Props) => {
 
   return (
     <Wrapper<FC<IListProps<Transaction>>>
+      onScroll={handleScroll}
       data={transactions.length > 0 ? transactions : walletTransactions}
       render={(transaction) => (
         <TransactionListItem transaction={transaction} />
