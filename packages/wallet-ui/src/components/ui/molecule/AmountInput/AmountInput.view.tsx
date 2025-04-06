@@ -62,6 +62,12 @@ export const AmountInputView = ({
     }
   };
 
+  const toggleUsdMode = () => {
+    setInputValue(totalPrice);
+    setTotalPrice(inputValue);
+    setUsdMode((prev) => !prev);
+  };
+
   useEffect(() => {
     // Adjust the input size whenever the value changes
     if (inputRef.current !== null) {
@@ -183,7 +189,12 @@ export const AmountInputView = ({
         </Left>
         <IconRight
           icon={['fas', 'exchange-alt']}
-          onClick={() => setUsdMode(!usdMode)}
+          onClick={asset.usdPrice !== undefined ? toggleUsdMode : undefined}
+          style={
+            asset.usdPrice === undefined
+              ? { cursor: 'not-allowed', opacity: 0.5 }
+              : undefined
+          }
         />
       </InputContainer>
       {helperText && <HelperText>{helperText}</HelperText>}
