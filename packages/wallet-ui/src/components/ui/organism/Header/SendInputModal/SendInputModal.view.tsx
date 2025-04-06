@@ -119,15 +119,15 @@ export const SendInputModalView = ({
               inputAmount.gt(userBalance.sub(fee))
             ) {
               setErrors((prevErrors) => ({
-              ...prevErrors,
-              amount: translate('inputAmountExceedsBalance'),
+                ...prevErrors,
+                amount: translate('inputAmountExceedsBalance'),
               }));
-            } 
+            }
             // Check if the input amount exceeds the user's total balance
             else if (inputAmount.gt(userBalance)) {
               setErrors((prevErrors) => ({
-              ...prevErrors,
-              amount: translate('inputAmountExceedsBalance'),
+                ...prevErrors,
+                amount: translate('inputAmountExceedsBalance'),
               }));
             }
           } catch (error) {
