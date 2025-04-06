@@ -1,8 +1,8 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ethers } from 'ethers';
 
 import { useAppSelector } from 'hooks';
-import { FeeToken } from 'types';
+import { FeeEstimate, FeeToken } from 'types';
 import { useMultiLanguage, useStarkNetSnap } from 'services';
 import {
   getMaxAmountToSpend,
@@ -37,7 +37,7 @@ interface Fields {
 interface Props {
   closeModal?: () => void;
   setSummaryModalOpen: (open: boolean) => void;
-  feeEstimates: any;
+  feeEstimates: FeeEstimate;
   isEstimatingGas: boolean;
   handlSetFields: (fields: Partial<Fields>) => void;
   setResolvedAddress: (address: string) => void;
@@ -111,10 +111,23 @@ export const SendInputModalView = ({
               erc20TokenBalanceSelected.decimals,
             );
             const userBalance = erc20TokenBalanceSelected.amount;
-            if (inputAmount.gt(userBalance)) {
+            const fee = feeEstimates?.fee || ethers.BigNumber.from(0);
+            // Check if the selected fee token is the same as the token being sent
+            // and if the input amount exceeds the user's balance after subtracting the fee
+            if (
+              fields.feeToken === erc20TokenBalanceSelected.symbol &&
+              inputAmount.gt(userBalance.sub(fee))
+            ) {
               setErrors((prevErrors) => ({
-                ...prevErrors,
-                amount: translate('inputAmountExceedsBalance'),
+              ...prevErrors,
+              amount: translate('inputAmountExceedsBalance'),
+              }));
+            } 
+            // Check if the input amount exceeds the user's total balance
+            else if (inputAmount.gt(userBalance)) {
+              setErrors((prevErrors) => ({
+              ...prevErrors,
+              amount: translate('inputAmountExceedsBalance'),
               }));
             }
           } catch (error) {
@@ -159,16 +172,20 @@ export const SendInputModalView = ({
           }
         }
         break;
-      case 'feeToken':
-        handlSetFields({
-          feeToken: fieldValue as FeeToken,
-        });
-        break;
     }
     handlSetFields({
       [fieldName]: fieldValue,
     });
   };
+
+  useEffect(() => {
+    // Revalidate the amount when the feeToken changes
+    // This is because the maximum amount that can be spent depends on the selected fee token
+    if (fields.feeToken) {
+      handleChange('amount', fields.amount);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fields.feeToken]);
 
   return (
     <Modal>
@@ -207,6 +224,7 @@ export const SendInputModalView = ({
             amount: getMaxAmountToSpend(
               erc20TokenBalanceSelected,
               feeEstimates?.fee,
+              fields.feeToken,
             ),
           }}
           isEstimatingGas={isEstimatingGas}
