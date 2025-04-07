@@ -111,7 +111,7 @@ export const SendInputModalView = ({
               erc20TokenBalanceSelected.decimals,
             );
             const userBalance = erc20TokenBalanceSelected.amount;
-            const fee = feeEstimates?.fee || ethers.BigNumber.from(0);
+            const fee = feeEstimates?.fee || ethers.BigNumber.from(1);
             // Check if the selected fee token is the same as the token being sent
             // and if the input amount exceeds the user's balance after subtracting the fee
             if (
@@ -230,6 +230,7 @@ export const SendInputModalView = ({
           isEstimatingGas={isEstimatingGas}
           setIsMaxAmountPending={setIsMaxAmountPending}
           isMaxAmountPending={isMaxAmountPending}
+          feeToken={fields.feeToken}
         />
         <SeparatorSmall />
         <div>

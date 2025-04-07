@@ -13,7 +13,7 @@ import {
   Wrapper,
   LoadingWrapper,
 } from './AmountInput.style';
-import { Erc20TokenBalance } from 'types';
+import { Erc20TokenBalance, FeeToken } from 'types';
 import { ethers } from 'ethers';
 import { getAmountPrice, isSpecialInputKey } from 'utils/utils';
 
@@ -28,6 +28,7 @@ interface Props extends InputHTMLAttributes<HTMLInputElement> {
   isEstimatingGas: boolean;
   isMaxAmountPending?: boolean;
   setIsMaxAmountPending?: (value: boolean) => void;
+  feeToken?: FeeToken;
 }
 
 export const AmountInputView = ({
@@ -42,6 +43,7 @@ export const AmountInputView = ({
   isEstimatingGas,
   isMaxAmountPending = false,
   setIsMaxAmountPending,
+  feeToken,
   ...otherProps
 }: Props) => {
   const [focused, setFocused] = useState(false);
@@ -117,23 +119,19 @@ export const AmountInputView = ({
     }
   };
 
+  const calculateMaxValue = () => {
+    const amountStr = ethers.utils.formatUnits(asset.amount, asset.decimals);
+    const amountFloat = parseFloat(amountStr);
+
+    return usdMode ? getAmountPrice(asset, amountFloat, false) : amountStr;
+  };
+
   const handleMaxClick = () => {
-    // If the fees are being fetched, set isMaxAmountPending to true
-    // to apply the maximum amount once the fees are fetched.
-    if (isEstimatingGas) {
-      typeof setIsMaxAmountPending === 'function' &&
-        setIsMaxAmountPending(true);
+    if (isEstimatingGas && feeToken === asset.symbol) {
+      setIsMaxAmountPending?.(true);
       return;
     }
-    let amountBN = ethers.BigNumber.from(asset.amount);
-    const amountStr = ethers.utils
-      .formatUnits(amountBN, asset.decimals)
-      .toString();
-    const amountFloat = parseFloat(amountStr);
-    const value = usdMode
-      ? getAmountPrice(asset, amountFloat, false)
-      : amountStr;
-    triggerOnChange(value);
+    triggerOnChange(calculateMaxValue());
   };
 
   useEffect(() => {
