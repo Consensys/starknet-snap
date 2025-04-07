@@ -48,6 +48,7 @@ interface Props {
     feeToken: FeeToken;
   };
   resolvedAddress: string;
+  feeTokens: FeeToken[];
 }
 
 export const SendInputModalView = ({
@@ -59,14 +60,12 @@ export const SendInputModalView = ({
   setResolvedAddress,
   fields,
   resolvedAddress,
+  feeTokens,
 }: Props) => {
   const networks = useAppSelector((state) => state.networks);
   const chainId = networks?.items[networks.activeNetwork]?.chainId;
   const erc20TokenBalanceSelected = useAppSelector(
     (state) => state.wallet.erc20TokenBalanceSelected,
-  );
-  const erc20TokenBalances = useAppSelector(
-    (state) => state.wallet.erc20TokenBalances,
   );
 
   const { getAddrFromStarkName } = useStarkNetSnap();
@@ -75,6 +74,11 @@ export const SendInputModalView = ({
   const [isMaxAmountPending, setIsMaxAmountPending] = useState(false);
   const [loadingStrkName, setLoadingStrkName] = useState(false);
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
+
+  const feeTokenOptions = feeTokens.map((token) => ({
+    label: token,
+    value: token,
+  }));
 
   const confirmEnabled = () => {
     return (
@@ -242,22 +246,12 @@ export const SendInputModalView = ({
             {translate('selectTokenForTransactionFees')}
           </label>
           <DropDown
-            value={fields.feeToken}
-            options={Object.values(FeeToken)
-              .filter((token) => {
-                // Only show fee tokens that have a non-zero balance in erc20TokenBalances
-                const tokenBalance = erc20TokenBalances.find(
-                  (balance) => balance.symbol === token,
-                );
-                return (
-                  tokenBalance &&
-                  !ethers.BigNumber.from(tokenBalance.amount).isZero()
-                );
-              })
-              .map((token) => ({
-                label: token,
-                value: token,
-              }))}
+            value={
+              feeTokenOptions.some((option) => option.value === fields.feeToken)
+                ? fields.feeToken
+                : feeTokenOptions[0]?.value // fallback to first valid option
+            }
+            options={feeTokenOptions}
             onChange={(e) => handleChange('feeToken', e.value)}
           />
         </div>
