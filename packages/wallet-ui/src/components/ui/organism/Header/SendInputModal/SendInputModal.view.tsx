@@ -65,6 +65,10 @@ export const SendInputModalView = ({
   const erc20TokenBalanceSelected = useAppSelector(
     (state) => state.wallet.erc20TokenBalanceSelected,
   );
+  const erc20TokenBalances = useAppSelector(
+    (state) => state.wallet.erc20TokenBalances,
+  );
+
   const { getAddrFromStarkName } = useStarkNetSnap();
   const { translate } = useMultiLanguage();
   const [errors, setErrors] = useState({ amount: '', address: '' });
@@ -239,10 +243,21 @@ export const SendInputModalView = ({
           </label>
           <DropDown
             value={fields.feeToken}
-            options={Object.values(FeeToken).map((token) => ({
-              label: token,
-              value: token,
-            }))}
+            options={Object.values(FeeToken)
+              .filter((token) => {
+                // Only show fee tokens that have a non-zero balance in erc20TokenBalances
+                const tokenBalance = erc20TokenBalances.find(
+                  (balance) => balance.symbol === token,
+                );
+                return (
+                  tokenBalance &&
+                  !ethers.BigNumber.from(tokenBalance.amount).isZero()
+                );
+              })
+              .map((token) => ({
+                label: token,
+                value: token,
+              }))}
             onChange={(e) => handleChange('feeToken', e.value)}
           />
         </div>
