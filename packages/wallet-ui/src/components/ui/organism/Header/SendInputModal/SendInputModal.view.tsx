@@ -122,17 +122,12 @@ export const SendInputModalView = ({
             const fee = feeEstimates?.fee || ethers.BigNumber.from(1);
             // Check if the selected fee token is the same as the token being sent
             // and if the input amount exceeds the user's balance after subtracting the fee
+            // or if the input amount exceeds the user's total balance
             if (
-              fields.feeToken === erc20TokenBalanceSelected.symbol &&
-              inputAmount.gt(userBalance.sub(fee))
+              (fields.feeToken === erc20TokenBalanceSelected.symbol &&
+                inputAmount.gt(userBalance.sub(fee))) ||
+              inputAmount.gt(userBalance)
             ) {
-              setErrors((prevErrors) => ({
-                ...prevErrors,
-                amount: translate('inputAmountExceedsBalance'),
-              }));
-            }
-            // Check if the input amount exceeds the user's total balance
-            else if (inputAmount.gt(userBalance)) {
               setErrors((prevErrors) => ({
                 ...prevErrors,
                 amount: translate('inputAmountExceedsBalance'),
