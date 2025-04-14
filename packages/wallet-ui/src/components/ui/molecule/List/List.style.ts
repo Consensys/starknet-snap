@@ -14,6 +14,7 @@ export const List = styled.ul`
   padding-inline-start: 0px;
   display: flex;
   flex-direction: column;
+  height: 100vh;
 `;
 
 export const ListItem = styled.li``;

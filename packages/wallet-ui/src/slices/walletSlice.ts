@@ -18,6 +18,10 @@ export interface WalletState {
   erc20TokenBalances: Erc20TokenBalance[];
   erc20TokenBalanceSelected: Erc20TokenBalance;
   transactions: Transaction[];
+  transactionCursor?: {
+    blockNumber: number;
+    txnHash: string;
+  };
   transactionDeploy?: Transaction;
   provider?: any; //TODO: metamask SDK is not export types
   visibility: {
@@ -36,6 +40,7 @@ const initialState: WalletState = {
   erc20TokenBalances: [],
   erc20TokenBalanceSelected: {} as Erc20TokenBalance,
   transactions: [],
+  transactionCursor: undefined,
   transactionDeploy: undefined,
   provider: undefined,
   visibility: {
@@ -155,8 +160,15 @@ export const walletSlice = createSlice({
     setErc20TokenBalanceSelected: (state, { payload }) => {
       state.erc20TokenBalanceSelected = payload;
     },
+    appendTransactions: (state, { payload }) => {
+      const transactions = state.transactions.concat(payload);
+      state.transactions = transactions;
+    },
     setTransactions: (state, { payload }) => {
       state.transactions = payload;
+    },
+    setTransactionCursor: (state, { payload }) => {
+      state.transactionCursor = payload;
     },
     setTransactionDeploy: (state, { payload }) => {
       state.transactionDeploy = payload;
@@ -187,7 +199,9 @@ export const {
   setErc20TokenBalances,
   setErc20TokenBalanceSelected,
   upsertErc20TokenBalance,
+  appendTransactions,
   setTransactions,
+  setTransactionCursor,
   setTransactionDeploy,
   resetWallet,
   setProvider,
