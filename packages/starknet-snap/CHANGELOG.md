@@ -1,5 +1,18 @@
 # Changelog
 
+## [3.4.0](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v3.3.0...starknet-snap-v3.4.0) (2025-04-03)
+
+
+### Features
+
+* add isDeployed field in account state snap ([#525](https://github.com/Consensys/starknet-snap/issues/525)) ([16e44d8](https://github.com/Consensys/starknet-snap/commit/16e44d892bd1956ac54808b433ddcc622da930e5))
+* prevent account with same name ([dcdbf34](https://github.com/Consensys/starknet-snap/commit/dcdbf34af38ee18f64db76e40fcb64f5412f34dd))
+
+
+### Bug Fixes
+
+* include failed transactions on RPC `starkNet_getTransactions` ([da1fbca](https://github.com/Consensys/starknet-snap/commit/da1fbca84fa43e7b473c8399c87ff850ff8d4768))
+
 ## [3.3.0](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v3.2.0...starknet-snap-v3.3.0) (2025-03-04)
 
 

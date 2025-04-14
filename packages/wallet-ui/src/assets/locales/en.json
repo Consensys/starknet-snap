@@ -175,6 +175,9 @@
     "invalidAddressFormat": {
       "message": "Invalid address format"
     },
+    "invalidAmount": {
+      "message": "Invalid amount"
+    },
     "loading": {
       "message": "Loading"
     },
