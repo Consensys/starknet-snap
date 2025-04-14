@@ -13,7 +13,7 @@ import {
   ETH_TOKEN_ADDR,
   STRK_TOKEN_ADDR,
 } from './constants';
-import { Erc20Token, Erc20TokenBalance, TokenBalance } from 'types';
+import { Erc20Token, Erc20TokenBalance, FeeToken, TokenBalance } from 'types';
 
 export const shortenAddress = (address: string, num = 3) => {
   if (!address) return '';
@@ -152,8 +152,13 @@ export const getMinAmountToSpend = (): number => {
 export const getMaxAmountToSpend = (
   asset: Erc20TokenBalance,
   gasFee?: string,
+  feeToken?: FeeToken,
 ): BigNumber => {
-  if (gasFee && [ETH_TOKEN_ADDR, STRK_TOKEN_ADDR].includes(asset.address)) {
+  if (
+    gasFee &&
+    feeToken === asset.symbol &&
+    [ETH_TOKEN_ADDR, STRK_TOKEN_ADDR].includes(asset.address)
+  ) {
     return asset.amount.sub(gasFee);
   }
   return asset.amount;
@@ -285,8 +290,12 @@ export const removeUndefined = (
   obj: Record<string, unknown>,
 ): Record<string, unknown> => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  return Object.fromEntries(
-    Object.entries(obj).filter(([_, val]) => val !== undefined),
+  return JSON.parse(
+    JSON.stringify(
+      Object.fromEntries(
+        Object.entries(obj).filter(([_, val]) => val !== undefined),
+      ),
+    ),
   );
 };
 

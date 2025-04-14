@@ -1,8 +1,8 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ethers } from 'ethers';
 
 import { useAppSelector } from 'hooks';
-import { FeeToken } from 'types';
+import { FeeEstimate, FeeToken } from 'types';
 import { useMultiLanguage, useStarkNetSnap } from 'services';
 import {
   getMaxAmountToSpend,
@@ -37,7 +37,7 @@ interface Fields {
 interface Props {
   closeModal?: () => void;
   setSummaryModalOpen: (open: boolean) => void;
-  feeEstimates: any;
+  feeEstimates: FeeEstimate;
   isEstimatingGas: boolean;
   handlSetFields: (fields: Partial<Fields>) => void;
   setResolvedAddress: (address: string) => void;
@@ -48,6 +48,7 @@ interface Props {
     feeToken: FeeToken;
   };
   resolvedAddress: string;
+  feeTokens: FeeToken[];
 }
 
 export const SendInputModalView = ({
@@ -59,18 +60,25 @@ export const SendInputModalView = ({
   setResolvedAddress,
   fields,
   resolvedAddress,
+  feeTokens,
 }: Props) => {
   const networks = useAppSelector((state) => state.networks);
   const chainId = networks?.items[networks.activeNetwork]?.chainId;
   const erc20TokenBalanceSelected = useAppSelector(
     (state) => state.wallet.erc20TokenBalanceSelected,
   );
+
   const { getAddrFromStarkName } = useStarkNetSnap();
   const { translate } = useMultiLanguage();
   const [errors, setErrors] = useState({ amount: '', address: '' });
   const [isMaxAmountPending, setIsMaxAmountPending] = useState(false);
   const [loadingStrkName, setLoadingStrkName] = useState(false);
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
+
+  const feeTokenOptions = feeTokens.map((token) => ({
+    label: token,
+    value: token,
+  }));
 
   const confirmEnabled = () => {
     return (
@@ -94,14 +102,32 @@ export const SendInputModalView = ({
     }));
     switch (fieldName) {
       case 'amount':
-        if (fieldValue !== '' && fieldValue !== '.') {
+        // If input is not empty, attempt to parse and validate against balance.
+        // Parsing failures or insufficient balance will trigger relevant errors.
+        // Empty input is allowed here (not a format error) — required validation is handled separately.
+        const isEmpty = fieldValue === '';
+        // Reset error message, if any, when the input is cleared.
+        // This allows the user to clear the input without showing an error.
+        setErrors((prevErrors) => ({
+          ...prevErrors,
+          amount: '',
+        }));
+        if (!isEmpty) {
           try {
             const inputAmount = ethers.utils.parseUnits(
               fieldValue,
               erc20TokenBalanceSelected.decimals,
             );
             const userBalance = erc20TokenBalanceSelected.amount;
-            if (inputAmount.gt(userBalance)) {
+            const fee = feeEstimates?.fee || ethers.BigNumber.from(1);
+            // Check if the selected fee token is the same as the token being sent
+            // and if the input amount exceeds the user's balance after subtracting the fee
+            // or if the input amount exceeds the user's total balance
+            if (
+              (fields.feeToken === erc20TokenBalanceSelected.symbol &&
+                inputAmount.gt(userBalance.sub(fee))) ||
+              inputAmount.gt(userBalance)
+            ) {
               setErrors((prevErrors) => ({
                 ...prevErrors,
                 amount: translate('inputAmountExceedsBalance'),
@@ -149,16 +175,20 @@ export const SendInputModalView = ({
           }
         }
         break;
-      case 'feeToken':
-        handlSetFields({
-          feeToken: fieldValue as FeeToken,
-        });
-        break;
     }
     handlSetFields({
       [fieldName]: fieldValue,
     });
   };
+
+  useEffect(() => {
+    // Revalidate the amount when the feeToken changes
+    // This is because the maximum amount that can be spent depends on the selected fee token
+    if (fields.feeToken) {
+      handleChange('amount', fields.amount);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fields.feeToken]);
 
   return (
     <Modal>
@@ -197,11 +227,13 @@ export const SendInputModalView = ({
             amount: getMaxAmountToSpend(
               erc20TokenBalanceSelected,
               feeEstimates?.fee,
+              fields.feeToken,
             ),
           }}
           isEstimatingGas={isEstimatingGas}
           setIsMaxAmountPending={setIsMaxAmountPending}
           isMaxAmountPending={isMaxAmountPending}
+          feeToken={fields.feeToken}
         />
         <SeparatorSmall />
         <div>
@@ -209,11 +241,12 @@ export const SendInputModalView = ({
             {translate('selectTokenForTransactionFees')}
           </label>
           <DropDown
-            value={fields.feeToken}
-            options={Object.values(FeeToken).map((token) => ({
-              label: token,
-              value: token,
-            }))}
+            value={
+              feeTokenOptions.some((option) => option.value === fields.feeToken)
+                ? fields.feeToken
+                : feeTokenOptions[0]?.value // fallback to first valid option
+            }
+            options={feeTokenOptions}
             onChange={(e) => handleChange('feeToken', e.value)}
           />
         </div>
