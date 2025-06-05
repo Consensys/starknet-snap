@@ -74,11 +74,6 @@ export const SendInputModalView = ({
   const [loadingStrkName, setLoadingStrkName] = useState(false);
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
-  const feeTokenOptions = feeTokens.map((token) => ({
-    label: token,
-    value: token,
-  }));
-
   const confirmEnabled = () => {
     return (
       !errors.address &&
