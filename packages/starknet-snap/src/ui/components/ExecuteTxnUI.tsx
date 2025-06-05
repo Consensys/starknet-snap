@@ -34,7 +34,6 @@ export type ExecuteTxnUIProps = {
   calls: FormattedCallData[];
   selectedFeeToken: string;
   includeDeploy: boolean;
-  errors?: ExecuteTxnUIErrors;
 };
 
 /**
@@ -48,7 +47,6 @@ export type ExecuteTxnUIProps = {
  * @param props.calls - The calls involved in the transaction.
  * @param props.selectedFeeToken - The token used for fees.
  * @param props.includeDeploy - Whether to include account deployment in the transaction.
- * @param [props.errors] - The object contains the error message for fee token selection.
  * @returns The ExecuteTxnUI component.
  */
 export const ExecuteTxnUI: SnapComponent<ExecuteTxnUIProps> = ({
