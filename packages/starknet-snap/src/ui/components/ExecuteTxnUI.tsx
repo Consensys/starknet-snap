@@ -8,7 +8,6 @@ import {
   Divider,
 } from '@metamask/snaps-sdk/jsx';
 
-import type { FeeToken } from '../../types/snapApi';
 import type { FormattedCallData } from '../../types/snapState';
 import { DEFAULT_DECIMAL_PLACES } from '../../utils/constants';
 import { getTranslator } from '../../utils/locale';
@@ -60,7 +59,6 @@ export const ExecuteTxnUI: SnapComponent<ExecuteTxnUIProps> = ({
   calls,
   selectedFeeToken,
   includeDeploy,
-  errors,
 }) => {
   // Calculate the totals using the helper
   const translate = getTranslator();
