@@ -262,9 +262,6 @@
     "selectAnOption": {
       "message": "Select an option"
     },
-    "selectTokenForTransactionFees": {
-      "message": "Select Token for Transaction Fees"
-    },
     "selectAnAccount": {
       "message": "Select an account"
     },

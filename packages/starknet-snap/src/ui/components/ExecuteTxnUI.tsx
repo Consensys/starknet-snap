@@ -14,7 +14,6 @@ import { DEFAULT_DECIMAL_PLACES } from '../../utils/constants';
 import { getTranslator } from '../../utils/locale';
 import { AddressUI, JsonDataUI, NetworkUI, SignerUI } from '../fragments';
 import { Amount } from '../fragments/Amount';
-import { FeeTokenSelector } from '../fragments/FeeTokenSelector';
 import { accumulateTotals } from '../utils';
 
 /**
@@ -102,10 +101,6 @@ export const ExecuteTxnUI: SnapComponent<ExecuteTxnUIProps> = ({
             )}
           </Section>
         ))}
-        <FeeTokenSelector
-          selectedToken={selectedFeeToken as FeeToken}
-          error={errors?.fees}
-        />
         <Section>
           <Icon name="gas" size="md" />
           <Amount

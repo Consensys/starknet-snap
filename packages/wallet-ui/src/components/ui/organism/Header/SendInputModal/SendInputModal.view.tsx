@@ -12,7 +12,6 @@ import {
 } from 'utils/utils';
 import { AmountInput } from 'components/ui/molecule/AmountInput';
 import { AddressInput } from 'components/ui/molecule/AddressInput';
-import { DropDown } from 'components/ui/molecule/DropDown';
 import {
   Bold,
   Normal,
@@ -235,21 +234,6 @@ export const SendInputModalView = ({
           isMaxAmountPending={isMaxAmountPending}
           feeToken={fields.feeToken}
         />
-        <SeparatorSmall />
-        <div>
-          <label htmlFor="feeToken">
-            {translate('selectTokenForTransactionFees')}
-          </label>
-          <DropDown
-            value={
-              feeTokenOptions.some((option) => option.value === fields.feeToken)
-                ? fields.feeToken
-                : feeTokenOptions[0]?.value // fallback to first valid option
-            }
-            options={feeTokenOptions}
-            onChange={(e) => handleChange('feeToken', e.value)}
-          />
-        </div>
       </Modal.Body>
       <Modal.Buttons>
         <ButtonStyled onClick={closeModal} backgroundTransparent borderVisible>
