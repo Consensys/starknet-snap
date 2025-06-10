@@ -143,10 +143,6 @@ export const getAccountInstance = (
   userAddress: string,
   privateKey: string | Uint8Array,
   cairoVersion?: CairoVersion,
-  transactionVersion?:
-    | BigNumberish
-    | typeof constants.TRANSACTION_VERSION.V2
-    | typeof constants.TRANSACTION_VERSION.V3,
   blockIdentifier?: BlockIdentifierEnum,
 ): Account => {
   const provider = getProvider(network, blockIdentifier);
@@ -155,9 +151,7 @@ export const getAccountInstance = (
     userAddress,
     privateKey,
     cairoVersion ?? CAIRO_VERSION,
-    transactionVersion as unknown as
-      | typeof constants.TRANSACTION_VERSION.V2
-      | typeof constants.TRANSACTION_VERSION.V3,
+    constants.TRANSACTION_VERSION.V3,
   );
 };
 
@@ -207,7 +201,6 @@ export const declareContract = async (
     senderAddress,
     privateKey,
     cairoVersion,
-    invocationsDetails?.version,
   ).declare(contractPayload, {
     ...invocationsDetails,
     skipValidate: false,
@@ -230,7 +223,6 @@ export const estimateFee = async (
     senderAddress,
     privateKey,
     cairoVersion,
-    invocationsDetails?.version,
     BlockIdentifierEnum.Latest,
   ).estimateInvokeFee(txnInvocation, {
     ...invocationsDetails,
@@ -254,7 +246,6 @@ export const estimateFeeBulk = async (
     senderAddress,
     privateKey,
     cairoVersion,
-    invocationsDetails?.version,
     BlockIdentifierEnum.Latest,
   ).estimateFeeBulk(txnInvocation, {
     ...invocationsDetails,
@@ -277,7 +268,6 @@ export const executeTxn = async (
     senderAddress,
     privateKey,
     cairoVersion,
-    invocationsDetails?.version,
   ).execute(txnInvocation, abis, {
     ...invocationsDetails,
     skipValidate: false,
@@ -307,7 +297,6 @@ export const deployAccount = async (
     contractAddress,
     privateKey,
     cairoVersion,
-    invocationsDetails?.version,
   ).deployAccount(deployAccountPayload, {
     ...invocationsDetails,
     skipValidate: false,
@@ -337,7 +326,6 @@ export const estimateAccountDeployFee = async (
     contractAddress,
     privateKey,
     cairoVersion,
-    invocationsDetails?.version,
   ).estimateAccountDeployFee(deployAccountPayload, {
     ...invocationsDetails,
     skipValidate: false,
