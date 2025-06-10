@@ -1,10 +1,9 @@
 import { useState } from 'react';
-import { useAppSelector, useCurrentNetwork, useEstimateFee } from 'hooks';
+import { useCurrentNetwork, useEstimateFee } from 'hooks';
 import { FeeToken } from 'types';
 import { DEFAULT_FEE_TOKEN } from 'utils/constants';
 import { SendInputModal } from '../SendInputModal';
 import { SendSummaryModal } from '../SendSummaryModal';
-import { ethers } from 'ethers';
 
 interface Props {
   closeModal?: () => void;
@@ -15,18 +14,7 @@ export const SendModalView = ({ closeModal }: Props) => {
   const [summaryModalOpen, setSummaryModalOpen] = useState(false);
   const [resolvedAddress, setResolvedAddress] = useState('');
 
-  const erc20TokenBalances = useAppSelector(
-    (state) => state.wallet.erc20TokenBalances,
-  );
-
-  const validFeeTokens = Object.values(FeeToken).filter((token) => {
-    const tokenBalance = erc20TokenBalances.find(
-      (balance) => balance.symbol === token,
-    );
-    return tokenBalance && !ethers.BigNumber.from(tokenBalance.amount).isZero();
-  });
-
-  const defaultFeeToken = validFeeTokens[0] || DEFAULT_FEE_TOKEN;
+  const defaultFeeToken = DEFAULT_FEE_TOKEN;
 
   const [fields, setFields] = useState({
     amount: '',
@@ -68,7 +56,6 @@ export const SendModalView = ({ closeModal }: Props) => {
           resolvedAddress={resolvedAddress}
           setResolvedAddress={setResolvedAddress}
           fields={fields}
-          feeTokens={validFeeTokens}
         />
       )}
       {summaryModalOpen && (
