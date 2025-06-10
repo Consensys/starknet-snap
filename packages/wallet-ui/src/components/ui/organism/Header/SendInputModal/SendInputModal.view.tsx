@@ -47,7 +47,6 @@ interface Props {
     feeToken: FeeToken;
   };
   resolvedAddress: string;
-  feeTokens: FeeToken[];
 }
 
 export const SendInputModalView = ({
@@ -59,7 +58,6 @@ export const SendInputModalView = ({
   setResolvedAddress,
   fields,
   resolvedAddress,
-  feeTokens,
 }: Props) => {
   const networks = useAppSelector((state) => state.networks);
   const chainId = networks?.items[networks.activeNetwork]?.chainId;
