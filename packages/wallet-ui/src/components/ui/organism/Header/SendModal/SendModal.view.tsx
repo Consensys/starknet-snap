@@ -26,7 +26,7 @@ export const SendModalView = ({ closeModal }: Props) => {
     return tokenBalance && !ethers.BigNumber.from(tokenBalance.amount).isZero();
   });
 
-  const defaultFeeToken = validFeeTokens[0] || DEFAULT_FEE_TOKEN;
+  const defaultFeeToken = DEFAULT_FEE_TOKEN;
 
   const [fields, setFields] = useState({
     amount: '',
@@ -68,7 +68,6 @@ export const SendModalView = ({ closeModal }: Props) => {
           resolvedAddress={resolvedAddress}
           setResolvedAddress={setResolvedAddress}
           fields={fields}
-          feeTokens={validFeeTokens}
         />
       )}
       {summaryModalOpen && (
