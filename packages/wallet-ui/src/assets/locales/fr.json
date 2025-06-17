@@ -256,9 +256,6 @@
     "selectAnOption": {
       "message": "Sélectionner une option"
     },
-    "selectTokenForTransactionFees": {
-      "message": "Sélectionner un jeton pour les frais de transaction"
-    },
     "selectAnAccount": {
       "message": "Sélectionnez un compte"
     },

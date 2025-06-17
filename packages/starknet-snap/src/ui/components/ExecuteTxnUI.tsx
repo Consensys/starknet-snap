@@ -8,13 +8,11 @@ import {
   Divider,
 } from '@metamask/snaps-sdk/jsx';
 
-import type { FeeToken } from '../../types/snapApi';
 import type { FormattedCallData } from '../../types/snapState';
 import { DEFAULT_DECIMAL_PLACES } from '../../utils/constants';
 import { getTranslator } from '../../utils/locale';
 import { AddressUI, JsonDataUI, NetworkUI, SignerUI } from '../fragments';
 import { Amount } from '../fragments/Amount';
-import { FeeTokenSelector } from '../fragments/FeeTokenSelector';
 import { accumulateTotals } from '../utils';
 
 /**
@@ -36,7 +34,6 @@ export type ExecuteTxnUIProps = {
   calls: FormattedCallData[];
   selectedFeeToken: string;
   includeDeploy: boolean;
-  errors?: ExecuteTxnUIErrors;
 };
 
 /**
@@ -50,7 +47,6 @@ export type ExecuteTxnUIProps = {
  * @param props.calls - The calls involved in the transaction.
  * @param props.selectedFeeToken - The token used for fees.
  * @param props.includeDeploy - Whether to include account deployment in the transaction.
- * @param [props.errors] - The object contains the error message for fee token selection.
  * @returns The ExecuteTxnUI component.
  */
 export const ExecuteTxnUI: SnapComponent<ExecuteTxnUIProps> = ({
@@ -61,7 +57,6 @@ export const ExecuteTxnUI: SnapComponent<ExecuteTxnUIProps> = ({
   calls,
   selectedFeeToken,
   includeDeploy,
-  errors,
 }) => {
   // Calculate the totals using the helper
   const translate = getTranslator();
@@ -102,10 +97,6 @@ export const ExecuteTxnUI: SnapComponent<ExecuteTxnUIProps> = ({
             )}
           </Section>
         ))}
-        <FeeTokenSelector
-          selectedToken={selectedFeeToken as FeeToken}
-          error={errors?.fees}
-        />
         <Section>
           <Icon name="gas" size="md" />
           <Amount
