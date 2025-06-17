@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.5.0](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v3.4.0...starknet-snap-v3.5.0) (2025-06-17)
+
+
+### Features
+
+* remove fee dropdown selection ([#549](https://github.com/Consensys/starknet-snap/issues/549)) ([42c5d0e](https://github.com/Consensys/starknet-snap/commit/42c5d0ead1ecba504d6f9101490a8f372d5d7668))
+
 ## [3.4.0](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v3.3.0...starknet-snap-v3.4.0) (2025-04-03)
 
 
