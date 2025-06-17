@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
 
+## [1.30.0](https://github.com/Consensys/starknet-snap/compare/wallet-ui-v1.29.0...wallet-ui-v1.30.0) (2025-06-17)
+
+
+### Features
+
+* remove fee dropdown selection ([#549](https://github.com/Consensys/starknet-snap/issues/549)) ([42c5d0e](https://github.com/Consensys/starknet-snap/commit/42c5d0ead1ecba504d6f9101490a8f372d5d7668))
+
 ## [1.29.0](https://github.com/Consensys/starknet-snap/compare/wallet-ui-v1.28.0...wallet-ui-v1.29.0) (2025-04-03)
 
 
