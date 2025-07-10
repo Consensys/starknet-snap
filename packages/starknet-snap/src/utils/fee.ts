@@ -48,9 +48,7 @@ export class ConsolidateFees {
         acc.overallFee += fee.overall_fee;
         acc.suggestedMaxFee += fee.suggestedMaxFee;
 
-        acc.resourceBounds.l1_gas.max_amount += BigInt(
-          fee.l1_gas_consumed,
-        );
+        acc.resourceBounds.l1_gas.max_amount += BigInt(fee.l1_gas_consumed);
         acc.resourceBounds.l1_gas.max_price_per_unit += BigInt(
           fee.l1_gas_price,
         );
@@ -130,7 +128,7 @@ export class ConsolidateFees {
           max_price_per_unit: numUtils.toHexString(
             this.resourceBounds.l1_data_gas.max_price_per_unit,
           ),
-        }
+        },
       },
     };
   }

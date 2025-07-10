@@ -7,7 +7,7 @@ import type {
   DeclareSignerDetails,
   Call,
   DeployAccountSignerDetails,
-  BigNumberish
+  BigNumberish,
 } from 'starknet';
 
 import { Config } from '../config';

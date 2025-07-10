@@ -1,5 +1,5 @@
 import { type Json } from '@metamask/snaps-sdk';
-import type { Call, constants } from 'starknet';
+import type { Call } from 'starknet';
 import { TransactionType } from 'starknet';
 import type { Infer } from 'superstruct';
 import { object, string, assign, optional, any } from 'superstruct';
@@ -9,6 +9,7 @@ import { AccountStateManager } from '../state/account-state-manager';
 import { TransactionRequestStateManager } from '../state/request-state-manager';
 import { TokenStateManager } from '../state/token-state-manager';
 import { TransactionStateManager } from '../state/transaction-state-manager';
+import { FeeToken } from '../types/snapApi';
 import type { ResourceBounds, TransactionRequest } from '../types/snapState';
 import { generateExecuteTxnFlow } from '../ui/utils';
 import {
@@ -30,15 +31,12 @@ import {
   getEstimatedFees,
 } from '../utils/starknetUtils';
 import {
-  transactionVersionToNumber,
   feeTokenToTransactionVersion,
-  transactionVersionToFeeToken,
   newDeployTransaction,
   newInvokeTransaction,
 } from '../utils/transaction';
 import type { AccountRpcControllerOptions } from './abstract/account-rpc-controller';
 import { AccountRpcController } from './abstract/account-rpc-controller';
-import { FeeToken } from '../types/snapApi';
 
 export const ExecuteTxnRequestStruct = assign(
   object({

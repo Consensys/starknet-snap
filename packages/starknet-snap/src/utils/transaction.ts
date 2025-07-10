@@ -33,7 +33,7 @@ export function transactionVersionToNumber(
 /**
  * Convert the feeToken unit to transaction version.
  *
- * @param feeToken - The feeToken unit.
+ * @param _feeToken - The feeToken unit.
  * @returns The transaction version.
  */
 // TODO Remove this function when the V3 transaction version is the only one supported.
@@ -46,7 +46,7 @@ export function feeTokenToTransactionVersion(
 /**
  * Convert the transaction version to feeToken unit.
  *
- * @param txnVersion - The transaction version.
+ * @param _txnVersion - The transaction version.
  * @returns The feeToken unit.
  */
 // TODO Remove this function when the V3 transaction version is the only one supported.

@@ -268,7 +268,7 @@ export const executeTxn = async (
   senderAddress: string,
   privateKey: string | Uint8Array,
   txnInvocation: Call | Call[],
-  abis?: Abi[],
+  _abis?: Abi[],
   invocationsDetails?: UniversalDetails,
   cairoVersion?: CairoVersion,
 ): Promise<InvokeFunctionResponse> => {
@@ -991,10 +991,7 @@ export const isAccountDeployed = async (network: Network, address: string) => {
 };
 
 export const _validateAndParseAddressFn = _validateAndParseAddress;
-export const validateAndParseAddress = (
-  address: BigNumberish,
-  length = 63,
-) => {
+export const validateAndParseAddress = (address: BigNumberish, length = 63) => {
   // getting rid of 0x and 0x0 prefixes
   const trimmedAddress = address.toString().replace(/^0x0?/u, '');
   if (trimmedAddress.length !== length) {

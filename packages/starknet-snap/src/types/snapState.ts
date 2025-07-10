@@ -1,6 +1,5 @@
 import type {
   RawCalldata,
-  EstimateFee,
   TransactionType as StarknetTransactionType,
 } from 'starknet';
 import type { Infer } from 'superstruct';

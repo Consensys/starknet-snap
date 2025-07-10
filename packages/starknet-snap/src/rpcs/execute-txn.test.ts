@@ -544,7 +544,7 @@ describe('ExecuteTxn', () => {
       );
       const { maxFee: updatedMaxFee, resourceBounds: updatedResourceBounds } =
         transactionRequest;
-      const { calls, abis, details } = request;
+      const { calls, details } = request;
 
       const result = await rpc.execute(request);
 

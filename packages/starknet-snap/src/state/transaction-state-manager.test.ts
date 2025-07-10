@@ -227,7 +227,9 @@ describe('TransactionStateManager', () => {
 
     it('returns the list of transaction by executionStatus', async () => {
       const { txns, stateManager } = await prepareFindTransctions();
-      const executionStatusCond: TransactionExecutionStatus[] = [TransactionExecutionStatus.REJECTED];
+      const executionStatusCond: TransactionExecutionStatus[] = [
+        TransactionExecutionStatus.REJECTED,
+      ];
 
       const result = await stateManager.findTransactions({
         executionStatus: executionStatusCond,

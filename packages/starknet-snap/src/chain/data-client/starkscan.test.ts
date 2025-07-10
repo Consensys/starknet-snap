@@ -443,7 +443,9 @@ describe('StarkScanClient', () => {
   });
 
   describe('getSenderAddress', () => {
-    const prepareMockTx = async (transactionType: TransactionType = TransactionType.INVOKE) => {
+    const prepareMockTx = async (
+      transactionType: TransactionType = TransactionType.INVOKE,
+    ) => {
       const account = await mockAccount();
       const mockTx = mockTxByType(transactionType, account.address);
       return mockTx;
