@@ -49,16 +49,22 @@ export class ConsolidateFees {
         acc.suggestedMaxFee += fee.suggestedMaxFee;
 
         acc.resourceBounds.l1_gas.max_amount += BigInt(
-          fee.resourceBounds.l1_gas.max_amount,
+          fee.l1_gas_consumed,
         );
         acc.resourceBounds.l1_gas.max_price_per_unit += BigInt(
-          fee.resourceBounds.l1_gas.max_price_per_unit,
+          fee.l1_gas_price,
         );
         acc.resourceBounds.l2_gas.max_amount += BigInt(
-          fee.resourceBounds.l2_gas.max_amount,
+          fee.l2_gas_consumed ?? BigInt(0),
         );
         acc.resourceBounds.l2_gas.max_price_per_unit += BigInt(
-          fee.resourceBounds.l2_gas.max_price_per_unit,
+          fee.l2_gas_price ?? BigInt(0),
+        );
+        acc.resourceBounds.l1_data_gas.max_amount += BigInt(
+          fee.l1_data_gas_consumed ?? BigInt(0),
+        );
+        acc.resourceBounds.l1_data_gas.max_price_per_unit += BigInt(
+          fee.l1_data_gas_price ?? BigInt(0),
         );
 
         return acc;
@@ -72,6 +78,10 @@ export class ConsolidateFees {
             max_price_per_unit: BigInt(0),
           },
           l2_gas: {
+            max_amount: BigInt(0),
+            max_price_per_unit: BigInt(0),
+          },
+          l1_data_gas: {
             max_amount: BigInt(0),
             max_price_per_unit: BigInt(0),
           },
@@ -113,6 +123,14 @@ export class ConsolidateFees {
             this.resourceBounds.l2_gas.max_price_per_unit,
           ),
         },
+        l1_data_gas: {
+          max_amount: numUtils.toHexString(
+            this.resourceBounds.l1_data_gas.max_amount,
+          ),
+          max_price_per_unit: numUtils.toHexString(
+            this.resourceBounds.l1_data_gas.max_price_per_unit,
+          ),
+        }
       },
     };
   }

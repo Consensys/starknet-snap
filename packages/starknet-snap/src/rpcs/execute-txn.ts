@@ -38,6 +38,7 @@ import {
 } from '../utils/transaction';
 import type { AccountRpcControllerOptions } from './abstract/account-rpc-controller';
 import { AccountRpcController } from './abstract/account-rpc-controller';
+import { FeeToken } from '../types/snapApi';
 
 export const ExecuteTxnRequestStruct = assign(
   object({
@@ -63,13 +64,11 @@ export type ConfirmTransactionParams = {
   address: string;
   maxFee: string;
   resourceBounds: ResourceBounds;
-  txnVersion: constants.TRANSACTION_VERSION;
   includeDeploy: boolean;
 };
 
 export type DeployAccountParams = {
   address: string;
-  txnVersion: constants.TRANSACTION_VERSION;
 };
 
 export type SendTransactionParams = {
@@ -82,7 +81,6 @@ export type SendTransactionParams = {
 export type SaveDataToStateParamas = {
   txnHashForDeploy?: string;
   txnHashForExecute: string;
-  txnVersion: constants.TRANSACTION_VERSION;
   maxFee: string;
   address: string;
   calls: Call[];
@@ -176,7 +174,6 @@ export class ExecuteTxnRpc extends AccountRpcController<
       maxFee: updatedMaxFee,
       resourceBounds: updatedResouceBounds,
     } = await this.confirmTransaction({
-      txnVersion: details?.version as unknown as constants.TRANSACTION_VERSION,
       address,
       calls: callsArray,
       maxFee,
@@ -191,7 +188,6 @@ export class ExecuteTxnRpc extends AccountRpcController<
     if (!accountDeployed) {
       txnHashForDeploy = await this.deployAccount({
         address,
-        txnVersion: updatedTxnVersion,
       });
     }
 
@@ -213,7 +209,6 @@ export class ExecuteTxnRpc extends AccountRpcController<
     await this.saveDataToState({
       txnHashForDeploy,
       txnHashForExecute,
-      txnVersion: updatedTxnVersion,
       maxFee: updatedMaxFee,
       address,
       calls: callsArray,
@@ -230,7 +225,6 @@ export class ExecuteTxnRpc extends AccountRpcController<
     address,
     maxFee,
     resourceBounds,
-    txnVersion,
     includeDeploy,
   }: ConfirmTransactionParams): Promise<TransactionRequest> {
     const requestId = uuidv4();
@@ -259,7 +253,7 @@ export class ExecuteTxnRpc extends AccountRpcController<
       maxFee,
       calls: formattedCalls,
       resourceBounds,
-      selectedFeeToken: transactionVersionToFeeToken(txnVersion),
+      selectedFeeToken: FeeToken.STRK,
       includeDeploy,
     };
 
@@ -301,7 +295,6 @@ export class ExecuteTxnRpc extends AccountRpcController<
 
   protected async deployAccount({
     address,
-    txnVersion,
   }: DeployAccountParams): Promise<string> {
     const { privateKey, publicKey } = this.account;
 
@@ -317,7 +310,6 @@ export class ExecuteTxnRpc extends AccountRpcController<
       publicKey,
       privateKey,
       CAIRO_VERSION,
-      { version: txnVersion },
     );
 
     if (contractAddress !== address) {
@@ -360,12 +352,11 @@ export class ExecuteTxnRpc extends AccountRpcController<
   protected async saveDataToState({
     txnHashForDeploy,
     txnHashForExecute,
-    txnVersion,
     maxFee,
     address,
     calls,
   }: SaveDataToStateParamas) {
-    const txnVersionInNumber = transactionVersionToNumber(txnVersion);
+    const txnVersionInNumber = 3; // TODO remove since there is only one
     const { chainId } = this.network;
 
     if (txnHashForDeploy) {

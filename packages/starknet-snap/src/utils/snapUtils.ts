@@ -7,6 +7,7 @@ import type {
   DeclareSignerDetails,
   Call,
   DeployAccountSignerDetails,
+  BigNumberish
 } from 'starknet';
 
 import { Config } from '../config';
@@ -246,7 +247,7 @@ export function getSendTxnText(
   contractFuncName: string,
   contractCallData: string[],
   senderAddress: string,
-  maxFee: numUtils.BigNumberish,
+  maxFee: BigNumberish,
   network: Network,
 ): Component[] {
   // Retrieve the ERC-20 token from snap state for confirmation display purpose

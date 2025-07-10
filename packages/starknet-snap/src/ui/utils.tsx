@@ -227,7 +227,7 @@ export async function generateExecuteTxnFlow(
         />
       ),
       context: {
-        request,
+        request: JSON.parse(JSON.stringify(request)),
       },
     },
   });

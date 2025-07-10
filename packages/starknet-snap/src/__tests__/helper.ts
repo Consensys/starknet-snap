@@ -492,6 +492,10 @@ export function generateTransactionRequests({
           max_amount: '0',
           max_price_per_unit: '0',
         },
+        l1_data_gas: {
+          max_amount: '0',
+          max_price_per_unit: '0',
+        },
       },
     });
   }
@@ -573,7 +577,17 @@ export function generateEstimateFeesResponse() {
       // eslint-disable-next-line @typescript-eslint/naming-convention
       overall_fee: BigInt(1500000000000000).toString(10),
       // eslint-disable-next-line @typescript-eslint/naming-convention
-      gas_consumed: BigInt('0x0'),
+      l1_gas_consumed: BigInt('0x0'),
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      l1_gas_price: BigInt('0x0'),
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      l2_gas_consumed: BigInt('0x0'),
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      l2_gas_price: BigInt('0x0'),
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      l1_data_gas_consumed: BigInt('0x0'),
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      l1_data_gas_price: BigInt('0x0'),
       suggestedMaxFee: BigInt(1500000000000000).toString(10),
       // eslint-disable-next-line @typescript-eslint/naming-convention
       gas_price: BigInt('0x0'),

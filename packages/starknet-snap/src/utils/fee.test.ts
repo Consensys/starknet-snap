@@ -38,6 +38,10 @@ describe('ConsolidateFees', () => {
             max_amount: BigInt(0),
             max_price_per_unit: BigInt(0),
           },
+          l1_data_gas: {
+            max_amount: BigInt(0),
+            max_price_per_unit: BigInt(0),
+          },
         },
       },
     );
@@ -80,6 +84,14 @@ describe('ConsolidateFees', () => {
             ),
             max_price_per_unit: numUtils.toHexString(
               consolidatedFeesObj.resourceBounds.l2_gas.max_price_per_unit,
+            ),
+          },
+          l1_data_gas: {
+            max_amount: numUtils.toHexString(
+              consolidatedFeesObj.resourceBounds.l1_data_gas.max_amount,
+            ),
+            max_price_per_unit: numUtils.toHexString(
+              consolidatedFeesObj.resourceBounds.l1_data_gas.max_price_per_unit,
             ),
           },
         },

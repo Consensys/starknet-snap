@@ -183,7 +183,7 @@ export const waitForTransaction = async (
   network: Network,
   senderAddress: string,
   privateKey: string | Uint8Array,
-  txnHash: numUtils.BigNumberish,
+  txnHash: BigNumberish,
   cairoVersion?: CairoVersion,
 ): Promise<GetTransactionReceiptResponse> => {
   return getAccountInstance(
@@ -278,7 +278,7 @@ export const executeTxn = async (
     privateKey,
     cairoVersion,
     invocationsDetails?.version,
-  ).execute(txnInvocation, abis, {
+  ).execute(txnInvocation, {
     ...invocationsDetails,
     skipValidate: false,
     blockIdentifier: BlockIdentifierEnum.Latest,
@@ -319,7 +319,7 @@ export const estimateAccountDeployFee = async (
   network: Network,
   contractAddress: string,
   contractCallData: RawCalldata,
-  addressSalt: numUtils.BigNumberish,
+  addressSalt: BigNumberish,
   privateKey: string | Uint8Array,
   cairoVersion?: CairoVersion,
   invocationsDetails?: UniversalDetails,
@@ -414,7 +414,7 @@ export const isEthBalanceEmpty = async (
 };
 
 export const getTransactionStatus = async (
-  transactionHash: numUtils.BigNumberish,
+  transactionHash: BigNumberish,
   network: Network,
 ) => {
   const provider = getProvider(network);
@@ -428,7 +428,7 @@ export const getTransactionStatus = async (
 };
 
 export const getTransaction = async (
-  transactionHash: numUtils.BigNumberish,
+  transactionHash: BigNumberish,
   network: Network,
 ) => {
   const provider = getProvider(network);
@@ -436,7 +436,7 @@ export const getTransaction = async (
 };
 
 export const getTransactionsFromVoyager = async (
-  toAddress: numUtils.BigNumberish,
+  toAddress: BigNumberish,
   pageSize: number,
   pageNum: number,
   network: Network,
@@ -455,7 +455,7 @@ export const getTransactionsFromVoyager = async (
 };
 
 const getTransactionsFromVoyagerHelper = async (
-  toAddress: numUtils.BigNumberish,
+  toAddress: BigNumberish,
   pageSize: number,
   minTimestamp: number, // in ms
   withDeployTxn: boolean,
@@ -538,8 +538,8 @@ const getTransactionsFromVoyagerHelper = async (
 };
 
 export const getMassagedTransactions = async (
-  toAddress: numUtils.BigNumberish,
-  contractAddress: numUtils.BigNumberish | undefined,
+  toAddress: BigNumberish,
+  contractAddress: BigNumberish | undefined,
   pageSize: number,
   minTimestamp: number, // in ms
   withDeployTxn: boolean,
@@ -773,7 +773,6 @@ export async function createAccount({
   cairoVersion = CAIRO_VERSION,
   waitMode = false,
   callback,
-  version = undefined,
 }: {
   network: Network;
   address: string;
@@ -781,7 +780,6 @@ export async function createAccount({
   privateKey: string;
   cairoVersion?: CairoVersion;
   waitMode?: boolean;
-  version?: constants.TRANSACTION_VERSION;
   callback?: (address: string, transactionHash: string) => Promise<void>;
 }) {
   // Deploy account will auto estimate the fee from the network if not provided
@@ -795,7 +793,6 @@ export async function createAccount({
     publicKey,
     privateKey,
     cairoVersion,
-    { version },
   );
 
   if (contractAddress !== address) {
@@ -995,7 +992,7 @@ export const isAccountDeployed = async (network: Network, address: string) => {
 
 export const _validateAndParseAddressFn = _validateAndParseAddress;
 export const validateAndParseAddress = (
-  address: numUtils.BigNumberish,
+  address: BigNumberish,
   length = 63,
 ) => {
   // getting rid of 0x and 0x0 prefixes

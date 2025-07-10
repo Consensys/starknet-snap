@@ -32,28 +32,12 @@ describe('getEstimatedFees', () => {
     };
   };
 
-  it.each([
-    {
-      txVersion: constants.TRANSACTION_VERSION.V2,
-      expectedUnit: FeeTokenUnit.ETH,
-    },
-    {
-      txVersion: constants.TRANSACTION_VERSION.V3,
-      expectedUnit: FeeTokenUnit.STRK,
-    },
-    {
-      txVersion: undefined,
-      expectedUnit: FeeTokenUnit.ETH,
-    },
-  ])(
-    'estimates fees correctly and assigns `$expectedUnit` to the unit of the result if the transaction version is $version',
-    async ({
-      txVersion,
-      expectedUnit,
-    }: {
-      txVersion?: TransactionVersion;
-      expectedUnit: FeeTokenUnit;
-    }) => {
+  it(
+    'estimates fees correctly and assigns `STRK` to the unit of the result if the transaction version is V3',
+    async () => {
+      const txVersion = constants.TRANSACTION_VERSION.V3;
+      const expectedUnit = FeeTokenUnit.STRK;
+
       const network = STARKNET_SEPOLIA_TESTNET_NETWORK;
       const {
         account,
