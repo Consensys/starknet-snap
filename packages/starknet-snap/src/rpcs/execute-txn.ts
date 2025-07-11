@@ -179,6 +179,7 @@ export class ExecuteTxnRpc extends AccountRpcController<
       includeDeploy,
     });
 
+    // TODO : Remove this when the resource bounds are fully supported on Mainnet
     if (this.network.chainId === constants.StarknetChainId.SN_MAIN) {
       delete updatedResouceBounds.l1_data_gas;
     }
