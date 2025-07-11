@@ -38,6 +38,7 @@ import {
   Signer,
   stark,
   TransactionType as StarknetTransactionType,
+  config,
 } from 'starknet';
 
 import {
@@ -134,6 +135,11 @@ export const getProvider = (
   };
   if (blockIdentifier) {
     providerParam.blockIdentifier = blockIdentifier;
+  }
+  if (network.chainId === constants.StarknetChainId.SN_MAIN) {
+    // For Mainnet, we use the legacy mode by default
+    providerParam.specVersion = '0.7.1';
+    config.set('legacyMode', true);
   }
   return new Provider(providerParam);
 };

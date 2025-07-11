@@ -34,13 +34,13 @@ export type FormattedCallData = {
 
 export type ResourceBounds = {
   l1_gas: { max_amount: string; max_price_per_unit: string };
-  l1_data_gas: { max_amount: string; max_price_per_unit: string };
+  l1_data_gas?: { max_amount: string; max_price_per_unit: string };
   l2_gas: { max_amount: string; max_price_per_unit: string };
 };
 
 export type ResourceBoundsInBigInt = {
   l1_gas: { max_amount: bigint; max_price_per_unit: bigint };
-  l1_data_gas: { max_amount: bigint; max_price_per_unit: bigint };
+  l1_data_gas?: { max_amount: bigint; max_price_per_unit: bigint };
   l2_gas: { max_amount: bigint; max_price_per_unit: bigint };
 };
 

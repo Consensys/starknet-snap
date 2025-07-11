@@ -571,8 +571,10 @@ export function generateStarkScanTransactions({
  *
  * @returns An array containing a mock EstimateFee object.
  */
-export function generateEstimateFeesResponse() {
-  return [
+export function generateEstimateFeesResponse(
+  chainId: constants.StarknetChainId = constants.StarknetChainId.SN_SEPOLIA,
+): EstimateFee[] {
+  const fees = [
     {
       // eslint-disable-next-line @typescript-eslint/naming-convention
       overall_fee: BigInt(1500000000000000).toString(10),
@@ -606,9 +608,23 @@ export function generateEstimateFeesResponse() {
           // eslint-disable-next-line @typescript-eslint/naming-convention
           max_price_per_unit: '0',
         },
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        l1_data_gas: {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          max_amount: '0',
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          max_price_per_unit: '0',
+        },
       },
     } as unknown as EstimateFee,
   ];
+  fees.forEach((fee) => {
+    if (chainId === constants.StarknetChainId.SN_MAIN) {
+      // For mainnet, we don't have l1_data_gas
+      delete fee.resourceBounds.l1_data_gas;
+    }
+  });
+  return fees;
 }
 
 /**

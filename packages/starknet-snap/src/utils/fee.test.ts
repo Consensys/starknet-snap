@@ -1,6 +1,7 @@
 import { num as numUtils } from 'starknet';
 
 import { generateEstimateFeesResponse } from '../__tests__/helper';
+import type { ResourceBounds } from '../types/snapState';
 import { ConsolidateFees } from './fee';
 
 /* eslint-disable @typescript-eslint/naming-convention */
@@ -65,36 +66,38 @@ describe('ConsolidateFees', () => {
       const consolidatedFeesObj = new ConsolidateFees(fees);
 
       const serializedFee = consolidatedFeesObj.serializate();
-
+      const resourceBounds: ResourceBounds = {
+        l1_gas: {
+          max_amount: numUtils.toHexString(
+            consolidatedFeesObj.resourceBounds.l1_gas.max_amount,
+          ),
+          max_price_per_unit: numUtils.toHexString(
+            consolidatedFeesObj.resourceBounds.l1_gas.max_price_per_unit,
+          ),
+        },
+        l2_gas: {
+          max_amount: numUtils.toHexString(
+            consolidatedFeesObj.resourceBounds.l2_gas.max_amount,
+          ),
+          max_price_per_unit: numUtils.toHexString(
+            consolidatedFeesObj.resourceBounds.l2_gas.max_price_per_unit,
+          ),
+        },
+      };
+      if (consolidatedFeesObj.resourceBounds.l1_data_gas) {
+        resourceBounds.l1_data_gas = {
+          max_amount: numUtils.toHexString(
+            consolidatedFeesObj.resourceBounds.l1_data_gas.max_amount,
+          ),
+          max_price_per_unit: numUtils.toHexString(
+            consolidatedFeesObj.resourceBounds.l1_data_gas.max_price_per_unit,
+          ),
+        };
+      }
       expect(serializedFee).toStrictEqual({
         overallFee: consolidatedFeesObj.overallFee.toString(10),
         suggestedMaxFee: consolidatedFeesObj.suggestedMaxFee.toString(10),
-        resourceBounds: {
-          l1_gas: {
-            max_amount: numUtils.toHexString(
-              consolidatedFeesObj.resourceBounds.l1_gas.max_amount,
-            ),
-            max_price_per_unit: numUtils.toHexString(
-              consolidatedFeesObj.resourceBounds.l1_gas.max_price_per_unit,
-            ),
-          },
-          l2_gas: {
-            max_amount: numUtils.toHexString(
-              consolidatedFeesObj.resourceBounds.l2_gas.max_amount,
-            ),
-            max_price_per_unit: numUtils.toHexString(
-              consolidatedFeesObj.resourceBounds.l2_gas.max_price_per_unit,
-            ),
-          },
-          l1_data_gas: {
-            max_amount: numUtils.toHexString(
-              consolidatedFeesObj.resourceBounds.l1_data_gas.max_amount,
-            ),
-            max_price_per_unit: numUtils.toHexString(
-              consolidatedFeesObj.resourceBounds.l1_data_gas.max_price_per_unit,
-            ),
-          },
-        },
+        resourceBounds,
       });
     });
   });

@@ -58,13 +58,14 @@ export class ConsolidateFees {
         acc.resourceBounds.l2_gas.max_price_per_unit += BigInt(
           fee.l2_gas_price ?? BigInt(0),
         );
-        acc.resourceBounds.l1_data_gas.max_amount += BigInt(
-          fee.l1_data_gas_consumed ?? BigInt(0),
-        );
-        acc.resourceBounds.l1_data_gas.max_price_per_unit += BigInt(
-          fee.l1_data_gas_price ?? BigInt(0),
-        );
-
+        if (fee.l1_data_gas_consumed && fee.l1_data_gas_price) {
+          acc.resourceBounds.l1_data_gas.max_amount += BigInt(
+            fee.l1_data_gas_consumed ?? BigInt(0),
+          );
+          acc.resourceBounds.l1_data_gas.max_price_per_unit += BigInt(
+            fee.l1_data_gas_price ?? BigInt(0),
+          );
+        }
         return acc;
       },
       {
@@ -100,36 +101,35 @@ export class ConsolidateFees {
    * @returns A serializated object.
    */
   serializate(): SerializatedConsolidatedFees {
+    const resourceBounds: ResourceBounds = {
+      // convert to hex string for serialization in starknet.js when using STRK token to pay the fee.
+      l1_gas: {
+        max_amount: numUtils.toHexString(this.resourceBounds.l1_gas.max_amount),
+        max_price_per_unit: numUtils.toHexString(
+          this.resourceBounds.l1_gas.max_price_per_unit,
+        ),
+      },
+      l2_gas: {
+        max_amount: numUtils.toHexString(this.resourceBounds.l2_gas.max_amount),
+        max_price_per_unit: numUtils.toHexString(
+          this.resourceBounds.l2_gas.max_price_per_unit,
+        ),
+      },
+    };
+    if (this.resourceBounds.l1_data_gas) {
+      resourceBounds.l1_data_gas = {
+        max_amount: numUtils.toHexString(
+          this.resourceBounds.l1_data_gas.max_amount,
+        ),
+        max_price_per_unit: numUtils.toHexString(
+          this.resourceBounds.l1_data_gas.max_price_per_unit,
+        ),
+      };
+    }
     return {
       suggestedMaxFee: this.suggestedMaxFee.toString(10),
       overallFee: this.overallFee.toString(10),
-      resourceBounds: {
-        // convert to hex string for serialization in starknet.js when using STRK token to pay the fee.
-        l1_gas: {
-          max_amount: numUtils.toHexString(
-            this.resourceBounds.l1_gas.max_amount,
-          ),
-          max_price_per_unit: numUtils.toHexString(
-            this.resourceBounds.l1_gas.max_price_per_unit,
-          ),
-        },
-        l2_gas: {
-          max_amount: numUtils.toHexString(
-            this.resourceBounds.l2_gas.max_amount,
-          ),
-          max_price_per_unit: numUtils.toHexString(
-            this.resourceBounds.l2_gas.max_price_per_unit,
-          ),
-        },
-        l1_data_gas: {
-          max_amount: numUtils.toHexString(
-            this.resourceBounds.l1_data_gas.max_amount,
-          ),
-          max_price_per_unit: numUtils.toHexString(
-            this.resourceBounds.l1_data_gas.max_price_per_unit,
-          ),
-        },
-      },
+      resourceBounds,
     };
   }
 }

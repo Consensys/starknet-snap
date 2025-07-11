@@ -1,6 +1,6 @@
 import { type Json } from '@metamask/snaps-sdk';
 import type { Call } from 'starknet';
-import { TransactionType } from 'starknet';
+import { constants, TransactionType } from 'starknet';
 import type { Infer } from 'superstruct';
 import { object, string, assign, optional, any } from 'superstruct';
 import { v4 as uuidv4 } from 'uuid';
@@ -179,6 +179,10 @@ export class ExecuteTxnRpc extends AccountRpcController<
       includeDeploy,
     });
 
+    if (this.network.chainId === constants.StarknetChainId.SN_MAIN) {
+      delete updatedResouceBounds.l1_data_gas;
+    }
+
     const updatedTxnVersion = feeTokenToTransactionVersion(selectedFeeToken);
 
     let txnHashForDeploy: string | undefined;
@@ -330,21 +334,30 @@ export class ExecuteTxnRpc extends AccountRpcController<
     details,
   }: SendTransactionParams): Promise<string> {
     const { privateKey } = this.account;
+    try {
+      const executeTxnResp = await executeTxnUtil(
+        this.network,
+        address,
+        privateKey,
+        calls,
+        abis,
+        details,
+      );
 
-    const executeTxnResp = await executeTxnUtil(
-      this.network,
-      address,
-      privateKey,
-      calls,
-      abis,
-      details,
-    );
+      if (!executeTxnResp?.transaction_hash) {
+        throw new Error('Failed to execute transaction');
+      }
 
-    if (!executeTxnResp?.transaction_hash) {
-      throw new Error('Failed to execute transaction');
+      return executeTxnResp.transaction_hash;
+    } catch (error) {
+      console.error('Error executing transaction:', error);
+      console.dir(error, { depth: null });
+      throw new Error(
+        `Failed to execute transaction: ${
+          error instanceof Error ? error.message : 'Unknown error'
+        }`,
+      );
     }
-
-    return executeTxnResp.transaction_hash;
   }
 
   protected async saveDataToState({
