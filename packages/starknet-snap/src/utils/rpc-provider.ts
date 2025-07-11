@@ -14,6 +14,8 @@ export function getRPCUrl(chainId: string) {
       return `https://starknet-mainnet.infura.io/v3/${Config.rpcApiKey}`;
     default:
     case constants.StarknetChainId.SN_SEPOLIA:
-      return `https://starknet-sepolia.infura.io/v3/${Config.rpcApiKey}`;
+      // TODO Change this to infuro when updated
+      return `https://starknet-sepolia.blastapi.io/${Config.rpcApiKeyBlast}/rpc/v0_8`;
+    // return `https://starknet-sepolia.infura.io/v3/${Config.rpcApiKey}`;
   }
 }
