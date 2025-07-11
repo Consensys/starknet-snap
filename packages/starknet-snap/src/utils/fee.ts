@@ -48,22 +48,24 @@ export class ConsolidateFees {
         acc.overallFee += fee.overall_fee;
         acc.suggestedMaxFee += fee.suggestedMaxFee;
 
-        acc.resourceBounds.l1_gas.max_amount += BigInt(fee.l1_gas_consumed);
+        acc.resourceBounds.l1_gas.max_amount += BigInt(
+          fee.resourceBounds.l1_gas.max_amount,
+        );
         acc.resourceBounds.l1_gas.max_price_per_unit += BigInt(
-          fee.l1_gas_price,
+          fee.resourceBounds.l1_gas.max_price_per_unit,
         );
         acc.resourceBounds.l2_gas.max_amount += BigInt(
-          fee.l2_gas_consumed ?? BigInt(0),
+          fee.resourceBounds.l2_gas.max_amount ?? BigInt(0),
         );
         acc.resourceBounds.l2_gas.max_price_per_unit += BigInt(
-          fee.l2_gas_price ?? BigInt(0),
+          fee.resourceBounds.l2_gas.max_price_per_unit ?? BigInt(0),
         );
-        if (fee.l1_data_gas_consumed && fee.l1_data_gas_price) {
+        if (acc.resourceBounds.l1_data_gas) {
           acc.resourceBounds.l1_data_gas.max_amount += BigInt(
-            fee.l1_data_gas_consumed ?? BigInt(0),
+            fee.resourceBounds.l1_data_gas?.max_amount ?? BigInt(0),
           );
           acc.resourceBounds.l1_data_gas.max_price_per_unit += BigInt(
-            fee.l1_data_gas_price ?? BigInt(0),
+            fee.resourceBounds.l1_data_gas?.max_price_per_unit ?? BigInt(0),
           );
         }
         return acc;
