@@ -106,19 +106,23 @@ export const getMaxDecimalsReadable = (
     ? assetAmount
     : ethers.utils.formatUnits(asset.amount, asset.decimals);
 
-  // If there's no decimal point, just return the string (e.g. "10", "100")
+  // If there's no decimal point, just return normalized integer (e.g. "00010" → "10")
   const indexDecimal = amountStr.indexOf('.');
-  if (indexDecimal === -1) return amountStr;
+  if (indexDecimal === -1) return String(Number(amountStr));
 
   // Limit decimal part to DECIMALS_DISPLAYED_MAX_LENGTH
   const integerPart = amountStr.substring(0, indexDecimal);
   const decimalPart = amountStr.substring(indexDecimal + 1);
 
   // Remove trailing zeros from decimal part
-  const trimmedDecimal = decimalPart.replace(/0+$/, '');
+  let i = decimalPart.length;
+  while (i > 0 && decimalPart[i - 1] === '0') {
+    i--;
+  }
+  const trimmedDecimal = decimalPart.substring(0, i);
 
-  // If there's no significant decimal, just return integer part
-  if (!trimmedDecimal) return integerPart;
+  // If there's no significant decimal, just return normalized integer
+  if (!trimmedDecimal) return String(Number(integerPart));
 
   // Limit to max decimals
   const limitedDecimal = trimmedDecimal.substring(
@@ -126,8 +130,9 @@ export const getMaxDecimalsReadable = (
     DECIMALS_DISPLAYED_MAX_LENGTH,
   );
 
-  return `${integerPart}.${limitedDecimal}`;
+  return `${String(Number(integerPart))}.${limitedDecimal}`;
 };
+
 
 export const getAmountPrice = (
   asset: Erc20TokenBalance,
