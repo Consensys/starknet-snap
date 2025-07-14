@@ -121,7 +121,10 @@ export const getMaxDecimalsReadable = (
   if (!trimmedDecimal) return integerPart;
 
   // Limit to max decimals
-  const limitedDecimal = trimmedDecimal.substring(0, DECIMALS_DISPLAYED_MAX_LENGTH);
+  const limitedDecimal = trimmedDecimal.substring(
+    0,
+    DECIMALS_DISPLAYED_MAX_LENGTH,
+  );
 
   return `${integerPart}.${limitedDecimal}`;
 };
