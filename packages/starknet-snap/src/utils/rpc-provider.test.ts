@@ -42,9 +42,7 @@ describe('getRPCUrl', () => {
 
 describe('isEnableRPCV8', () => {
   it('returns true for Sepolia', () => {
-    expect(
-      Config.enableRPCV8[constants.StarknetChainId.SN_SEPOLIA],
-    ).toBe(true);
+    expect(Config.enableRPCV8[constants.StarknetChainId.SN_SEPOLIA]).toBe(true);
   });
 
   it('returns false for Mainnet', () => {
