@@ -1,6 +1,6 @@
 import { type Json } from '@metamask/snaps-sdk';
-import type { Call } from 'starknet';
-import { constants, TransactionType } from 'starknet';
+import type { Call, constants } from 'starknet';
+import { TransactionType } from 'starknet';
 import type { Infer } from 'superstruct';
 import { object, string, assign, optional, any } from 'superstruct';
 import { v4 as uuidv4 } from 'uuid';
@@ -24,6 +24,7 @@ import {
 } from '../utils';
 import { CAIRO_VERSION } from '../utils/constants';
 import { UserRejectedOpError } from '../utils/exceptions';
+import { isEnableRPCV8 } from '../utils/rpc-provider';
 import {
   deployAccount,
   executeTxn as executeTxnUtil,
@@ -179,8 +180,7 @@ export class ExecuteTxnRpc extends AccountRpcController<
       includeDeploy,
     });
 
-    // TODO : Remove this when the resource bounds are fully supported on Mainnet
-    if (this.network.chainId === constants.StarknetChainId.SN_MAIN) {
+    if (!isEnableRPCV8(this.network.chainId as constants.StarknetChainId)) {
       delete updatedResouceBounds.l1_data_gas;
     }
 
@@ -351,8 +351,6 @@ export class ExecuteTxnRpc extends AccountRpcController<
 
       return executeTxnResp.transaction_hash;
     } catch (error) {
-      console.error('Error executing transaction:', error);
-      console.dir(error, { depth: null });
       throw new Error(
         `Failed to execute transaction: ${
           error instanceof Error ? error.message : 'Unknown error'

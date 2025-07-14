@@ -10,6 +10,7 @@ describe('getRPCUrl', () => {
   });
   afterEach(function () {
     Config.rpcApiKey = '';
+    Config.rpcApiKeyBlast = '';
   });
 
   it('returns Mainnet RPC URL if chain id is Mainnet', () => {
@@ -36,5 +37,17 @@ describe('getRPCUrl', () => {
     // expect(getRPCUrl(constants.StarknetChainId.SN_SEPOLIA)).toBe(
     //   `https://starknet-sepolia.infura.io/v3/${Config.rpcApiKey}`,
     // );
+  });
+});
+
+describe('isEnableRPCV8', () => {
+  it('returns true for Sepolia', () => {
+    expect(
+      Config.enableRPCV8[constants.StarknetChainId.SN_SEPOLIA],
+    ).toBe(true);
+  });
+
+  it('returns false for Mainnet', () => {
+    expect(Config.enableRPCV8[constants.StarknetChainId.SN_MAIN]).toBe(false);
   });
 });

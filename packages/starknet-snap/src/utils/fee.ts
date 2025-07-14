@@ -43,29 +43,43 @@ export class ConsolidateFees {
    * @returns The consolidated fees.
    */
   protected consolidateFee(): ConsolidatedFees {
-    const consolidateResult = this.fees.reduce(
+    const consolidateResult = this.fees.reduce<{
+      overallFee: bigint;
+      suggestedMaxFee: bigint;
+      resourceBounds: {
+        l1_gas: { max_amount: bigint; max_price_per_unit: bigint };
+        l2_gas: { max_amount: bigint; max_price_per_unit: bigint };
+        l1_data_gas?: { max_amount: bigint; max_price_per_unit: bigint };
+      };
+    }>(
       (acc, fee) => {
         acc.overallFee += fee.overall_fee;
         acc.suggestedMaxFee += fee.suggestedMaxFee;
 
         acc.resourceBounds.l1_gas.max_amount += BigInt(
-          fee.resourceBounds.l1_gas.max_amount,
+          fee.resourceBounds.l1_gas.max_amount ?? '0',
         );
         acc.resourceBounds.l1_gas.max_price_per_unit += BigInt(
-          fee.resourceBounds.l1_gas.max_price_per_unit,
+          fee.resourceBounds.l1_gas.max_price_per_unit ?? '0',
         );
         acc.resourceBounds.l2_gas.max_amount += BigInt(
-          fee.resourceBounds.l2_gas.max_amount ?? BigInt(0),
+          fee.resourceBounds.l2_gas?.max_amount ?? '0',
         );
         acc.resourceBounds.l2_gas.max_price_per_unit += BigInt(
-          fee.resourceBounds.l2_gas.max_price_per_unit ?? BigInt(0),
+          fee.resourceBounds.l2_gas?.max_price_per_unit ?? '0',
         );
-        if (acc.resourceBounds.l1_data_gas) {
+        if (fee.resourceBounds.l1_data_gas) {
+          if (!acc.resourceBounds.l1_data_gas) {
+            acc.resourceBounds.l1_data_gas = {
+              max_amount: BigInt(0),
+              max_price_per_unit: BigInt(0),
+            };
+          }
           acc.resourceBounds.l1_data_gas.max_amount += BigInt(
-            fee.resourceBounds.l1_data_gas?.max_amount ?? BigInt(0),
+            fee.resourceBounds.l1_data_gas.max_amount ?? '0',
           );
           acc.resourceBounds.l1_data_gas.max_price_per_unit += BigInt(
-            fee.resourceBounds.l1_data_gas?.max_price_per_unit ?? BigInt(0),
+            fee.resourceBounds.l1_data_gas.max_price_per_unit ?? '0',
           );
         }
         return acc;
@@ -79,10 +93,6 @@ export class ConsolidateFees {
             max_price_per_unit: BigInt(0),
           },
           l2_gas: {
-            max_amount: BigInt(0),
-            max_price_per_unit: BigInt(0),
-          },
-          l1_data_gas: {
             max_amount: BigInt(0),
             max_price_per_unit: BigInt(0),
           },
@@ -117,17 +127,15 @@ export class ConsolidateFees {
           this.resourceBounds.l2_gas.max_price_per_unit,
         ),
       },
-    };
-    if (this.resourceBounds.l1_data_gas) {
-      resourceBounds.l1_data_gas = {
+      l1_data_gas: {
         max_amount: numUtils.toHexString(
-          this.resourceBounds.l1_data_gas.max_amount,
+          this.resourceBounds.l1_data_gas?.max_amount ?? BigInt(0),
         ),
         max_price_per_unit: numUtils.toHexString(
-          this.resourceBounds.l1_data_gas.max_price_per_unit,
+          this.resourceBounds.l1_data_gas?.max_price_per_unit ?? BigInt(0),
         ),
-      };
-    }
+      },
+    };
     return {
       suggestedMaxFee: this.suggestedMaxFee.toString(10),
       overallFee: this.overallFee.toString(10),

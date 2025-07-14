@@ -1,4 +1,4 @@
-import { num as numUtils } from 'starknet';
+import { constants, num as numUtils } from 'starknet';
 
 import { generateEstimateFeesResponse } from '../__tests__/helper';
 import type { ResourceBounds } from '../types/snapState';
@@ -49,7 +49,9 @@ describe('ConsolidateFees', () => {
   };
 
   it('consolidates fees', () => {
-    const fees = generateEstimateFeesResponse();
+    const fees = generateEstimateFeesResponse(
+      constants.StarknetChainId.SN_MAIN,
+    );
     const consolidatedFeesObj = new ConsolidateFees(fees);
 
     const { overallFee, suggestedMaxFee, resourceBounds } =
@@ -81,6 +83,15 @@ describe('ConsolidateFees', () => {
           ),
           max_price_per_unit: numUtils.toHexString(
             consolidatedFeesObj.resourceBounds.l2_gas.max_price_per_unit,
+          ),
+        },
+        l1_data_gas: {
+          max_amount: numUtils.toHexString(
+            consolidatedFeesObj.resourceBounds.l1_data_gas?.max_amount ?? '0',
+          ),
+          max_price_per_unit: numUtils.toHexString(
+            consolidatedFeesObj.resourceBounds.l1_data_gas
+              ?.max_price_per_unit ?? '0',
           ),
         },
       };

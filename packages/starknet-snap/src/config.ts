@@ -27,6 +27,9 @@ export type SnapConfig = {
   explorer: {
     [key: string]: string;
   };
+  enableRPCV8: {
+    [key: string]: boolean;
+  };
   dataClient: {
     [key: string]: {
       apiKey: string | undefined;
@@ -77,6 +80,11 @@ export const Config: SnapConfig = {
     [constants.StarknetChainId.SN_SEPOLIA]:
       // eslint-disable-next-line no-template-curly-in-string
       'https://sepolia.voyager.online/contract/${address}',
+  },
+
+  enableRPCV8: {
+    [constants.StarknetChainId.SN_MAIN]: false,
+    [constants.StarknetChainId.SN_SEPOLIA]: true,
   },
 
   dataClient: {

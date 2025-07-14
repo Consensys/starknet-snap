@@ -79,7 +79,7 @@ import { ConsolidateFees } from './fee';
 import { hexToString } from './formatter-utils';
 import { getAddressKey } from './keyPair';
 import { logger } from './logger';
-import { getRPCUrl } from './rpc-provider';
+import { isEnableRPCV8, getRPCUrl } from './rpc-provider';
 import { toJson } from './serializer';
 import {
   getAccount,
@@ -136,7 +136,11 @@ export const getProvider = (
   if (blockIdentifier) {
     providerParam.blockIdentifier = blockIdentifier;
   }
-  if (network.chainId === constants.StarknetChainId.SN_MAIN) {
+  if (isEnableRPCV8(network.chainId as constants.StarknetChainId)) {
+    // For Sepolia, we use the new RPC V8 mode by default
+    providerParam.specVersion = '0.8.1';
+    config.set('legacyMode', false);
+  } else {
     // For Mainnet, we use the legacy mode by default
     providerParam.specVersion = '0.7.1';
     config.set('legacyMode', true);
@@ -1072,7 +1076,8 @@ export async function getEstimatedFees(
       payload: deployAccountpayload,
     });
   }
-
+  console.log('estimateFee transactionInvocations', transactionInvocations);
+  console.log('estimateFee invocationsDetails', invocationsDetails);
   const estimateResults = await estimateFeeBulk(
     network,
     address,

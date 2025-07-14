@@ -19,3 +19,12 @@ export function getRPCUrl(chainId: string) {
     // return `https://starknet-sepolia.infura.io/v3/${Config.rpcApiKey}`;
   }
 }
+
+/**
+ *
+ * @param chainId - The Chain ID.
+ * @returns Whether the RPC V8 is enabled for the given chain.
+ */
+export const isEnableRPCV8 = (chainId: constants.StarknetChainId) => {
+  return Config.enableRPCV8[chainId];
+};
