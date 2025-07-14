@@ -133,7 +133,6 @@ export const getMaxDecimalsReadable = (
   return `${String(Number(integerPart))}.${limitedDecimal}`;
 };
 
-
 export const getAmountPrice = (
   asset: Erc20TokenBalance,
   assetAmount: number,
