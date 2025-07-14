@@ -105,19 +105,25 @@ export const getMaxDecimalsReadable = (
   const amountStr = assetAmount
     ? assetAmount
     : ethers.utils.formatUnits(asset.amount, asset.decimals);
+
+  // If there's no decimal point, just return the string (e.g. "10", "100")
   const indexDecimal = amountStr.indexOf('.');
-  const decimalPart = amountStr.substring(indexDecimal + 1).split('');
-  const firstNonZeroIndexReverse = decimalPart
-    .reverse()
-    .findIndex((char) => char !== '0');
-  if (firstNonZeroIndexReverse !== -1) {
-    let lastNonZeroIndex = amountStr.length - firstNonZeroIndexReverse;
-    if (lastNonZeroIndex - indexDecimal > DECIMALS_DISPLAYED_MAX_LENGTH) {
-      lastNonZeroIndex = indexDecimal + 1 + DECIMALS_DISPLAYED_MAX_LENGTH;
-    }
-    return amountStr.substring(0, lastNonZeroIndex);
-  }
-  return amountStr.substring(0, indexDecimal);
+  if (indexDecimal === -1) return amountStr;
+
+  // Limit decimal part to DECIMALS_DISPLAYED_MAX_LENGTH
+  const integerPart = amountStr.substring(0, indexDecimal);
+  const decimalPart = amountStr.substring(indexDecimal + 1);
+
+  // Remove trailing zeros from decimal part
+  const trimmedDecimal = decimalPart.replace(/0+$/, '');
+
+  // If there's no significant decimal, just return integer part
+  if (!trimmedDecimal) return integerPart;
+
+  // Limit to max decimals
+  const limitedDecimal = trimmedDecimal.substring(0, DECIMALS_DISPLAYED_MAX_LENGTH);
+
+  return `${integerPart}.${limitedDecimal}`;
 };
 
 export const getAmountPrice = (
