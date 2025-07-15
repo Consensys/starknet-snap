@@ -95,16 +95,6 @@ describe('ConsolidateFees', () => {
           ),
         },
       };
-      if (consolidatedFeesObj.resourceBounds.l1_data_gas) {
-        resourceBounds.l1_data_gas = {
-          max_amount: numUtils.toHexString(
-            consolidatedFeesObj.resourceBounds.l1_data_gas.max_amount,
-          ),
-          max_price_per_unit: numUtils.toHexString(
-            consolidatedFeesObj.resourceBounds.l1_data_gas.max_price_per_unit,
-          ),
-        };
-      }
       expect(serializedFee).toStrictEqual({
         overallFee: consolidatedFeesObj.overallFee.toString(10),
         suggestedMaxFee: consolidatedFeesObj.suggestedMaxFee.toString(10),

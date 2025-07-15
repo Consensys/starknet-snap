@@ -38,7 +38,6 @@ import {
   Signer,
   stark,
   TransactionType as StarknetTransactionType,
-  config,
 } from 'starknet';
 
 import {
@@ -139,11 +138,9 @@ export const getProvider = (
   if (isEnableRPCV8(network.chainId as constants.StarknetChainId)) {
     // For Sepolia, we use the new RPC V8 mode by default
     providerParam.specVersion = '0.8.1';
-    config.set('legacyMode', false);
   } else {
     // For Mainnet, we use the legacy mode by default
     providerParam.specVersion = '0.7.1';
-    config.set('legacyMode', true);
   }
   return new Provider(providerParam);
 };
