@@ -1,5 +1,3 @@
-import type { constants } from 'starknet';
-import { config } from 'starknet';
 import type { Infer } from 'superstruct';
 import { assign, boolean } from 'superstruct';
 
@@ -7,7 +5,6 @@ import { NetworkStateManager } from '../state/network-state-manager';
 import { renderSwitchNetworkUI } from '../ui/utils';
 import { AuthorizableStruct, BaseRequestStruct } from '../utils';
 import { InvalidNetworkError, UserRejectedOpError } from '../utils/exceptions';
-import { isEnableRPCV8 } from '../utils/rpc-provider';
 import { RpcController } from './abstract/base-rpc-controller';
 
 export const SwitchNetworkRequestStruct = assign(
@@ -87,9 +84,6 @@ export class SwitchNetworkRpc extends RpcController<
       ) {
         throw new UserRejectedOpError() as unknown as Error;
       }
-
-      const isV8 = isEnableRPCV8(network.chainId as constants.StarknetChainId);
-      config.set('legacyMode', !isV8);
 
       await networkStateMgr.setCurrentNetwork(network);
 

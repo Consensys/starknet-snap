@@ -204,7 +204,7 @@ export class ExecuteTxnRpc extends AccountRpcController<
         // Aways repect the input, unless the account is not deployed
         // TODO: we may also need to increment the nonce base on the input, if the account is not deployed
         nonce: accountDeployed ? details?.nonce : 1,
-        maxFee,
+        maxFee: updatedMaxFee,
         resourceBounds: updatedResouceBounds,
       },
     });
