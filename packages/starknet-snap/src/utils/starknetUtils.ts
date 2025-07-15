@@ -1076,8 +1076,6 @@ export async function getEstimatedFees(
       payload: deployAccountpayload,
     });
   }
-  console.log('estimateFee transactionInvocations', transactionInvocations);
-  console.log('estimateFee invocationsDetails', invocationsDetails);
   const estimateResults = await estimateFeeBulk(
     network,
     address,

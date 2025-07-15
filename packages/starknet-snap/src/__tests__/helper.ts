@@ -41,7 +41,6 @@ import {
   PROXY_CONTRACT_HASH,
 } from '../utils/constants';
 import { grindKey } from '../utils/keyPair';
-import { isEnableRPCV8 } from '../utils/rpc-provider';
 import { invokeTx, cairo0DeployTx } from './fixture/stark-scan-example.json';
 
 /* eslint-disable */
@@ -619,12 +618,6 @@ export function generateEstimateFeesResponse(
       },
     } as unknown as EstimateFee,
   ];
-  fees.forEach((fee) => {
-    if (isEnableRPCV8(chainId)) {
-      // For mainnet, we don't have l1_data_gas
-      delete fee.resourceBounds.l1_data_gas;
-    }
-  });
   return fees;
 }
 
