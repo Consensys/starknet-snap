@@ -15,7 +15,6 @@ const config: SnapConfig = {
     SNAP_ENV: process.env.SNAP_ENV ?? 'prod',
     VOYAGER_API_KEY: process.env.VOYAGER_API_KEY ?? '',
     DIN_API_KEY: process.env.DIN_API_KEY ?? '',
-    BLAST_API_KEY: process.env.BLAST_API_KEY ?? '',
     STARKSCAN_API_KEY: process.env.STARKSCAN_API_KEY ?? '',
     LOG_LEVEL: process.env.LOG_LEVEL ?? '0',
     /* eslint-disable */
