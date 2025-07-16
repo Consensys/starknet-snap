@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.5.0](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v3.4.0...starknet-snap-v3.5.0) (2025-07-16)
+## [4.0.0](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v3.4.0...starknet-snap-v4.0.0) (2025-07-16)
 
 
 ### Features
