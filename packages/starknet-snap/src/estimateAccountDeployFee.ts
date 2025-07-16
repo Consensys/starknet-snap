@@ -58,8 +58,8 @@ export async function estimateAccDeployFee(params: ApiParamsWithKeyDeriver) {
     const resp = {
       suggestedMaxFee: estimateDeployFee.suggestedMaxFee.toString(10),
       overallFee: estimateDeployFee.overall_fee.toString(10),
-      gasConsumed: estimateDeployFee.gas_consumed?.toString(10) ?? '0',
-      gasPrice: estimateDeployFee.gas_price?.toString(10) ?? '0',
+      gasConsumed: estimateDeployFee.l1_gas_consumed?.toString(10) ?? '0',
+      gasPrice: estimateDeployFee.l1_gas_price?.toString(10) ?? '0',
       unit: 'wei',
     };
     logger.log(`estimateAccountDeployFee:\nresp: ${toJson(resp)}`);

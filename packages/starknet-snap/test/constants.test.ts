@@ -436,23 +436,27 @@ export const getBalanceResp = ['0x0', '0x0'];
 
 export const estimateDeployFeeResp = {
   overall_fee: num.toBigInt('0x0'),
-  gas_consumed: num.toBigInt('0x0'),
+  l1_gas_consumed: num.toBigInt('0x0'),
+  l1_gas_price: num.toBigInt('0x0'),
+  l2_gas_consumed: num.toBigInt('0x0'),
+  l2_gas_price: num.toBigInt('0x0'),
   suggestedMaxFee: num.toBigInt('0x0'),
-  gas_price: num.toBigInt('0x0'),
 } as EstimateFee;
 
 export const estimateDeployFeeResp2 = {
   overall_fee: num.toBigInt('0xaff3f0a7'),
-  gas_consumed: num.toBigInt('0x18e1'),
+  l1_gas_consumed: num.toBigInt('0x18e1'),
+  l1_gas_price: num.toBigInt('0x071287'),
+  l2_gas_consumed: num.toBigInt('0x0107ede8fa'),
+  l2_gas_price: num.toBigInt('0x0107ede8fa'),
   suggestedMaxFee: num.toBigInt('0x0107ede8fa'),
-  gas_price: num.toBigInt('0x071287'),
 } as EstimateFee;
 
 export const estimateDeployFeeResp3 = {
   overall_fee: num.toBigInt('0x1160f77b2edd'),
-  gas_consumed: num.toBigInt('0x18e1'),
+  l1_gas_consumed: num.toBigInt('0x18e1'),
   suggestedMaxFee: num.toBigInt('0x1a117338c64b'),
-  gas_price: num.toBigInt('0xb2d3297d'),
+  l1_gas_price: num.toBigInt('0xb2d3297d'),
 } as EstimateFee;
 
 export const estimateDeployFeeResp4 = {

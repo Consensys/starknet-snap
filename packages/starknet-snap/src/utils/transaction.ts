@@ -33,27 +33,25 @@ export function transactionVersionToNumber(
 /**
  * Convert the feeToken unit to transaction version.
  *
- * @param feeToken - The feeToken unit.
+ * @param _feeToken - The feeToken unit.
  * @returns The transaction version.
  */
+// TODO Remove this function when the V3 transaction version is the only one supported.
 export function feeTokenToTransactionVersion(
-  feeToken: string,
-): constants.TRANSACTION_VERSION {
-  return feeToken === FeeToken.STRK
-    ? constants.TRANSACTION_VERSION.V3
-    : constants.TRANSACTION_VERSION.V1;
+  _feeToken: string,
+): typeof constants.TRANSACTION_VERSION.V3 {
+  return constants.TRANSACTION_VERSION.V3;
 }
 
 /**
  * Convert the transaction version to feeToken unit.
  *
- * @param txnVersion - The transaction version.
+ * @param _txnVersion - The transaction version.
  * @returns The feeToken unit.
  */
-export function transactionVersionToFeeToken(txnVersion: string): FeeToken {
-  return txnVersion === constants.TRANSACTION_VERSION.V3
-    ? FeeToken.STRK
-    : FeeToken.ETH;
+// TODO Remove this function when the V3 transaction version is the only one supported.
+export function transactionVersionToFeeToken(_txnVersion: string): FeeToken {
+  return FeeToken.STRK;
 }
 
 /**
