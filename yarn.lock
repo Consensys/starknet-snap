@@ -2708,10 +2708,24 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@endo/env-options@npm:^1.1.4":
-  version: 1.1.4
-  resolution: "@endo/env-options@npm:1.1.4"
-  checksum: 9d2a32e6aa7105a617855fa33ddc1dc845be944c3e42518e7e147a9320d8b083196943957a6c63e3db60615076e86fed13c3c1c1a2799f586ef087454aa6a294
+"@endo/cache-map@npm:^1.1.0":
+  version: 1.1.0
+  resolution: "@endo/cache-map@npm:1.1.0"
+  checksum: 51a1690a6d189a060876abfbb497094efb8e0de328709882777963a7a69f6786a4bbf56bcc87bc8513ffd4a415062928acd4e0e49a89af58061734c7498eb086
+  languageName: node
+  linkType: hard
+
+"@endo/env-options@npm:^1.1.11":
+  version: 1.1.11
+  resolution: "@endo/env-options@npm:1.1.11"
+  checksum: 599634509b28f005d12aaf2d7a2500ef222f6ce72889ba70a7306fb6fbed84b1bada2de29f5d3d0e48af22dbb41794d69d5df5ce91a94d791fe34d9abd3b5cb7
+  languageName: node
+  linkType: hard
+
+"@endo/immutable-arraybuffer@npm:^1.1.2":
+  version: 1.1.2
+  resolution: "@endo/immutable-arraybuffer@npm:1.1.2"
+  checksum: 7a71573e09cbf0099d329957cb943384038c21c0be9834817af8291ae4cc08dd8bbded30b4e106232f26740df22a421b1aeac3a072bdb7b0303423c44c872963
   languageName: node
   linkType: hard
 
@@ -24871,11 +24885,13 @@ __metadata:
   linkType: hard
 
 "ses@npm:^1.1.0":
-  version: 1.5.0
-  resolution: "ses@npm:1.5.0"
+  version: 1.14.0
+  resolution: "ses@npm:1.14.0"
   dependencies:
-    "@endo/env-options": ^1.1.4
-  checksum: feaf07c285ab44645532fde8d679ba458fcb040512341d817c053c5b44c37d61f664c60a7b0fc8c1f0b999520888746010d89f718e1a154856ab93d1eea45b31
+    "@endo/cache-map": ^1.1.0
+    "@endo/env-options": ^1.1.11
+    "@endo/immutable-arraybuffer": ^1.1.2
+  checksum: d7340161d4401aea03473960282674b76fdfe23122cae0ec52c3fc5460a2a708bb81f15bd28de4fd8536f64b79360264b0a6f6b864bd1ea0a2d4ba75e96f274b
   languageName: node
   linkType: hard
 
