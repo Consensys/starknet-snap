@@ -1,5 +1,5 @@
 {
-  "version": "3.4.0",
+  "version": "4.0.0",
   "description": "Manage Starknet accounts and assets with MetaMask.",
   "proposedName": "Starknet",
   "repository": {
@@ -7,7 +7,7 @@
     "url": "https://github.com/ConsenSys/starknet-snap.git"
   },
   "source": {
-    "shasum": "oa3QClnvY9DcDxomSgrxwAHtVp3WVgZ/FZILly0N45Y=",
+    "shasum": "gEwA/t7vMoY2xy8VkBaIVoyO3dpKu0G49R5IWH0vfmQ=",
     "location": {
       "npm": {
         "filePath": "dist/bundle.js",

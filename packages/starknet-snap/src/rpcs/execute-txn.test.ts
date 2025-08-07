@@ -318,7 +318,6 @@ describe('ExecuteTxn', () => {
         publicKey,
         privateKey,
         CAIRO_VERSION,
-        { version: request.txnVersion },
       );
     });
 
@@ -501,7 +500,6 @@ describe('ExecuteTxn', () => {
         transaction_hash: sendTansactionResponse,
       });
       expect(confirmTransactionSpy).toHaveBeenCalledWith({
-        txnVersion: details?.version,
         address,
         calls,
         maxFee,
@@ -523,7 +521,6 @@ describe('ExecuteTxn', () => {
       expect(saveDataToStateSpy).toHaveBeenCalledWith({
         txnHashForDeploy: undefined,
         txnHashForExecute: sendTansactionResponse,
-        txnVersion: updatedTxnVersion,
         maxFee: updatedMaxFee,
         address,
         calls,
@@ -547,7 +544,7 @@ describe('ExecuteTxn', () => {
       );
       const { maxFee: updatedMaxFee, resourceBounds: updatedResourceBounds } =
         transactionRequest;
-      const { calls, abis, details } = request;
+      const { calls, details } = request;
 
       const result = await rpc.execute(request);
 
@@ -556,12 +553,10 @@ describe('ExecuteTxn', () => {
       });
       expect(deployAccountSpy).toHaveBeenCalledWith({
         address,
-        txnVersion: updatedTxnVersion,
       });
       expect(sendTransactionSpy).toHaveBeenCalledWith({
         address,
         calls,
-        abis,
         details: {
           ...details,
           nonce: 1,
@@ -573,7 +568,6 @@ describe('ExecuteTxn', () => {
       expect(saveDataToStateSpy).toHaveBeenCalledWith({
         txnHashForDeploy: deployAccountResponse,
         txnHashForExecute: sendTansactionResponse,
-        txnVersion: updatedTxnVersion,
         maxFee: updatedMaxFee,
         address,
         calls,

@@ -207,7 +207,7 @@ describe('TransactionStateManager', () => {
 
     it('returns the list of transaction by finalityStatus', async () => {
       const { txns, stateManager } = await prepareFindTransctions();
-      const finalityStatusCond = [
+      const finalityStatusCond: TransactionFinalityStatus[] = [
         TransactionFinalityStatus.ACCEPTED_ON_L1,
         TransactionFinalityStatus.ACCEPTED_ON_L2,
       ];
@@ -227,7 +227,9 @@ describe('TransactionStateManager', () => {
 
     it('returns the list of transaction by executionStatus', async () => {
       const { txns, stateManager } = await prepareFindTransctions();
-      const executionStatusCond = [TransactionExecutionStatus.REJECTED];
+      const executionStatusCond: TransactionExecutionStatus[] = [
+        TransactionExecutionStatus.REJECTED,
+      ];
 
       const result = await stateManager.findTransactions({
         executionStatus: executionStatusCond,
@@ -244,11 +246,11 @@ describe('TransactionStateManager', () => {
 
     it('returns the list of transaction by mutilple conditions', async () => {
       const { txns, stateManager } = await prepareFindTransctions();
-      const finalityStatusCond = [
+      const finalityStatusCond: TransactionFinalityStatus[] = [
         TransactionFinalityStatus.ACCEPTED_ON_L1,
         TransactionFinalityStatus.ACCEPTED_ON_L2,
       ];
-      const executionStatusCond = [
+      const executionStatusCond: TransactionExecutionStatus[] = [
         TransactionExecutionStatus.REVERTED,
         TransactionExecutionStatus.SUCCEEDED,
         TransactionExecutionStatus.REJECTED,
