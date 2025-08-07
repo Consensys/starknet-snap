@@ -177,6 +177,8 @@ export const ResourceBoundMappingStruct = object({
   l1_gas: optional(ResourceBoundStruct),
   // eslint-disable-next-line @typescript-eslint/naming-convention
   l2_gas: optional(ResourceBoundStruct),
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  l1_data_gas: optional(ResourceBoundStruct),
 });
 
 export const V3TransactionDetailStruct = object({

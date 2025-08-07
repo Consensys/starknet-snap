@@ -1,6 +1,5 @@
 import type {
   RawCalldata,
-  EstimateFee,
   TransactionType as StarknetTransactionType,
 } from 'starknet';
 import type { Infer } from 'superstruct';
@@ -33,13 +32,15 @@ export type FormattedCallData = {
   tokenTransferData?: TokenTransferData;
 };
 
-export type ResourceBounds = Pick<
-  EstimateFee,
-  'resourceBounds'
->['resourceBounds'];
+export type ResourceBounds = {
+  l1_gas: { max_amount: string; max_price_per_unit: string };
+  l1_data_gas?: { max_amount: string; max_price_per_unit: string };
+  l2_gas: { max_amount: string; max_price_per_unit: string };
+};
 
 export type ResourceBoundsInBigInt = {
   l1_gas: { max_amount: bigint; max_price_per_unit: bigint };
+  l1_data_gas?: { max_amount: bigint; max_price_per_unit: bigint };
   l2_gas: { max_amount: bigint; max_price_per_unit: bigint };
 };
 
@@ -111,6 +112,7 @@ export enum TransactionStatus { // for retrieving txn from Starknet feeder gatew
   ACCEPTED_ON_L1 = 'ACCEPTED_ON_L1',
   NOT_RECEIVED = 'NOT_RECEIVED',
   REJECTED = 'REJECTED',
+  REVERTED = 'REVERTED',
 }
 
 export enum FinailityStatus {

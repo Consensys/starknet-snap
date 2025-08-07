@@ -6,7 +6,6 @@ import {
 
 import callsExamples from '../__tests__/fixture/callsExamples.json';
 import { generateAccounts } from '../__tests__/helper';
-import { FeeToken } from '../types/snapApi';
 import { ContractFuncName, TransactionDataVersion } from '../types/snapState';
 import {
   ETHER_SEPOLIA_TESTNET,
@@ -19,8 +18,6 @@ import {
   newDeployTransaction,
   newInvokeTransaction,
   transactionVersionToNumber,
-  feeTokenToTransactionVersion,
-  transactionVersionToFeeToken,
   transactionSelectorToName,
   isFundTransferEntrypoint,
 } from './transaction';
@@ -51,45 +48,6 @@ describe('transactionVersionToNumber', () => {
     'converts the transaction version to 1 if the given txnVersion is %s',
     (txnVersion: string) => {
       expect(transactionVersionToNumber(txnVersion)).toBe(1);
-    },
-  );
-});
-
-describe('feeTokenToTransactionVersion', () => {
-  it('converts feeToken string to transaction version v3 if it is STRK', () => {
-    expect(feeTokenToTransactionVersion(FeeToken.STRK)).toStrictEqual(
-      constants.TRANSACTION_VERSION.V3,
-    );
-  });
-
-  it.each([FeeToken.ETH, 'invalid_unit'])(
-    'converts feeToken string to transaction version v1 if it is not STRK - %s',
-    (txnVersion: string) => {
-      expect(feeTokenToTransactionVersion(txnVersion)).toStrictEqual(
-        constants.TRANSACTION_VERSION.V1,
-      );
-    },
-  );
-});
-
-describe('transactionVersionToFeeToken', () => {
-  it('converts transaction version to STRK unit if it is transaction v3', () => {
-    expect(
-      transactionVersionToFeeToken(constants.TRANSACTION_VERSION.V3),
-    ).toStrictEqual(FeeToken.STRK);
-  });
-
-  it.each([
-    Object.values(constants.TRANSACTION_VERSION).filter(
-      (ver) => ver !== constants.TRANSACTION_VERSION.V3,
-    ),
-    'invalid_unit',
-  ])(
-    'converts transaction version to ETH unit if it is not STRK - %s',
-    (txnVersion: string) => {
-      expect(transactionVersionToFeeToken(txnVersion)).toStrictEqual(
-        FeeToken.ETH,
-      );
     },
   );
 });

@@ -77,7 +77,7 @@ export const defaultAccount = {
   addressIndex: 0,
 } as Account;
 
-export const DEFAULT_FEE_TOKEN = FeeToken.ETH;
+export const DEFAULT_FEE_TOKEN = FeeToken.STRK;
 
 export const MIN_METAMASK_VERSION = '12.5.0';
 
