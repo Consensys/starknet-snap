@@ -5,6 +5,7 @@ import type {
   ApiParamsWithKeyDeriver,
   SignDeployAccountTransactionRequestParams,
 } from './types/snapApi';
+import { getTranslator } from './utils/locale';
 import { logger } from './utils/logger';
 import { toJson } from './utils/serializer';
 import {
@@ -53,12 +54,13 @@ export async function signDeployAccountTransaction(
     );
 
     if (requestParamsObj.enableAuthorize) {
+      const translate = getTranslator();
       const response = await wallet.request({
         method: 'snap_dialog',
         params: {
           type: DialogType.Confirmation,
           content: panel([
-            heading('Do you want to sign this transaction?'),
+            heading(translate('signTransactionPrompt')),
             ...snapComponents,
           ]),
         },

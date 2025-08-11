@@ -8,24 +8,26 @@ export enum LogLevel {
   OFF = 0,
 }
 
+/* eslint-disable @typescript-eslint/no-empty-function */
 export class Logger {
-  log = jest.fn();
+  log() {}
 
-  warn = jest.fn();
+  warn() {}
 
-  error = jest.fn();
+  error() {}
 
-  debug = jest.fn();
+  debug() {}
 
-  info = jest.fn();
+  info() {}
 
-  trace = jest.fn();
+  trace() {}
 
-  init = jest.fn();
+  init() {}
 
-  getLogLevel = jest.fn();
+  getLogLevel() {}
 
-  logLevel = 0;
+  logLevel() {}
 }
+/* eslint-enable */
 
 export const logger = new Logger();

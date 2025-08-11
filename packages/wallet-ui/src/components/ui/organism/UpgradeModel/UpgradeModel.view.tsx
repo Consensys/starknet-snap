@@ -1,18 +1,12 @@
 import { useEffect, useState } from 'react';
-import { useStarkNetSnap } from 'services';
+import { useMultiLanguage, useStarkNetSnap } from 'services';
 import { useAppSelector, useAppDispatch } from 'hooks/redux';
 import Toastr from 'toastr2';
 
 import { setUpgradeModalVisible } from 'slices/modalSlice';
-import { openExplorerTab, shortenAddress } from '../../../../utils/utils';
-import {
-  UpgradeButton,
-  StarknetLogo,
-  Title,
-  Wrapper,
-  DescriptionCentered,
-  Txnlink,
-} from './UpgradeModel.style';
+import { Modal } from 'components/ui/atom/Modal';
+import { openExplorerTab, shortenAddress } from 'utils/utils';
+import { Txnlink } from './UpgradeModel.style';
 
 interface Props {
   address: string;
@@ -28,6 +22,7 @@ enum Stage {
 export const UpgradeModelView = ({ address }: Props) => {
   const dispatch = useAppDispatch();
   const { upgradeAccount, waitForAccountUpdate } = useStarkNetSnap();
+  const { translate } = useMultiLanguage();
   const [txnHash, setTxnHash] = useState('');
   const [stage, setStage] = useState(Stage.INIT);
   const networks = useAppSelector((state) => state.networks);
@@ -50,7 +45,7 @@ export const UpgradeModelView = ({ address }: Props) => {
     } catch (err) {
       //eslint-disable-next-line no-console
       console.error(err);
-      toastr.error(`Upgrade account failed`);
+      toastr.error(translate('upgradeAccountFailed'));
     }
   };
 
@@ -70,7 +65,7 @@ export const UpgradeModelView = ({ address }: Props) => {
 
   useEffect(() => {
     if (stage === Stage.SUCCESS) {
-      toastr.success(`Account upgraded successfully`);
+      toastr.success(translate('accountUpgradedSuccessfully'));
       dispatch(setUpgradeModalVisible(false));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -81,61 +76,49 @@ export const UpgradeModelView = ({ address }: Props) => {
       case Stage.INIT:
         return (
           <>
-            <DescriptionCentered>
-              A new version of the smart contract <br />
-              is necessary to proceed with the Snap.
+            <Modal.Body>
+              {translate('newVersionOfSmartContractNecessaryPart1')} <br />
               <br />
+              {translate('newVersionOfSmartContractNecessaryPart2')} <br />
               <br />
-              New enhancements will come with <br />
-              this version.
-              <br />
-              <br />
-              Click on the "Upgrade" button to install it.
-              <br />
-              Thank you!
-            </DescriptionCentered>
-            <UpgradeButton onClick={onUpgrade}>Upgrade</UpgradeButton>
+              {translate('newVersionOfSmartContractNecessaryPart3')} <br />
+              {translate('newVersionOfSmartContractNecessaryPart4')}
+            </Modal.Body>
+            <Modal.Button onClick={onUpgrade}>
+              {translate('upgrade')}
+            </Modal.Button>
           </>
         );
       case Stage.WAITING_FOR_TXN:
-        return (
-          <DescriptionCentered>
-            Waiting for transaction to be complete.
-          </DescriptionCentered>
-        );
+        return <Modal.Body>{translate('waitingForTransaction')}</Modal.Body>;
       case Stage.SUCCESS:
         return (
-          <DescriptionCentered>
-            Account upgraded successfully.
-          </DescriptionCentered>
+          <Modal.Body>{translate('accountUpgradedSuccessfully')}</Modal.Body>
         );
       default:
         return (
-          <DescriptionCentered>
-            Transaction Hash: <br />{' '}
+          <Modal.Body>
+            {translate('transactionHash')} <br />{' '}
             <Txnlink onClick={() => openExplorerTab(txnHash, 'tx', chainId)}>
               {shortenAddress(txnHash)}{' '}
             </Txnlink>
             <br />
-            Your upgrade transaction is still pending and has reached the
-            maximum retry limit for status checks. Please wait for the
-            transaction to complete.
+            {translate('upgradeTransactionPendingPart1')} <br />
             <br />
+            {translate('upgradeTransactionPendingPart2')} <br />
             <br />
-            Please try again in a couple of hours.
-            <br />
-            <br />
-            Thank you for your comprehension.
-          </DescriptionCentered>
+            {translate('upgradeTransactionPendingPart3')}
+          </Modal.Body>
         );
     }
   };
 
   return (
-    <Wrapper>
-      <StarknetLogo />
-      <Title>Upgrade Account</Title>
+    <Modal>
+      <Modal.Logo />
+      <Modal.Title>{translate('upgradeAccount')}</Modal.Title>
+
       {renderComponent()}
-    </Wrapper>
+    </Modal>
   );
 };

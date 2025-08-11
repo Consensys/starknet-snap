@@ -1,6 +1,6 @@
 {
   "name": "wallet-ui",
-  "version": "1.23.0",
+  "version": "1.30.0",
   "private": true,
   "homepage": "/starknet",
   "license": "(Apache-2.0 OR MIT)",
@@ -44,7 +44,6 @@
     "terser": "^5.14.2"
   },
   "dependencies": {
-    "@consensys/starknet-snap": "file:../starknet-snap",
     "@emotion/react": "^11.9.0",
     "@emotion/styled": "^11.8.1",
     "@fortawesome/fontawesome-svg-core": "^6.1.1",
@@ -77,6 +76,7 @@
     "@metamask/eslint-config-jest": "^12.1.0",
     "@metamask/eslint-config-nodejs": "^12.1.0",
     "@metamask/eslint-config-typescript": "^12.1.0",
+    "@metamask/utils": "^11.0.1",
     "@storybook/addon-actions": "^6.5.3",
     "@storybook/addon-essentials": "^6.5.3",
     "@storybook/addon-interactions": "^6.5.3",

@@ -4,22 +4,15 @@ import type { Mutex } from 'async-mutex';
 import convert from 'ethereum-unit-converter';
 import { num as numUtils, constants } from 'starknet';
 import type {
-  InvocationsDetails,
-  DeclareContractPayload,
-  Abi,
   DeclareSignerDetails,
   Call,
   DeployAccountSignerDetails,
-  Invocations,
-  UniversalDetails,
+  BigNumberish,
 } from 'starknet';
 
-import {
-  FeeToken,
-  type AddErc20TokenRequestParams,
-  type AddNetworkRequestParams,
-} from '../types/snapApi';
-import { TransactionStatus } from '../types/snapState';
+import { Config } from '../config';
+import { type AddNetworkRequestParams } from '../types/snapApi';
+import { ContractFuncName, TransactionStatus } from '../types/snapState';
 import type {
   Network,
   Erc20Token,
@@ -30,21 +23,16 @@ import type {
 } from '../types/snapState';
 import {
   MAXIMUM_NETWORK_NAME_LENGTH,
-  MAXIMUM_TOKEN_NAME_LENGTH,
-  MAXIMUM_TOKEN_SYMBOL_LENGTH,
   PRELOADED_NETWORKS,
-  PRELOADED_TOKENS,
-  STARKNET_MAINNET_NETWORK,
   STARKNET_SEPOLIA_TESTNET_NETWORK,
 } from './constants';
 import { DeployRequiredError, UpgradeRequiredError } from './exceptions';
+import { getTranslator } from './locale';
 import { logger } from './logger';
 import { toJson } from './serializer';
 import { alertDialog } from './snap';
-import {
-  validateAccountRequireUpgradeOrDeploy,
-  validateAndParseAddress,
-} from './starknetUtils';
+import { validateAccountRequireUpgradeOrDeploy } from './starknetUtils';
+import { isValidAsciiStrField } from './string';
 import {
   filterTransactions,
   TimestampFilter,
@@ -91,27 +79,6 @@ async function setState(
  *
  * @param str
  */
-function hasOnlyAsciiChars(str: string) {
-  return /^[ -~]+$/u.test(str);
-}
-
-/**
- *
- * @param fieldStr
- * @param maxLength
- */
-function isValidAsciiStrField(fieldStr: string, maxLength: number) {
-  return (
-    hasOnlyAsciiChars(fieldStr) &&
-    fieldStr.trim().length > 0 &&
-    fieldStr.length <= maxLength
-  );
-}
-
-/**
- *
- * @param str
- */
 function isHexWithPrefix(str: string) {
   return /^0x[0-9a-fA-F]+$/u.test(str);
 }
@@ -132,72 +99,10 @@ function isValidHttpUrl(urlStr: string) {
 
 /**
  *
- * @param tokenName
- */
-function isValidTokenName(tokenName: string) {
-  return isValidAsciiStrField(tokenName, MAXIMUM_TOKEN_NAME_LENGTH);
-}
-
-/**
- *
- * @param tokenSymbol
- */
-function isValidTokenSymbol(tokenSymbol: string) {
-  return isValidAsciiStrField(tokenSymbol, MAXIMUM_TOKEN_SYMBOL_LENGTH);
-}
-
-/**
- *
  * @param networkName
  */
 function isValidNetworkName(networkName: string) {
   return isValidAsciiStrField(networkName, MAXIMUM_NETWORK_NAME_LENGTH);
-}
-
-/**
- *
- * @param tokenName
- * @param chainId
- */
-function isPreloadedTokenName(tokenName: string, chainId: string) {
-  return Boolean(
-    PRELOADED_TOKENS.find(
-      (token) =>
-        token.name.trim() === tokenName.trim() &&
-        isSameChainId(token.chainId, chainId),
-    ),
-  );
-}
-
-/**
- *
- * @param tokenSymbol
- * @param chainId
- */
-function isPreloadedTokenSymbol(tokenSymbol: string, chainId: string) {
-  return Boolean(
-    PRELOADED_TOKENS.find(
-      (token) =>
-        token.symbol.trim() === tokenSymbol.trim() &&
-        isSameChainId(token.chainId, chainId),
-    ),
-  );
-}
-
-/**
- *
- * @param tokenAddress
- * @param chainId
- */
-function isPreloadedTokenAddress(tokenAddress: string, chainId: string) {
-  const bigIntTokenAddress = numUtils.toBigInt(tokenAddress);
-  return Boolean(
-    PRELOADED_TOKENS.find(
-      (token) =>
-        numUtils.toBigInt(token.address) === bigIntTokenAddress &&
-        isSameChainId(token.chainId, chainId),
-    ),
-  );
 }
 
 /**
@@ -222,46 +127,6 @@ function isPreloadedNetworkName(networkName: string) {
       (network) => network.name.trim() === networkName.trim(),
     ),
   );
-}
-
-/**
- *
- * @param params
- * @param network
- */
-export function validateAddErc20TokenParams(
-  params: AddErc20TokenRequestParams,
-  network: Network,
-) {
-  try {
-    validateAndParseAddress(params.tokenAddress);
-  } catch (error) {
-    throw new Error(
-      `The given token address is invalid: ${params.tokenAddress}`,
-    );
-  }
-
-  if (!isValidTokenName(params.tokenName)) {
-    throw new Error(
-      `The given token name is invalid, needs to be in ASCII chars, not all spaces, and has length larger than ${MAXIMUM_TOKEN_NAME_LENGTH}: ${params.tokenName}`,
-    );
-  }
-
-  if (!isValidTokenSymbol(params.tokenSymbol)) {
-    throw new Error(
-      `The given token symbol is invalid, needs to be in ASCII chars, not all spaces, and has length larger than ${MAXIMUM_TOKEN_SYMBOL_LENGTH}: ${params.tokenSymbol}`,
-    );
-  }
-
-  if (
-    isPreloadedTokenAddress(params.tokenAddress, network.chainId) ||
-    isPreloadedTokenName(params.tokenName, network.chainId) ||
-    isPreloadedTokenSymbol(params.tokenSymbol, network.chainId)
-  ) {
-    throw new Error(
-      'The given token address, name, or symbol is the same as one of the preloaded tokens, and thus cannot be added',
-    );
-  }
 }
 
 /**
@@ -350,64 +215,18 @@ export function addDialogTxt(
  * @param network
  */
 export function getNetworkTxt(network: Network) {
+  const translate = getTranslator();
   const components = [];
-  addDialogTxt(components, 'Chain Name', network.name);
-  addDialogTxt(components, 'Chain ID', network.chainId);
+  addDialogTxt(components, translate('chainName'), network.name);
+  addDialogTxt(components, translate('chainId'), network.chainId);
   if (network.baseUrl) {
-    addDialogTxt(components, 'Base URL', network.baseUrl);
+    addDialogTxt(components, translate('baseUrl'), network.baseUrl);
   }
   if (network.nodeUrl) {
-    addDialogTxt(components, 'RPC URL', network.nodeUrl);
+    addDialogTxt(components, translate('rpcUrl'), network.nodeUrl);
   }
   if (network.voyagerUrl) {
-    addDialogTxt(components, 'Explorer URL', network.voyagerUrl);
-  }
-  return components;
-}
-
-/**
- *
- * @param senderAddress
- * @param network
- * @param invocations
- * @param abis
- * @param details
- */
-export function getTxnSnapTxt(
-  senderAddress: string,
-  network: Network,
-  invocations: Invocations | Call | Call[],
-  abis?: Abi[],
-  details?: UniversalDetails,
-) {
-  const components = [];
-  addDialogTxt(components, 'Network', network.name);
-  addDialogTxt(components, 'Signer Address', senderAddress);
-  addDialogTxt(
-    components,
-    'Transaction Invocation',
-    JSON.stringify(invocations, null, 2),
-  );
-  if (abis && abis.length > 0) {
-    addDialogTxt(components, 'Abis', JSON.stringify(abis, null, 2));
-  }
-
-  if (details?.maxFee) {
-    const feeToken: FeeToken =
-      details?.version === constants.TRANSACTION_VERSION.V3
-        ? FeeToken.STRK
-        : FeeToken.ETH;
-    addDialogTxt(
-      components,
-      `Max Fee(${feeToken})`,
-      convert(details.maxFee, 'wei', 'ether'),
-    );
-  }
-  if (details?.nonce) {
-    addDialogTxt(components, 'Nonce', details.nonce.toString());
-  }
-  if (details?.version) {
-    addDialogTxt(components, 'Version', details.version.toString());
+    addDialogTxt(components, translate('explorerUrl'), network.voyagerUrl);
   }
   return components;
 }
@@ -428,23 +247,28 @@ export function getSendTxnText(
   contractFuncName: string,
   contractCallData: string[],
   senderAddress: string,
-  maxFee: numUtils.BigNumberish,
+  maxFee: BigNumberish,
   network: Network,
 ): Component[] {
   // Retrieve the ERC-20 token from snap state for confirmation display purpose
+  const translate = getTranslator();
   const token = getErc20Token(state, contractAddress, network.chainId);
   const components = [];
-  addDialogTxt(components, 'Signer Address', senderAddress);
-  addDialogTxt(components, 'Contract', contractAddress);
-  addDialogTxt(components, 'Call Data', `[${contractCallData.join(', ')}]`);
+  addDialogTxt(components, translate('signerAddress'), senderAddress);
+  addDialogTxt(components, translate('contract'), contractAddress);
   addDialogTxt(
     components,
-    'Estimated Gas Fee(ETH)',
+    translate('callData'),
+    `[${contractCallData.join(', ')}]`,
+  );
+  addDialogTxt(
+    components,
+    `${translate('estimatedGasFee')}(ETH)`,
     convert(maxFee, 'wei', 'ether'),
   );
-  addDialogTxt(components, 'Network', network.name);
+  addDialogTxt(components, translate('network'), network.name);
 
-  if (token && contractFuncName === 'transfer') {
+  if (token && contractFuncName === ContractFuncName.Transfer) {
     try {
       let amount = '';
       if ([3, 6, 9, 12, 15, 18].includes(token.decimals)) {
@@ -454,9 +278,17 @@ export function getSendTxnText(
           Number(contractCallData[1]) * Math.pow(10, -1 * token.decimals)
         ).toFixed(token.decimals);
       }
-      addDialogTxt(components, 'Sender Address', senderAddress);
-      addDialogTxt(components, 'Recipient Address', contractCallData[0]);
-      addDialogTxt(components, `Amount(${token.symbol})`, amount);
+      addDialogTxt(components, translate('senderAddress'), senderAddress);
+      addDialogTxt(
+        components,
+        translate('recipientAddress'),
+        contractCallData[0],
+      );
+      addDialogTxt(
+        components,
+        translate('amountWithSymbol', token.symbol),
+        amount,
+      );
     } catch (error) {
       logger.error(
         // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
@@ -482,96 +314,15 @@ export function getSignTxnTxt(
   network: Network,
   txnInvocation: Call[] | DeclareSignerDetails | DeployAccountSignerDetails,
 ) {
+  const translate = getTranslator();
   const components = [];
-  addDialogTxt(components, 'Network', network.name);
-  addDialogTxt(components, 'Signer Address', signerAddress);
+  addDialogTxt(components, translate('network'), network.name);
+  addDialogTxt(components, translate('signerAddress'), signerAddress);
   addDialogTxt(
     components,
-    'Transaction',
+    translate('transaction'),
     JSON.stringify(txnInvocation, null, 2),
   );
-  return components;
-}
-
-/**
- *
- * @param senderAddress
- * @param network
- * @param contractPayload
- * @param invocationsDetails
- */
-export function getDeclareSnapTxt(
-  senderAddress: string,
-  network: Network,
-  contractPayload: DeclareContractPayload,
-  invocationsDetails?: InvocationsDetails,
-) {
-  const components = [];
-  addDialogTxt(components, 'Network', network.name);
-  addDialogTxt(components, 'Signer Address', senderAddress);
-
-  if (contractPayload.contract) {
-    const _contractPayload =
-      typeof contractPayload.contract === 'string' ||
-      contractPayload.contract instanceof String
-        ? contractPayload.contract.toString()
-        : JSON.stringify(contractPayload.contract, null, 2);
-    addDialogTxt(components, 'Contract', _contractPayload);
-  }
-  if (contractPayload.compiledClassHash) {
-    addDialogTxt(
-      components,
-      'Complied Class Hash',
-      contractPayload.compiledClassHash,
-    );
-  }
-  if (contractPayload.classHash) {
-    addDialogTxt(components, 'Class Hash', contractPayload.classHash);
-  }
-  if (contractPayload.casm) {
-    addDialogTxt(
-      components,
-      'Casm',
-      JSON.stringify(contractPayload.casm, null, 2),
-    );
-  }
-  if (invocationsDetails?.maxFee !== undefined) {
-    addDialogTxt(
-      components,
-      'Max Fee(ETH)',
-      convert(invocationsDetails.maxFee, 'wei', 'ether'),
-    );
-  }
-  if (invocationsDetails?.nonce !== undefined) {
-    addDialogTxt(components, 'Nonce', invocationsDetails.nonce.toString());
-  }
-  if (invocationsDetails?.version !== undefined) {
-    addDialogTxt(components, 'Version', invocationsDetails.version.toString());
-  }
-  return components;
-}
-
-/**
- *
- * @param tokenAddress
- * @param tokenName
- * @param tokenSymbol
- * @param tokenDecimals
- * @param network
- */
-export function getAddTokenText(
-  tokenAddress: string,
-  tokenName: string,
-  tokenSymbol: string,
-  tokenDecimals: number,
-  network: Network,
-) {
-  const components = [];
-  addDialogTxt(components, 'Network', network.name);
-  addDialogTxt(components, 'Token Address', tokenAddress);
-  addDialogTxt(components, 'Token Name', tokenName);
-  addDialogTxt(components, 'Token Symbol', tokenSymbol);
-  addDialogTxt(components, 'Token Decimals', tokenDecimals.toString());
   return components;
 }
 
@@ -648,7 +399,7 @@ export async function upsertAccount(
       storedAccount.derivationPath = userAccount.derivationPath;
       storedAccount.publicKey = userAccount.publicKey;
       storedAccount.deployTxnHash =
-        userAccount.deployTxnHash || storedAccount.deployTxnHash;
+        userAccount.deployTxnHash ?? storedAccount.deployTxnHash;
       storedAccount.upgradeRequired = userAccount.upgradeRequired;
       storedAccount.deployRequired = userAccount.deployRequired;
     }
@@ -855,11 +606,11 @@ export function getNetworkFromChainId(
   state: SnapState,
   targerChainId: string | undefined,
 ) {
-  const chainId = targerChainId ?? STARKNET_MAINNET_NETWORK.chainId;
+  const chainId = targerChainId ?? Config.defaultNetwork.chainId;
   const network = getNetwork(state, chainId);
   if (network === undefined) {
     throw new Error(
-      `can't find the network in snap state with chainId: ${chainId}`,
+      `can'translate find the network in snap state with chainId: ${chainId}`,
     );
   }
   logger.log(
@@ -875,28 +626,6 @@ export function getNetworkFromChainId(
  */
 export function getChainIdHex(network: Network) {
   return `0x${numUtils.toBigInt(network.chainId).toString(16)}`;
-}
-
-/**
- *
- * @param chainId
- */
-export function getRPCUrl(chainId: string) {
-  switch (chainId) {
-    case constants.StarknetChainId.SN_MAIN:
-      return `https://starknet-mainnet.g.alchemy.com/starknet/version/rpc/v0_7/${getRPCCredentials()}`;
-    default:
-    case STARKNET_SEPOLIA_TESTNET_NETWORK.chainId:
-      return `https://starknet-sepolia.g.alchemy.com/starknet/version/rpc/v0_7/${getRPCCredentials()}`;
-  }
-}
-
-/**
- *
- */
-export function getRPCCredentials(): string {
-  // eslint-disable-next-line no-restricted-globals
-  return process.env.ALCHEMY_API_KEY ?? '';
 }
 
 /**
@@ -1117,7 +846,7 @@ export async function removeAcceptedTransaction(
  * @param state
  */
 export function getCurrentNetwork(state: SnapState) {
-  return state.currentNetwork ?? STARKNET_MAINNET_NETWORK;
+  return state.currentNetwork ?? Config.defaultNetwork;
 }
 
 /**
@@ -1172,11 +901,10 @@ export function toMap<Key, Val, FnParam>(
  * Displays a modal to the user requesting them to upgrade their account.
  */
 export async function showUpgradeRequestModal() {
+  const translate = getTranslator();
   await alertDialog([
-    heading('Account Upgrade Mandatory!'),
-    text(
-      `Visit the [companion dapp for Starknet](${getDappUrl()}) and click “Upgrade”.\nThank you!`,
-    ),
+    heading(translate('accountUpgradeMandatory')),
+    text(translate('visitCompanionDappAndUpgrade', getDappUrl())),
   ]);
 }
 
@@ -1184,11 +912,10 @@ export async function showUpgradeRequestModal() {
  * Displays a modal to the user requesting them to deploy their account.
  */
 export async function showDeployRequestModal() {
+  const translate = getTranslator();
   await alertDialog([
-    heading('Account Deployment Mandatory!'),
-    text(
-      `Visit the [companion dapp for Starknet](${getDappUrl()}) to deploy your account.\nThank you!`,
-    ),
+    heading(translate('accountDeploymentMandatory')),
+    text(translate('visitCompanionDappAndDeploy', getDappUrl())),
   ]);
 }
 

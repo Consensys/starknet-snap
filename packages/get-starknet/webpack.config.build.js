@@ -18,11 +18,14 @@ module.exports = (env) =>
   merge(common, {
     mode: 'production',
     output: {
+      filename: '[name].[contenthash].js?v=[fullhash]', // Appends a cache-busting query string
+      chunkFilename: '[name].[contenthash].js?v=[fullhash]', // For dynamically imported chunks
       publicPath: process.env.GET_STARKNET_PUBLIC_PATH || 'https://snaps.consensys.io/starknet/get-starknet/v1/',
     },
     plugins: [
       new webpack.DefinePlugin({
         'process.env.SNAP_ID': JSON.stringify(process.env.SNAP_ID || 'npm:@consensys/starknet-snap'),
+        'process.env.SNAP_VERSION': JSON.stringify(process.env.SNAP_VERSION || '*'),
       }),
       new ModuleFederationPlugin({
         name: 'MetaMaskStarknetSnapWallet',

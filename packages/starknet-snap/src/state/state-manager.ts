@@ -14,7 +14,13 @@ export abstract class StateManager<Entity> extends SnapStateManager<SnapState> {
           erc20Tokens: [],
           networks: [],
           transactions: [],
+          transactionRequests: [],
+          currentAccount: {},
         };
+      }
+
+      if (!state.transactionRequests) {
+        state.transactionRequests = [];
       }
 
       if (!state.accContracts) {
@@ -31,6 +37,10 @@ export abstract class StateManager<Entity> extends SnapStateManager<SnapState> {
 
       if (!state.transactions) {
         state.transactions = [];
+      }
+
+      if (!state.currentAccount) {
+        state.currentAccount = {};
       }
 
       return state;

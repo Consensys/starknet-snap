@@ -107,3 +107,11 @@ export const Icon = styled(FontAwesomeIcon).attrs<IIcon>((props) => ({
       ? props.theme.palette.error.main
       : props.theme.palette.success.main,
 }))<IIcon>``;
+
+export const InfoText = styled.div`
+  font-size: ${(props) => props.theme.typography.p2.fontSize};
+  font-family: ${(props) => props.theme.typography.p2.fontFamily};
+  color: ${(props) => props.theme.palette.grey.black};
+  padding-top: ${(props) => props.theme.spacing.tiny};
+  padding-left: ${(props) => props.theme.spacing.small};
+`;

@@ -2,6 +2,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Button } from 'components/ui/atom/Button';
 import styled from 'styled-components';
 import { theme } from 'theme/default';
+import { LoadingSmall } from 'components/ui/atom/LoadingSmall'; // Import LoadingSmall
 
 interface IInput {
   focused?: boolean;
@@ -42,6 +43,14 @@ const getInputBorderColorByState = (
   return theme.palette.grey.grey2;
 };
 
+export const LoadingWrapper = styled(LoadingSmall).attrs({
+  showText: false,
+})`
+  width: 16px;
+  height: 16px;
+  margin-right: 10px;
+`;
+
 export const Wrapper = styled.div`
   display: flex;
   flex-direction: column;
@@ -65,7 +74,6 @@ export const MaxButton = styled(Button).attrs((props) => ({
 export const Input = styled.input<IInput>`
   border: none;
   height: 50px;
-  width: 8px;
   font-size: ${(props) => props.theme.typography.p2.fontSize};
   font-family: ${(props) => props.theme.typography.p2.fontFamily};
   color: ${(props) =>

@@ -1,5 +1,6 @@
 import { assert, string } from 'superstruct';
 
+import { Config } from '../config';
 import type { Network, SnapState } from '../types/snapState';
 import type { IFilter } from './filter';
 import { ChainIdFilter as BaseChainIdFilter } from './filter';
@@ -59,6 +60,9 @@ export class NetworkStateManager extends StateManager<Network> {
 
   /**
    * Finds a network based on the given chainId.
+   * The query will first be looked up in the state. If the result is false, it will then fallback to the available Networks constants.
+   *
+   * (Note) Due to the returned network object may not exist in the state, it may failed to execute `updateNetwork` with the returned network object.
    *
    * @param param - The param object.
    * @param param.chainId - The chainId to search for.
@@ -74,7 +78,12 @@ export class NetworkStateManager extends StateManager<Network> {
     state?: SnapState,
   ): Promise<Network | null> {
     const filters: INetworkFilter[] = [new ChainIdFilter([chainId])];
-    return this.find(filters, state);
+    // in case the network not found from the state, try to get the network from the available Networks constants
+    return (
+      (await this.find(filters, state)) ??
+      Config.availableNetworks.find((network) => network.chainId === chainId) ??
+      null
+    );
   }
 
   /**
@@ -88,10 +97,9 @@ export class NetworkStateManager extends StateManager<Network> {
   async updateNetwork(data: Network): Promise<void> {
     try {
       await this.update(async (state: SnapState) => {
-        const dataInState = await this.getNetwork(
-          {
-            chainId: data.chainId,
-          },
+        // Use underlying function `find` to avoid searching network from constants
+        const dataInState = await this.find(
+          [new ChainIdFilter([data.chainId])],
           state,
         );
 
@@ -111,8 +119,20 @@ export class NetworkStateManager extends StateManager<Network> {
    * @param [state] - The optional SnapState object.
    * @returns A Promise that resolves with the current Network object if found, or null if not found.
    */
-  async getCurrentNetwork(state?: SnapState): Promise<Network | null> {
-    return (state ?? (await this.get())).currentNetwork ?? null;
+  async getCurrentNetwork(state?: SnapState): Promise<Network> {
+    const { currentNetwork } = state ?? (await this.get());
+
+    // Make sure the current network is either Sepolia testnet or Mainnet. By default it will be Mainnet.
+    if (
+      !currentNetwork ||
+      !Config.availableNetworks.find(
+        (network) => network.chainId === currentNetwork.chainId,
+      )
+    ) {
+      return Config.defaultNetwork;
+    }
+
+    return currentNetwork;
   }
 
   /**

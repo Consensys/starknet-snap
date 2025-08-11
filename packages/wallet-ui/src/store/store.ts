@@ -3,6 +3,7 @@ import { persistReducer } from 'redux-persist';
 import storage from 'redux-persist/lib/storage';
 import walletReducer from 'slices/walletSlice';
 import networkReducer from 'slices/networkSlice';
+import cacheReducer from 'slices/cacheSlice';
 import modalSlice from 'slices/modalSlice';
 import UIReducer from 'slices/UISlice';
 import thunk from 'redux-thunk';
@@ -10,13 +11,13 @@ import thunk from 'redux-thunk';
 const persistConfig = {
   key: 'root',
   storage,
-  blacklist: ['wallet', 'modals', 'networks'],
+  blacklist: ['wallet', 'modals', 'networks', 'cache'],
 };
 
 const walletPersistConfig = {
   key: 'wallet',
   storage,
-  whitelist: ['forceReconnect'],
+  whitelist: ['forceReconnect', 'visibility'],
 };
 
 const networkPersistConfig = {
@@ -30,6 +31,7 @@ const reducers = combineReducers({
   networks: persistReducer(networkPersistConfig, networkReducer),
   modals: modalSlice,
   UI: UIReducer,
+  cache: cacheReducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, reducers);

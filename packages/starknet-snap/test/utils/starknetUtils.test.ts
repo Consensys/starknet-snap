@@ -26,7 +26,7 @@ import {
   Provider,
   GetTransactionReceiptResponse,
 } from 'starknet';
-import { hexToString } from '../../src/utils/formatterUtils';
+import { hexToString } from '../../src/utils/formatter-utils';
 import { BIP44AddressKeyDeriver } from '@metamask/key-tree';
 
 chai.use(sinonChai);

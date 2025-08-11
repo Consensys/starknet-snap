@@ -1,5 +1,104 @@
 # Changelog
 
+## [4.0.0](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v3.4.0...starknet-snap-v4.0.0) (2025-07-16)
+
+
+### Features
+
+* remove fee dropdown selection ([#549](https://github.com/Consensys/starknet-snap/issues/549)) ([42c5d0e](https://github.com/Consensys/starknet-snap/commit/42c5d0ead1ecba504d6f9101490a8f372d5d7668))
+* upgrade to starknet.js v7.6.3 and support Starknet v0.14 (V3 transactions, resource bounds) ([f1cac79](https://github.com/Consensys/starknet-snap/commit/f1cac7986e3b742f65cb488d7991c0420d31c613))
+
+## [3.4.0](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v3.3.0...starknet-snap-v3.4.0) (2025-04-03)
+
+
+### Features
+
+* add isDeployed field in account state snap ([#525](https://github.com/Consensys/starknet-snap/issues/525)) ([16e44d8](https://github.com/Consensys/starknet-snap/commit/16e44d892bd1956ac54808b433ddcc622da930e5))
+* prevent account with same name ([dcdbf34](https://github.com/Consensys/starknet-snap/commit/dcdbf34af38ee18f64db76e40fcb64f5412f34dd))
+
+
+### Bug Fixes
+
+* include failed transactions on RPC `starkNet_getTransactions` ([da1fbca](https://github.com/Consensys/starknet-snap/commit/da1fbca84fa43e7b473c8399c87ff850ff8d4768))
+
+## [3.3.0](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v3.2.0...starknet-snap-v3.3.0) (2025-03-04)
+
+
+### Features
+
+* Support account name management in Snap ([9a8651f](https://github.com/Consensys/starknet-snap/commit/9a8651f68373a0366eeb71a10aa75998ae71f71e))
+
+## [3.2.0](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v3.1.0...starknet-snap-v3.2.0) (2025-02-07)
+
+
+### Features
+
+* Add `AccountService` to refactor  the Cairo Contract 1 and 0 discovery logic ([#503](https://github.com/Consensys/starknet-snap/issues/503)) ([3d76d1c](https://github.com/Consensys/starknet-snap/commit/3d76d1c91f341f1d33cefbe7ffee880c228d8e49))
+* Enable multiple accounts support in SNAP with new RPC API `starkNet_listAccounts`,`starkNet_swtichAccount`,`starkNet_addAccount`,`starkNet_toggleAccountVisibility` ([#504](https://github.com/Consensys/starknet-snap/issues/504), [#477](https://github.com/Consensys/starknet-snap/issues/477), [#478](https://github.com/Consensys/starknet-snap/issues/478), [#474](https://github.com/Consensys/starknet-snap/issues/474), [#476](https://github.com/Consensys/starknet-snap/issues/476)) ([6124ed3](https://github.com/Consensys/starknet-snap/commit/6124ed387da0ef491f08b5c709ca47e29b838dda))
+* Enable multiple languages (FR) to support in SNAP and Wallet UI ([#495](https://github.com/Consensys/starknet-snap/issues/495), [#481](https://github.com/Consensys/starknet-snap/issues/481)) ([ece4e17](https://github.com/Consensys/starknet-snap/commit/ece4e1793bf16c2be2ae86f1999f81273e131878))
+
+## [3.1.0](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v3.0.0...starknet-snap-v3.1.0) (2024-12-19)
+
+
+### Features
+
+* Add permission boundary.  Block RPCs - `starkNet_addNetwork`, `starkNet_estimateAccountDeployFee` and `starkNet_getStoredTransactions` access for any origin ([#448](https://github.com/Consensys/starknet-snap/issues/448)) ([1e80070](https://github.com/Consensys/starknet-snap/commit/1e800700e1713a94da6ab0e3d074e0c5f16a0d6c))
+* Add new RPC `starkNet_getAddrFromStarkName` to support  transfer money with .stark name ([#437](https://github.com/Consensys/starknet-snap/issues/437)) ([#449](https://github.com/Consensys/starknet-snap/issues/449)) ([c9e2c64](https://github.com/Consensys/starknet-snap/commit/c9e2c64572ce22bb111e6075fa6191dc025bc863))
+* Refactor RPC `starkNet_getTransactions` and change the provider from Voyager to StarkScan ([#453](https://github.com/Consensys/starknet-snap/issues/453)) ([#457](https://github.com/Consensys/starknet-snap/issues/457)) ([#458](https://github.com/Consensys/starknet-snap/issues/458)) ([#459](https://github.com/Consensys/starknet-snap/issues/459)) ([#341](https://github.com/Consensys/starknet-snap/issues/341)) ([cfdc79d](https://github.com/Consensys/starknet-snap/commit/cfdc79da6a0dda518b2dd6dd3c699de254d8e7f1)) ([5b72ef9](https://github.com/Consensys/starknet-snap/commit/5b72ef9f8ab55ad57dcaca25e306d3feecffcf0d))
+* Replace RPC provider from Alchemy to Infura DIN ([451](https://github.com/Consensys/starknet-snap/pull/451)) ([eb6c688](https://github.com/Consensys/starknet-snap/commit/eb6c68876659df171a9c3d9421be1ecf4273d2ee))
+* Refactor RPC starkNet_getTransactionStatus to have superstruct validation ([447](https://github.com/Consensys/starknet-snap/pull/447)) ([5d569a88](https://github.com/Consensys/starknet-snap/commit/5d569a88ed0605e4f022de5b567acfd5c8fc6f15))
+* Remove RPCs `starkNet_sendTransaction` and `starkNet_estimateFees` ([442](https://github.com/Consensys/starknet-snap/pull/442)) ([fbfcb54a](https://github.com/Consensys/starknet-snap/commit/fbfcb54abd8f97b01e2e514c84c86ddf0086fbca))
+
+
+### Bug Fixes
+
+* Consolidate `ResourceBounds` sum ([#456](https://github.com/Consensys/starknet-snap/issues/456)) ([85ea8ba](https://github.com/Consensys/starknet-snap/commit/85ea8bacc8c0251b47dbd63cd23f8e96f073db56))
+
+## [3.0.0](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v2.11.0...starknet-snap-v3.0.0) (2024-11-26)
+
+
+### ⚠ BREAKING CHANGES
+
+* Enable JSX support, 1) Allow users to select the fee token in the execute transaction dialog (#417, #418, #419, #420). 2) Add JSX support and detection (#415, #416). 3) Replace RPC dialogs with JSX-based components ([#422](https://github.com/Consensys/starknet-snap/issues/422))
+
+### Features
+
+* Enable JSX support, 1) Allow users to select the fee token in the execute transaction dialog ([#417](https://github.com/Consensys/starknet-snap/issues/417), [#418](https://github.com/Consensys/starknet-snap/issues/418), [#419](https://github.com/Consensys/starknet-snap/issues/419), [#420](https://github.com/Consensys/starknet-snap/issues/420)). 2) Add JSX support and detection ([#415](https://github.com/Consensys/starknet-snap/issues/415), [#416](https://github.com/Consensys/starknet-snap/issues/416)). 3) Replace RPC dialogs with JSX-based components ([#422](https://github.com/Consensys/starknet-snap/issues/422)) ([abfc0e5](https://github.com/Consensys/starknet-snap/commit/abfc0e52cc5c9c4fc7ec7e04a9ff667acbf99813))
+
+## [2.11.0](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v2.10.1...starknet-snap-v2.11.0) (2024-10-28)
+
+
+### Features
+
+* Add custom error code to meet get-starknet v4 exception format ([#374](https://github.com/Consensys/starknet-snap/issues/374)) ([e61eb8b](https://github.com/Consensys/starknet-snap/commit/e61eb8bb4b7b1e2af50ed02bbdd4dac517867710))
+* Add new RPC `starkNet_getDeploymentData` to support get-starknet v4 ([#381](https://github.com/Consensys/starknet-snap/issues/381)) ([a034bcf](https://github.com/Consensys/starknet-snap/commit/a034bcfb3b60242559e57f7ffbba9a7359444f1f))
+* Add UI divider and hyperlink the address to the explorer on the UI dialog ([#405](https://github.com/Consensys/starknet-snap/issues/405), [#404](https://github.com/Consensys/starknet-snap/issues/404)) ([a77fede](https://github.com/Consensys/starknet-snap/commit/a77fedebcc3674549b117eb865d500c6d5209c7f))
+* Refactor RPC `starkNet_addErc20Token` to have superstruct validation ([#388](https://github.com/Consensys/starknet-snap/issues/388)) ([157b5ad](https://github.com/Consensys/starknet-snap/commit/157b5ad2930fe4dfa0c154596c942c295d9c4d99))
+* Refactor RPC `starkNet_declareContract` to have superstruct validation ([#398](https://github.com/Consensys/starknet-snap/issues/398)) ([5617ccf](https://github.com/Consensys/starknet-snap/commit/5617ccf85af58943313ef81bf3a03deed0c4eb0f))
+* Refactor RPC `starkNet_switchNetwork` to have superstruct validation ([#369](https://github.com/Consensys/starknet-snap/issues/369), [#373](https://github.com/Consensys/starknet-snap/issues/373), [#368](https://github.com/Consensys/starknet-snap/issues/368)) ([d0384bf](https://github.com/Consensys/starknet-snap/commit/d0384bf9c9476c2168586cf7dc48fe6adb965bcb))
+
+
+### Bug Fixes
+
+* Fix incorrect params passed to RPCs `starkNet_signDeclareTransaction`, `starkNet_verifySignedMessage`, `starkNet_declareContract` and `starkNet_getDeploymentData` ([#401](https://github.com/Consensys/starknet-snap/issues/401)) ([a834beb](https://github.com/Consensys/starknet-snap/commit/a834beb4bc0bb42f2f21b50f1cbb5a961e938b1e))
+* Fix RPC `starkNet_executeTxn` storing in-correct state data if the params `calls`  is not an array ([#376](https://github.com/Consensys/starknet-snap/issues/376)) ([508b958](https://github.com/Consensys/starknet-snap/commit/508b9584b534bd93235296fd36328fbaaa52334b))
+
+## [2.10.1](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v2.10.0...starknet-snap-v2.10.1) (2024-10-02)
+
+
+### Bug Fixes
+
+* fix snap homepage screen error if the logger is not initialised ([#363](https://github.com/Consensys/starknet-snap/issues/363)) ([6117509](https://github.com/Consensys/starknet-snap/commit/61175090256aa3d614b0e850947e0f90b5e05908))
+
+## [2.10.0](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v2.9.0...starknet-snap-v2.10.0) (2024-09-20)
+
+
+### Features
+
+* support STRK token for the gas fee in sending transaction and estimate fee ([#271](https://github.com/Consensys/starknet-snap/issues/271)) ([8f50a33](https://github.com/Consensys/starknet-snap/commit/8f50a33ca7cdce88c6853ce1945cd7f7a7b24fae))
+* change default network to mainnet ([#357](https://github.com/Consensys/starknet-snap/issues/357)) ([b2eccb7](https://github.com/Consensys/starknet-snap/commit/b2eccb74e958d2087917484469cb2139e2f537b7))
+* bump starknet.js to v6.11.0 ([#296](https://github.com/Consensys/starknet-snap/issues/296)) ([e298244](https://github.com/Consensys/starknet-snap/commit/e298244a5e68e2809ab6367330e104c53ca5c861))
+* allow multiple consecutive transactions ([#289](https://github.com/Consensys/starknet-snap/issues/289)) ([5a501f9](https://github.com/Consensys/starknet-snap/commit/5a501f9aae7c3cdf041f479eac38f4a1e82855e9))
 
 ## [2.9.0](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v2.8.0...starknet-snap-v2.9.0) (2024-07-16)
 

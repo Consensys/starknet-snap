@@ -1,17 +1,14 @@
 import type { BIP44AddressKeyDeriver } from '@metamask/key-tree';
 import type Mutex from 'async-mutex/lib/Mutex';
 import type {
-  Abi,
-  Call,
-  InvocationsSignerDetails,
   DeclareContractPayload,
   InvocationsDetails,
   Invocations,
   EstimateFeeDetails,
   DeployAccountSignerDetails,
-  DeclareSignerDetails,
-  typedData,
   constants,
+  TransactionExecutionStatus,
+  TransactionFinalityStatus,
 } from 'starknet';
 
 import type { SnapState, VoyagerTransactionType } from './snapState';
@@ -31,27 +28,21 @@ export type ApiParamsWithKeyDeriver = ApiParams & {
 export type ApiRequestParams =
   | CreateAccountRequestParams
   | GetStoredUserAccountsRequestParams
-  | ExtractPrivateKeyRequestParams
   | ExtractPublicKeyRequestParams
-  | SignMessageRequestParams
-  | VerifySignedMessageRequestParams
   | GetErc20TokenBalanceRequestParams
   | GetTransactionStatusRequestParams
   | SendTransactionRequestParams
   | GetValueRequestParams
   | EstimateFeeRequestParams
   | EstimateAccountDeployFeeRequestParams
-  | AddErc20TokenRequestParams
   | GetStoredErc20TokensRequestParams
   | AddNetworkRequestParams
   | GetStoredNetworksRequestParams
   | GetStoredTransactionsRequestParams
   | GetTransactionsRequestParams
   | RecoverAccountsRequestParams
-  | ExecuteTxnRequestParams
   | EstimateFeesRequestParams
-  | DeclareContractRequestParams
-  | SignTransactionRequestParams;
+  | DeclareContractRequestParams;
 
 export type BaseRequestParams = {
   chainId?: string;
@@ -74,24 +65,8 @@ export type GetStoredErc20TokensRequestParams = BaseRequestParams;
 
 export type GetStoredNetworksRequestParams = Omit<BaseRequestParams, 'chainId'>;
 
-export type ExtractPrivateKeyRequestParams = {
-  userAddress: string;
-} & BaseRequestParams;
-
 export type ExtractPublicKeyRequestParams = {
   userAddress: string;
-} & BaseRequestParams;
-
-export type SignMessageRequestParams = {
-  typedDataMessage: typeof typedData.TypedData;
-} & Authorizable &
-  SignRequestParams &
-  BaseRequestParams;
-
-export type VerifySignedMessageRequestParams = {
-  signerAddress: string;
-  signature: string;
-  typedDataMessage?: string;
 } & BaseRequestParams;
 
 export type GetErc20TokenBalanceRequestParams = {
@@ -134,13 +109,6 @@ export type EstimateAccountDeployFeeRequestParams = {
   addressIndex?: string | number;
 } & BaseRequestParams;
 
-export type AddErc20TokenRequestParams = {
-  tokenAddress: string;
-  tokenName: string;
-  tokenSymbol: string;
-  tokenDecimals?: string | number;
-} & BaseRequestParams;
-
 export type AddNetworkRequestParams = {
   networkName: string;
   networkChainId: string;
@@ -172,13 +140,6 @@ export type RecoverAccountsRequestParams = {
   maxMissed?: string | number;
 } & BaseRequestParams;
 
-export type ExecuteTxnRequestParams = {
-  senderAddress: string;
-  txnInvocation: Call | Call[];
-  abis?: Abi[];
-  invocationsDetails?: InvocationsDetails;
-} & BaseRequestParams;
-
 export type EstimateFeesRequestParams = {
   senderAddress: string;
   invocations: Invocations;
@@ -193,8 +154,8 @@ export type DeclareContractRequestParams = {
 } & BaseRequestParams;
 
 export type RpcV4GetTransactionReceiptResponse = {
-  execution_status?: string;
-  finality_status?: string;
+  execution_status?: TransactionExecutionStatus;
+  finality_status?: TransactionFinalityStatus;
 };
 
 export type Authorizable = {
@@ -205,28 +166,10 @@ export type SignRequestParams = {
   signerAddress: string;
 };
 
-export type SignTransactionRequestParams = {
-  transactions: Call[];
-  transactionsDetail: InvocationsSignerDetails;
-} & Authorizable &
-  SignRequestParams &
-  BaseRequestParams;
-
 export type SignDeployAccountTransactionRequestParams = {
   transaction: DeployAccountSignerDetails;
 } & Authorizable &
   SignRequestParams &
-  BaseRequestParams;
-
-export type SignDeclareTransactionRequestParams = {
-  transaction: DeclareSignerDetails;
-} & Authorizable &
-  SignRequestParams &
-  BaseRequestParams;
-
-export type SwitchNetworkRequestParams = {
-  chainId: string;
-} & Authorizable &
   BaseRequestParams;
 
 export type GetStarkNameRequestParam = {
@@ -242,5 +185,4 @@ export enum FeeTokenUnit {
   ETH = 'wei',
   STRK = 'fri',
 }
-
-/* eslint-disable */
+/* eslint-enable */

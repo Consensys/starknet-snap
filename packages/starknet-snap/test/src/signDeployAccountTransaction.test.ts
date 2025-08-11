@@ -22,11 +22,7 @@ import {
 } from '../../src/types/snapApi';
 import { DeployAccountSignerDetails, constants } from 'starknet';
 import * as utils from '../../src/utils/starknetUtils';
-import * as snapsUtil from '../../src/utils/snapUtils';
-import {
-  DeployRequiredError,
-  UpgradeRequiredError,
-} from '../../src/utils/exceptions';
+import { loadLocale } from '../../src/utils/locale';
 
 chai.use(sinonChai);
 const sandbox = sinon.createSandbox();
@@ -83,6 +79,7 @@ describe('Test function: signDeployAccountTransaction', function () {
   });
 
   it('should sign a transaction from an user account correctly', async function () {
+    await loadLocale();
     sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolvesThis();
     sandbox.stub(utils, 'signDeployAccountTransaction').resolves(signature3);
     const result = await signDeployAccountTransaction(apiParams);
@@ -91,6 +88,7 @@ describe('Test function: signDeployAccountTransaction', function () {
   });
 
   it('should throw error if signDeployAccountTransaction fail', async function () {
+    await loadLocale();
     sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolvesThis();
     sandbox.stub(utils, 'signDeployAccountTransaction').throws(new Error());
     let result;
@@ -105,6 +103,7 @@ describe('Test function: signDeployAccountTransaction', function () {
   });
 
   it('should return false if user deny to sign the transaction', async function () {
+    await loadLocale();
     sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolvesThis();
     const stub = sandbox.stub(utils, 'signDeployAccountTransaction');
     walletStub.rpcStubs.snap_dialog.resolves(false);
@@ -116,6 +115,7 @@ describe('Test function: signDeployAccountTransaction', function () {
   });
 
   it('should skip dialog if enableAuthorize is false', async function () {
+    await loadLocale();
     sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolvesThis();
     sandbox.stub(utils, 'signDeployAccountTransaction').resolves(signature3);
     const paramsObject =
@@ -128,6 +128,7 @@ describe('Test function: signDeployAccountTransaction', function () {
   });
 
   it('should skip dialog if enableAuthorize is omit', async function () {
+    await loadLocale();
     sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolvesThis();
     sandbox.stub(utils, 'signDeployAccountTransaction').resolves(signature3);
     const paramsObject =

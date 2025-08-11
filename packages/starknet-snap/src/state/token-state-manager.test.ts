@@ -308,4 +308,44 @@ describe('TokenStateManager', () => {
       );
     });
   });
+
+  describe('upsertToken', () => {
+    const createTokenToUpsert = () => {
+      return {
+        address: '0x123455',
+        symbol: 'TO',
+        name: 'Token',
+        decimals: 18,
+        chainId: constants.StarknetChainId.SN_SEPOLIA,
+      };
+    };
+    it('adds the token to state if it does not exist', async () => {
+      const token = createTokenToUpsert();
+      const { state } = await mockState({
+        tokens: [ETHER_MAINNET],
+      });
+
+      const stateManager = new TokenStateManager();
+      await stateManager.upsertToken(token);
+
+      expect(state.erc20Tokens[1]).toStrictEqual(token);
+    });
+
+    it('updates the token in state if it exists', async () => {
+      const token = createTokenToUpsert();
+      const { state } = await mockState({
+        tokens: [ETHER_MAINNET, token],
+      });
+
+      const updatedEntity = {
+        ...token,
+        name: 'Updated Token',
+      };
+
+      const stateManager = new TokenStateManager();
+      await stateManager.upsertToken(updatedEntity);
+
+      expect(state.erc20Tokens[1]).toStrictEqual(updatedEntity);
+    });
+  });
 });

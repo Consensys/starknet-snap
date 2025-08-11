@@ -9,11 +9,16 @@ import { ASSETS_PRICE_REFRESH_FREQUENCY } from 'utils/constants';
 
 export const AssetsListView = () => {
   const { setErc20TokenBalance, refreshTokensUSDPrice } = useStarkNetSnap();
-  const wallet = useAppSelector((state) => state.wallet);
+  const erc20TokenBalances = useAppSelector(
+    (state) => state.wallet.erc20TokenBalances,
+  );
+  const erc20TokenBalanceSelected = useAppSelector(
+    (state) => state.wallet.erc20TokenBalanceSelected,
+  );
   const timeoutHandle = useRef(setTimeout(() => {}));
 
   useEffect(() => {
-    if (wallet.erc20TokenBalances?.length > 0) {
+    if (erc20TokenBalances?.length > 0) {
       clearTimeout(timeoutHandle.current); // cancel the timeout that was in-flight
       timeoutHandle.current = setTimeout(
         () => refreshTokensUSDPrice(),
@@ -22,7 +27,7 @@ export const AssetsListView = () => {
       return () => clearTimeout(timeoutHandle.current);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [wallet.erc20TokenBalances]);
+  }, [erc20TokenBalances]);
 
   const handleClick = (asset: Erc20TokenBalance) => {
     setErc20TokenBalance(asset);
@@ -30,12 +35,12 @@ export const AssetsListView = () => {
 
   return (
     <Wrapper<FC<IListProps<Erc20TokenBalance>>>
-      data={wallet.erc20TokenBalances}
+      data={erc20TokenBalances}
       render={(asset) => (
         <AssetListItem
           asset={asset}
           onClick={() => handleClick(asset)}
-          selected={wallet.erc20TokenBalanceSelected.address === asset.address}
+          selected={erc20TokenBalanceSelected.address === asset.address}
         />
       )}
       keyExtractor={(asset) => asset.address}

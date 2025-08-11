@@ -1,4 +1,4 @@
-import { KeyboardEvent, ChangeEvent } from 'react';
+import { KeyboardEvent, ChangeEvent, useEffect } from 'react';
 import {
   InputHTMLAttributes,
   useRef,
@@ -22,6 +22,8 @@ import { STARKNET_ADDRESS_LENGTH } from 'utils/constants';
 interface Props extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   setIsValidAddress?: Dispatch<SetStateAction<boolean>>;
+  disableValidate?: boolean;
+  validateError?: string;
 }
 
 export const AddressInputView = ({
@@ -29,12 +31,19 @@ export const AddressInputView = ({
   onChange,
   label,
   setIsValidAddress,
+  disableValidate,
+  validateError,
   ...otherProps
 }: Props) => {
   const [focused, setFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState('');
   const [valid, setValid] = useState(false);
+  useEffect(() => {
+    if (!disableValidate || !inputRef.current) return;
+    setValid(inputRef.current.value !== '' && validateError === '');
+    setError(validateError ?? '');
+  }, [disableValidate, validateError]);
 
   const displayIcon = () => {
     return valid || error !== '';
@@ -54,9 +63,10 @@ export const AddressInputView = ({
     //Check if valid address
     onChange && onChange(event);
 
-    if (!inputRef.current) {
-      return;
-    }
+    if (!inputRef.current) return;
+
+    if (disableValidate) return;
+
     const isValid =
       inputRef.current.value !== '' && isValidAddress(inputRef.current.value);
     if (isValid) {

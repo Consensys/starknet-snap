@@ -67,10 +67,10 @@ export abstract class SnapStateManager<State> {
    *
    * @param callback - A Promise function that takes the state as an argument.
    */
-  public async withTransaction(
-    callback: (state: State) => Promise<void>,
-  ): Promise<void> {
-    await this.mtx.runExclusive(async () => {
+  public async withTransaction<Response>(
+    callback: (state: State) => Promise<Response>,
+  ): Promise<Response> {
+    return await this.mtx.runExclusive(async () => {
       await this.#beginTransaction();
 
       if (
@@ -88,8 +88,9 @@ export abstract class SnapStateManager<State> {
       );
 
       try {
-        await callback(this.#transaction.current);
+        const result = await callback(this.#transaction.current);
         await this.set(this.#transaction.current);
+        return result;
       } catch (error) {
         logger.info(
           `SnapStateManager.withTransaction [${

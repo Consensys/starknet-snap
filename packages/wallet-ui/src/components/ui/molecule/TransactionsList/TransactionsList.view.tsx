@@ -2,7 +2,10 @@ import { useAppSelector } from 'hooks/redux';
 import { FC, useEffect, useRef } from 'react';
 import { useStarkNetSnap } from 'services';
 import { Transaction } from 'types';
-import { TRANSACTIONS_REFRESH_FREQUENCY } from 'utils/constants';
+import {
+  defaultAccount,
+  TRANSACTIONS_REFRESH_FREQUENCY,
+} from 'utils/constants';
 import { IListProps } from '../List/List.view';
 import { TransactionListItem } from './TransactionListItem';
 import { Wrapper } from './TransactionsList.style';
@@ -14,22 +17,26 @@ interface Props {
 export const TransactionsListView = ({ transactions }: Props) => {
   const { getTransactions } = useStarkNetSnap();
   const networks = useAppSelector((state) => state.networks);
-  const wallet = useAppSelector((state) => state.wallet);
+  const currentAccount = useAppSelector((state) => state.wallet.currentAccount);
+  const erc20TokenBalanceSelected = useAppSelector(
+    (state) => state.wallet.erc20TokenBalanceSelected,
+  );
+  const walletTransactions = useAppSelector(
+    (state) => state.wallet.transactions,
+  );
   const timeoutHandle = useRef(setTimeout(() => {}));
+  const chainId = networks.items[networks.activeNetwork]?.chainId;
 
   useEffect(() => {
-    const chain = networks.items[networks.activeNetwork]?.chainId;
-    const address = wallet.accounts?.[0] as unknown as string;
-    if (chain && address) {
+    if (chainId && erc20TokenBalanceSelected.address) {
       clearTimeout(timeoutHandle.current); // cancel the timeout that was in-flight
       timeoutHandle.current = setTimeout(
         () =>
           getTransactions(
-            address,
-            wallet.erc20TokenBalanceSelected.address,
+            currentAccount.address,
+            erc20TokenBalanceSelected.address,
             10,
-            10,
-            chain,
+            chainId,
             false,
             true,
           ),
@@ -38,37 +45,41 @@ export const TransactionsListView = ({ transactions }: Props) => {
       return () => clearTimeout(timeoutHandle.current);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [wallet.transactions]);
+  }, [walletTransactions]);
 
   useEffect(
     () => {
-      const chain = networks.items[networks.activeNetwork]?.chainId;
-      const address = wallet.accounts?.[0] as unknown as string;
-      if (chain && address) {
+      if (
+        chainId &&
+        erc20TokenBalanceSelected.address &&
+        currentAccount.address !== defaultAccount.address
+      ) {
         clearTimeout(timeoutHandle.current); // cancel the timeout that was in-flight
         getTransactions(
-          address,
-          wallet.erc20TokenBalanceSelected.address,
+          currentAccount.address,
+          erc20TokenBalanceSelected.address,
           10,
-          10,
-          chain,
+          chainId,
         );
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       // eslint-disable-next-line react-hooks/exhaustive-deps
-      wallet.erc20TokenBalanceSelected.address,
+      erc20TokenBalanceSelected.address,
       // eslint-disable-next-line react-hooks/exhaustive-deps
-      wallet.erc20TokenBalanceSelected.chainId,
+      erc20TokenBalanceSelected.chainId,
       // eslint-disable-next-line react-hooks/exhaustive-deps
-      wallet.accounts?.[0],
+      currentAccount.address,
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      currentAccount.chainId,
+      chainId,
     ],
   );
 
   return (
     <Wrapper<FC<IListProps<Transaction>>>
-      data={transactions.length > 0 ? transactions : wallet.transactions}
+      data={transactions.length > 0 ? transactions : walletTransactions}
       render={(transaction) => (
         <TransactionListItem transaction={transaction} />
       )}

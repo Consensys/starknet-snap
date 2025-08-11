@@ -1,18 +1,12 @@
 import { useEffect, useState } from 'react';
-import { useStarkNetSnap } from 'services';
+import { useMultiLanguage, useStarkNetSnap } from 'services';
 import { useAppSelector, useAppDispatch } from 'hooks/redux';
 import Toastr from 'toastr2';
 
+import { Modal } from 'components/ui/atom/Modal';
 import { setDeployModalVisible } from 'slices/modalSlice';
-import { openExplorerTab, shortenAddress } from '../../../../utils/utils';
-import {
-  DeployButton,
-  StarknetLogo,
-  Title,
-  Wrapper,
-  DescriptionCentered,
-  Txnlink,
-} from './DeployModal.style';
+import { openExplorerTab, shortenAddress } from 'utils/utils';
+import { Txnlink } from './DeployModal.style';
 import { AccountAddressView } from 'components/ui/molecule/AccountAddress/AccountAddress.view';
 
 interface Props {
@@ -29,6 +23,8 @@ enum Stage {
 export const DeployModalView = ({ address }: Props) => {
   const dispatch = useAppDispatch();
   const { deployAccount, waitForAccountCreation } = useStarkNetSnap();
+  const { translate } = useMultiLanguage();
+
   const [txnHash, setTxnHash] = useState('');
   const [stage, setStage] = useState(Stage.INIT);
   const networks = useAppSelector((state) => state.networks);
@@ -51,7 +47,7 @@ export const DeployModalView = ({ address }: Props) => {
     } catch (err) {
       //eslint-disable-next-line no-console
       console.error(err);
-      toastr.error(`Deploy account failed`);
+      toastr.error(translate('deployAccountFailed'));
     }
   };
 
@@ -71,7 +67,7 @@ export const DeployModalView = ({ address }: Props) => {
 
   useEffect(() => {
     if (stage === Stage.SUCCESS) {
-      toastr.success(`Account deployed successfully`);
+      toastr.success(translate('accountDeployedSuccessfully'));
       dispatch(setDeployModalVisible(false));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -82,64 +78,52 @@ export const DeployModalView = ({ address }: Props) => {
       case Stage.INIT:
         return (
           <>
-            <DescriptionCentered>
-              You have a non-zero balance on a Cairo 0 non-deployed address
+            <Modal.Body>
+              {translate('nonZeroBalanceOnCairo0')}
               <br />
               <br />
               <center>
                 <AccountAddressView address={address}></AccountAddressView>
               </center>
               <br />
-              A deployment of your address is necessary to proceed with the
-              Snap.
+              {translate('deploymentNecessaryToProceedPart1')} <br />
               <br />
+              {translate('deploymentNecessaryToProceedPart2')} <br />
               <br />
-              Click on the "Deploy" button to proceed.
-              <br />
-              Thank you!
-            </DescriptionCentered>
-            <DeployButton onClick={onDeploy}>Deploy</DeployButton>
+              {translate('deploymentNecessaryToProceedPart3')}
+            </Modal.Body>
+            <Modal.Button onClick={onDeploy}>Deploy</Modal.Button>
           </>
         );
       case Stage.WAITING_FOR_TXN:
-        return (
-          <DescriptionCentered>
-            Waiting for transaction to be complete.
-          </DescriptionCentered>
-        );
+        return <Modal.Body>{translate('waitingForTransaction')}</Modal.Body>;
       case Stage.SUCCESS:
         return (
-          <DescriptionCentered>
-            Account deployd successfully.
-          </DescriptionCentered>
+          <Modal.Body>{translate('accountDeployedSuccessfully')}</Modal.Body>
         );
       default:
         return (
-          <DescriptionCentered>
-            Transaction Hash: <br />{' '}
+          <Modal.Body>
+            {translate('transactionHash')} <br />{' '}
             <Txnlink onClick={() => openExplorerTab(txnHash, 'tx', chainId)}>
               {shortenAddress(txnHash)}{' '}
             </Txnlink>
             <br />
-            Your deploy transaction is still pending and has reached the maximum
-            retry limit for status checks. Please wait for the transaction to
-            complete.
+            {translate('deployTransactionPendingPart1')} <br />
             <br />
+            {translate('deployTransactionPendingPart2')} <br />
             <br />
-            Please try again in a couple of hours.
-            <br />
-            <br />
-            Thank you for your comprehension.
-          </DescriptionCentered>
+            {translate('deployTransactionPendingPart3')}
+          </Modal.Body>
         );
     }
   };
 
   return (
-    <Wrapper>
-      <StarknetLogo />
-      <Title>Deploy Account</Title>
+    <Modal>
+      <Modal.Title>{translate('deployAccount')}</Modal.Title>
+      <Modal.Logo />
       {renderComponent()}
-    </Wrapper>
+    </Modal>
   );
 };

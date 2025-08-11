@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useAppDispatch } from 'hooks/redux';
 import { setProvider } from 'slices/walletSlice';
+import { setMinMMVersionModalVisible } from 'slices/modalSlice';
 import { enableLoadingWithMessage, disableLoading } from 'slices/UISlice';
+import { MIN_METAMASK_VERSION } from 'utils/constants';
+import semver from 'semver/preload';
 
 interface MetaMaskProvider {
   isMetaMask: boolean;
@@ -95,11 +98,13 @@ export const useHasMetamask = () => {
       try {
         dispatch(enableLoadingWithMessage('Detecting Metamask...'));
         const provider = await detectMetamaskSupport(window);
-        // Use the new detection method
 
         if (provider && (await isSupportSnap(provider))) {
           dispatch(setProvider(provider));
           setHasMetamask(provider != null);
+          if (await isMetaMaskUpgradeRequired(provider)) {
+            dispatch(setMinMMVersionModalVisible(true));
+          }
         } else {
           dispatch(setProvider(null));
           setHasMetamask(false);
@@ -117,6 +122,16 @@ export const useHasMetamask = () => {
   return {
     hasMetamask,
   };
+};
+
+const isMetaMaskUpgradeRequired = async (provider: any) => {
+  const clientVersion = await provider.request({
+    method: 'web3_clientVersion',
+    params: [],
+  });
+  const versionMatch = clientVersion.match(/MetaMask\/v(\d+\.\d+\.\d+)/);
+  const currentVersion = versionMatch[1];
+  return semver.lt(currentVersion, MIN_METAMASK_VERSION);
 };
 
 const isSupportSnap = async (provider: any) => {

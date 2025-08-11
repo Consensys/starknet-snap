@@ -18,7 +18,17 @@ import {
   SnapError,
 } from '@metamask/snaps-sdk';
 
-import { isSnapRpcError } from './error';
+import {
+  createWalletRpcErrorWrapper,
+  isSnapRpcError,
+  WalletRpcErrorCode,
+} from './error';
+import {
+  InvalidNetworkError,
+  UnknownError,
+  UserRejectedOpError,
+  InvalidRequestParamsError,
+} from './exceptions';
 
 describe('isSnapRpcError', () => {
   it('returns true for a Snap RPC error', () => {
@@ -42,7 +52,14 @@ describe('isSnapRpcError', () => {
       LimitExceededError,
     ];
 
-    for (const ErrorCtor of snapErrors) {
+    const customSnapErrors = [
+      InvalidNetworkError,
+      UserRejectedOpError,
+      UnknownError,
+      InvalidRequestParamsError,
+    ];
+
+    for (const ErrorCtor of [...snapErrors, ...customSnapErrors]) {
       const error = new ErrorCtor('snap error message');
       expect(isSnapRpcError(error)).toBe(true);
     }
@@ -51,5 +68,21 @@ describe('isSnapRpcError', () => {
   it('returns false for a non-Snap RPC error', () => {
     const error = new Error('error message');
     expect(isSnapRpcError(error)).toBe(false);
+  });
+});
+
+describe('createWalletRpcErrorWrapper', () => {
+  it('returns a serialized SnapError', () => {
+    const wrapper = createWalletRpcErrorWrapper(
+      WalletRpcErrorCode.InvalidRequest,
+      { someData: 'data' },
+    );
+
+    expect(wrapper).toStrictEqual({
+      walletRpcError: {
+        someData: 'data',
+        code: WalletRpcErrorCode.InvalidRequest,
+      },
+    });
   });
 });

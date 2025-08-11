@@ -3,6 +3,102 @@
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
 
+## [1.30.0](https://github.com/Consensys/starknet-snap/compare/wallet-ui-v1.29.0...wallet-ui-v1.30.0) (2025-07-16)
+
+
+### Features
+
+* remove fee dropdown selection ([#549](https://github.com/Consensys/starknet-snap/issues/549)) ([42c5d0e](https://github.com/Consensys/starknet-snap/commit/42c5d0ead1ecba504d6f9101490a8f372d5d7668))
+
+
+### Bug Fixes
+
+* incorrect truncation in getMaxDecimalsReadable ([#556](https://github.com/Consensys/starknet-snap/issues/556)) ([6812d98](https://github.com/Consensys/starknet-snap/commit/6812d984127f82d0f1e7aad46525a076e861e16f))
+
+## [1.29.0](https://github.com/Consensys/starknet-snap/compare/wallet-ui-v1.28.0...wallet-ui-v1.29.0) (2025-04-03)
+
+
+### Features
+
+* add account list contextual menu ([223c1c0](https://github.com/Consensys/starknet-snap/commit/223c1c025b9434714eea1186df3b9dde44cc83c4))
+* enable account search by name ([866264f](https://github.com/Consensys/starknet-snap/commit/866264fa91474ef174a2b53d157f401c2153b21e))
+* enhance account visibility management ([04426cd](https://github.com/Consensys/starknet-snap/commit/04426cdb98a9228fe1354bbe37a7e896e28c2876))
+* enhance transaction fee estimation UX with cache ([4549a37](https://github.com/Consensys/starknet-snap/commit/4549a37b2f9782e117a77db4ff5da09d13da9380))
+* prevent account with same name ([17a5b38](https://github.com/Consensys/starknet-snap/commit/17a5b38e67c6146ee719d8e000e60896be92f140))
+
+
+### Bug Fixes
+
+* invalid inputs on send transaction cause Error ([#533](https://github.com/Consensys/starknet-snap/issues/533)) ([cf6713a](https://github.com/Consensys/starknet-snap/commit/cf6713a6d86e091a6e51576aadc673a694f0e2eb))
+* ui fails to send Snap RPC request on Firefox ([7453796](https://github.com/Consensys/starknet-snap/commit/745379627389237077eec8fca8f9bff861fe3fe1))
+
+## [1.28.0](https://github.com/Consensys/starknet-snap/compare/wallet-ui-v1.27.0...wallet-ui-v1.28.0) (2025-03-04)
+
+
+### Features
+
+* Enable back button from send transaction ([710cca7](https://github.com/Consensys/starknet-snap/commit/710cca794dcd6e3f1f239d1b34baac62dc7b84c7))
+* Enhance Accounts management UX by refining the layout of the account list popup ([ed2b4d6](https://github.com/Consensys/starknet-snap/commit/ed2b4d6bc682962bd24e2fc1a64d28d133f13290))
+* Support account name management in wallet-ui ([d31f6a0](https://github.com/Consensys/starknet-snap/commit/d31f6a002c5793fffb0159b595322a2845554549))
+
+
+### Bug Fixes
+
+* SNAP version does not auto update in UI ([67f7d0d](https://github.com/Consensys/starknet-snap/commit/67f7d0d85116348f85445228935612257ae84a31))
+
+## [1.27.0](https://github.com/Consensys/starknet-snap/compare/wallet-ui-v1.26.0...wallet-ui-v1.27.0) (2025-02-07)
+
+
+### Features
+
+* Enable multiple languages (FR) to support in SNAP and Wallet UI ([#495](https://github.com/Consensys/starknet-snap/issues/495), [#481](https://github.com/Consensys/starknet-snap/issues/481)) ([ece4e17](https://github.com/Consensys/starknet-snap/commit/ece4e1793bf16c2be2ae86f1999f81273e131878))
+* Enable support multiple accounts in Wallet UI to allow add accounts, switch accounts and hide/unhide accounts ([#506](https://github.com/Consensys/starknet-snap/issues/506), [#475](https://github.com/Consensys/starknet-snap/issues/475), [#482](https://github.com/Consensys/starknet-snap/issues/482), [#499](https://github.com/Consensys/starknet-snap/issues/499), [#501](https://github.com/Consensys/starknet-snap/issues/501)). ([a9fcd27](https://github.com/Consensys/starknet-snap/commit/a9fcd2753d1fdfdb7559b5e90b4537aebfee1b11))
+
+## [1.26.0](https://github.com/Consensys/starknet-snap/compare/wallet-ui-v1.25.0...wallet-ui-v1.26.0) (2024-12-19)
+
+
+### Features
+
+* allow users to transfer money to a .stark name ([#437](https://github.com/Consensys/starknet-snap/issues/437)) ([#449](https://github.com/Consensys/starknet-snap/issues/449)) ([c9e2c64](https://github.com/Consensys/starknet-snap/commit/c9e2c64572ce22bb111e6075fa6191dc025bc863))
+* Refactor RPC `starkNet_getTransactions` and change the provider from Voyager to StarkScan ([#453](https://github.com/Consensys/starknet-snap/issues/453)) ([#457](https://github.com/Consensys/starknet-snap/issues/457)) ([#458](https://github.com/Consensys/starknet-snap/issues/458)) ([#459](https://github.com/Consensys/starknet-snap/issues/459)) ([5b72ef9](https://github.com/Consensys/starknet-snap/commit/5b72ef9f8ab55ad57dcaca25e306d3feecffcf0d))
+
+
+### Bug Fixes
+
+* Mute Wallet UI error message when user deny a request ([#460](https://github.com/Consensys/starknet-snap/issues/460)) ([8027bc2](https://github.com/Consensys/starknet-snap/commit/8027bc2ce968291b8d4724362f7d3b087610a5ec))
+
+## [1.25.0](https://github.com/Consensys/starknet-snap/compare/wallet-ui-v1.24.1...wallet-ui-v1.25.0) (2024-11-26)
+
+
+### Features
+
+* Add minimum MetaMask version requirements detection. ([#424](https://github.com/Consensys/starknet-snap/issues/424)) ([f6cde30](https://github.com/Consensys/starknet-snap/commit/f6cde302f491f6f2bd4322ce996a699e046fe9ee))
+
+
+### Bug Fixes
+
+* Add missing asset icon for `USDC`, `USDT` and `STRK` token ([#428](https://github.com/Consensys/starknet-snap/issues/428)) ([9f43a22](https://github.com/Consensys/starknet-snap/commit/9f43a228e844ab200984a0b5a1f8ff7bb0d8288d))
+
+## [1.24.1](https://github.com/Consensys/starknet-snap/compare/wallet-ui-v1.24.0...wallet-ui-v1.24.1) (2024-10-28)
+
+
+### Bug Fixes
+
+* Remove Snap dependency on Wallet UI package ([#397](https://github.com/Consensys/starknet-snap/issues/397)) ([c9c1aaf](https://github.com/Consensys/starknet-snap/commit/c9c1aafb45120b7d0767337f300e1ab6ff277ab3))
+
+## [1.24.0](https://github.com/Consensys/starknet-snap/compare/wallet-ui-v1.23.0...wallet-ui-v1.24.0) (2024-09-20)
+
+
+### Features
+
+* support STRK token for the gas fee in wallet-ui ([#271](https://github.com/Consensys/starknet-snap/issues/271)) ([8f50a33](https://github.com/Consensys/starknet-snap/commit/8f50a33ca7cdce88c6853ce1945cd7f7a7b24fae))
+* bump starknet.js to v6.11.0 ([#296](https://github.com/Consensys/starknet-snap/issues/296)) ([e298244](https://github.com/Consensys/starknet-snap/commit/e298244a5e68e2809ab6367330e104c53ca5c861))
+
+
+### Bug Fixes
+
+* update message for waiting deploy/upgrade txn complete ([#297](https://github.com/Consensys/starknet-snap/issues/297)) ([141fa20](https://github.com/Consensys/starknet-snap/commit/141fa2023911e8c6f2d1b495a2d78bec79a3e5d7))
+
 ## [1.23.0](https://github.com/Consensys/starknet-snap/compare/wallet-ui-v1.22.0...wallet-ui-v1.23.0) (2024-07-16)
 
 
