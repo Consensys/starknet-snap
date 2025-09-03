@@ -80,7 +80,7 @@ export const Config: SnapConfig = {
   },
 
   enableRPCV8: {
-    [constants.StarknetChainId.SN_MAIN]: false,
+    [constants.StarknetChainId.SN_MAIN]: true,
     [constants.StarknetChainId.SN_SEPOLIA]: true,
   },
 
