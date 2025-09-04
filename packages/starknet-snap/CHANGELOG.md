@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.1.0](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v4.0.0...starknet-snap-v4.1.0) (2025-09-04)
+
+
+### Features
+
+* enable rpcv8 on mainnet ([#564](https://github.com/Consensys/starknet-snap/issues/564)) ([aa68124](https://github.com/Consensys/starknet-snap/commit/aa68124528d2fb52172acf28c29903a37546fb68))
+
 ## [4.0.0](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v3.4.0...starknet-snap-v4.0.0) (2025-07-16)
 
 
