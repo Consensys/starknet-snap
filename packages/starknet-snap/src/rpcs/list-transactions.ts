@@ -1,7 +1,16 @@
 import type { Infer } from 'superstruct';
-import { assign, max, optional, min, number, type, array } from 'superstruct';
+import {
+  assign,
+  max,
+  optional,
+  min,
+  number,
+  type,
+  array,
+  string,
+  object,
+} from 'superstruct';
 
-import { Config } from '../config';
 import { AddressStruct, BaseRequestStruct, TransactionStruct } from '../utils';
 import { createTransactionService } from '../utils/factory';
 import { ChainRpcController } from './abstract/chain-rpc-controller';
@@ -11,13 +20,28 @@ export const ListTransactionsRequestStruct = assign(
   type({
     // The txnsInLastNumOfDays is optional, but it has to be between 1 and 365.
     txnsInLastNumOfDays: optional(max(min(number(), 1), 365)),
+    cursor: optional(
+      type({
+        blockNumber: min(number(), 0),
+        txnHash: string(),
+      }),
+    ),
     senderAddress: AddressStruct,
     contractAddress: AddressStruct,
   }),
   BaseRequestStruct,
 );
 
-export const ListTransactionsResponseStruct = array(TransactionStruct);
+export const TransactionsStruct = array(TransactionStruct);
+export const TransactionsCursorStruct = type({
+  blockNumber: min(number(), -1),
+  txnHash: string(),
+});
+
+export const ListTransactionsResponseStruct = object({
+  transactions: TransactionsStruct,
+  cursor: optional(TransactionsCursorStruct),
+});
 
 export type ListTransactionsParams = Infer<
   typeof ListTransactionsRequestStruct
@@ -57,15 +81,13 @@ export class ListTransactionsRpc extends ChainRpcController<
   protected async handleRequest(
     params: ListTransactionsParams,
   ): Promise<ListTransactionsResponse> {
-    const { senderAddress, contractAddress, txnsInLastNumOfDays } = params;
-    const tillToInDay =
-      txnsInLastNumOfDays ?? Config.transaction.list.txnsInLastNumOfDays;
+    const { senderAddress, contractAddress, cursor } = params;
 
     const service = createTransactionService(this.network);
     const transactions = await service.getTransactions(
       senderAddress,
       contractAddress,
-      tillToInDay,
+      cursor,
     );
 
     return transactions as unknown as ListTransactionsResponse;

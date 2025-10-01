@@ -1,7 +1,7 @@
 import { TransactionType, constants } from 'starknet';
 import type { Struct } from 'superstruct';
 
-import type { V2Transaction } from '../../types/snapState';
+import type { TransactionsCursor, V2Transaction } from '../../types/snapState';
 import { type Network, type Transaction } from '../../types/snapState';
 import { InvalidNetworkError } from '../../utils/exceptions';
 import {
@@ -21,7 +21,7 @@ import {
 export class StarkScanClient extends ApiClient implements IDataClient {
   apiClientName = 'StarkScanClient';
 
-  protected limit = 100;
+  protected limit = 10;
 
   protected network: Network;
 
@@ -78,73 +78,58 @@ export class StarkScanClient extends ApiClient implements IDataClient {
 
   /**
    * Fetches the transactions for a given contract address.
-   * The transactions are fetched in descending order and it will include the deploy transaction.
+   * Transactions are retrieved in descending order for pagination.
    *
-   * @param address - The address of the contract to fetch the transactions for.
-   * @param to - The filter includes transactions with a timestamp that is >= a specified value, but the deploy transaction is always included regardless of its timestamp.
-   * @returns A Promise that resolve an array of Transaction object.
+   * @param address - The contract address to fetch transactions for.
+   * @param cursor - Optional pagination cursor.
+   * @param cursor.blockNumber - The block number for pagination.
+   * @param cursor.txnHash - The transaction hash for pagination.
+   * @returns A Promise resolving to an object with transactions and a pagination cursor.
    */
-  async getTransactions(address: string, to: number): Promise<Transaction[]> {
+  async getTransactions(
+    address: string,
+    cursor?: { blockNumber: number; txnHash: string },
+  ): Promise<{ transactions: Transaction[]; cursor: TransactionsCursor }> {
     let apiUrl = this.getApiUrl(
       `/transactions?contract_address=${address}&order_by=desc&limit=${this.limit}`,
     );
 
+    if (cursor !== undefined) {
+      apiUrl += `&to_block=${cursor.blockNumber}`;
+    }
+
     const txs: Transaction[] = [];
-    let deployTxFound = false;
-    let process = true;
-    let timestamp = 0;
+    let newCursor: TransactionsCursor = {
+      blockNumber: -1,
+      txnHash: '',
+    };
 
-    // Scan the transactions in descending order by timestamp
-    // Include the transaction if:
-    // - it's timestamp is greater than the `tillTo` AND
-    // - there is an next data to fetch
-    while (process && (timestamp === 0 || timestamp >= to)) {
-      process = false;
+    const result = await this.sendApiRequest<StarkScanTransactionsResponse>({
+      apiUrl,
+      responseStruct: StarkScanTransactionsResponseStruct,
+      requestName: 'getTransactions',
+    });
 
-      const result = await this.sendApiRequest<StarkScanTransactionsResponse>({
-        apiUrl,
-        responseStruct: StarkScanTransactionsResponseStruct,
-        requestName: 'getTransactions',
-      });
+    const matchingIndex = cursor
+      ? result.data.findIndex((txn) => txn.transaction_hash === cursor.txnHash)
+      : -1;
 
-      for (const data of result.data) {
-        const tx = this.toTransaction(data);
-        const isDeployTx = this.isDeployTransaction(data);
-
-        if (isDeployTx) {
-          deployTxFound = true;
-        }
-
-        timestamp = tx.timestamp;
-        // Only include the records that newer than or equal to the `to` timestamp from the same batch of result
-        // If there is an deploy transaction from the result, it should included too.
-        // e.g
-        // to: 1000
-        // [
-        //   { timestamp: 1100, transaction_type: "invoke"  }, <-- include
-        //   { timestamp: 900, transaction_type: "invoke" }, <-- exclude
-        //   { timestamp: 100, transaction_type: "deploy" }  <-- include
-        // ]
-        if (timestamp >= to || isDeployTx) {
-          txs.push(tx);
-        }
-      }
-
-      if (result.next_url) {
-        apiUrl = result.next_url;
-        process = true;
-      }
+    const startIndex = matchingIndex >= 0 ? matchingIndex + 1 : 0;
+    console.log('startIndex', startIndex);
+    for (let i = startIndex; i < result.data.length; i++) {
+      const tx = this.toTransaction(result.data[i]);
+      txs.push(tx);
     }
 
-    // In case no deploy transaction found from above,
-    // then scan the transactions in asc order by timestamp,
-    // the deploy transaction should usually be the first transaction from the list
-    if (!deployTxFound) {
-      const deployTx = await this.getDeployTransaction(address);
-      deployTx && txs.push(deployTx);
+    if (result.data.length > 0) {
+      const lastTx = result.data[result.data.length - 1];
+      newCursor = {
+        blockNumber: lastTx.block_number,
+        txnHash: lastTx.transaction_hash,
+      };
     }
 
-    return txs;
+    return { transactions: txs, cursor: newCursor };
   }
 
   /**

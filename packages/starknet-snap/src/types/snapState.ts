@@ -174,4 +174,9 @@ export type Transaction =
   | LegacyTransaction
   | (V2Transaction & { status?: TransactionStatus | string });
 
+export type TransactionsCursor = {
+  blockNumber: number;
+  txnHash: string;
+};
+
 /* eslint-disable */
