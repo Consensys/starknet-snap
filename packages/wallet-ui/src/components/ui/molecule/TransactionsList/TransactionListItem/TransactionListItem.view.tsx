@@ -17,30 +17,41 @@ import {
 } from './TransactionListItem.style';
 import {
   getIcon,
+  getTranslationNameForTxnType,
   getTxnDate,
   getTxnFailureReason,
-  getTxnName,
   getTxnStatus,
-  getTxnToFromLabel,
+  getTxnType,
   getTxnValues,
+  TxnType,
 } from './types';
 import { getHumanReadableAmount, openExplorerTab } from 'utils/utils';
+import { useMultiLanguage } from 'services';
 
 interface Props {
   transaction: Transaction;
 }
 
 export const TransactionListItemView = ({ transaction }: Props) => {
-  const wallet = useAppSelector((state) => state.wallet);
+  const { translate } = useMultiLanguage();
+  const erc20TokenBalances = useAppSelector(
+    (state) => state.wallet.erc20TokenBalances,
+  );
+  const erc20TokenBalanceSelected = useAppSelector(
+    (state) => state.wallet.erc20TokenBalanceSelected,
+  );
+  const locale = useAppSelector((state) => state.wallet.locale);
   const [currencySymbol, setCurrencySymbol] = useState('N/A');
   const [txnValue, setTxnValue] = useState('0');
   const [txnUsdValue, setTxnUsdValue] = useState('0.00');
+  const tokenAddress = erc20TokenBalanceSelected.address;
 
   useEffect(() => {
     const fetchData = async () => {
-      const foundToken = wallet.erc20TokenBalances.find((token) =>
+      // Find the matching token
+      const foundToken = erc20TokenBalances.find((token) =>
         ethers.BigNumber.from(token.address).eq(
-          ethers.BigNumber.from(transaction.contractAddress),
+          ethers.BigNumber.from(tokenAddress),
         ),
       );
       if (foundToken) {
@@ -48,6 +59,7 @@ export const TransactionListItemView = ({ transaction }: Props) => {
           transaction,
           foundToken.decimals,
           foundToken.usdPrice,
+          tokenAddress,
         );
         setTxnValue(getHumanReadableAmount(foundToken, txnValues.txnValue));
         setTxnUsdValue(txnValues.txnUsdValue);
@@ -57,11 +69,11 @@ export const TransactionListItemView = ({ transaction }: Props) => {
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const txnName = getTxnName(transaction);
-  const txnDate = getTxnDate(transaction);
+  const txnName = getTxnType(transaction, tokenAddress);
+  const txnNameTranslated = getTranslationNameForTxnType(txnName, translate);
+  const txnDate = getTxnDate(transaction, locale);
   const txnStatus = getTxnStatus(transaction);
-  const txnToFromLabel = getTxnToFromLabel(transaction);
+  const txnToFromLabel = '';
   const txnFailureReason = getTxnFailureReason(transaction);
   return (
     <Wrapper
@@ -74,7 +86,7 @@ export const TransactionListItemView = ({ transaction }: Props) => {
           <IconStyled transactionname={txnName} icon={getIcon(txnName)} />
         </LeftIcon>
         <Column>
-          <Label>{txnName}</Label>
+          <Label>{txnNameTranslated}</Label>
           <Description>
             {txnDate}
             <br />
@@ -87,7 +99,7 @@ export const TransactionListItemView = ({ transaction }: Props) => {
       </Left>
       <Middle>{txnToFromLabel} </Middle>
       <Right>
-        {txnName === 'Send' && (
+        {txnName === TxnType.Send && (
           <AssetQuantity
             currency={currencySymbol}
             currencyValue={txnValue}

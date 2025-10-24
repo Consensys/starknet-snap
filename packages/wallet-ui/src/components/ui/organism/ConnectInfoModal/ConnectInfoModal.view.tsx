@@ -1,8 +1,11 @@
+import { useAppDispatch, useAppSelector } from 'hooks/redux';
+
+import { setInfoModalVisible } from 'slices/modalSlice';
+import { useMultiLanguage } from 'services';
 import { Alert } from 'components/ui/atom/Alert';
 import { Button } from 'components/ui/atom/Button';
-import { Bold, ButtonDiv, Normal, Wrapper } from './ConnectInfoModal.style';
-import { useAppDispatch, useAppSelector } from 'hooks/redux';
-import { setInfoModalVisible } from 'slices/modalSlice';
+import { Modal } from 'components/ui/atom/Modal';
+import { Bold, Normal } from './ConnectInfoModal.style';
 
 interface Props {
   address: string;
@@ -12,32 +15,32 @@ interface Props {
 export const ConnectInfoModalView = ({ address, onButtonClick }: Props) => {
   const networks = useAppSelector((state) => state.networks);
   const dispatch = useAppDispatch();
+  const { translate } = useMultiLanguage();
+
   return (
-    <div>
-      <Wrapper>
-        <div>
-          <Normal>Network</Normal>
-          <Bold>{networks.items[networks.activeNetwork].name}</Bold>
-        </div>
-        <div>
-          <Normal>Starknet account</Normal>
+    <Modal>
+      <Modal.Body align="left">
+        <p>
+          <Normal>{translate('network')}</Normal>
+          <Bold>{networks.items[networks.activeNetwork]?.name}</Bold>
+        </p>
+        <p>
+          <Normal>{translate('starknetAccount')}</Normal>
           <Bold>{address}</Bold>
-        </div>
+        </p>
         <Alert
           variant="info"
-          text="This account was generated with your MetaMask Secret Recovery Phrase."
+          text={translate('accountGeneratedWithRecoveryPhrase')}
         />
-      </Wrapper>
-      <ButtonDiv>
-        <Button
-          onClick={() => {
-            dispatch(setInfoModalVisible(false));
-            onButtonClick && onButtonClick();
-          }}
-        >
-          GOT IT!
-        </Button>
-      </ButtonDiv>
-    </div>
+      </Modal.Body>
+      <Button
+        onClick={() => {
+          dispatch(setInfoModalVisible(false));
+          onButtonClick && onButtonClick();
+        }}
+      >
+        {translate('gotIt')}
+      </Button>
+    </Modal>
   );
 };

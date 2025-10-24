@@ -4,11 +4,15 @@ import { StructError, assert } from 'superstruct';
 import contractExample from '../__tests__/fixture/contract-example.json';
 import transactionExample from '../__tests__/fixture/transactionExample.json';
 import typedDataExample from '../__tests__/fixture/typedDataExample.json';
+import { generateTransactions } from '../__tests__/helper';
+import { ContractFuncName } from '../types/snapState';
+import { createAccountObject } from '../wallet/account/__test__/helper';
 import {
   ACCOUNT_CLASS_HASH,
   CAIRO_VERSION,
   CAIRO_VERSION_LEGACY,
   ETHER_SEPOLIA_TESTNET,
+  STARKNET_SEPOLIA_TESTNET_NETWORK,
 } from './constants';
 import {
   AddressStruct,
@@ -27,6 +31,8 @@ import {
   ChainIdStruct,
   TokenSymbolStruct,
   TokenNameStruct,
+  TransactionStruct,
+  AccountStruct,
 } from './superstruct';
 
 describe('TokenNameStruct', () => {
@@ -392,7 +398,7 @@ describe('InvocationsStruct', () => {
       type: TransactionType.INVOKE,
       payload: {
         contractAddress: ETHER_SEPOLIA_TESTNET.address,
-        entrypoint: 'transfer',
+        entrypoint: ContractFuncName.Transfer,
       },
     },
     {
@@ -424,7 +430,7 @@ describe('InvocationsStruct', () => {
     {
       type: TransactionType.INVOKE,
       payload: {
-        entrypoint: 'transfer',
+        entrypoint: ContractFuncName.Transfer,
       },
     },
     {
@@ -500,7 +506,7 @@ describe('InvocationsStruct', () => {
       payload: [
         {
           contractAddress: ETHER_SEPOLIA_TESTNET.address,
-          entrypoint: 'transfer',
+          entrypoint: ContractFuncName.Transfer,
         },
       ],
     },
@@ -529,5 +535,58 @@ describe('InvocationsStruct', () => {
     expect(() => assert([request], InvocationsStruct)).toThrow(
       'At path: entrypoint -- At path: entrypoint -- Expected a string, but received: undefined',
     );
+  });
+});
+
+describe('TransactionStruct', () => {
+  it('does not throw error if the transaction is valid', () => {
+    const [transaction] = generateTransactions({
+      chainId: constants.StarknetChainId.SN_SEPOLIA,
+      address:
+        '0x04882a372da3dfe1c53170ad75893832469bf87b62b13e84662565c4a88f25cd',
+    });
+    expect(() => assert(transaction, TransactionStruct)).not.toThrow();
+  });
+
+  it('throws error if the transaction is invalid', () => {
+    const [transaction] = generateTransactions({
+      chainId: constants.StarknetChainId.SN_SEPOLIA,
+      address:
+        '0x04882a372da3dfe1c53170ad75893832469bf87b62b13e84662565c4a88f25cd',
+    });
+    expect(() =>
+      assert(
+        {
+          ...transaction,
+          txnType: 'invalid txn type',
+        },
+        TransactionStruct,
+      ),
+    ).toThrow(StructError);
+  });
+});
+
+describe('AccountStruct', () => {
+  it('does not throw error if the account is valid', async () => {
+    const network = STARKNET_SEPOLIA_TESTNET_NETWORK;
+    const { accountObj } = await createAccountObject(network);
+
+    jest
+      .spyOn(accountObj.accountContract, 'isRequireUpgrade')
+      .mockResolvedValue(false);
+    jest
+      .spyOn(accountObj.accountContract, 'isRequireDeploy')
+      .mockResolvedValue(false);
+    jest
+      .spyOn(accountObj.accountContract, 'isDeployed')
+      .mockResolvedValue(true);
+
+    const account = await accountObj.serialize();
+
+    expect(() => assert(account, AccountStruct)).not.toThrow();
+  });
+
+  it('throws error if the account is invalid', () => {
+    expect(() => assert({}, AccountStruct)).toThrow(StructError);
   });
 });

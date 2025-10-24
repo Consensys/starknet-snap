@@ -1,5 +1,77 @@
 # Changelog
 
+## [4.1.0](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v4.0.0...starknet-snap-v4.1.0) (2025-09-04)
+
+
+### Features
+
+* enable rpcv8 on mainnet ([#564](https://github.com/Consensys/starknet-snap/issues/564)) ([aa68124](https://github.com/Consensys/starknet-snap/commit/aa68124528d2fb52172acf28c29903a37546fb68))
+
+## [4.0.0](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v3.4.0...starknet-snap-v4.0.0) (2025-07-16)
+
+
+### Features
+
+* remove fee dropdown selection ([#549](https://github.com/Consensys/starknet-snap/issues/549)) ([42c5d0e](https://github.com/Consensys/starknet-snap/commit/42c5d0ead1ecba504d6f9101490a8f372d5d7668))
+* upgrade to starknet.js v7.6.3 and support Starknet v0.14 (V3 transactions, resource bounds) ([f1cac79](https://github.com/Consensys/starknet-snap/commit/f1cac7986e3b742f65cb488d7991c0420d31c613))
+
+## [3.4.0](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v3.3.0...starknet-snap-v3.4.0) (2025-04-03)
+
+
+### Features
+
+* add isDeployed field in account state snap ([#525](https://github.com/Consensys/starknet-snap/issues/525)) ([16e44d8](https://github.com/Consensys/starknet-snap/commit/16e44d892bd1956ac54808b433ddcc622da930e5))
+* prevent account with same name ([dcdbf34](https://github.com/Consensys/starknet-snap/commit/dcdbf34af38ee18f64db76e40fcb64f5412f34dd))
+
+
+### Bug Fixes
+
+* include failed transactions on RPC `starkNet_getTransactions` ([da1fbca](https://github.com/Consensys/starknet-snap/commit/da1fbca84fa43e7b473c8399c87ff850ff8d4768))
+
+## [3.3.0](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v3.2.0...starknet-snap-v3.3.0) (2025-03-04)
+
+
+### Features
+
+* Support account name management in Snap ([9a8651f](https://github.com/Consensys/starknet-snap/commit/9a8651f68373a0366eeb71a10aa75998ae71f71e))
+
+## [3.2.0](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v3.1.0...starknet-snap-v3.2.0) (2025-02-07)
+
+
+### Features
+
+* Add `AccountService` to refactor  the Cairo Contract 1 and 0 discovery logic ([#503](https://github.com/Consensys/starknet-snap/issues/503)) ([3d76d1c](https://github.com/Consensys/starknet-snap/commit/3d76d1c91f341f1d33cefbe7ffee880c228d8e49))
+* Enable multiple accounts support in SNAP with new RPC API `starkNet_listAccounts`,`starkNet_swtichAccount`,`starkNet_addAccount`,`starkNet_toggleAccountVisibility` ([#504](https://github.com/Consensys/starknet-snap/issues/504), [#477](https://github.com/Consensys/starknet-snap/issues/477), [#478](https://github.com/Consensys/starknet-snap/issues/478), [#474](https://github.com/Consensys/starknet-snap/issues/474), [#476](https://github.com/Consensys/starknet-snap/issues/476)) ([6124ed3](https://github.com/Consensys/starknet-snap/commit/6124ed387da0ef491f08b5c709ca47e29b838dda))
+* Enable multiple languages (FR) to support in SNAP and Wallet UI ([#495](https://github.com/Consensys/starknet-snap/issues/495), [#481](https://github.com/Consensys/starknet-snap/issues/481)) ([ece4e17](https://github.com/Consensys/starknet-snap/commit/ece4e1793bf16c2be2ae86f1999f81273e131878))
+
+## [3.1.0](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v3.0.0...starknet-snap-v3.1.0) (2024-12-19)
+
+
+### Features
+
+* Add permission boundary.  Block RPCs - `starkNet_addNetwork`, `starkNet_estimateAccountDeployFee` and `starkNet_getStoredTransactions` access for any origin ([#448](https://github.com/Consensys/starknet-snap/issues/448)) ([1e80070](https://github.com/Consensys/starknet-snap/commit/1e800700e1713a94da6ab0e3d074e0c5f16a0d6c))
+* Add new RPC `starkNet_getAddrFromStarkName` to support  transfer money with .stark name ([#437](https://github.com/Consensys/starknet-snap/issues/437)) ([#449](https://github.com/Consensys/starknet-snap/issues/449)) ([c9e2c64](https://github.com/Consensys/starknet-snap/commit/c9e2c64572ce22bb111e6075fa6191dc025bc863))
+* Refactor RPC `starkNet_getTransactions` and change the provider from Voyager to StarkScan ([#453](https://github.com/Consensys/starknet-snap/issues/453)) ([#457](https://github.com/Consensys/starknet-snap/issues/457)) ([#458](https://github.com/Consensys/starknet-snap/issues/458)) ([#459](https://github.com/Consensys/starknet-snap/issues/459)) ([#341](https://github.com/Consensys/starknet-snap/issues/341)) ([cfdc79d](https://github.com/Consensys/starknet-snap/commit/cfdc79da6a0dda518b2dd6dd3c699de254d8e7f1)) ([5b72ef9](https://github.com/Consensys/starknet-snap/commit/5b72ef9f8ab55ad57dcaca25e306d3feecffcf0d))
+* Replace RPC provider from Alchemy to Infura DIN ([451](https://github.com/Consensys/starknet-snap/pull/451)) ([eb6c688](https://github.com/Consensys/starknet-snap/commit/eb6c68876659df171a9c3d9421be1ecf4273d2ee))
+* Refactor RPC starkNet_getTransactionStatus to have superstruct validation ([447](https://github.com/Consensys/starknet-snap/pull/447)) ([5d569a88](https://github.com/Consensys/starknet-snap/commit/5d569a88ed0605e4f022de5b567acfd5c8fc6f15))
+* Remove RPCs `starkNet_sendTransaction` and `starkNet_estimateFees` ([442](https://github.com/Consensys/starknet-snap/pull/442)) ([fbfcb54a](https://github.com/Consensys/starknet-snap/commit/fbfcb54abd8f97b01e2e514c84c86ddf0086fbca))
+
+
+### Bug Fixes
+
+* Consolidate `ResourceBounds` sum ([#456](https://github.com/Consensys/starknet-snap/issues/456)) ([85ea8ba](https://github.com/Consensys/starknet-snap/commit/85ea8bacc8c0251b47dbd63cd23f8e96f073db56))
+
+## [3.0.0](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v2.11.0...starknet-snap-v3.0.0) (2024-11-26)
+
+
+### ⚠ BREAKING CHANGES
+
+* Enable JSX support, 1) Allow users to select the fee token in the execute transaction dialog (#417, #418, #419, #420). 2) Add JSX support and detection (#415, #416). 3) Replace RPC dialogs with JSX-based components ([#422](https://github.com/Consensys/starknet-snap/issues/422))
+
+### Features
+
+* Enable JSX support, 1) Allow users to select the fee token in the execute transaction dialog ([#417](https://github.com/Consensys/starknet-snap/issues/417), [#418](https://github.com/Consensys/starknet-snap/issues/418), [#419](https://github.com/Consensys/starknet-snap/issues/419), [#420](https://github.com/Consensys/starknet-snap/issues/420)). 2) Add JSX support and detection ([#415](https://github.com/Consensys/starknet-snap/issues/415), [#416](https://github.com/Consensys/starknet-snap/issues/416)). 3) Replace RPC dialogs with JSX-based components ([#422](https://github.com/Consensys/starknet-snap/issues/422)) ([abfc0e5](https://github.com/Consensys/starknet-snap/commit/abfc0e52cc5c9c4fc7ec7e04a9ff667acbf99813))
+
 ## [2.11.0](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v2.10.1...starknet-snap-v2.11.0) (2024-10-28)
 
 

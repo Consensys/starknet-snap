@@ -1,9 +1,16 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useEffect, useRef, useState } from 'react';
+
+import { useAppSelector, useCurrentAccount, useCurrentNetwork } from 'hooks';
+import { useMultiLanguage, useStarkNetSnap } from 'services';
 import { RoundedIcon } from 'components/ui/atom/RoundedIcon';
-import { AccountAddress } from 'components/ui/molecule/AccountAddress';
 import { AssetsList } from 'components/ui/molecule/AssetsList';
 import { PopIn } from 'components/ui/molecule/PopIn';
+import { PopperTooltip } from 'components/ui/molecule/PopperTooltip';
+import { openExplorerTab } from 'utils/utils';
+import { defaultAccount } from 'utils/constants';
+import { AccountDrawer } from '../AccountDrawer';
+import { AddTokenModal } from '../AddTokenModal';
 import { AccountDetailsModal } from '../AccountDetailsModal';
 import { ConnectInfoModal } from '../ConnectInfoModal';
 import {
@@ -12,6 +19,7 @@ import {
   AccountDetailsContent,
   AccountImageStyled,
   AccountLabel,
+  CopyIcon,
   AddTokenButton,
   DivList,
   InfoIcon,
@@ -19,28 +27,23 @@ import {
   RowDiv,
   Wrapper,
 } from './SideBar.style';
-import { openExplorerTab } from 'utils/utils';
-import { useAppSelector } from 'hooks/redux';
-import { AddTokenModal } from '../AddTokenModal';
-import { useStarkNetSnap } from 'services';
-import { DUMMY_ADDRESS } from 'utils/constants';
 
-interface Props {
-  address: string;
-}
-
-export const SideBarView = ({ address }: Props) => {
-  const networks = useAppSelector((state) => state.networks);
-  const chainId = networks?.items[networks.activeNetwork]?.chainId;
+export const SideBarView = () => {
+  const { getStarkName } = useStarkNetSnap();
+  const { translate } = useMultiLanguage();
+  const currentNework = useCurrentNetwork();
+  const { address, accountName } = useCurrentAccount();
+  const erc20TokenBalances = useAppSelector(
+    (state) => state.wallet.erc20TokenBalances,
+  );
+  const connected = useAppSelector((state) => state.wallet.connected);
   const [listOverflow, setListOverflow] = useState(false);
   const [infoModalOpen, setInfoModalOpen] = useState(false);
   const [accountDetailsOpen, setAccountDetailsOpen] = useState(false);
-  const wallet = useAppSelector((state) => state.wallet);
   const [addTokenOpen, setAddTokenOpen] = useState(false);
-  const { getStarkName } = useStarkNetSnap();
   const [starkName, setStarkName] = useState<string | undefined>(undefined);
-
   const ref = useRef<HTMLDivElement>();
+  const chainId = currentNework?.chainId;
 
   useEffect(() => {
     if (ref.current) {
@@ -51,10 +54,10 @@ export const SideBarView = ({ address }: Props) => {
         setListOverflow(false);
       }
     }
-  }, [wallet.erc20TokenBalances]);
+  }, [erc20TokenBalances]);
 
   useEffect(() => {
-    if (address && address !== DUMMY_ADDRESS) {
+    if (address && address !== defaultAccount.address) {
       getStarkName(address, chainId)
         .then((name) => {
           setStarkName(name);
@@ -72,7 +75,7 @@ export const SideBarView = ({ address }: Props) => {
         isOpen={accountDetailsOpen}
         setIsOpen={setAccountDetailsOpen}
       >
-        <AccountDetailsModal address={address} />
+        <AccountDetailsModal />
       </PopInStyled>
       <PopIn
         isOpen={infoModalOpen}
@@ -95,25 +98,32 @@ export const SideBarView = ({ address }: Props) => {
               iconLeft="qrcode"
               onClick={() => setAccountDetailsOpen(true)}
             >
-              Account details
+              {translate('accountDetails')}
             </AccountDetailButton>
             <AccountDetailButton
               backgroundTransparent
               iconLeft="external-link"
               onClick={() => openExplorerTab(address, 'contract', chainId)}
             >
-              View on explorer
+              {translate('viewOnExplorer')}
             </AccountDetailButton>
           </AccountDetailsContent>
         }
       >
-        <AccountImageStyled address={address} connected={wallet.connected} />
+        <AccountImageStyled address={address} connected={connected} />
       </AccountDetails>
 
-      <AccountLabel>My account</AccountLabel>
+      <AccountLabel>{accountName}</AccountLabel>
       <RowDiv>
         <InfoIcon onClick={() => setInfoModalOpen(true)}>i</InfoIcon>
-        <AccountAddress address={address} starkName={starkName} />
+        <AccountDrawer starkName={starkName} />
+        <PopperTooltip content="Copied!" closeTrigger="click">
+          <CopyIcon
+            onClick={async () => navigator.clipboard.writeText(address)}
+          >
+            <FontAwesomeIcon icon="copy" />
+          </CopyIcon>
+        </PopperTooltip>
       </RowDiv>
       <DivList ref={ref as any}>
         <AssetsList />
@@ -128,7 +138,7 @@ export const SideBarView = ({ address }: Props) => {
         shadowVisible={listOverflow}
         onClick={() => setAddTokenOpen(true)}
       >
-        ADD TOKEN
+        {translate('addToken').toUpperCase()}
       </AddTokenButton>
       <PopIn isOpen={addTokenOpen} setIsOpen={setAddTokenOpen}>
         <AddTokenModal closeModal={() => setAddTokenOpen(false)} />

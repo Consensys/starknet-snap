@@ -1,5 +1,7 @@
 import { KeyboardEvent } from 'react';
-import { ethers } from 'ethers';
+import { BigNumber, ethers } from 'ethers';
+import { constants } from 'starknet';
+
 import {
   DECIMALS_DISPLAYED_MAX_LENGTH,
   STARKNET_MAINNET_EXPLORER,
@@ -7,9 +9,11 @@ import {
   SEPOLIA_CHAINID,
   TIMEOUT_DURATION,
   MIN_ACC_CONTRACT_VERSION,
+  DENY_ERROR_CODE,
+  ETH_TOKEN_ADDR,
+  STRK_TOKEN_ADDR,
 } from './constants';
-import { Erc20Token, Erc20TokenBalance, TokenBalance } from 'types';
-import { constants } from 'starknet';
+import { Erc20Token, Erc20TokenBalance, FeeToken, TokenBalance } from 'types';
 
 export const shortenAddress = (address: string, num = 3) => {
   if (!address) return '';
@@ -101,19 +105,32 @@ export const getMaxDecimalsReadable = (
   const amountStr = assetAmount
     ? assetAmount
     : ethers.utils.formatUnits(asset.amount, asset.decimals);
+
+  // If there's no decimal point, just return normalized integer (e.g. "00010" → "10")
   const indexDecimal = amountStr.indexOf('.');
-  const decimalPart = amountStr.substring(indexDecimal + 1).split('');
-  const firstNonZeroIndexReverse = decimalPart
-    .reverse()
-    .findIndex((char) => char !== '0');
-  if (firstNonZeroIndexReverse !== -1) {
-    let lastNonZeroIndex = amountStr.length - firstNonZeroIndexReverse;
-    if (lastNonZeroIndex - indexDecimal > DECIMALS_DISPLAYED_MAX_LENGTH) {
-      lastNonZeroIndex = indexDecimal + 1 + DECIMALS_DISPLAYED_MAX_LENGTH;
-    }
-    return amountStr.substring(0, lastNonZeroIndex);
+  if (indexDecimal === -1) return String(Number(amountStr));
+
+  // Limit decimal part to DECIMALS_DISPLAYED_MAX_LENGTH
+  const integerPart = amountStr.substring(0, indexDecimal);
+  const decimalPart = amountStr.substring(indexDecimal + 1);
+
+  // Remove trailing zeros from decimal part
+  let i = decimalPart.length;
+  while (i > 0 && decimalPart[i - 1] === '0') {
+    i--;
   }
-  return amountStr.substring(0, indexDecimal);
+  const trimmedDecimal = decimalPart.substring(0, i);
+
+  // If there's no significant decimal, just return normalized integer
+  if (!trimmedDecimal) return String(Number(integerPart));
+
+  // Limit to max decimals
+  const limitedDecimal = trimmedDecimal.substring(
+    0,
+    DECIMALS_DISPLAYED_MAX_LENGTH,
+  );
+
+  return `${String(Number(integerPart))}.${limitedDecimal}`;
 };
 
 export const getAmountPrice = (
@@ -139,6 +156,25 @@ export const getMaxDecimals = (asset: Erc20TokenBalance) => {
     return MAX_DECIMALS;
   }
   return asset.decimals;
+};
+
+export const getMinAmountToSpend = (): number => {
+  return 1;
+};
+
+export const getMaxAmountToSpend = (
+  asset: Erc20TokenBalance,
+  gasFee?: string,
+  feeToken?: FeeToken,
+): BigNumber => {
+  if (
+    gasFee &&
+    feeToken === asset.symbol &&
+    [ETH_TOKEN_ADDR, STRK_TOKEN_ADDR].includes(asset.address)
+  ) {
+    return asset.amount.sub(gasFee);
+  }
+  return asset.amount;
 };
 
 export const isSpecialInputKey = (event: KeyboardEvent<HTMLInputElement>) => {
@@ -242,3 +278,42 @@ export function getTokenBalanceWithDetails(
   const { balance } = tokenBalance;
   return addMissingPropertiesToToken(token, balance.toString(), tokenUSDPrice);
 }
+
+export const isValidStarkName = (starkName: string): boolean => {
+  return /^(?:[a-z0-9-]{1,48}(?:[a-z0-9-]{1,48}[a-z0-9-])?\.)*[a-z0-9-]{1,48}\.stark$/.test(
+    starkName,
+  );
+};
+
+export const isUserDenyError = (error: any): Boolean => {
+  if (error?.data?.walletRpcError?.code) {
+    return error?.data?.walletRpcError?.code === DENY_ERROR_CODE;
+  }
+  return false;
+};
+
+export const getDefaultAccountName = (hdIndex = 0): string => {
+  if (hdIndex < 0) {
+    throw new Error('hdIndex cannot be negative.');
+  }
+  return `Account ${hdIndex + 1}`;
+};
+
+export const removeUndefined = (
+  obj: Record<string, unknown>,
+): Record<string, unknown> => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  return JSON.parse(
+    JSON.stringify(
+      Object.fromEntries(
+        Object.entries(obj).filter(([_, val]) => val !== undefined),
+      ),
+    ),
+  );
+};
+
+export const formatAddress = (address: string, starkName?: string): string => {
+  return starkName
+    ? shortenDomain(starkName)
+    : (shortenAddress(address) as string);
+};

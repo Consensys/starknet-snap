@@ -1,6 +1,6 @@
 {
   "name": "@consensys/get-starknet",
-  "version": "1.3.0",
+  "version": "1.5.1",
   "license": "(Apache-2.0 OR MIT)",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -48,7 +48,7 @@
     "typescript": "^4.6.3",
     "webpack": "^5.91.0",
     "webpack-cli": "^5.1.4",
-    "webpack-dev-server": "^5.0.4"
+    "webpack-dev-server": "^5.2.1"
   },
   "publishConfig": {
     "access": "public",
@@ -56,6 +56,7 @@
   },
   "dependencies": {
     "async-mutex": "^0.3.2",
+    "semver": "^7.7.1",
     "starknet": "6.11.0"
   }
 }

@@ -1,4 +1,19 @@
-import { mapDeprecatedParams } from './formatter-utils';
+import { constants } from 'starknet';
+
+import { singleCall } from '../__tests__/fixture/callsExamples.json';
+import { generateAccounts } from '../__tests__/helper';
+import { TokenStateManager } from '../state/token-state-manager';
+import { ContractFuncName, type Erc20Token } from '../types/snapState';
+import { ETHER_SEPOLIA_TESTNET } from './constants';
+import {
+  callToTransactionReqCall,
+  mapDeprecatedParams,
+  dayToSec,
+  msToSec,
+} from './formatter-utils';
+import { logger } from './logger';
+
+jest.mock('./logger');
 
 describe('mapDeprecatedParams', () => {
   it('maps deprecated parameters to their new equivalents', () => {
@@ -63,5 +78,152 @@ describe('mapDeprecatedParams', () => {
     mapDeprecatedParams(requestParams, mappings);
 
     expect(requestParams).toStrictEqual(expected);
+  });
+});
+
+describe('callToTransactionReqCall', () => {
+  const chainId = constants.StarknetChainId.SN_SEPOLIA;
+
+  const mockGetToken = async (tokenData: Erc20Token | null) => {
+    const getTokenSpy = jest.spyOn(TokenStateManager.prototype, 'getToken');
+    // Mock getToken method to return the provided tokenData
+    getTokenSpy.mockResolvedValue(tokenData);
+
+    return {
+      getTokenSpy,
+    };
+  };
+
+  const getSenderAndRecipient = async () => {
+    const [{ address }, { address: receipientAddress }] =
+      await generateAccounts(chainId, 2);
+    return {
+      senderAddress: address,
+      recipientAddress: receipientAddress,
+    };
+  };
+
+  it('returns a formatted `call` object without `tokenTransferData` if no ERC20 transfer calldata is present.', async () => {
+    const call = singleCall.calls;
+    const { senderAddress } = await getSenderAndRecipient();
+
+    // The getToken method should not be called, so we prepare the spy with null
+    const { getTokenSpy } = await mockGetToken(null);
+
+    const result = await callToTransactionReqCall(
+      call,
+      chainId,
+      senderAddress,
+      new TokenStateManager(),
+    );
+
+    expect(getTokenSpy).not.toHaveBeenCalled();
+    expect(result).toStrictEqual({
+      contractAddress: call.contractAddress,
+      calldata: call.calldata,
+      entrypoint: call.entrypoint,
+    });
+  });
+
+  it('returns a formatted `call` object without `tokenTransferData` if the Erc20Token can not be found.', async () => {
+    const { senderAddress, recipientAddress } = await getSenderAndRecipient();
+    const call = {
+      ...singleCall.calls,
+      entrypoint: ContractFuncName.Transfer,
+      calldata: [recipientAddress, '1000'],
+    };
+
+    // Simulate the case where the token can not be found
+    await mockGetToken(null);
+
+    const result = await callToTransactionReqCall(
+      call,
+      chainId,
+      senderAddress,
+      new TokenStateManager(),
+    );
+
+    expect(result).toStrictEqual({
+      contractAddress: call.contractAddress,
+      calldata: call.calldata,
+      entrypoint: call.entrypoint,
+    });
+  });
+
+  it('returns a formatted `call` object without `tokenTransferData` if the calldata is not in the expected format', async () => {
+    const { senderAddress } = await getSenderAndRecipient();
+    const call = { ...singleCall.calls, entrypoint: 'transfer', calldata: [] };
+    const loggerSpy = jest.spyOn(logger, 'warn');
+
+    await mockGetToken(ETHER_SEPOLIA_TESTNET);
+
+    const result = await callToTransactionReqCall(
+      call,
+      chainId,
+      senderAddress,
+      new TokenStateManager(),
+    );
+
+    expect(loggerSpy).toHaveBeenCalled();
+    expect(result).toStrictEqual({
+      contractAddress: call.contractAddress,
+      calldata: call.calldata,
+      entrypoint: call.entrypoint,
+    });
+  });
+
+  it('returns a formatted `call` object with `tokenTransferData` if ERC20 transfer calldata is present', async () => {
+    const { senderAddress, recipientAddress } = await getSenderAndRecipient();
+    const transferAmt = '1000';
+    const call = {
+      ...singleCall.calls,
+      entrypoint: ContractFuncName.Transfer,
+      calldata: [recipientAddress, transferAmt],
+    };
+    const token = ETHER_SEPOLIA_TESTNET;
+
+    const { getTokenSpy } = await mockGetToken(token);
+
+    const result = await callToTransactionReqCall(
+      call,
+      chainId,
+      senderAddress,
+      new TokenStateManager(),
+    );
+
+    expect(getTokenSpy).toHaveBeenCalledWith({
+      address: call.contractAddress,
+      chainId,
+    });
+    expect(result).toStrictEqual({
+      contractAddress: call.contractAddress,
+      calldata: call.calldata,
+      entrypoint: call.entrypoint,
+      tokenTransferData: {
+        senderAddress,
+        recipientAddress,
+        amount: transferAmt,
+        symbol: token.symbol,
+        decimals: token.decimals,
+      },
+    });
+  });
+});
+
+describe('dayToSec', () => {
+  it('converts days to seconds', () => {
+    const days = 10;
+    const expected = days * 24 * 60 * 60;
+
+    expect(dayToSec(days)).toBe(expected);
+  });
+});
+
+describe('msToSec', () => {
+  it('converts milliseconds to seconds', () => {
+    const ms = Date.now();
+    const expected = Math.floor(ms / 1000);
+
+    expect(msToSec(ms)).toBe(expected);
   });
 });

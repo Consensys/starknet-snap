@@ -1,18 +1,9 @@
 import type { Infer } from 'superstruct';
 import { object, string, assign, array } from 'superstruct';
 
-import {
-  AddressStruct,
-  BaseRequestStruct,
-  AccountRpcController,
-  CairoVersionStruct,
-} from '../utils';
-import { ACCOUNT_CLASS_HASH, CAIRO_VERSION } from '../utils/constants';
+import { AddressStruct, BaseRequestStruct, CairoVersionStruct } from '../utils';
 import { AccountAlreadyDeployedError } from '../utils/exceptions';
-import {
-  getDeployAccountCallData,
-  isAccountDeployed,
-} from '../utils/starknetUtils';
+import { AccountRpcController } from './abstract/account-rpc-controller';
 
 export const GetDeploymentDataRequestStruct = assign(
   object({
@@ -65,26 +56,40 @@ export class GetDeploymentDataRpc extends AccountRpcController<
   }
 
   protected async handleRequest(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     params: GetDeploymentDataParams,
   ): Promise<GetDeploymentDataResponse> {
-    const { address } = params;
+    const { accountContract } = this.account;
+    const {
+      deployPayload: {
+        contractAddress: address,
+        classHash,
+        addressSalt: salt,
+        constructorCalldata: calldata,
+      },
+      cairoVerion,
+    } = accountContract;
+
     // Due to AccountRpcController built-in validation,
-    // if the account required to force deploy (Cairo 0 with balance), it will alert with a warning dialog.
-    // if the account required to force upgrade (Cairo 0 without balance), it will alert with a warning dialog.
+    // if the account required to:
+    // - deploy (Cairo 0 with balance)
+    // - upgrade (Cairo 0 without balance)
+    // it will throw an error
     // hence we can safely assume that the account is Cairo 1 account.
-    if (await isAccountDeployed(this.network, address)) {
+    // therefore if the account is already deployed, we should throw an error.
+    if (await accountContract.isDeployed()) {
       throw new AccountAlreadyDeployedError();
     }
 
     // We only need to take care the deployment data for Cairo 1 account.
     return {
-      address: params.address,
+      address,
       // eslint-disable-next-line @typescript-eslint/naming-convention
-      class_hash: ACCOUNT_CLASS_HASH,
-      salt: this.account.publicKey,
-      calldata: getDeployAccountCallData(this.account.publicKey, CAIRO_VERSION),
-      version: CAIRO_VERSION,
-    };
+      class_hash: classHash,
+      salt,
+      calldata,
+      version: cairoVerion.toString(10),
+    } as GetDeploymentDataResponse;
   }
 }
 

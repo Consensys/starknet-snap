@@ -22,6 +22,8 @@ export const AccountLabel = styled.h3`
   align-self: center;
   margin-top: ${(props) => props.theme.spacing.base};
   margin-bottom: 12px;
+  word-break: break-word;
+  width: 200px;
 `;
 
 export const RowDiv = styled.div`
@@ -37,6 +39,12 @@ export const DivList = styled.div``;
 export const InfoIcon = styled(RoundedIcon)`
   cursor: pointer;
   margin-right: ${(props) => props.theme.spacing.tiny2};
+`;
+
+export const CopyIcon = styled(RoundedIcon)`
+  cursor: pointer;
+  border: none;
+  margin-left: ${(props) => props.theme.spacing.tiny2};
 `;
 
 export const AddTokenButton = styled(Button).attrs((props) => ({

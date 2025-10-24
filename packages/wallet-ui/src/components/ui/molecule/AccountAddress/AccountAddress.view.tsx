@@ -2,6 +2,7 @@ import { PopperPlacementType } from '@mui/material';
 import { shortenAddress, shortenDomain } from 'utils/utils';
 import { PopperTooltip } from '../PopperTooltip';
 import { Wrapper } from './AccountAddress.style';
+import { useMultiLanguage } from 'services';
 
 interface Props {
   address: string;
@@ -19,16 +20,17 @@ export const AccountAddressView = ({
   const handleAddressClick = () => {
     navigator.clipboard.writeText(address);
   };
+  const { translate } = useMultiLanguage();
 
   return (
     <>
       <PopperTooltip
-        content="Copied!"
+        content={translate('copied')}
         closeTrigger="click"
         placement={placement}
       >
         <PopperTooltip
-          content="Copy to clipboard"
+          content={translate('copyToClipboard')}
           closeTrigger="hover"
           placement={placement}
         >

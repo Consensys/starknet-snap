@@ -74,11 +74,25 @@ export class MockProvider implements MetaMaskProvider {
   request = jest.fn();
 }
 
+export class MockMetaMaskSnapWallet extends MetaMaskSnapWallet {
+  public pollingDelayMs = 0;
+
+  public pollingTimeoutMs = 0;
+
+  public startPolling(): void {
+    super.startPolling();
+  }
+
+  public stopPolling(): void {
+    super.stopPolling();
+  }
+}
+
 /**
  * Create a wallet instance.
  */
 export function createWallet() {
-  return new MetaMaskSnapWallet(new MockProvider());
+  return new MockMetaMaskSnapWallet(new MockProvider());
 }
 
 /**
@@ -101,17 +115,17 @@ export function mockWalletInit({
 }) {
   const installSpy = jest.spyOn(MetaMaskSnap.prototype, 'installIfNot');
   const getCurrentNetworkSpy = jest.spyOn(MetaMaskSnap.prototype, 'getCurrentNetwork');
-  const recoverDefaultAccountSpy = jest.spyOn(MetaMaskSnap.prototype, 'recoverDefaultAccount');
+  const getCurrentAccountSpy = jest.spyOn(MetaMaskSnap.prototype, 'getCurrentAccount');
   const initSpy = jest.spyOn(MetaMaskSnapWallet.prototype, 'init');
 
   installSpy.mockResolvedValue(install);
   getCurrentNetworkSpy.mockResolvedValue(currentNetwork);
-  recoverDefaultAccountSpy.mockResolvedValue(generateAccount({ address }));
+  getCurrentAccountSpy.mockResolvedValue(generateAccount({ address }));
 
   return {
     initSpy,
     installSpy,
     getCurrentNetworkSpy,
-    recoverDefaultAccountSpy,
+    getCurrentAccountSpy,
   };
 }

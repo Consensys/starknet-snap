@@ -1,3 +1,11 @@
+import type { Call } from 'starknet';
+import { assert } from 'superstruct';
+
+import type { TokenStateManager } from '../state/token-state-manager';
+import { ContractFuncName, type FormattedCallData } from '../types/snapState';
+import { logger } from './logger';
+import { AddressStruct, NumberStringStruct } from './superstruct';
+
 export const hexToString = (hexStr) => {
   let str = '';
   for (let i = 0; i < hexStr.length; i += 2) {
@@ -37,3 +45,71 @@ export const mapDeprecatedParams = <Params>(
     }
   });
 };
+
+export const callToTransactionReqCall = async (
+  call: Call,
+  chainId: string,
+  address: string,
+  tokenStateManager: TokenStateManager,
+): Promise<FormattedCallData> => {
+  const { contractAddress, calldata, entrypoint } = call;
+  // Base data object for each call, with transfer fields left as optional
+  const formattedCall: FormattedCallData = {
+    contractAddress,
+    calldata: calldata as string[],
+    entrypoint,
+  };
+
+  // Check if the entrypoint is 'transfer' and the populate transfer fields
+  if (entrypoint === ContractFuncName.Transfer && calldata) {
+    try {
+      const token = await tokenStateManager.getToken({
+        address: contractAddress,
+        chainId,
+      });
+
+      if (token) {
+        const senderAddress = address;
+
+        // ensure the data is in correct format,
+        // if an error occur, it will catch and not to format it
+        assert(calldata[0], AddressStruct);
+        assert(calldata[1], NumberStringStruct);
+        const recipientAddress = calldata[0]; // Assuming calldata[0] is the recipient address
+        const amount = calldata[1];
+        // Populate transfer-specific fields
+        formattedCall.tokenTransferData = {
+          senderAddress,
+          recipientAddress,
+          amount: typeof amount === 'number' ? amount.toString() : amount,
+          symbol: token.symbol,
+          decimals: token.decimals,
+        };
+      }
+    } catch (error) {
+      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+      logger.warn(`Error in amount conversion: ${error.message}`);
+    }
+  }
+  return formattedCall;
+};
+
+/**
+ * Converts days to seconds.
+ *
+ * @param days - The number of days to convert.
+ * @returns The number of seconds in the given number of days.
+ */
+export function dayToSec(days: number): number {
+  return days * 24 * 60 * 60;
+}
+
+/**
+ * Converts milliseconds to seconds.
+ *
+ * @param ms - The number of milliseconds to convert.
+ * @returns The number of seconds in the given number of milliseconds.
+ */
+export function msToSec(ms: number): number {
+  return Math.floor(ms / 1000);
+}

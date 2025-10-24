@@ -6,7 +6,13 @@ import type {
   Invocations,
   UniversalDetails,
 } from 'starknet';
-import { constants, TransactionType, validateAndParseAddress } from 'starknet';
+import {
+  constants,
+  TransactionType,
+  validateAndParseAddress,
+  TransactionFinalityStatus,
+  TransactionExecutionStatus,
+} from 'starknet';
 import type { Struct } from 'superstruct';
 import {
   boolean,
@@ -25,14 +31,19 @@ import {
   validate,
   nonempty,
   unknown,
+  empty,
+  nullable,
+  type,
 } from 'superstruct';
 
+import { TransactionDataVersion } from '../types/snapState';
 import {
   CAIRO_VERSION_LEGACY,
   CAIRO_VERSION,
   MAXIMUM_TOKEN_NAME_LENGTH,
   MAXIMUM_TOKEN_SYMBOL_LENGTH,
 } from './constants';
+import { isValidStarkName } from './starknetUtils';
 import { isValidAsciiStrField } from './string';
 
 export const TokenNameStruct = refine(
@@ -76,6 +87,16 @@ export const AddressStruct = refine(
     return true;
   },
 );
+
+export const TransactionFinalityStatusStruct = enums(
+  Object.values(TransactionFinalityStatus),
+);
+
+export const TransactionExecutionStatusStruct = enums(
+  Object.values(TransactionExecutionStatus),
+);
+
+export const TransactionTypeStruct = enums(Object.values(TransactionType));
 
 export const ChainIdStruct = enums(Object.values(constants.StarknetChainId));
 
@@ -156,6 +177,8 @@ export const ResourceBoundMappingStruct = object({
   l1_gas: optional(ResourceBoundStruct),
   // eslint-disable-next-line @typescript-eslint/naming-convention
   l2_gas: optional(ResourceBoundStruct),
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  l1_data_gas: optional(ResourceBoundStruct),
 });
 
 export const V3TransactionDetailStruct = object({
@@ -186,6 +209,28 @@ export const DeclareSignDetailsStruct = assign(
     chainId: ChainIdStruct,
     version: TxVersionStruct,
   }),
+);
+
+export const StarkNameStruct = refine(
+  string(),
+  'StarkNameStruct',
+  (value: string) => {
+    if (isValidStarkName(value)) {
+      return true;
+    }
+    return `The given stark name is invalid`;
+  },
+);
+
+export const AccountNameStruct = refine(
+  string(),
+  'AccountNameStruct',
+  (value: string) => {
+    if (value.length >= 1 && value.length <= 20) {
+      return true;
+    }
+    return `The given account name is invalid`;
+  },
 );
 
 /* ------------------------------ Contract Struct ------------------------------ */
@@ -275,12 +320,7 @@ export const BaseInvocationStruct = object({
   // lets not accept optaional payload to reduce the complexity of the struct
   // as the snap control the input
   payload: unknown(),
-  type: enums([
-    TransactionType.DECLARE,
-    TransactionType.DEPLOY,
-    TransactionType.DEPLOY_ACCOUNT,
-    TransactionType.INVOKE,
-  ]),
+  type: TransactionTypeStruct,
 });
 
 export const CallsStruct = define<Call[] | Call>(
@@ -369,3 +409,47 @@ export const UniversalDetailsStruct = define<UniversalDetails>(
     );
   },
 );
+
+export const TransactionStruct = object({
+  txnHash: HexStruct,
+  txnType: TransactionTypeStruct,
+  chainId: string(),
+  senderAddress: union([AddressStruct, empty(string())]),
+  contractAddress: union([AddressStruct, empty(string())]),
+  executionStatus: union([TransactionExecutionStatusStruct, string()]),
+  finalityStatus: union([TransactionFinalityStatusStruct, string()]),
+  failureReason: string(),
+  timestamp: number(),
+  maxFee: nullable(string()),
+  actualFee: nullable(string()),
+  accountCalls: nullable(
+    record(
+      HexStruct,
+      array(
+        object({
+          contract: HexStruct,
+          contractFuncName: string(),
+          contractCallData: array(string()),
+          recipient: optional(string()),
+          amount: optional(string()),
+        }),
+      ),
+    ),
+  ),
+  version: number(),
+  // Snap data Version to support backward compatibility , migration.
+  dataVersion: enums(Object.values(TransactionDataVersion)),
+});
+
+export const AccountStruct = type({
+  address: AddressStruct,
+  chainId: ChainIdStruct,
+  publicKey: HexStruct,
+  addressSalt: HexStruct,
+  addressIndex: number(),
+  cairoVersion: CairoVersionStruct,
+  upgradeRequired: boolean(),
+  deployRequired: boolean(),
+  accountName: optional(string()),
+  isDeployed: optional(boolean()),
+});

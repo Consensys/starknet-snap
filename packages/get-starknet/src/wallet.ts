@@ -1,12 +1,12 @@
 import type { MutexInterface } from 'async-mutex';
 import { Mutex } from 'async-mutex';
-import type { WalletEventHandlers } from 'get-starknet-core';
+import type { AccountChangeEventHandler, NetworkChangeEventHandler, WalletEventHandlers } from 'get-starknet-core';
 import { type RpcMessage, type StarknetWindowObject } from 'get-starknet-core';
 import type { AccountInterface, ProviderInterface } from 'starknet';
 import { Provider } from 'starknet';
 
 import { MetaMaskAccount } from './accounts';
-import { RpcMethod, WalletIconMetaData } from './constants';
+import { RpcMethod, WalletEvent, WalletIconMetaData } from './constants';
 import {
   WalletSupportedSpecs,
   WalletSupportedWalletApi,
@@ -26,6 +26,14 @@ import type { MetaMaskProvider, Network } from './type';
 import type { IStarknetWalletRpc } from './utils';
 import { WalletRpcError, WalletRpcErrorCode } from './utils/error';
 
+type CallbackFunction = (...args: any[]) => any;
+
+const resolver = async (func: CallbackFunction, arg1: string | string[], arg2?: string[]): Promise<any> => {
+  return new Promise((resolve) => {
+    resolve(func(arg1, arg2));
+  });
+};
+
 export class MetaMaskSnapWallet implements StarknetWindowObject {
   id: string;
 
@@ -35,6 +43,10 @@ export class MetaMaskSnapWallet implements StarknetWindowObject {
 
   icon: string;
 
+  /**
+   * Determines whether the wallet is connected.
+   * @deprecated This property is deprecated and will be removed in a future release.
+   */
   isConnected: boolean;
 
   snap: MetaMaskSnap;
@@ -55,17 +67,41 @@ export class MetaMaskSnapWallet implements StarknetWindowObject {
 
   lock: MutexInterface;
 
+  #pollingController: AbortController | undefined;
+
+  // eslint-disable-next-line no-restricted-syntax
+  #accountChangeHandlers: Set<AccountChangeEventHandler> = new Set();
+
+  // eslint-disable-next-line no-restricted-syntax
+  #networkChangeHandlers: Set<NetworkChangeEventHandler> = new Set();
+
+  protected pollingDelayMs = 100;
+
+  protected pollingTimeoutMs = 5000;
+
   // eslint-disable-next-line @typescript-eslint/naming-convention, no-restricted-globals
   static readonly snapId = process.env.SNAP_ID ?? 'npm:@consensys/starknet-snap';
 
-  constructor(metamaskProvider: MetaMaskProvider, snapVersion = '*') {
+  // eslint-disable-next-line @typescript-eslint/naming-convention, no-restricted-globals
+  static readonly snapVersion = process.env.SNAP_VERSION ?? '*';
+
+  /**
+   * Initializes a new instance of the MetaMaskSnapWallet class.
+   *
+   * The Snap version is now enforced globally via a static `snapVersion` property,
+   * this ensures consistent versioning across all instances and removes the need for consumers to specify it.
+   *
+   * @param metamaskProvider - The MetaMask Wallet Provider.
+   * @param _snapVersion - The `_snapVersion` parameter remains to maintain compatibility with existing usage.
+   */
+  constructor(metamaskProvider: MetaMaskProvider, _snapVersion = '*') {
     this.id = 'metamask';
     this.name = 'Metamask';
     this.version = 'v2.0.0';
     this.icon = WalletIconMetaData;
     this.lock = new Mutex();
     this.metamaskProvider = metamaskProvider;
-    this.snap = new MetaMaskSnap(MetaMaskSnapWallet.snapId, snapVersion, this.metamaskProvider);
+    this.snap = new MetaMaskSnap(MetaMaskSnapWallet.snapId, MetaMaskSnapWallet.snapVersion, this.metamaskProvider);
     this.isConnected = false;
 
     this.#rpcHandlers = new Map<string, IStarknetWalletRpc>([
@@ -107,15 +143,19 @@ export class MetaMaskSnapWallet implements StarknetWindowObject {
   }
 
   async #getWalletAddress(chainId: string) {
-    const accountResponse = await this.snap.recoverDefaultAccount(chainId);
+    const accountResponse = await this.snap.getCurrentAccount({ chainId, fromState: true });
 
     if (!accountResponse?.address) {
-      throw new Error('Unable to recover accounts');
+      throw new Error('Unable to retrieve the wallet account');
     }
 
     return accountResponse.address;
   }
 
+  /**
+   * Starknet.js Account interface.
+   * @deprecated This property is deprecated and will be removed in a future release.
+   */
   get account() {
     if (!this.#account) {
       if (!this.selectedAddress) {
@@ -129,6 +169,10 @@ export class MetaMaskSnapWallet implements StarknetWindowObject {
     return this.#account;
   }
 
+  /**
+   * Starknet.js  Provider interface.
+   * @deprecated This property is deprecated and will be removed in a future release.
+   */
   get provider(): ProviderInterface {
     if (!this.#provider) {
       if (!this.#network) {
@@ -142,10 +186,18 @@ export class MetaMaskSnapWallet implements StarknetWindowObject {
     return this.#provider;
   }
 
+  /**
+   * The selected account's address of the wallet.
+   * @deprecated This property is deprecated and will be removed in a future release. Use RPC `wallet_requestAccounts` instead.
+   */
   get selectedAddress(): string {
     return this.#selectedAddress;
   }
 
+  /**
+   * The selected chain id of the wallet.
+   * @deprecated This property is deprecated and will be removed in a future release. Use RPC `wallet_requestChainId` instead.
+   */
   get chainId(): string {
     return this.#chainId;
   }
@@ -177,15 +229,22 @@ export class MetaMaskSnapWallet implements StarknetWindowObject {
       throw new Error('Unable to find the selected network');
     }
 
+    const address = await this.#getWalletAddress(network.chainId);
     if (!this.#network || network.chainId !== this.#network.chainId) {
-      // address is depends on network, if network changes, address will update
-      this.#selectedAddress = await this.#getWalletAddress(network.chainId);
       // provider is depends on network.nodeUrl, if network changes, set provider to undefine for reinitialization
       this.#provider = undefined;
       // account is depends on address and provider, if network changes, address will update,
       // hence set account to undefine for reinitialization
       this.#account = undefined;
     }
+
+    if (address !== this.#selectedAddress) {
+      // account is depend on address,
+      // hence set account to undefine for reinitialization
+      this.#account = undefined;
+    }
+
+    this.#selectedAddress = address;
 
     this.#network = network;
     this.#chainId = network.chainId;
@@ -198,23 +257,136 @@ export class MetaMaskSnapWallet implements StarknetWindowObject {
    * accommodate potential support for multiple addresses in the future.
    *
    * @returns An array of address.
+   * @deprecated This property is deprecated and will be removed in a future release.
    */
   async enable() {
     await this.init();
     return [this.selectedAddress];
   }
 
+  /**
+   * Checks if the wallet is preauthorized.
+   * @deprecated This property is deprecated and will be removed in a future release.
+   */
   async isPreauthorized() {
     return true;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  on<Event extends keyof WalletEventHandlers>(_event: Event, _handleEvent: WalletEventHandlers[Event]): void {
-    // No operation for now
+  /**
+   * Subscribe the `accountsChanged` or `networkChanged` event.
+   *
+   * @param event - The event name ('accountsChanged' or 'networkChanged').
+   * @param handleEvent - The event handler function.
+   */
+  on<Event extends keyof WalletEventHandlers>(event: Event, handleEvent: WalletEventHandlers[Event]): void {
+    if (event === WalletEvent.AccountsChanged) {
+      this.#accountChangeHandlers.add(handleEvent as AccountChangeEventHandler);
+    } else if (event === WalletEvent.NetworkChanged) {
+      this.#networkChangeHandlers.add(handleEvent as NetworkChangeEventHandler);
+    } else {
+      throw new Error(`Unsupported event: ${String(event)}`);
+    }
+    if (!this.#pollingController) {
+      this.startPolling();
+    }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  off<Event extends keyof WalletEventHandlers>(_event: Event, _handleEvent?: WalletEventHandlers[Event]): void {
-    // No operation for now
+  /**
+   * Un-subscribe the `accountsChanged` or `networkChanged` event for a given handler.
+   *
+   * @param event - The event name ('accountsChanged' or 'networkChanged').
+   * @param handleEvent - The event handler function to un-subscribe.
+   */
+  off<Event extends keyof WalletEventHandlers>(event: Event, handleEvent: WalletEventHandlers[Event]): void {
+    if (event === WalletEvent.AccountsChanged) {
+      this.#accountChangeHandlers.delete(handleEvent as AccountChangeEventHandler);
+    } else if (event === WalletEvent.NetworkChanged) {
+      this.#networkChangeHandlers.delete(handleEvent as NetworkChangeEventHandler);
+    } else {
+      throw new Error(`Unsupported event: ${String(event)}`);
+    }
+    if (this.#accountChangeHandlers.size + this.#networkChangeHandlers.size === 0) {
+      this.stopPolling();
+    }
+  }
+
+  /**
+   * Polling function for detecting changes with a maximum delay.
+   * The function balances between responsiveness (handling changes as quickly as possible)
+   * and efficiency (ensuring a controlled polling frequency).
+   *
+   * 1. Polling operation: Runs with a timeout to prevent infinite hangs.
+   * 2. Minimum delay: Introduces a small delay (e.g., 100ms) between iterations
+   * to avoid excessive resource usage while still scanning for updates promptly.
+   */
+  #pollingFunction = async (): Promise<void> => {
+    if (!this.#pollingController) {
+      return; // Abort if the polling controller is not initialized
+    }
+    const { signal } = this.#pollingController;
+
+    while (!signal.aborted) {
+      // Early exit if there are no handlers left
+      if (this.#accountChangeHandlers.size + this.#networkChangeHandlers.size === 0) {
+        this.stopPolling();
+        return;
+      }
+
+      const previousNetwork = this.#chainId;
+      const previousAddress = this.#selectedAddress;
+
+      try {
+        // Perform the polling operation with a timeout.
+        // Ensures the operation completes within a maximum time frame to avoid infinite hangs.
+        // If `this.#init()` takes too long, the timeout will reject and continue to the next iteration.
+        await Promise.race([
+          // Fetch network, assign address and chainId for thread safe.
+          this.#init(),
+          new Promise((_, reject) =>
+            // Timeout after `this.pollingTimeoutMs`.
+            setTimeout(() => reject(new Error('Polling timeout exceeded')), this.pollingTimeoutMs),
+          ),
+        ]);
+
+        // By checking the previous network is undefined
+        // it will not sending event to client when the wallet object initialized first time
+        if (previousNetwork !== this.#chainId && previousNetwork !== undefined) {
+          // With `Promise.allSettled`, we can handle all promises and continue even if some fail.
+          await Promise.allSettled(
+            Array.from(this.#networkChangeHandlers).map(async (callback) =>
+              resolver(callback, this.#chainId, [this.#selectedAddress]),
+            ),
+          );
+        }
+
+        // By checking the previous address is undefined
+        // it will not sending event to client when the wallet object initialized first tim
+        if (previousAddress !== this.#selectedAddress && previousAddress !== undefined) {
+          // With `Promise.allSettled`, we can handle all promises and continue even if some fail.
+          await Promise.allSettled(
+            Array.from(this.#accountChangeHandlers).map(async (callback) =>
+              resolver(callback, [this.#selectedAddress]),
+            ),
+          );
+        }
+      } catch (_error) {
+        // Silently handle errors to avoid breaking the loop
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, this.pollingDelayMs));
+    }
+  };
+
+  protected startPolling(): void {
+    this.#pollingController = new AbortController();
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
+    this.#pollingFunction();
+  }
+
+  protected stopPolling(): void {
+    if (this.#pollingController) {
+      this.#pollingController.abort();
+      this.#pollingController = undefined;
+    }
   }
 }

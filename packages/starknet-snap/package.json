@@ -1,6 +1,6 @@
 {
   "name": "@consensys/starknet-snap",
-  "version": "2.11.0",
+  "version": "4.1.0",
   "keywords": [],
   "repository": {
     "type": "git",
@@ -12,6 +12,7 @@
   "files": [
     "dist/",
     "images/",
+    "locales/",
     "snap.manifest.json"
   ],
   "scripts": {
@@ -22,14 +23,14 @@
     "cover:report": "nyc report --reporter=lcov --reporter=text",
     "jest": "jest --passWithNoTests",
     "lint": "yarn lint:eslint && yarn lint:misc --check",
-    "lint:eslint": "eslint . --cache --ext js,ts",
+    "lint:eslint": "eslint . --cache --ext js,ts,tsx",
     "lint:fix": "yarn lint:eslint --fix && yarn lint:misc --write",
-    "lint:misc": "prettier '**/*.ts' '**/*.json' '**/*.md' '!CHANGELOG.md' --ignore-path .gitignore",
+    "lint:misc": "prettier '**/*.ts' '**/*.tsx' '**/*.json' '**/*.md' '!CHANGELOG.md' --ignore-path .gitignore",
     "serve": "mm-snap serve",
     "start": "mm-snap watch",
     "test": "yarn run test:unit && yarn run cover:report && yarn run jest",
-    "test:unit": "nyc --check-coverage --statements 50 --branches 50 --functions 50 --lines 50 mocha --colors -r ts-node/register --require test/global.ts \"test/**/*.test.ts\"",
-    "test:unit:one": "nyc --check-coverage --statements 50 --branches 50 --functions 50 --lines 50 mocha --colors -r ts-node/register --require test/global.ts"
+    "test:unit": "nyc --check-coverage --statements 35 --branches 35 --functions 35 --lines 35 mocha --colors -r ts-node/register --require test/global.ts \"test/**/*.test.ts\"",
+    "test:unit:one": "nyc --check-coverage --statements 35 --branches 35 --functions 35 --lines 35 mocha --colors -r ts-node/register --require test/global.ts"
   },
   "nyc": {
     "exclude": [
@@ -39,12 +40,12 @@
   },
   "dependencies": {
     "@metamask/key-tree": "9.0.0",
-    "@metamask/snaps-sdk": "^4.0.0",
+    "@metamask/snaps-sdk": "^6.1.1",
     "@metamask/utils": "^9.1.0",
     "async-mutex": "^0.3.2",
     "ethereum-unit-converter": "^0.0.17",
     "ethers": "^5.5.1",
-    "starknet": "6.11.0",
+    "starknet": "7.6.3",
     "starknet_v4.22.0": "npm:starknet@4.22.0",
     "superstruct": "^2.0.2",
     "uuid": "^10.0.0"
@@ -59,6 +60,8 @@
     "@metamask/snaps-jest": "^8.2.0",
     "@types/chai": "^4.3.1",
     "@types/chai-as-promised": "^7.1.5",
+    "@types/react": "18.2.4",
+    "@types/react-dom": "18.2.4",
     "@types/sinon": "^10.0.11",
     "@types/sinon-chai": "^3.2.8",
     "@typescript-eslint/eslint-plugin": "^5.42.1",

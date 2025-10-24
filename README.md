@@ -53,7 +53,7 @@ This is a sample dApp that uses the Starknet Snap. The dApp code can be found [h
 ### Prerequisites
 
 - [MetaMask Flask](https://metamask.io/flask/)
-  - ⚠️ You cannot have other versions of MetaMask installed
+  - ⚠️ You cannot have other versions of MetaMask installed.
 - Node.js `18`. We **strongly** recommend you install via [NVM](https://github.com/creationix/nvm) to avoid incompatibility issues between different node projects.
     - Once installed, you should also install [Yarn](http://yarnpkg.com/) with `npm i -g yarn` to make working with this repository easier.
 

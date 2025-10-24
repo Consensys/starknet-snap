@@ -1,33 +1,31 @@
 import { useState, useEffect } from 'react';
+import Toastr from 'toastr2';
 import { useAppSelector } from 'hooks/redux';
-import { useStarkNetSnap } from 'services';
+
+import { useMultiLanguage, useStarkNetSnap } from 'services';
 import { Alert } from 'components/ui/atom/Alert';
 import { AddressInput } from 'components/ui/molecule/AddressInput';
 import { InputWithLabel } from 'components/ui/molecule/InputWithLabel';
-import {
-  ButtonStyled,
-  ButtonsWrapper,
-  FormGroup,
-  Space,
-  Title,
-  Wrapper,
-} from './AddToken.style';
-import Toastr from 'toastr2';
+import { Modal } from 'components/ui/atom/Modal';
+import { ButtonStyled, FormGroup, Space } from './AddToken.style';
+
 const toastr = new Toastr({
   closeDuration: 10000000,
   showDuration: 1000000000,
   positionClass: 'toast-top-center',
 });
+
 interface Props {
   closeModal: () => void;
 }
 
 export const AddTokenModalView = ({ closeModal }: Props) => {
   const { setErc20TokenBalance, addErc20Token } = useStarkNetSnap();
+  const { translate } = useMultiLanguage();
   const [enabled, setEnabled] = useState(false);
   const networks = useAppSelector((state) => state.networks);
-  const { accounts } = useAppSelector((state) => state.wallet);
-  const chain = networks && networks.items[networks.activeNetwork].chainId;
+  const currentAccount = useAppSelector((state) => state.wallet.currentAccount);
+  const chainId = networks?.items[networks.activeNetwork].chainId;
   const [isValidAddress, setIsValidAddress] = useState(false);
   const [fields, setFields] = useState({
     address: '',
@@ -35,6 +33,7 @@ export const AddTokenModalView = ({ closeModal }: Props) => {
     symbol: '',
     decimal: '',
   });
+
   const handleChange = (fieldName: string, fieldValue: string) => {
     setFields((prevFields) => ({
       ...prevFields,
@@ -50,17 +49,14 @@ export const AddTokenModalView = ({ closeModal }: Props) => {
   }, [fields, isValidAddress]);
 
   return (
-    <>
-      <Wrapper>
-        <Title>Add Token</Title>
-        <Alert
-          text="Anyone can create a token, including creating fake versions of existing tokens. Learn more about scams and security risks."
-          variant="warning"
-        />
+    <Modal>
+      <Modal.Title>{translate('addToken')}</Modal.Title>
+      <Modal.Body>
+        <Alert text={translate('tokenCreationWarning')} variant="warning" />
         <Space />
         <FormGroup>
           <AddressInput
-            label="ContractAddress"
+            label={translate('contractAddress')}
             placeholder=""
             onChange={(event) => handleChange('address', event.target.value)}
             setIsValidAddress={setIsValidAddress}
@@ -68,19 +64,19 @@ export const AddTokenModalView = ({ closeModal }: Props) => {
         </FormGroup>
         <FormGroup>
           <InputWithLabel
-            label="Name"
+            label={translate('name')}
             onChange={(event) => handleChange('name', event.target.value)}
           />
         </FormGroup>
         <FormGroup>
           <InputWithLabel
-            label="Symbol"
+            label={translate('symbol')}
             onChange={(event) => handleChange('symbol', event.target.value)}
           />
         </FormGroup>
         <FormGroup>
           <InputWithLabel
-            label="Decimal"
+            label={translate('decimal')}
             placeholder="0"
             type="number"
             onChange={(event) =>
@@ -91,10 +87,10 @@ export const AddTokenModalView = ({ closeModal }: Props) => {
             }
           />
         </FormGroup>
-      </Wrapper>
-      <ButtonsWrapper>
+      </Modal.Body>
+      <Modal.Buttons>
         <ButtonStyled onClick={closeModal} backgroundTransparent borderVisible>
-          CANCEL
+          {translate('cancel')}
         </ButtonStyled>
         <ButtonStyled
           enabled={enabled}
@@ -105,22 +101,22 @@ export const AddTokenModalView = ({ closeModal }: Props) => {
                 fields.name,
                 fields.symbol,
                 parseFloat(fields.decimal),
-                chain,
-                accounts[0] as unknown as string,
+                chainId,
+                currentAccount.address,
               );
               if (newToken) {
                 setErc20TokenBalance(newToken);
-                toastr.success('Token added successfully');
+                toastr.success(translate('tokenAddedSuccessfully'));
               }
               closeModal();
             } catch (err) {
-              toastr.error('Error while adding token');
+              toastr.error(translate('errorAddingToken'));
             }
           }}
         >
-          ADD
+          {translate('add')}
         </ButtonStyled>
-      </ButtonsWrapper>
-    </>
+      </Modal.Buttons>
+    </Modal>
   );
 };

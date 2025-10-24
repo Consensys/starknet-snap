@@ -1,39 +1,43 @@
-import type { Component, Json } from '@metamask/snaps-sdk';
-import convert from 'ethereum-unit-converter';
-import type { Call, Calldata } from 'starknet';
-import { constants, TransactionStatus, TransactionType } from 'starknet';
+import { type Json } from '@metamask/snaps-sdk';
+import type { Call, constants } from 'starknet';
+import { TransactionType } from 'starknet';
 import type { Infer } from 'superstruct';
 import { object, string, assign, optional, any } from 'superstruct';
+import { v4 as uuidv4 } from 'uuid';
 
 import { AccountStateManager } from '../state/account-state-manager';
+import { TransactionRequestStateManager } from '../state/request-state-manager';
 import { TokenStateManager } from '../state/token-state-manager';
 import { TransactionStateManager } from '../state/transaction-state-manager';
 import { FeeToken } from '../types/snapApi';
-import { VoyagerTransactionType, type Transaction } from '../types/snapState';
-import type { AccountRpcControllerOptions } from '../utils';
+import type { ResourceBounds, TransactionRequest } from '../types/snapState';
+import { generateExecuteTxnFlow } from '../ui/utils';
 import {
   AddressStruct,
   BaseRequestStruct,
-  AccountRpcController,
-  confirmDialog,
   UniversalDetailsStruct,
   CallsStruct,
   mapDeprecatedParams,
-  addressUI,
-  signerUI,
-  networkUI,
-  jsonDataUI,
-  dividerUI,
-  headerUI,
-  rowUI,
+  createInteractiveConfirmDialog,
+  callToTransactionReqCall,
+  logger,
 } from '../utils';
+import { CAIRO_VERSION } from '../utils/constants';
 import { UserRejectedOpError } from '../utils/exceptions';
-import { logger } from '../utils/logger';
+import { isEnableRPCV8 } from '../utils/rpc-provider';
 import {
-  createAccount,
+  deployAccount,
   executeTxn as executeTxnUtil,
+  getDeployAccountCallData,
   getEstimatedFees,
 } from '../utils/starknetUtils';
+import {
+  feeTokenToTransactionVersion,
+  newDeployTransaction,
+  newInvokeTransaction,
+} from '../utils/transaction';
+import type { AccountRpcControllerOptions } from './abstract/account-rpc-controller';
+import { AccountRpcController } from './abstract/account-rpc-controller';
 
 export const ExecuteTxnRequestStruct = assign(
   object({
@@ -54,6 +58,33 @@ export type ExecuteTxnParams = Infer<typeof ExecuteTxnRequestStruct> & Json;
 
 export type ExecuteTxnResponse = Infer<typeof ExecuteTxnResponseStruct>;
 
+export type ConfirmTransactionParams = {
+  calls: Call[];
+  address: string;
+  maxFee: string;
+  resourceBounds: ResourceBounds;
+  includeDeploy: boolean;
+};
+
+export type DeployAccountParams = {
+  address: string;
+};
+
+export type SendTransactionParams = {
+  address: string;
+  calls: Call[];
+  abis?: any[];
+  details?: Infer<typeof UniversalDetailsStruct>;
+};
+
+export type SaveDataToStateParamas = {
+  txnHashForDeploy?: string;
+  txnHashForExecute: string;
+  maxFee: string;
+  address: string;
+  calls: Call[];
+};
+
 /**
  * The RPC handler to execute a transaction.
  */
@@ -62,6 +93,8 @@ export class ExecuteTxnRpc extends AccountRpcController<
   ExecuteTxnResponse
 > {
   protected txnStateManager: TransactionStateManager;
+
+  protected reqStateManager: TransactionRequestStateManager;
 
   protected accStateManager: AccountStateManager;
 
@@ -74,6 +107,7 @@ export class ExecuteTxnRpc extends AccountRpcController<
   constructor(options?: AccountRpcControllerOptions) {
     super(options);
     this.txnStateManager = new TransactionStateManager();
+    this.reqStateManager = new TransactionRequestStateManager();
     this.accStateManager = new AccountStateManager();
     this.tokenStateManager = new TokenStateManager();
   }
@@ -112,264 +146,255 @@ export class ExecuteTxnRpc extends AccountRpcController<
   ): Promise<ExecuteTxnResponse> {
     const { address, calls, abis, details } = params;
     const { privateKey, publicKey } = this.account;
+    const callsArray = Array.isArray(calls) ? calls : [calls];
 
-    const { includeDeploy, suggestedMaxFee, estimateResults } =
-      await getEstimatedFees(
-        this.network,
-        address,
-        privateKey,
-        publicKey,
-        [
-          {
-            type: TransactionType.INVOKE,
-            payload: calls,
-          },
-        ],
-        details,
-      );
-
-    const accountDeployed = !includeDeploy;
-    const version =
-      details?.version as unknown as constants.TRANSACTION_VERSION;
-
-    if (
-      !(await this.getExecuteTxnConsensus(
-        address,
-        accountDeployed,
-        calls,
-        suggestedMaxFee,
-        version,
-      ))
-    ) {
-      throw new UserRejectedOpError() as unknown as Error;
-    }
-
-    if (!accountDeployed) {
-      await createAccount({
-        network: this.network,
-        address,
-        publicKey,
-        privateKey,
-        waitMode: false,
-        callback: async (contractAddress: string, transactionHash: string) => {
-          await this.updateAccountAsDeploy(contractAddress, transactionHash);
-        },
-        version,
-      });
-    }
-
-    const resourceBounds = estimateResults.map(
-      (result) => result.resourceBounds,
-    );
-
-    const executeTxnResp = await executeTxnUtil(
+    const {
+      includeDeploy,
+      suggestedMaxFee: maxFee,
+      resourceBounds,
+    } = await getEstimatedFees(
       this.network,
       address,
       privateKey,
-      calls,
+      publicKey,
+      [
+        {
+          type: TransactionType.INVOKE,
+          payload: calls,
+        },
+      ],
+      details,
+    );
+
+    const accountDeployed = !includeDeploy;
+
+    const {
+      selectedFeeToken,
+      maxFee: updatedMaxFee,
+      resourceBounds: updatedResouceBounds,
+    } = await this.confirmTransaction({
+      address,
+      calls: callsArray,
+      maxFee,
+      resourceBounds,
+      includeDeploy,
+    });
+
+    if (!isEnableRPCV8(this.network.chainId as constants.StarknetChainId)) {
+      delete updatedResouceBounds.l1_data_gas;
+    }
+
+    const updatedTxnVersion = feeTokenToTransactionVersion(selectedFeeToken);
+
+    let txnHashForDeploy: string | undefined;
+
+    if (!accountDeployed) {
+      txnHashForDeploy = await this.deployAccount({
+        address,
+      });
+    }
+
+    const txnHashForExecute = await this.sendTransaction({
+      address,
+      calls: callsArray,
       abis,
-      {
+      details: {
         ...details,
+        version: updatedTxnVersion,
         // Aways repect the input, unless the account is not deployed
         // TODO: we may also need to increment the nonce base on the input, if the account is not deployed
         nonce: accountDeployed ? details?.nonce : 1,
-        maxFee: suggestedMaxFee,
-        resourceBounds: resourceBounds[resourceBounds.length - 1],
+        maxFee: updatedMaxFee,
+        resourceBounds: updatedResouceBounds,
       },
-    );
-
-    if (!executeTxnResp?.transaction_hash) {
-      throw new Error('Failed to execute transaction');
-    }
-
-    // Since the RPC supports the `calls` parameter either as a single `call` object or an array of `call` objects,
-    // and the current state data structure does not yet support multiple `call` objects in a single transaction,
-    // we need to convert `calls` into a single `call` object as a temporary fix.
-    const call = Array.isArray(calls) ? calls[0] : calls;
-
-    await this.txnStateManager.addTransaction(
-      this.createInvokeTxn(address, executeTxnResp.transaction_hash, call),
-    );
-
-    return executeTxnResp;
-  }
-
-  protected async updateAccountAsDeploy(
-    address: string,
-    transactionHash: string,
-  ): Promise<void> {
-    if (!transactionHash) {
-      throw new Error(`Failed to deploy account for address ${address}`);
-    }
-
-    await this.txnStateManager.addTransaction(
-      this.createDeployTxn(address, transactionHash),
-    );
-
-    await this.accStateManager.updateAccountAsDeploy({
-      address,
-      chainId: this.network.chainId,
-      transactionHash,
     });
+
+    await this.saveDataToState({
+      txnHashForDeploy,
+      txnHashForExecute,
+      maxFee: updatedMaxFee,
+      address,
+      calls: callsArray,
+    });
+
+    return {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      transaction_hash: txnHashForExecute,
+    };
   }
 
-  protected async getExecuteTxnConsensus(
-    address: string,
-    accountDeployed: boolean,
-    calls: Call[] | Call,
-    maxFee: string,
-    version?: constants.TRANSACTION_VERSION,
-  ) {
-    const { name: chainName, chainId } = this.network;
-    const callsArray = Array.isArray(calls) ? calls : [calls];
+  protected async confirmTransaction({
+    calls,
+    address,
+    maxFee,
+    resourceBounds,
+    includeDeploy,
+  }: ConfirmTransactionParams): Promise<TransactionRequest> {
+    const requestId = uuidv4();
+    const { chainId, name: networkName } = this.network;
+    const { hdIndex: addressIndex } = this.account;
 
-    const components: Component[] = [];
-    const feeToken: FeeToken =
-      version === constants.TRANSACTION_VERSION.V3
-        ? FeeToken.STRK
-        : FeeToken.ETH;
-
-    components.push(headerUI('Do you want to sign this transaction?'));
-    components.push(
-      signerUI({
-        address,
-        chainId,
-      }),
-    );
-
-    // Display a message to indicate the signed transaction will include an account deployment
-    if (!accountDeployed) {
-      components.push(headerUI(`The account will be deployed`));
-    }
-
-    components.push(dividerUI());
-    components.push(
-      rowUI({
-        label: `Estimated Gas Fee (${feeToken})`,
-        value: convert(maxFee, 'wei', 'ether'),
-      }),
-    );
-
-    components.push(dividerUI());
-    components.push(
-      networkUI({
-        networkName: chainName,
-      }),
-    );
-
-    // Iterate over each call in the calls array
-    for (const call of callsArray) {
-      const { contractAddress, calldata, entrypoint } = call;
-      components.push(dividerUI());
-      components.push(
-        addressUI({
-          label: 'Contract',
-          address: contractAddress,
+    const formattedCalls = await Promise.all(
+      calls.map(async (call) =>
+        callToTransactionReqCall(
+          call,
           chainId,
-        }),
-      );
+          address,
+          this.tokenStateManager,
+        ),
+      ),
+    );
 
-      components.push(
-        jsonDataUI({
-          label: 'Call Data',
-          data: calldata,
-        }),
-      );
+    const request: TransactionRequest = {
+      chainId,
+      networkName,
+      id: requestId,
+      interfaceId: '',
+      type: TransactionType.INVOKE,
+      signer: address,
+      addressIndex,
+      maxFee,
+      calls: formattedCalls,
+      resourceBounds,
+      selectedFeeToken: FeeToken.STRK,
+      includeDeploy,
+    };
 
-      // If the contract is an ERC20 token and the function is 'transfer', display sender, recipient, and amount
-      const token = await this.tokenStateManager.getToken({
-        address: contractAddress,
-        chainId,
+    const interfaceId = await generateExecuteTxnFlow(request);
+
+    request.interfaceId = interfaceId;
+
+    await this.reqStateManager.upsertTransactionRequest(request);
+
+    try {
+      if (!(await createInteractiveConfirmDialog(interfaceId))) {
+        throw new UserRejectedOpError() as unknown as Error;
+      }
+
+      // Retrieve the updated transaction request,
+      // the transaction request may have been updated during the confirmation process.
+      const updatedRequest = await this.reqStateManager.getTransactionRequest({
+        requestId,
       });
 
-      if (token && entrypoint === 'transfer' && calldata) {
-        try {
-          const senderAddress = address;
-          const recipientAddress = calldata[0]; // Assuming the first element in calldata is the recipient
-          let amount = '';
-
-          if ([3, 6, 9, 12, 15, 18].includes(token.decimals)) {
-            amount = convert(calldata[1], -1 * token.decimals, 'ether');
-          } else {
-            amount = (
-              Number(calldata[1]) * Math.pow(10, -1 * token.decimals)
-            ).toFixed(token.decimals);
-          }
-          components.push(dividerUI());
-          components.push(
-            addressUI({
-              label: 'Sender Address',
-              address: senderAddress,
-              chainId,
-            }),
-            dividerUI(),
-            addressUI({
-              label: 'Recipient Address',
-              address: recipientAddress,
-              chainId,
-            }),
-            dividerUI(),
-            rowUI({
-              label: `Amount (${token.symbol})`,
-              value: amount,
-            }),
-          );
-        } catch (error) {
-          logger.warn(
-            // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-            `error found in amount conversion: ${error}`,
-          );
-        }
+      if (!updatedRequest) {
+        throw new Error('Failed to retrieve the updated transaction request');
       }
+
+      return updatedRequest;
+    } finally {
+      // Remove the transaction request from the state without throwing an error
+      await this.removeTransactionRequestSafe(requestId);
+    }
+  }
+
+  protected async removeTransactionRequestSafe(requestId: string) {
+    try {
+      await this.reqStateManager.removeTransactionRequest(requestId);
+    } catch (error) {
+      logger.error('Failed to remove transaction request', error);
+    }
+  }
+
+  protected async deployAccount({
+    address,
+  }: DeployAccountParams): Promise<string> {
+    const { privateKey, publicKey } = this.account;
+
+    const callData = getDeployAccountCallData(publicKey, CAIRO_VERSION);
+
+    const {
+      contract_address: contractAddress,
+      transaction_hash: transactionHash,
+    } = await deployAccount(
+      this.network,
+      address,
+      callData,
+      publicKey,
+      privateKey,
+      CAIRO_VERSION,
+    );
+
+    if (contractAddress !== address) {
+      logger.warn(`
+        contract address is not match with the desired address\n contract address: ${contractAddress}, desired address: ${address}
+        `);
     }
 
-    return await confirmDialog(components);
+    if (!transactionHash) {
+      throw new Error(`Failed to deploy account`);
+    }
+
+    return transactionHash;
   }
 
-  protected createDeployTxn(
-    address: string,
-    transactionHash: string,
-  ): Transaction {
-    return {
-      txnHash: transactionHash,
-      txnType: VoyagerTransactionType.DEPLOY_ACCOUNT,
-      chainId: this.network.chainId,
-      senderAddress: address,
-      contractAddress: address,
-      contractFuncName: '',
-      contractCallData: [],
-      finalityStatus: TransactionStatus.RECEIVED,
-      executionStatus: TransactionStatus.RECEIVED,
-      status: '',
-      failureReason: '',
-      eventIds: [],
-      timestamp: Math.floor(Date.now() / 1000),
-    };
+  protected async sendTransaction({
+    address,
+    calls,
+    abis,
+    details,
+  }: SendTransactionParams): Promise<string> {
+    const { privateKey } = this.account;
+    try {
+      const executeTxnResp = await executeTxnUtil(
+        this.network,
+        address,
+        privateKey,
+        calls,
+        abis,
+        details,
+      );
+
+      if (!executeTxnResp?.transaction_hash) {
+        throw new Error('Failed to execute transaction');
+      }
+
+      return executeTxnResp.transaction_hash;
+    } catch (error) {
+      throw new Error(
+        `Failed to execute transaction: ${
+          error instanceof Error ? error.message : 'Unknown error'
+        }`,
+      );
+    }
   }
 
-  protected createInvokeTxn(
-    address: string,
-    transactionHash: string,
-    callData: Call,
-  ): Transaction {
-    const { contractAddress, calldata, entrypoint } = callData;
-    return {
-      txnHash: transactionHash,
-      txnType: VoyagerTransactionType.INVOKE,
-      chainId: this.network.chainId,
-      senderAddress: address,
-      contractAddress,
-      contractFuncName: entrypoint,
-      contractCallData: (calldata as unknown as Calldata)?.map(
-        (data: string) => `0x${BigInt(data).toString(16)}`,
-      ),
-      finalityStatus: TransactionStatus.RECEIVED,
-      executionStatus: TransactionStatus.RECEIVED,
-      status: '',
-      failureReason: '',
-      eventIds: [],
-      timestamp: Math.floor(Date.now() / 1000),
-    };
+  protected async saveDataToState({
+    txnHashForDeploy,
+    txnHashForExecute,
+    maxFee,
+    address,
+    calls,
+  }: SaveDataToStateParamas) {
+    const txnVersionInNumber = 3; // TODO remove since there is only one
+    const { chainId } = this.network;
+
+    if (txnHashForDeploy) {
+      await this.txnStateManager.addTransaction(
+        newDeployTransaction({
+          senderAddress: address,
+          txnHash: txnHashForDeploy,
+          chainId,
+          txnVersion: txnVersionInNumber,
+        }),
+      );
+      await this.accStateManager.updateAccountAsDeploy({
+        address,
+        chainId,
+        transactionHash: txnHashForDeploy,
+      });
+    }
+
+    await this.txnStateManager.addTransaction(
+      newInvokeTransaction({
+        senderAddress: address,
+        txnHash: txnHashForExecute,
+        chainId,
+        maxFee,
+        txnVersion: txnVersionInNumber,
+        calls,
+      }),
+    );
   }
 }
 

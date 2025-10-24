@@ -1,47 +1,50 @@
 import { useEffect } from 'react';
-import './App.css';
-import GlobalStyle from 'theme/GlobalStyles';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { far } from '@fortawesome/free-regular-svg-icons';
 import { fas } from '@fortawesome/free-solid-svg-icons';
-import { Home } from 'components/pages/Home';
-import { FrameworkView } from 'components/ui/Framework/Framework.view';
-import { useAppSelector } from 'hooks/redux';
-import { useStarkNetSnap } from 'services';
 import { ThemeProvider } from 'styled-components';
+import 'toastr2/dist/toastr.min.css';
+
+import './App.css';
+import GlobalStyle from 'theme/GlobalStyles';
 import { theme } from 'theme/default';
-import { ConnectModal } from 'components/ui/organism/ConnectModal';
+import { useAppSelector } from 'hooks/redux';
+import { useHasMetamask } from 'hooks/useHasMetamask';
+import { useStarkNetSnap } from 'services';
+import { FrameworkView } from 'components/ui/Framework/Framework.view';
 import { PopIn } from 'components/ui/molecule/PopIn';
 import { LoadingBackdrop } from 'components/ui/molecule/LoadingBackdrop';
+import { ConnectModal } from 'components/ui/organism/ConnectModal';
 import { ConnectInfoModal } from 'components/ui/organism/ConnectInfoModal';
 import { UpgradeModel } from 'components/ui/organism/UpgradeModel';
-import 'toastr2/dist/toastr.min.css';
 import { NoMetamaskModal } from 'components/ui/organism/NoMetamaskModal';
-import { MinVersionModal } from './components/ui/organism/MinVersionModal';
-import { useHasMetamask } from 'hooks/useHasMetamask';
-import { DUMMY_ADDRESS } from 'utils/constants';
+import { MinVersionModal } from 'components/ui/organism/MinVersionModal';
 import { DeployModal } from 'components/ui/organism/DeployModal';
+import { MinMetamaskVersionModal } from 'components/ui/organism/MinMetamaskVersionModal';
+import { Home } from 'components/pages/Home';
+import { ForceUpgadeModal } from 'components/ui/organism/ForceUpgadeModal';
 
 library.add(fas, far);
 
 function App() {
-  const { initSnap, getWalletData, checkConnection } = useStarkNetSnap();
-  const { connected, forceReconnect, provider } = useAppSelector(
-    (state) => state.wallet,
-  );
+  const { initSnap, initWalletData, checkConnection } = useStarkNetSnap();
+  const connected = useAppSelector((state) => state.wallet.connected);
+  const forceReconnect = useAppSelector((state) => state.wallet.forceReconnect);
+  const provider = useAppSelector((state) => state.wallet.provider);
+  const currentAccount = useAppSelector((state) => state.wallet.currentAccount);
   const {
     infoModalVisible,
     minVersionModalVisible,
+    minMMVersionModalVisible,
     upgradeModalVisible,
     deployModalVisible,
+    forceReconnectModalVisible,
   } = useAppSelector((state) => state.modals);
   const { loader } = useAppSelector((state) => state.UI);
   const networks = useAppSelector((state) => state.networks);
-  const { accounts } = useAppSelector((state) => state.wallet);
   const { hasMetamask } = useHasMetamask();
-
-  const address =
-    accounts?.length > 0 ? (accounts[0] as unknown as string) : DUMMY_ADDRESS;
+  const chainId = networks.items?.[networks.activeNetwork]?.chainId;
+  const address = currentAccount.address;
 
   useEffect(() => {
     if (!provider) {
@@ -57,14 +60,16 @@ function App() {
   }, [connected, forceReconnect, hasMetamask, provider]);
 
   useEffect(() => {
-    if (provider && networks.items.length > 0) {
-      const chainId = networks.items[networks.activeNetwork].chainId;
-      getWalletData(chainId);
+    if (provider && networks.items.length > 0 && chainId) {
+      initWalletData({ chainId });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [networks.activeNetwork, provider]);
+  }, [networks.activeNetwork, provider, chainId]);
 
   const loading = loader.isLoading;
+  const isModalEligibleToShow =
+    !minVersionModalVisible && !minMMVersionModalVisible;
+
   return (
     <ThemeProvider theme={theme}>
       <GlobalStyle />
@@ -72,8 +77,16 @@ function App() {
         <PopIn isOpen={!connected && !loading} showClose={false}>
           <NoMetamaskModal />
         </PopIn>
+        {/* This Modal will be shown when the SNAP must re-installed due to breaking change from Metamask  */}
         <PopIn isOpen={minVersionModalVisible} showClose={false}>
           <MinVersionModal />
+        </PopIn>
+        {/* This Modal will be shown when the Metamask version is outdate to support the SNAP */}
+        <PopIn isOpen={minMMVersionModalVisible} showClose={false}>
+          <MinMetamaskVersionModal />
+        </PopIn>
+        <PopIn isOpen={forceReconnectModalVisible} showClose={false}>
+          <ForceUpgadeModal />
         </PopIn>
         <PopIn
           isOpen={!loading && !!hasMetamask && !connected}
@@ -81,22 +94,25 @@ function App() {
         >
           <ConnectModal />
         </PopIn>
-        <PopIn isOpen={infoModalVisible} showClose={false}>
+        <PopIn
+          isOpen={isModalEligibleToShow && infoModalVisible}
+          showClose={false}
+        >
           <ConnectInfoModal address={address} />
         </PopIn>
         <PopIn
-          isOpen={!minVersionModalVisible && upgradeModalVisible}
+          isOpen={isModalEligibleToShow && upgradeModalVisible}
           showClose={false}
         >
           <UpgradeModel address={address} />
         </PopIn>
         <PopIn
-          isOpen={!minVersionModalVisible && deployModalVisible}
+          isOpen={isModalEligibleToShow && deployModalVisible}
           showClose={false}
         >
           <DeployModal address={address} />
         </PopIn>
-        <Home address={address} />
+        <Home />
         <PopIn isOpen={loading}>
           {loading && (
             <LoadingBackdrop>{loader.loadingMessage}</LoadingBackdrop>

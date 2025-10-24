@@ -1,4 +1,10 @@
-import type { RawCalldata } from 'starknet';
+import type {
+  RawCalldata,
+  TransactionType as StarknetTransactionType,
+} from 'starknet';
+import type { Infer } from 'superstruct';
+
+import type { TransactionStruct } from '../utils';
 
 /* eslint-disable */
 export type SnapState = {
@@ -7,19 +13,67 @@ export type SnapState = {
   networks: Network[];
   transactions: Transaction[];
   currentNetwork?: Network;
+  transactionRequests?: TransactionRequest[];
+  currentAccount?: Record<string, AccContract>;
 };
+
+export type TokenTransferData = {
+  senderAddress: string;
+  recipientAddress: string;
+  amount: string;
+  decimals: number;
+  symbol: string;
+};
+
+export type FormattedCallData = {
+  contractAddress: string;
+  calldata?: string[];
+  entrypoint: string;
+  tokenTransferData?: TokenTransferData;
+};
+
+export type ResourceBounds = {
+  l1_gas: { max_amount: string; max_price_per_unit: string };
+  l1_data_gas?: { max_amount: string; max_price_per_unit: string };
+  l2_gas: { max_amount: string; max_price_per_unit: string };
+};
+
+export type ResourceBoundsInBigInt = {
+  l1_gas: { max_amount: bigint; max_price_per_unit: bigint };
+  l1_data_gas?: { max_amount: bigint; max_price_per_unit: bigint };
+  l2_gas: { max_amount: bigint; max_price_per_unit: bigint };
+};
+
+export type TransactionRequest = {
+  id: string;
+  interfaceId: string;
+  type: StarknetTransactionType;
+  signer: string;
+  addressIndex: number;
+  chainId: string;
+  networkName: string;
+  maxFee: string;
+  calls: FormattedCallData[];
+  resourceBounds: ResourceBounds;
+  selectedFeeToken: string;
+  includeDeploy: boolean;
+};
+
+export type AccountMetaData = { accountName?: string };
 
 export type AccContract = {
   addressSalt: string;
   publicKey: string; // in hex
   address: string; // in hex
   addressIndex: number;
-  derivationPath: string;
-  deployTxnHash: string; // in hex
+  derivationPath?: string;
+  deployTxnHash?: string; // in hex
   chainId: string; // in hex
+  isDeployed?: boolean;
   upgradeRequired?: boolean;
   deployRequired?: boolean;
-};
+  cairoVersion?: string;
+} & AccountMetaData;
 
 export type Erc20Token = {
   address: string; // in hex
@@ -58,6 +112,7 @@ export enum TransactionStatus { // for retrieving txn from Starknet feeder gatew
   ACCEPTED_ON_L1 = 'ACCEPTED_ON_L1',
   NOT_RECEIVED = 'NOT_RECEIVED',
   REJECTED = 'REJECTED',
+  REVERTED = 'REVERTED',
 }
 
 export enum FinailityStatus {
@@ -79,12 +134,18 @@ export enum TransactionStatusType { // for retrieving txn from StarkNet feeder g
   DEPRECATION = 'status',
 }
 
-export type Transaction = {
+export type TranscationAccountCall = {
+  contract: string;
+  contractFuncName: string;
+  contractCallData: string[];
+  recipient?: string;
+  amount?: string;
+};
+
+export type LegacyTransaction = {
   txnHash: string; // in hex
-  // TODO: Change the type of txnType to `TransactionType` in the SnapState, when this state manager apply to getTransactions, there is no migration neeeded, as the state is override for every fetch for getTransactions
   txnType: VoyagerTransactionType | string;
   chainId: string; // in hex
-  // TODO: rename it to address to sync with the same naming convention in the AccContract
   senderAddress: string; // in hex
   contractAddress: string; // in hex
   contractFuncName: string;
@@ -96,5 +157,21 @@ export type Transaction = {
   eventIds: string[];
   timestamp: number;
 };
+
+export enum TransactionDataVersion {
+  V2 = 'V2',
+}
+
+export enum ContractFuncName {
+  Upgrade = 'upgrade',
+  Transfer = 'transfer',
+}
+
+export type V2Transaction = Infer<typeof TransactionStruct>;
+
+// FIXME: temp solution for backward compatibility before StarkScan implemented in get transactions
+export type Transaction =
+  | LegacyTransaction
+  | (V2Transaction & { status?: TransactionStatus | string });
 
 /* eslint-disable */

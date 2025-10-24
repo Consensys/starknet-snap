@@ -1,22 +1,17 @@
-import type { Component } from '@metamask/snaps-sdk';
 import type { DeclareSignerDetails } from 'starknet';
 import type { Infer } from 'superstruct';
 import { array, object, string, assign } from 'superstruct';
 
+import { renderSignDeclareTransactionUI } from '../ui/utils';
 import {
-  confirmDialog,
   AddressStruct,
   BaseRequestStruct,
-  AccountRpcController,
   DeclareSignDetailsStruct,
   mapDeprecatedParams,
-  signerUI,
-  networkUI,
-  jsonDataUI,
-  headerUI,
 } from '../utils';
 import { UserRejectedOpError } from '../utils/exceptions';
 import { signDeclareTransaction as signDeclareTransactionUtil } from '../utils/starknetUtils';
+import { AccountRpcController } from './abstract/account-rpc-controller';
 
 export const SignDeclareTransactionRequestStruct = assign(
   object({
@@ -84,7 +79,14 @@ export class SignDeclareTransactionRpc extends AccountRpcController<
     params: SignDeclareTransactionParams,
   ): Promise<SignDeclareTransactionResponse> {
     const { details } = params;
-    if (!(await this.getSignDeclareTransactionConsensus(details))) {
+    if (
+      !(await renderSignDeclareTransactionUI({
+        senderAddress: details.senderAddress,
+        networkName: this.network.name,
+        chainId: this.network.chainId,
+        declareTransactions: details,
+      }))
+    ) {
       throw new UserRejectedOpError() as unknown as Error;
     }
 
@@ -92,35 +94,6 @@ export class SignDeclareTransactionRpc extends AccountRpcController<
       this.account.privateKey,
       details as unknown as DeclareSignerDetails,
     )) as unknown as SignDeclareTransactionResponse;
-  }
-
-  protected async getSignDeclareTransactionConsensus(
-    details: Infer<typeof DeclareSignDetailsStruct>,
-  ) {
-    const components: Component[] = [];
-    components.push(headerUI('Do you want to sign this transaction?'));
-
-    components.push(
-      signerUI({
-        address: details.senderAddress,
-        chainId: this.network.chainId,
-      }),
-    );
-
-    components.push(
-      networkUI({
-        networkName: this.network.name,
-      }),
-    );
-
-    components.push(
-      jsonDataUI({
-        label: 'Declare Transaction Details',
-        data: details,
-      }),
-    );
-
-    return await confirmDialog(components);
   }
 }
 

@@ -18,7 +18,6 @@ import type {
   DeployAccountSignerDetails,
   CairoVersion,
   InvocationsSignerDetails,
-  ProviderInterface,
   GetTransactionReceiptResponse,
   BigNumberish,
   ArraySignatureType,
@@ -45,8 +44,13 @@ import {
   FeeTokenUnit,
   type RpcV4GetTransactionReceiptResponse,
 } from '../types/snapApi';
-import type { Network, SnapState, Transaction } from '../types/snapState';
-import { TransactionType } from '../types/snapState';
+import type {
+  Network,
+  ResourceBounds,
+  SnapState,
+  Transaction,
+} from '../types/snapState';
+import { ContractFuncName, TransactionType } from '../types/snapState';
 import type {
   DeployAccountPayload,
   TransactionResponse,
@@ -70,14 +74,15 @@ import {
   BlockIdentifierEnum,
 } from './constants';
 import { DeployRequiredError, UpgradeRequiredError } from './exceptions';
+import { ConsolidateFees } from './fee';
 import { hexToString } from './formatter-utils';
 import { getAddressKey } from './keyPair';
 import { logger } from './logger';
+import { isEnableRPCV8, getRPCUrl } from './rpc-provider';
 import { toJson } from './serializer';
 import {
   getAccount,
   getAccounts,
-  getRPCUrl,
   getTransactionsFromVoyagerUrl,
   getVoyagerCredentials,
 } from './snapUtils';
@@ -122,13 +127,20 @@ export const getCallDataArray = (callDataStr: string): string[] => {
 export const getProvider = (
   network: Network,
   blockIdentifier?: BlockIdentifierEnum,
-): ProviderInterface => {
+): Provider => {
   let providerParam: ProviderOptions = {};
   providerParam = {
     nodeUrl: getRPCUrl(network.chainId),
   };
   if (blockIdentifier) {
     providerParam.blockIdentifier = blockIdentifier;
+  }
+  if (isEnableRPCV8(network.chainId as constants.StarknetChainId)) {
+    // For Sepolia, we use the new RPC V8 mode by default
+    providerParam.specVersion = '0.8.1';
+  } else {
+    // For Mainnet, we use the legacy mode by default
+    providerParam.specVersion = '0.7.1';
   }
   return new Provider(providerParam);
 };
@@ -178,7 +190,7 @@ export const waitForTransaction = async (
   network: Network,
   senderAddress: string,
   privateKey: string | Uint8Array,
-  txnHash: numUtils.BigNumberish,
+  txnHash: BigNumberish,
   cairoVersion?: CairoVersion,
 ): Promise<GetTransactionReceiptResponse> => {
   return getAccountInstance(
@@ -263,7 +275,7 @@ export const executeTxn = async (
   senderAddress: string,
   privateKey: string | Uint8Array,
   txnInvocation: Call | Call[],
-  abis?: Abi[],
+  _abis?: Abi[],
   invocationsDetails?: UniversalDetails,
   cairoVersion?: CairoVersion,
 ): Promise<InvokeFunctionResponse> => {
@@ -273,7 +285,7 @@ export const executeTxn = async (
     privateKey,
     cairoVersion,
     invocationsDetails?.version,
-  ).execute(txnInvocation, abis, {
+  ).execute(txnInvocation, {
     ...invocationsDetails,
     skipValidate: false,
     blockIdentifier: BlockIdentifierEnum.Latest,
@@ -284,7 +296,7 @@ export const deployAccount = async (
   network: Network,
   contractAddress: string,
   contractCallData: RawCalldata,
-  addressSalt: numUtils.BigNumberish,
+  addressSalt: string,
   privateKey: string | Uint8Array,
   cairoVersion?: CairoVersion,
   invocationsDetails?: UniversalDetails,
@@ -314,7 +326,7 @@ export const estimateAccountDeployFee = async (
   network: Network,
   contractAddress: string,
   contractCallData: RawCalldata,
-  addressSalt: numUtils.BigNumberish,
+  addressSalt: BigNumberish,
   privateKey: string | Uint8Array,
   cairoVersion?: CairoVersion,
   invocationsDetails?: UniversalDetails,
@@ -409,7 +421,7 @@ export const isEthBalanceEmpty = async (
 };
 
 export const getTransactionStatus = async (
-  transactionHash: numUtils.BigNumberish,
+  transactionHash: BigNumberish,
   network: Network,
 ) => {
   const provider = getProvider(network);
@@ -423,7 +435,7 @@ export const getTransactionStatus = async (
 };
 
 export const getTransaction = async (
-  transactionHash: numUtils.BigNumberish,
+  transactionHash: BigNumberish,
   network: Network,
 ) => {
   const provider = getProvider(network);
@@ -431,7 +443,7 @@ export const getTransaction = async (
 };
 
 export const getTransactionsFromVoyager = async (
-  toAddress: numUtils.BigNumberish,
+  toAddress: BigNumberish,
   pageSize: number,
   pageNum: number,
   network: Network,
@@ -450,7 +462,7 @@ export const getTransactionsFromVoyager = async (
 };
 
 const getTransactionsFromVoyagerHelper = async (
-  toAddress: numUtils.BigNumberish,
+  toAddress: BigNumberish,
   pageSize: number,
   minTimestamp: number, // in ms
   withDeployTxn: boolean,
@@ -533,8 +545,8 @@ const getTransactionsFromVoyagerHelper = async (
 };
 
 export const getMassagedTransactions = async (
-  toAddress: numUtils.BigNumberish,
-  contractAddress: numUtils.BigNumberish | undefined,
+  toAddress: BigNumberish,
+  contractAddress: BigNumberish | undefined,
   pageSize: number,
   minTimestamp: number, // in ms
   withDeployTxn: boolean,
@@ -590,10 +602,10 @@ export const getMassagedTransactions = async (
       let txContractFuncName = '';
       switch (txFuncSelector) {
         case bigIntTransferSelectorHex:
-          txContractFuncName = 'transfer';
+          txContractFuncName = ContractFuncName.Transfer;
           break;
         case bigIntUpgradeSelectorHex:
-          txContractFuncName = 'upgrade';
+          txContractFuncName = ContractFuncName.Upgrade;
           break;
         default:
           txContractFuncName = '';
@@ -702,9 +714,7 @@ export const getAccContractAddressAndCallData = (publicKey) => {
     0,
   );
 
-  if (address.length < 66) {
-    address = address.replace('0x', `0x${'0'.repeat(66 - address.length)}`);
-  }
+  address = _validateAndParseAddress(address);
   return {
     address,
     callData,
@@ -727,9 +737,7 @@ export const getAccContractAddressAndCallDataLegacy = (publicKey) => {
     callData,
     0,
   );
-  if (address.length < 66) {
-    address = address.replace('0x', `0x${'0'.repeat(66 - address.length)}`);
-  }
+  address = _validateAndParseAddress(address);
   return {
     address,
     callData,
@@ -772,7 +780,6 @@ export async function createAccount({
   cairoVersion = CAIRO_VERSION,
   waitMode = false,
   callback,
-  version = undefined,
 }: {
   network: Network;
   address: string;
@@ -780,7 +787,6 @@ export async function createAccount({
   privateKey: string;
   cairoVersion?: CairoVersion;
   waitMode?: boolean;
-  version?: constants.TRANSACTION_VERSION;
   callback?: (address: string, transactionHash: string) => Promise<void>;
 }) {
   // Deploy account will auto estimate the fee from the network if not provided
@@ -794,7 +800,6 @@ export async function createAccount({
     publicKey,
     privateKey,
     cairoVersion,
-    { version },
   );
 
   if (contractAddress !== address) {
@@ -992,29 +997,8 @@ export const isAccountDeployed = async (network: Network, address: string) => {
   }
 };
 
-export const addFeesFromAllTransactions = (
-  fees: EstimateFee[],
-): Pick<EstimateFee, 'suggestedMaxFee' | 'overall_fee'> => {
-  let overallFee = numUtils.toBigInt(0);
-  let suggestedMaxFee = numUtils.toBigInt(0);
-
-  fees.forEach((fee) => {
-    overallFee += fee.overall_fee;
-    suggestedMaxFee += fee.suggestedMaxFee;
-  });
-
-  return {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    overall_fee: overallFee,
-    suggestedMaxFee,
-  };
-};
-
 export const _validateAndParseAddressFn = _validateAndParseAddress;
-export const validateAndParseAddress = (
-  address: numUtils.BigNumberish,
-  length = 63,
-) => {
+export const validateAndParseAddress = (address: BigNumberish, length = 63) => {
   // getting rid of 0x and 0x0 prefixes
   const trimmedAddress = address.toString().replace(/^0x0?/u, '');
   if (trimmedAddress.length !== length) {
@@ -1077,6 +1061,7 @@ export async function getEstimatedFees(
   overallFee: string;
   unit: FeeTokenUnit;
   includeDeploy: boolean;
+  resourceBounds: ResourceBounds;
   estimateResults: EstimateFee[];
 }> {
   const accountDeployed = await isAccountDeployed(network, address);
@@ -1088,8 +1073,7 @@ export async function getEstimatedFees(
       payload: deployAccountpayload,
     });
   }
-
-  const estimateBulkFeeResp = await estimateFeeBulk(
+  const estimateResults = await estimateFeeBulk(
     network,
     address,
     privateKey,
@@ -1097,17 +1081,19 @@ export async function getEstimatedFees(
     invocationsDetails,
   );
 
-  const estimateFeeResp = addFeesFromAllTransactions(estimateBulkFeeResp);
+  const consolidateFeesObj = new ConsolidateFees(estimateResults);
+  const consolidateResult = consolidateFeesObj.serializate();
 
   return {
-    suggestedMaxFee: estimateFeeResp.suggestedMaxFee.toString(10),
-    overallFee: estimateFeeResp.overall_fee.toString(10),
+    suggestedMaxFee: consolidateResult.suggestedMaxFee,
+    overallFee: consolidateResult.overallFee,
+    resourceBounds: consolidateResult.resourceBounds,
     unit:
       invocationsDetails?.version === constants.TRANSACTION_VERSION.V3
         ? FeeTokenUnit.STRK
         : FeeTokenUnit.ETH,
     includeDeploy: !accountDeployed,
-    estimateResults: estimateBulkFeeResp,
+    estimateResults,
   };
 }
 
@@ -1366,4 +1352,18 @@ export const validateAccountRequireUpgradeOrDeploy = async (
   } else if (await isDeployRequired(network, address, pubKey)) {
     throw new DeployRequiredError();
   }
+};
+
+export const getAddrFromStarkNameUtil = async (
+  network: Network,
+  starkName: string,
+) => {
+  const provider = getProvider(network);
+  return Account.getAddressFromStarkName(provider, starkName);
+};
+
+export const isValidStarkName = (starkName: string): boolean => {
+  return /^(?:[a-z0-9-]{1,48}(?:[a-z0-9-]{1,48}[a-z0-9-])?\.)*[a-z0-9-]{1,48}\.stark$/.test(
+    starkName,
+  );
 };

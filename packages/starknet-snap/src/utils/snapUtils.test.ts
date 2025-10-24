@@ -3,6 +3,7 @@ import { constants } from 'starknet';
 import { generateAccounts } from '../__tests__/helper';
 import { STARKNET_SEPOLIA_TESTNET_NETWORK } from './constants';
 import { DeployRequiredError, UpgradeRequiredError } from './exceptions';
+import { loadLocale } from './locale';
 import * as snapHelper from './snap';
 import { verifyIfAccountNeedUpgradeOrDeploy } from './snapUtils';
 import * as starknetUtils from './starknetUtils';
@@ -111,6 +112,7 @@ describe('verifyIfAccountNeedUpgradeOrDeploy', () => {
   ])(
     'throws error and renders alert dialog if the account required $action and `showAlert` is true',
     async (testData: { error: Error }) => {
+      await loadLocale();
       const account = await mockAcccount();
       const { verifyIfAccountNeedUpgradeOrDeploySpy, alertDialogSpy } =
         prepareMock();

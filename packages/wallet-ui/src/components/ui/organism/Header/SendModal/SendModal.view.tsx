@@ -1,170 +1,78 @@
 import { useState } from 'react';
-import { AmountInput } from 'components/ui/molecule/AmountInput';
-import { SendSummaryModal } from '../SendSummaryModal';
-import {
-  Buttons,
-  ButtonStyled,
-  Header,
-  MessageAlert,
-  Network,
-  Separator,
-  SeparatorSmall,
-  Title,
-  Wrapper,
-} from './SendModal.style';
-import { useAppSelector } from 'hooks/redux';
-import { ethers } from 'ethers';
-import { AddressInput } from 'components/ui/molecule/AddressInput';
-import { isValidAddress } from 'utils/utils';
-import { Bold, Normal } from '../../ConnectInfoModal/ConnectInfoModal.style';
-import { DropDown } from 'components/ui/molecule/DropDown';
-import { DEFAULT_FEE_TOKEN } from 'utils/constants';
+import { useCurrentNetwork, useEstimateFee } from 'hooks';
 import { FeeToken } from 'types';
+import { DEFAULT_FEE_TOKEN } from 'utils/constants';
+import { SendInputModal } from '../SendInputModal';
+import { SendSummaryModal } from '../SendSummaryModal';
 
 interface Props {
   closeModal?: () => void;
 }
 
 export const SendModalView = ({ closeModal }: Props) => {
-  const networks = useAppSelector((state) => state.networks);
-  const wallet = useAppSelector((state) => state.wallet);
+  const chainId = useCurrentNetwork()?.chainId;
   const [summaryModalOpen, setSummaryModalOpen] = useState(false);
+  const [resolvedAddress, setResolvedAddress] = useState('');
+
+  const defaultFeeToken = DEFAULT_FEE_TOKEN;
+
   const [fields, setFields] = useState({
     amount: '',
     address: '',
-    chainId:
-      networks.items.length > 0
-        ? networks.items[networks.activeNetwork].chainId
-        : '',
-    feeToken: DEFAULT_FEE_TOKEN, // Default fee token
+    chainId: chainId ?? '',
+    feeToken: defaultFeeToken,
   });
-  const [errors, setErrors] = useState({ amount: '', address: '' });
+  const { loading, feeEstimates, flushFeeCache } = useEstimateFee(
+    fields.feeToken,
+  );
 
-  const handleChange = (fieldName: string, fieldValue: string) => {
-    //Check if input amount does not exceed user balance
-    setErrors((prevErrors) => ({
-      ...prevErrors,
-      [fieldName]: '',
-    }));
-    switch (fieldName) {
-      case 'amount':
-        if (fieldValue !== '' && fieldValue !== '.') {
-          const inputAmount = ethers.utils.parseUnits(
-            fieldValue,
-            wallet.erc20TokenBalanceSelected.decimals,
-          );
-          const userBalance = wallet.erc20TokenBalanceSelected.amount;
-          if (inputAmount.gt(userBalance)) {
-            setErrors((prevErrors) => ({
-              ...prevErrors,
-              amount: 'Input amount exceeds user balance',
-            }));
-          }
-        }
-        break;
-      case 'address':
-        if (fieldValue !== '') {
-          if (!isValidAddress(fieldValue)) {
-            setErrors((prevErrors) => ({
-              ...prevErrors,
-              address: 'Invalid address format',
-            }));
-          }
-        }
-        break;
-      case 'feeToken':
-        setFields((prevFields) => ({
-          ...prevFields,
-          feeToken: fieldValue as FeeToken,
-        }));
-        break;
-    }
+  const handlSetFields = (
+    fields: Partial<{
+      amount: string;
+      address: string;
+      chainId: string;
+      feeToken: FeeToken;
+    }>,
+  ) => {
     setFields((prevFields) => ({
       ...prevFields,
-      [fieldName]: fieldValue,
+      ...fields,
     }));
   };
 
-  const confirmEnabled = () => {
-    return (
-      !errors.address &&
-      !errors.amount &&
-      fields.amount.length > 0 &&
-      fields.address.length > 0
-    );
+  const handleBack = () => {
+    setSummaryModalOpen(false);
   };
 
   return (
     <>
       {!summaryModalOpen && (
-        <div>
-          <Wrapper>
-            <Header>
-              <Title>Send</Title>
-            </Header>
-            <Network>
-              <Normal>Network</Normal>
-              <Bold>{networks.items[networks.activeNetwork].name}</Bold>
-            </Network>
-            <AddressInput
-              label="To"
-              placeholder="Paste recipient address here"
-              onChange={(value) => handleChange('address', value.target.value)}
-            />
-            <SeparatorSmall />
-            <MessageAlert
-              variant="info"
-              text="Please only enter a valid Starknet address. Sending funds to a different network might result in permanent loss."
-            />
-            <Separator />
-            <AmountInput
-              label="Amount"
-              onChangeCustom={(value) => handleChange('amount', value)}
-              error={errors.amount !== '' ? true : false}
-              helperText={errors.amount}
-              decimalsMax={wallet.erc20TokenBalanceSelected.decimals}
-              asset={wallet.erc20TokenBalanceSelected}
-            />
-            <SeparatorSmall />
-            <div>
-              <label htmlFor="feeToken">
-                Select Token for Transaction Fees
-              </label>
-              <DropDown
-                value={fields.feeToken}
-                options={Object.values(FeeToken).map((token) => ({
-                  label: token,
-                  value: token,
-                }))}
-                onChange={(e) => handleChange('feeToken', e.value)}
-              />
-            </div>
-          </Wrapper>
-          <Buttons>
-            <ButtonStyled
-              onClick={closeModal}
-              backgroundTransparent
-              borderVisible
-            >
-              CANCEL
-            </ButtonStyled>
-            <ButtonStyled
-              onClick={() => setSummaryModalOpen(true)}
-              enabled={confirmEnabled()}
-            >
-              CONFIRM
-            </ButtonStyled>
-          </Buttons>
-        </div>
+        <SendInputModal
+          closeModal={closeModal}
+          setSummaryModalOpen={setSummaryModalOpen}
+          feeEstimates={feeEstimates}
+          isEstimatingGas={loading}
+          handlSetFields={handlSetFields}
+          resolvedAddress={resolvedAddress}
+          setResolvedAddress={setResolvedAddress}
+          fields={fields}
+        />
       )}
-
       {summaryModalOpen && (
         <SendSummaryModal
-          closeModal={closeModal}
-          address={fields.address}
+          closeModal={() => {
+            if (feeEstimates.includeDeploy) {
+              flushFeeCache();
+            }
+            closeModal && closeModal();
+          }}
+          handleBack={handleBack}
+          address={resolvedAddress}
           amount={fields.amount}
           chainId={fields.chainId}
-          selectedFeeToken={fields.feeToken} // Pass the selected fee token
+          gasFees={feeEstimates}
+          selectedFeeToken={fields.feeToken}
+          isEstimatingGas={loading}
         />
       )}
     </>

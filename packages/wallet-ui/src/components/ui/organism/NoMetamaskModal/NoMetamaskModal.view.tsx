@@ -1,28 +1,19 @@
-import {
-  ConnectButton,
-  DescriptionCentered,
-  MetamaskIcon,
-  StarknetLogo,
-  Title,
-  Wrapper,
-} from './NoMetamaskModal.style';
+import { useMultiLanguage } from 'services';
+import { Modal } from 'components/ui/atom/Modal';
 
 export const NoMetamaskModalView = () => {
+  const { translate } = useMultiLanguage();
+
   return (
-    <Wrapper>
-      <StarknetLogo />
-      <Title>You don't have the MetaMask extension</Title>
-      <DescriptionCentered>
-        You need to install MetaMask extension in order to use the Starknet
-        Snap.
-        <br />
-        <br />
-      </DescriptionCentered>
+    <Modal>
+      <Modal.Logo />
+      <Modal.Title>{translate('metaMaskExtensionRequired')}</Modal.Title>
+      <Modal.Body>{translate('installMetaMaskToUseSnap')}</Modal.Body>
       <a href="https://metamask.io/" target="_blank" rel="noreferrer noopener">
-        <ConnectButton customIconLeft={<MetamaskIcon />} onClick={() => {}}>
-          Download MetaMask
-        </ConnectButton>
+        <Modal.Button onClick={() => {}}>
+          {translate('downloadMetaMask')}
+        </Modal.Button>
       </a>
-    </Wrapper>
+    </Modal>
   );
 };

@@ -11,4 +11,6 @@ export * from './string';
 export * from './token';
 export * from './snap-ui';
 export * from './explorer';
+export * from './contract';
+export * from './account';
 // TODO: add other utils

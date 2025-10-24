@@ -1,8 +1,6 @@
-import type { InvocationsSignerDetails } from 'starknet';
-import { constants } from 'starknet';
+import type { InvocationsSignerDetails, constants } from 'starknet';
 
 import transactionExample from '../__tests__/fixture/transactionExample.json'; // Assuming you have a similar fixture
-import type { SnapState } from '../types/snapState';
 import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../utils/constants';
 import {
   UserRejectedOpError,
@@ -10,12 +8,8 @@ import {
 } from '../utils/exceptions';
 import * as starknetUtils from '../utils/starknetUtils';
 import {
-  mockAccount,
-  prepareMockAccount,
-  prepareConfirmDialog,
-  buildNetworkComponent,
-  buildSignerComponent,
-  buildJsonDataComponent,
+  setupAccountController,
+  mockRenderSignTransactionUI,
 } from './__tests__/helper';
 import { signTransaction } from './sign-transaction';
 import type { SignTransactionParams } from './sign-transaction';
@@ -23,37 +17,36 @@ import type { SignTransactionParams } from './sign-transaction';
 jest.mock('../utils/logger');
 
 describe('signTransaction', () => {
-  const state: SnapState = {
-    accContracts: [],
-    erc20Tokens: [],
-    networks: [STARKNET_SEPOLIA_TESTNET_NETWORK],
-    transactions: [],
-  };
+  const network = STARKNET_SEPOLIA_TESTNET_NETWORK;
 
-  const createRequestParam = (
-    chainId: constants.StarknetChainId,
-    address: string,
-    enableAuthorize?: boolean,
-  ): SignTransactionParams => {
+  const setupSignTransactionTest = async (enableAuthorize = false) => {
+    const { account } = await setupAccountController({
+      network,
+    });
+
+    const { confirmDialogSpy } = mockRenderSignTransactionUI();
+
     const request: SignTransactionParams = {
-      chainId,
-      address,
+      chainId: network.chainId as constants.StarknetChainId,
+      address: account.address,
       transactions: transactionExample.transactions,
       transactionsDetail:
         transactionExample.transactionsDetail as unknown as InvocationsSignerDetails,
+      enableAuthorize,
     };
+
     if (enableAuthorize) {
       request.enableAuthorize = enableAuthorize;
     }
-    return request;
+    return {
+      request,
+      account,
+      confirmDialogSpy,
+    };
   };
 
   it('signs a transaction correctly', async () => {
-    const chainId = constants.StarknetChainId.SN_SEPOLIA;
-    const account = await mockAccount(chainId);
-    prepareMockAccount(account, state);
-    prepareConfirmDialog();
-    const request = createRequestParam(chainId, account.address);
+    const { request, account } = await setupSignTransactionTest();
 
     const expectedResult = await starknetUtils.signTransactions(
       account.privateKey,
@@ -67,30 +60,21 @@ describe('signTransaction', () => {
   });
 
   it('renders confirmation dialog', async () => {
-    const chainId = constants.StarknetChainId.SN_SEPOLIA;
-    const account = await mockAccount(chainId);
-    const { address } = account;
-    prepareMockAccount(account, state);
-    const { confirmDialogSpy } = prepareConfirmDialog();
-    const request = createRequestParam(chainId, account.address, true);
+    const { request, account, confirmDialogSpy } =
+      await setupSignTransactionTest(true);
 
     await signTransaction.execute(request);
 
-    const calls = confirmDialogSpy.mock.calls[0][0];
-    expect(calls).toStrictEqual([
-      { type: 'heading', value: 'Do you want to sign this transaction?' },
-      buildSignerComponent(address, chainId),
-      buildNetworkComponent(STARKNET_SEPOLIA_TESTNET_NETWORK.name),
-      buildJsonDataComponent('Transaction', transactionExample.transactions),
-    ]);
+    expect(confirmDialogSpy).toHaveBeenCalledWith({
+      senderAddress: account.address,
+      chainId: network.chainId as constants.StarknetChainId,
+      networkName: STARKNET_SEPOLIA_TESTNET_NETWORK.name,
+      transactions: request.transactions,
+    });
   });
 
   it('does not render the confirmation dialog if enableAuthorize is false', async () => {
-    const chainId = constants.StarknetChainId.SN_SEPOLIA;
-    const account = await mockAccount(chainId);
-    prepareMockAccount(account, state);
-    const { confirmDialogSpy } = prepareConfirmDialog();
-    const request = createRequestParam(chainId, account.address, false);
+    const { request, confirmDialogSpy } = await setupSignTransactionTest(false);
 
     await signTransaction.execute(request);
 
@@ -98,12 +82,8 @@ describe('signTransaction', () => {
   });
 
   it('throws `UserRejectedOpError` if user denied the operation', async () => {
-    const chainId = constants.StarknetChainId.SN_SEPOLIA;
-    const account = await mockAccount(chainId);
-    prepareMockAccount(account, state);
-    const { confirmDialogSpy } = prepareConfirmDialog();
+    const { request, confirmDialogSpy } = await setupSignTransactionTest(true);
     confirmDialogSpy.mockResolvedValue(false);
-    const request = createRequestParam(chainId, account.address, true);
 
     await expect(signTransaction.execute(request)).rejects.toThrow(
       UserRejectedOpError,
