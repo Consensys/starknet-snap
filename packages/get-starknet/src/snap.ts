@@ -443,6 +443,7 @@ export class MetaMaskSnap {
     if (!response?.[this.#snapId]?.enabled) {
       return false;
     }
+
     return true;
   }
 
