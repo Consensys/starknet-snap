@@ -69,17 +69,39 @@ export class MetaMaskSnap {
     })) as string;
   }
 
+  /**
+   * Signs a transaction using the Snap.
+   * 
+   * @param address - The address to sign with.
+   * @param transactions - The transactions to sign.
+   * @param transactionsDetail - The transaction details.
+   * @param chainId - Optional chain ID.
+   * @param enableAuthorize - [DEPRECATED] This parameter is deprecated for security reasons.
+   *                         The Snap will now always require user confirmation regardless of this value.
+   *                         Setting this to false will trigger a deprecation warning.
+   * @returns A promise that resolves to the signature.
+   */
   async signTransaction({
     address,
     transactions,
     transactionsDetail,
     chainId,
+    enableAuthorize,
   }: {
     address: string;
     transactions: Call[];
     transactionsDetail: InvocationsSignerDetails;
     chainId?: string;
+    enableAuthorize?: boolean;
   }): Promise<Signature> {
+    if (enableAuthorize === false) {
+      // eslint-disable-next-line no-console
+      console.warn(
+        '[DEPRECATED] MetaMaskSnap.signTransaction: The enableAuthorize: false parameter is deprecated for security reasons. ' +
+        'The Snap will now always require user confirmation for signing operations. ' +
+        'This parameter will be ignored and the confirmation dialog will be shown.'
+      );
+    }
     return (await this.#provider.request({
       method: 'wallet_invokeSnap',
       params: {
@@ -91,6 +113,7 @@ export class MetaMaskSnap {
             transactions,
             transactionsDetail,
             chainId,
+            enableAuthorize,
           }),
         },
       },
@@ -178,6 +201,17 @@ export class MetaMaskSnap {
     })) as InvokeFunctionResponse;
   }
 
+  /**
+   * Signs a message using the Snap.
+   * 
+   * @param typedDataMessage - The typed data message to sign.
+   * @param enableAuthorize - [DEPRECATED] This parameter is deprecated for security reasons.
+   *                         The Snap will now always require user confirmation regardless of this value.
+   *                         Setting this to false will trigger a deprecation warning.
+   * @param address - The address to sign with.
+   * @param chainId - Optional chain ID.
+   * @returns A promise that resolves to the signature.
+   */
   async signMessage({
     typedDataMessage,
     enableAuthorize,
@@ -189,6 +223,14 @@ export class MetaMaskSnap {
     address: string;
     chainId?: string;
   }): Promise<Signature> {
+    if (enableAuthorize === false) {
+      // eslint-disable-next-line no-console
+      console.warn(
+        '[DEPRECATED] MetaMaskSnap.signMessage: The enableAuthorize: false parameter is deprecated for security reasons. ' +
+        'The Snap will now always require user confirmation for signing operations. ' +
+        'This parameter will be ignored and the confirmation dialog will be shown.'
+      );
+    }
     return (await this.#provider.request({
       method: 'wallet_invokeSnap',
       params: {
