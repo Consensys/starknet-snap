@@ -31,11 +31,10 @@ export class MetaMaskSigner implements SignerInterface {
 
   /**
    * Signs a message using the Snap.
-   * 
+   *
    * @deprecated The `enableAuthorize` parameter is deprecated for security reasons.
    * The Snap will now always require user confirmation for signing operations.
    * This method will continue to work but will show the confirmation dialog.
-   * 
    * @param typedDataMessage - The typed data message to sign.
    * @param address - The address to sign with.
    * @returns A promise that resolves to the signature.
@@ -51,11 +50,10 @@ export class MetaMaskSigner implements SignerInterface {
 
   /**
    * Signs a transaction calling the Snap.
-   * 
+   *
    * @deprecated The `enableAuthorize` parameter is deprecated for security reasons.
    * The Snap will now always require user confirmation for signing operations.
    * This method will continue to work but will show the confirmation dialog.
-   * 
    * @param transactions - The array of transactions to be signed.
    * @param transactionsDetail - The details required for signing the transactions.
    * @param _abis - [Deprecated] The ABI definitions for the contracts involved in the transactions. This parameter is optional and may be undefined.

@@ -71,14 +71,13 @@ export class MetaMaskSnap {
 
   /**
    * Signs a transaction using the Snap.
-   * 
-   * @param address - The address to sign with.
-   * @param transactions - The transactions to sign.
-   * @param transactionsDetail - The transaction details.
-   * @param chainId - Optional chain ID.
-   * @param enableAuthorize - [DEPRECATED] This parameter is deprecated for security reasons.
-   *                         The Snap will now always require user confirmation regardless of this value.
-   *                         Setting this to false will trigger a deprecation warning.
+   *
+   * @param params - Parameters for signing a transaction.
+   * @param params.address - The address to sign with.
+   * @param params.transactions - The transactions to sign.
+   * @param params.transactionsDetail - The transaction details.
+   * @param params.chainId - Optional chain ID.
+   * @param params.enableAuthorize - [DEPRECATED] Deprecated for security reasons.
    * @returns A promise that resolves to the signature.
    */
   async signTransaction({
@@ -98,8 +97,8 @@ export class MetaMaskSnap {
       // eslint-disable-next-line no-console
       console.warn(
         '[DEPRECATED] MetaMaskSnap.signTransaction: The enableAuthorize: false parameter is deprecated for security reasons. ' +
-        'The Snap will now always require user confirmation for signing operations. ' +
-        'This parameter will be ignored and the confirmation dialog will be shown.'
+          'The Snap will now always require user confirmation for signing operations. ' +
+          'This parameter will be ignored and the confirmation dialog will be shown.',
       );
     }
     return (await this.#provider.request({
@@ -203,13 +202,14 @@ export class MetaMaskSnap {
 
   /**
    * Signs a message using the Snap.
-   * 
-   * @param typedDataMessage - The typed data message to sign.
-   * @param enableAuthorize - [DEPRECATED] This parameter is deprecated for security reasons.
-   *                         The Snap will now always require user confirmation regardless of this value.
-   *                         Setting this to false will trigger a deprecation warning.
-   * @param address - The address to sign with.
-   * @param chainId - Optional chain ID.
+   *
+   * @param params - Parameters for signing a typed message.
+   * @param params.typedDataMessage - The typed data message to sign.
+   * @param params.enableAuthorize - [DEPRECATED] Deprecated for security reasons.
+   * The Snap will now always require user confirmation regardless of this value.
+   * Setting this to false will trigger a deprecation warning.
+   * @param params.address - The address to sign with.
+   * @param params.chainId - Optional chain ID.
    * @returns A promise that resolves to the signature.
    */
   async signMessage({
@@ -223,12 +223,12 @@ export class MetaMaskSnap {
     address: string;
     chainId?: string;
   }): Promise<Signature> {
-    if (enableAuthorize === false) {
+    if (!enableAuthorize) {
       // eslint-disable-next-line no-console
       console.warn(
         '[DEPRECATED] MetaMaskSnap.signMessage: The enableAuthorize: false parameter is deprecated for security reasons. ' +
-        'The Snap will now always require user confirmation for signing operations. ' +
-        'This parameter will be ignored and the confirmation dialog will be shown.'
+          'The Snap will now always require user confirmation for signing operations. ' +
+          'This parameter will be ignored and the confirmation dialog will be shown.',
       );
     }
     return (await this.#provider.request({
