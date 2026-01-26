@@ -24,7 +24,6 @@ describe('WalletSignTypedData', () => {
     expect(signSpy).toHaveBeenCalledWith({
       chainId: network.chainId,
       typedDataMessage: typedDataExample,
-      enableAuthorize: true,
       address: account.address,
     });
     expect(result).toStrictEqual(expectedResult);
