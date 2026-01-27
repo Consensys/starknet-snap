@@ -32,9 +32,6 @@ export class MetaMaskSigner implements SignerInterface {
   /**
    * Signs a message using the Snap.
    *
-   * @deprecated The `enableAuthorize` parameter is deprecated for security reasons.
-   * The Snap will now always require user confirmation for signing operations.
-   * This method will continue to work but will show the confirmation dialog.
    * @param typedDataMessage - The typed data message to sign.
    * @param address - The address to sign with.
    * @returns A promise that resolves to the signature.
@@ -42,7 +39,6 @@ export class MetaMaskSigner implements SignerInterface {
   async signMessage(typedDataMessage: TypedData, address: string): Promise<Signature> {
     const result = (await this.#snap.signMessage({
       typedDataMessage,
-      enableAuthorize: true, // Deprecated: will be ignored by snap, always shows UI
       address,
     })) as ArraySignatureType;
     return new ec.starkCurve.Signature(numUtils.toBigInt(result[0]), numUtils.toBigInt(result[1]));
@@ -51,9 +47,6 @@ export class MetaMaskSigner implements SignerInterface {
   /**
    * Signs a transaction calling the Snap.
    *
-   * @deprecated The `enableAuthorize` parameter is deprecated for security reasons.
-   * The Snap will now always require user confirmation for signing operations.
-   * This method will continue to work but will show the confirmation dialog.
    * @param transactions - The array of transactions to be signed.
    * @param transactionsDetail - The details required for signing the transactions.
    * @param _abis - [Deprecated] The ABI definitions for the contracts involved in the transactions. This parameter is optional and may be undefined.
@@ -68,7 +61,6 @@ export class MetaMaskSigner implements SignerInterface {
       address: this.#address,
       transactions,
       transactionsDetail,
-      enableAuthorize: true, // Deprecated: will be ignored by snap, always shows UI
     })) as ArraySignatureType;
     return new ec.starkCurve.Signature(numUtils.toBigInt(result[0]), numUtils.toBigInt(result[1]));
   }

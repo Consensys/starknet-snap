@@ -77,7 +77,6 @@ export class MetaMaskSnap {
    * @param params.transactions - The transactions to sign.
    * @param params.transactionsDetail - The transaction details.
    * @param params.chainId - Optional chain ID.
-   * @param params.enableAuthorize - [DEPRECATED] Deprecated for security reasons.
    * @returns A promise that resolves to the signature.
    */
   async signTransaction({
@@ -85,22 +84,12 @@ export class MetaMaskSnap {
     transactions,
     transactionsDetail,
     chainId,
-    enableAuthorize,
   }: {
     address: string;
     transactions: Call[];
     transactionsDetail: InvocationsSignerDetails;
     chainId?: string;
-    enableAuthorize?: boolean;
   }): Promise<Signature> {
-    if (enableAuthorize === false) {
-      // eslint-disable-next-line no-console
-      console.warn(
-        '[DEPRECATED] MetaMaskSnap.signTransaction: The enableAuthorize: false parameter is deprecated for security reasons. ' +
-          'The Snap will now always require user confirmation for signing operations. ' +
-          'This parameter will be ignored and the confirmation dialog will be shown.',
-      );
-    }
     return (await this.#provider.request({
       method: 'wallet_invokeSnap',
       params: {
@@ -112,7 +101,6 @@ export class MetaMaskSnap {
             transactions,
             transactionsDetail,
             chainId,
-            enableAuthorize,
           }),
         },
       },
@@ -126,28 +114,17 @@ export class MetaMaskSnap {
    * @param params.signerAddress - The signer address.
    * @param params.transaction - The deploy account transaction details.
    * @param params.chainId - Optional chain ID.
-   * @param params.enableAuthorize - [DEPRECATED] Deprecated for security reasons.
    * @returns A promise that resolves to the signature.
    */
   async signDeployAccountTransaction({
     signerAddress,
     transaction,
     chainId,
-    enableAuthorize,
   }: {
     signerAddress: string;
     transaction: DeployAccountSignerDetails;
     chainId?: string;
-    enableAuthorize?: boolean;
   }): Promise<Signature> {
-    if (enableAuthorize === false) {
-      // eslint-disable-next-line no-console
-      console.warn(
-        '[DEPRECATED] MetaMaskSnap.signDeployAccountTransaction: The enableAuthorize: false parameter is deprecated for security reasons. ' +
-          'The Snap will now always require user confirmation for signing operations. ' +
-          'This parameter will be ignored and the confirmation dialog will be shown.',
-      );
-    }
     return (await this.#provider.request({
       method: 'wallet_invokeSnap',
       params: {
@@ -158,7 +135,6 @@ export class MetaMaskSnap {
             signerAddress,
             transaction,
             chainId,
-            enableAuthorize,
           }),
         },
       },
@@ -172,28 +148,17 @@ export class MetaMaskSnap {
    * @param params.address - The address to sign with.
    * @param params.details - The declare transaction details.
    * @param params.chainId - Optional chain ID.
-   * @param params.enableAuthorize - [DEPRECATED] Deprecated for security reasons.
    * @returns A promise that resolves to the signature.
    */
   async signDeclareTransaction({
     address,
     details,
     chainId,
-    enableAuthorize,
   }: {
     address: string;
     details: DeclareSignerDetails;
     chainId?: string;
-    enableAuthorize?: boolean;
   }): Promise<Signature> {
-    if (enableAuthorize === false) {
-      // eslint-disable-next-line no-console
-      console.warn(
-        '[DEPRECATED] MetaMaskSnap.signDeclareTransaction: The enableAuthorize: false parameter is deprecated for security reasons. ' +
-          'The Snap will now always require user confirmation for signing operations. ' +
-          'This parameter will be ignored and the confirmation dialog will be shown.',
-      );
-    }
     return (await this.#provider.request({
       method: 'wallet_invokeSnap',
       params: {
@@ -204,7 +169,6 @@ export class MetaMaskSnap {
             address,
             details,
             chainId,
-            enableAuthorize,
           }),
         },
       },
