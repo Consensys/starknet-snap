@@ -1,6 +1,6 @@
 {
   "name": "@consensys/get-starknet",
-  "version": "1.5.1",
+  "version": "1.6.0",
   "license": "(Apache-2.0 OR MIT)",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
