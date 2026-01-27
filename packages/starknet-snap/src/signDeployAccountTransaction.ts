@@ -53,22 +53,21 @@ export async function signDeployAccountTransaction(
       requestParamsObj.transaction,
     );
 
-    if (requestParamsObj.enableAuthorize) {
-      const translate = getTranslator();
-      const response = await wallet.request({
-        method: 'snap_dialog',
-        params: {
-          type: DialogType.Confirmation,
-          content: panel([
-            heading(translate('signTransactionPrompt')),
-            ...snapComponents,
-          ]),
-        },
-      });
+    // Always show confirmation dialog for security - enableAuthorize is deprecated
+    const translate = getTranslator();
+    const response = await wallet.request({
+      method: 'snap_dialog',
+      params: {
+        type: DialogType.Confirmation,
+        content: panel([
+          heading(translate('signTransactionPrompt')),
+          ...snapComponents,
+        ]),
+      },
+    });
 
-      if (!response) {
-        return false;
-      }
+    if (!response) {
+      return false;
     }
 
     return await signDeployAccountTransactionUtil(

@@ -18,8 +18,6 @@ export class WalletSignTypedData extends StarknetWalletRpc {
         message: params.message,
         primaryType: params.primaryType,
       },
-      // Ensure there will be a dialog to confirm the sign operation
-      enableAuthorize: true,
       address: this.wallet.selectedAddress,
     })) as unknown as Result;
   }

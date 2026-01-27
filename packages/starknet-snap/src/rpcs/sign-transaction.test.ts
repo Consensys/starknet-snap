@@ -73,14 +73,6 @@ describe('signTransaction', () => {
     });
   });
 
-  it('does not render the confirmation dialog if enableAuthorize is false', async () => {
-    const { request, confirmDialogSpy } = await setupSignTransactionTest(false);
-
-    await signTransaction.execute(request);
-
-    expect(confirmDialogSpy).not.toHaveBeenCalled();
-  });
-
   it('throws `UserRejectedOpError` if user denied the operation', async () => {
     const { request, confirmDialogSpy } = await setupSignTransactionTest(true);
     confirmDialogSpy.mockResolvedValue(false);
