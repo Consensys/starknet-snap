@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.2.0](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v4.1.0...starknet-snap-v4.2.0) (2026-01-27)
+
+
+### Features
+
+* deprecate enableAuthorize parameter in signMessage and signTransaction ([#568](https://github.com/Consensys/starknet-snap/issues/568)) ([d557a81](https://github.com/Consensys/starknet-snap/commit/d557a81f97902bc0a6f237e637723171d7596a07))
+
 ## [4.1.0](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v4.0.0...starknet-snap-v4.1.0) (2025-09-04)
 
 
