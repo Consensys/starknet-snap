@@ -29,10 +29,16 @@ export class MetaMaskSigner implements SignerInterface {
     });
   }
 
+  /**
+   * Signs a message using the Snap.
+   *
+   * @param typedDataMessage - The typed data message to sign.
+   * @param address - The address to sign with.
+   * @returns A promise that resolves to the signature.
+   */
   async signMessage(typedDataMessage: TypedData, address: string): Promise<Signature> {
     const result = (await this.#snap.signMessage({
       typedDataMessage,
-      enableAuthorize: false,
       address,
     })) as ArraySignatureType;
     return new ec.starkCurve.Signature(numUtils.toBigInt(result[0]), numUtils.toBigInt(result[1]));

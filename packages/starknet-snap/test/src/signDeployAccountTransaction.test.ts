@@ -114,7 +114,7 @@ describe('Test function: signDeployAccountTransaction', function () {
     expect(result).to.be.eql(false);
   });
 
-  it('should skip dialog if enableAuthorize is false', async function () {
+  it('should always show dialog even if enableAuthorize is false', async function () {
     await loadLocale();
     sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolvesThis();
     sandbox.stub(utils, 'signDeployAccountTransaction').resolves(signature3);
@@ -122,12 +122,12 @@ describe('Test function: signDeployAccountTransaction', function () {
       apiParams.requestParams as SignDeployAccountTransactionRequestParams;
     paramsObject.enableAuthorize = false;
     const result = await signDeployAccountTransaction(apiParams);
-    expect(walletStub.rpcStubs.snap_dialog).to.have.been.callCount(0);
+    expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledOnce;
     expect(result).to.be.eql(signature3);
     paramsObject.enableAuthorize = true;
   });
 
-  it('should skip dialog if enableAuthorize is omit', async function () {
+  it('should always show dialog even if enableAuthorize is omit', async function () {
     await loadLocale();
     sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolvesThis();
     sandbox.stub(utils, 'signDeployAccountTransaction').resolves(signature3);
@@ -135,7 +135,7 @@ describe('Test function: signDeployAccountTransaction', function () {
       apiParams.requestParams as SignDeployAccountTransactionRequestParams;
     paramsObject.enableAuthorize = undefined;
     const result = await signDeployAccountTransaction(apiParams);
-    expect(walletStub.rpcStubs.snap_dialog).to.have.been.callCount(0);
+    expect(walletStub.rpcStubs.snap_dialog).to.have.been.calledOnce;
     expect(result).to.be.eql(signature3);
     paramsObject.enableAuthorize = true;
   });

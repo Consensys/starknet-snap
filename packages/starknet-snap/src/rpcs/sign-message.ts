@@ -70,11 +70,8 @@ export class SignMessageRpc extends AccountRpcController<
   protected async handleRequest(
     params: SignMessageParams,
   ): Promise<SignMessageResponse> {
-    const { enableAuthorize, typedDataMessage, address } = params;
+    const { typedDataMessage, address } = params;
     if (
-      // Get Starknet expected not to show the confirm dialog, therefore, `enableAuthorize` will set to false to bypass the confirmation
-      // TODO: enableAuthorize should set default to true
-      enableAuthorize &&
       !(await renderSignMessageUI({
         address,
         typedDataMessage,

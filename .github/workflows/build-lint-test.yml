@@ -94,6 +94,13 @@ jobs:
       - test
     steps:
       - uses: actions/checkout@v3
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+          cache: 'yarn'
+
       - name: Restore Coverage Report
         uses: actions/cache@v3
         id: restore-coverage-report
@@ -101,13 +108,28 @@ jobs:
           path: |
             ./packages/**/coverage
           key: ${{ github.sha }}-20.x-coverage-report
+
+      - name: Download SonarScanner CLI
+        run: |
+          SC_VERSION=5.0.1.3006
+          curl -sSLo /tmp/sonar-scanner.zip "https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-${SC_VERSION}-linux.zip"
+          unzip -q /tmp/sonar-scanner.zip -d /tmp
+          echo "SONAR_SCANNER_BIN=/tmp/sonar-scanner-${SC_VERSION}-linux/bin/sonar-scanner" >> "$GITHUB_ENV"
+
       - name: SonarCloud Scan Starknet-Snap
-        uses: SonarSource/sonarcloud-github-action@v2.1.1
-        with:
-          projectBaseDir: packages/starknet-snap/
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # for PR decoration
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_STARKNET_SNAP }}
+        run: |
+          cd packages/starknet-snap
+          NODE_PATH="$(which node)"
+          echo "Using node: $NODE_PATH"
+          "$SONAR_SCANNER_BIN" \
+            -Dsonar.host.url="https://sonarcloud.io" \
+            -Dsonar.organization="consensys" \
+            -Dsonar.projectKey="consensys_starknet-snap-starknet-snap" \
+            -Dsonar.login="$SONAR_TOKEN" \
+            -Dsonar.nodejs.executable="$NODE_PATH"
   
   code-scan-wallet-ui:
     name: Scan Wallet UI
@@ -116,6 +138,13 @@ jobs:
       - test
     steps:
       - uses: actions/checkout@v3
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+          cache: 'yarn'
+
       - name: Restore Coverage Report
         uses: actions/cache@v3
         id: restore-coverage-report
@@ -123,10 +152,25 @@ jobs:
           path: |
             ./packages/**/coverage
           key: ${{ github.sha }}-20.x-coverage-report
+
+      - name: Download SonarScanner CLI
+        run: |
+          SC_VERSION=5.0.1.3006
+          curl -sSLo /tmp/sonar-scanner.zip "https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-${SC_VERSION}-linux.zip"
+          unzip -q /tmp/sonar-scanner.zip -d /tmp
+          echo "SONAR_SCANNER_BIN=/tmp/sonar-scanner-${SC_VERSION}-linux/bin/sonar-scanner" >> "$GITHUB_ENV"
+
       - name: SonarCloud Scan Wallet-UI
-        uses: SonarSource/sonarcloud-github-action@v2.1.1
-        with:
-          projectBaseDir: packages/wallet-ui/
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # for PR decoration
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_WALLET_UI }}
+        run: |
+          cd packages/wallet-ui
+          NODE_PATH="$(which node)"
+          echo "Using node: $NODE_PATH"
+          "$SONAR_SCANNER_BIN" \
+            -Dsonar.host.url="https://sonarcloud.io" \
+            -Dsonar.organization="consensys" \
+            -Dsonar.projectKey="consensys_starknet-snap-wallet-ui" \
+            -Dsonar.login="$SONAR_TOKEN" \
+            -Dsonar.nodejs.executable="$NODE_PATH"
