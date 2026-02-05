@@ -3,10 +3,6 @@ name: Publish NPM
 on:
   workflow_dispatch:
 
-permissions:
-  contents: write
-  id-token: write  # Required for OIDC
-
 jobs:
   prepare-deployment:
     environment: production
@@ -147,4 +143,5 @@ jobs:
         run: |
           npm publish ./packages/starknet-snap --tag "$TAG" --access public
         env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           TAG: ${{ needs.prepare-deployment.outputs.TAG }}
