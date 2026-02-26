@@ -13,6 +13,10 @@
   },
   "scripts": {
     "start": "GET_STARKNET_PUBLIC_PATH=http://localhost:8082/ SNAP_ID=local:http://localhost:8081 yarn build && webpack-cli serve --config webpack.config.local.js",
+    "proxy:local": "GET_STARKNET_PROXY_TARGET=local mitmproxy -s scripts/proxy-local.py",
+    "proxy:local:web": "GET_STARKNET_PROXY_TARGET=local mitmweb -s scripts/proxy-local.py",
+    "proxy:dev": "GET_STARKNET_PROXY_TARGET=dev mitmproxy -s scripts/proxy-local.py",
+    "proxy:dev:web": "GET_STARKNET_PROXY_TARGET=dev mitmweb -s scripts/proxy-local.py",
     "clean": "rimraf dist",
     "build": "webpack --config webpack.config.build.js",
     "prettier": "prettier --write \"src/**/*.ts\"",
