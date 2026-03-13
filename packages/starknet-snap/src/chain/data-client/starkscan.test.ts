@@ -203,138 +203,37 @@ describe('StarkScanClient', () => {
   });
 
   describe('getTransactions', () => {
-    const mSecsFor24Hours = 1000 * 60 * 60 * 24;
-
-    const getFromAndToTimestamp = (tillToInDay: number) => {
-      const from = Math.floor(Date.now() / 1000);
-      const to = from - tillToInDay * 24 * 60 * 60;
-      return {
-        from,
-        to,
-      };
-    };
-
     it('returns transactions', async () => {
       const account = await mockAccount();
       const { fetchSpy } = createMockFetch();
-      const { from, to } = getFromAndToTimestamp(5);
       // generate 10 invoke transactions
       const mockResponse = generateStarkScanTransactions({
         address: account.address,
-        startFrom: from,
       });
       mockApiSuccess({ fetchSpy, response: mockResponse });
 
       const client = createMockClient();
-      const result = await client.getTransactions(account.address, to);
-
-      // The result should include the transaction if:
-      // - it's timestamp is greater than the `tillTo`
-      // - it's transaction type is `DEPLOY_ACCOUNT`
-      expect(result).toHaveLength(
-        mockResponse.data.filter(
-          (tx) =>
-            tx.transaction_type === TransactionType.DEPLOY_ACCOUNT ||
-            tx.timestamp >= to,
-        ).length,
-      );
+      const result = await client.getTransactions(account.address);
+      expect(result.transactions).toHaveLength(mockResponse.data.length);
       expect(
-        result.find((tx) => tx.txnType === TransactionType.DEPLOY_ACCOUNT),
+        result.transactions.find(
+          (tx) => tx.txnType === TransactionType.DEPLOY_ACCOUNT,
+        ),
       ).toBeDefined();
     });
 
     it('returns empty array if no result found', async () => {
       const account = await mockAccount();
       const { fetchSpy } = createMockFetch();
-      const { to } = getFromAndToTimestamp(5);
       // mock the get invoke transactions response with empty data
       mockApiSuccess({ fetchSpy });
       // mock the get deploy transaction response with empty data
       mockApiSuccess({ fetchSpy });
 
       const client = createMockClient();
-      const result = await client.getTransactions(account.address, to);
+      const result = await client.getTransactions(account.address);
 
-      expect(result).toStrictEqual([]);
-    });
-
-    it('continue to fetch if next_url is presented', async () => {
-      const account = await mockAccount();
-      const { fetchSpy } = createMockFetch();
-      // generate the to timestamp which is 100 days ago
-      const { to } = getFromAndToTimestamp(100);
-      const mockPage1Response = generateStarkScanTransactions({
-        address: account.address,
-        txnTypes: [TransactionType.INVOKE],
-        cnt: 10,
-      });
-      const mockPage2Response = generateStarkScanTransactions({
-        address: account.address,
-        cnt: 10,
-      });
-      const firstPageUrl = `https://api-sepolia.starkscan.co/api/v0/transactions?contract_address=${account.address}&order_by=desc&limit=100`;
-      const nextPageUrl = `https://api-sepolia.starkscan.co/api/v0/transactions?contract_address=${account.address}&order_by=desc&cursor=MTcyNDc1OTQwNzAwMDAwNjAwMDAwMA%3D%3D`;
-
-      // mock the first page response, which contains the next_url
-      mockApiSuccess({
-        fetchSpy,
-        response: {
-          data: mockPage1Response.data,
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          next_url: nextPageUrl,
-        },
-      });
-      // mock the send page response
-      mockApiSuccess({ fetchSpy, response: mockPage2Response });
-
-      const client = createMockClient();
-      await client.getTransactions(account.address, to);
-
-      expect(fetchSpy).toHaveBeenCalledTimes(2);
-      expect(fetchSpy).toHaveBeenNthCalledWith(
-        1,
-        firstPageUrl,
-        expect.any(Object),
-      );
-      expect(fetchSpy).toHaveBeenNthCalledWith(
-        2,
-        nextPageUrl,
-        expect.any(Object),
-      );
-    });
-
-    it('fetchs the deploy transaction if it is not present', async () => {
-      const account = await mockAccount();
-      const { fetchSpy } = createMockFetch();
-      // generate the to timestamp which is 5 days ago
-      const { from, to } = getFromAndToTimestamp(5);
-      // generate 10 invoke transactions, and 1 day time gap between each transaction
-      const mockInvokeResponse = generateStarkScanTransactions({
-        address: account.address,
-        startFrom: from,
-        timestampReduction: mSecsFor24Hours,
-        txnTypes: [TransactionType.INVOKE],
-      });
-      // generate another 5 invoke transactions + deploy transactions for testing the fallback case
-      const mockDeployResponse = generateStarkScanTransactions({
-        address: account.address,
-        // generate transactions that start from 100 days ago, to ensure not overlap with above invoke transactions
-        startFrom: mSecsFor24Hours * 100,
-        timestampReduction: mSecsFor24Hours,
-        txnTypes: [TransactionType.INVOKE, TransactionType.DEPLOY_ACCOUNT],
-        cnt: 5,
-      });
-      mockApiSuccess({ fetchSpy, response: mockInvokeResponse });
-      mockApiSuccess({ fetchSpy, response: mockDeployResponse });
-
-      const client = createMockClient();
-      // We only fetch the transactions from the last 5 days
-      const result = await client.getTransactions(account.address, to);
-
-      // The result should include a deploy transaction, even it is not from the last 5 days
-      expect(
-        result.find((tx) => tx.txnType === TransactionType.DEPLOY_ACCOUNT),
-      ).toBeDefined();
+      expect(result.transactions).toStrictEqual([]);
     });
   });
 

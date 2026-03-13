@@ -3,7 +3,6 @@ import type { constants } from 'starknet';
 import { generateTransactions } from '../__tests__/helper';
 import type { IDataClient } from '../chain/data-client';
 import { TransactionService } from '../chain/transaction-service';
-import { Config } from '../config';
 import {
   ETHER_SEPOLIA_TESTNET,
   STARKNET_SEPOLIA_TESTNET_NETWORK,
@@ -39,7 +38,13 @@ describe('listTransactions', () => {
       TransactionService.prototype,
       'getTransactions',
     );
-    getTransactionsSpy.mockResolvedValue(transactions);
+    getTransactionsSpy.mockResolvedValue({
+      transactions,
+      cursor: {
+        blockNumber: -1,
+        txnHash: '',
+      },
+    });
 
     return { transactions, getTransactionsSpy, account, chainId };
   };
@@ -58,26 +63,15 @@ describe('listTransactions', () => {
     expect(getTransactionsSpy).toHaveBeenCalledWith(
       account.address,
       ETHER_SEPOLIA_TESTNET.address,
-      1,
+      undefined,
     );
-    expect(result).toStrictEqual(transactions);
-  });
-
-  it('fetchs transactions with config value if input `txnsInLastNumOfDays` has not given', async () => {
-    const { getTransactionsSpy, chainId, account } =
-      await setupListTransactionsTest();
-
-    await listTransactions.execute({
-      chainId,
-      senderAddress: account.address,
-      contractAddress: ETHER_SEPOLIA_TESTNET.address,
+    expect(result).toStrictEqual({
+      transactions,
+      cursor: {
+        blockNumber: -1,
+        txnHash: '',
+      },
     });
-
-    expect(getTransactionsSpy).toHaveBeenCalledWith(
-      account.address,
-      ETHER_SEPOLIA_TESTNET.address,
-      Config.transaction.list.txnsInLastNumOfDays,
-    );
   });
 
   it('throws `InvalidRequestParamsError` when request parameter is not correct', async () => {
