@@ -1,5 +1,6 @@
 import {
   constants,
+  ETransactionVersion,
   TransactionFinalityStatus,
   TransactionType,
 } from 'starknet';
@@ -24,8 +25,8 @@ import {
 
 describe('transactionVersionToNumber', () => {
   it.each([
-    constants.TRANSACTION_VERSION.V3,
-    constants.TRANSACTION_VERSION.F3,
+    ETransactionVersion.V3,
+    ETransactionVersion.F3,
     3,
     '3',
   ])(
@@ -36,10 +37,10 @@ describe('transactionVersionToNumber', () => {
   );
 
   it.each([
-    ...Object.values(constants.TRANSACTION_VERSION).filter(
+    ...Object.values(ETransactionVersion).filter(
       (ver) =>
-        ver !== constants.TRANSACTION_VERSION.V3 &&
-        ver !== constants.TRANSACTION_VERSION.F3,
+        ver !== ETransactionVersion.V3 &&
+        ver !== ETransactionVersion.F3,
     ),
     '1',
     1,

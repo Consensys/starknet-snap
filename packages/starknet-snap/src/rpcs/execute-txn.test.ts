@@ -1,5 +1,5 @@
 import type { Call } from 'starknet';
-import { constants, TransactionType } from 'starknet';
+import { ETransactionVersion, TransactionType } from 'starknet';
 import { v4 as uuidv4 } from 'uuid';
 
 import callsExamples from '../__tests__/fixture/callsExamples.json';
@@ -137,7 +137,7 @@ describe('ExecuteTxn', () => {
     const setupConfirmTransactionTest = async (confirm = true) => {
       const network = STARKNET_SEPOLIA_TESTNET_NETWORK;
       const includeDeploy = true;
-      const txnVersion = constants.TRANSACTION_VERSION.V3;
+      const txnVersion = ETransactionVersion.V3;
       const { calls } = callsExamples.multipleCalls;
 
       const { account, rpc } = await setupMockRpc(network, calls);
@@ -265,7 +265,7 @@ describe('ExecuteTxn', () => {
   describe('deployAccount', () => {
     const setupDeployAccountTest = async () => {
       const network = STARKNET_SEPOLIA_TESTNET_NETWORK;
-      const txnVersion = constants.TRANSACTION_VERSION.V3;
+      const txnVersion = ETransactionVersion.V3;
       const { calls } = callsExamples.multipleCalls;
       const { account, rpc } = await setupMockRpc(network, calls);
 
@@ -338,7 +338,7 @@ describe('ExecuteTxn', () => {
   describe('sendTransaction', () => {
     const setupConfirmTransactionTest = async () => {
       const network = STARKNET_SEPOLIA_TESTNET_NETWORK;
-      const txnVersion = constants.TRANSACTION_VERSION.V3;
+      const txnVersion = ETransactionVersion.V3;
       const { calls } = callsExamples.multipleCalls;
 
       const { account, rpc } = await setupMockRpc(network, calls);
@@ -578,7 +578,7 @@ describe('ExecuteTxn', () => {
   describe('saveDataToState', () => {
     const setupSaveDataToStateTest = async () => {
       const network = STARKNET_SEPOLIA_TESTNET_NETWORK;
-      const txnVersion = constants.TRANSACTION_VERSION.V3;
+      const txnVersion = ETransactionVersion.V3;
       const { hash: txnHashForExecute, calls } = callsExamples.multipleCalls;
       const { hash: txnHashForDeploy } = callsExamples.singleCall;
 

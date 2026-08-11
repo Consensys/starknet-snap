@@ -30,6 +30,7 @@ import {
   num as numUtils,
   typedData,
   constants,
+  ETransactionVersion,
   encode,
   CallData,
   Provider,
@@ -152,8 +153,8 @@ export const getAccountInstance = (
   cairoVersion?: CairoVersion,
   transactionVersion?:
     | BigNumberish
-    | typeof constants.TRANSACTION_VERSION.V2
-    | typeof constants.TRANSACTION_VERSION.V3,
+    | typeof ETransactionVersion.V2
+    | typeof ETransactionVersion.V3,
   blockIdentifier?: BlockIdentifierEnum,
 ): Account => {
   const provider = getProvider(network, blockIdentifier);
@@ -163,8 +164,8 @@ export const getAccountInstance = (
     privateKey,
     cairoVersion ?? CAIRO_VERSION,
     transactionVersion as unknown as
-      | typeof constants.TRANSACTION_VERSION.V2
-      | typeof constants.TRANSACTION_VERSION.V3,
+      | typeof ETransactionVersion.V2
+      | typeof ETransactionVersion.V3,
   );
 };
 
@@ -1089,7 +1090,7 @@ export async function getEstimatedFees(
     overallFee: consolidateResult.overallFee,
     resourceBounds: consolidateResult.resourceBounds,
     unit:
-      invocationsDetails?.version === constants.TRANSACTION_VERSION.V3
+      invocationsDetails?.version === ETransactionVersion.V3
         ? FeeTokenUnit.STRK
         : FeeTokenUnit.ETH,
     includeDeploy: !accountDeployed,

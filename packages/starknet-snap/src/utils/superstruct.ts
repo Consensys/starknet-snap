@@ -8,6 +8,7 @@ import type {
 } from 'starknet';
 import {
   constants,
+  ETransactionVersion,
   TransactionType,
   validateAndParseAddress,
   TransactionFinalityStatus,
@@ -154,14 +155,14 @@ export const NumberStringStruct = union([number(), HexStruct]);
 export const CairoVersionStruct = enums([CAIRO_VERSION, CAIRO_VERSION_LEGACY]);
 
 export const TxVersionStruct = enums([
-  constants.TRANSACTION_VERSION.V1,
-  constants.TRANSACTION_VERSION.V2,
-  constants.TRANSACTION_VERSION.V3,
+  ETransactionVersion.V1,
+  ETransactionVersion.V2,
+  ETransactionVersion.V3,
 ]);
 
-export const V1TxVersionStruct = enums([constants.TRANSACTION_VERSION.V1]);
+export const V1TxVersionStruct = enums([ETransactionVersion.V1]);
 
-export const V3TxVersionStruct = enums([constants.TRANSACTION_VERSION.V3]);
+export const V3TxVersionStruct = enums([ETransactionVersion.V3]);
 
 export const EDataModeStruct = enums(['L1', 'L2']);
 

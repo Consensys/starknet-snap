@@ -1,5 +1,5 @@
 import type { DeclareSignerDetails } from 'starknet';
-import { constants } from 'starknet';
+import { constants, ETransactionVersion } from 'starknet';
 
 import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../utils/constants';
 import {
@@ -26,7 +26,7 @@ describe('signDeclareTransaction', () => {
         '0x025ec026985a3bf9d0cc1fe17326b245dfdc3ff89b8fde106542a3ea56c5a918',
       senderAddress: address,
       chainId: chainId as constants.StarknetChainId,
-      version: constants.TRANSACTION_VERSION.V2,
+      version: ETransactionVersion.V2,
       maxFee: 0,
       nonce: 0,
     },

@@ -1,6 +1,6 @@
 import type { Call } from 'starknet';
 import {
-  constants,
+  ETransactionVersion,
   TransactionFinalityStatus,
   TransactionType,
   validateAndParseAddress,
@@ -22,8 +22,8 @@ export function transactionVersionToNumber(
   txnVersion: string | number,
 ): number {
   const v3TxnVersion = new Set([
-    constants.TRANSACTION_VERSION.V3,
-    constants.TRANSACTION_VERSION.F3,
+    ETransactionVersion.V3,
+    ETransactionVersion.F3,
     '3',
     3,
   ]);
@@ -39,8 +39,8 @@ export function transactionVersionToNumber(
 // TODO Remove this function when the V3 transaction version is the only one supported.
 export function feeTokenToTransactionVersion(
   _feeToken: string,
-): typeof constants.TRANSACTION_VERSION.V3 {
-  return constants.TRANSACTION_VERSION.V3;
+): typeof ETransactionVersion.V3 {
+  return ETransactionVersion.V3;
 }
 
 /**

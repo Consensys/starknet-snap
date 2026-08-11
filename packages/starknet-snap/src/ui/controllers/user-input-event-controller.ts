@@ -4,7 +4,7 @@ import type {
   UserInputEvent,
 } from '@metamask/snaps-sdk';
 import { UserInputEventType } from '@metamask/snaps-sdk';
-import { constants, ec, num as numUtils, TransactionType } from 'starknet';
+import { ETransactionVersion, ec, num as numUtils, TransactionType } from 'starknet';
 
 import { NetworkStateManager } from '../../state/network-state-manager';
 import { TransactionRequestStateManager } from '../../state/request-state-manager';
@@ -96,7 +96,7 @@ export class UserInputEventController {
 
   protected feeTokenToTransactionVersion(feeToken: FeeToken) {
     return feeToken === FeeToken.STRK
-      ? constants.TRANSACTION_VERSION.V3
+      ? ETransactionVersion.V3
       : undefined;
   }
 

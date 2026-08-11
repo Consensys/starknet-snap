@@ -1,12 +1,12 @@
 import type { BIP44AddressKeyDeriver } from '@metamask/key-tree';
 import type Mutex from 'async-mutex/lib/Mutex';
+import { ETransactionVersion } from 'starknet';
 import type {
   DeclareContractPayload,
   InvocationsDetails,
   Invocations,
   EstimateFeeDetails,
   DeployAccountSignerDetails,
-  constants,
   TransactionExecutionStatus,
   TransactionFinalityStatus,
 } from 'starknet';
@@ -50,8 +50,8 @@ export type BaseRequestParams = {
 
 export type TransactionVersionParams = {
   transactionVersion?:
-    | typeof constants.TRANSACTION_VERSION.V2
-    | typeof constants.TRANSACTION_VERSION.V3;
+    | typeof ETransactionVersion.V2
+    | typeof ETransactionVersion.V3;
 };
 
 export type CreateAccountRequestParams = {
