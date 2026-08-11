@@ -195,7 +195,7 @@ describe('TransactionService', () => {
       expect(findTransactionsSpy).toHaveBeenCalledWith({
         senderAddress: [address],
         chainId: [network.chainId],
-        finalityStatus: [TransactionFinalityStatus.RECEIVED],
+        finalityStatus: [TransactionFinalityStatus.PRE_CONFIRMED],
         dataVersion: [TransactionDataVersion.V2],
       });
       expect(transactions).toStrictEqual(filteredTransactions);

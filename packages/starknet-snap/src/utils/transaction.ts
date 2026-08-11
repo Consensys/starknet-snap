@@ -159,9 +159,9 @@ export function newInvokeTransaction({
     chainId,
     senderAddress,
     contractAddress: '',
-    finalityStatus: TransactionFinalityStatus.RECEIVED,
+    finalityStatus: TransactionFinalityStatus.PRE_CONFIRMED,
     // executionStatus will be using the same result as finality if the transaction is yet confirmed
-    executionStatus: TransactionFinalityStatus.RECEIVED,
+    executionStatus: TransactionFinalityStatus.PRE_CONFIRMED,
     failureReason: '',
     timestamp: msToSec(Date.now()),
     dataVersion: TransactionDataVersion.V2,
@@ -200,9 +200,9 @@ export function newDeployTransaction({
     chainId,
     senderAddress,
     contractAddress: senderAddress,
-    finalityStatus: TransactionFinalityStatus.RECEIVED,
+    finalityStatus: TransactionFinalityStatus.PRE_CONFIRMED,
     // executionStatus will be using the same result as finality if the transaction is yet confirmed
-    executionStatus: TransactionFinalityStatus.RECEIVED,
+    executionStatus: TransactionFinalityStatus.PRE_CONFIRMED,
     failureReason: '',
     timestamp: msToSec(Date.now()),
     dataVersion: TransactionDataVersion.V2,

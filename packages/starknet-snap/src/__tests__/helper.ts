@@ -275,7 +275,7 @@ export function generateTransactions({
 
     const executionStatus = getRandomData(executionStatuses);
     const finalityStatus =
-      executionStatus === TransactionExecutionStatus.REJECTED
+      executionStatus === TransactionExecutionStatus.REVERTED
         ? TransactionFinalityStatus.ACCEPTED_ON_L2
         : getRandomData(finalityStatuses);
     const txnType = getRandomData(_txnTypes);
