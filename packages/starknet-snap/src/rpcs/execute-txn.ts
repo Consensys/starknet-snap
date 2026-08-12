@@ -24,7 +24,6 @@ import {
 } from '../utils';
 import { CAIRO_VERSION } from '../utils/constants';
 import { UserRejectedOpError } from '../utils/exceptions';
-import { isEnableRPCV8 } from '../utils/rpc-provider';
 import {
   deployAccount,
   executeTxn as executeTxnUtil,
@@ -179,10 +178,6 @@ export class ExecuteTxnRpc extends AccountRpcController<
       resourceBounds,
       includeDeploy,
     });
-
-    if (!isEnableRPCV8(this.network.chainId as constants.StarknetChainId)) {
-      delete updatedResouceBounds.l1_data_gas;
-    }
 
     const updatedTxnVersion = feeTokenToTransactionVersion(selectedFeeToken);
 

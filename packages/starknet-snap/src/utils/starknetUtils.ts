@@ -79,7 +79,7 @@ import { ConsolidateFees } from './fee';
 import { hexToString } from './formatter-utils';
 import { getAddressKey } from './keyPair';
 import { logger } from './logger';
-import { isEnableRPCV8, getRPCUrl } from './rpc-provider';
+import { getRPCUrl } from './rpc-provider';
 import { toJson } from './serializer';
 import {
   getAccount,
@@ -136,13 +136,7 @@ export const getProvider = (
   if (blockIdentifier) {
     providerParam.blockIdentifier = blockIdentifier;
   }
-  if (isEnableRPCV8(network.chainId as constants.StarknetChainId)) {
-    // For Sepolia, we use the new RPC V8 mode by default
-    providerParam.specVersion = '0.8.1';
-  } else {
-    // For Mainnet, we use the legacy mode by default
-    providerParam.specVersion = '0.7.1';
-  }
+  providerParam.specVersion = '0.9.0';
   return new Provider(providerParam);
 };
 
@@ -151,22 +145,15 @@ export const getAccountInstance = (
   userAddress: string,
   privateKey: string | Uint8Array,
   cairoVersion?: CairoVersion,
-  transactionVersion?:
-    | BigNumberish
-    | typeof ETransactionVersion.V2
-    | typeof ETransactionVersion.V3,
   blockIdentifier?: BlockIdentifierEnum,
 ): Account => {
   const provider = getProvider(network, blockIdentifier);
-  return new Account(
+  return new Account({
     provider,
-    userAddress,
-    privateKey,
-    cairoVersion ?? CAIRO_VERSION,
-    transactionVersion as unknown as
-      | typeof ETransactionVersion.V2
-      | typeof ETransactionVersion.V3,
-  );
+    address: userAddress,
+    signer: privateKey,
+    cairoVersion: cairoVersion ?? CAIRO_VERSION,
+  });
 };
 
 export const callContract = async (
@@ -215,7 +202,6 @@ export const declareContract = async (
     senderAddress,
     privateKey,
     cairoVersion,
-    invocationsDetails?.version,
   ).declare(contractPayload, {
     ...invocationsDetails,
     skipValidate: false,
@@ -238,7 +224,6 @@ export const estimateFee = async (
     senderAddress,
     privateKey,
     cairoVersion,
-    invocationsDetails?.version,
     BlockIdentifierEnum.Latest,
   ).estimateInvokeFee(txnInvocation, {
     ...invocationsDetails,
@@ -262,7 +247,6 @@ export const estimateFeeBulk = async (
     senderAddress,
     privateKey,
     cairoVersion,
-    invocationsDetails?.version,
     BlockIdentifierEnum.Latest,
   ).estimateFeeBulk(txnInvocation, {
     ...invocationsDetails,
@@ -285,7 +269,6 @@ export const executeTxn = async (
     senderAddress,
     privateKey,
     cairoVersion,
-    invocationsDetails?.version,
   ).execute(txnInvocation, {
     ...invocationsDetails,
     skipValidate: false,
@@ -315,7 +298,6 @@ export const deployAccount = async (
     contractAddress,
     privateKey,
     cairoVersion,
-    invocationsDetails?.version,
   ).deployAccount(deployAccountPayload, {
     ...invocationsDetails,
     skipValidate: false,
@@ -345,7 +327,6 @@ export const estimateAccountDeployFee = async (
     contractAddress,
     privateKey,
     cairoVersion,
-    invocationsDetails?.version,
   ).estimateAccountDeployFee(deployAccountPayload, {
     ...invocationsDetails,
     skipValidate: false,
