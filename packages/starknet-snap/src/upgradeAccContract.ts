@@ -1,5 +1,5 @@
 import { heading, panel, DialogType } from '@metamask/snaps-sdk';
-import { num as numUtils, constants, CallData } from 'starknet';
+import { CallData } from 'starknet';
 
 import type {
   ApiParamsWithKeyDeriver,
@@ -81,19 +81,14 @@ export async function upgradeAccContract(params: ApiParamsWithKeyDeriver) {
       calldata,
     };
 
-    let maxFee = requestParamsObj.maxFee
-      ? numUtils.toBigInt(requestParamsObj.maxFee)
-      : constants.ZERO;
-    if (maxFee === constants.ZERO) {
-      const estFeeResp = await estimateFee(
-        network,
-        contractAddress,
-        privateKey,
-        txnInvocation,
-        CAIRO_VERSION_LEGACY,
-      );
-      maxFee = estFeeResp.overall_fee;
-    }
+    const estFeeResp = await estimateFee(
+      network,
+      contractAddress,
+      privateKey,
+      txnInvocation,
+      CAIRO_VERSION_LEGACY,
+    );
+    const maxFee = estFeeResp.overall_fee;
 
     const dialogComponents = getSendTxnText(
       state,
@@ -132,9 +127,7 @@ export async function upgradeAccContract(params: ApiParamsWithKeyDeriver) {
       privateKey,
       txnInvocation,
       undefined,
-      {
-        maxFee,
-      },
+      { resourceBounds: estFeeResp.resourceBounds },
       CAIRO_VERSION_LEGACY,
     );
 

@@ -300,7 +300,7 @@ export const DeclareContractPayloadStruct = object({
   contract: CompiledContractStruct,
   classHash: optional(string()),
   casm: optional(CompiledSierraCasmStruct),
-  compiledClassHash: optional(string()),
+  compiledClassHash: string(),
 });
 
 export const DeployAccountContractStruct = object({

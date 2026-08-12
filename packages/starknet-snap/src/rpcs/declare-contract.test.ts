@@ -16,7 +16,6 @@ import {
   buildNetworkComponent,
   buildRowComponent,
   buildSignerComponent,
-  generateRandomFee,
   mockConfirmDialog,
   setupAccountController,
 } from './__tests__/helper';
@@ -96,8 +95,15 @@ describe('DeclareContractRpc', () => {
   it('declares a contract correctly if user confirms the dialog', async () => {
     const payload = generateExpectedDeclareTransactionPayload();
     const details = {
-      maxFee: generateRandomFee('1000000000000000', '2000000000000000'),
-    };
+      resourceBounds: {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        l1_gas: { max_amount: '1000000', max_price_per_unit: '100' },
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        l1_data_gas: { max_amount: '0', max_price_per_unit: '0' },
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        l2_gas: { max_amount: '0', max_price_per_unit: '0' },
+      },
+    } as unknown as UniversalDetails;
     const transactionHash = '0x123';
 
     const {
@@ -125,8 +131,15 @@ describe('DeclareContractRpc', () => {
   it('throws UserRejectedOpError if user cancels the dialog', async () => {
     const payload = generateExpectedDeclareTransactionPayload();
     const details = {
-      maxFee: generateRandomFee('1000000000000000', '2000000000000000'),
-    };
+      resourceBounds: {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        l1_gas: { max_amount: '1000000', max_price_per_unit: '100' },
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        l1_data_gas: { max_amount: '0', max_price_per_unit: '0' },
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        l2_gas: { max_amount: '0', max_price_per_unit: '0' },
+      },
+    } as unknown as UniversalDetails;
     const transactionHash =
       '0x07f901c023bac6c874691244c4c2332c6825b916fb68d240c807c6156db84fd3';
 
@@ -172,8 +185,13 @@ describe('DeclareContractRpc', () => {
     async ({ declareContractMockResp }) => {
       const payload = generateExpectedDeclareTransactionPayload();
       const details = {
-        maxFee: generateRandomFee('1000000000000000', '2000000000000000'),
-      };
+        resourceBounds: {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          l1_gas: { max_amount: '1000000', max_price_per_unit: '100' },
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          l2_gas: { max_amount: '0', max_price_per_unit: '0' },
+        },
+      } as unknown as UniversalDetails;
       const transactionHash = '0x123';
 
       const { request, declareContractUtilSpy } =
@@ -191,11 +209,20 @@ describe('DeclareContractRpc', () => {
 
   it('renders confirmation dialog', async () => {
     const payload = generateExpectedDeclareTransactionPayload();
+    const l1MaxAmount = '1000000';
+    const l1MaxPrice = '100';
     const details = {
-      maxFee: generateRandomFee('1000000000000000', '2000000000000000'),
-    };
-    // Convert maxFee to ETH from Wei
-    const maxFeeInEth = utils.formatUnits(details.maxFee, 'ether');
+      resourceBounds: {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        l1_gas: { max_amount: l1MaxAmount, max_price_per_unit: l1MaxPrice },
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        l1_data_gas: { max_amount: '0', max_price_per_unit: '0' },
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        l2_gas: { max_amount: '0', max_price_per_unit: '0' },
+      },
+    } as unknown as UniversalDetails;
+    const overallFee = (BigInt(l1MaxAmount) * BigInt(l1MaxPrice)).toString();
+    const maxFeeInEth = utils.formatUnits(overallFee, 'ether');
     const transactionHash = '0x123';
 
     const { request, confirmDialogSpy, account } =
