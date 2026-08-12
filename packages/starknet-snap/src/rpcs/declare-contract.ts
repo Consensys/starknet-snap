@@ -147,12 +147,15 @@ export class DeclareContractRpc extends AccountRpcController<
     }
 
     if (details?.resourceBounds) {
+      /* eslint-disable @typescript-eslint/naming-convention, camelcase */
       const { l1_gas, l1_data_gas, l2_gas } = details.resourceBounds;
       const overallFee = (
         BigInt(l1_gas.max_amount) * BigInt(l1_gas.max_price_per_unit) +
-        BigInt(l1_data_gas.max_amount) * BigInt(l1_data_gas.max_price_per_unit) +
+        BigInt(l1_data_gas.max_amount) *
+          BigInt(l1_data_gas.max_price_per_unit) +
         BigInt(l2_gas.max_amount) * BigInt(l2_gas.max_price_per_unit)
       ).toString();
+      /* eslint-enable @typescript-eslint/naming-convention, camelcase */
       const maxFeeInEth = convert(overallFee, 'wei', 'ether');
       components.push(dividerUI());
       components.push(

@@ -1,5 +1,5 @@
-import type { Invocations } from 'starknet';
-import { constants, ETransactionVersion, TransactionType } from 'starknet';
+import type { Invocations, constants } from 'starknet';
+import { ETransactionVersion, TransactionType } from 'starknet';
 import type { Infer } from 'superstruct';
 
 import callsExamples from '../__tests__/fixture/callsExamples.json';

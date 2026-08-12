@@ -1,5 +1,8 @@
 import { JsonBIP44CoinTypeNode } from '@metamask/key-tree';
-import type { EstimateFeeResponseOverhead, GetTransactionResponse } from 'starknet';
+import type {
+  EstimateFeeResponseOverhead,
+  GetTransactionResponse,
+} from 'starknet';
 import { constants, num } from 'starknet';
 import {
   AccContract,
@@ -437,9 +440,15 @@ export const getBalanceResp = ['0x0', '0x0'];
 
 const emptyResourceBounds = {
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  l1_gas: { max_amount: num.toBigInt('0x0'), max_price_per_unit: num.toBigInt('0x0') },
+  l1_gas: {
+    max_amount: num.toBigInt('0x0'),
+    max_price_per_unit: num.toBigInt('0x0'),
+  },
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  l2_gas: { max_amount: num.toBigInt('0x0'), max_price_per_unit: num.toBigInt('0x0') },
+  l2_gas: {
+    max_amount: num.toBigInt('0x0'),
+    max_price_per_unit: num.toBigInt('0x0'),
+  },
 };
 
 export const estimateDeployFeeResp = {

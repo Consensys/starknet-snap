@@ -60,9 +60,7 @@ export const useEstimateFee = (feeToken: FeeToken = FeeToken.ETH) => {
           callData,
           address,
           chainId,
-          feeToken === FeeToken.STRK
-            ? ETransactionVersion.V3
-            : undefined,
+          feeToken === FeeToken.STRK ? ETransactionVersion.V3 : undefined,
         );
 
         saveCache({

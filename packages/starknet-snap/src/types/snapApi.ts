@@ -1,7 +1,7 @@
 import type { BIP44AddressKeyDeriver } from '@metamask/key-tree';
 import type Mutex from 'async-mutex/lib/Mutex';
-import { ETransactionVersion } from 'starknet';
 import type {
+  ETransactionVersion,
   DeclareContractPayload,
   InvocationsDetails,
   Invocations,

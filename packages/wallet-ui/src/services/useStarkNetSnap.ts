@@ -335,9 +335,7 @@ export const useStarkNetSnap = () => {
           calls,
           details: {
             version:
-              feeToken === FeeToken.STRK
-                ? ETransactionVersion.V3
-                : undefined,
+              feeToken === FeeToken.STRK ? ETransactionVersion.V3 : undefined,
             maxFee,
           } as UniversalDetails,
           chainId,

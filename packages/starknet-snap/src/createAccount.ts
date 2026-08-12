@@ -1,6 +1,5 @@
 import { heading, panel, DialogType } from '@metamask/snaps-sdk';
 import type { CairoVersion, EstimateFeeResponseOverhead } from 'starknet';
-import { num as numUtils } from 'starknet';
 
 import type {
   ApiParamsWithKeyDeriver,
@@ -74,14 +73,15 @@ export async function createAccount(
           `estimateAccountDeployFee:\ncontractAddress = ${contractAddress}\npublicKey = ${publicKey}\naddressIndex = ${addressIndexInUsed}`,
         );
 
-        const estimateDeployFee: EstimateFeeResponseOverhead = await estimateAccountDeployFee(
-          network,
-          contractAddress,
-          contractCallData,
-          publicKey,
-          privateKey,
-          cairoVersion,
-        );
+        const estimateDeployFee: EstimateFeeResponseOverhead =
+          await estimateAccountDeployFee(
+            network,
+            contractAddress,
+            contractCallData,
+            publicKey,
+            privateKey,
+            cairoVersion,
+          );
         logger.log(
           `estimateAccountDeployFee:\nestimateDeployFee: ${toJson(
             estimateDeployFee,

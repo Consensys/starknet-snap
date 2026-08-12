@@ -42,13 +42,14 @@ export async function estimateAccDeployFee(params: ApiParamsWithKeyDeriver) {
       `estimateAccountDeployFee:\ncontractAddress = ${contractAddress}\npublicKey = ${publicKey}\naddressIndex = ${addressIndexInUsed}`,
     );
 
-    const estimateDeployFee: EstimateFeeResponseOverhead = await estimateAccountDeployFee(
-      network,
-      contractAddress,
-      contractCallData,
-      publicKey,
-      privateKey,
-    );
+    const estimateDeployFee: EstimateFeeResponseOverhead =
+      await estimateAccountDeployFee(
+        network,
+        contractAddress,
+        contractCallData,
+        publicKey,
+        privateKey,
+      );
     logger.log(
       `estimateAccountDeployFee:\nestimateDeployFee: ${toJson(
         estimateDeployFee,
@@ -58,8 +59,10 @@ export async function estimateAccDeployFee(params: ApiParamsWithKeyDeriver) {
     const resp = {
       suggestedMaxFee: estimateDeployFee.overall_fee.toString(10),
       overallFee: estimateDeployFee.overall_fee.toString(10),
-      gasConsumed: estimateDeployFee.resourceBounds.l1_gas.max_amount.toString(10),
-      gasPrice: estimateDeployFee.resourceBounds.l1_gas.max_price_per_unit.toString(10),
+      gasConsumed:
+        estimateDeployFee.resourceBounds.l1_gas.max_amount.toString(10),
+      gasPrice:
+        estimateDeployFee.resourceBounds.l1_gas.max_price_per_unit.toString(10),
       unit: estimateDeployFee.unit,
     };
     logger.log(`estimateAccountDeployFee:\nresp: ${toJson(resp)}`);

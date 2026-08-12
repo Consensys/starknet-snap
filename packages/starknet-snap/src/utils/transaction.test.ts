@@ -24,12 +24,7 @@ import {
 } from './transaction';
 
 describe('transactionVersionToNumber', () => {
-  it.each([
-    ETransactionVersion.V3,
-    ETransactionVersion.F3,
-    3,
-    '3',
-  ])(
+  it.each([ETransactionVersion.V3, ETransactionVersion.F3, 3, '3'])(
     'converts the transaction version to 3 if the given txnVersion is %s',
     (txnVersion: string) => {
       expect(transactionVersionToNumber(txnVersion)).toBe(3);
@@ -38,9 +33,7 @@ describe('transactionVersionToNumber', () => {
 
   it.each([
     ...Object.values(ETransactionVersion).filter(
-      (ver) =>
-        ver !== ETransactionVersion.V3 &&
-        ver !== ETransactionVersion.F3,
+      (ver) => ver !== ETransactionVersion.V3 && ver !== ETransactionVersion.F3,
     ),
     '1',
     1,

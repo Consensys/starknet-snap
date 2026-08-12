@@ -1,5 +1,5 @@
-import type { DeclareSignerDetails } from 'starknet';
-import { constants, ETransactionVersion } from 'starknet';
+import type { DeclareSignerDetails, constants } from 'starknet';
+import { ETransactionVersion } from 'starknet';
 
 import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../utils/constants';
 import {

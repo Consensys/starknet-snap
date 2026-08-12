@@ -1,5 +1,5 @@
 import { type Json } from '@metamask/snaps-sdk';
-import type { Call, constants } from 'starknet';
+import type { Call } from 'starknet';
 import { TransactionType } from 'starknet';
 import type { Infer } from 'superstruct';
 import { object, string, assign, optional, any } from 'superstruct';
@@ -199,15 +199,14 @@ export class ExecuteTxnRpc extends AccountRpcController<
         // Aways repect the input, unless the account is not deployed
         // TODO: we may also need to increment the nonce base on the input, if the account is not deployed
         nonce: accountDeployed ? details?.nonce : 1,
+        /* eslint-disable @typescript-eslint/naming-convention */
         resourceBounds: {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           l1_gas: {
             max_amount: BigInt(updatedResouceBounds.l1_gas.max_amount),
             max_price_per_unit: BigInt(
               updatedResouceBounds.l1_gas.max_price_per_unit,
             ),
           },
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           l1_data_gas: {
             max_amount: BigInt(
               updatedResouceBounds.l1_data_gas?.max_amount ?? '0',
@@ -216,7 +215,6 @@ export class ExecuteTxnRpc extends AccountRpcController<
               updatedResouceBounds.l1_data_gas?.max_price_per_unit ?? '0',
             ),
           },
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           l2_gas: {
             max_amount: BigInt(updatedResouceBounds.l2_gas.max_amount),
             max_price_per_unit: BigInt(
@@ -224,6 +222,7 @@ export class ExecuteTxnRpc extends AccountRpcController<
             ),
           },
         },
+        /* eslint-enable @typescript-eslint/naming-convention */
       },
     });
 
