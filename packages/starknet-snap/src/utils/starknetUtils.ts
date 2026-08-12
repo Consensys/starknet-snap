@@ -4,7 +4,7 @@ import type {
   Call,
   DeployContractResponse,
   InvokeFunctionResponse,
-  EstimateFee,
+  EstimateFeeResponseOverhead,
   RawCalldata,
   CallContractResponse,
   ProviderOptions,
@@ -230,7 +230,7 @@ export const estimateFee = async (
   txnInvocation: Call | Call[],
   cairoVersion?: CairoVersion,
   invocationsDetails?: UniversalDetails,
-): Promise<EstimateFee> => {
+): Promise<EstimateFeeResponseOverhead> => {
   // We force block identifier to latest to avoid issues estimating fees on
   // the pending block, that can fail if there are already transactions in the pending state.
   return await getAccountInstance(
@@ -254,7 +254,7 @@ export const estimateFeeBulk = async (
   txnInvocation: Invocations,
   invocationsDetails?: UniversalDetails,
   cairoVersion?: CairoVersion,
-): Promise<EstimateFee[]> => {
+): Promise<EstimateFeeResponseOverhead[]> => {
   // We force block identifier to latest to avoid issues estimating fees on
   // the pending block, that can fail if there are already transactions in the pending state.
   return await getAccountInstance(
@@ -331,7 +331,7 @@ export const estimateAccountDeployFee = async (
   privateKey: string | Uint8Array,
   cairoVersion?: CairoVersion,
   invocationsDetails?: UniversalDetails,
-): Promise<EstimateFee> => {
+): Promise<EstimateFeeResponseOverhead> => {
   const classHash =
     cairoVersion === CAIRO_VERSION ? ACCOUNT_CLASS_HASH : PROXY_CONTRACT_HASH;
   const deployAccountPayload = {
@@ -1047,7 +1047,7 @@ export function createAccountDeployPayload(
  * @param {string} publicKey - The public key of the account to be potentially deployed.
  * @param {Invocations} transactionInvocations - The batch of transactions to be executed.
  * @param {UniversalDetails} [invocationsDetails] - Optional details about the transaction invocations.
- * @returns {Promise<EstimateFeeResponse>} A promise that resolves to an object containing the estimated fees,
+ * @returns {Promise<EstimateFeeResponseOverheadResponse>} A promise that resolves to an object containing the estimated fees,
  * including the suggested maximum fee and the overall fee in wei.
  */
 export async function getEstimatedFees(
@@ -1063,7 +1063,7 @@ export async function getEstimatedFees(
   unit: FeeTokenUnit;
   includeDeploy: boolean;
   resourceBounds: ResourceBounds;
-  estimateResults: EstimateFee[];
+  estimateResults: EstimateFeeResponseOverhead[];
 }> {
   const accountDeployed = await isAccountDeployed(network, address);
   if (!accountDeployed) {
@@ -1205,7 +1205,7 @@ export async function estimateAccountUpgradeFee(
       txnInvocation,
       CAIRO_VERSION_LEGACY,
     );
-    return numUtils.toBigInt(estFeeResp.suggestedMaxFee.toString(10) ?? '0');
+    return estFeeResp.overall_fee;
   }
   return maxFee;
 }

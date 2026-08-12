@@ -61,7 +61,7 @@ describe('Test function: estimateAccountDeployFee', function () {
     });
     const result = await estimateAccDeployFee(apiParams);
     expect(result.suggestedMaxFee).to.be.eq(
-      estimateDeployFeeResp3.suggestedMaxFee.toString(10),
+      estimateDeployFeeResp3.overall_fee.toString(10),
     );
   });
 
@@ -75,7 +75,7 @@ describe('Test function: estimateAccountDeployFee', function () {
     };
     const result = await estimateAccDeployFee(apiParams);
     expect(result.suggestedMaxFee).to.be.eq(
-      estimateDeployFeeResp4.suggestedMaxFee.toString(10),
+      estimateDeployFeeResp4.overall_fee.toString(10),
     );
   });
 

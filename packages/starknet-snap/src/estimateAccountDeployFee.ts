@@ -1,4 +1,4 @@
-import type { EstimateFee } from 'starknet';
+import type { EstimateFeeResponseOverhead } from 'starknet';
 
 import type {
   ApiParamsWithKeyDeriver,
@@ -42,7 +42,7 @@ export async function estimateAccDeployFee(params: ApiParamsWithKeyDeriver) {
       `estimateAccountDeployFee:\ncontractAddress = ${contractAddress}\npublicKey = ${publicKey}\naddressIndex = ${addressIndexInUsed}`,
     );
 
-    const estimateDeployFee: EstimateFee = await estimateAccountDeployFee(
+    const estimateDeployFee: EstimateFeeResponseOverhead = await estimateAccountDeployFee(
       network,
       contractAddress,
       contractCallData,
@@ -56,11 +56,11 @@ export async function estimateAccDeployFee(params: ApiParamsWithKeyDeriver) {
     );
 
     const resp = {
-      suggestedMaxFee: estimateDeployFee.suggestedMaxFee.toString(10),
+      suggestedMaxFee: estimateDeployFee.overall_fee.toString(10),
       overallFee: estimateDeployFee.overall_fee.toString(10),
-      gasConsumed: estimateDeployFee.l1_gas_consumed?.toString(10) ?? '0',
-      gasPrice: estimateDeployFee.l1_gas_price?.toString(10) ?? '0',
-      unit: 'wei',
+      gasConsumed: estimateDeployFee.resourceBounds.l1_gas.max_amount.toString(10),
+      gasPrice: estimateDeployFee.resourceBounds.l1_gas.max_price_per_unit.toString(10),
+      unit: estimateDeployFee.unit,
     };
     logger.log(`estimateAccountDeployFee:\nresp: ${toJson(resp)}`);
 

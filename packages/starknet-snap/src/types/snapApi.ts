@@ -5,7 +5,7 @@ import type {
   DeclareContractPayload,
   InvocationsDetails,
   Invocations,
-  EstimateFeeDetails,
+  UniversalDetails,
   DeployAccountSignerDetails,
   TransactionExecutionStatus,
   TransactionFinalityStatus,
@@ -143,7 +143,7 @@ export type RecoverAccountsRequestParams = {
 export type EstimateFeesRequestParams = {
   senderAddress: string;
   invocations: Invocations;
-  invocationDetails?: EstimateFeeDetails;
+  invocationDetails?: UniversalDetails;
 } & BaseRequestParams &
   TransactionVersionParams;
 

@@ -1,5 +1,6 @@
 import { JsonBIP44CoinTypeNode } from '@metamask/key-tree';
-import { EstimateFee, GetTransactionResponse, constants, num } from 'starknet';
+import type { EstimateFeeResponseOverhead, GetTransactionResponse } from 'starknet';
+import { constants, num } from 'starknet';
 import {
   AccContract,
   Erc20Token,
@@ -434,45 +435,48 @@ export const mainnetTxn1: Transaction = {
 
 export const getBalanceResp = ['0x0', '0x0'];
 
+const emptyResourceBounds = {
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  l1_gas: { max_amount: num.toBigInt('0x0'), max_price_per_unit: num.toBigInt('0x0') },
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  l2_gas: { max_amount: num.toBigInt('0x0'), max_price_per_unit: num.toBigInt('0x0') },
+};
+
 export const estimateDeployFeeResp = {
   overall_fee: num.toBigInt('0x0'),
-  l1_gas_consumed: num.toBigInt('0x0'),
-  l1_gas_price: num.toBigInt('0x0'),
-  l2_gas_consumed: num.toBigInt('0x0'),
-  l2_gas_price: num.toBigInt('0x0'),
-  suggestedMaxFee: num.toBigInt('0x0'),
-} as EstimateFee;
+  unit: 'WEI',
+  resourceBounds: emptyResourceBounds,
+} as EstimateFeeResponseOverhead;
 
 export const estimateDeployFeeResp2 = {
   overall_fee: num.toBigInt('0xaff3f0a7'),
-  l1_gas_consumed: num.toBigInt('0x18e1'),
-  l1_gas_price: num.toBigInt('0x071287'),
-  l2_gas_consumed: num.toBigInt('0x0107ede8fa'),
-  l2_gas_price: num.toBigInt('0x0107ede8fa'),
-  suggestedMaxFee: num.toBigInt('0x0107ede8fa'),
-} as EstimateFee;
+  unit: 'WEI',
+  resourceBounds: emptyResourceBounds,
+} as EstimateFeeResponseOverhead;
 
 export const estimateDeployFeeResp3 = {
   overall_fee: num.toBigInt('0x1160f77b2edd'),
-  l1_gas_consumed: num.toBigInt('0x18e1'),
-  suggestedMaxFee: num.toBigInt('0x1a117338c64b'),
-  l1_gas_price: num.toBigInt('0xb2d3297d'),
-} as EstimateFee;
+  unit: 'WEI',
+  resourceBounds: emptyResourceBounds,
+} as EstimateFeeResponseOverhead;
 
 export const estimateDeployFeeResp4 = {
   overall_fee: num.toBigInt('0x1160f77b2edd'),
-  suggestedMaxFee: num.toBigInt('0x1a117338c64b'),
-} as EstimateFee;
+  unit: 'WEI',
+  resourceBounds: emptyResourceBounds,
+} as EstimateFeeResponseOverhead;
 
 export const estimateFeeResp = {
   overall_fee: num.toBigInt('0x0dc3e44d89e6'),
-  suggestedMaxFee: num.toBigInt('0x14a5d6744ed9'),
-} as EstimateFee;
+  unit: 'WEI',
+  resourceBounds: emptyResourceBounds,
+} as EstimateFeeResponseOverhead;
 
 export const estimateFeeResp2 = {
   overall_fee: num.toBigInt('0x0dc3e44d89e6'),
-  suggestedMaxFee: num.toBigInt('0x14a5d6744ed9'),
-} as EstimateFee;
+  unit: 'WEI',
+  resourceBounds: emptyResourceBounds,
+} as EstimateFeeResponseOverhead;
 
 export const unfoundUserAddress =
   '0x0404d766fd6db2c23177e5ea289af99e81e5c4a7badae588950ad0f8572c49b9';

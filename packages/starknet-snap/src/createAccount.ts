@@ -1,5 +1,5 @@
 import { heading, panel, DialogType } from '@metamask/snaps-sdk';
-import type { CairoVersion, EstimateFee } from 'starknet';
+import type { CairoVersion, EstimateFeeResponseOverhead } from 'starknet';
 import { num as numUtils } from 'starknet';
 
 import type {
@@ -74,7 +74,7 @@ export async function createAccount(
           `estimateAccountDeployFee:\ncontractAddress = ${contractAddress}\npublicKey = ${publicKey}\naddressIndex = ${addressIndexInUsed}`,
         );
 
-        const estimateDeployFee: EstimateFee = await estimateAccountDeployFee(
+        const estimateDeployFee: EstimateFeeResponseOverhead = await estimateAccountDeployFee(
           network,
           contractAddress,
           contractCallData,
@@ -87,9 +87,7 @@ export async function createAccount(
             estimateDeployFee,
           )}`,
         );
-        const maxFee = numUtils.toBigInt(
-          estimateDeployFee.suggestedMaxFee.toString(10) ?? '0',
-        );
+        const maxFee = estimateDeployFee.overall_fee;
         const dialogComponents = getSendTxnText(
           state,
           contractAddress,

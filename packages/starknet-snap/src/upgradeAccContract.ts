@@ -92,9 +92,7 @@ export async function upgradeAccContract(params: ApiParamsWithKeyDeriver) {
         txnInvocation,
         CAIRO_VERSION_LEGACY,
       );
-      maxFee = numUtils.toBigInt(
-        estFeeResp.suggestedMaxFee.toString(10) ?? '0',
-      );
+      maxFee = estFeeResp.overall_fee;
     }
 
     const dialogComponents = getSendTxnText(
