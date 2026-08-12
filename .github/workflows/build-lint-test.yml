@@ -144,7 +144,7 @@ jobs:
         # This is SonarSource/sonarqube-scan-action@v7.1.0
         uses: SonarSource/sonarqube-scan-action@299e4b793aaa83bf2aba7c9c14bedbb485688ec4
         with:
-          projectBaseDir: packages/starknet-snap/
+          projectBaseDir: packages/wallet-ui/
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # for PR decoration
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_WALLET_UI }}
