@@ -13,9 +13,9 @@ jobs:
     name: Prepare
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
       - name: Use Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@3235b876344d2a9aa001b8d1453c930bba69e610 # v3.9.1
         with:
           node-version-file: '.nvmrc'
           cache: 'yarn'
@@ -28,15 +28,15 @@ jobs:
     needs:
       - prepare
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
       - name: Set up Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@3235b876344d2a9aa001b8d1453c930bba69e610 # v3.9.1
         with:
           node-version-file: '.nvmrc'
           cache: 'yarn'
       - name: Cache NPM tarballs
         id: cache-npm-tarballs
-        uses: actions/cache@v3
+        uses: actions/cache@6f8efc29b200d32929f49075959781ed54ec270c # v3.5.0
         with:
           path: |
             node_modules/.cache/npm
@@ -52,9 +52,9 @@ jobs:
     needs:
       - prepare
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
       - name: Set up Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@3235b876344d2a9aa001b8d1453c930bba69e610 # v3.9.1
         with:
           node-version-file: '.nvmrc'
           cache: 'yarn'
@@ -70,9 +70,9 @@ jobs:
       matrix:
         node-version: [18.x, 20.x]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@3235b876344d2a9aa001b8d1453c930bba69e610 # v3.9.1
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'yarn'
@@ -80,7 +80,7 @@ jobs:
       - run: yarn build
       - run: yarn test
       - name: Cache Coverage Report
-        uses: actions/cache@v3
+        uses: actions/cache@6f8efc29b200d32929f49075959781ed54ec270c # v3.5.0
         id: cache-coverage-report
         with:
           path: |
@@ -93,43 +93,30 @@ jobs:
     needs:
       - test
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
 
       - name: Set up Node.js 20
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@3235b876344d2a9aa001b8d1453c930bba69e610 # v3.9.1
         with:
           node-version: '20'
           cache: 'yarn'
 
       - name: Restore Coverage Report
-        uses: actions/cache@v3
+        uses: actions/cache@6f8efc29b200d32929f49075959781ed54ec270c # v3.5.0
         id: restore-coverage-report
         with:
           path: |
             ./packages/**/coverage
           key: ${{ github.sha }}-20.x-coverage-report
 
-      - name: Download SonarScanner CLI
-        run: |
-          SC_VERSION=5.0.1.3006
-          curl -sSLo /tmp/sonar-scanner.zip "https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-${SC_VERSION}-linux.zip"
-          unzip -q /tmp/sonar-scanner.zip -d /tmp
-          echo "SONAR_SCANNER_BIN=/tmp/sonar-scanner-${SC_VERSION}-linux/bin/sonar-scanner" >> "$GITHUB_ENV"
-
       - name: SonarCloud Scan Starknet-Snap
+        # This is SonarSource/sonarqube-scan-action@v7.1.0
+        uses: SonarSource/sonarqube-scan-action@299e4b793aaa83bf2aba7c9c14bedbb485688ec4
+        with:
+          projectBaseDir: packages/starknet-snap/
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # for PR decoration
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_STARKNET_SNAP }}
-        run: |
-          cd packages/starknet-snap
-          NODE_PATH="$(which node)"
-          echo "Using node: $NODE_PATH"
-          "$SONAR_SCANNER_BIN" \
-            -Dsonar.host.url="https://sonarcloud.io" \
-            -Dsonar.organization="consensys" \
-            -Dsonar.projectKey="consensys_starknet-snap-starknet-snap" \
-            -Dsonar.login="$SONAR_TOKEN" \
-            -Dsonar.nodejs.executable="$NODE_PATH"
   
   code-scan-wallet-ui:
     name: Scan Wallet UI
@@ -137,40 +124,27 @@ jobs:
     needs:
       - test
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
 
       - name: Set up Node.js 20
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@3235b876344d2a9aa001b8d1453c930bba69e610 # v3.9.1
         with:
           node-version: '20'
           cache: 'yarn'
 
       - name: Restore Coverage Report
-        uses: actions/cache@v3
+        uses: actions/cache@6f8efc29b200d32929f49075959781ed54ec270c # v3.5.0
         id: restore-coverage-report
         with:
           path: |
             ./packages/**/coverage
           key: ${{ github.sha }}-20.x-coverage-report
 
-      - name: Download SonarScanner CLI
-        run: |
-          SC_VERSION=5.0.1.3006
-          curl -sSLo /tmp/sonar-scanner.zip "https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-${SC_VERSION}-linux.zip"
-          unzip -q /tmp/sonar-scanner.zip -d /tmp
-          echo "SONAR_SCANNER_BIN=/tmp/sonar-scanner-${SC_VERSION}-linux/bin/sonar-scanner" >> "$GITHUB_ENV"
-
       - name: SonarCloud Scan Wallet-UI
+        # This is SonarSource/sonarqube-scan-action@v7.1.0
+        uses: SonarSource/sonarqube-scan-action@299e4b793aaa83bf2aba7c9c14bedbb485688ec4
+        with:
+          projectBaseDir: packages/wallet-ui/
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # for PR decoration
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_WALLET_UI }}
-        run: |
-          cd packages/wallet-ui
-          NODE_PATH="$(which node)"
-          echo "Using node: $NODE_PATH"
-          "$SONAR_SCANNER_BIN" \
-            -Dsonar.host.url="https://sonarcloud.io" \
-            -Dsonar.organization="consensys" \
-            -Dsonar.projectKey="consensys_starknet-snap-wallet-ui" \
-            -Dsonar.login="$SONAR_TOKEN" \
-            -Dsonar.nodejs.executable="$NODE_PATH"
