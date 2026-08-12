@@ -97,7 +97,11 @@ export const TransactionExecutionStatusStruct = enums(
   Object.values(TransactionExecutionStatus),
 );
 
-export const TransactionTypeStruct = enums(Object.values(TransactionType));
+// Include 'INVOKE_FUNCTION' for backward compat: pre-v9 starknet.js stored this value
+export const TransactionTypeStruct = enums([
+  ...Object.values(TransactionType),
+  'INVOKE_FUNCTION',
+]);
 
 export const ChainIdStruct = enums(Object.values(constants.StarknetChainId));
 

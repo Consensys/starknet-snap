@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { constants } from 'starknet';
+import { ETransactionVersion } from 'starknet';
 
 import { FeeToken, ContractFuncName, FeeEstimate } from 'types';
 import { useStarkNetSnap } from 'services';
@@ -61,7 +61,7 @@ export const useEstimateFee = (feeToken: FeeToken = FeeToken.ETH) => {
           address,
           chainId,
           feeToken === FeeToken.STRK
-            ? constants.TRANSACTION_VERSION.V3
+            ? ETransactionVersion.V3
             : undefined,
         );
 

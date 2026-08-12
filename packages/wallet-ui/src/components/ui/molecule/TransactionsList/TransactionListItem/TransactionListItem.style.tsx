@@ -21,10 +21,8 @@ const getStatusColor = (status?: string) => {
     case TransactionFinalityStatus.ACCEPTED_ON_L2:
     case TransactionExecutionStatus.SUCCEEDED:
       return theme.palette.success.dark;
-    case TransactionFinalityStatus.RECEIVED:
+    case TransactionFinalityStatus.PRE_CONFIRMED:
       return theme.palette.info.main;
-    case TransactionFinalityStatus.NOT_RECEIVED:
-    case TransactionExecutionStatus.REJECTED:
     case TransactionExecutionStatus.REVERTED:
       return theme.palette.error.main;
     default:
