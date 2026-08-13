@@ -594,6 +594,13 @@ export function generateEstimateFeesResponse(
           // eslint-disable-next-line @typescript-eslint/naming-convention
           max_price_per_unit: BigInt(0),
         },
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        l1_data_gas: {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          max_amount: BigInt(0),
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          max_price_per_unit: BigInt(0),
+        },
       },
     } as unknown as EstimateFeeResponseOverhead,
   ];

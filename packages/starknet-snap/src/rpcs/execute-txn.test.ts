@@ -514,8 +514,30 @@ describe('ExecuteTxn', () => {
         details: {
           ...details,
           version: updatedTxnVersion,
-          maxFee: updatedMaxFee,
-          resourceBounds: updatedResourceBounds,
+          /* eslint-disable @typescript-eslint/naming-convention */
+          resourceBounds: {
+            l1_gas: {
+              max_amount: BigInt(updatedResourceBounds.l1_gas.max_amount),
+              max_price_per_unit: BigInt(
+                updatedResourceBounds.l1_gas.max_price_per_unit,
+              ),
+            },
+            l1_data_gas: {
+              max_amount: BigInt(
+                updatedResourceBounds.l1_data_gas?.max_amount ?? '0',
+              ),
+              max_price_per_unit: BigInt(
+                updatedResourceBounds.l1_data_gas?.max_price_per_unit ?? '0',
+              ),
+            },
+            l2_gas: {
+              max_amount: BigInt(updatedResourceBounds.l2_gas.max_amount),
+              max_price_per_unit: BigInt(
+                updatedResourceBounds.l2_gas.max_price_per_unit,
+              ),
+            },
+          },
+          /* eslint-enable @typescript-eslint/naming-convention */
         },
       });
       expect(saveDataToStateSpy).toHaveBeenCalledWith({
@@ -549,6 +571,7 @@ describe('ExecuteTxn', () => {
       const result = await rpc.execute(request);
 
       expect(result).toStrictEqual({
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         transaction_hash: sendTansactionResponse,
       });
       expect(deployAccountSpy).toHaveBeenCalledWith({
@@ -561,8 +584,30 @@ describe('ExecuteTxn', () => {
           ...details,
           nonce: 1,
           version: updatedTxnVersion,
-          maxFee: updatedMaxFee,
-          resourceBounds: updatedResourceBounds,
+          /* eslint-disable @typescript-eslint/naming-convention */
+          resourceBounds: {
+            l1_gas: {
+              max_amount: BigInt(updatedResourceBounds.l1_gas.max_amount),
+              max_price_per_unit: BigInt(
+                updatedResourceBounds.l1_gas.max_price_per_unit,
+              ),
+            },
+            l1_data_gas: {
+              max_amount: BigInt(
+                updatedResourceBounds.l1_data_gas?.max_amount ?? '0',
+              ),
+              max_price_per_unit: BigInt(
+                updatedResourceBounds.l1_data_gas?.max_price_per_unit ?? '0',
+              ),
+            },
+            l2_gas: {
+              max_amount: BigInt(updatedResourceBounds.l2_gas.max_amount),
+              max_price_per_unit: BigInt(
+                updatedResourceBounds.l2_gas.max_price_per_unit,
+              ),
+            },
+          },
+          /* eslint-enable @typescript-eslint/naming-convention */
         },
       });
       expect(saveDataToStateSpy).toHaveBeenCalledWith({

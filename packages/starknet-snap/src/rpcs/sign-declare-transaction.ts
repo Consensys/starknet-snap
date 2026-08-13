@@ -1,4 +1,5 @@
-import type { DeclareSignerDetails } from 'starknet';
+import type { ResourceBounds } from 'starknet';
+import { stark, type DeclareSignerDetails } from 'starknet';
 import type { Infer } from 'superstruct';
 import { array, object, string, assign } from 'superstruct';
 
@@ -90,9 +91,17 @@ export class SignDeclareTransactionRpc extends AccountRpcController<
       throw new UserRejectedOpError() as unknown as Error;
     }
 
+    const inputDetails = details as unknown as DeclareSignerDetails;
+    const txDetails = {
+      ...inputDetails,
+      resourceBounds: stark.resourceBoundsToBigInt(
+        inputDetails.resourceBounds as unknown as ResourceBounds,
+      ),
+    };
+
     return (await signDeclareTransactionUtil(
       this.account.privateKey,
-      details as unknown as DeclareSignerDetails,
+      txDetails,
     )) as unknown as SignDeclareTransactionResponse;
   }
 }

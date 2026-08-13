@@ -189,6 +189,8 @@ describe('DeclareContractRpc', () => {
           // eslint-disable-next-line @typescript-eslint/naming-convention
           l1_gas: { max_amount: '1000000', max_price_per_unit: '100' },
           // eslint-disable-next-line @typescript-eslint/naming-convention
+          l1_data_gas: { max_amount: '0', max_price_per_unit: '0' },
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           l2_gas: { max_amount: '0', max_price_per_unit: '0' },
         },
       } as unknown as UniversalDetails;

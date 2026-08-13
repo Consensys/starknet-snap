@@ -405,6 +405,7 @@ describe('InvocationsStruct', () => {
       type: TransactionType.DECLARE,
       payload: {
         contract: contractExample.contract,
+        compiledClassHash: ACCOUNT_CLASS_HASH,
       },
     },
     {
