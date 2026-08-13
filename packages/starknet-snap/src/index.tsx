@@ -342,9 +342,9 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
         Config.snapEnv === SnapEnv.Prod
           ? new UnknownError('Unable to execute the rpc request')
           : new UnknownError(
-              `Unable to execute the rpc request: ${
-                error?.message ?? String(error)
-              }`,
+              `Unable to execute the rpc request: ${String(
+                error?.message ?? error,
+              )}`,
             );
     }
     logger.error(

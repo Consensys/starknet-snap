@@ -43,7 +43,7 @@ export class ContractReader {
     blockIdentifier?: BlockIdentifier;
   }): Promise<CallContractResponse> {
     try {
-      return await this.rpcProvider.callContract(
+      const resp = await this.rpcProvider.callContract(
         {
           contractAddress,
           entrypoint,
@@ -51,9 +51,29 @@ export class ContractReader {
         },
         blockIdentifier,
       );
+
+      // starknet.js's `fetchEndpoint` resolves to `undefined` when the node
+      // replies with a JSON body that contains neither `result` nor `error`
+      // (it destructures `{ error, result }` and returns `result` unguarded).
+      // Callers index into the response (e.g. `resp[0]` in
+      // `AccountContractReader`), so an unguarded pass-through surfaces as
+      // `TypeError: Cannot read properties of undefined (reading '0')`.
+      if (!Array.isArray(resp) || resp.length === 0) {
+        throw new ContractReadError(
+          `Invalid RPC response calling ${entrypoint} on ${contractAddress}: ${JSON.stringify(
+            resp,
+          )}`,
+        );
+      }
+
+      return resp;
     } catch (error) {
-      if (!error.message.includes(CONTRACT_NOT_DEPLOYED_ERROR)) {
-        throw new ContractReadError(error.message);
+      if (error instanceof ContractReadError) {
+        throw error;
+      }
+      // `error.message` is not guaranteed: non-Error values can be thrown.
+      if (!error?.message?.includes?.(CONTRACT_NOT_DEPLOYED_ERROR)) {
+        throw new ContractReadError(error?.message ?? String(error));
       }
       throw new ContractNotDeployedError();
     }
