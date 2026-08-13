@@ -54,7 +54,8 @@ import { useSnap } from './useSnap';
 
 export const useStarkNetSnap = () => {
   const dispatch = useAppDispatch();
-  const { invokeSnap, isSnapRequireUpdate, requestSnap, ping } = useSnap();
+  const { invokeSnap, isSnapRequireUpdate, requestSnap, ping, snapId } =
+    useSnap();
   const { loader } = useAppSelector((state) => state.UI);
   const erc20TokenBalances = useAppSelector(
     (state) => state.wallet.erc20TokenBalances,
@@ -140,15 +141,18 @@ export const useStarkNetSnap = () => {
   };
 
   const initSnap = async () => {
-    if (await isSnapRequireUpdate()) {
-      requestUpgradeSnap();
-      return;
-    }
-
     if (!loader.isLoading) {
       dispatch(enableLoadingWithMessage('Initializing wallet ...'));
     }
     try {
+      // Kept inside the try: `isSnapRequireUpdate` calls `wallet_getSnaps`,
+      // which can reject. Previously it sat outside and its rejection escaped
+      // as an unhandled promise rejection.
+      if (await isSnapRequireUpdate()) {
+        requestUpgradeSnap();
+        return;
+      }
+
       await loadLocale();
 
       const networks = await getNetworks();
@@ -178,7 +182,15 @@ export const useStarkNetSnap = () => {
         toastr.error('Snap is unaccessible or unauthorized');
         dispatch(setWalletConnection(false));
       }
-      if (err.code && err.code === -32603) {
+      // -32603 is the generic JSON-RPC "internal error" code, which the Snap
+      // returns for *every* failed request (see `onRpcRequest` in
+      // packages/starknet-snap/src/index.tsx). Treating it as "your snap state
+      // is broken, reinstall" produces a false "install the latest version"
+      // prompt whenever an unrelated request fails - e.g. a Starknet RPC node
+      // returning 401. The reinstall flow only ever applied to snaps installed
+      // from npm, so skip it for locally served snaps.
+      const isLocalSnap = snapId.startsWith('local:');
+      if (err.code && err.code === -32603 && !isLocalSnap) {
         //We have to make the user reinstall the snap after the flask update to 10.25.0
         //following the breaking change : snap_manageState now uses SIP-6 algorithm for encryption
         //This change breaks the old snap state, hence the reinstallation
@@ -202,18 +214,23 @@ export const useStarkNetSnap = () => {
       dispatch(enableLoadingWithMessage('Getting network data ...'));
     }
 
-    let currentAccount = account;
-    if (!currentAccount) {
-      currentAccount = await getCurrentAccount(chainId);
+    try {
+      let currentAccount = account;
+      if (!currentAccount) {
+        currentAccount = await getCurrentAccount(chainId);
+      }
+
+      await setAccount(chainId, currentAccount);
+
+      const { address } = currentAccount;
+
+      await initTokensAndBalances(chainId, address);
+    } finally {
+      // Always clear the loader, otherwise a failed request leaves the app
+      // stuck behind the loading backdrop. The error still propagates to the
+      // caller, which is responsible for reporting it.
+      dispatch(disableLoading());
     }
-
-    await setAccount(chainId, currentAccount);
-
-    const { address } = currentAccount;
-
-    await initTokensAndBalances(chainId, address);
-
-    dispatch(disableLoading());
   };
 
   const setAccount = async (chainId: string, currentAccount: Account) => {
