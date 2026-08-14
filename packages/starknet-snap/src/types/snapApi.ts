@@ -34,7 +34,6 @@ export type ApiRequestParams =
   | SendTransactionRequestParams
   | GetValueRequestParams
   | EstimateFeeRequestParams
-  | EstimateAccountDeployFeeRequestParams
   | GetStoredErc20TokensRequestParams
   | AddNetworkRequestParams
   | GetStoredNetworksRequestParams
@@ -104,10 +103,6 @@ export type EstimateFeeRequestParams = {
   senderAddress: string;
 } & BaseRequestParams &
   TransactionVersionParams;
-
-export type EstimateAccountDeployFeeRequestParams = {
-  addressIndex?: string | number;
-} & BaseRequestParams;
 
 export type AddNetworkRequestParams = {
   networkName: string;
