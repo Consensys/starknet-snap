@@ -82,6 +82,7 @@ import {
 import {
   CAIRO_VERSION_LEGACY,
   PRELOADED_TOKENS,
+  SnapEnv,
   STARKNET_MAINNET_NETWORK,
   STARKNET_SEPOLIA_TESTNET_NETWORK,
   STARKNET_TESTNET_NETWORK,
@@ -326,8 +327,25 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
     let snapError = error;
 
     if (!isSnapRpcError(error)) {
+      // Always log the ORIGINAL error before discarding it. Wrapping in
+      // `UnknownError` replaces the message with a generic string, so without
+      // this the real cause is unrecoverable - the client only ever sees
+      // "Unable to execute the rpc request".
+      logger.error(
+        `onRpcRequest unexpected error in ${request.method}:`,
+        error?.stack ?? error?.message ?? String(error),
+      );
+
       // To ensure the error meets both the SnapError format and WalletRpc format.
-      snapError = new UnknownError('Unable to execute the rpc request');
+      // Outside production, keep the original message so it reaches the dapp.
+      snapError =
+        Config.snapEnv === SnapEnv.Prod
+          ? new UnknownError('Unable to execute the rpc request')
+          : new UnknownError(
+              `Unable to execute the rpc request: ${String(
+                error?.message ?? error,
+              )}`,
+            );
     }
     logger.error(
       `onRpcRequest error: ${JSON.stringify(snapError.toJSON(), null, 2)}`,

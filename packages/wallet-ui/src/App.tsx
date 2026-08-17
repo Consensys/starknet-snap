@@ -1,4 +1,5 @@
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
+import Toastr from 'toastr2';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { far } from '@fortawesome/free-regular-svg-icons';
 import { fas } from '@fortawesome/free-solid-svg-icons';
@@ -23,6 +24,7 @@ import { DeployModal } from 'components/ui/organism/DeployModal';
 import { MinMetamaskVersionModal } from 'components/ui/organism/MinMetamaskVersionModal';
 import { Home } from 'components/pages/Home';
 import { ForceUpgadeModal } from 'components/ui/organism/ForceUpgadeModal';
+import { normalizeSnapError } from 'utils/error';
 
 library.add(fas, far);
 
@@ -46,22 +48,37 @@ function App() {
   const chainId = networks.items?.[networks.activeNetwork]?.chainId;
   const address = currentAccount.address;
 
+  // These effects kick off async work without awaiting it. Without an explicit
+  // catch, any rejection escapes as an unhandled promise rejection, and CRA's
+  // dev overlay renders it as `[object Object]` with a stack that points only
+  // at the overlay itself. Catch here so the real message is visible.
+  const reportAsyncFailure = useCallback((context: string, error: unknown) => {
+    const normalized = normalizeSnapError(error, context);
+    // eslint-disable-next-line no-console
+    console.error(normalized);
+    new Toastr().error(normalized.message);
+  }, []);
+
   useEffect(() => {
     if (!provider) {
       return;
     }
     if (connected) {
-      initSnap();
+      initSnap().catch((error) => reportAsyncFailure('initSnap', error));
     }
     if (hasMetamask && !connected && !forceReconnect) {
-      checkConnection();
+      checkConnection().catch((error) =>
+        reportAsyncFailure('checkConnection', error),
+      );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [connected, forceReconnect, hasMetamask, provider]);
 
   useEffect(() => {
     if (provider && networks.items.length > 0 && chainId) {
-      initWalletData({ chainId });
+      initWalletData({ chainId }).catch((error) =>
+        reportAsyncFailure('initWalletData', error),
+      );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [networks.activeNetwork, provider, chainId]);

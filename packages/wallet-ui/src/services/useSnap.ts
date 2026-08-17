@@ -2,6 +2,7 @@ import { useAppSelector } from 'hooks/redux';
 import semver from 'semver/preload';
 
 import { removeUndefined } from 'utils/utils';
+import { normalizeSnapError } from 'utils/error';
 
 export type InvokeSnapParams = {
   method: string;
@@ -50,21 +51,32 @@ export const useSnap = () => {
       // for now we dont have a proper logging system, so we just log to console
       // eslint-disable-next-line no-console
       console.error(method, error);
-      throw error;
+      // MetaMask rejects with a plain `{ code, message, data }` object. Rethrow
+      // it as a real Error so unhandled rejections surface a readable message
+      // instead of `[object Object]`. `code` / `data` are preserved.
+      throw normalizeSnapError(error, method);
     }
   };
 
   const getInstalledSnaps = async (): Promise<SnapsMetaData> => {
-    return await provider.request({ method: 'wallet_getSnaps' });
+    try {
+      return await provider.request({ method: 'wallet_getSnaps' });
+    } catch (error) {
+      throw normalizeSnapError(error, 'wallet_getSnaps');
+    }
   };
 
   const requestSnap = async (): Promise<SnapsMetaData> => {
-    return await provider.request({
-      method: 'wallet_requestSnaps',
-      params: {
-        [snapId]: { version: snapVersion },
-      },
-    });
+    try {
+      return await provider.request({
+        method: 'wallet_requestSnaps',
+        params: {
+          [snapId]: { version: snapVersion },
+        },
+      });
+    } catch (error) {
+      throw normalizeSnapError(error, 'wallet_requestSnaps');
+    }
   };
 
   const ping = async (): Promise<void> => {

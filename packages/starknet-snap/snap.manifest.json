@@ -7,7 +7,7 @@
     "url": "https://github.com/ConsenSys/starknet-snap.git"
   },
   "source": {
-    "shasum": "85OCFEvQwnSkcaCQUXLw0Lyk6EB0ka1FvMrrxkCJSQQ=",
+    "shasum": "Q4srgXGyGzep+2TDzZHXglfSbp+D7pq00/831biQDxI=",
     "location": {
       "npm": {
         "filePath": "dist/bundle.js",
@@ -16,7 +16,10 @@
         "registry": "https://registry.npmjs.org"
       }
     },
-    "locales": ["locales/en.json", "locales/fr.json"]
+    "locales": [
+      "locales/en.json",
+      "locales/fr.json"
+    ]
   },
   "initialPermissions": {
     "snap_getPreferences": {},

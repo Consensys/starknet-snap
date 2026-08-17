@@ -1,4 +1,5 @@
 import type { Json } from '@metamask/snaps-sdk';
+import { Mutex } from 'async-mutex';
 
 import { NetworkStateManager } from '../../state/network-state-manager';
 import type { Network } from '../../types/snapState';
@@ -23,9 +24,29 @@ export abstract class ChainRpcController<
 
   protected networkStateMgr: NetworkStateManager;
 
+  /**
+   * Serializes executions per controller instance.
+   *
+   * Every RPC controller is exported as a module-level singleton (e.g.
+   * `export const getCurrentAccount = new GetCurrentAccountRpc()` in
+   * `rpcs/get-current-account.ts`), while `preExecute` stores the resolved
+   * network on `this.network`. Without serialization, two concurrent requests
+   * for different chains (easily produced by switching networks quickly in
+   * the companion dapp) race on that field: request A can run
+   * `handleRequest` with request B's network, returning wrong-chain data or
+   * writing wrong-chain state.
+   */
+  readonly #executionMutex = new Mutex();
+
   constructor() {
     super();
     this.networkStateMgr = new NetworkStateManager();
+  }
+
+  async execute(params: Request): Promise<Response> {
+    return await this.#executionMutex.runExclusive(
+      async () => await super.execute(params),
+    );
   }
 
   protected async getNetwork(chainId: string): Promise<Network> {
