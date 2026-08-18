@@ -24,6 +24,7 @@ import {
 } from '../utils';
 import { CAIRO_VERSION } from '../utils/constants';
 import { UserRejectedOpError } from '../utils/exceptions';
+import { showAccountCreationDeprecatedModal } from '../utils/snapUtils';
 import {
   deployAccount,
   executeTxn as executeTxnUtil,
@@ -247,6 +248,11 @@ export class ExecuteTxnRpc extends AccountRpcController<
     resourceBounds,
     includeDeploy,
   }: ConfirmTransactionParams): Promise<TransactionRequest> {
+    if (includeDeploy) {
+      await showAccountCreationDeprecatedModal();
+      throw new UserRejectedOpError() as unknown as Error;
+    }
+
     const requestId = uuidv4();
     const { chainId, name: networkName } = this.network;
     const { hdIndex: addressIndex } = this.account;

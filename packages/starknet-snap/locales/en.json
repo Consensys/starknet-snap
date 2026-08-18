@@ -1,6 +1,12 @@
 {
   "locale": "en",
   "messages": {
+    "accountCreationDeprecated": {
+      "message": "New accounts are no longer supported."
+    },
+    "accountCreationDeprecatedDesc": {
+      "message": "Looking for a Starknet wallet? Find other options at [starknet.io/wallets](https://www.starknet.io/wallets)"
+    },
     "accountDeploymentMandatory": {
       "message": "Account Deployment Mandatory!"
     },

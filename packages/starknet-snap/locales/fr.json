@@ -1,6 +1,12 @@
 {
   "locale": "fr",
   "messages": {
+    "accountCreationDeprecated": {
+      "message": "Les nouveaux comptes ne sont plus pris en charge."
+    },
+    "accountCreationDeprecatedDesc": {
+      "message": "Vous cherchez un portefeuille Starknet ? Découvrez d'autres options sur [starknet.io/wallets](https://www.starknet.io/wallets)"
+    },
     "accountDeploymentMandatory": {
       "message": "Déploiement du compte obligatoire !"
     },

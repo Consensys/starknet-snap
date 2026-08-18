@@ -16,6 +16,15 @@
     "accountDeployedSuccessfully": {
       "message": "Account deployed successfully."
     },
+    "accountCreationDeprecated": {
+      "message": "New accounts are no longer supported."
+    },
+    "accountCreationDeprecatedDesc": {
+      "message": "Looking for a Starknet wallet? Find other options at"
+    },
+    "switchToDeployedAccount": {
+      "message": "If you have a deployed account, switch to it."
+    },
     "accountDetails": {
       "message": "Account details"
     },
