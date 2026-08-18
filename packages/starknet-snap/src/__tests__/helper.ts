@@ -6,7 +6,7 @@ import type { UserInputEvent } from '@metamask/snaps-sdk';
 import { UserInputEventType } from '@metamask/snaps-sdk';
 import { generateMnemonic } from 'bip39';
 import { getRandomValues } from 'crypto';
-import type { EstimateFee } from 'starknet';
+import type { EstimateFeeResponseOverhead } from 'starknet';
 import {
   constants,
   ec,
@@ -275,7 +275,7 @@ export function generateTransactions({
 
     const executionStatus = getRandomData(executionStatuses);
     const finalityStatus =
-      executionStatus === TransactionExecutionStatus.REJECTED
+      executionStatus === TransactionExecutionStatus.REVERTED
         ? TransactionFinalityStatus.ACCEPTED_ON_L2
         : getRandomData(finalityStatuses);
     const txnType = getRandomData(_txnTypes);
@@ -569,54 +569,40 @@ export function generateStarkScanTransactions({
 /**
  * Method to generate a mock estimate fee response.
  *
- * @returns An array containing a mock EstimateFee object.
+ * @returns An array containing a mock EstimateFeeResponseOverhead object.
  */
 export function generateEstimateFeesResponse(
   chainId: constants.StarknetChainId = constants.StarknetChainId.SN_SEPOLIA,
-): EstimateFee[] {
+): EstimateFeeResponseOverhead[] {
   const fees = [
     {
       // eslint-disable-next-line @typescript-eslint/naming-convention
-      overall_fee: BigInt(1500000000000000).toString(10),
-      // eslint-disable-next-line @typescript-eslint/naming-convention
-      l1_gas_consumed: BigInt('0x0'),
-      // eslint-disable-next-line @typescript-eslint/naming-convention
-      l1_gas_price: BigInt('0x0'),
-      // eslint-disable-next-line @typescript-eslint/naming-convention
-      l2_gas_consumed: BigInt('0x0'),
-      // eslint-disable-next-line @typescript-eslint/naming-convention
-      l2_gas_price: BigInt('0x0'),
-      // eslint-disable-next-line @typescript-eslint/naming-convention
-      l1_data_gas_consumed: BigInt('0x0'),
-      // eslint-disable-next-line @typescript-eslint/naming-convention
-      l1_data_gas_price: BigInt('0x0'),
-      suggestedMaxFee: BigInt(1500000000000000).toString(10),
-      // eslint-disable-next-line @typescript-eslint/naming-convention
-      gas_price: BigInt('0x0'),
+      overall_fee: BigInt(1500000000000000),
+      unit: 'WEI',
       resourceBounds: {
         // eslint-disable-next-line @typescript-eslint/naming-convention
         l1_gas: {
           // eslint-disable-next-line @typescript-eslint/naming-convention
-          max_amount: '0',
+          max_amount: BigInt(0),
           // eslint-disable-next-line @typescript-eslint/naming-convention
-          max_price_per_unit: '0',
+          max_price_per_unit: BigInt(0),
         },
         // eslint-disable-next-line @typescript-eslint/naming-convention
         l2_gas: {
           // eslint-disable-next-line @typescript-eslint/naming-convention
-          max_amount: '0',
+          max_amount: BigInt(0),
           // eslint-disable-next-line @typescript-eslint/naming-convention
-          max_price_per_unit: '0',
+          max_price_per_unit: BigInt(0),
         },
         // eslint-disable-next-line @typescript-eslint/naming-convention
         l1_data_gas: {
           // eslint-disable-next-line @typescript-eslint/naming-convention
-          max_amount: '0',
+          max_amount: BigInt(0),
           // eslint-disable-next-line @typescript-eslint/naming-convention
-          max_price_per_unit: '0',
+          max_price_per_unit: BigInt(0),
         },
       },
-    } as unknown as EstimateFee,
+    } as unknown as EstimateFeeResponseOverhead,
   ];
   return fees;
 }

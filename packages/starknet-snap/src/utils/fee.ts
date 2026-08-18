@@ -1,4 +1,4 @@
-import type { EstimateFee } from 'starknet';
+import type { EstimateFeeResponseOverhead } from 'starknet';
 import { num as numUtils } from 'starknet';
 
 import type {
@@ -20,7 +20,7 @@ export type SerializatedConsolidatedFees = {
 
 /* eslint-disable @typescript-eslint/naming-convention */
 export class ConsolidateFees {
-  fees: EstimateFee[];
+  fees: EstimateFeeResponseOverhead[];
 
   overallFee: bigint;
 
@@ -28,7 +28,7 @@ export class ConsolidateFees {
 
   resourceBounds: ResourceBoundsInBigInt;
 
-  constructor(fees: EstimateFee[]) {
+  constructor(fees: EstimateFeeResponseOverhead[]) {
     this.fees = fees;
     const { overallFee, suggestedMaxFee, resourceBounds } =
       this.consolidateFee();
@@ -54,20 +54,16 @@ export class ConsolidateFees {
     }>(
       (acc, fee) => {
         acc.overallFee += fee.overall_fee;
-        acc.suggestedMaxFee += fee.suggestedMaxFee;
+        acc.suggestedMaxFee += fee.overall_fee;
 
-        acc.resourceBounds.l1_gas.max_amount += BigInt(
-          fee.resourceBounds.l1_gas.max_amount ?? '0',
-        );
-        acc.resourceBounds.l1_gas.max_price_per_unit += BigInt(
-          fee.resourceBounds.l1_gas.max_price_per_unit ?? '0',
-        );
-        acc.resourceBounds.l2_gas.max_amount += BigInt(
-          fee.resourceBounds.l2_gas?.max_amount ?? '0',
-        );
-        acc.resourceBounds.l2_gas.max_price_per_unit += BigInt(
-          fee.resourceBounds.l2_gas?.max_price_per_unit ?? '0',
-        );
+        acc.resourceBounds.l1_gas.max_amount +=
+          fee.resourceBounds.l1_gas.max_amount;
+        acc.resourceBounds.l1_gas.max_price_per_unit +=
+          fee.resourceBounds.l1_gas.max_price_per_unit;
+        acc.resourceBounds.l2_gas.max_amount +=
+          fee.resourceBounds.l2_gas.max_amount;
+        acc.resourceBounds.l2_gas.max_price_per_unit +=
+          fee.resourceBounds.l2_gas.max_price_per_unit;
         if (fee.resourceBounds.l1_data_gas) {
           if (!acc.resourceBounds.l1_data_gas) {
             acc.resourceBounds.l1_data_gas = {
@@ -75,12 +71,10 @@ export class ConsolidateFees {
               max_price_per_unit: BigInt(0),
             };
           }
-          acc.resourceBounds.l1_data_gas.max_amount += BigInt(
-            fee.resourceBounds.l1_data_gas.max_amount ?? '0',
-          );
-          acc.resourceBounds.l1_data_gas.max_price_per_unit += BigInt(
-            fee.resourceBounds.l1_data_gas.max_price_per_unit ?? '0',
-          );
+          acc.resourceBounds.l1_data_gas.max_amount +=
+            fee.resourceBounds.l1_data_gas.max_amount;
+          acc.resourceBounds.l1_data_gas.max_price_per_unit +=
+            fee.resourceBounds.l1_data_gas.max_price_per_unit;
         }
         return acc;
       },

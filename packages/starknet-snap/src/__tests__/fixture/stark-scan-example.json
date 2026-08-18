@@ -11,7 +11,7 @@
     "transaction_status": "ACCEPTED_ON_L1",
     "transaction_finality_status": "ACCEPTED_ON_L1",
     "transaction_execution_status": "SUCCEEDED",
-    "transaction_type": "INVOKE_FUNCTION",
+    "transaction_type": "INVOKE",
     "version": 1,
     "signature": [
       "0x555fe1b8e5183be2f6c81e5203ee3928aab894ab0b31279c89a3c7f016865fc",
@@ -70,7 +70,7 @@
     "transaction_status": "ACCEPTED_ON_L1",
     "transaction_finality_status": "ACCEPTED_ON_L1",
     "transaction_execution_status": "SUCCEEDED",
-    "transaction_type": "INVOKE_FUNCTION",
+    "transaction_type": "INVOKE",
     "version": 1,
     "signature": [
       "0x417671c63219250e0c80d53b1e1b3c0dd76ade552806a51fdfd8c06f7c47a12",

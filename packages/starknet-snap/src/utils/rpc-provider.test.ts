@@ -29,13 +29,3 @@ describe('getRPCUrl', () => {
     );
   });
 });
-
-describe('isEnableRPCV8', () => {
-  it('returns true for Sepolia', () => {
-    expect(Config.enableRPCV8[constants.StarknetChainId.SN_SEPOLIA]).toBe(true);
-  });
-
-  it('returns true for Mainnet', () => {
-    expect(Config.enableRPCV8[constants.StarknetChainId.SN_MAIN]).toBe(true);
-  });
-});

@@ -51,7 +51,7 @@
     "@fortawesome/free-solid-svg-icons": "^6.1.1",
     "@fortawesome/react-fontawesome": "^0.1.18",
     "@headlessui/react": "^1.6.4",
-    "@metamask/jazzicon": "github:metamask/jazzicon#d923914fda6a8795f74c2e66134f73cd72070667",
+    "@metamask/jazzicon": "^2.0.0",
     "@mui/icons-material": "^5.6.2",
     "@mui/material": "^5.6.2",
     "@reduxjs/toolkit": "^1.8.1",
@@ -64,7 +64,7 @@
     "react-redux": "^8.0.1",
     "redux-persist": "^6.0.0",
     "semver": "^7.5.2",
-    "starknet": "6.11.0",
+    "starknet": "^9.4.2",
     "styled-components": "^5.3.5",
     "toastr2": "^3.0.0-alpha.18",
     "web-vitals": "^2.1.4"

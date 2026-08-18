@@ -10,7 +10,7 @@ describe('ConsolidateFees', () => {
     return fees.reduce(
       (acc, fee) => {
         acc.overallFee += fee.overall_fee;
-        acc.suggestedMaxFee += fee.suggestedMaxFee;
+        acc.suggestedMaxFee += fee.overall_fee;
 
         acc.resourceBounds.l1_gas.max_amount += BigInt(
           fee.resourceBounds.l1_gas.max_amount,

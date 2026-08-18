@@ -228,7 +228,7 @@ describe('TransactionStateManager', () => {
     it('returns the list of transaction by executionStatus', async () => {
       const { txns, stateManager } = await prepareFindTransctions();
       const executionStatusCond: TransactionExecutionStatus[] = [
-        TransactionExecutionStatus.REJECTED,
+        TransactionExecutionStatus.REVERTED,
       ];
 
       const result = await stateManager.findTransactions({
@@ -253,7 +253,6 @@ describe('TransactionStateManager', () => {
       const executionStatusCond: TransactionExecutionStatus[] = [
         TransactionExecutionStatus.REVERTED,
         TransactionExecutionStatus.SUCCEEDED,
-        TransactionExecutionStatus.REJECTED,
       ];
       const contractAddressCond = [
         PRELOADED_TOKENS.map((token) => token.address.toLowerCase())[0],
@@ -316,7 +315,7 @@ describe('TransactionStateManager', () => {
       const txn = txns[2];
       const updatedEntity = {
         ...txn,
-        executionStatus: TransactionExecutionStatus.REJECTED,
+        executionStatus: TransactionExecutionStatus.REVERTED,
         finalityStatus: TransactionFinalityStatus.ACCEPTED_ON_L1,
         timestamp: Math.floor(Date.now() / 1000),
       };

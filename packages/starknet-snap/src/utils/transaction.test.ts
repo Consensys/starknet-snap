@@ -1,5 +1,6 @@
 import {
   constants,
+  ETransactionVersion,
   TransactionFinalityStatus,
   TransactionType,
 } from 'starknet';
@@ -23,12 +24,7 @@ import {
 } from './transaction';
 
 describe('transactionVersionToNumber', () => {
-  it.each([
-    constants.TRANSACTION_VERSION.V3,
-    constants.TRANSACTION_VERSION.F3,
-    3,
-    '3',
-  ])(
+  it.each([ETransactionVersion.V3, ETransactionVersion.F3, 3, '3'])(
     'converts the transaction version to 3 if the given txnVersion is %s',
     (txnVersion: string) => {
       expect(transactionVersionToNumber(txnVersion)).toBe(3);
@@ -36,10 +32,8 @@ describe('transactionVersionToNumber', () => {
   );
 
   it.each([
-    ...Object.values(constants.TRANSACTION_VERSION).filter(
-      (ver) =>
-        ver !== constants.TRANSACTION_VERSION.V3 &&
-        ver !== constants.TRANSACTION_VERSION.F3,
+    ...Object.values(ETransactionVersion).filter(
+      (ver) => ver !== ETransactionVersion.V3 && ver !== ETransactionVersion.F3,
     ),
     '1',
     1,
@@ -187,8 +181,8 @@ describe('newInvokeTransaction', () => {
       chainId,
       senderAddress,
       contractAddress: '',
-      finalityStatus: TransactionFinalityStatus.RECEIVED,
-      executionStatus: TransactionFinalityStatus.RECEIVED,
+      finalityStatus: TransactionFinalityStatus.PRE_CONFIRMED,
+      executionStatus: TransactionFinalityStatus.PRE_CONFIRMED,
       failureReason: '',
       timestamp: expect.any(Number),
       dataVersion: TransactionDataVersion.V2,
@@ -225,8 +219,8 @@ describe('newInvokeTransaction', () => {
       chainId,
       senderAddress,
       contractAddress: '',
-      finalityStatus: TransactionFinalityStatus.RECEIVED,
-      executionStatus: TransactionFinalityStatus.RECEIVED,
+      finalityStatus: TransactionFinalityStatus.PRE_CONFIRMED,
+      executionStatus: TransactionFinalityStatus.PRE_CONFIRMED,
       failureReason: '',
       timestamp: expect.any(Number),
       dataVersion: TransactionDataVersion.V2,
@@ -258,8 +252,8 @@ describe('newDeployTransaction', () => {
       chainId,
       senderAddress,
       contractAddress: senderAddress,
-      finalityStatus: TransactionFinalityStatus.RECEIVED,
-      executionStatus: TransactionFinalityStatus.RECEIVED,
+      finalityStatus: TransactionFinalityStatus.PRE_CONFIRMED,
+      executionStatus: TransactionFinalityStatus.PRE_CONFIRMED,
       failureReason: '',
       timestamp: expect.any(Number),
       dataVersion: TransactionDataVersion.V2,
@@ -292,8 +286,8 @@ describe('newDeployTransaction', () => {
       chainId,
       senderAddress,
       contractAddress: senderAddress,
-      finalityStatus: TransactionFinalityStatus.RECEIVED,
-      executionStatus: TransactionFinalityStatus.RECEIVED,
+      finalityStatus: TransactionFinalityStatus.PRE_CONFIRMED,
+      executionStatus: TransactionFinalityStatus.PRE_CONFIRMED,
       failureReason: '',
       timestamp: expect.any(Number),
       dataVersion: TransactionDataVersion.V2,

@@ -1,5 +1,5 @@
 import type { Invocations } from 'starknet';
-import { constants, TransactionType } from 'starknet';
+import { constants, ETransactionVersion, TransactionType } from 'starknet';
 
 import callsExamples from '../__tests__/fixture/callsExamples.json';
 import { mockAccount } from '../rpcs/__tests__/helper';
@@ -32,7 +32,7 @@ describe('getEstimatedFees', () => {
   };
 
   it('estimates fees correctly and assigns `STRK` to the unit of the result if the transaction version is V3', async () => {
-    const txVersion = constants.TRANSACTION_VERSION.V3;
+    const txVersion = ETransactionVersion.V3;
     const expectedUnit = FeeTokenUnit.STRK;
 
     const network = STARKNET_SEPOLIA_TESTNET_NETWORK;

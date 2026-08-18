@@ -1,6 +1,6 @@
 import type { Call } from 'starknet';
 import {
-  constants,
+  ETransactionVersion,
   TransactionFinalityStatus,
   TransactionType,
   validateAndParseAddress,
@@ -22,8 +22,8 @@ export function transactionVersionToNumber(
   txnVersion: string | number,
 ): number {
   const v3TxnVersion = new Set([
-    constants.TRANSACTION_VERSION.V3,
-    constants.TRANSACTION_VERSION.F3,
+    ETransactionVersion.V3,
+    ETransactionVersion.F3,
     '3',
     3,
   ]);
@@ -39,8 +39,8 @@ export function transactionVersionToNumber(
 // TODO Remove this function when the V3 transaction version is the only one supported.
 export function feeTokenToTransactionVersion(
   _feeToken: string,
-): typeof constants.TRANSACTION_VERSION.V3 {
-  return constants.TRANSACTION_VERSION.V3;
+): typeof ETransactionVersion.V3 {
+  return ETransactionVersion.V3;
 }
 
 /**
@@ -159,9 +159,9 @@ export function newInvokeTransaction({
     chainId,
     senderAddress,
     contractAddress: '',
-    finalityStatus: TransactionFinalityStatus.RECEIVED,
+    finalityStatus: TransactionFinalityStatus.PRE_CONFIRMED,
     // executionStatus will be using the same result as finality if the transaction is yet confirmed
-    executionStatus: TransactionFinalityStatus.RECEIVED,
+    executionStatus: TransactionFinalityStatus.PRE_CONFIRMED,
     failureReason: '',
     timestamp: msToSec(Date.now()),
     dataVersion: TransactionDataVersion.V2,
@@ -200,9 +200,9 @@ export function newDeployTransaction({
     chainId,
     senderAddress,
     contractAddress: senderAddress,
-    finalityStatus: TransactionFinalityStatus.RECEIVED,
+    finalityStatus: TransactionFinalityStatus.PRE_CONFIRMED,
     // executionStatus will be using the same result as finality if the transaction is yet confirmed
-    executionStatus: TransactionFinalityStatus.RECEIVED,
+    executionStatus: TransactionFinalityStatus.PRE_CONFIRMED,
     failureReason: '',
     timestamp: msToSec(Date.now()),
     dataVersion: TransactionDataVersion.V2,

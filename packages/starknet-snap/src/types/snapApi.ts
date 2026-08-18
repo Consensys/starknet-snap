@@ -1,12 +1,12 @@
 import type { BIP44AddressKeyDeriver } from '@metamask/key-tree';
 import type Mutex from 'async-mutex/lib/Mutex';
 import type {
+  ETransactionVersion,
   DeclareContractPayload,
   InvocationsDetails,
   Invocations,
-  EstimateFeeDetails,
+  UniversalDetails,
   DeployAccountSignerDetails,
-  constants,
   TransactionExecutionStatus,
   TransactionFinalityStatus,
 } from 'starknet';
@@ -34,7 +34,6 @@ export type ApiRequestParams =
   | SendTransactionRequestParams
   | GetValueRequestParams
   | EstimateFeeRequestParams
-  | EstimateAccountDeployFeeRequestParams
   | GetStoredErc20TokensRequestParams
   | AddNetworkRequestParams
   | GetStoredNetworksRequestParams
@@ -50,8 +49,8 @@ export type BaseRequestParams = {
 
 export type TransactionVersionParams = {
   transactionVersion?:
-    | typeof constants.TRANSACTION_VERSION.V2
-    | typeof constants.TRANSACTION_VERSION.V3;
+    | typeof ETransactionVersion.V2
+    | typeof ETransactionVersion.V3;
 };
 
 export type CreateAccountRequestParams = {
@@ -105,10 +104,6 @@ export type EstimateFeeRequestParams = {
 } & BaseRequestParams &
   TransactionVersionParams;
 
-export type EstimateAccountDeployFeeRequestParams = {
-  addressIndex?: string | number;
-} & BaseRequestParams;
-
 export type AddNetworkRequestParams = {
   networkName: string;
   networkChainId: string;
@@ -143,7 +138,7 @@ export type RecoverAccountsRequestParams = {
 export type EstimateFeesRequestParams = {
   senderAddress: string;
   invocations: Invocations;
-  invocationDetails?: EstimateFeeDetails;
+  invocationDetails?: UniversalDetails;
 } & BaseRequestParams &
   TransactionVersionParams;
 

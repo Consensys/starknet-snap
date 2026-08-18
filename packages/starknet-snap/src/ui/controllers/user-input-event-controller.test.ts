@@ -1,5 +1,10 @@
 import type { InterfaceContext, UserInputEvent } from '@metamask/snaps-sdk';
-import { constants, ec, num as numUtils, TransactionType } from 'starknet';
+import {
+  ETransactionVersion,
+  ec,
+  num as numUtils,
+  TransactionType,
+} from 'starknet';
 
 import type { StarknetAccount } from '../../__tests__/helper';
 import {
@@ -164,7 +169,7 @@ describe('UserInputEventController', () => {
     it.each([
       {
         feeToken: FeeToken.STRK,
-        transactionVersion: constants.TRANSACTION_VERSION.V3,
+        transactionVersion: ETransactionVersion.V3,
       },
       {
         feeToken: FeeToken.ETH,

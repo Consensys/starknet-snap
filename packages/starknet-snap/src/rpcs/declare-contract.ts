@@ -146,8 +146,23 @@ export class DeclareContractRpc extends AccountRpcController<
       );
     }
 
-    if (details?.maxFee) {
-      const maxFeeInEth = convert(details.maxFee, 'wei', 'ether');
+    if (details?.resourceBounds) {
+      /* eslint-disable @typescript-eslint/naming-convention, camelcase */
+      const { l1_gas, l1_data_gas, l2_gas } = details.resourceBounds;
+      const gasEntries = [l1_gas, l1_data_gas, l2_gas];
+      const overallFee = gasEntries
+        .reduce(
+          (accumulator, gasEntry) =>
+            gasEntry
+              ? accumulator +
+                BigInt(gasEntry.max_amount) *
+                  BigInt(gasEntry.max_price_per_unit)
+              : accumulator,
+          BigInt(0),
+        )
+        .toString();
+      /* eslint-enable @typescript-eslint/naming-convention, camelcase */
+      const maxFeeInEth = convert(overallFee, 'wei', 'ether');
       components.push(dividerUI());
       components.push(
         rowUI({

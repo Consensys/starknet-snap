@@ -51,7 +51,7 @@ export class TransactionService {
     const transactions = await this.txnStateMgr.findTransactions({
       senderAddress: [address],
       chainId: [this.network.chainId],
-      finalityStatus: [TransactionFinalityStatus.RECEIVED],
+      finalityStatus: [TransactionFinalityStatus.PRE_CONFIRMED],
       // Exculde the transaction data that are not in the latest version,
       // hence we dont have to migrate the data, as it can be retrieved from the chain eventually.
       dataVersion: [TransactionDataVersion.V2],

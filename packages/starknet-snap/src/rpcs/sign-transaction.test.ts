@@ -1,4 +1,5 @@
-import type { InvocationsSignerDetails, constants } from 'starknet';
+import type { ResourceBounds } from 'starknet';
+import { stark, type constants } from 'starknet';
 
 import transactionExample from '../__tests__/fixture/transactionExample.json'; // Assuming you have a similar fixture
 import { STARKNET_SEPOLIA_TESTNET_NETWORK } from '../utils/constants';
@@ -30,8 +31,7 @@ describe('signTransaction', () => {
       chainId: network.chainId as constants.StarknetChainId,
       address: account.address,
       transactions: transactionExample.transactions,
-      transactionsDetail:
-        transactionExample.transactionsDetail as unknown as InvocationsSignerDetails,
+      transactionsDetail: transactionExample.transactionsDetail,
       enableAuthorize,
     };
 
@@ -51,7 +51,13 @@ describe('signTransaction', () => {
     const expectedResult = await starknetUtils.signTransactions(
       account.privateKey,
       request.transactions,
-      request.transactionsDetail,
+      {
+        ...request.transactionsDetail,
+        resourceBounds: stark.resourceBoundsToBigInt(
+          request.transactionsDetail
+            .resourceBounds as unknown as ResourceBounds,
+        ),
+      },
     );
 
     const result = await signTransaction.execute(request);

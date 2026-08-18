@@ -174,7 +174,7 @@ export const CAIRO_VERSION_LEGACY = '0';
 
 export enum BlockIdentifierEnum {
   Latest = 'latest',
-  Pending = 'pending',
+  Pending = 'pre_confirmed',
 }
 
 export enum SnapEnv {

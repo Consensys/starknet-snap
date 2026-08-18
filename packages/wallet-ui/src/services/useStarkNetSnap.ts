@@ -2,7 +2,7 @@ import { BigNumber, ethers } from 'ethers';
 import Toastr from 'toastr2';
 import {
   Call,
-  constants,
+  ETransactionVersion,
   Invocations,
   TransactionType,
   UniversalDetails,
@@ -279,7 +279,7 @@ export const useStarkNetSnap = () => {
     contractCallData: string,
     address: string,
     chainId: string,
-    transactionVersion?: typeof constants.TRANSACTION_VERSION.V3,
+    transactionVersion?: typeof ETransactionVersion.V3,
   ) {
     const invocations: Invocations = [
       {
@@ -335,9 +335,7 @@ export const useStarkNetSnap = () => {
           calls,
           details: {
             version:
-              feeToken === FeeToken.STRK
-                ? constants.TRANSACTION_VERSION.V3
-                : undefined,
+              feeToken === FeeToken.STRK ? ETransactionVersion.V3 : undefined,
             maxFee,
           } as UniversalDetails,
           chainId,

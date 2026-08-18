@@ -1,5 +1,5 @@
-import type { Invocations } from 'starknet';
-import { constants, TransactionType } from 'starknet';
+import type { Invocations, constants } from 'starknet';
+import { ETransactionVersion, TransactionType } from 'starknet';
 import type { Infer } from 'superstruct';
 
 import callsExamples from '../__tests__/fixture/callsExamples.json';
@@ -73,7 +73,7 @@ describe('estimateFee', () => {
     } = setupMockEstimateFeeTest({
       chainId: chainId as constants.StarknetChainId,
       address: account.address,
-      version: constants.TRANSACTION_VERSION.V1,
+      version: ETransactionVersion.V1,
     });
 
     const result = await estimateFee.execute(request);
@@ -85,7 +85,7 @@ describe('estimateFee', () => {
       account.publicKey,
       request.invocations,
       {
-        version: constants.TRANSACTION_VERSION.V1,
+        version: ETransactionVersion.V1,
       },
     );
     expect(result).toStrictEqual({

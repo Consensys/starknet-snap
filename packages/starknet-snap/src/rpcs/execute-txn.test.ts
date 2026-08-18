@@ -1,5 +1,5 @@
 import type { Call } from 'starknet';
-import { constants, TransactionType } from 'starknet';
+import { ETransactionVersion, TransactionType } from 'starknet';
 import { v4 as uuidv4 } from 'uuid';
 
 import callsExamples from '../__tests__/fixture/callsExamples.json';
@@ -137,7 +137,7 @@ describe('ExecuteTxn', () => {
     const setupConfirmTransactionTest = async (confirm = true) => {
       const network = STARKNET_SEPOLIA_TESTNET_NETWORK;
       const includeDeploy = true;
-      const txnVersion = constants.TRANSACTION_VERSION.V3;
+      const txnVersion = ETransactionVersion.V3;
       const { calls } = callsExamples.multipleCalls;
 
       const { account, rpc } = await setupMockRpc(network, calls);
@@ -265,7 +265,7 @@ describe('ExecuteTxn', () => {
   describe('deployAccount', () => {
     const setupDeployAccountTest = async () => {
       const network = STARKNET_SEPOLIA_TESTNET_NETWORK;
-      const txnVersion = constants.TRANSACTION_VERSION.V3;
+      const txnVersion = ETransactionVersion.V3;
       const { calls } = callsExamples.multipleCalls;
       const { account, rpc } = await setupMockRpc(network, calls);
 
@@ -338,7 +338,7 @@ describe('ExecuteTxn', () => {
   describe('sendTransaction', () => {
     const setupConfirmTransactionTest = async () => {
       const network = STARKNET_SEPOLIA_TESTNET_NETWORK;
-      const txnVersion = constants.TRANSACTION_VERSION.V3;
+      const txnVersion = ETransactionVersion.V3;
       const { calls } = callsExamples.multipleCalls;
 
       const { account, rpc } = await setupMockRpc(network, calls);
@@ -514,8 +514,30 @@ describe('ExecuteTxn', () => {
         details: {
           ...details,
           version: updatedTxnVersion,
-          maxFee: updatedMaxFee,
-          resourceBounds: updatedResourceBounds,
+          /* eslint-disable @typescript-eslint/naming-convention */
+          resourceBounds: {
+            l1_gas: {
+              max_amount: BigInt(updatedResourceBounds.l1_gas.max_amount),
+              max_price_per_unit: BigInt(
+                updatedResourceBounds.l1_gas.max_price_per_unit,
+              ),
+            },
+            l1_data_gas: {
+              max_amount: BigInt(
+                updatedResourceBounds.l1_data_gas?.max_amount ?? '0',
+              ),
+              max_price_per_unit: BigInt(
+                updatedResourceBounds.l1_data_gas?.max_price_per_unit ?? '0',
+              ),
+            },
+            l2_gas: {
+              max_amount: BigInt(updatedResourceBounds.l2_gas.max_amount),
+              max_price_per_unit: BigInt(
+                updatedResourceBounds.l2_gas.max_price_per_unit,
+              ),
+            },
+          },
+          /* eslint-enable @typescript-eslint/naming-convention */
         },
       });
       expect(saveDataToStateSpy).toHaveBeenCalledWith({
@@ -549,6 +571,7 @@ describe('ExecuteTxn', () => {
       const result = await rpc.execute(request);
 
       expect(result).toStrictEqual({
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         transaction_hash: sendTansactionResponse,
       });
       expect(deployAccountSpy).toHaveBeenCalledWith({
@@ -561,8 +584,30 @@ describe('ExecuteTxn', () => {
           ...details,
           nonce: 1,
           version: updatedTxnVersion,
-          maxFee: updatedMaxFee,
-          resourceBounds: updatedResourceBounds,
+          /* eslint-disable @typescript-eslint/naming-convention */
+          resourceBounds: {
+            l1_gas: {
+              max_amount: BigInt(updatedResourceBounds.l1_gas.max_amount),
+              max_price_per_unit: BigInt(
+                updatedResourceBounds.l1_gas.max_price_per_unit,
+              ),
+            },
+            l1_data_gas: {
+              max_amount: BigInt(
+                updatedResourceBounds.l1_data_gas?.max_amount ?? '0',
+              ),
+              max_price_per_unit: BigInt(
+                updatedResourceBounds.l1_data_gas?.max_price_per_unit ?? '0',
+              ),
+            },
+            l2_gas: {
+              max_amount: BigInt(updatedResourceBounds.l2_gas.max_amount),
+              max_price_per_unit: BigInt(
+                updatedResourceBounds.l2_gas.max_price_per_unit,
+              ),
+            },
+          },
+          /* eslint-enable @typescript-eslint/naming-convention */
         },
       });
       expect(saveDataToStateSpy).toHaveBeenCalledWith({
@@ -578,7 +623,7 @@ describe('ExecuteTxn', () => {
   describe('saveDataToState', () => {
     const setupSaveDataToStateTest = async () => {
       const network = STARKNET_SEPOLIA_TESTNET_NETWORK;
-      const txnVersion = constants.TRANSACTION_VERSION.V3;
+      const txnVersion = ETransactionVersion.V3;
       const { hash: txnHashForExecute, calls } = callsExamples.multipleCalls;
       const { hash: txnHashForDeploy } = callsExamples.singleCall;
 

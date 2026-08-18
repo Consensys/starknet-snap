@@ -1,4 +1,4 @@
-import { constants, TransactionType } from 'starknet';
+import { constants, ETransactionVersion, TransactionType } from 'starknet';
 import { StructError, assert } from 'superstruct';
 
 import contractExample from '../__tests__/fixture/contract-example.json';
@@ -180,9 +180,9 @@ describe('CairoVersionStruct', () => {
 
 describe('TxVersionStruct', () => {
   it.each([
-    constants.TRANSACTION_VERSION.V1,
-    constants.TRANSACTION_VERSION.V2,
-    constants.TRANSACTION_VERSION.V3,
+    ETransactionVersion.V1,
+    ETransactionVersion.V2,
+    ETransactionVersion.V3,
   ])('does not throw error if the tx version is %s', (version) => {
     expect(() => assert(version, TxVersionStruct)).not.toThrow();
   });
@@ -297,7 +297,7 @@ describe('V3TransactionDetailStruct', () => {
   it.each([
     {
       nonce: '1',
-      version: constants.TRANSACTION_VERSION.V3,
+      version: ETransactionVersion.V3,
       resourceBounds: {
         // eslint-disable-next-line @typescript-eslint/naming-convention
         l1_gas: {
@@ -351,7 +351,7 @@ describe('DeclareSignDetailsStruct', () => {
       senderAddress:
         '0x025ec026985a3bf9d0cc1fe17326b245dfdc3ff89b8fde106542a3ea56c5a918',
       chainId: constants.StarknetChainId.SN_SEPOLIA,
-      version: constants.TRANSACTION_VERSION.V1,
+      version: ETransactionVersion.V1,
       maxFee: '0',
       nonce: '0',
     },
@@ -361,7 +361,7 @@ describe('DeclareSignDetailsStruct', () => {
       senderAddress:
         '0x025ec026985a3bf9d0cc1fe17326b245dfdc3ff89b8fde106542a3ea56c5a918',
       chainId: constants.StarknetChainId.SN_SEPOLIA,
-      version: constants.TRANSACTION_VERSION.V3,
+      version: ETransactionVersion.V3,
       nonce: '0x1',
       resourceBounds: {
         // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -405,6 +405,7 @@ describe('InvocationsStruct', () => {
       type: TransactionType.DECLARE,
       payload: {
         contract: contractExample.contract,
+        compiledClassHash: ACCOUNT_CLASS_HASH,
       },
     },
     {

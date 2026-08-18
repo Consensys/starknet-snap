@@ -1,5 +1,5 @@
 import { type Json } from '@metamask/snaps-sdk';
-import type { Call, constants } from 'starknet';
+import type { Call } from 'starknet';
 import { TransactionType } from 'starknet';
 import type { Infer } from 'superstruct';
 import { object, string, assign, optional, any } from 'superstruct';
@@ -24,7 +24,6 @@ import {
 } from '../utils';
 import { CAIRO_VERSION } from '../utils/constants';
 import { UserRejectedOpError } from '../utils/exceptions';
-import { isEnableRPCV8 } from '../utils/rpc-provider';
 import {
   deployAccount,
   executeTxn as executeTxnUtil,
@@ -180,10 +179,6 @@ export class ExecuteTxnRpc extends AccountRpcController<
       includeDeploy,
     });
 
-    if (!isEnableRPCV8(this.network.chainId as constants.StarknetChainId)) {
-      delete updatedResouceBounds.l1_data_gas;
-    }
-
     const updatedTxnVersion = feeTokenToTransactionVersion(selectedFeeToken);
 
     let txnHashForDeploy: string | undefined;
@@ -204,8 +199,30 @@ export class ExecuteTxnRpc extends AccountRpcController<
         // Aways repect the input, unless the account is not deployed
         // TODO: we may also need to increment the nonce base on the input, if the account is not deployed
         nonce: accountDeployed ? details?.nonce : 1,
-        maxFee: updatedMaxFee,
-        resourceBounds: updatedResouceBounds,
+        /* eslint-disable @typescript-eslint/naming-convention */
+        resourceBounds: {
+          l1_gas: {
+            max_amount: BigInt(updatedResouceBounds.l1_gas.max_amount),
+            max_price_per_unit: BigInt(
+              updatedResouceBounds.l1_gas.max_price_per_unit,
+            ),
+          },
+          l1_data_gas: {
+            max_amount: BigInt(
+              updatedResouceBounds.l1_data_gas?.max_amount ?? '0',
+            ),
+            max_price_per_unit: BigInt(
+              updatedResouceBounds.l1_data_gas?.max_price_per_unit ?? '0',
+            ),
+          },
+          l2_gas: {
+            max_amount: BigInt(updatedResouceBounds.l2_gas.max_amount),
+            max_price_per_unit: BigInt(
+              updatedResouceBounds.l2_gas.max_price_per_unit,
+            ),
+          },
+        },
+        /* eslint-enable @typescript-eslint/naming-convention */
       },
     });
 

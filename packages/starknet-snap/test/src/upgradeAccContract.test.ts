@@ -183,7 +183,7 @@ describe('Test function: upgradeAccContract', function () {
         txnInvocation,
         undefined,
         {
-          maxFee: num.toBigInt(estimateFeeResp.suggestedMaxFee),
+          resourceBounds: estimateFeeResp.resourceBounds,
         },
         CAIRO_VERSION_LEGACY,
       );
