@@ -22,7 +22,8 @@ export type SnapConfig = {
   defaultNetwork: Network;
   availableNetworks: Network[];
   preloadTokens: Erc20Token[];
-  rpcApiKey: string;
+  rpcApiKeyAlchemy: string;
+  rpcApiKeyDin: string;
   explorer: {
     [key: string]: string;
   };
@@ -65,7 +66,9 @@ export const Config: SnapConfig = {
   },
 
   // eslint-disable-next-line no-restricted-globals
-  rpcApiKey: process.env.DIN_API_KEY ?? '',
+  rpcApiKeyDin: process.env.DIN_API_KEY ?? '',
+  // eslint-disable-next-line no-restricted-globals
+  rpcApiKeyAlchemy: process.env.ALCHEMY_API_KEY ?? '',
 
   explorer: {
     [constants.StarknetChainId.SN_MAIN]:
