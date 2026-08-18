@@ -81,7 +81,7 @@ describe('StarkScanClient', () => {
   const mockApiSuccess = ({
     fetchSpy,
     // eslint-disable-next-line @typescript-eslint/naming-convention
-    response = { data: [], next_url: null },
+    response = { items: [], nextCursor: null },
   }: {
     fetchSpy: jest.SpyInstance;
     response?: StarkScanTransactionsResponse;
@@ -101,11 +101,11 @@ describe('StarkScanClient', () => {
 
   const mockTxByType = (txnType: TransactionType, address: string) => {
     const mockResponse = generateStarkScanTransactions({
-      address,
-      txnTypes: [txnType],
-      cnt: 1,
-    });
-    const tx = mockResponse.data[0];
+        address,
+        txnTypes: [txnType],
+        cnt: 1,
+      });
+    const tx = mockResponse.items[0];
     return tx;
   };
 
@@ -113,11 +113,11 @@ describe('StarkScanClient', () => {
     it.each([
       {
         network: STARKNET_SEPOLIA_TESTNET_NETWORK,
-        expectedUrl: 'https://api-sepolia.starkscan.co/api/v0',
+        expectedUrl: 'https://api.starkscan.co',
       },
       {
         network: STARKNET_MAINNET_NETWORK,
-        expectedUrl: 'https://api.starkscan.co/api/v0',
+        expectedUrl: 'https://api.starkscan.co',
       },
     ])(
       'returns the api url if the chain id is $network.name',
@@ -159,7 +159,7 @@ describe('StarkScanClient', () => {
     it('fetches data', async () => {
       const { fetchSpy } = createMockFetch();
       // eslint-disable-next-line @typescript-eslint/naming-convention
-      const expectedResponse = { data: [], next_url: null };
+      const expectedResponse = { items: [], nextCursor: null };
       mockApiSuccess({ fetchSpy, response: expectedResponse });
 
       const client = createMockClient();
@@ -185,8 +185,7 @@ describe('StarkScanClient', () => {
         method: 'GET',
         body: undefined,
         headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': apiKey,
+          'X-Starkscan-Api-Key': apiKey,
         },
       });
     });
@@ -232,10 +231,11 @@ describe('StarkScanClient', () => {
       // - it's timestamp is greater than the `tillTo`
       // - it's transaction type is `DEPLOY_ACCOUNT`
       expect(result).toHaveLength(
-        mockResponse.data.filter(
+        mockResponse.items.filter(
           (tx) =>
-            tx.transaction_type === TransactionType.DEPLOY_ACCOUNT ||
-            tx.timestamp >= to,
+            tx.txType === TransactionType.DEPLOY_ACCOUNT ||
+            (tx.timestampIso &&
+              Math.floor(Date.parse(tx.timestampIso) / 1000) >= to),
         ).length,
       );
       expect(
@@ -258,7 +258,7 @@ describe('StarkScanClient', () => {
       expect(result).toStrictEqual([]);
     });
 
-    it('continue to fetch if next_url is presented', async () => {
+    it('continue to fetch if nextCursor is presented', async () => {
       const account = await mockAccount();
       const { fetchSpy } = createMockFetch();
       // generate the to timestamp which is 100 days ago
@@ -272,19 +272,17 @@ describe('StarkScanClient', () => {
         address: account.address,
         cnt: 10,
       });
-      const firstPageUrl = `https://api-sepolia.starkscan.co/api/v0/transactions?contract_address=${account.address}&order_by=desc&limit=100`;
-      const nextPageUrl = `https://api-sepolia.starkscan.co/api/v0/transactions?contract_address=${account.address}&order_by=desc&cursor=MTcyNDc1OTQwNzAwMDAwNjAwMDAwMA%3D%3D`;
+      const firstPageUrl = `https://api.starkscan.co/v1/SN_SEPOLIA/address/${account.address}/transactions?limit=100`;
+      const nextCursor = 'opaque-cursor-1';
+      const nextPageUrl = `https://api.starkscan.co/v1/SN_SEPOLIA/address/${account.address}/transactions?limit=100&cursor=${nextCursor}`;
 
-      // mock the first page response, which contains the next_url
       mockApiSuccess({
         fetchSpy,
         response: {
-          data: mockPage1Response.data,
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          next_url: nextPageUrl,
+          items: mockPage1Response.items,
+          nextCursor,
         },
       });
-      // mock the send page response
       mockApiSuccess({ fetchSpy, response: mockPage2Response });
 
       const client = createMockClient();
@@ -346,21 +344,26 @@ describe('StarkScanClient', () => {
       const client = createMockClient();
       const result = client.toTransaction(mockTx);
 
-      const { contract_address: contract, calldata: contractCallData } =
-        mockTx.account_calls[0];
+      const { contract_address: contract, calldata: contractCallData } = {
+        contract_address: mockTx.topTransferTokenAddress as string,
+        calldata:
+          mockTx.counterparty && mockTx.topTransferAmount
+            ? [mockTx.counterparty, mockTx.topTransferAmount]
+            : [],
+      };
 
       expect(result).toStrictEqual({
-        txnHash: mockTx.transaction_hash,
-        txnType: mockTx.transaction_type,
+        txnHash: mockTx.txHash,
+        txnType: mockTx.txType,
         chainId: STARKNET_SEPOLIA_TESTNET_NETWORK.chainId,
         senderAddress: account.address,
-        contractAddress: '',
-        timestamp: mockTx.timestamp,
-        finalityStatus: mockTx.transaction_finality_status,
-        executionStatus: mockTx.transaction_execution_status,
-        failureReason: mockTx.revert_error ?? '',
-        maxFee: mockTx.max_fee,
-        actualFee: mockTx.actual_fee,
+        contractAddress: mockTx.toAddress,
+        timestamp: Math.floor(Date.parse(mockTx.timestampIso as string) / 1000),
+        finalityStatus: mockTx.finalityStatus,
+        executionStatus: mockTx.executionStatus,
+        failureReason: '',
+        maxFee: '0',
+        actualFee: null,
         accountCalls: {
           [contract]: [
             {
@@ -372,7 +375,7 @@ describe('StarkScanClient', () => {
             },
           ],
         },
-        version: mockTx.version,
+        version: 3,
         dataVersion: TransactionDataVersion.V2,
       });
     });
@@ -388,19 +391,19 @@ describe('StarkScanClient', () => {
       const result = client.toTransaction(mockTx);
 
       expect(result).toStrictEqual({
-        txnHash: mockTx.transaction_hash,
-        txnType: mockTx.transaction_type,
+        txnHash: mockTx.txHash,
+        txnType: mockTx.txType,
         chainId: STARKNET_SEPOLIA_TESTNET_NETWORK.chainId,
         senderAddress: account.address,
         contractAddress: account.address,
-        timestamp: mockTx.timestamp,
-        finalityStatus: mockTx.transaction_finality_status,
-        executionStatus: mockTx.transaction_execution_status,
-        failureReason: mockTx.revert_error ?? '',
-        maxFee: mockTx.max_fee,
-        actualFee: mockTx.actual_fee,
+        timestamp: Math.floor(Date.parse(mockTx.timestampIso as string) / 1000),
+        finalityStatus: mockTx.finalityStatus,
+        executionStatus: mockTx.executionStatus,
+        failureReason: '',
+        maxFee: null,
+        actualFee: null,
         accountCalls: null,
-        version: mockTx.version,
+        version: 3,
         dataVersion: TransactionDataVersion.V2,
       });
     });
@@ -456,7 +459,7 @@ describe('StarkScanClient', () => {
 
       const client = createMockClient();
       expect(client.getSenderAddress(mockTx)).toStrictEqual(
-        mockTx.sender_address,
+        mockTx.fromAddress,
       );
     });
 
@@ -465,7 +468,7 @@ describe('StarkScanClient', () => {
 
       const client = createMockClient();
       expect(client.getSenderAddress(mockTx)).toStrictEqual(
-        mockTx.contract_address,
+        mockTx.toAddress,
       );
     });
 
@@ -477,7 +480,7 @@ describe('StarkScanClient', () => {
         client.getSenderAddress({
           ...mockTx,
           // eslint-disable-next-line @typescript-eslint/naming-convention
-          sender_address: null,
+          fromAddress: null,
         }),
       ).toBe('');
     });
