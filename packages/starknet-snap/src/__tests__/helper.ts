@@ -41,7 +41,6 @@ import {
   PROXY_CONTRACT_HASH,
 } from '../utils/constants';
 import { grindKey } from '../utils/keyPair';
-import { invokeTx, cairo0DeployTx } from './fixture/stark-scan-example.json';
 
 /* eslint-disable */
 export type StarknetAccount = AccContract & {
@@ -527,42 +526,70 @@ export function generateStarkScanTransactions({
   cnt?: number;
   txnTypes?: TransactionType[];
 }): StarkScanTransactionsResponse {
+  const toIso = (value: number) => {
+    const ms = value > 1e12 ? value : value * 1000;
+    return new Date(ms).toISOString();
+  };
+
   let transactionStartFrom = startFrom;
   const txs: StarkScanTransaction[] = [];
-  let totalRecordCnt = txnTypes.includes(TransactionType.DEPLOY_ACCOUNT)
+  const totalRecordCnt = txnTypes.includes(TransactionType.DEPLOY_ACCOUNT)
     ? cnt - 1
     : cnt;
+  const tokenAddress = PRELOADED_TOKENS[0].address;
+  const transferCalldata = [address, '1000'];
 
   for (let i = 0; i < totalRecordCnt; i++) {
-    let newTx = {
-      ...invokeTx,
-      account_calls: [...invokeTx.account_calls],
-    };
-    newTx.sender_address = address;
-    newTx.account_calls[0].caller_address = address;
-    newTx.timestamp = transactionStartFrom;
-    newTx.transaction_hash = validateAndParseAddress(
-      `0x${transactionStartFrom.toString(16)}`,
-    );
+    const timestampIso = toIso(transactionStartFrom);
+    txs.push({
+      blockNumber: 1,
+      timestampIso,
+      txIndex: i,
+      txHash: validateAndParseAddress(`0x${transactionStartFrom.toString(16)}`),
+      kinds: ['token_in', 'contract_call'],
+      counterparty: transferCalldata[0],
+      txType: TransactionType.INVOKE,
+      executionStatus: TransactionExecutionStatus.SUCCEEDED,
+      finalityStatus: TransactionFinalityStatus.ACCEPTED_ON_L1,
+      fromAddress: address,
+      toAddress: tokenAddress,
+      primaryMethod: 'transfer',
+      callCount: 1,
+      methodsDiffer: false,
+      transferCount: 1,
+      topTransferTokenAddress: tokenAddress,
+      topTransferAmount: transferCalldata[1],
+      topTransferStandard: 'erc20',
+    });
     transactionStartFrom -= timestampReduction;
-    txs.push(newTx as unknown as StarkScanTransaction);
   }
 
   if (txnTypes.includes(TransactionType.DEPLOY_ACCOUNT)) {
-    let deployTx = {
-      ...cairo0DeployTx,
-      account_calls: [...cairo0DeployTx.account_calls],
-    };
-    deployTx.contract_address = address;
-    deployTx.transaction_hash = validateAndParseAddress(
-      `0x${transactionStartFrom.toString(16)}`,
-    );
-    txs.push(deployTx as unknown as StarkScanTransaction);
+    txs.push({
+      blockNumber: 1,
+      timestampIso: toIso(transactionStartFrom),
+      txIndex: totalRecordCnt,
+      txHash: validateAndParseAddress(`0x${transactionStartFrom.toString(16)}`),
+      kinds: ['account_deploy'],
+      counterparty: null,
+      txType: TransactionType.DEPLOY_ACCOUNT,
+      executionStatus: TransactionExecutionStatus.SUCCEEDED,
+      finalityStatus: TransactionFinalityStatus.ACCEPTED_ON_L1,
+      fromAddress: address,
+      toAddress: address,
+      primaryMethod: null,
+      callCount: 0,
+      methodsDiffer: false,
+      transferCount: 0,
+      topTransferTokenAddress: null,
+      topTransferAmount: null,
+      topTransferStandard: null,
+    });
   }
 
   return {
-    next_url: null,
-    data: txs,
+    nextCursor: null,
+    items: txs,
   };
 }
 

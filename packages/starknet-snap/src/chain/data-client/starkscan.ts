@@ -27,32 +27,44 @@ export class StarkScanClient extends ApiClient implements IDataClient {
 
   protected options: StarkScanOptions;
 
-  protected deploySelectorName = 'constructor';
-
   constructor(network: Network, options: StarkScanOptions) {
     super();
     this.network = network;
     this.options = options;
   }
 
-  protected get baseUrl(): string {
+  protected get chain(): string {
     switch (this.network.chainId) {
       case constants.StarknetChainId.SN_SEPOLIA:
-        return 'https://api-sepolia.starkscan.co/api/v0';
+        return 'SN_SEPOLIA';
       case constants.StarknetChainId.SN_MAIN:
-        return 'https://api.starkscan.co/api/v0';
+        return 'SN_MAIN';
       default:
         throw new InvalidNetworkError();
     }
   }
 
-  protected getApiUrl(endpoint: string): string {
-    return `${this.baseUrl}${endpoint}`;
+  protected get baseUrl(): string {
+    switch (this.network.chainId) {
+      case constants.StarknetChainId.SN_SEPOLIA:
+      case constants.StarknetChainId.SN_MAIN:
+        return 'https://api.starkscan.co';
+      default:
+        throw new InvalidNetworkError();
+    }
+  }
+
+  protected getApiUrl(address: string, cursor?: string): string {
+    let url = `${this.baseUrl}/v1/${this.chain}/address/${address}/transactions?limit=${this.limit}`;
+    if (cursor) {
+      url += `&cursor=${encodeURIComponent(cursor)}`;
+    }
+    return url;
   }
 
   protected getHttpHeaders(): HttpHeaders {
     return {
-      'x-api-key': this.options.apiKey,
+      'X-Starkscan-Api-Key': this.options.apiKey,
     };
   }
 
@@ -78,26 +90,20 @@ export class StarkScanClient extends ApiClient implements IDataClient {
 
   /**
    * Fetches the transactions for a given contract address.
-   * The transactions are fetched in descending order and it will include the deploy transaction.
+   * The transactions are fetched newest-first and include the deploy transaction when found.
    *
    * @param address - The address of the contract to fetch the transactions for.
-   * @param to - The filter includes transactions with a timestamp that is >= a specified value, but the deploy transaction is always included regardless of its timestamp.
+   * @param to - Unix timestamp; include txs at or after this time. Deploy txs are always included.
    * @returns A Promise that resolve an array of Transaction object.
    */
   async getTransactions(address: string, to: number): Promise<Transaction[]> {
-    let apiUrl = this.getApiUrl(
-      `/transactions?contract_address=${address}&order_by=desc&limit=${this.limit}`,
-    );
+    let apiUrl = this.getApiUrl(address);
 
     const txs: Transaction[] = [];
     let deployTxFound = false;
     let process = true;
     let timestamp = 0;
 
-    // Scan the transactions in descending order by timestamp
-    // Include the transaction if:
-    // - it's timestamp is greater than the `tillTo` AND
-    // - there is an next data to fetch
     while (process && (timestamp === 0 || timestamp >= to)) {
       process = false;
 
@@ -107,7 +113,7 @@ export class StarkScanClient extends ApiClient implements IDataClient {
         requestName: 'getTransactions',
       });
 
-      for (const data of result.data) {
+      for (const data of result.items) {
         const tx = this.toTransaction(data);
         const isDeployTx = this.isDeployTransaction(data);
 
@@ -116,29 +122,17 @@ export class StarkScanClient extends ApiClient implements IDataClient {
         }
 
         timestamp = tx.timestamp;
-        // Only include the records that newer than or equal to the `to` timestamp from the same batch of result
-        // If there is an deploy transaction from the result, it should included too.
-        // e.g
-        // to: 1000
-        // [
-        //   { timestamp: 1100, transaction_type: "invoke"  }, <-- include
-        //   { timestamp: 900, transaction_type: "invoke" }, <-- exclude
-        //   { timestamp: 100, transaction_type: "deploy" }  <-- include
-        // ]
         if (timestamp >= to || isDeployTx) {
           txs.push(tx);
         }
       }
 
-      if (result.next_url) {
-        apiUrl = result.next_url;
+      if (result.nextCursor) {
+        apiUrl = this.getApiUrl(address, result.nextCursor);
         process = true;
       }
     }
 
-    // In case no deploy transaction found from above,
-    // then scan the transactions in asc order by timestamp,
-    // the deploy transaction should usually be the first transaction from the list
     if (!deployTxFound) {
       const deployTx = await this.getDeployTransaction(address);
       deployTx && txs.push(deployTx);
@@ -154,19 +148,14 @@ export class StarkScanClient extends ApiClient implements IDataClient {
    * @returns A Promise that resolve the Transaction object or null if the transaction can not be found.
    */
   async getDeployTransaction(address: string): Promise<Transaction | null> {
-    // Fetch the first 5 transactions to find the deploy transaction
-    // The deploy transaction usually is the first transaction from the list
-    const apiUrl = this.getApiUrl(
-      `/transactions?contract_address=${address}&order_by=asc&limit=5`,
-    );
-
+    const apiUrl = this.getApiUrl(address);
     const result = await this.sendApiRequest<StarkScanTransactionsResponse>({
       apiUrl,
       responseStruct: StarkScanTransactionsResponseStruct,
       requestName: 'getTransactions',
     });
 
-    for (const data of result.data) {
+    for (const data of result.items) {
       if (this.isDeployTransaction(data)) {
         return this.toTransaction(data);
       }
@@ -176,85 +165,89 @@ export class StarkScanClient extends ApiClient implements IDataClient {
   }
 
   protected isDeployTransaction(tx: StarkScanTransaction): boolean {
-    return tx.transaction_type === TransactionType.DEPLOY_ACCOUNT;
+    return tx.txType === TransactionType.DEPLOY_ACCOUNT;
   }
 
   protected getContractAddress(tx: StarkScanTransaction): string {
-    // backfill the contract address if it is null
-    return tx.contract_address ?? '';
+    return tx.toAddress ?? tx.topTransferTokenAddress ?? '';
   }
 
   protected getSenderAddress(tx: StarkScanTransaction): string {
-    let sender = tx.sender_address;
-
     if (this.isDeployTransaction(tx)) {
-      // if it is a deploy transaction, the contract address is the sender address
-      sender = tx.contract_address as unknown as string;
+      return tx.toAddress ?? tx.fromAddress ?? '';
     }
+    return tx.fromAddress ?? '';
+  }
 
-    // backfill the sender address if it is null
-    return sender ?? '';
+  protected toUnixTimestamp(timestampIso: string | null): number {
+    if (!timestampIso) {
+      return 0;
+    }
+    const ms = Date.parse(timestampIso);
+    return Number.isNaN(ms) ? 0 : Math.floor(ms / 1000);
   }
 
   protected toTransaction(tx: StarkScanTransaction): Transaction {
-    /* eslint-disable @typescript-eslint/naming-convention, camelcase */
     const {
-      transaction_hash: txnHash,
-      transaction_type: txnType,
-      timestamp,
-      transaction_finality_status: finalityStatus,
-      transaction_execution_status: executionStatus,
-      max_fee,
-      actual_fee: actualFee,
-      revert_error,
-      // account_calls representing the calls to invoke from the account contract, it can be multiple
-      // If the transaction is a deploy transaction, the account_calls is a empty array
-      account_calls: calls,
-      version: txnVersion,
+      txHash: txnHash,
+      txType: txnType,
+      timestampIso,
+      finalityStatus,
+      executionStatus,
+      topTransferTokenAddress,
+      topTransferAmount,
+      counterparty,
+      primaryMethod,
     } = tx;
 
     const { chainId } = this.network;
     const senderAddress = this.getSenderAddress(tx);
-    const failureReason = revert_error ?? '';
-    const maxFee = max_fee ?? '0';
+    const timestamp = this.toUnixTimestamp(timestampIso);
+    const txnVersion = 3;
 
     let transaction: V2Transaction;
 
-    // eslint-disable-next-line no-negated-condition
-    if (!this.isDeployTransaction(tx)) {
-      transaction = newInvokeTransaction({
-        txnHash,
-        senderAddress,
-        chainId,
-        maxFee,
-        calls: calls.map((call) => ({
-          contractAddress: call.contract_address,
-          entrypoint: call.selector,
-          calldata: call.calldata,
-        })),
-        txnVersion,
-      });
-    } else {
+    if (this.isDeployTransaction(tx)) {
       transaction = newDeployTransaction({
         txnHash,
         senderAddress,
         chainId,
         txnVersion,
       });
+    } else {
+      const tokenAddress = topTransferTokenAddress ?? tx.toAddress ?? '';
+      const calldata =
+        counterparty && topTransferAmount
+          ? [counterparty, topTransferAmount]
+          : [];
+      transaction = newInvokeTransaction({
+        txnHash,
+        senderAddress,
+        chainId,
+        maxFee: '0',
+        calls: tokenAddress
+          ? [
+              {
+                contractAddress: tokenAddress,
+                entrypoint: primaryMethod ?? 'transfer',
+                calldata,
+              },
+            ]
+          : [],
+        txnVersion,
+      });
     }
 
     return {
       ...transaction,
-      // Override the fields from the StarkScanTransaction
       timestamp,
-      finalityStatus,
-      executionStatus,
-      actualFee,
-      maxFee,
+      finalityStatus: finalityStatus ?? transaction.finalityStatus,
+      executionStatus: executionStatus ?? transaction.executionStatus,
+      actualFee: null,
+      maxFee: this.isDeployTransaction(tx) ? null : '0',
       contractAddress: this.getContractAddress(tx),
-      failureReason,
-      txnType,
+      failureReason: executionStatus === 'REVERTED' ? 'REVERTED' : '',
+      txnType: (txnType as TransactionType) ?? transaction.txnType,
     };
-    /* eslint-enable */
   }
 }

@@ -69,7 +69,9 @@ export abstract class ApiClient {
       url,
       method,
       headers: {
-        'Content-Type': 'application/json',
+        ...(method === HttpMethod.Post
+          ? { 'Content-Type': 'application/json' }
+          : {}),
         ...headers,
       },
       body:
