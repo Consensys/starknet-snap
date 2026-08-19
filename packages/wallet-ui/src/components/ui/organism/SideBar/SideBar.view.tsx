@@ -32,7 +32,7 @@ export const SideBarView = () => {
   const { getStarkName } = useStarkNetSnap();
   const { translate } = useMultiLanguage();
   const currentNework = useCurrentNetwork();
-  const { address, accountName } = useCurrentAccount();
+  const { address, accountName, isDeployed } = useCurrentAccount();
   const erc20TokenBalances = useAppSelector(
     (state) => state.wallet.erc20TokenBalances,
   );
@@ -44,6 +44,7 @@ export const SideBarView = () => {
   const [starkName, setStarkName] = useState<string | undefined>(undefined);
   const ref = useRef<HTMLDivElement>();
   const chainId = currentNework?.chainId;
+  const hideUndeployedAccount = isDeployed !== true;
 
   useEffect(() => {
     if (ref.current) {
@@ -57,7 +58,7 @@ export const SideBarView = () => {
   }, [erc20TokenBalances]);
 
   useEffect(() => {
-    if (address && address !== defaultAccount.address) {
+    if (address && address !== defaultAccount.address && isDeployed === true) {
       getStarkName(address, chainId)
         .then((name) => {
           setStarkName(name);
@@ -67,7 +68,7 @@ export const SideBarView = () => {
         });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [address, chainId]);
+  }, [address, chainId, isDeployed]);
 
   return (
     <Wrapper>
@@ -87,43 +88,51 @@ export const SideBarView = () => {
           address={address}
         />
       </PopIn>
-      <AccountDetails
-        arrowVisible={false}
-        closeTrigger="click"
-        offSet={[60, 0]}
-        content={
-          <AccountDetailsContent>
-            <AccountDetailButton
-              backgroundTransparent
-              iconLeft="qrcode"
-              onClick={() => setAccountDetailsOpen(true)}
-            >
-              {translate('accountDetails')}
-            </AccountDetailButton>
-            <AccountDetailButton
-              backgroundTransparent
-              iconLeft="external-link"
-              onClick={() => openExplorerTab(address, 'contract', chainId)}
-            >
-              {translate('viewOnExplorer')}
-            </AccountDetailButton>
-          </AccountDetailsContent>
-        }
-      >
+      {hideUndeployedAccount ? (
         <AccountImageStyled address={address} connected={connected} />
-      </AccountDetails>
+      ) : (
+        <AccountDetails
+          arrowVisible={false}
+          closeTrigger="click"
+          offSet={[60, 0]}
+          content={
+            <AccountDetailsContent>
+              <AccountDetailButton
+                backgroundTransparent
+                iconLeft="qrcode"
+                onClick={() => setAccountDetailsOpen(true)}
+              >
+                {translate('accountDetails')}
+              </AccountDetailButton>
+              <AccountDetailButton
+                backgroundTransparent
+                iconLeft="external-link"
+                onClick={() => openExplorerTab(address, 'contract', chainId)}
+              >
+                {translate('viewOnExplorer')}
+              </AccountDetailButton>
+            </AccountDetailsContent>
+          }
+        >
+          <AccountImageStyled address={address} connected={connected} />
+        </AccountDetails>
+      )}
 
       <AccountLabel>{accountName}</AccountLabel>
       <RowDiv>
-        <InfoIcon onClick={() => setInfoModalOpen(true)}>i</InfoIcon>
+        {!hideUndeployedAccount && (
+          <InfoIcon onClick={() => setInfoModalOpen(true)}>i</InfoIcon>
+        )}
         <AccountDrawer starkName={starkName} />
-        <PopperTooltip content="Copied!" closeTrigger="click">
-          <CopyIcon
-            onClick={async () => navigator.clipboard.writeText(address)}
-          >
-            <FontAwesomeIcon icon="copy" />
-          </CopyIcon>
-        </PopperTooltip>
+        {!hideUndeployedAccount && (
+          <PopperTooltip content="Copied!" closeTrigger="click">
+            <CopyIcon
+              onClick={async () => navigator.clipboard.writeText(address)}
+            >
+              <FontAwesomeIcon icon="copy" />
+            </CopyIcon>
+          </PopperTooltip>
+        )}
       </RowDiv>
       <DivList ref={ref as any}>
         <AssetsList />

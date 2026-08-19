@@ -24,3 +24,29 @@ export const NoTransactions = styled.p`
   text-align: center;
   color: ${(props) => props.theme.palette.grey.grey1};
 `;
+
+export const DeprecationBox = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 24px;
+  padding: 16px;
+  border-radius: 8px;
+  background-color: ${(props) => props.theme.palette.warning.light};
+  color: ${(props) => props.theme.palette.warning.dark};
+`;
+
+export const DeprecationTitle = styled.h2`
+  ${(props) => props.theme.typography.h4};
+  margin: 0;
+`;
+
+export const DeprecationBody = styled.p`
+  ${(props) => props.theme.typography.p2};
+  margin: 0;
+`;
+
+export const DeprecationLink = styled.a`
+  color: ${(props) => props.theme.palette.info.dark};
+  text-decoration: underline;
+`;

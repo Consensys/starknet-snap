@@ -920,6 +920,18 @@ export async function showDeployRequestModal() {
 }
 
 /**
+ * Displays a modal informing the user that creating a new (undeployed) account
+ * is no longer supported.
+ */
+export async function showAccountCreationDeprecatedModal() {
+  const translate = getTranslator();
+  await alertDialog([
+    heading(translate('accountCreationDeprecated')),
+    text(translate('accountCreationDeprecatedDesc')),
+  ]);
+}
+
+/**
  * Verifies whether the account needs to be upgraded or deployed and throws an error if necessary.
  *
  * @param network - The network object.

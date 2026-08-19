@@ -24,8 +24,17 @@ describe('homepageController', () => {
   }
 
   describe('execute', () => {
-    const setupExecuteTest = async (network: Network, balance = '1000') => {
-      const { account } = await setupAccountController({ network });
+    const setupExecuteTest = async (
+      network: Network,
+      balance = '1000',
+      { isDeployed = true, requireDeploy = false } = {},
+    ) => {
+      const { account, isDeploySpy, isRequireDeploySpy } =
+        await setupAccountController({
+          network,
+          isDeployed,
+          requireDeploy,
+        });
 
       const getBalanceSpy = jest.spyOn(
         MockHomePageController.prototype,
@@ -36,6 +45,8 @@ describe('homepageController', () => {
       return {
         account,
         getBalanceSpy,
+        isDeploySpy,
+        isRequireDeploySpy,
       };
     };
 
@@ -94,6 +105,73 @@ describe('homepageController', () => {
         currentNetwork,
         account.address,
       );
+    });
+
+    const deprecationHomepage = {
+      content: {
+        children: [
+          {
+            type: 'heading',
+            value: 'New accounts are no longer supported.',
+          },
+          {
+            type: 'text',
+            value:
+              'Looking for a Starknet wallet? Find other options at [starknet.io/wallets](https://www.starknet.io/wallets)',
+          },
+        ],
+        type: 'panel',
+      },
+    };
+
+    it('returns the deprecation notice and does not include the address if the account is not deployed', async () => {
+      await loadLocale();
+
+      const { getBalanceSpy, account } = await setupExecuteTest(
+        currentNetwork,
+        '100',
+        {
+          isDeployed: false,
+        },
+      );
+
+      const homepageController = new MockHomePageController();
+      const result = await homepageController.execute();
+
+      expect(result).toStrictEqual(deprecationHomepage);
+      expect(JSON.stringify(result)).not.toContain(account.address);
+      expect(getBalanceSpy).not.toHaveBeenCalled();
+    });
+
+    it('returns the deprecation notice if the account requires deploy', async () => {
+      await loadLocale();
+
+      const { getBalanceSpy } = await setupExecuteTest(currentNetwork, '100', {
+        isDeployed: true,
+        requireDeploy: true,
+      });
+
+      const homepageController = new MockHomePageController();
+      const result = await homepageController.execute();
+
+      expect(result).toStrictEqual(deprecationHomepage);
+      expect(getBalanceSpy).not.toHaveBeenCalled();
+    });
+
+    it('returns the deprecation notice if the deployment check fails', async () => {
+      await loadLocale();
+
+      const { getBalanceSpy, isDeploySpy } = await setupExecuteTest(
+        currentNetwork,
+        '100',
+      );
+      isDeploySpy.mockReset().mockRejectedValue(new Error('rpc error'));
+
+      const homepageController = new MockHomePageController();
+      const result = await homepageController.execute();
+
+      expect(result).toStrictEqual(deprecationHomepage);
+      expect(getBalanceSpy).not.toHaveBeenCalled();
     });
 
     it('throws `Failed to initialize Snap HomePage` error if an error was thrown', async () => {

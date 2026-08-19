@@ -34,7 +34,7 @@ export const AccountItem = ({
   onIconButtonClick,
 }: Props) => {
   const { translate } = useMultiLanguage();
-  const { address, accountName } = account;
+  const { address, accountName, isDeployed } = account;
   const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null);
 
   const preventDefaultMouseEvent = (event: React.MouseEvent) => {
@@ -84,7 +84,9 @@ export const AccountItem = ({
         <AccountImageStyled size={30} address={address} />
         <AccountDetailsWrapper>
           <AccountName>{accountName}</AccountName>
-          <AccountAddress>{formatAddress(address)}</AccountAddress>
+          {isDeployed === true && (
+            <AccountAddress>{formatAddress(address)}</AccountAddress>
+          )}
         </AccountDetailsWrapper>
       </AccountInfoWrapper>
       <div>
@@ -106,10 +108,12 @@ export const AccountItem = ({
               <span>{visible ? translate('hide') : translate('unhide')}</span>
             </MenuItem>
           )}
-          <MenuItem onClick={handleCopyAddress}>
-            <VisibilityIcon icon="clone" />
-            <span>{translate('copyToClipboard')}</span>
-          </MenuItem>
+          {isDeployed === true && (
+            <MenuItem onClick={handleCopyAddress}>
+              <VisibilityIcon icon="clone" />
+              <span>{translate('copyToClipboard')}</span>
+            </MenuItem>
+          )}
         </Menu>
       </div>
     </Wrapper>

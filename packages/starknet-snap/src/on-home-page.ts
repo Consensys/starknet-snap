@@ -3,6 +3,7 @@ import {
   SnapError,
   copyable,
   divider,
+  heading,
   panel,
   row,
   text,
@@ -16,6 +17,8 @@ import { BlockIdentifierEnum, ETHER_MAINNET } from './utils/constants';
 import { createAccountService } from './utils/factory';
 import { getTranslator } from './utils/locale';
 import { getBalance } from './utils/starknetUtils';
+import type { Account } from './wallet/account';
+
 /**
  * The onHomePage handler to execute the home page event operation.
  */
@@ -38,7 +41,22 @@ export class HomePageController {
 
       const accountService = createAccountService(network);
 
-      const account = await accountService.getCurrentAccount();
+      let account;
+      try {
+        account = await accountService.getCurrentAccount();
+      } catch (error) {
+        logger.error(
+          'Failed to get current account for homepage',
+          toJson(error),
+        );
+        return this.buildDeprecationComponents();
+      }
+
+      // Never render a copyable address unless the contract is confirmed
+      // deployed on-chain. Matches wallet-ui (`isDeployed !== true`).
+      if (!(await this.shouldShowAccountAddress(account))) {
+        return this.buildDeprecationComponents();
+      }
 
       const balance = await this.getBalance(network, account.address);
 
@@ -51,6 +69,30 @@ export class HomePageController {
       logger.error('Failed to execute onHomePage', toJson(error));
 
       throw new SnapError('Failed to initialize Snap HomePage');
+    }
+  }
+
+  /**
+   * Whether the homepage may display the account address.
+   * Fail closed: any uncertainty hides the address so funds cannot be sent to it.
+   *
+   * @param account - The current snap account.
+   * @returns True only if the account contract is deployed.
+   */
+  protected async shouldShowAccountAddress(account: Account): Promise<boolean> {
+    try {
+      const [{ isDeployed, deployRequired }, liveDeployed] = await Promise.all([
+        account.serialize(),
+        account.accountContract.isDeployed(true),
+      ]);
+
+      return isDeployed === true && liveDeployed && deployRequired !== true;
+    } catch (error) {
+      logger.error(
+        'Failed to determine homepage account deployment status',
+        toJson(error),
+      );
+      return false;
     }
   }
 
@@ -74,6 +116,16 @@ export class HomePageController {
       ethers.BigNumber.from(balance),
       ethToken.decimals,
     );
+  }
+
+  protected buildDeprecationComponents(): OnHomePageResponse {
+    const translate = getTranslator();
+    return {
+      content: panel([
+        heading(translate('accountCreationDeprecated')),
+        text(translate('accountCreationDeprecatedDesc')),
+      ]),
+    };
   }
 
   protected buildComponents(

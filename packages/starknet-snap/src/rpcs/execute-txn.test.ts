@@ -22,6 +22,7 @@ import {
   InvalidRequestParamsError,
 } from '../utils/exceptions';
 import * as formatUtils from '../utils/formatter-utils';
+import * as snapUtils from '../utils/snapUtils';
 import * as starknetUtils from '../utils/starknetUtils';
 import {
   feeTokenToTransactionVersion,
@@ -134,9 +135,14 @@ const mockGenerateExecuteTxnFlow = () => {
 
 describe('ExecuteTxn', () => {
   describe('confirmTransaction', () => {
-    const setupConfirmTransactionTest = async (confirm = true) => {
+    const setupConfirmTransactionTest = async ({
+      confirm = true,
+      includeDeploy = false,
+    }: {
+      confirm?: boolean;
+      includeDeploy?: boolean;
+    } = {}) => {
       const network = STARKNET_SEPOLIA_TESTNET_NETWORK;
-      const includeDeploy = true;
       const txnVersion = ETransactionVersion.V3;
       const { calls } = callsExamples.multipleCalls;
 
@@ -254,11 +260,35 @@ describe('ExecuteTxn', () => {
     });
 
     it('throws UserRejectedOpError if user denied the operation', async () => {
-      const { request, rpc } = await setupConfirmTransactionTest(false);
+      const { request, rpc } = await setupConfirmTransactionTest({
+        confirm: false,
+      });
 
       await expect(rpc.confirmTransaction(request)).rejects.toThrow(
         UserRejectedOpError,
       );
+    });
+
+    it('shows the deprecation alert and throws UserRejectedOpError if the account is not deployed', async () => {
+      const { request, rpc } = await setupConfirmTransactionTest({
+        includeDeploy: true,
+      });
+      const generateExecuteTxnFlowSpy = jest.spyOn(
+        uiUtils,
+        'generateExecuteTxnFlow',
+      );
+      const showAccountCreationDeprecatedModalSpy = jest.spyOn(
+        snapUtils,
+        'showAccountCreationDeprecatedModal',
+      );
+      showAccountCreationDeprecatedModalSpy.mockResolvedValue();
+
+      await expect(rpc.confirmTransaction(request)).rejects.toThrow(
+        UserRejectedOpError,
+      );
+
+      expect(showAccountCreationDeprecatedModalSpy).toHaveBeenCalledTimes(1);
+      expect(generateExecuteTxnFlowSpy).not.toHaveBeenCalled();
     });
   });
 
@@ -549,74 +579,26 @@ describe('ExecuteTxn', () => {
       });
     });
 
-    it('executes a transaction and return the transaction hash with deploy account', async () => {
+    it('throws UserRejectedOpError and does not deploy if the account is not deployed', async () => {
       const {
         rpc,
         request,
-        sendTansactionResponse,
-        account: { address },
-        deployAccountResponse,
         deployAccountSpy,
-        saveDataToStateSpy,
-        transactionRequest,
         sendTransactionSpy,
+        confirmTransactionSpy,
       } = await setupExecuteTest(false);
-      const updatedTxnVersion = feeTokenToTransactionVersion(
-        transactionRequest.selectedFeeToken,
+      confirmTransactionSpy.mockRestore();
+      const showAccountCreationDeprecatedModalSpy = jest.spyOn(
+        snapUtils,
+        'showAccountCreationDeprecatedModal',
       );
-      const { maxFee: updatedMaxFee, resourceBounds: updatedResourceBounds } =
-        transactionRequest;
-      const { calls, details } = request;
+      showAccountCreationDeprecatedModalSpy.mockResolvedValue();
 
-      const result = await rpc.execute(request);
+      await expect(rpc.execute(request)).rejects.toThrow(UserRejectedOpError);
 
-      expect(result).toStrictEqual({
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        transaction_hash: sendTansactionResponse,
-      });
-      expect(deployAccountSpy).toHaveBeenCalledWith({
-        address,
-      });
-      expect(sendTransactionSpy).toHaveBeenCalledWith({
-        address,
-        calls,
-        details: {
-          ...details,
-          nonce: 1,
-          version: updatedTxnVersion,
-          /* eslint-disable @typescript-eslint/naming-convention */
-          resourceBounds: {
-            l1_gas: {
-              max_amount: BigInt(updatedResourceBounds.l1_gas.max_amount),
-              max_price_per_unit: BigInt(
-                updatedResourceBounds.l1_gas.max_price_per_unit,
-              ),
-            },
-            l1_data_gas: {
-              max_amount: BigInt(
-                updatedResourceBounds.l1_data_gas?.max_amount ?? '0',
-              ),
-              max_price_per_unit: BigInt(
-                updatedResourceBounds.l1_data_gas?.max_price_per_unit ?? '0',
-              ),
-            },
-            l2_gas: {
-              max_amount: BigInt(updatedResourceBounds.l2_gas.max_amount),
-              max_price_per_unit: BigInt(
-                updatedResourceBounds.l2_gas.max_price_per_unit,
-              ),
-            },
-          },
-          /* eslint-enable @typescript-eslint/naming-convention */
-        },
-      });
-      expect(saveDataToStateSpy).toHaveBeenCalledWith({
-        txnHashForDeploy: deployAccountResponse,
-        txnHashForExecute: sendTansactionResponse,
-        maxFee: updatedMaxFee,
-        address,
-        calls,
-      });
+      expect(showAccountCreationDeprecatedModalSpy).toHaveBeenCalledTimes(1);
+      expect(deployAccountSpy).not.toHaveBeenCalled();
+      expect(sendTransactionSpy).not.toHaveBeenCalled();
     });
   });
 

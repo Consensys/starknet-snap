@@ -16,6 +16,15 @@
     "accountDeployedSuccessfully": {
       "message": "Compte déployé avec succès."
     },
+    "accountCreationDeprecated": {
+      "message": "Les nouveaux comptes ne sont plus pris en charge."
+    },
+    "accountCreationDeprecatedDesc": {
+      "message": "Vous cherchez un portefeuille Starknet ? Découvrez d'autres options sur"
+    },
+    "switchToDeployedAccount": {
+      "message": "Si vous avez un compte déjà déployé, basculez vers celui-ci."
+    },
     "accountDetails": {
       "message": "Détails du compte"
     },
