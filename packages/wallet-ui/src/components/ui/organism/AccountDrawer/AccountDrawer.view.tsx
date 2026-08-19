@@ -35,9 +35,7 @@ export const AccountDrawerView = ({ starkName }: Props) => {
         iconRight="angle-down"
         onClick={() => setAccountListModalOpen(true)}
       >
-        {isDeployed === true
-          ? formatAddress(address, starkName)
-          : accountName}
+        {isDeployed === true ? formatAddress(address, starkName) : accountName}
       </Drawer>
     </>
   );

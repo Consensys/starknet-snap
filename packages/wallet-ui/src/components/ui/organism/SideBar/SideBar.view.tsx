@@ -58,11 +58,7 @@ export const SideBarView = () => {
   }, [erc20TokenBalances]);
 
   useEffect(() => {
-    if (
-      address &&
-      address !== defaultAccount.address &&
-      isDeployed === true
-    ) {
+    if (address && address !== defaultAccount.address && isDeployed === true) {
       getStarkName(address, chainId)
         .then((name) => {
           setStarkName(name);
