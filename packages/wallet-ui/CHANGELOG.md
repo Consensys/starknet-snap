@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
 
+## [1.31.0](https://github.com/Consensys/starknet-snap/compare/wallet-ui-v1.30.0...wallet-ui-v1.31.0) (2026-08-19)
+
+
+### Features
+
+* deprecation notice for new account ([#582](https://github.com/Consensys/starknet-snap/issues/582)) ([26a70fb](https://github.com/Consensys/starknet-snap/commit/26a70fbcba911d10dfcddf59ed6148d3f17a2530))
+
+
+### Bug Fixes
+
+* Starknet breaking changes ([#577](https://github.com/Consensys/starknet-snap/issues/577)) ([1948a71](https://github.com/Consensys/starknet-snap/commit/1948a719f77c8d34ef40a07a0f152378a06b4382))
+
 ## [1.30.0](https://github.com/Consensys/starknet-snap/compare/wallet-ui-v1.29.0...wallet-ui-v1.30.0) (2025-07-16)
 
 
