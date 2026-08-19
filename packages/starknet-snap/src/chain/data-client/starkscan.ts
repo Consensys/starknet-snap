@@ -207,7 +207,14 @@ export class StarkScanClient extends ApiClient implements IDataClient {
 
     let transaction: V2Transaction;
 
-    if (!this.isDeployTransaction(tx)) {
+    if (this.isDeployTransaction(tx)) {
+      transaction = newDeployTransaction({
+        txnHash,
+        senderAddress,
+        chainId,
+        txnVersion,
+      });
+    } else {
       const tokenAddress = topTransferTokenAddress ?? tx.toAddress ?? '';
       const calldata =
         counterparty && topTransferAmount
@@ -227,13 +234,6 @@ export class StarkScanClient extends ApiClient implements IDataClient {
               },
             ]
           : [],
-        txnVersion,
-      });
-    } else {
-      transaction = newDeployTransaction({
-        txnHash,
-        senderAddress,
-        chainId,
         txnVersion,
       });
     }

@@ -101,10 +101,10 @@ describe('StarkScanClient', () => {
 
   const mockTxByType = (txnType: TransactionType, address: string) => {
     const mockResponse = generateStarkScanTransactions({
-        address,
-        txnTypes: [txnType],
-        cnt: 1,
-      });
+      address,
+      txnTypes: [txnType],
+      cnt: 1,
+    });
     const tx = mockResponse.items[0];
     return tx;
   };
@@ -344,13 +344,11 @@ describe('StarkScanClient', () => {
       const client = createMockClient();
       const result = client.toTransaction(mockTx);
 
-      const { contract_address: contract, calldata: contractCallData } = {
-        contract_address: mockTx.topTransferTokenAddress as string,
-        calldata:
-          mockTx.counterparty && mockTx.topTransferAmount
-            ? [mockTx.counterparty, mockTx.topTransferAmount]
-            : [],
-      };
+      const contract = mockTx.topTransferTokenAddress as string;
+      const contractCallData =
+        mockTx.counterparty && mockTx.topTransferAmount
+          ? [mockTx.counterparty, mockTx.topTransferAmount]
+          : [];
 
       expect(result).toStrictEqual({
         txnHash: mockTx.txHash,
@@ -458,18 +456,14 @@ describe('StarkScanClient', () => {
       const mockTx = await prepareMockTx();
 
       const client = createMockClient();
-      expect(client.getSenderAddress(mockTx)).toStrictEqual(
-        mockTx.fromAddress,
-      );
+      expect(client.getSenderAddress(mockTx)).toStrictEqual(mockTx.fromAddress);
     });
 
     it('returns the contract address if it is a deploy transaction', async () => {
       const mockTx = await prepareMockTx(TransactionType.DEPLOY_ACCOUNT);
 
       const client = createMockClient();
-      expect(client.getSenderAddress(mockTx)).toStrictEqual(
-        mockTx.toAddress,
-      );
+      expect(client.getSenderAddress(mockTx)).toStrictEqual(mockTx.toAddress);
     });
 
     it('returns an empty string if the sender address is null', async () => {
@@ -479,7 +473,6 @@ describe('StarkScanClient', () => {
       expect(
         client.getSenderAddress({
           ...mockTx,
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           fromAddress: null,
         }),
       ).toBe('');

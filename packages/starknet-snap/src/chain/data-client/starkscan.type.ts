@@ -1,12 +1,5 @@
 import type { Infer } from 'superstruct';
-import {
-  array,
-  boolean,
-  nullable,
-  number,
-  object,
-  string,
-} from 'superstruct';
+import { array, boolean, nullable, number, object, string } from 'superstruct';
 
 export const StarkScanTransactionStruct = object({
   blockNumber: number(),
