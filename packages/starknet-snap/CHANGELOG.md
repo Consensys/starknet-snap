@@ -10,7 +10,7 @@
 
 ### Bug Fixes
 
-* Starknet breaking changes ([#577](https://github.com/Consensys/starknet-snap/issues/577)) ([1948a71](https://github.com/Consensys/starknet-snap/commit/1948a719f77c8d34ef40a07a0f152378a06b4382))
+* starknet breaking changes ([#577](https://github.com/Consensys/starknet-snap/issues/577)) ([1948a71](https://github.com/Consensys/starknet-snap/commit/1948a719f77c8d34ef40a07a0f152378a06b4382))
 * starkscan api integration, update response structure and fix timestamp handling  ([#581](https://github.com/Consensys/starknet-snap/issues/581)) ([b7e4c65](https://github.com/Consensys/starknet-snap/commit/b7e4c6558ce7d51ebe6a405eadbd23bac7aa085c))
 
 ## [4.2.0](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v4.1.0...starknet-snap-v4.2.0) (2026-01-27)
