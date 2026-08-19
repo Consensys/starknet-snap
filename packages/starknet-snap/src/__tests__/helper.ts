@@ -41,7 +41,6 @@ import {
   PROXY_CONTRACT_HASH,
 } from '../utils/constants';
 import { grindKey } from '../utils/keyPair';
-import { invokeTx } from './fixture/stark-scan-example.json';
 
 /* eslint-disable */
 export type StarknetAccount = AccContract & {
@@ -537,8 +536,8 @@ export function generateStarkScanTransactions({
   const totalRecordCnt = txnTypes.includes(TransactionType.DEPLOY_ACCOUNT)
     ? cnt - 1
     : cnt;
-  const tokenAddress = invokeTx.account_calls[0].contract_address;
-  const transferCalldata = invokeTx.account_calls[0].calldata;
+  const tokenAddress = PRELOADED_TOKENS[0].address;
+  const transferCalldata = [address, '1000'];
 
   for (let i = 0; i < totalRecordCnt; i++) {
     const timestampIso = toIso(transactionStartFrom);
