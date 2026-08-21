@@ -22,6 +22,7 @@ The Starknet Snap allows users to **deploy Starknet accounts, make transactions 
     - [Quickstart](#quickstart)
     - [Snap](#snap)
     - [UI](#ui)
+  - [Testing](#testing-dev-snap-on-extarnal-dapps)
 - [Dapp Integration Guide](#dapp-integration-guide)
   - [How to Install](#how-to-install)
   - [Interact with Starknet Snap's API](#interact-with-starknet-snaps-api)
@@ -111,6 +112,69 @@ yarn workspace wallet-ui start
 This will launch the following: 
 
 - Wallet UI dapp: http://localhost:3000/
+
+### Testing Dev Snap on Extarnal dApps
+
+When interacting with dApps in the Starknet ecosystem, the Snap is - most of the times - consumed through the [`get-starknet`](https://github.com/starknet-io/get-starknet) middleware using **Webpack Module Federation**, which dynamically loads the Snap bridge from:
+
+```
+https://snaps.consensys.io/starknet/get-starknet/v1/remoteEntry.js
+```
+
+This path is **hardcoded in the `get-starknet` npm package**, making it difficult to test a custom Snap version during development.
+
+This setup is useful when you want to test a **new version of the Snap** in **external dApps** (such as [StarkGate](https://starkgate.starknet.io/)) using **MetaMask Flask**, **without requiring allowlisting of the new Snap version**.
+
+To do this, you can use [`mitmproxy`](https://mitmproxy.org/) to **intercept and rewrite** production requests to the Snap CDN and point them to your development deployment instead.
+
+#### ✅ Use Case
+
+- You're testing a Snap update (e.g. for Starknet v0.14)
+- You want to test it inside external dApps that load `get-starknet` from the production URL
+- You’re using **MetaMask Flask** to bypass allowlist enforcement
+- You want to avoid publishing or allowlisting a new Snap version just for testing
+
+#### ⚙️ How to Set It Up
+
+1. **Install `mitmproxy`**:
+   ```bash
+   brew install mitmproxy
+   ```
+
+2. **Create a `rewrite.py` script**:
+   ```python
+   from mitmproxy import http
+
+   def request(flow: http.HTTPFlow) -> None:
+       if "snaps.consensys.io/starknet/get-starknet" in flow.request.pretty_url:
+           flow.request.host = "dev.snaps.consensys.io"
+   ```
+
+3. **Run mitmproxy with your script**:
+   ```bash
+   mitmproxy -s rewrite.py
+   ```
+
+4. **Configure your system or browser to use `localhost:8080` as an HTTP and HTTPS proxy**
+
+5. **Visit [`http://mitm.it`](http://mitm.it)** in your browser, download the **macOS certificate**, and add it to your **System Keychain** as “Always Trust”
+
+6. Once set up, when the dApp or MetaMask Flask loads:
+   ```
+   https://snaps.consensys.io/starknet/get-starknet/v1/remoteEntry.js
+   ```
+   it will **silently be served** from:
+   ```
+   https://dev.snaps.consensys.io/starknet/get-starknet/v1/remoteEntry.js
+   ```
+
+#### 🔒 Notes
+
+- This setup only works with **MetaMask Flask**, which does not enforce Snap allowlisting.
+- External dApps will think they’re loading the production Snap, but under the hood they’re executing your dev version.
+- This is a great way to validate Snap changes in real-world scenarios without needing Snap Registry changes or full deployment.
+
+
 
 ## Dapp Integration Guide
 
