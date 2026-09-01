@@ -348,6 +348,7 @@ describe('ExecuteTxn', () => {
         publicKey,
         privateKey,
         CAIRO_VERSION,
+        { version: ETransactionVersion.V3 },
       );
     });
 

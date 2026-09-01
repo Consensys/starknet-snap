@@ -50,3 +50,8 @@ export const DeprecationLink = styled.a`
   color: ${(props) => props.theme.palette.info.dark};
   text-decoration: underline;
 `;
+
+export const DeprecationDeployButton = styled.div`
+  margin-top: 8px;
+  display: flex;
+`;

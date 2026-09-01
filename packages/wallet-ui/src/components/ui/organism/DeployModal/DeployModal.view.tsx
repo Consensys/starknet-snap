@@ -1,13 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useMultiLanguage, useStarkNetSnap } from 'services';
-import { useAppSelector, useAppDispatch } from 'hooks/redux';
+import { useAppSelector, useAppDispatch, useCurrentAccount } from 'hooks';
 import Toastr from 'toastr2';
 
 import { Modal } from 'components/ui/atom/Modal';
 import { setDeployModalVisible } from 'slices/modalSlice';
 import { openExplorerTab, shortenAddress } from 'utils/utils';
 import { Txnlink } from './DeployModal.style';
-import { AccountAddressView } from 'components/ui/molecule/AccountAddress/AccountAddress.view';
 
 interface Props {
   address: string;
@@ -22,8 +21,10 @@ enum Stage {
 
 export const DeployModalView = ({ address }: Props) => {
   const dispatch = useAppDispatch();
-  const { deployAccount, waitForAccountCreation } = useStarkNetSnap();
+  const { deployAccount, waitForAccountCreation, initWalletData } =
+    useStarkNetSnap();
   const { translate } = useMultiLanguage();
+  const { addressIndex } = useCurrentAccount();
 
   const [txnHash, setTxnHash] = useState('');
   const [stage, setStage] = useState(Stage.INIT);
@@ -33,7 +34,7 @@ export const DeployModalView = ({ address }: Props) => {
 
   const onDeploy = async () => {
     try {
-      const resp = await deployAccount(address, '0', chainId);
+      const resp = await deployAccount(chainId, { addressIndex });
 
       if (resp === false) {
         return;
@@ -69,6 +70,7 @@ export const DeployModalView = ({ address }: Props) => {
     if (stage === Stage.SUCCESS) {
       toastr.success(translate('accountDeployedSuccessfully'));
       dispatch(setDeployModalVisible(false));
+      void initWalletData({ chainId });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stage, dispatch]);
@@ -82,17 +84,15 @@ export const DeployModalView = ({ address }: Props) => {
               {translate('nonZeroBalanceOnCairo0')}
               <br />
               <br />
-              <center>
-                <AccountAddressView address={address}></AccountAddressView>
-              </center>
-              <br />
               {translate('deploymentNecessaryToProceedPart1')} <br />
               <br />
               {translate('deploymentNecessaryToProceedPart2')} <br />
               <br />
               {translate('deploymentNecessaryToProceedPart3')}
             </Modal.Body>
-            <Modal.Button onClick={onDeploy}>Deploy</Modal.Button>
+            <Modal.Button onClick={onDeploy}>
+              {translate('deploy')}
+            </Modal.Button>
           </>
         );
       case Stage.WAITING_FOR_TXN:

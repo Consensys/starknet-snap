@@ -382,21 +382,20 @@ export const useStarkNetSnap = () => {
   };
 
   const deployAccount = async (
-    contractAddress: string,
-    maxFee: string,
     chainId: string,
+    { addressIndex }: { addressIndex: number },
   ) => {
     dispatch(enableLoadingWithMessage('Deploying account...'));
     try {
       const response = await invokeSnap<{
         transaction_hash: string;
+        address?: string;
       }>({
-        method: 'starkNet_createAccountLegacy',
+        method: 'starkNet_createAccount',
         params: {
-          contractAddress,
-          maxFee,
           chainId,
           deploy: true,
+          addressIndex,
         },
       });
       return response;

@@ -1,6 +1,6 @@
 import { type Json } from '@metamask/snaps-sdk';
 import type { Call } from 'starknet';
-import { TransactionType } from 'starknet';
+import { ETransactionVersion, TransactionType } from 'starknet';
 import type { Infer } from 'superstruct';
 import { object, string, assign, optional, any } from 'superstruct';
 import { v4 as uuidv4 } from 'uuid';
@@ -336,6 +336,7 @@ export class ExecuteTxnRpc extends AccountRpcController<
       publicKey,
       privateKey,
       CAIRO_VERSION,
+      { version: ETransactionVersion.V3 },
     );
 
     if (contractAddress !== address) {

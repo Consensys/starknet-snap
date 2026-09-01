@@ -25,6 +25,12 @@
     "switchToDeployedAccount": {
       "message": "If you have a deployed account, switch to it."
     },
+    "deployAccountRiskWarning": {
+      "message": "If you already sent funds to this undeployed account, you can deploy it to unlock them. Deploying requires a STRK fee balance on the account. New accounts are still not supported."
+    },
+    "deployAccountRiskAccept": {
+      "message": "I understand the risk — deploy my account"
+    },
     "accountDetails": {
       "message": "Account details"
     },

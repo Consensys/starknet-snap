@@ -1,5 +1,6 @@
 import { heading, panel, DialogType } from '@metamask/snaps-sdk';
 import type { CairoVersion, EstimateFeeResponseOverhead } from 'starknet';
+import { ETransactionVersion } from 'starknet';
 
 import type {
   ApiParamsWithKeyDeriver,
@@ -25,6 +26,10 @@ import {
   estimateAccountDeployFee,
 } from './utils/starknetUtils';
 import { newDeployTransaction } from './utils/transaction';
+
+const DEPLOY_ACCOUNT_DETAILS = {
+  version: ETransactionVersion.V3,
+};
 
 /**
  * Create an starknet account.
@@ -81,6 +86,7 @@ export async function createAccount(
             publicKey,
             privateKey,
             cairoVersion,
+            DEPLOY_ACCOUNT_DETAILS,
           );
         logger.log(
           `estimateAccountDeployFee:\nestimateDeployFee: ${toJson(
@@ -123,6 +129,7 @@ export async function createAccount(
         publicKey,
         privateKey,
         cairoVersion,
+        DEPLOY_ACCOUNT_DETAILS,
       );
 
       if (deployResp.contract_address && deployResp.transaction_hash) {
@@ -144,9 +151,8 @@ export async function createAccount(
           txnHash: deployResp.transaction_hash,
           chainId: network.chainId,
           senderAddress: deployResp.contract_address,
-          // whenever create account is happen, we pay the fee in ETH, so txnVersion is 1
-          // FIXME: it should allow to pay the fee in STRK
-          txnVersion: 1,
+          // Deploy account fees are paid in STRK via transaction version 3
+          txnVersion: 3,
         });
 
         await upsertTransaction(txn, wallet, saveMutex);

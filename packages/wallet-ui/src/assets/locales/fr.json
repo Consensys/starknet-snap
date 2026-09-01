@@ -25,6 +25,12 @@
     "switchToDeployedAccount": {
       "message": "Si vous avez un compte déjà déployé, basculez vers celui-ci."
     },
+    "deployAccountRiskWarning": {
+      "message": "Si vous avez déjà envoyé des fonds vers ce compte non déployé, vous pouvez le déployer pour les débloquer. Le déploiement nécessite un solde STRK sur le compte pour les frais. Les nouveaux comptes ne sont toujours pas pris en charge."
+    },
+    "deployAccountRiskAccept": {
+      "message": "Je comprends le risque — déployer mon compte"
+    },
     "accountDetails": {
       "message": "Détails du compte"
     },
