@@ -7,6 +7,7 @@ import { Modal } from 'components/ui/atom/Modal';
 import { setDeployModalVisible } from 'slices/modalSlice';
 import { openExplorerTab, shortenAddress } from 'utils/utils';
 import { Txnlink } from './DeployModal.style';
+import { AccountAddressView } from 'components/ui/molecule/AccountAddress/AccountAddress.view';
 
 interface Props {
   address: string;
@@ -21,8 +22,7 @@ enum Stage {
 
 export const DeployModalView = ({ address }: Props) => {
   const dispatch = useAppDispatch();
-  const { deployAccount, waitForAccountCreation, initWalletData } =
-    useStarkNetSnap();
+  const { deployAccount, waitForAccountCreation } = useStarkNetSnap();
   const { translate } = useMultiLanguage();
   const { addressIndex } = useCurrentAccount();
 
@@ -34,7 +34,12 @@ export const DeployModalView = ({ address }: Props) => {
 
   const onDeploy = async () => {
     try {
-      const resp = await deployAccount(chainId, { addressIndex });
+      // Cairo 0 undeployed accounts must use the legacy deploy path so the
+      // counterfactual address (and ETH-funded balance) stay unchanged.
+      const resp = await deployAccount(chainId, {
+        addressIndex,
+        legacy: true,
+      });
 
       if (resp === false) {
         return;
@@ -70,7 +75,6 @@ export const DeployModalView = ({ address }: Props) => {
     if (stage === Stage.SUCCESS) {
       toastr.success(translate('accountDeployedSuccessfully'));
       dispatch(setDeployModalVisible(false));
-      void initWalletData({ chainId });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stage, dispatch]);
@@ -84,15 +88,17 @@ export const DeployModalView = ({ address }: Props) => {
               {translate('nonZeroBalanceOnCairo0')}
               <br />
               <br />
+              <center>
+                <AccountAddressView address={address}></AccountAddressView>
+              </center>
+              <br />
               {translate('deploymentNecessaryToProceedPart1')} <br />
               <br />
               {translate('deploymentNecessaryToProceedPart2')} <br />
               <br />
               {translate('deploymentNecessaryToProceedPart3')}
             </Modal.Body>
-            <Modal.Button onClick={onDeploy}>
-              {translate('deploy')}
-            </Modal.Button>
+            <Modal.Button onClick={onDeploy}>Deploy</Modal.Button>
           </>
         );
       case Stage.WAITING_FOR_TXN:

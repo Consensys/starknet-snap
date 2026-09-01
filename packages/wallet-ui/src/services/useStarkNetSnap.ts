@@ -383,7 +383,13 @@ export const useStarkNetSnap = () => {
 
   const deployAccount = async (
     chainId: string,
-    { addressIndex }: { addressIndex: number },
+    {
+      addressIndex,
+      legacy = false,
+    }: {
+      addressIndex: number;
+      legacy?: boolean;
+    },
   ) => {
     dispatch(enableLoadingWithMessage('Deploying account...'));
     try {
@@ -391,7 +397,9 @@ export const useStarkNetSnap = () => {
         transaction_hash: string;
         address?: string;
       }>({
-        method: 'starkNet_createAccount',
+        method: legacy
+          ? 'starkNet_createAccountLegacy'
+          : 'starkNet_createAccount',
         params: {
           chainId,
           deploy: true,

@@ -27,7 +27,7 @@ import {
 } from './utils/starknetUtils';
 import { newDeployTransaction } from './utils/transaction';
 
-const DEPLOY_ACCOUNT_DETAILS = {
+const DEPLOY_ACCOUNT_V3_DETAILS = {
   version: ETransactionVersion.V3,
 };
 
@@ -73,6 +73,15 @@ export async function createAccount(
     );
 
     if (deploy) {
+      // Cairo 1 deploys pay fees in STRK (tx v3). Cairo 0 legacy keeps the
+      // previous ETH fee path so its behavior stays unchanged.
+      const isLegacyCairo0 = cairoVersion === CAIRO_VERSION_LEGACY;
+      const deployDetails = isLegacyCairo0
+        ? undefined
+        : DEPLOY_ACCOUNT_V3_DETAILS;
+      const feeTokenSymbol = isLegacyCairo0 ? 'ETH' : 'STRK';
+      const txnVersion = isLegacyCairo0 ? 1 : 3;
+
       if (!silentMode) {
         logger.log(
           `estimateAccountDeployFee:\ncontractAddress = ${contractAddress}\npublicKey = ${publicKey}\naddressIndex = ${addressIndexInUsed}`,
@@ -86,7 +95,7 @@ export async function createAccount(
             publicKey,
             privateKey,
             cairoVersion,
-            DEPLOY_ACCOUNT_DETAILS,
+            deployDetails,
           );
         logger.log(
           `estimateAccountDeployFee:\nestimateDeployFee: ${toJson(
@@ -102,6 +111,7 @@ export async function createAccount(
           contractAddress,
           maxFee,
           network,
+          feeTokenSymbol,
         );
 
         const response = await wallet.request({
@@ -129,7 +139,7 @@ export async function createAccount(
         publicKey,
         privateKey,
         cairoVersion,
-        DEPLOY_ACCOUNT_DETAILS,
+        deployDetails,
       );
 
       if (deployResp.contract_address && deployResp.transaction_hash) {
@@ -141,7 +151,7 @@ export async function createAccount(
           derivationPath,
           deployTxnHash: deployResp.transaction_hash,
           chainId: network.chainId,
-          upgradeRequired: cairoVersion === CAIRO_VERSION_LEGACY,
+          upgradeRequired: isLegacyCairo0,
           deployRequired: false,
         };
 
@@ -151,8 +161,7 @@ export async function createAccount(
           txnHash: deployResp.transaction_hash,
           chainId: network.chainId,
           senderAddress: deployResp.contract_address,
-          // Deploy account fees are paid in STRK via transaction version 3
-          txnVersion: 3,
+          txnVersion,
         });
 
         await upsertTransaction(txn, wallet, saveMutex);

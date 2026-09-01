@@ -240,6 +240,7 @@ export function getNetworkTxt(network: Network) {
  * @param senderAddress
  * @param maxFee
  * @param network
+ * @param feeTokenSymbol - Fee token shown in the confirmation dialog. Defaults to ETH.
  */
 export function getSendTxnText(
   state: SnapState,
@@ -249,6 +250,7 @@ export function getSendTxnText(
   senderAddress: string,
   maxFee: BigNumberish,
   network: Network,
+  feeTokenSymbol = 'ETH',
 ): Component[] {
   // Retrieve the ERC-20 token from snap state for confirmation display purpose
   const translate = getTranslator();
@@ -263,7 +265,7 @@ export function getSendTxnText(
   );
   addDialogTxt(
     components,
-    `${translate('estimatedGasFee')}(ETH)`,
+    `${translate('estimatedGasFee')}(${feeTokenSymbol})`,
     convert(maxFee, 'wei', 'ether'),
   );
   addDialogTxt(components, translate('network'), network.name);
