@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.4.0](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v4.3.0...starknet-snap-v4.4.0) (2026-09-02)
+
+
+### Features
+
+* upgrade to TxEv3 for STRK fees and add manual deploy UI ([#584](https://github.com/Consensys/starknet-snap/issues/584)) ([7b9a0c4](https://github.com/Consensys/starknet-snap/commit/7b9a0c48493f59d5c9c79c99d13fa1dd6fe16a32))
+
 ## [4.3.0](https://github.com/Consensys/starknet-snap/compare/starknet-snap-v4.2.0...starknet-snap-v4.3.0) (2026-08-19)
 
 

@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
 
+## [1.32.0](https://github.com/Consensys/starknet-snap/compare/wallet-ui-v1.31.0...wallet-ui-v1.32.0) (2026-09-02)
+
+
+### Features
+
+* upgrade to TxEv3 for STRK fees and add manual deploy UI ([#584](https://github.com/Consensys/starknet-snap/issues/584)) ([7b9a0c4](https://github.com/Consensys/starknet-snap/commit/7b9a0c48493f59d5c9c79c99d13fa1dd6fe16a32))
+
 ## [1.31.0](https://github.com/Consensys/starknet-snap/compare/wallet-ui-v1.30.0...wallet-ui-v1.31.0) (2026-08-19)
 
 
