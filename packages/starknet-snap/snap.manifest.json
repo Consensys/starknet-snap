@@ -16,10 +16,7 @@
         "registry": "https://registry.npmjs.org"
       }
     },
-    "locales": [
-      "locales/en.json",
-      "locales/fr.json"
-    ]
+    "locales": ["locales/en.json", "locales/fr.json"]
   },
   "initialPermissions": {
     "snap_getPreferences": {},
