@@ -87,6 +87,62 @@ describe('Test function: signDeployAccountTransaction', function () {
     expect(result).to.be.eql(signature3);
   });
 
+  it('should normalize v3 resource bounds before signing', async function () {
+    await loadLocale();
+    sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolvesThis();
+    const signStub = sandbox
+      .stub(utils, 'signDeployAccountTransaction')
+      .resolves(signature3);
+    apiParams.requestParams = {
+      ...requestObject,
+      transaction: {
+        ...declareNDeployPayload,
+        version: '0x3',
+        resourceBounds: {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          l1_gas: {
+            max_amount: '0x3e8',
+            max_price_per_unit: '0x12f4d15901214',
+          },
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          l2_gas: {
+            max_amount: '0x2941d8',
+            max_price_per_unit: '0x18704fcb0c',
+          },
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          l1_data_gas: {
+            max_amount: '0x5e8',
+            max_price_per_unit: '0x4c66803094',
+          },
+        },
+      } as unknown as DeployAccountSignerDetails,
+    };
+
+    const result = await signDeployAccountTransaction(apiParams);
+
+    expect(result).to.be.eql(signature3);
+    expect(signStub).to.have.been.calledOnce;
+    const transaction = signStub.firstCall.args[1] as DeployAccountSignerDetails;
+    expect(transaction.resourceBounds.l1_gas.max_amount).to.equal(
+      BigInt('0x3e8'),
+    );
+    expect(transaction.resourceBounds.l1_gas.max_price_per_unit).to.equal(
+      BigInt('0x12f4d15901214'),
+    );
+    expect(transaction.resourceBounds.l2_gas.max_amount).to.equal(
+      BigInt('0x2941d8'),
+    );
+    expect(transaction.resourceBounds.l2_gas.max_price_per_unit).to.equal(
+      BigInt('0x18704fcb0c'),
+    );
+    expect(transaction.resourceBounds.l1_data_gas?.max_amount).to.equal(
+      BigInt('0x5e8'),
+    );
+    expect(
+      transaction.resourceBounds.l1_data_gas?.max_price_per_unit,
+    ).to.equal(BigInt('0x4c66803094'));
+  });
+
   it('should throw error if signDeployAccountTransaction fail', async function () {
     await loadLocale();
     sandbox.stub(utils, 'validateAccountRequireUpgradeOrDeploy').resolvesThis();

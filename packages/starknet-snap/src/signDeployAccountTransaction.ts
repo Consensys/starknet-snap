@@ -1,5 +1,6 @@
 import { heading, panel, DialogType } from '@metamask/snaps-sdk';
-import type { Signature } from 'starknet';
+import type { ResourceBounds, Signature } from 'starknet';
+import { stark } from 'starknet';
 
 import type {
   ApiParamsWithKeyDeriver,
@@ -70,10 +71,17 @@ export async function signDeployAccountTransaction(
       return false;
     }
 
-    return await signDeployAccountTransactionUtil(
-      privateKey,
-      requestParamsObj.transaction,
-    );
+    const transaction = requestParamsObj.transaction.resourceBounds
+      ? {
+          ...requestParamsObj.transaction,
+          resourceBounds: stark.resourceBoundsToBigInt(
+            requestParamsObj.transaction
+              .resourceBounds as unknown as ResourceBounds,
+          ),
+        }
+      : requestParamsObj.transaction;
+
+    return await signDeployAccountTransactionUtil(privateKey, transaction);
   } catch (error) {
     logger.error(`Problem found:`, error);
     throw error;
