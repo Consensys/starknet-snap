@@ -11,6 +11,11 @@ jobs:
     name: Check workflows
     runs-on: ubuntu-latest
     steps:
+      - name: Wiz sensor
+        uses: Consensys/github-actions/wiz-sensor@c529b19afef5a8e2ff6993638a99a905de633ddb
+        with:
+          enabled: ${{ vars.WIZ_SENSOR_ENABLED }}
+          token: ${{ secrets.WIZ_SENSOR_TOKEN }}
       - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
       - name: Download actionlint
         id: download-actionlint
@@ -36,6 +41,11 @@ jobs:
     outputs:
       PASSED: ${{ steps.set-output.outputs.PASSED }}
     steps:
+      - name: Wiz sensor
+        uses: Consensys/github-actions/wiz-sensor@c529b19afef5a8e2ff6993638a99a905de633ddb
+        with:
+          enabled: ${{ vars.WIZ_SENSOR_ENABLED }}
+          token: ${{ secrets.WIZ_SENSOR_TOKEN }}
       - name: Set PASSED output
         id: set-output
         run: echo "PASSED=true" >> "$GITHUB_OUTPUT"
@@ -46,6 +56,11 @@ jobs:
     runs-on: ubuntu-latest
     needs: all-jobs-completed
     steps:
+      - name: Wiz sensor
+        uses: Consensys/github-actions/wiz-sensor@c529b19afef5a8e2ff6993638a99a905de633ddb
+        with:
+          enabled: ${{ vars.WIZ_SENSOR_ENABLED }}
+          token: ${{ secrets.WIZ_SENSOR_TOKEN }}
       - name: Check that all jobs have passed
         run: |
           passed="${{ needs.all-jobs-completed.outputs.PASSED }}"

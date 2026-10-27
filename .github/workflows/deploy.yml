@@ -14,6 +14,11 @@ jobs:
       contents: write
     runs-on: ubuntu-latest
     steps:
+      - name: Wiz sensor
+        uses: Consensys/github-actions/wiz-sensor@c529b19afef5a8e2ff6993638a99a905de633ddb
+        with:
+          enabled: ${{ vars.WIZ_SENSOR_ENABLED }}
+          token: ${{ secrets.WIZ_SENSOR_TOKEN }}
       - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
         with:
           ref: ${{ github.sha }}
@@ -79,6 +84,11 @@ jobs:
       contents: write
     runs-on: ubuntu-latest
     steps:
+      - name: Wiz sensor
+        uses: Consensys/github-actions/wiz-sensor@c529b19afef5a8e2ff6993638a99a905de633ddb
+        with:
+          enabled: ${{ vars.WIZ_SENSOR_ENABLED }}
+          token: ${{ secrets.WIZ_SENSOR_TOKEN }}
       - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
         with:
           ref: ${{ github.sha }}
@@ -138,6 +148,11 @@ jobs:
       - prepare-deployment
       - install-build
     steps:
+      - name: Wiz sensor
+        uses: Consensys/github-actions/wiz-sensor@c529b19afef5a8e2ff6993638a99a905de633ddb
+        with:
+          enabled: ${{ vars.WIZ_SENSOR_ENABLED }}
+          token: ${{ secrets.WIZ_SENSOR_TOKEN }}
       - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
         with:
           ref: ${{ github.sha }}
@@ -170,6 +185,11 @@ jobs:
       - publish-npm-dry-run
       - prepare-deployment
     steps:
+      - name: Wiz sensor
+        uses: Consensys/github-actions/wiz-sensor@c529b19afef5a8e2ff6993638a99a905de633ddb
+        with:
+          enabled: ${{ vars.WIZ_SENSOR_ENABLED }}
+          token: ${{ secrets.WIZ_SENSOR_TOKEN }}
       - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
         with:
           ref: ${{ github.sha }}
@@ -203,6 +223,11 @@ jobs:
       - prepare-deployment
       - publish-npm
     steps:
+      - name: Wiz sensor
+        uses: Consensys/github-actions/wiz-sensor@c529b19afef5a8e2ff6993638a99a905de633ddb
+        with:
+          enabled: ${{ vars.WIZ_SENSOR_ENABLED }}
+          token: ${{ secrets.WIZ_SENSOR_TOKEN }}
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@67fbcbb121271f7775d2e7715933280b06314838 # v1.7.0
         with:
@@ -237,6 +262,11 @@ jobs:
       - prepare-deployment
       - install-build
     steps:
+      - name: Wiz sensor
+        uses: Consensys/github-actions/wiz-sensor@c529b19afef5a8e2ff6993638a99a905de633ddb
+        with:
+          enabled: ${{ vars.WIZ_SENSOR_ENABLED }}
+          token: ${{ secrets.WIZ_SENSOR_TOKEN }}
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@67fbcbb121271f7775d2e7715933280b06314838 # v1.7.0
         with:
@@ -272,6 +302,11 @@ jobs:
       - deploy-get-starknet
       - prepare-deployment
     steps:
+      - name: Wiz sensor
+        uses: Consensys/github-actions/wiz-sensor@c529b19afef5a8e2ff6993638a99a905de633ddb
+        with:
+          enabled: ${{ vars.WIZ_SENSOR_ENABLED }}
+          token: ${{ secrets.WIZ_SENSOR_TOKEN }}
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@67fbcbb121271f7775d2e7715933280b06314838 # v1.7.0
         with:
