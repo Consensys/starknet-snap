@@ -89,14 +89,22 @@ resource "aws_cloudfront_distribution" "dist" {
     allowed_methods        = ["GET", "HEAD"]
     cached_methods         = ["GET", "HEAD"]
     target_origin_id       = aws_s3_bucket.bucket.bucket_regional_domain_name
-    min_ttl                = 0
-    default_ttl            = 0
-    max_ttl                = 0
 
-    forwarded_values {
-      query_string = false
-      cookies {
-        forward = "none"
+    cache_policy_id            = var.cache_policy_id
+    origin_request_policy_id   = var.origin_request_policy_id
+    response_headers_policy_id = var.response_headers_policy_id
+
+    min_ttl     = var.cache_policy_id == null ? 0 : null
+    default_ttl = var.cache_policy_id == null ? 0 : null
+    max_ttl     = var.cache_policy_id == null ? 0 : null
+
+    dynamic "forwarded_values" {
+      for_each = var.cache_policy_id == null ? [1] : []
+      content {
+        query_string = false
+        cookies {
+          forward = "none"
+        }
       }
     }
 
