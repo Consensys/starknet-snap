@@ -80,4 +80,8 @@ module "s3_snaps_page_prod_new" {
   certificate_arn      = local.snaps_cert_new
   cloudfront_functions = local.cloudfront_functions
   tags                 = module.tags.common
+
+  cache_policy_id            = "658327ea-f89d-4fab-a63d-7e88639e58f6" # Managed-CachingOptimized
+  origin_request_policy_id   = "88a5eaf4-2fd4-4709-b370-b4c650ea3fcf" # Managed-CORS-S3Origin
+  response_headers_policy_id = "5cc3b908-e619-4b99-88e5-2cf7f45965bd" # Managed-CORS-With-Preflight
 }

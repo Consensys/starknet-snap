@@ -43,3 +43,20 @@ variable "lambda_function_arn" {
   type        = list(string)
   default     = []
 }
+variable "cache_policy_id" {
+  description = "CloudFront cache policy ID for the default behavior. When null, legacy forwarded_values with TTL 0 are used."
+  type        = string
+  default     = null
+}
+
+variable "origin_request_policy_id" {
+  description = "CloudFront origin request policy ID for the default behavior."
+  type        = string
+  default     = null
+}
+
+variable "response_headers_policy_id" {
+  description = "CloudFront response headers policy ID for the default behavior."
+  type        = string
+  default     = null
+}
